@@ -6,8 +6,7 @@
 //   Any     → Reset  button  always visible
 // The display uses three separate fixed-width spans (minutes, seconds,
 // centiseconds) so rapid digit changes in one segment never shift another.
-// The study-timer partial is loaded dynamically, so initialization waits for
-// the 'partialsLoaded' custom event dispatched by index.html's partial loader.
+// The timer HTML is embedded in pages/auth/setting.html.
 
 let focusTimer = null;
 let timeLeft = 150000; // 25 minutes in centiseconds (1500 s × 100)
@@ -110,7 +109,7 @@ function resetTimer() {
 
 /**
  * Bind click handlers to the timer control buttons.
- * Called once the study-timer partial exists in the DOM.
+ * Called once the timer DOM elements exist in settings.html.
  */
 function initTimerControls() {
   const startBtn = document.getElementById('start-btn');
@@ -119,8 +118,8 @@ function initTimerControls() {
   const resetBtn = document.getElementById('reset-btn');
 
   if (!startBtn || !pauseBtn || !resumeBtn || !resetBtn) {
-    // Partial hasn't been injected yet — safe to ignore because we only
-    // call this after the partialsLoaded event fires.
+    // Timer DOM elements haven't been added yet — safe to ignore because
+    // we only call this after DOMContentLoaded or if elements already exist.
     return;
   }
 
@@ -133,15 +132,11 @@ function initTimerControls() {
 }
 
 // ── Bootstrap ─────────────────────────────────────────────────────────────
-// The study-timer HTML partial is injected asynchronously.  index.html's
-// partial loader dispatches a 'partialsLoaded' custom event when all
-// partials are ready.  If this script runs after that point (e.g. because
-// of a hot-reload or a second pass), initialise immediately.
+// The timer HTML is embedded directly in settings.html.  If this script
+// runs before the DOM is ready (e.g. via async loading), defer initialisation.
 
 if (document.getElementById('start-btn')) {
   initTimerControls();
-} else if (window.partialsLoadedFlag) {
-  initTimerControls();
 } else {
-  document.addEventListener('partialsLoaded', initTimerControls, { once: true });
+  document.addEventListener('DOMContentLoaded', initTimerControls, { once: true });
 }

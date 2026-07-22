@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Skill Graph · Knowledge Map</title>
+    <link rel="stylesheet" href="skill-graph.css" />
+</head>
+<body>
+    <div class="app" id="app">
+        <!-- Header -->
+        <header class="app-header">
+            <div>
+                <h1>🧠 Skill Graph Knowledge Map</h1>
+                <p class="subtitle">Force-directed DSA topic map · mastery based visualization</p>
+            </div>
+            <div class="header-controls">
+                <button class="theme-toggle" id="themeToggle">
+                    <span id="themeIcon">🌙</span> <span id="themeLabel">Dark</span>
+                </button>
+            </div>
+        </header>
+
+        <!-- Controls -->
+        <section class="controls-section">
+            <div class="search-container">
+                <input type="text" id="searchInput" placeholder="🔍 Search topics..." />
+                <button class="btn-clear-search" id="clearSearchBtn">✕</button>
+            </div>
+            <div class="control-buttons">
+                <button class="btn-reset-view" id="resetViewBtn">🔄 Reset View</button>
+                <button class="btn-toggle-labels" id="toggleLabelsBtn">🏷️ Labels</button>
+                <button class="btn-legend" id="legendBtn">📊 Legend</button>
+            </div>
+        </section>
+
+        <!-- Graph Container -->
+        <section class="graph-section">
+            <div class="graph-container" id="graphContainer">
+                <canvas id="graphCanvas"></canvas>
+                <div class="graph-overlay" id="graphOverlay">
+                    <div class="node-tooltip" id="nodeTooltip" style="display: none;">
+                        <div class="tooltip-title" id="tooltipTitle">Topic</div>
+                        <div class="tooltip-mastery" id="tooltipMastery">Mastery: 0%</div>
+                        <div class="tooltip-prereqs" id="tooltipPrereqs">Prerequisites: none</div>
+                        <div class="tooltip-actions">
+                            <button class="btn-tooltip-learn" id="tooltipLearnBtn">📖 Learn</button>
+                            <button class="btn-tooltip-quiz" id="tooltipQuizBtn">📝 Quiz</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="graph-loading" id="graphLoading">
+                    <div class="loader"></div>
+                    <p>Building knowledge map...</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Stats & Legend -->
+        <section class="stats-section">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-label">Topics</div>
+                    <div class="stat-value" id="topicCount">0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Connections</div>
+                    <div class="stat-value" id="edgeCount">0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Avg Mastery</div>
+                    <div class="stat-value" id="avgMastery">0%</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Strong Topics</div>
+                    <div class="stat-value" id="strongCount">0</div>
+                </div>
+            </div>
+
+            <div class="legend-container" id="legendContainer" style="display: none;">
+                <div class="legend-title">📊 Mastery Legend</div>
+                <div class="legend-items">
+                    <div class="legend-item">
+                        <span class="legend-color" style="background: #ef4444;"></span>
+                        <span>Weak (0-40%)</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-color" style="background: #f59e0b;"></span>
+                        <span>Developing (40-60%)</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-color" style="background: #22c55e;"></span>
+                        <span>Strong (60-80%)</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-color" style="background: #3b82f6;"></span>
+                        <span>Mastered (80-100%)</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="app-footer">
+            <span>Skill Graph · Powered by DSA Topics · Data from data/dsa-topics.js</span>
+        </footer>
+    </div>
+
+    <script src="skill-graph.js"></script>
+</body>
+</html>
