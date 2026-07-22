@@ -144,6 +144,13 @@ const editors = [
     icon: 'fa-code-branch',
     desc: 'Write F# with live syntax highlighting, functional pipeline operators, pattern matching, discriminated unions, and execution.'
   },
+   {
+    name: 'OCaml Playground',
+    path: '/pages/editors/ocaml-editor/ocaml-editor.html',
+    category: 'JVM & Functional',
+    icon: 'fa-cube',
+    desc: 'Write OCaml with syntax highlighting, templates for pattern matching and functors, and real-time execution.'
+  },
   {
     name: 'Prolog Playground',
     path: '/pages/editors/prolog-playground/prolog-playground.html',
@@ -190,7 +197,13 @@ const editors = [
     icon: 'fa-gem',
     desc: 'Write D language code with syntax highlighting, starter templates, and simulated execution.',
   },
-  
+   {
+    name: 'Move Editor',
+    path: '/pages/editors/move-editor/move-editor.html',
+    category: 'Systems & Special',
+    icon: 'fa-link',
+    desc: 'Write Move smart contracts with syntax highlighting, starter templates, and simulated blockchain execution.'
+  },
   {
     name: 'SQL Editor',
     path: '/pages/editors/sql-editor/sql-editor.html',

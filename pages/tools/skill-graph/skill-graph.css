@@ -1,0 +1,455 @@
+/* ----- reset & base ----- */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    background: #f1f5f9;
+    color: #0b1b2f;
+    font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    padding: 1.5rem;
+    transition: background 0.2s, color 0.2s;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+}
+
+body.dark {
+    background: #0f172a;
+    color: #e2e8f0;
+}
+
+.app {
+    max-width: 1400px;
+    width: 100%;
+}
+
+/* ----- header ----- */
+.app-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    margin-bottom: 1.5rem;
+    border-bottom: 1px solid #d1d9e6;
+    padding-bottom: 0.8rem;
+}
+
+.dark .app-header {
+    border-bottom-color: #334155;
+}
+
+.app-header h1 {
+    font-weight: 700;
+    font-size: 2rem;
+    letter-spacing: -0.02em;
+}
+
+.subtitle {
+    font-size: 0.9rem;
+    opacity: 0.7;
+    margin-top: 0.1rem;
+}
+
+.header-controls {
+    display: flex;
+    gap: 0.8rem;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.theme-toggle {
+    background: #e2e8f0;
+    border: none;
+    border-radius: 40px;
+    padding: 0.4rem 1.2rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: 0.15s;
+    font-size: 0.9rem;
+}
+
+.dark .theme-toggle {
+    background: #1e293b;
+    color: #f1f5f9;
+}
+
+.theme-toggle:hover {
+    filter: brightness(0.92);
+    transform: translateY(-1px);
+}
+
+/* ----- controls ----- */
+.controls-section {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    background: #ffffff;
+    padding: 0.8rem 1.5rem;
+    border-radius: 16px;
+    border: 1px solid #e2e8f0;
+    transition: background 0.2s;
+}
+
+.dark .controls-section {
+    background: #1e293b;
+    border-color: #334155;
+}
+
+.search-container {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex: 1;
+    max-width: 400px;
+    position: relative;
+}
+
+.search-container input {
+    flex: 1;
+    padding: 0.5rem 1rem;
+    border: 1px solid #d1d9e6;
+    border-radius: 30px;
+    background: #f8fafc;
+    font-size: 0.9rem;
+    outline: none;
+    transition: 0.15s;
+}
+
+.dark .search-container input {
+    background: #0f172a;
+    border-color: #334155;
+    color: #e2e8f0;
+}
+
+.search-container input:focus {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.btn-clear-search {
+    position: absolute;
+    right: 10px;
+    background: none;
+    border: none;
+    color: #94a3b8;
+    cursor: pointer;
+    font-size: 1rem;
+    padding: 0 0.5rem;
+}
+
+.btn-clear-search:hover {
+    color: #ef4444;
+}
+
+.control-buttons {
+    display: flex;
+    gap: 0.6rem;
+    flex-wrap: wrap;
+}
+
+.btn-reset-view,
+.btn-toggle-labels,
+.btn-legend {
+    padding: 0.4rem 1rem;
+    border: none;
+    border-radius: 30px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: 0.15s;
+    font-size: 0.85rem;
+    background: #e2e8f0;
+    color: #0b1b2f;
+}
+
+.dark .btn-reset-view,
+.dark .btn-toggle-labels,
+.dark .btn-legend {
+    background: #334155;
+    color: #e2e8f0;
+}
+
+.btn-reset-view:hover,
+.btn-toggle-labels:hover,
+.btn-legend:hover {
+    filter: brightness(0.9);
+    transform: translateY(-1px);
+}
+
+/* ----- graph container ----- */
+.graph-section {
+    background: #ffffff;
+    border-radius: 20px;
+    border: 1px solid #e2e8f0;
+    overflow: hidden;
+    margin-bottom: 1.5rem;
+    transition: background 0.2s;
+    position: relative;
+}
+
+.dark .graph-section {
+    background: #1e293b;
+    border-color: #334155;
+}
+
+.graph-container {
+    position: relative;
+    width: 100%;
+    height: 600px;
+    background: #fafbfc;
+    overflow: hidden;
+}
+
+.dark .graph-container {
+    background: #0f172a;
+}
+
+#graphCanvas {
+    width: 100%;
+    height: 100%;
+    display: block;
+    cursor: grab;
+}
+
+#graphCanvas:active {
+    cursor: grabbing;
+}
+
+.graph-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+}
+
+.node-tooltip {
+    position: absolute;
+    background: #ffffff;
+    padding: 0.8rem 1.2rem;
+    border-radius: 12px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+    border: 1px solid #e2e8f0;
+    max-width: 250px;
+    pointer-events: auto;
+    transition: background 0.2s;
+    z-index: 10;
+}
+
+.dark .node-tooltip {
+    background: #1e293b;
+    border-color: #334155;
+    color: #e2e8f0;
+}
+
+.tooltip-title {
+    font-weight: 700;
+    font-size: 1rem;
+    margin-bottom: 0.3rem;
+}
+
+.tooltip-mastery {
+    font-size: 0.85rem;
+    color: #3b82f6;
+    margin-bottom: 0.2rem;
+}
+
+.tooltip-prereqs {
+    font-size: 0.8rem;
+    opacity: 0.7;
+    margin-bottom: 0.5rem;
+}
+
+.tooltip-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.btn-tooltip-learn,
+.btn-tooltip-quiz {
+    padding: 0.3rem 0.8rem;
+    border: none;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: 0.15s;
+}
+
+.btn-tooltip-learn {
+    background: #3b82f6;
+    color: white;
+}
+
+.btn-tooltip-learn:hover {
+    background: #2563eb;
+}
+
+.btn-tooltip-quiz {
+    background: #22c55e;
+    color: white;
+}
+
+.btn-tooltip-quiz:hover {
+    background: #16a34a;
+}
+
+.graph-loading {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    opacity: 0.6;
+}
+
+.loader {
+    border: 4px solid #e2e8f0;
+    border-top: 4px solid #3b82f6;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 1rem;
+}
+
+.dark .loader {
+    border-color: #334155;
+    border-top-color: #3b82f6;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* ----- stats ----- */
+.stats-section {
+    display: flex;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 1rem;
+    flex: 1;
+}
+
+.stat-card {
+    background: #ffffff;
+    border-radius: 16px;
+    padding: 1rem 1.2rem;
+    border: 1px solid #e2e8f0;
+    transition: background 0.2s;
+}
+
+.dark .stat-card {
+    background: #1e293b;
+    border-color: #334155;
+}
+
+.stat-label {
+    font-size: 0.75rem;
+    opacity: 0.6;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-weight: 600;
+}
+
+.stat-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-top: 0.2rem;
+}
+
+.legend-container {
+    background: #ffffff;
+    border-radius: 16px;
+    padding: 1rem 1.5rem;
+    border: 1px solid #e2e8f0;
+    min-width: 200px;
+    transition: background 0.2s;
+}
+
+.dark .legend-container {
+    background: #1e293b;
+    border-color: #334155;
+}
+
+.legend-title {
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+}
+
+.legend-items {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.85rem;
+}
+
+.legend-color {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    display: inline-block;
+}
+
+/* ----- footer ----- */
+.app-footer {
+    margin-top: 2rem;
+    font-size: 0.8rem;
+    opacity: 0.5;
+    text-align: center;
+    border-top: 1px solid #d1d9e6;
+    padding-top: 1.2rem;
+}
+
+.dark .app-footer {
+    border-top-color: #334155;
+}
+
+/* ----- responsive ----- */
+@media (max-width: 768px) {
+    .app-header h1 {
+        font-size: 1.4rem;
+    }
+    .controls-section {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    .search-container {
+        max-width: 100%;
+    }
+    .control-buttons {
+        justify-content: stretch;
+    }
+    .control-buttons button {
+        flex: 1;
+        text-align: center;
+    }
+    .graph-container {
+        height: 400px;
+    }
+    .stats-section {
+        flex-direction: column;
+    }
+    .legend-container {
+        min-width: auto;
+    }
+}

@@ -1,0 +1,426 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>DSA Flashcards Revision | Algo Infinity Verse</title>
+    <meta name="description" content="Review DSA concepts with interactive flashcards. Covers arrays, trees, graphs, dynamic programming, and more." />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+
+    <link rel="stylesheet" href="/styles.css" />
+
+    <style>
+      body[data-page="flashcards"] {
+        background: var(--bg-primary, #0E0E14);
+      }
+
+      .flashcards-page {
+        padding: 120px 32px 80px;
+        max-width: 900px;
+        margin: 0 auto;
+      }
+
+      .flashcards-page-header {
+        text-align: center;
+        margin-bottom: 48px;
+      }
+
+      .flashcards-page-header h1 {
+        font-family: 'DM Serif Display', Georgia, serif;
+        font-size: clamp(1.8rem, 4vw, 2.8rem);
+        font-weight: 400;
+        color: var(--text-primary, #E8E4F2);
+        margin: 0 0 12px;
+      }
+
+      .flashcards-page-header p {
+        font-family: 'Inter', sans-serif;
+        font-size: 1.05rem;
+        color: var(--text-secondary, #A398C0);
+        margin: 0;
+      }
+
+      /* Retain the original flashcards section styles */
+      .flashcards-section {
+        position: relative;
+      }
+
+      .flashcards-section .section-title {
+        font-family: 'DM Serif Display', Georgia, serif;
+        font-size: 1.5rem;
+        color: var(--text-primary, #E8E4F2);
+        margin-bottom: 32px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .flashcards-section .section-title .title-icon {
+        font-size: 1.3rem;
+      }
+
+      .flashcards-section .section-subtitle {
+        font-family: 'Inter', sans-serif;
+        font-size: 0.92rem;
+        color: var(--text-secondary, #A398C0);
+        margin: -16px 0 32px;
+      }
+
+      .flashcards-controls {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        margin-bottom: 24px;
+      }
+
+      .filter-btn {
+        padding: 8px 20px;
+        background: var(--card-bg, #1C1C26);
+        border: 1px solid var(--border-color, rgba(212, 196, 240, 0.12));
+        border-radius: 100px;
+        color: var(--text-secondary, #A398C0);
+        font-family: 'Inter', sans-serif;
+        font-size: 0.85rem;
+        cursor: pointer;
+        transition: all 0.25s ease;
+      }
+
+      .filter-btn:hover {
+        border-color: rgba(212, 196, 240, 0.25);
+        color: var(--text-primary, #E8E4F2);
+      }
+
+      .filter-btn.active {
+        background: rgba(212, 196, 240, 0.12);
+        border-color: #D4C4F0;
+        color: #D4C4F0;
+      }
+
+      .flashcards-toolbar {
+        display: flex;
+        justify-content: flex-end;
+        margin-bottom: 16px;
+      }
+
+      .sound-toggle-btn {
+        padding: 8px 12px;
+        background: var(--card-bg, #1C1C26);
+        border: 1px solid var(--border-color, rgba(212, 196, 240, 0.12));
+        border-radius: 8px;
+        color: var(--text-secondary, #A398C0);
+        cursor: pointer;
+        font-size: 1rem;
+        transition: all 0.25s ease;
+      }
+
+      .sound-toggle-btn:hover {
+        border-color: rgba(212, 196, 240, 0.25);
+        color: var(--text-primary, #E8E4F2);
+      }
+
+      .flashcards-shell {
+        background: var(--card-bg, #1C1C26);
+        border: 1px solid var(--border-color, rgba(212, 196, 240, 0.08));
+        border-radius: 20px;
+        padding: 32px;
+      }
+
+      .flashcards-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 24px;
+        flex-wrap: wrap;
+        gap: 12px;
+      }
+
+      .flashcards-meta {
+        display: flex;
+        gap: 16px;
+        align-items: center;
+      }
+
+      .flashcards-progress,
+      .flashcards-total {
+        font-family: 'Inter', sans-serif;
+        font-size: 0.85rem;
+        color: var(--text-secondary, #A398C0);
+      }
+
+      .flashcards-nav {
+        display: flex;
+        gap: 8px;
+      }
+
+      .flashcards-nav .pagination-btn {
+        padding: 8px 16px;
+        background: transparent;
+        border: 1px solid var(--border-color, rgba(212, 196, 240, 0.12));
+        border-radius: 8px;
+        color: var(--text-secondary, #A398C0);
+        font-family: 'Inter', sans-serif;
+        font-size: 0.82rem;
+        cursor: pointer;
+        transition: all 0.25s ease;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+
+      .flashcards-nav .pagination-btn:hover:not(:disabled) {
+        border-color: rgba(212, 196, 240, 0.25);
+        color: var(--text-primary, #E8E4F2);
+      }
+
+      .flashcards-nav .pagination-btn:disabled {
+        opacity: 0.4;
+        cursor: not-allowed;
+      }
+
+      .flashcards-stage {
+        position: relative;
+      }
+
+      .flashcard {
+        perspective: 1200px;
+        min-height: 280px;
+        margin-bottom: 20px;
+      }
+
+      .flashcard-inner {
+        position: relative;
+        transition: transform 0.35s ease;
+        transform-style: preserve-3d;
+      }
+
+      .flashcard-face {
+        backface-visibility: hidden;
+        -webkit-backface-visibility: hidden;
+        padding: 32px;
+        background: rgba(255, 255, 255, 0.02);
+        border: 1px solid rgba(255, 255, 255, 0.06);
+        border-radius: 16px;
+        min-height: 200px;
+      }
+
+      .flashcard-front {
+        font-family: 'Inter', sans-serif;
+        font-size: 1.1rem;
+        color: var(--text-primary, #E8E4F2);
+        line-height: 1.6;
+      }
+
+      .flashcard-back {
+        display: none;
+        margin-top: 12px;
+      }
+
+      .flashcard.is-revealed .flashcard-back {
+        display: block;
+      }
+
+      .flashcard-options {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      .flashcard-option {
+        padding: 12px 16px;
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 10px;
+        font-family: 'Inter', sans-serif;
+        font-size: 0.92rem;
+        color: var(--text-primary, #E8E4F2);
+        cursor: pointer;
+        transition: all 0.2s ease;
+      }
+
+      .flashcard-option:hover {
+        background: rgba(255, 255, 255, 0.06);
+        border-color: rgba(212, 196, 240, 0.2);
+      }
+
+      .flashcard-option.correct {
+        background: rgba(196, 226, 208, 0.15);
+        border-color: #C4E2D0;
+        color: #C4E2D0;
+      }
+
+      .flashcard-option.incorrect {
+        background: rgba(237, 200, 210, 0.15);
+        border-color: #EDC8D2;
+        color: #EDC8D2;
+      }
+
+      .flashcard-explanation {
+        margin-top: 16px;
+        padding: 12px 16px;
+        background: rgba(212, 196, 240, 0.06);
+        border: 1px solid rgba(212, 196, 240, 0.12);
+        border-radius: 10px;
+        font-family: 'Inter', sans-serif;
+        font-size: 0.85rem;
+        color: #D4C4F0;
+        line-height: 1.5;
+      }
+
+      .flashcards-actions {
+        text-align: center;
+        margin-top: 16px;
+      }
+
+      .flashcards-actions .btn-primary {
+        padding: 12px 28px;
+        background: linear-gradient(135deg, #D4C4F0, #BCC8F0);
+        border: none;
+        border-radius: 100px;
+        color: #0E0E14;
+        font-family: 'Inter', sans-serif;
+        font-size: 0.9rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.3s ease;
+      }
+
+      .flashcards-actions .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(212, 196, 240, 0.25);
+      }
+
+      .flashcards-actions .btn-primary:disabled {
+        opacity: 0.4;
+        cursor: not-allowed;
+        transform: none;
+        box-shadow: none;
+      }
+
+      .flashcards-small.muted {
+        font-size: 0.8rem;
+        color: var(--text-tertiary, #7A7298);
+        margin-top: 8px;
+      }
+
+      @media (max-width: 640px) {
+        .flashcards-page { padding: 80px 16px 48px; }
+        .flashcards-shell { padding: 20px; }
+        .flashcards-header { flex-direction: column; align-items: flex-start; }
+        .flashcard { min-height: 200px; }
+        .flashcard-face { padding: 20px; }
+      }
+    </style>
+
+    <script>
+      (function() {
+        try {
+          var storedTheme = localStorage.getItem('theme');
+          var prefersLight = window.matchMedia('(prefers-color-scheme: light)').matches;
+          var theme = storedTheme || (prefersLight ? 'light' : 'dark');
+          if (theme === 'light') {
+            document.documentElement.classList.add('light-mode');
+          } else {
+            document.documentElement.classList.remove('light-mode');
+          }
+        } catch (e) {}
+      })();
+    </script>
+  </head>
+  <body data-page="flashcards">
+    <div id="navbar-placeholder"></div>
+
+    <main class="flashcards-page">
+      <div class="flashcards-page-header">
+        <h1>DSA Flashcards Revision</h1>
+        <p>Reveal answers, navigate cards, and persist your revision progress.</p>
+      </div>
+
+      <section id="flashcards" class="flashcards-section">
+        <h2 class="section-title">
+          <span class="title-icon"><i class="fas fa-layer-group"></i></span>
+          Choose a Topic
+        </h2>
+
+        <div class="flashcards-controls" role="group" aria-label="Flashcard category filters">
+          <button type="button" class="filter-btn active" data-flashcards-category="arrays">Arrays</button>
+          <button type="button" class="filter-btn" data-flashcards-category="trees">Trees</button>
+          <button type="button" class="filter-btn" data-flashcards-category="graphs">Graphs</button>
+          <button type="button" class="filter-btn" data-flashcards-category="dp">DP</button>
+        </div>
+
+        <div class="flashcards-toolbar">
+          <button type="button" id="flashcardsSoundToggle" class="sound-toggle-btn" title="Toggle sound">
+            <i class="fas fa-volume-up"></i>
+          </button>
+        </div>
+
+        <div class="flashcards-shell">
+          <div class="flashcards-header">
+            <div class="flashcards-meta">
+              <div class="flashcards-progress" id="flashcardsProgressText">Reviewed 0 / 0</div>
+              <div class="flashcards-total" id="flashcardsTotalText"></div>
+            </div>
+            <div class="flashcards-nav">
+              <button type="button" id="flashcardsPrevBtn" class="pagination-btn" disabled>
+                <i class="fas fa-chevron-left"></i> Prev
+              </button>
+              <button type="button" id="flashcardsNextBtn" class="pagination-btn">
+                Next <i class="fas fa-chevron-right"></i>
+              </button>
+            </div>
+          </div>
+
+          <div class="flashcards-stage">
+            <div class="flashcard" id="flashcardRoot" aria-live="polite">
+              <div class="flashcard-inner">
+                <div class="flashcard-face flashcard-front" id="flashcardQuestion"></div>
+                <div class="flashcard-face flashcard-back" id="flashcardAnswer"></div>
+              </div>
+            </div>
+
+            <div class="flashcards-actions">
+              <button type="button" id="flashcardsRevealBtn" class="btn-primary">
+                <i class="fas fa-eye"></i> Reveal Options
+              </button>
+              <div class="flashcards-small muted" id="flashcardsSmallHint"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <div id="footer-placeholder"></div>
+
+    <!-- Data -->
+    <script src="/data/quiz-questions.js"></script>
+
+    <!-- Dependencies -->
+    <script src="/script.js"></script>
+    <script src="/auth.js"></script>
+    <script type="module" src="/modules/flashcards.js"></script>
+
+    <!-- Partials & Init -->
+    <script>
+      async function loadAllPartials() {
+        await Promise.all([
+          loadPartial('navbar-placeholder', '/partials/navbar.html'),
+          loadPartial('footer-placeholder', '/partials/footer.html'),
+        ]);
+        if (window.initFlashcardsRevision) {
+          window.initFlashcardsRevision();
+        }
+      }
+      loadAllPartials();
+    </script>
+  </body>
+</html>

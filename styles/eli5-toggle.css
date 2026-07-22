@@ -101,18 +101,20 @@
 
 /* ═══ Simple content styling ═══ */
 .eli5-simple-content {
-  background: rgba(254, 243, 199, 0.35);
+  background: rgba(251, 191, 36, 0.12);
+  border: 1px solid rgba(251, 191, 36, 0.25);
   border-radius: 10px;
   padding: 1rem 1.25rem;
   margin: 1rem 0;
   font-size: 0.95rem;
   line-height: 1.65;
-  color: #475569;
+  color: #fef3c7;
 }
 
 .light-mode .eli5-simple-content {
-  background: rgba(254, 243, 199, 0.5);
-  color: #374151;
+  background: #fef3c7;
+  border-color: #fde68a;
+  color: #78350f;
 }
 
 .eli5-simple-content .eli5-label-badge {
@@ -123,8 +125,12 @@
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.04em;
-  color: #92400e;
+  color: #fbbf24;
   margin-bottom: 0.5rem;
+}
+
+.light-mode .eli5-simple-content .eli5-label-badge {
+  color: #92400e;
 }
 
 /* ═══ Reduce motion ═══ */

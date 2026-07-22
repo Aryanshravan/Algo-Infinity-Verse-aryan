@@ -340,6 +340,13 @@
     <script type="module" src="/dist/legacy-bundle.mjs"></script>
     <script src="/theme.js"></script>
     <script type="module" src="sorting-visualizer.js"></script>
+    <script type="module">
+      import { initVisualizerKeyboardShortcuts } from '/modules/visualizer-keyboard.js';
+      // sorting-visualizer already follows the #startBtn/#pauseBtn/#resetBtn/
+      // #newArrayBtn/#dbgPrevBtn/#dbgNextBtn/#speedRange/#soundToggle
+      // convention, so the module defaults apply as-is (#2567).
+      initVisualizerKeyboardShortcuts();
+    </script>
   
   <script>
     loadPartial('navbar-placeholder', '/partials/navbar.html');
