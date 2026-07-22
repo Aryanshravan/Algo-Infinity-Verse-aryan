@@ -200,6 +200,26 @@
     </main>
 
     <script src="dp-visualizer.js"></script>
+    <script type="module">
+      import { initVisualizerKeyboardShortcuts } from '/modules/visualizer-keyboard.js';
+      // dp-visualizer combines play/pause into a single #btnPlayPause
+      // toggle, uses #btnStepBack/#btnStepFwd for stepping, #btnReset for
+      // reset, #speedSlider as a step-delay-in-ms slider (lower = faster,
+      // same convention as sorting-visualizer's speedRange), and has no
+      // sound toggle (#2567).
+      initVisualizerKeyboardShortcuts({
+        play: null,
+        pause: null,
+        playPause: '#btnPlayPause',
+        reset: '#btnReset',
+        newItem: null,
+        stepBack: '#btnStepBack',
+        stepForward: '#btnStepFwd',
+        speedRange: '#speedSlider',
+        speedRangeLowerIsFaster: true,
+        soundToggle: null,
+      });
+    </script>
   </body>
 </html>
 

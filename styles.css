@@ -2239,6 +2239,25 @@ button.auth-submit[data-loading='true'] {
   }
 }
 
+/* ===== SKIP TO MAIN CONTENT (WCAG 2.4.1 Bypass Blocks) ===== */
+.skip-link {
+  position: absolute;
+  top: -100%;
+  left: 16px;
+  z-index: 10001;
+  padding: 0.75rem 1.25rem;
+  background: var(--primary, #7c3aed);
+  color: #fff;
+  border-radius: 0 0 8px 8px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: top 0.2s ease;
+}
+
+.skip-link:focus {
+  top: 0;
+}
+
 /* ===== NAVIGATION BAR ===== */
 .navbar {
   position: fixed;
@@ -2908,7 +2927,8 @@ html.light-mode .recent-item.selected {
 }
 
 .has-dropdown:hover .dropdown-menu,
-.has-dropdown:focus-within .dropdown-menu {
+.has-dropdown:focus-within .dropdown-menu,
+.has-dropdown.open .dropdown-menu {
   opacity: 1;
   visibility: visible;
   transform: translateY(0);

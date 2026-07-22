@@ -1,4 +1,5 @@
 import { executeSandboxedCode } from '../modules/code-executor.js';
+import { executeWasmPython, executeWasmCpp, isWasmSupported } from '../modules/wasm-executor.js';
 import { getCurrentTheme, onThemeChange, THEMES } from '../modules/theme.js';
 
 // DOM Elements
@@ -419,7 +420,20 @@ async function runDart(code) {
 
 async function runPython(code) {
     clearOutput();
-    output.textContent = "⏳ Running Python via Judge0...";
+    output.textContent = "⚡ Initializing Pyodide WASM Engine...";
+
+    if (isWasmSupported()) {
+        try {
+            output.textContent = "⚡ Running Python locally via Pyodide WASM...";
+            const res = await executeWasmPython(code);
+            const header = `⚡ Client-side WASM Engine (executed in ${res.executionTime}ms)\n----------------------------------------\n`;
+            output.textContent = header + res.logs.join("\n");
+            return;
+        } catch (wasmErr) {
+            console.warn("WASM Python execution failed/fallback:", wasmErr);
+            output.textContent = `⚠️ WASM Engine message: ${wasmErr.message}\n⏳ Falling back to Judge0 Remote API...\n`;
+        }
+    }
 
     try {
         const response = await fetch(
@@ -483,7 +497,20 @@ async function runJava(code) {
 
 async function runCpp(code) {
     clearOutput();
-    output.textContent = "⏳ Running C++ via Judge0...";
+    output.textContent = "⚡ Initializing C++ WASM Engine...";
+
+    if (isWasmSupported()) {
+        try {
+            output.textContent = "⚡ Running C++ locally via WASM Engine...";
+            const res = await executeWasmCpp(code);
+            const header = `⚡ Client-side WASM Engine (executed in ${res.executionTime}ms)\n----------------------------------------\n`;
+            output.textContent = header + res.logs.join("\n");
+            return;
+        } catch (wasmErr) {
+            console.warn("WASM C++ execution failed/fallback:", wasmErr);
+            output.textContent = `⚠️ WASM Engine message: ${wasmErr.message}\n⏳ Falling back to Judge0 Remote API...\n`;
+        }
+    }
 
     try {
         const response = await fetch(

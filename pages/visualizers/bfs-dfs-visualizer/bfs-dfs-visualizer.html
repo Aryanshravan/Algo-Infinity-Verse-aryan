@@ -222,5 +222,22 @@
     <!-- Scripts -->
     <script src="/script.js"></script>
     <script src="bfs-dfs-visualizer.js"></script>
+    <script type="module">
+      import { initVisualizerKeyboardShortcuts } from '/modules/visualizer-keyboard.js';
+      // bfs-dfs-visualizer uses its own bd*-prefixed button IDs, a Run
+      // button (not a Play/Pause toggle), only forward stepping, no sound
+      // toggle, and a direct speed slider (higher value = faster) (#2567).
+      initVisualizerKeyboardShortcuts({
+        play: '#bdRunBtn',
+        pause: '#bdPauseBtn',
+        reset: '#bdResetBtn',
+        newItem: null,
+        stepBack: null,
+        stepForward: '#bdStepBtn',
+        speedRange: '#bdSpeed',
+        speedRangeLowerIsFaster: false,
+        soundToggle: null,
+      });
+    </script>
   </body>
 </html>
