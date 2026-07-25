@@ -38,6 +38,27 @@ const visualizers = [
     icon: 'fa-network-wired',
     desc: 'Visualize Distributed Transactions and Compensating Actions using the Sagas Pattern.',
   },
+  {
+    name: 'TCP Congestion Control Arena',
+    path: '/pages/visualizers/tcp-congestion-arena/tcp-congestion-arena.html',
+    category: 'Networking',
+    icon: 'fa-network-wired',
+    desc: 'Simulate how CUBIC (loss-based) and BBR (bandwidth-based) handle network congestion and packet loss.',
+  },
+  {
+    name: 'Transactional Outbox Pattern',
+    path: '/pages/visualizers/outbox-pattern/outbox-pattern.html',
+    category: 'Distributed Systems',
+    icon: 'fa-database',
+    desc: 'Visualize the Transactional Outbox Pattern to solve the dual-write problem in microservices.',
+  },
+  {
+    name: 'TLS 1.3 Handshake Simulator',
+    path: '/pages/visualizers/tls13-simulator/tls13-simulator.html',
+    category: 'Security & Crypto',
+    icon: 'fa-lock',
+    desc: 'Interactive visualizer for the TLS 1.3 cryptographic handshake protocol (1-RTT and 0-RTT).',
+  },
   // ── Sorting & Searching ──
   {
     name: 'Sorting Visualizer',
@@ -194,6 +215,13 @@ const visualizers = [
     category: 'Trees & BSTs',
     icon: 'fa-floppy-disk',
     desc: 'Explore persistent data structures with versioned segment trees.',
+  },
+  {
+    name: 'Persistent Segment Tree Visualizer',
+    path: '/pages/visualizers/persistent-segment-tree-visualizer/persistent-segment-tree-visualizer.html',
+    category: 'Trees & BSTs',
+    icon: 'fa-code-branch',
+    desc: 'Interactive versioned segment tree with K-th smallest queries.',
   },
   {
     name: 'Heap Percolation Visualizer',
@@ -371,6 +399,13 @@ const visualizers = [
     category: 'System Design',
     icon: 'fa-circle-nodes',
     desc: 'Dynamo-style N/W/R tunable consistency — animated write/read quorums, staleness demo, read repair, and strong consistency guarantee.',
+  },
+  {
+    name: 'RabbitMQ Messaging Visualizer',
+    path: '/pages/visualizers/rabbitmq-visualizer/rabbitmq-visualizer.html',
+    category: 'System Design',
+    icon: 'fa-envelope-open-text',
+    desc: 'Interactive RabbitMQ simulator demonstrating Direct, Topic (*,#), Fanout, and Headers exchanges, Dead Letter Queues (DLQ), retry backoff, and acknowledgements.',
   },
 
   // ── Dynamic Programming ──
@@ -942,6 +977,13 @@ const visualizers = [
     desc: 'Square-root decomposition for range query optimization.',
   },
   {
+    name: 'Euler Tour + Sparse Table LCA',
+    path: '/pages/visualizers/euler-tour-lca/euler-tour-lca.html',
+    category: 'Data Structures',
+    icon: 'fa-project-diagram',
+    desc: 'Answering "Common Ancestor" queries in O(1) using Euler tour and sparse table.',
+  },
+  {
     name: 'Quadtree Collision Visualizer',
     path: '/pages/visualizers/quadtree-collision/quadtree-collision.html',
     category: 'Data Structures',
@@ -998,11 +1040,11 @@ const visualizers = [
     desc: 'Guaranteed O(1) worst-case lookup via two tables and eviction chains.',
   },
   {
-  name: 'Cuckoo Filter Visualizer',
-  path: '/pages/visualizers/cuckoo-filter/cuckoo-filter.html',
-  category: 'Data Structures',
-  icon: 'fa-filter',
-  desc: 'Bloom Filters that can delete — fingerprint XOR dual-bucket scheme, cuckoo eviction chains, false positive demo, and Bloom vs Cuckoo space comparison.',
+    name: 'Cuckoo Filter Visualizer',
+    path: '/pages/visualizers/cuckoo-filter/cuckoo-filter.html',
+    category: 'Data Structures',
+    icon: 'fa-filter',
+    desc: 'Bloom Filters that can delete — fingerprint XOR dual-bucket scheme, cuckoo eviction chains, false positive demo, and Bloom vs Cuckoo space comparison.',
   },
   {
     name: 'LSH Visualizer',
@@ -1047,11 +1089,32 @@ const visualizers = [
     desc: 'How RAID 6 and QR codes survive missing data — points on a polynomial curve, live disk failures.',
   },
   {
-  name: 'Kalman Filter Visualizer',
-  path: '/pages/visualizers/kalman-filter/kalman-filter.html',
-  category: 'Algorithms',
-  icon: 'fa-chart-line',
-  desc: 'GPS and robotics state estimation — watch predict/update steps, Kalman gain, Gaussian belief narrowing, and sensor noise vs estimation accuracy live.',
+    name: 'Kalman Filter Visualizer',
+    path: '/pages/visualizers/kalman-filter/kalman-filter.html',
+    category: 'Algorithms',
+    icon: 'fa-chart-line',
+    desc: 'GPS and robotics state estimation — watch predict/update steps, Kalman gain, Gaussian belief narrowing, and sensor noise vs estimation accuracy live.',
+  },
+  {
+    name: "Mo's Algorithm Visualizer",
+    path: '/pages/visualizers/mos-algorithm-visualizer/mos-algorithm-visualizer.html',
+    category: 'Graph Algorithms',
+    icon: 'fa-arrows-left-right',
+    desc: 'Answer thousands of offline range queries via sqrt-decomposition block sort and a two-pointer sweep.',
+  },
+  {
+    name: 'DSU on Tree Visualizer',
+    path: '/pages/visualizers/dsu-on-tree-visualizer/dsu-on-tree-visualizer.html',
+    category: 'Data Structures',
+    icon: 'fa-code-merge',
+    desc: 'Small-to-large merging — keep the heavy child, merge only light subtrees, O(n log n) subtree queries.',
+  },
+  {
+    name: 'Convex Hull Trick / Li Chao Tree Visualizer',
+    path: '/pages/visualizers/convex-hull-trick-visualizer/convex-hull-trick-visualizer.html',
+    category: 'Dynamic Programming',
+    icon: 'fa-chart-line',
+    desc: 'Turn O(N) per-query line evaluation into O(log N) — dominated-line envelope, Li Chao Tree, and a real DP optimization demo.',
   },
 
   // ── Special & Creative ──

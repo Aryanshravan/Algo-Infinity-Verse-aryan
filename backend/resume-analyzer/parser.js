@@ -1,5 +1,6 @@
 import { Worker, isMainThread, parentPort, workerData } from 'worker_threads';
 import { fileURLToPath } from 'url';
+import os from 'os';
 
 if (!isMainThread) {
   (async () => {
@@ -25,9 +26,34 @@ if (!isMainThread) {
   })();
 }
 
-export async function extractResumeText(file) {
-  return new Promise((resolve, reject) => {
-    const worker = new Worker(fileURLToPath(import.meta.url), {
+const MAX_CONCURRENT_WORKERS = Math.max(2, Math.min(4, os.cpus()?.length || 2));
+let activeWorkers = 0;
+const workerQueue = [];
+
+function processNextWorkerTask() {
+  if (activeWorkers >= MAX_CONCURRENT_WORKERS || workerQueue.length === 0) {
+    return;
+  }
+
+  const { file, resolve, reject } = workerQueue.shift();
+  activeWorkers++;
+
+  let worker;
+  let settled = false;
+
+  const cleanup = () => {
+    if (!settled) {
+      settled = true;
+      activeWorkers--;
+      if (worker) {
+        worker.terminate().catch(() => {});
+      }
+      processNextWorkerTask();
+    }
+  };
+
+  try {
+    worker = new Worker(fileURLToPath(import.meta.url), {
       workerData: {
         buffer: file.buffer,
         mimetype: file.mimetype,
@@ -37,12 +63,29 @@ export async function extractResumeText(file) {
     worker.on('message', (msg) => {
       if (msg.error) reject(new Error(msg.error));
       else resolve(msg.result);
+      cleanup();
     });
 
-    worker.on('error', reject);
+    worker.on('error', (err) => {
+      reject(err);
+      cleanup();
+    });
 
     worker.on('exit', (code) => {
-      if (code !== 0) reject(new Error(`Worker stopped with exit code ${code}`));
+      if (code !== 0 && !settled) {
+        reject(new Error(`Worker stopped with exit code ${code}`));
+      }
+      cleanup();
     });
+  } catch (err) {
+    reject(err);
+    cleanup();
+  }
+}
+
+export async function extractResumeText(file) {
+  return new Promise((resolve, reject) => {
+    workerQueue.push({ file, resolve, reject });
+    processNextWorkerTask();
   });
 }

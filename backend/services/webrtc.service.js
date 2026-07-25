@@ -141,6 +141,7 @@ export class WebRTCService {
     this.rooms = new Map();
     this.peers = new Map();
     this.roomTimeouts = new Map();
+    this.roomOpSequences = new Map();
     this.maxRoomSize = options.maxRoomSize || MAX_ROOM_SIZE;
     this.roomTimeout = options.roomTimeout || ROOM_TIMEOUT_MS;
   }
@@ -519,6 +520,52 @@ export class WebRTCService {
   }
 
   /**
+   * Handle WebRTC OT operation with room sequence numbers and vector clocks
+   * @param {Object} socket - Socket instance
+   * @param {string} roomId - Room ID
+   * @param {Object} opData - Operation payload
+   * @param {string} targetSocketId - Target socket ID
+   */
+  handleOtOperation(socket, roomId, opData, targetSocketId) {
+    try {
+      const roomValidation = validateRoomId(roomId);
+      if (!roomValidation.valid) {
+        socket.emit('error', { message: roomValidation.error });
+        return;
+      }
+      const validRoomId = roomValidation.value;
+      const roomName = this.getRoomName(validRoomId);
+
+      if (!opData || typeof opData !== 'object') {
+        socket.emit('error', { message: 'Invalid OT operation payload.' });
+        return;
+      }
+
+      const currentSeq = (this.roomOpSequences.get(roomName) || 0) + 1;
+      this.roomOpSequences.set(roomName, currentSeq);
+
+      const enrichedOp = {
+        ...opData,
+        opSeq: currentSeq,
+        senderSocketId: socket.id,
+        timestamp: Date.now(),
+      };
+
+      if (targetSocketId) {
+        const targetValidation = validateTargetSocketId(targetSocketId);
+        if (targetValidation.valid) {
+          socket.to(targetSocketId).emit('webrtc-ot-operation', enrichedOp, socket.id);
+        }
+      } else {
+        socket.to(roomName).emit('webrtc-ot-operation', enrichedOp, socket.id);
+      }
+    } catch (error) {
+      console.error('[WebRTC] OT operation error:', error);
+      socket.emit('error', { message: 'Failed to process OT operation.' });
+    }
+  }
+
+  /**
    * Setup WebRTC signaling for socket
    * @param {Object} socket - Socket instance
    */
@@ -544,6 +591,11 @@ export class WebRTCService {
 
     socket.on('webrtc-ice-candidate', (roomId, candidate, targetSocketId) => {
       this.handleIceCandidate(socket, roomId, candidate, targetSocketId);
+    });
+
+    // OT operations
+    socket.on('webrtc-ot-operation', (roomId, opData, targetSocketId) => {
+      this.handleOtOperation(socket, roomId, opData, targetSocketId);
     });
 
     // Screen sharing
