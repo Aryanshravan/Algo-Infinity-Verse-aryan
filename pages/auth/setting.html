@@ -118,6 +118,27 @@
         </div>
     </div>
 
+    <!-- Study Timer -->
+    <div class="section">
+        <h2>Study Timer</h2>
+        <p class="subtitle" style="margin-bottom: 1rem;">
+            Pomodoro-style focus timer — 25 minutes by default.
+        </p>
+        <div class="timer-display" id="timer-display" role="timer" aria-label="Focus session time remaining">
+            <span id="timer-minutes">25</span>
+            <span class="timer-separator">:</span>
+            <span id="timer-seconds">00</span>
+            <span class="timer-separator">:</span>
+            <span id="timer-centiseconds">00</span>
+        </div>
+        <div class="timer-controls">
+            <button type="button" id="start-btn" class="btn timer-btn timer-btn--primary">Start</button>
+            <button type="button" id="pause-btn" class="btn timer-btn timer-btn--secondary" style="display: none;">Pause</button>
+            <button type="button" id="resume-btn" class="btn timer-btn timer-btn--primary" style="display: none;">Resume</button>
+            <button type="button" id="reset-btn" class="btn timer-btn timer-btn--secondary">Reset</button>
+        </div>
+    </div>
+
     <!-- Progress Backup -->
     <div class="section">
         <h2>Progress Backup</h2>
@@ -153,6 +174,7 @@
 <script src="/interceptors.js"></script>    <script src="/bootstrap-legacy.js"></script>
 <script src="/auth.js"></script>
 <script src="/script.js"></script>
+<script src="/timer.js"></script>
     <script type="module" src="/dist/legacy-bundle.mjs"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {

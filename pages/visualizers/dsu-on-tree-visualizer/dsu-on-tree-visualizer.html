@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>DSU on Tree Visualizer | Algo Infinity Verse</title>
+    <meta name="description" content="Answer subtree queries in O(n log n) by keeping the heavy child's data structure and merging only smaller subtrees into it — small-to-large merging, animated." />
+    <link rel="stylesheet" href="../../../styles.css" />
+    <link rel="stylesheet" href="dsu-on-tree-visualizer.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Poppins:wght@300;400;500;600;700&family=Fira+Code:wght@400;500;600&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <link rel="stylesheet" href="/modules/quick-notes/quick-notes.css" />
+  </head>
+  <body data-page="dsu-on-tree-visualizer">
+
+    <div id="navbar-placeholder"></div>
+
+    <button id="scrollTopBtn" aria-label="Scroll to top" class="scroll-top-btn">
+      <i class="fas fa-circle-chevron-up"></i>
+    </button>
+
+    <section class="dt-hero">
+      <div class="dt-hero-bg"><canvas id="dtHeroCanvas" class="dt-hero-canvas"></canvas></div>
+      <div class="dt-hero-inner">
+        <div class="dt-hero-eyebrow">🌳 Small-to-Large Merging · O(n log n) Subtree Queries</div>
+        <h1 class="dt-hero-title">DSU on Tree</h1>
+        <p class="dt-hero-sub">Keep the biggest child's data. Merge only the small ones in.</p>
+        <p class="dt-hero-desc">Every node needs an answer about its own subtree. Recomputing from scratch at every node is O(n²). Keep the heavy child's structure, merge everything else into it — each element only ever moves O(log n) times across the whole tree.</p>
+        <a href="#lab" class="btn btn-primary dt-btn-primary"><i class="fas fa-code-merge"></i> Watch It Merge</a>
+      </div>
+    </section>
+
+    <section id="lab" class="section dt-section">
+      <div class="container">
+
+        <div class="dt-control-card">
+          <div class="dt-row">
+            <button class="btn btn-secondary dt-randomize-btn" id="dtRandomizeBtn"><i class="fas fa-shuffle"></i> Randomize Tree</button>
+            <button class="btn dt-btn-primary dt-run-btn" id="dtRunBtn"><i class="fas fa-play"></i> Run DSU on Tree</button>
+            <button class="btn btn-secondary dt-step-btn" id="dtStepBtn"><i class="fas fa-step-forward"></i> Step</button>
+          </div>
+        </div>
+
+        <div class="dt-status" id="dtStatus">Answering "how many distinct values in my subtree" at every node. Run to watch heavy children get kept, light children get merged.</div>
+
+        <div class="dt-main-layout">
+
+          <div class="dt-tree-section">
+            <div class="dt-panel-title"><i class="fas fa-sitemap"></i> Tree — Ring Thickness Shows Kept Structure Size</div>
+            <div class="dt-canvas-wrap" id="dtCanvasWrap"><canvas id="dtCanvas" class="dt-canvas"></canvas></div>
+            <div class="dt-legend">
+              <span class="dt-leg"><span class="dt-leg-dot dt-leg-heavy"></span>Heavy child (kept)</span>
+              <span class="dt-leg"><span class="dt-leg-dot dt-leg-light"></span>Light child (merged in, then discarded)</span>
+              <span class="dt-leg"><span class="dt-leg-dot dt-leg-current"></span>Currently processing</span>
+            </div>
+          </div>
+
+          <div class="dt-right-panel">
+
+            <div class="dt-panel-card">
+              <div class="dt-panel-title"><i class="fas fa-gauge-high"></i> Per-Element Move Count</div>
+              <div class="dt-stat-rows">
+                <div class="dt-stat-row"><span>Total element moves</span><span id="dtTotalMoves">0</span></div>
+                <div class="dt-stat-row"><span>Max moves for any single node</span><span id="dtMaxMoves">0</span></div>
+                <div class="dt-stat-row"><span>log₂(n) bound</span><span id="dtLogBound">—</span></div>
+              </div>
+            </div>
+
+            <div class="dt-panel-card">
+              <div class="dt-panel-title"><i class="fas fa-scale-balanced"></i> Naive vs Small-to-Large</div>
+              <div class="dt-stat-rows">
+                <div class="dt-stat-row"><span>Naive (rebuild every node)</span><span id="dtNaiveTouches">—</span></div>
+                <div class="dt-stat-row"><span>Small-to-large (this run)</span><span id="dtSlTouches">—</span></div>
+              </div>
+            </div>
+
+            <div class="dt-panel-card">
+              <div class="dt-panel-title"><i class="fas fa-list-ol"></i> Log</div>
+              <div class="dt-log" id="dtLog"><div class="dt-empty">No activity yet.</div></div>
+            </div>
+
+          </div>
+
+        </div>
+
+        <div class="dt-results-card">
+          <div class="dt-panel-title"><i class="fas fa-list-check"></i> Distinct Values per Subtree — Final Answers</div>
+          <div class="dt-results-row" id="dtResultsRow"></div>
+        </div>
+
+      </div>
+    </section>
+
+    <section id="learn" class="section">
+      <div class="container">
+        <h2 class="section-title"><span class="title-icon">🌳</span> The log n Proof, In One Sentence</h2>
+        <div class="dt-learn-grid">
+          <div class="dt-learn-card" style="--lc:#06b6d4">
+            <div class="dt-learn-icon">👑</div>
+            <h3>Always Keep the Biggest</h3>
+            <p>At every node, identify the child with the largest subtree — the "heavy" child. Its data structure is never rebuilt; it's simply reused as the parent's own structure.</p>
+          </div>
+          <div class="dt-learn-card" style="--lc:#a855f7">
+            <div class="dt-learn-icon">🔀</div>
+            <h3>Only Small Ones Get Merged</h3>
+            <p>Every OTHER child ("light" children) gets its elements inserted one by one into the kept structure, then discarded. This is the only work actually done at each node.</p>
+          </div>
+          <div class="dt-learn-card" style="--lc:#22c55e">
+            <div class="dt-learn-icon">📐</div>
+            <h3>Why log n Moves Is the Ceiling</h3>
+            <p>Every time an element gets merged as part of a "light" subtree, the subtree containing it at least DOUBLES in size — from the light subtree's size to something bigger than the heavy sibling it merged into. Size can only double log n times before reaching n.</p>
+          </div>
+          <div class="dt-learn-card" style="--lc:#f59e0b">
+            <div class="dt-learn-icon">🏆</div>
+            <h3>Same Trick as Union-Find</h3>
+            <p>This is the exact same "small-to-large" idea behind union-by-size in Disjoint Set Union — always attach the smaller structure to the larger one. DSU on Tree just applies it to per-node subtree processing order instead of set merging.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div id="footer-placeholder"></div>
+
+    <script src="../../../auth.js"></script>
+    <script src="../../../script.js"></script>
+    <script src="../../../theme.js"></script>
+    <script src="../../../auth-gate.js"></script>
+    <script src="dsu-on-tree-visualizer.js"></script>
+    <script>
+      if (typeof loadPartial === 'function') {
+        loadPartial('navbar-placeholder', '/partials/navbar.html').then(function() {
+          if (typeof initNavbar === 'function') initNavbar();
+        });
+        loadPartial('footer-placeholder', '/partials/footer.html');
+      }
+    </script>
+    <script src="/modules/quick-notes/quick-notes.js"></script>
+  </body>
+</html>

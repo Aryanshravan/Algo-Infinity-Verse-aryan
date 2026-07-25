@@ -1,0 +1,216 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Elixir Editor – Live Code Editor | Algo Infinity Verse</title>
+    <meta
+      name="description"
+      content="Write, compile, and run Elixir code in your browser with syntax highlighting, concurrent programming templates, and real-time output."
+    />
+    <link rel="stylesheet" href="/styles.css" />
+    <link rel="stylesheet" href="elixir-editor.css" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Poppins:wght@300;400;500;600;700&family=Fira+Code:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+
+    <!-- Theme Initialization Script -->
+    <script>
+      (function () {
+        try {
+          const storedTheme = localStorage.getItem('theme');
+          const prefersLight = window.matchMedia('(prefers-color-scheme: light)').matches;
+          const theme = storedTheme || (prefersLight ? 'light' : 'dark');
+          if (theme === 'light') {
+            document.documentElement.classList.add('light-mode');
+          } else {
+            document.documentElement.classList.remove('light-mode');
+          }
+        } catch (e) {}
+      })();
+    </script>
+  </head>
+  <body data-page="elixir-editor" data-no-loading>
+    <div id="loading-screen" class="hidden">
+      <div class="loader">
+        <div class="infinity-loader">∞</div>
+        <h2>Algo Infinity Verse</h2>
+        <div class="loading-bar"><div class="loading-progress"></div></div>
+      </div>
+    </div>
+
+    <button type="button" id="scrollTopBtn" class="scroll-top-btn" aria-label="Scroll to top">
+      <i class="fas fa-arrow-up"></i>
+    </button>
+
+    <div id="navbar-placeholder"></div>
+
+    <section class="hero ex-hero">
+      <div class="hero-background">
+        <div class="stars"></div>
+        <div class="stars2"></div>
+        <div class="stars3"></div>
+      </div>
+      <div class="hero-content">
+        <h1 class="hero-title">
+          <span class="title-line">Write Elixir.</span>
+          <span
+            class="main-title"
+            style="
+              background: linear-gradient(135deg, #6e4a8e 0%, #a27bc6 100%);
+              -webkit-background-clip: text;
+              -webkit-text-fill-color: transparent;
+            "
+            >Run It Instantly.</span
+          >
+          <span class="subtitle">In-Browser Elixir Editor</span>
+        </h1>
+      </div>
+    </section>
+
+    <main class="editor-container">
+      <div class="editor-wrapper">
+        <div class="editor-header">
+          <div class="editor-info">
+            <i class="fas fa-cube" style="color: #a27bc6"></i>
+            <span id="exActiveFileName">main.exs</span>
+            <span id="exStatusBadge" class="ex-status-badge ex-status-ready">Ready</span>
+          </div>
+          <div class="editor-actions">
+            <select id="exExampleSelect" class="ex-select" aria-label="Load example">
+              <option value="hello">Hello World</option>
+              <option value="variables">Pattern Matching & Variables</option>
+              <option value="recursion">Recursion & Lists</option>
+              <option value="concurrency">Concurrency & Processes</option>
+              <option value="structs">Structs & Protocols</option>
+            </select>
+            <button
+              type="button"
+              id="exCopyBtn"
+              class="ex-icon-btn"
+              title="Copy Code"
+              aria-label="Copy Code"
+            >
+              <i class="fas fa-copy"></i>
+            </button>
+            <button
+              type="button"
+              id="exSaveBtn"
+              class="ex-icon-btn"
+              title="Save Project"
+              aria-label="Save Project"
+            >
+              <i class="fas fa-save"></i>
+            </button>
+            <button
+              type="button"
+              id="exResetBtn"
+              class="ex-icon-btn ex-reset-btn"
+              title="Reset Editor"
+              aria-label="Reset Editor"
+            >
+              <i class="fas fa-undo"></i>
+            </button>
+            <button type="button" id="exRunBtn" class="ex-run-btn">
+              <i class="fas fa-play"></i> Run Code
+            </button>
+          </div>
+        </div>
+
+        <div class="editor-main">
+          <!-- File Explorer Sidebar -->
+          <aside class="file-explorer" role="navigation" aria-label="File Explorer">
+            <div class="explorer-header">
+              <span><i class="fas fa-folder-open"></i> FILES</span>
+              <button
+                type="button"
+                id="exNewFileBtn"
+                class="explorer-action-btn"
+                title="New File"
+                aria-label="New File"
+              >
+                <i class="fas fa-file-circle-plus"></i>
+              </button>
+            </div>
+            <div id="exFileList" class="file-list" role="listbox" aria-label="Project Files">
+              <!-- Dynamically populated -->
+            </div>
+          </aside>
+
+          <!-- Code Editor Workspace -->
+          <div class="code-editor-workspace">
+            <div class="code-editor">
+              <div class="line-numbers" id="exLineNumbers" aria-hidden="true">1</div>
+              <textarea
+                id="exEditor"
+                class="code-textarea"
+                spellcheck="false"
+                autocomplete="off"
+                autocorrect="off"
+                autocapitalize="off"
+                aria-label="Elixir code editor"
+                placeholder="# Write your Elixir code here..."
+              ></textarea>
+              <div class="syntax-highlight" id="exHighlight" aria-hidden="true"></div>
+            </div>
+            <div class="editor-shortcuts">
+              <span><kbd>Ctrl</kbd>+<kbd>Enter</kbd> Run Code</span>
+              <span><kbd>Ctrl</kbd>+<kbd>S</kbd> Save Project</span>
+              <span><kbd>Tab</kbd> Indent (2 Spaces)</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panels-container">
+        <div class="panel output-panel">
+          <div class="panel-header">
+            <i class="fas fa-terminal" style="color: #a27bc6"></i>
+            <span>Standard Output</span>
+          </div>
+          <div id="exOutputBody" class="panel-body">
+            <span class="ex-output-placeholder">Output will appear here after running...</span>
+          </div>
+        </div>
+
+        <div class="panel console-panel">
+          <div class="panel-header">
+            <i class="fas fa-exclamation-triangle" style="color: #ea580c"></i>
+            <span>Elixir Compiler / Errors</span>
+            <button
+              type="button"
+              id="exConsoleClear"
+              class="console-clear-btn"
+              title="Clear Console"
+              aria-label="Clear Console"
+            >
+              <i class="fas fa-trash-alt"></i>
+            </button>
+          </div>
+          <div id="exConsoleBody" class="panel-body">
+            <span class="ex-console-placeholder">No compilation errors.</span>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <div id="footer-placeholder"></div>
+
+    <script src="elixir-editor.js"></script>
+    <script src="/auth.js"></script>
+    <script src="/bootstrap-legacy.js"></script>
+
+    <script src="/script.js"></script>
+    <script type="module" src="/dist/legacy-bundle.mjs"></script>
+    <script src="/theme.js"></script>
+    <script>
+      loadPartial('navbar-placeholder', '/partials/navbar.html');
+      loadPartial('footer-placeholder', '/partials/footer.html');
+    </script>
+  </body>
+</html>

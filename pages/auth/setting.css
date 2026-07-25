@@ -157,6 +157,51 @@ input::placeholder{
     font-family:'Orbitron',sans-serif;
 }
 
+.timer-display{
+    text-align:center;
+    font-size:3rem;
+    font-weight:400;
+    font-family:'JetBrains Mono',monospace;
+    color:#a76cff;
+    margin-bottom:24px;
+    font-variant-numeric:tabular-nums;
+    letter-spacing:0.05em;
+}
+
+.timer-separator{
+    display:inline-block;
+    width:1ch;
+    text-align:center;
+    color:#7f83a8;
+}
+
+.timer-controls{
+    display:flex;
+    gap:12px;
+    justify-content:center;
+}
+
+.timer-btn{
+    width:auto;
+    padding:12px 28px;
+    border:none;
+    border-radius:30px;
+    cursor:pointer;
+    font-family:Orbitron,sans-serif;
+    font-size:14px;
+}
+
+.timer-btn--primary{
+    background:linear-gradient(90deg,#6578ff,#a76cff);
+    color:white;
+}
+
+.timer-btn--secondary{
+    background:transparent;
+    border:1px solid #7f83a8;
+    color:#a8abd3;
+}
+
 @media(max-width:600px){
 
     .settings-container{

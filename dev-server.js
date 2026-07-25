@@ -13,8 +13,11 @@ let execWriteQueue = Promise.resolve();
 
 async function ensureStore() {
   await fs.mkdir(DATA_DIR, { recursive: true });
-  try { await fs.access(EXECUTIONS_FILE); }
-  catch { await fs.writeFile(EXECUTIONS_FILE, '[]\n'); }
+  try {
+    await fs.access(EXECUTIONS_FILE);
+  } catch {
+    await fs.writeFile(EXECUTIONS_FILE, '[]\n');
+  }
 }
 
 async function appendExecution(record) {
@@ -32,27 +35,28 @@ async function appendExecution(record) {
 }
 
 const LANGUAGE_IDS = {
-  python:      71,
-  javascript:  63,
-  java:        62,
-  'c++':       54,
-  cpp:         54,
-  c:           50,
-  typescript:  74,
-  go:          60,
-  rust:        73,
-  ruby:        72,
-  swift:       83,
-  dart:        98,
-  haskell:     89,
-  kotlin:      78,
+  python: 71,
+  javascript: 63,
+  java: 62,
+  'c++': 54,
+  cpp: 54,
+  c: 50,
+  typescript: 74,
+  go: 60,
+  rust: 73,
+  ruby: 72,
+  swift: 83,
+  dart: 98,
+  haskell: 89,
+  kotlin: 78,
+  bash: 46,
 };
 
 const JUDGE0 = 'https://ce.judge0.com';
 const POLL_INTERVAL = 600;
 const MAX_POLLS = 50;
 const b64 = (s) => Buffer.from(s, 'utf-8').toString('base64');
-const d64 = (s) => s ? Buffer.from(s, 'base64').toString('utf-8') : '';
+const d64 = (s) => (s ? Buffer.from(s, 'base64').toString('utf-8') : '');
 
 async function pollSubmission(token) {
   const safeToken = encodeURIComponent(token);
@@ -61,7 +65,7 @@ async function pollSubmission(token) {
     if (!resp.ok) throw new Error(`Judge0 poll error: ${await resp.text()}`);
     const data = await resp.json();
     if (data.status && data.status.id >= 3) return data;
-    await new Promise(r => setTimeout(r, POLL_INTERVAL));
+    await new Promise((r) => setTimeout(r, POLL_INTERVAL));
   }
   throw new Error('Judge0 execution timed out');
 }
@@ -73,7 +77,8 @@ app.use(express.json());
 app.post('/api/execute', async (req, res) => {
   // Validate request body size via Content-Length header
   const contentLength = parseInt(req.headers['content-length'] || '0', 10);
-  if (contentLength > 100000) { // 100KB limit
+  if (contentLength > 100000) {
+    // 100KB limit
     return res.status(413).json({ error: 'Payload too large. Request body must be under 100KB.' });
   }
 
@@ -94,7 +99,9 @@ app.post('/api/execute', async (req, res) => {
 
   const MAX_CODE_LENGTH = 50000; // 50KB
   if (source_code.length > MAX_CODE_LENGTH) {
-    return res.status(400).json({ error: `source_code exceeds maximum length of ${MAX_CODE_LENGTH} characters.` });
+    return res
+      .status(400)
+      .json({ error: `source_code exceeds maximum length of ${MAX_CODE_LENGTH} characters.` });
   }
 
   const language_id = req.body.language_id ?? LANGUAGE_IDS[language.toLowerCase()];
@@ -104,17 +111,21 @@ app.post('/api/execute', async (req, res) => {
   }
 
   try {
-    const submitResp = await fetch(
-      `${JUDGE0}/submissions?base64_encoded=true&wait=false`,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ source_code: b64(source_code), language_id, stdin: b64(stdin), compiler_options: language_id === 54 ? '-std=c++17' : undefined }),
-      }
-    );
+    const submitResp = await fetch(`${JUDGE0}/submissions?base64_encoded=true&wait=false`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        source_code: b64(source_code),
+        language_id,
+        stdin: b64(stdin),
+        compiler_options: language_id === 54 ? '-std=c++17' : undefined,
+      }),
+    });
 
     if (!submitResp.ok) {
-      return res.status(submitResp.status).json({ error: `Judge0 error: ${await submitResp.text()}` });
+      return res
+        .status(submitResp.status)
+        .json({ error: `Judge0 error: ${await submitResp.text()}` });
     }
 
     const { token } = await submitResp.json();
@@ -141,20 +152,19 @@ app.post('/api/execute', async (req, res) => {
       exitCode,
       cpuTime: data.time ?? null,
       memory: data.memory ?? null,
-      error: exitCode !== 0 ? (data.status?.description || 'Execution error') : null,
+      error: exitCode !== 0 ? data.status?.description || 'Execution error' : null,
       createdAt: new Date().toISOString(),
       variableSnapshots: [],
     };
-    appendExecution(executionRecord).catch((e) => console.error('Failed to save execution log:', e));
+    appendExecution(executionRecord).catch((e) =>
+      console.error('Failed to save execution log:', e)
+    );
 
     return res.status(200).json({
-      success: true,
-      data: {
-        output: stdout,
-        stderr,
-        memory: data.memory ?? null,
-        cpuTime: data.time ?? null,
-      }
+      stdout,
+      stderr,
+      code: exitCode,
+      status: exitCode === 0 ? 'Accepted' : 'Runtime Error',
     });
   } catch (err) {
     return res.status(500).json({ error: err.message });

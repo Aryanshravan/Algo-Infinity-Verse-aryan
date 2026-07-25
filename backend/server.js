@@ -197,9 +197,6 @@ function clearLoginFailures(identifier) {
 const protectedPaths = new Set([
   '/community',
   '/community.html',
-  '/support-page',
-  '/support-page/',
-  '/support-page/index.html',
 ]);
 
 const mimeTypes = {
