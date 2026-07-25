@@ -43,4 +43,22 @@ export class VCSProvider {
       }
     });
   }
+
+  /**
+   * Get a recursive listing of file paths in the repository's default branch.
+   * @param {{ includeContent?: boolean }} [options]
+   * @returns {Promise<string[]>} Array of file paths relative to repo root.
+   */
+  async getRepoFilePaths(_options = {}) {
+    throw new Error("Method 'getRepoFilePaths()' must be implemented by subclasses.");
+  }
+
+  /**
+   * Fetch the raw content of a file from the default branch of the repository.
+   * @param {string} filePath - Path relative to repository root.
+   * @returns {Promise<string|null>} File content or null if not found.
+   */
+  async getFileContent(_filePath) {
+    throw new Error("Method 'getFileContent()' must be implemented by subclasses.");
+  }
 }

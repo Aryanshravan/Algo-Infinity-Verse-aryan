@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Battle Replay System · DSA Battle Review</title>
+    <link rel="stylesheet" href="battle-replay.css" />
+</head>
+<body>
+    <div class="app" id="app">
+        <!-- Header -->
+        <header class="app-header">
+            <div>
+                <h1>🎮 Battle Replay System</h1>
+                <p class="subtitle">Review DSA battles like chess.com game review</p>
+            </div>
+            <div class="header-controls">
+                <button class="theme-toggle" id="themeToggle">
+                    <span id="themeIcon">🌙</span> <span id="themeLabel">Dark</span>
+                </button>
+            </div>
+        </header>
+
+        <!-- Battle Loader -->
+        <section class="loader-section">
+            <div class="loader-container">
+                <input type="text" id="battleIdInput" placeholder="Enter Battle ID (e.g., battle_12345)" />
+                <button class="btn-load-battle" id="loadBattleBtn">🔍 Load Battle</button>
+            </div>
+            <div class="battle-info" id="battleInfo" style="display: none;">
+                <div class="battle-meta">
+                    <span class="battle-id" id="battleIdDisplay">Battle #12345</span>
+                    <span class="battle-date" id="battleDate">2024-01-15 14:30</span>
+                    <span class="battle-duration" id="battleDuration">⏱️ 12:34</span>
+                </div>
+                <div class="battle-players">
+                    <div class="player-tag player-1" id="player1Tag">
+                        <span class="player-name">Player 1</span>
+                        <span class="player-result" id="player1Result">🏆 Winner</span>
+                    </div>
+                    <div class="vs-badge">VS</div>
+                    <div class="player-tag player-2" id="player2Tag">
+                        <span class="player-name">Player 2</span>
+                        <span class="player-result" id="player2Result">💔 Lost</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Replay Controls -->
+        <section class="controls-section" id="controlsSection" style="display: none;">
+            <div class="timeline-container">
+                <div class="timeline-scrubber" id="timelineScrubber">
+                    <div class="timeline-track" id="timelineTrack">
+                        <div class="timeline-progress" id="timelineProgress" style="width: 0%;"></div>
+                        <div class="timeline-handle" id="timelineHandle" style="left: 0%;"></div>
+                        <div class="timeline-events" id="timelineEvents"></div>
+                    </div>
+                    <div class="timeline-time">
+                        <span class="time-current" id="timeCurrent">00:00</span>
+                        <span class="time-total" id="timeTotal">00:00</span>
+                    </div>
+                </div>
+                <div class="replay-controls">
+                    <button class="btn-replay" id="rewindBtn">⏮️</button>
+                    <button class="btn-replay" id="playPauseBtn">▶️</button>
+                    <button class="btn-replay" id="forwardBtn">⏭️</button>
+                    <div class="speed-control">
+                        <label>Speed</label>
+                        <select id="speedSelect">
+                            <option value="0.5">0.5x</option>
+                            <option value="1" selected>1x</option>
+                            <option value="2">2x</option>
+                            <option value="4">4x</option>
+                        </select>
+                    </div>
+                    <button class="btn-replay" id="stepBackBtn">⏪</button>
+                    <button class="btn-replay" id="stepForwardBtn">⏩</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Side-by-side Code Comparison -->
+        <section class="code-section" id="codeSection" style="display: none;">
+            <div class="code-grid">
+                <div class="code-panel player-1-panel">
+                    <div class="code-header">
+                        <span class="player-label" id="player1Label">👤 Player 1</span>
+                        <span class="code-status" id="player1Status">💻 Coding...</span>
+                        <span class="code-submissions" id="player1Submissions">Submissions: 0</span>
+                    </div>
+                    <div class="code-editor" id="player1Code">
+                        <pre><code id="player1CodeContent">// Waiting for code...</code></pre>
+                    </div>
+                </div>
+                <div class="code-panel player-2-panel">
+                    <div class="code-header">
+                        <span class="player-label" id="player2Label">👤 Player 2</span>
+                        <span class="code-status" id="player2Status">💻 Coding...</span>
+                        <span class="code-submissions" id="player2Submissions">Submissions: 0</span>
+                    </div>
+                    <div class="code-editor" id="player2Code">
+                        <pre><code id="player2CodeContent">// Waiting for code...</code></pre>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Event Timeline -->
+        <section class="events-section" id="eventsSection" style="display: none;">
+            <div class="events-header">
+                <h3>📋 Event Timeline</h3>
+                <button class="btn-toggle-events" id="toggleEventsBtn">Show Events</button>
+            </div>
+            <div class="events-list" id="eventsList">
+                <div class="event-item">
+                    <span class="event-time">00:00</span>
+                    <span class="event-type">Battle Started</span>
+                    <span class="event-desc">Both players joined</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Loading & Error States -->
+        <div class="loading-overlay" id="loadingOverlay" style="display: none;">
+            <div class="loader"></div>
+            <p>Loading battle replay...</p>
+        </div>
+
+        <div class="error-message" id="errorMessage" style="display: none;">
+            <span class="error-icon">⚠️</span>
+            <span class="error-text" id="errorText">Battle not found</span>
+            <button class="btn-close-error" id="closeErrorBtn">✕</button>
+        </div>
+
+        <!-- Footer -->
+        <footer class="app-footer">
+            <span>Battle Replay System · Powered by Socket.IO · Real-time event replay</span>
+        </footer>
+    </div>
+
+    <script src="battle-replay.js"></script>
+</body>
+</html>

@@ -538,6 +538,7 @@
           <option value="vbnet">VB.NET</option>
           <option value="fsharp">F#</option>
           <option value="prolog">Prolog</option>
+          <option value="elixir">Elixir</option>
         </select>
         <button type="button" id="runBtn" aria-label="Run code">▶ Run</button>
         <button type="button" id="profileBtn" aria-label="Profile time complexity">
@@ -586,6 +587,7 @@
         vbnet: `' VB.NET Code Playground\nImports System\n\nModule Program\n    Sub Main()\n        Console.WriteLine("Hello from VB.NET")\n    End Sub\nEnd Module`,
         fsharp: `// F# Code Playground\nlet solve input =\n    printfn "%A" input\n    input\n\n[<EntryPoint>]\nlet main argv =\n    solve "Hello from F#"\n    0`,
         prolog: `% Prolog Code Playground\nparent(john, bob).\nparent(bob, charlie).\nancestor(X, Y) :- parent(X, Y).\nancestor(X, Y) :- parent(X, Z), ancestor(Z, Y).`,
+        elixir: `# Elixir Code Playground\ndefmodule Solver do\n  def solve(input) do\n    IO.puts("Input: #{input}")\n    input\n  end\nend\n\nSolver.solve("Hello from Elixir")`,
       };
 
       let editor;
@@ -644,6 +646,7 @@
           vbnet: 'vb',
           fsharp: 'fsharp',
           prolog: 'prolog',
+          elixir: 'elixir',
         };
         const lang = modeMap[this.value];
         if (editor && monacoInstance) {

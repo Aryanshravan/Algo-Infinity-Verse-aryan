@@ -6,7 +6,4 @@
 export const protectedPaths = new Set([
   '/community',
   '/community.html',
-  '/support-page',
-  '/support-page/',
-  '/support-page/index.html',
 ]);
