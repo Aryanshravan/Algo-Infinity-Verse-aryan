@@ -19,6 +19,7 @@ import {
 } from '../handlers/memoryHandlers.js';
 import { handleUserPersonality } from '../handlers/personalityHandlers.js';
 import { handleRefactoringDojoSubmit } from './refactoringDojoRoutes.js';
+import { explainCode } from '../services/codeExplainer.service.js';
 
 const MAX_TOPIC_LENGTH = 100;
 
@@ -323,6 +324,20 @@ export function setupApiRoutes(req, res, pathname) {
 
   if (pathname === '/api/refactoring-dojo/submit' && req.method === 'POST') {
     return wrapHandler(handleRefactoringDojoSubmit, 'default', true)(req, res);
+  }
+
+  if (pathname === '/api/explain-code' && req.method === 'POST') {
+    return wrapHandler(
+      async (req, res) => {
+        const { code, language } = req.body || {};
+        const result = await explainCode({ code, language });
+        res.statusCode = 200;
+        res.setHeader('Content-Type', 'application/json');
+        res.end(JSON.stringify(result));
+      },
+      'default',
+      false
+    )(req, res);
   }
 
   return null;

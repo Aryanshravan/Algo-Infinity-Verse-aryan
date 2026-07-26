@@ -20,6 +20,7 @@
 
     <link rel="stylesheet" href="cqrs-visualizer.css" />
     <script src="/theme.js"></script>
+    <link rel="stylesheet" href="/modules/quick-notes/quick-notes.css" />
   </head>
   <body class="cqrs-body">
     <nav class="navbar cqrs-nav">
@@ -59,9 +60,14 @@
         <div class="event-store-container">
           <div class="section-title">
             <h3><i class="fas fa-database"></i> Event Store (Append-Only Ledger)</h3>
-            <button class="btn btn-sm" id="btnReplay">
-              <i class="fas fa-history"></i> Replay Events
-            </button>
+            <div class="actions">
+              <button class="btn btn-sm" id="btnTakeSnapshot">
+                <i class="fas fa-camera"></i> Take Snapshot
+              </button>
+              <button class="btn btn-sm" id="btnReplay">
+                <i class="fas fa-history"></i> Replay Events
+              </button>
+            </div>
           </div>
           <div class="event-log" id="eventLog">
             <!-- Events append here -->
@@ -92,24 +98,37 @@
 
         <div class="projection-container">
           <h3>Materialized View (User Projection)</h3>
-          <p class="helper-text">
-            This view is rebuilt automatically by applying events to a snapshot. It is purely
-            optimized for fast JSON retrieval.
-          </p>
-
-          <div class="code-editor">
-            <div class="editor-header">
-              <span class="filename">user_projection.json</span>
-              <div class="dots">
-                <span class="dot red"></span>
-                <span class="dot yellow"></span>
-                <span class="dot green"></span>
+          <div style="display: flex; gap: 1rem">
+            <div class="code-editor" style="flex: 1">
+              <div class="editor-header">
+                <span class="filename">user_projection.json</span>
+                <div class="dots">
+                  <span class="dot red"></span>
+                  <span class="dot yellow"></span>
+                  <span class="dot green"></span>
+                </div>
               </div>
+              <pre><code id="jsonProjection" class="language-json">{
+    "status": "Not Initialized"
+  }</code></pre>
             </div>
-            <pre><code id="jsonProjection" class="language-json">{
-  "status": "Not Initialized"
-}</code></pre>
+
+            <div class="code-editor" style="flex: 1">
+              <div class="editor-header" style="background: #2a2d3e">
+                <span class="filename">snapshot.json</span>
+                <div class="dots">
+                  <span class="dot red"></span>
+                  <span class="dot yellow"></span>
+                  <span class="dot green"></span>
+                </div>
+              </div>
+              <pre><code id="jsonSnapshot" class="language-json" style="color: #a0aabf;">No snapshot taken.</code></pre>
+            </div>
           </div>
+          <p class="helper-text" style="margin-top: 10px">
+            This view is rebuilt automatically by applying events. If a snapshot exists, replay
+            starts from the snapshot state.
+          </p>
         </div>
 
         <div class="query-tester">
@@ -125,5 +144,6 @@
     </main>
 
     <script src="cqrs-visualizer.js"></script>
+    <script src="/modules/quick-notes/quick-notes.js"></script>
   </body>
 </html>

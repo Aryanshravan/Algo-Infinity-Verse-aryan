@@ -1,0 +1,851 @@
+/* ════════════════════════════════════════════════
+   Bulk Repository Analyzer — Dedicated Stylesheet
+   Palette: warm pastels (no purple, cyan, or lime)
+   ════════════════════════════════════════════════ */
+
+/* ── Design Tokens (inspired by Code Editor & Interview Hub landing pages) ── */
+.bulk-analyzer-page {
+  --bra-bg: #0a0a14;
+  --bra-surface: #12121f;
+  --bra-surface-hover: #1a1a2e;
+  --bra-card: #141421;
+  --bra-card-border: rgba(148, 163, 184, 0.12);
+  --bra-card-border-hover: rgba(148, 163, 184, 0.22);
+
+  --bra-primary: #fcc8d0;
+  --bra-primary-light: #fdd8df;
+  --bra-primary-glow: rgba(252, 200, 208, 0.12);
+
+  --bra-cyan: #06b6d4;
+  --bra-emerald: #10b981;
+  --bra-emerald-glow: rgba(16, 185, 129, 0.12);
+
+  --bra-warning: #f59e0b;
+  --bra-warning-glow: rgba(245, 158, 11, 0.12);
+
+  --bra-error: #fb7185;
+  --bra-error-glow: rgba(251, 113, 133, 0.12);
+
+  --bra-text: #ffffff;
+  --bra-text-secondary: #94a3b8;
+  --bra-text-muted: #64748b;
+
+  --bra-font-display: 'JetBrains Mono', monospace;
+  --bra-font-body: 'Inter', sans-serif;
+  --bra-font-mono: 'JetBrains Mono', monospace;
+
+  --bra-radius: 12px;
+  --bra-radius-sm: 10px;
+  --bra-radius-xs: 6px;
+
+  --bra-transition: 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* ── Page Container ────────────────────────────── */
+.bulk-analyzer-page {
+  min-height: 100vh;
+  background: var(--bra-bg);
+  color: var(--bra-text);
+  font-family: var(--bra-font-body);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  line-height: 1.6;
+}
+
+.bra-container {
+  width: 100%;
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 5rem 1.5rem 3rem;
+}
+
+/* ── Hero ──────────────────────────────────────── */
+.bra-hero {
+  text-align: center;
+  margin-bottom: 2rem;
+  padding-top: 2rem;
+}
+
+.bra-hero-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  border-radius: 16px;
+  background: var(--bra-primary-glow);
+  color: var(--bra-primary);
+  font-size: 1.4rem;
+  margin-bottom: 0.75rem;
+}
+
+.bra-hero-title {
+  font-family: var(--bra-font-display);
+  font-size: clamp(2.5rem, 6vw, 4.5rem);
+  font-weight: 700;
+  letter-spacing: -1px;
+  line-height: 1.1;
+  color: var(--bra-text);
+  margin: 0 0 0.5rem;
+}
+
+.bra-hero-title-accent {
+  color: var(--bra-primary);
+}
+
+.bra-hero-subtitle {
+  font-size: 1.05rem;
+  color: var(--bra-text-secondary);
+  max-width: 520px;
+  margin: 0 auto;
+  line-height: 1.6;
+}
+
+/* ── Upload Zone ───────────────────────────────── */
+.bra-upload-card {
+  background: var(--bra-card);
+  border: 1px solid var(--bra-card-border);
+  border-radius: var(--bra-radius);
+  padding: 0.25rem;
+  transition: var(--bra-transition);
+}
+
+.bra-upload-card:focus-within {
+  border-color: var(--bra-primary);
+  box-shadow: 0 0 0 3px var(--bra-primary-glow);
+}
+
+.bra-upload-zone {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  padding: 2.5rem 2rem;
+  border: 2px dashed var(--bra-card-border-hover);
+  border-radius: var(--bra-radius);
+  cursor: pointer;
+  transition: border-color var(--bra-transition), transform var(--bra-transition), background var(--bra-transition);
+  background: transparent;
+  overflow: hidden;
+}
+
+/* Solid border overlay — animates opacity instead of border-style */
+.bra-upload-zone::before {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border: 2px solid var(--bra-primary);
+  border-radius: var(--bra-radius);
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  pointer-events: none;
+}
+
+/* Radial glow effect */
+.bra-upload-zone::after {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: calc(var(--bra-radius) - 2px);
+  background: radial-gradient(
+    600px circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+    var(--bra-primary-glow),
+    transparent 60%
+  );
+  opacity: 0;
+  transition: opacity 0.5s ease;
+  pointer-events: none;
+}
+
+.bra-upload-zone:hover::before,
+.bra-upload-zone.dragover::before {
+  opacity: 1;
+}
+
+.bra-upload-zone:hover::after,
+.bra-upload-zone.dragover::after {
+  opacity: 1;
+}
+
+.bra-upload-zone:hover {
+  border-color: var(--bra-primary);
+  transform: translateY(-1px);
+}
+
+.bra-upload-zone.dragover {
+  border-color: var(--bra-primary);
+  background: var(--bra-primary-glow);
+  transform: scale(1.01);
+}
+
+
+
+/* Upload icon with buoyancy */
+.bra-upload-icon-wrap {
+  position: relative;
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 0.15rem;
+}
+
+.bra-upload-icon {
+  font-size: 1.75rem;
+  color: var(--bra-primary);
+  transition: var(--bra-transition);
+}
+
+.bra-upload-zone.dragover .bra-upload-icon {
+  transform: scale(1.15);
+  color: var(--bra-primary-light);
+}
+
+/* Upload text */
+.bra-upload-title {
+  font-family: var(--bra-font-display);
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--bra-text);
+  margin: 0;
+}
+
+.bra-upload-hint {
+  font-size: 0.82rem;
+  color: var(--bra-text-secondary);
+  margin: 0;
+}
+
+.bra-upload-format {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin-top: 0.5rem;
+  padding: 0.2rem 0.7rem;
+  border-radius: 999px;
+  background: rgba(148, 163, 184, 0.08);
+  font-family: var(--bra-font-mono);
+  font-size: 0.68rem;
+  color: var(--bra-text-muted);
+}
+
+.bra-upload-zone.dragover .bra-upload-format {
+  background: var(--bra-primary-glow);
+  color: var(--bra-primary);
+}
+
+/* Upload success state */
+.bra-upload-zone.is-uploaded {
+  border-color: var(--bra-success);
+  border-style: solid;
+  pointer-events: none;
+}
+
+.bra-upload-zone.is-uploaded .bra-upload-icon {
+  color: var(--bra-success);
+}
+
+/* File input hidden */
+.bra-file-input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ── Progress Dashboard ────────────────────────── */
+.bra-dashboard {
+  display: none;
+  margin-top: 1rem;
+}
+
+.bra-dashboard.is-visible {
+  display: block;
+}
+
+.bra-dashboard-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.75rem;
+}
+
+.bra-dashboard-title {
+  font-family: var(--bra-font-display);
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--bra-text);
+  margin: 0;
+}
+
+.bra-dashboard-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.3rem 0.85rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  font-family: var(--bra-font-mono);
+  background: var(--bra-cyan);
+  color: #ffffff;
+}
+
+/* ── Stats Grid ───────────────────────────────── */
+.bra-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.6rem;
+  margin-bottom: 0.75rem;
+}
+
+.bra-stat-card {
+  background: var(--bra-surface);
+  border: 1px solid var(--bra-card-border);
+  border-radius: var(--bra-radius-sm);
+  padding: 0.75rem 0.6rem;
+  text-align: center;
+}
+
+.bra-stat-number {
+  font-family: var(--bra-font-display);
+  font-size: 1.35rem;
+  font-weight: 700;
+  line-height: 1.1;
+  margin-bottom: 0.15rem;
+}
+
+.bra-stat-card--total .bra-stat-number { color: var(--bra-text); }
+.bra-stat-card--done .bra-stat-number { color: var(--bra-emerald); }
+.bra-stat-card--failed .bra-stat-number { color: var(--bra-error); }
+
+.bra-stat-label {
+  font-size: 0.8rem;
+  color: var(--bra-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-weight: 500;
+}
+
+/* ── Progress Bar ──────────────────────────────── */
+.bra-progress-wrap {
+  margin-bottom: 0.75rem;
+}
+
+.bra-progress-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.bra-progress-label {
+  font-size: 0.82rem;
+  color: var(--bra-text-secondary);
+  font-weight: 500;
+}
+
+.bra-progress-pct {
+  font-family: var(--bra-font-mono);
+  font-size: 0.82rem;
+  color: var(--bra-cyan);
+  font-weight: 600;
+}
+
+.bra-progress-track {
+  position: relative;
+  width: 100%;
+  height: 10px;
+  background: rgba(148, 163, 184, 0.08);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.bra-progress-fill {
+  height: 100%;
+  width: 0%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--bra-cyan), #38bdf8);
+  transition: width 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+/* No shimmer overlay — kept simple */
+
+/* ── Per-Row Status List ───────────────────────── */
+.bra-status-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  margin-bottom: 0.75rem;
+  max-height: 180px;
+  overflow-y: auto;
+  padding-right: 0.25rem;
+}
+
+/* Custom scrollbar */
+.bra-status-list::-webkit-scrollbar {
+  width: 4px;
+}
+
+.bra-status-list::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.bra-status-list::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.15);
+  border-radius: 999px;
+}
+
+.bra-status-list::-webkit-scrollbar-thumb:hover {
+  background: rgba(148, 163, 184, 0.25);
+}
+
+.bra-status-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.4rem 0.7rem;
+  background: var(--bra-surface);
+  border: 1px solid var(--bra-card-border);
+  border-radius: var(--bra-radius-xs);
+}
+
+.bra-status-row:hover {
+  border-color: var(--bra-card-border-hover);
+}
+
+/* Status dot indicator */
+.bra-status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  position: relative;
+}
+
+.bra-status-dot--queued {
+  background: var(--bra-text-muted);
+}
+
+.bra-status-dot--analyzing {
+  background: var(--bra-primary);
+  animation: bra-dotPulse 1.2s ease-in-out infinite;
+}
+
+.bra-status-dot--done {
+  background: var(--bra-emerald);
+}
+
+.bra-status-dot--failed {
+  background: var(--bra-error);
+}
+
+@keyframes bra-dotPulse {
+  0%, 100% { box-shadow: 0 0 0 0 var(--bra-primary-glow); }
+  50% { box-shadow: 0 0 0 6px transparent; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bra-status-dot--analyzing {
+    animation: none;
+  }
+}
+
+.bra-status-repo {
+  flex: 1;
+  min-width: 0;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--bra-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.bra-status-label {
+  font-family: var(--bra-font-mono);
+  font-size: 0.72rem;
+  color: var(--bra-text-muted);
+  flex-shrink: 0;
+}
+
+.bra-status-label--analyzing {
+  color: var(--bra-primary);
+}
+
+.bra-status-label--done {
+  color: var(--bra-emerald);
+}
+
+.bra-status-label--failed {
+  color: var(--bra-error);
+}
+
+/* ── Results Table ─────────────────────────────── */
+.bra-results {
+  display: none;
+  margin-top: 0.75rem;
+}
+
+.bra-results.is-visible {
+  display: block;
+}
+
+.bra-results-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
+}
+
+.bra-results-title {
+  font-family: var(--bra-font-display);
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--bra-text);
+  margin: 0;
+}
+
+.bra-results-count {
+  font-family: var(--bra-font-mono);
+  font-size: 0.78rem;
+  color: var(--bra-text-secondary);
+}
+
+.bra-table-wrap {
+  overflow-x: auto;
+  border: 1px solid var(--bra-card-border);
+  border-radius: var(--bra-radius-sm);
+  background: var(--bra-card);
+}
+
+.bra-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.82rem;
+}
+
+.bra-table thead {
+  background: var(--bra-surface);
+}
+
+.bra-table th {
+  padding: 0.55rem 0.85rem;
+  text-align: left;
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--bra-text-secondary);
+  border-bottom: 1px solid var(--bra-card-border);
+  white-space: nowrap;
+}
+
+.bra-table td {
+  padding: 0.5rem 0.85rem;
+  border-bottom: 1px solid var(--bra-card-border);
+  color: var(--bra-text);
+}
+
+.bra-table tbody tr {
+  transition: background var(--bra-transition);
+}
+
+.bra-table tbody tr:hover {
+  background: var(--bra-surface-hover);
+}
+
+.bra-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+/* No staggered row animations — kept simple */
+
+/* Repo name cell */
+.bra-repo-cell {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.bra-repo-icon {
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  background: rgba(148, 163, 184, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  color: var(--bra-text-secondary);
+  flex-shrink: 0;
+}
+
+.bra-repo-link {
+  color: var(--bra-text);
+  text-decoration: none;
+  font-weight: 500;
+  transition: color var(--bra-transition);
+}
+
+.bra-repo-link:hover {
+  color: var(--bra-primary);
+}
+
+.bra-repo-link::after {
+  content: '\2197';
+  display: inline-block;
+  margin-left: 0.25rem;
+  font-size: 0.7em;
+  opacity: 0;
+  transition: opacity var(--bra-transition);
+}
+
+.bra-repo-link:hover::after {
+  opacity: 0.6;
+}
+
+/* Score badges */
+.bra-score {
+  white-space: nowrap;
+}
+
+.bra-score-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.2rem 0.65rem;
+  border-radius: 999px;
+  font-family: var(--bra-font-mono);
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+.bra-score-badge--high {
+  background: var(--bra-emerald-glow);
+  color: var(--bra-emerald);
+}
+
+.bra-score-badge--mid {
+  background: var(--bra-warning-glow);
+  color: var(--bra-warning);
+}
+
+.bra-score-badge--low {
+  background: var(--bra-error-glow);
+  color: var(--bra-error);
+}
+
+/* Status cell */
+.bra-status-cell {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.82rem;
+}
+
+.bra-status-cell--success {
+  color: var(--bra-emerald);
+}
+
+.bra-status-cell--error {
+  color: var(--bra-error);
+}
+
+.bra-status-error-msg {
+  color: var(--bra-text-muted);
+  font-size: 0.78rem;
+  max-width: 200px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ── Error Banner ──────────────────────────────── */
+.bra-error-banner {
+  display: none;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.7rem 1rem;
+  background: var(--bra-error-glow);
+  border: 1px solid rgba(251, 113, 133, 0.2);
+  border-radius: var(--bra-radius-sm);
+  color: var(--bra-error);
+  font-size: 0.85rem;
+  margin-top: 0.75rem;
+}
+
+.bra-error-banner.is-visible {
+  display: flex;
+}
+
+.bra-error-banner i {
+  font-size: 1.1rem;
+  flex-shrink: 0;
+}
+
+.bra-error-dismiss {
+  margin-left: auto;
+  background: none;
+  border: none;
+  color: var(--bra-text-muted);
+  cursor: pointer;
+  padding: 0.25rem;
+  font-size: 0.9rem;
+  transition: color var(--bra-transition);
+}
+
+.bra-error-dismiss:hover {
+  color: var(--bra-text);
+}
+
+/* ── Empty State ──────────────────────────────── */
+.bra-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 2rem;
+  text-align: center;
+  color: var(--bra-text-muted);
+}
+
+.bra-empty-icon {
+  font-size: 2.5rem;
+  color: var(--bra-text-muted);
+  opacity: 0.4;
+  margin-bottom: 1rem;
+}
+
+.bra-empty-text {
+  font-size: 0.9rem;
+  max-width: 300px;
+  line-height: 1.6;
+}
+
+/* ── Loading Indicator ─────────────────────────── */
+.bra-loading {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  padding: 2rem;
+  color: var(--bra-text-secondary);
+  font-size: 0.9rem;
+}
+
+.bra-loading.is-visible {
+  display: flex;
+}
+
+.bra-spinner {
+  width: 20px;
+  height: 20px;
+  border: 2px solid rgba(148, 163, 184, 0.15);
+  border-top-color: var(--bra-cyan);
+  border-radius: 50%;
+  animation: bra-spin 0.7s linear infinite;
+}
+
+@keyframes bra-spin {
+  to { transform: rotate(360deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bra-spinner {
+    animation: none;
+    opacity: 0.5;
+  }
+}
+
+/* ── Responsive ────────────────────────────────── */
+@media (max-width: 700px) {
+  .bra-container {
+    padding: 5rem 1rem 1.5rem;
+  }
+
+  .bra-upload-zone {
+    padding: 1.5rem 1.25rem;
+  }
+
+  .bra-stats-grid {
+    gap: 0.4rem;
+  }
+
+  .bra-stat-card {
+    padding: 0.6rem 0.4rem;
+  }
+
+  .bra-stat-number {
+    font-size: 1.15rem;
+  }
+
+  .bra-stat-label {
+    font-size: 0.65rem;
+  }
+
+  .bra-status-list {
+    max-height: 140px;
+  }
+
+  .bra-table th,
+  .bra-table td {
+    padding: 0.4rem 0.6rem;
+  }
+
+  .bra-hero-icon {
+    width: 40px;
+    height: 40px;
+    font-size: 1.1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .bra-stats-grid {
+    gap: 0.3rem;
+  }
+
+  .bra-stat-card {
+    padding: 0.5rem 0.3rem;
+  }
+
+  .bra-stat-number {
+    font-size: 1rem;
+  }
+
+  .bra-upload-zone {
+    padding: 1.25rem 0.75rem;
+  }
+
+  .bra-upload-icon {
+    font-size: 1.4rem;
+  }
+
+  .bra-upload-title {
+    font-size: 0.9rem;
+  }
+
+  .bra-dashboard-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.4rem;
+  }
+
+  .bra-status-row {
+    padding: 0.35rem 0.5rem;
+  }
+
+  .bra-hero {
+    margin-bottom: 1rem;
+  }
+}

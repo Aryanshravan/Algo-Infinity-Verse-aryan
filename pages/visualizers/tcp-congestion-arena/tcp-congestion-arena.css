@@ -1,0 +1,315 @@
+/* TCP Congestion Arena CSS */
+:root {
+  --bg-dark: #0f172a;
+  --panel-bg: rgba(30, 41, 59, 0.7);
+  --border-color: rgba(148, 163, 184, 0.2);
+  --text-primary: #f8fafc;
+  --text-secondary: #94a3b8;
+
+  --color-cubic: #3b82f6; /* Blue */
+  --color-bbr: #10b981; /* Green */
+  --color-loss: #ef4444; /* Red */
+  --color-pipe: #1e293b;
+}
+
+body.tcp-body {
+  background-color: var(--bg-dark);
+  color: var(--text-primary);
+  font-family: 'Poppins', sans-serif;
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.tcp-nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 2rem;
+  background: rgba(15, 23, 42, 0.9);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.nav-logo {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: 'Orbitron', sans-serif;
+  font-size: 1.25rem;
+  font-weight: 700;
+}
+.logo-text {
+  color: var(--color-bbr);
+  font-size: 1.5rem;
+}
+
+.engine-badge {
+  background: rgba(59, 130, 246, 0.2);
+  color: #93c5fd;
+  padding: 0.5rem 1rem;
+  border-radius: 9999px;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.tcp-workspace {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  padding: 2rem;
+  gap: 1.5rem;
+}
+
+.workspace-header {
+  background: var(--panel-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+.workspace-header h1 {
+  margin: 0;
+  font-family: 'Orbitron', sans-serif;
+  font-size: 1.5rem;
+}
+.subtitle {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+}
+
+.control-panel {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  background: rgba(0, 0, 0, 0.2);
+  padding: 1rem;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+}
+
+.btn {
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-family: 'Poppins', sans-serif;
+  font-weight: 600;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.btn-primary {
+  background: var(--color-cubic);
+  color: white;
+}
+.btn-primary:hover {
+  background: #2563eb;
+}
+.btn-secondary {
+  background: #334155;
+  color: white;
+}
+.btn-secondary:hover {
+  background: #475569;
+}
+.btn-danger {
+  background: var(--color-loss);
+  color: white;
+  margin-left: auto;
+}
+.btn-danger:hover {
+  background: #dc2626;
+}
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Main Content */
+.visualizer-content {
+  display: flex;
+  flex: 1;
+  gap: 1.5rem;
+}
+
+/* Pipes Section */
+.pipes-panel {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.lane-container {
+  background: var(--panel-bg);
+  border: 2px solid var(--border-color);
+  border-radius: 12px;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+.lane-container:first-child {
+  border-color: var(--color-cubic);
+}
+.lane-container:last-child {
+  border-color: var(--color-bbr);
+}
+
+.lane-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.lane-header h2 {
+  margin: 0;
+  font-size: 1.2rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.lane-container:first-child h2 {
+  color: var(--color-cubic);
+}
+.lane-container:last-child h2 {
+  color: var(--color-bbr);
+}
+
+.badge {
+  font-size: 0.7rem;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-family: 'Fira Code', monospace;
+  font-weight: normal;
+  margin-left: 0.5rem;
+}
+.badge-loss {
+  background: rgba(59, 130, 246, 0.2);
+  border: 1px solid var(--color-cubic);
+  color: #93c5fd;
+}
+.badge-bw {
+  background: rgba(16, 185, 129, 0.2);
+  border: 1px solid var(--color-bbr);
+  color: #6ee7b7;
+}
+
+.stats-box {
+  background: rgba(0, 0, 0, 0.3);
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  font-family: 'Fira Code', monospace;
+  font-size: 0.9rem;
+}
+.stat-label {
+  color: var(--text-secondary);
+}
+.stat-value {
+  font-weight: bold;
+  font-size: 1.1rem;
+}
+.lane-container:first-child .stat-value {
+  color: var(--color-cubic);
+}
+.lane-container:last-child .stat-value {
+  color: var(--color-bbr);
+}
+
+.network-pipe {
+  height: 60px;
+  background: var(--color-pipe);
+  border: 1px dashed rgba(255, 255, 255, 0.2);
+  border-radius: 30px;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+}
+
+.packet {
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  border-radius: 4px;
+  background: white;
+  left: 0;
+}
+.packet.cubic-pkt {
+  background: var(--color-cubic);
+  box-shadow: 0 0 10px rgba(59, 130, 246, 0.8);
+}
+.packet.bbr-pkt {
+  background: var(--color-bbr);
+  box-shadow: 0 0 10px rgba(16, 185, 129, 0.8);
+}
+.packet.dropped {
+  background: var(--color-loss) !important;
+  box-shadow: 0 0 15px var(--color-loss) !important;
+  animation: explode 0.5s forwards;
+}
+
+@keyframes explode {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(2);
+    opacity: 0.8;
+  }
+  100% {
+    transform: scale(0);
+    opacity: 0;
+  }
+}
+
+/* Graph Section */
+.graph-panel {
+  flex: 1;
+  background: var(--panel-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+}
+
+.graph-panel .panel-header {
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid var(--border-color);
+}
+.graph-panel h2 {
+  margin: 0;
+  font-size: 1.2rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.graph-container {
+  flex: 1;
+  padding: 1.5rem;
+  min-height: 300px;
+}
+
+.explanation-box {
+  padding: 1.5rem;
+  background: rgba(0, 0, 0, 0.2);
+  border-top: 1px solid var(--border-color);
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+.explanation-box p {
+  margin: 0 0 0.5rem 0;
+}
+.explanation-box p:last-child {
+  margin: 0;
+}
+.explanation-box strong {
+  color: #f8fafc;
+}

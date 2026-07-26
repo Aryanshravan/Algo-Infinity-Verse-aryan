@@ -54,10 +54,23 @@ body.graph-body {
 .hidden { display: none !important; }
 
 /* Workspace */
-.graph-workspace { flex: 1; display: flex; overflow: hidden; background: #020617; }
+.graph-workspace {
+  flex: 1;
+  display: flex;
+  overflow: hidden;
+  background: #020617;
+}
 
 /* Left Panel */
-.panel-left { width: 380px; display: flex; flex-direction: column; background: var(--glass-bg); border-right: 1px solid var(--glass-border); z-index: 10; overflow-y: auto; }
+.panel-left {
+  width: 340px;
+  display: flex;
+  flex-direction: column;
+  background: var(--glass-bg);
+  border-right: 1px solid var(--glass-border);
+  z-index: 10;
+  overflow-y: auto;
+}
 .panel-header { padding: 1.2rem 1.5rem; background: #020617; border-bottom: 1px solid var(--glass-border); }
 .panel-header h3 { margin: 0; font-family: 'Orbitron', sans-serif; font-size: 1.1rem; color: #fff; display: flex; align-items: center; gap: 0.5rem; }
 
@@ -109,7 +122,13 @@ body.graph-body {
 .node-swatch.visited { background: var(--node-visited); border-color: #34d399; }
 .node-swatch.path { background: var(--node-path); border-color: #fbcfe8; box-shadow: 0 0 8px var(--node-path); }
 
-.canvas-wrapper { flex: 1; position: relative; overflow: hidden; background-image: radial-gradient(circle at center, #0f172a 0%, #020617 100%); }
+.canvas-wrapper {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+  background-image: radial-gradient(circle at center, #0f172a 0%, #020617 100%);
+  min-height: 400px;
+}
 
 /* SVG Edges Layer */
 .edge-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; pointer-events: none; }
@@ -139,7 +158,35 @@ body.graph-body {
 .modal-actions { display: flex; gap: 1rem; }
 
 @media (max-width: 900px) {
-    .graph-workspace { flex-direction: column; overflow-y: auto; }
-    .panel-left { width: 100%; border-right: none; border-bottom: 1px solid var(--glass-border); flex-shrink: 0; }
-    .panel-right { min-height: 500px; flex: none; }
+  body.graph-body {
+    overflow-y: auto;
+    height: auto;
+    min-height: 100vh;
+  }
+
+  .graph-workspace {
+    flex-direction: column;
+    overflow-y: visible;
+  }
+
+  .panel-left {
+    width: 100%;
+    border-right: none;
+    border-bottom: 1px solid var(--glass-border);
+    flex-shrink: 0;
+    max-height: 50vh;
+  }
+
+  .panel-right {
+    min-height: 60vh;
+    flex: none;
+  }
+
+  .canvas-wrapper {
+    min-height: 400px;
+  }
+
+  .logs-section {
+    min-height: 120px;
+  }
 }

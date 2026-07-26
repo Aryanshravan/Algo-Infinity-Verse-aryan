@@ -20,6 +20,7 @@
 
     <link rel="stylesheet" href="distributed-tracing.css" />
     <script src="/theme.js"></script>
+    <link rel="stylesheet" href="/modules/quick-notes/quick-notes.css" />
   </head>
   <body class="tracing-body">
     <nav class="navbar tracing-nav">
@@ -80,7 +81,7 @@
         <div class="waterfall-container">
           <div class="waterfall-header">
             <div class="span-name-col">Service / Operation</div>
-            <div class="span-timeline-col">
+            <div class="span-timeline-col" id="timelineHeader">
               <span>0ms</span>
               <span>50ms</span>
               <span>100ms</span>
@@ -96,5 +97,6 @@
     </main>
 
     <script src="distributed-tracing.js"></script>
+    <script src="/modules/quick-notes/quick-notes.js"></script>
   </body>
 </html>

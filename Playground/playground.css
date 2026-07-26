@@ -5298,14 +5298,16 @@ html.light-mode {
   position: absolute;
   bottom: 200px;
   right: 20px;
-  background: var(--dark-surface);
-  border: 1px solid var(--glass-border);
-  border-radius: 10px;
-  padding: 1rem;
+  background: rgba(28, 28, 38, 0.85);
+  border: 1px solid rgba(212, 196, 240, 0.12);
+  border-radius: 8px;
+  padding: 10px 14px;
   width: 250px;
   display: none;
-  box-shadow: var(--glass-shadow);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
   z-index: 20;
+  font-family: 'JetBrains Mono', monospace;
 }
 
 .shortcuts-panel.active {
@@ -5314,28 +5316,35 @@ html.light-mode {
 
 .shortcuts-title {
   font-weight: 600;
-  margin-bottom: 0.8rem;
-  color: var(--accent);
+  margin-bottom: 0.6rem;
+  font-size: 0.75rem;
+  color: #A398C0;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
 }
 
 .shortcuts-list {
   list-style: none;
+  margin: 0;
+  padding: 0;
 }
 
 .shortcuts-list li {
   display: flex;
   justify-content: space-between;
-  padding: 0.4rem 0;
-  font-size: 0.85rem;
-  color: var(--text-secondary);
+  align-items: center;
+  padding: 0.3rem 0;
+  font-size: 0.72rem;
+  color: #A398C0;
 }
 
 .shortcut-key {
-  background: var(--dark-card);
-  padding: 0.2rem 0.5rem;
+  background: rgba(255, 255, 255, 0.06);
+  padding: 0.15rem 0.45rem;
   border-radius: 4px;
-  font-family: monospace;
-  color: var(--text-primary);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.68rem;
+  color: #E4E0F0;
 }
 
 /* ===== ANIMATIONS ===== */

@@ -101,10 +101,12 @@ function initEditors() {
 
 // --- Dynamic Profiler Engine ---
 function initDynamicProfiler() {
-  const ctx = document.getElementById('profilerChart');
+  var ctx = document.getElementById('profilerChart');
   if (!ctx) return;
 
-  profilerChart = new Chart(ctx, {
+  var createChart = function() {
+    if (typeof Chart === 'undefined') return;
+    profilerChart = new Chart(ctx, {
     type: 'line',
     data: {
       labels: [10, 100, 1000, 5000],
@@ -139,9 +141,15 @@ function initDynamicProfiler() {
       },
       plugins: {
         legend: { labels: { color: '#f8fafc' } },
-      },
-    },
-  });
+      },    },
+    });
+  };
+
+  if (typeof lazyVisualizer !== 'undefined') {
+    lazyVisualizer.lazyLoadChartJS(ctx, createChart);
+  } else {
+    createChart();
+  }
 
   els.runProfilerBtn.addEventListener('click', runDynamicProfiler);
 }

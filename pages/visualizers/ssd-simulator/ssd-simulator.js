@@ -353,8 +353,13 @@ function updateTelemetry() {
 // ==========================================
 
 function initChart() {
-    const ctx = document.getElementById('wafChart').getContext('2d');
-    wafChart = new Chart(ctx, {
+    var canvas = document.getElementById('wafChart');
+    if (!canvas) return;
+    var ctx = canvas.getContext('2d');
+
+    var createChart = function() {
+        if (typeof Chart === 'undefined') return;
+        wafChart = new Chart(ctx, {
         type: 'line',
         data: {
             labels: [],
@@ -378,6 +383,13 @@ function initChart() {
             plugins: { legend: { display: false } }
         }
     });
+    };
+
+    if (typeof lazyVisualizer !== 'undefined') {
+        lazyVisualizer.lazyLoadChartJS(canvas, createChart);
+    } else {
+        createChart();
+    }
 }
 
 function updateUI(highlightLBA = null) {

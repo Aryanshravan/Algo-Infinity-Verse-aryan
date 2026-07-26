@@ -3,7 +3,12 @@
 // ==========================================================================
 
 document.addEventListener("DOMContentLoaded", () => {
-  initGlobeApp();
+  var container = document.getElementById("canvas3d-container");
+  if (typeof lazyVisualizer !== 'undefined') {
+    lazyVisualizer.lazyLoadThree(container, initGlobeApp);
+  } else {
+    initGlobeApp();
+  }
 });
 
 // Three.js Globals

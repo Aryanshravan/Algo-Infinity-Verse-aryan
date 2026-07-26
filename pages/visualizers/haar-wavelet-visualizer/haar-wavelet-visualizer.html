@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Haar Wavelet Transform Visualizer | Algo Infinity Verse</title>
+    <meta name="description" content="Visualize multi-resolution signal decomposition and JPEG2000 compression mechanics using the Haar Wavelet.">
+    <link rel="stylesheet" href="../../../styles.css">
+    <link rel="stylesheet" href="haar-wavelet-visualizer.css">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Poppins:wght@300;400;500;600;700&family=Fira+Code:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body data-page="haar-wavelet-visualizer">
+
+    <div id="navbar-placeholder"></div>
+
+    <button id="scrollTopBtn" aria-label="Scroll to top" class="scroll-top-btn">
+      <i class="fas fa-circle-chevron-up"></i>
+    </button>
+
+    <section class="hwv-hero">
+      <div class="hwv-hero-bg"><canvas id="hwvHeroCanvas" class="hwv-hero-canvas"></canvas></div>
+      <div class="hwv-hero-inner">
+        <div class="hwv-hero-eyebrow">🎛️ Signal Processing</div>
+        <h1 class="hwv-hero-title">Haar Wavelet Transform</h1>
+        <p class="hwv-hero-sub">Time meets Frequency. The math behind JPEG2000.</p>
+        <p class="hwv-hero-desc">Unlike the Fourier Transform which loses time information, Wavelets decompose signals into both Frequency and Position simultaneously. By recursively splitting a signal into "Averages" (Approximation) and "Differences" (Detail), we can isolate noise, compress data, and analyze multi-resolution features perfectly!</p>
+        <a href="#lab" class="btn btn-primary hwv-btn-primary"><i class="fas fa-wave-square"></i> Enter the Lab</a>
+      </div>
+    </section>
+
+    <section id="lab" class="section hwv-section">
+      <div class="container">
+
+        <div class="hwv-control-card">
+          <div class="hwv-row">
+            <span class="hwv-row-label">Signal Preset</span>
+            <select id="presetSelect" class="hwv-select">
+                <option value="sine">Sine Wave</option>
+                <option value="step">Step Function</option>
+                <option value="spiky">Spiky Signal</option>
+                <option value="random">Random Noise</option>
+            </select>
+            <button class="btn btn-secondary hwv-btn" id="btnInit"><i class="fas fa-redo"></i> Load Signal</button>
+            <button class="btn hwv-btn-primary hwv-btn" id="btnFwdStep"><i class="fas fa-step-forward"></i> Decompose Step</button>
+            <button class="btn hwv-btn-primary hwv-btn" id="btnFwdAll"><i class="fas fa-fast-forward"></i> Full Transform</button>
+            <button class="btn btn-secondary hwv-btn" id="btnInverse"><i class="fas fa-backward"></i> Full Reconstruct</button>
+          </div>
+          <div class="hwv-row" style="margin-top: 0.5rem; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 0.8rem;">
+            <span class="hwv-row-label">Compression Demo</span>
+            <input type="range" id="threshRange" min="0" max="50" value="5" style="width:140px;" />
+            <span class="hwv-row-label" id="threshLabel" style="text-transform:none; font-family: Fira Code, monospace; width:45px;">5</span>
+            <button class="btn btn-secondary hwv-btn" id="btnCompress"><i class="fas fa-compress-alt"></i> Threshold & Compress</button>
+          </div>
+        </div>
+
+        <div class="hwv-status" id="hwvStatus" role="status" aria-live="polite">Signal loaded. Ready to decompose!</div>
+
+        <div class="hwv-main-layout">
+          <!-- Signal Space Canvas -->
+          <div class="hwv-panel-card">
+            <div class="hwv-panel-title">
+                <span><i class="fas fa-chart-area" style="color:#06b6d4;"></i> Signal Domain</span>
+                <div style="display:flex; gap:10px; font-size:0.65rem;">
+                    <span><span style="color:rgba(255,255,255,0.3);">■</span> Original</span>
+                    <span><span style="color:#06b6d4;">■</span> Reconstructed</span>
+                </div>
+            </div>
+            <div class="hwv-canvas-wrapper"><canvas id="signalCanvas"></canvas></div>
+            <div class="hwv-stats">
+                <div class="stat-box"><span class="stat-lbl">Points</span><span class="stat-val">16</span></div>
+                <div class="stat-box"><span class="stat-lbl">MSE (Error)</span><span class="stat-val" id="statMSE">0.00</span></div>
+            </div>
+          </div>
+
+          <!-- Wavelet Space Canvas -->
+          <div class="hwv-panel-card">
+            <div class="hwv-panel-title">
+                <span><i class="fas fa-th-large" style="color:#a855f7;"></i> Wavelet Coefficients Array</span>
+                <div style="display:flex; gap:10px; font-size:0.65rem;">
+                    <span><span style="color:#06b6d4;">■</span> Averages (Low Freq)</span>
+                    <span><span style="color:#f59e0b;">■</span> Details (High Freq)</span>
+                </div>
+            </div>
+            <div class="hwv-canvas-wrapper"><canvas id="waveletCanvas"></canvas></div>
+            <div class="hwv-stats">
+                <div class="stat-box"><span class="stat-lbl">Current Level</span><span class="stat-val" id="statLevel">0</span></div>
+                <div class="stat-box"><span class="stat-lbl">Non-Zero Coeffs</span><span class="stat-val" id="statCoeffs">16 / 16</span></div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <section id="learn" class="section">
+      <div class="container">
+        <h2 class="section-title"><span class="title-icon">✨</span> How It Works</h2>
+        <div class="hwv-learn-grid">
+          <div class="hwv-learn-card" style="--lc:#06b6d4">
+            <div class="hwv-learn-icon">➗</div>
+            <h3>Decomposition</h3>
+            <p>At each step, we look at adjacent pairs of numbers. We replace them with their <strong>Average</strong> (the smooth approximation) and their <strong>Half-Difference</strong> (the sharp detail). We repeat this process recursively only on the Averages.</p>
+          </div>
+          <div class="hwv-learn-card" style="--lc:#a855f7">
+            <div class="hwv-learn-icon">🔍</div>
+            <h3>Multi-Resolution</h3>
+            <p>Level 1 details represent high frequencies (rapid changes). Level 2 details represent medium frequencies, and so on. The final Average is the DC component (the global average of the entire signal).</p>
+          </div>
+          <div class="hwv-learn-card" style="--lc:#22c55e">
+            <div class="hwv-learn-icon">🧩</div>
+            <h3>Reconstruction</h3>
+            <p>The transform is completely lossless. To go backwards, simply use $Avg + Diff = Left$ and $Avg - Diff = Right$. By repeating this from the coarsest level back to level 0, you restore the original signal perfectly.</p>
+          </div>
+          <div class="hwv-learn-card" style="--lc:#f59e0b">
+            <div class="hwv-learn-icon">🗜️</div>
+            <h3>Compression Magic</h3>
+            <p>Real-world signals are mostly smooth, meaning most <strong>Detail</strong> coefficients are close to zero. By thresholding (forcing small details to 0), we can throw away most of the array and still reconstruct a highly accurate approximation. This powers JPEG2000!</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div id="footer-placeholder"></div>
+
+    <script src="../../../auth.js"></script>
+    <script src="../../../script.js"></script>
+    <script src="../../../theme.js"></script>
+    <script src="../../../auth-gate.js"></script>
+    <script src="haar-wavelet-visualizer.js"></script>
+    <script>
+      if (typeof loadPartial === 'function') {
+        loadPartial('navbar-placeholder', '/partials/navbar.html').then(function() {
+          if (typeof initNavbar === 'function') initNavbar();
+        });
+        loadPartial('footer-placeholder', '/partials/footer.html');
+      }
+    </script>
+</body>
+</html>

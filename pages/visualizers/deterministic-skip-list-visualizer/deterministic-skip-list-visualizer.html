@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Deterministic vs Randomized Skip List | Algo Infinity Verse</title>
+    <meta name="description" content="Watch a Deterministic (1-2-3) Skip List race against a Randomized Skip List, especially during unlucky coin flip streaks!">
+    <link rel="stylesheet" href="../../../styles.css">
+    <link rel="stylesheet" href="deterministic-skip-list-visualizer.css">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Poppins:wght@300;400;500;600;700&family=Fira+Code:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body data-page="deterministic-skip-list">
+
+    <div id="navbar-placeholder"></div>
+
+    <button id="scrollTopBtn" aria-label="Scroll to top" class="scroll-top-btn">
+      <i class="fas fa-circle-chevron-up"></i>
+    </button>
+
+    <section class="dsl-hero">
+      <div class="dsl-hero-bg"><canvas id="dslHeroCanvas" class="dsl-hero-canvas"></canvas></div>
+      <div class="dsl-hero-inner">
+        <div class="dsl-hero-eyebrow">🧱 Data Structures</div>
+        <h1 class="dsl-hero-title">Deterministic Skip List</h1>
+        <p class="dsl-hero-sub">Randomization Isn't the Only Way to $O(\log N)$</p>
+        <p class="dsl-hero-desc">Standard Skip Lists rely on coin flips, providing <em>expected</em> $O(\log N)$ searches. But what if you get terribly unlucky? A <strong>Deterministic (1-2-3) Skip List</strong> eliminates randomness entirely. By enforcing a strict structural invariant (always 1 to 3 nodes between taller nodes), it guarantees strict $O(\log N)$ worst-case bounds, much like a B-Tree!</p>
+        <a href="#lab" class="btn btn-primary dsl-btn-primary"><i class="fas fa-layer-group"></i> Enter the Lab</a>
+      </div>
+    </section>
+
+    <section id="lab" class="section dsl-section">
+      <div class="container">
+
+        <div class="dsl-control-card">
+          <div class="dsl-row">
+            <span class="dsl-row-label">Insert Values</span>
+            <input type="text" id="insertSeq" class="dsl-input" value="10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 130, 140, 150" style="width: 320px;" />
+            
+            <label class="dsl-row-label" style="display:flex; align-items:center; gap:0.4rem; cursor:pointer;">
+                <input type="checkbox" id="chkUnlucky" /> Force "Unlucky Streak" (Rig Coins)
+            </label>
+            
+            <div style="flex:1"></div>
+            
+            <button class="btn btn-secondary dsl-btn" id="btnReset"><i class="fas fa-trash-alt"></i> Reset</button>
+          </div>
+          <div class="dsl-row" style="margin-top: 0.5rem; border-top: 1px solid var(--glass-border); padding-top: 0.8rem;">
+            <button class="btn dsl-btn-primary dsl-btn" id="btnStep"><i class="fas fa-step-forward"></i> Insert Next</button>
+            <button class="btn dsl-btn-primary dsl-btn" id="btnPlay"><i class="fas fa-play"></i> Auto Play Full Sequence</button>
+            
+            <span class="dsl-row-label" style="margin-left:auto;">Speed</span>
+            <input type="range" id="speedRange" min="1" max="100" value="80" style="width:100px;" />
+          </div>
+        </div>
+
+        <div class="dsl-status" id="dslStatus" role="status" aria-live="polite">Ready to build. Click Insert Next to begin inserting 10.</div>
+
+        <div class="dsl-main-layout">
+          
+          <div class="dsl-left-col">
+              <!-- Randomized Skip List -->
+              <div class="dsl-panel-card">
+                <div class="dsl-panel-title">
+                    <span><i class="fas fa-dice" style="color:#f59e0b;"></i> Standard Randomized Skip List</span>
+                    <span class="stat-badge" id="rndStat">Height: 1 | Max Depth: 1</span>
+                </div>
+                <div class="dsl-canvas-wrapper" style="height: 180px;">
+                    <canvas id="randCanvas"></canvas>
+                </div>
+              </div>
+    
+              <!-- Deterministic Skip List -->
+              <div class="dsl-panel-card">
+                <div class="dsl-panel-title">
+                    <span><i class="fas fa-shield-alt" style="color:#06b6d4;"></i> Deterministic (1-2-3) Skip List</span>
+                    <span class="stat-badge" id="detStat">Height: 1 | Max Depth: 1</span>
+                </div>
+                <div class="dsl-canvas-wrapper" style="height: 180px;">
+                    <canvas id="detCanvas"></canvas>
+                </div>
+              </div>
+          </div>
+          
+          <div class="dsl-right-col">
+              <!-- Height Comparison Chart -->
+              <div class="dsl-panel-card" style="height: 100%;">
+                <div class="dsl-panel-title">
+                    <span><i class="fas fa-chart-line" style="color:#a855f7;"></i> Max Height Tracker</span>
+                </div>
+                <div class="dsl-canvas-wrapper" style="flex:1; height: auto; min-height: 250px;">
+                    <canvas id="chartCanvas"></canvas>
+                </div>
+                <div style="display:flex; justify-content:center; gap:15px; margin-top:0.5rem; font-size:0.7rem; font-family:'Fira Code', monospace;">
+                    <span style="color:#f59e0b;">■ Randomized</span>
+                    <span style="color:#06b6d4;">■ Deterministic</span>
+                </div>
+              </div>
+          </div>
+          
+        </div>
+
+      </div>
+    </section>
+
+    <section id="learn" class="section">
+      <div class="container">
+        <h2 class="section-title"><span class="title-icon">✨</span> How It Works</h2>
+        <div class="dsl-learn-grid">
+          <div class="dsl-learn-card" style="--lc:#f59e0b">
+            <div class="dsl-learn-icon">🎲</div>
+            <h3>Randomized Promotion</h3>
+            <p>The standard Skip List flips a coin to decide a node's height. If it lands Tails forever, your skip list devolves into a flat linked list, completely ruining your $O(\log N)$ search time. It's rare, but theoretically possible in adversarial scenarios.</p>
+          </div>
+          <div class="dsl-learn-card" style="--lc:#06b6d4">
+            <div class="dsl-learn-icon">📏</div>
+            <h3>The 1-2-3 Invariant</h3>
+            <p>Deterministic skip lists throw out the dice. Instead, they enforce a strict rule: between any two nodes of height $H$, there must be exactly 1, 2, or 3 nodes of height $H-1$. This strictly bounds the tree height mathematically.</p>
+          </div>
+          <div class="dsl-learn-card" style="--lc:#22c55e">
+            <div class="dsl-learn-icon">⚖️</div>
+            <h3>Cascading Rebalances</h3>
+            <p>When you insert a node, it starts at height 1. If this creates a gap of 4 height-1 nodes, the algorithm detects it and forces the 2nd node to promote to height 2. If this creates a gap of 4 height-2 nodes, it cascades upwards! This is isomorphic to B-Tree splitting.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div id="footer-placeholder"></div>
+
+    <script src="../../../auth.js"></script>
+    <script src="../../../script.js"></script>
+    <script src="../../../theme.js"></script>
+    <script src="../../../auth-gate.js"></script>
+    <script src="deterministic-skip-list-visualizer.js"></script>
+    <script>
+      if (typeof loadPartial === 'function') {
+        loadPartial('navbar-placeholder', '/partials/navbar.html').then(function() {
+          if (typeof initNavbar === 'function') initNavbar();
+        });
+        loadPartial('footer-placeholder', '/partials/footer.html');
+      }
+    </script>
+</body>
+</html>

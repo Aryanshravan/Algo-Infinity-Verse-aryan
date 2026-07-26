@@ -4,34 +4,20 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SWIM Protocol Simulator - Algo Infinity Verse</title>
-    <link rel="stylesheet" href="../../styles.css">
+    <meta name="description" content="Simulate the SWIM gossip-based failure detection protocol, visualizing membership updates across a cluster.">
+    <link rel="stylesheet" href="../../../styles.css">
     <link rel="stylesheet" href="swim-simulator.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="/modules/quick-notes/quick-notes.css" />
 </head>
-<body>
-    <nav class="navbar">
-        <div class="logo">
-            <i class="fas fa-infinity"></i>
-            <span>Algo Infinity Verse</span>
-        </div>
-        <ul class="nav-links">
-            <li><a href="../../index.html">Home</a></li>
-            <li><a href="../../dsa.html">DSA Modules</a></li>
-            <li><a href="../visualizers.html" class="active">Visualizers</a></li>
-            <li><a href="../../contribute.html">Contribute</a></li>
-        </ul>
-        <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark mode">
-            <i class="fas fa-moon"></i>
-        </button>
-    </nav>
-
+<body data-page="swim-simulator">
+    <div id="navbar-placeholder"></div>
     <div class="simulator-container">
         <header class="simulator-header">
             <h1><i class="fas fa-share-nodes"></i> SWIM Gossip Protocol Simulator</h1>
             <p>Distributed Cluster Membership, Failure Detection, and Ping-Req Probes</p>
         </header>
-
         <div class="simulator-layout">
             <div class="canvas-section">
                 <canvas id="swimCanvas"></canvas>
@@ -41,7 +27,6 @@
                     <div class="legend-item"><span class="color-box status-dead"></span> Dead</div>
                 </div>
             </div>
-
             <div class="controls-section">
                 <h2>Controls</h2>
                 <div class="control-group">
@@ -54,7 +39,6 @@
                     <h3>Simulation Log</h3>
                     <div id="simLog" class="log-container"></div>
                 </div>
-
                 <div class="instructions">
                     <h3>How to use</h3>
                     <ul>
@@ -67,8 +51,15 @@
             </div>
         </div>
     </div>
-
-    <script src="../../scripts/theme.js"></script>
+    <script src="../../../theme.js"></script>
     <script src="swim-simulator.js"></script>
+    <script>
+      if (typeof loadPartial === 'function') {
+        loadPartial('navbar-placeholder', '/partials/navbar.html').then(function () {
+          if (typeof initNavbar === 'function') initNavbar();
+        });
+      }
+    </script>
+    <script src="/modules/quick-notes/quick-notes.js"></script>
 </body>
 </html>
