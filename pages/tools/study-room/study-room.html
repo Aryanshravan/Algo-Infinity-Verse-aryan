@@ -1,0 +1,268 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Ambient Study Room | Algo Infinity Verse</title>
+    <meta
+      name="description"
+      content="Focus with ambient background sounds (lofi, rain, cafe, fireplace) and a built-in Pomodoro timer. Distraction-free study environment for DSA learning."
+    />
+
+    <link rel="stylesheet" href="/styles.css" />
+    <link rel="stylesheet" href="study-room.css" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+  </head>
+  <body data-page="study-room">
+    <!-- Skip link -->
+    <a href="#main" class="skip-link">Skip to main content</a>
+
+    <!-- Navbar -->
+    <div id="navbar-placeholder"></div>
+
+    <main id="main" tabindex="-1" class="sr-main">
+      <!-- ─── Background Atmosphere ─── -->
+      <div class="sr-atmosphere" aria-hidden="true">
+        <div class="sr-glow sr-glow--1"></div>
+        <div class="sr-glow sr-glow--2"></div>
+        <div class="sr-glow sr-glow--3"></div>
+        <div class="sr-ambient-lines"></div>
+      </div>
+
+      <!-- ─── Header ─── -->
+      <header class="sr-header">
+        <div class="sr-header-inner">
+          <div class="sr-header-left">
+            <h1 class="sr-title">
+              <span class="sr-title-icon">
+                <i class="fas fa-headphones"></i>
+              </span>
+              Study Room
+            </h1>
+            <p class="sr-subtitle">Choose your atmosphere, set your focus</p>
+          </div>
+          <div class="sr-header-right">
+            <div class="sr-session-badge" id="srSessionBadge">
+              <i class="fas fa-clock"></i>
+              <span id="srTodayFocus">0m</span>
+              <span class="sr-session-badge-label">today</span>
+            </div>
+            <button
+              type="button"
+              id="srMuteBtn"
+              class="sr-mute-btn"
+              aria-label="Mute all sounds (M)"
+              title="Mute all sounds (M)"
+            >
+              <i class="fas fa-volume-high"></i>
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <!-- ─── Main Study Panel ─── -->
+      <section class="sr-panel" aria-label="Study room controls">
+        <!-- Left: Sound Mixer -->
+        <div class="sr-sound-mixer">
+          <div class="sr-panel-header">
+            <h2 class="sr-panel-title">
+              <i class="fas fa-sliders"></i>
+              Sound Mix
+            </h2>
+            <div class="sr-panel-actions">
+              <span class="sr-mix-hint">Mix &amp; match</span>
+              <button type="button" id="srStopAllBtn" class="sr-btn-icon" title="Stop all sounds">
+                <i class="fas fa-stop"></i>
+              </button>
+            </div>
+          </div>
+
+          <div class="sr-sounds-list" id="srSoundsList" role="group" aria-label="Sound options">
+            <!-- Each sound channel rendered by JS -->
+          </div>
+
+          <!-- Sound presets -->
+          <div class="sr-presets">
+            <span class="sr-presets-label">Quick combos</span>
+            <div class="sr-presets-grid" id="srPresets">
+              <button type="button" class="sr-preset-btn" data-preset="focus" title="Rain + White noise">
+                <i class="fas fa-brain"></i> Deep Focus
+              </button>
+              <button type="button" class="sr-preset-btn" data-preset="cozy" title="Fireplace + Lofi">
+                <i class="fas fa-mug-hot"></i> Cozy Study
+              </button>
+              <button type="button" class="sr-preset-btn" data-preset="cafe" title="Cafe + Lofi">
+                <i class="fas fa-music"></i> Café Vibes
+              </button>
+              <button type="button" class="sr-preset-btn" data-preset="sleep" title="Ocean + Rain">
+                <i class="fas fa-cloud-moon"></i> Wind Down
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: Pomodoro Timer -->
+        <div class="sr-timer-panel">
+          <div class="sr-timer-display">
+            <!-- Mode indicator -->
+            <div class="sr-timer-mode" id="srTimerMode">
+              <span class="sr-mode-indicator sr-mode-focus" id="srModeIndicator"></span>
+              <span id="srModeLabel">Focus</span>
+            </div>
+
+            <!-- The clock -->
+            <div class="sr-clock" aria-live="polite" aria-atomic="true">
+              <span class="sr-clock-digits" id="srClockDisplay">25:00</span>
+              <span class="sr-clock-label" id="srClockLabel">time remaining</span>
+            </div>
+
+            <!-- Timer progress ring (CSS-based) -->
+            <div class="sr-ring-container" aria-hidden="true">
+              <svg class="sr-ring" viewBox="0 0 120 120">
+                <circle class="sr-ring-bg" cx="60" cy="60" r="54" />
+                <circle
+                  class="sr-ring-fill"
+                  id="srRingFill"
+                  cx="60"
+                  cy="60"
+                  r="54"
+                  stroke-dasharray="339.292"
+                  stroke-dashoffset="0"
+                />
+              </svg>
+            </div>
+          </div>
+
+          <!-- Timer controls -->
+          <div class="sr-timer-controls">
+            <div class="sr-mode-tabs" role="group" aria-label="Timer mode">
+              <button
+                type="button"
+                class="sr-mode-tab active"
+                data-mode="focus"
+                id="srModeFocus"
+              >
+                <i class="fas fa-bullseye"></i> Focus
+              </button>
+              <button type="button" class="sr-mode-tab" data-mode="break" id="srModeBreak">
+                <i class="fas fa-mug-saucer"></i> Break
+              </button>
+            </div>
+
+            <div class="sr-actions">
+              <button type="button" id="srStartBtn" class="sr-btn sr-btn-primary" aria-label="Start timer">
+                <i class="fas fa-play" id="srPlayIcon"></i>
+                <span id="srPlayLabel">Start</span>
+              </button>
+              <button type="button" id="srResetBtn" class="sr-btn sr-btn-secondary" aria-label="Reset timer">
+                <i class="fas fa-undo"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- Timer customisation -->
+          <div class="sr-timer-settings">
+            <details class="sr-settings-details" id="srSettingsDetails">
+              <summary class="sr-settings-summary">
+                <i class="fas fa-gear"></i>
+                <span>Customize durations</span>
+              </summary>
+              <div class="sr-settings-body">
+                <div class="sr-settings-row">
+                  <label for="srFocusDuration">Focus</label>
+                  <div class="sr-stepper">
+                    <button type="button" class="sr-stepper-btn" data-target="focus" data-dir="down" aria-label="Decrease focus duration">
+                      <i class="fas fa-minus"></i>
+                    </button>
+                    <input
+                      type="number"
+                      id="srFocusDuration"
+                      class="sr-stepper-input"
+                      value="25"
+                      min="1"
+                      max="120"
+                      aria-label="Focus duration in minutes"
+                    />
+                    <button type="button" class="sr-stepper-btn" data-target="focus" data-dir="up" aria-label="Increase focus duration">
+                      <i class="fas fa-plus"></i>
+                    </button>
+                    <span class="sr-stepper-unit">min</span>
+                  </div>
+                </div>
+                <div class="sr-settings-row">
+                  <label for="srBreakDuration">Break</label>
+                  <div class="sr-stepper">
+                    <button type="button" class="sr-stepper-btn" data-target="break" data-dir="down" aria-label="Decrease break duration">
+                      <i class="fas fa-minus"></i>
+                    </button>
+                    <input
+                      type="number"
+                      id="srBreakDuration"
+                      class="sr-stepper-input"
+                      value="5"
+                      min="1"
+                      max="60"
+                      aria-label="Break duration in minutes"
+                    />
+                    <button type="button" class="sr-stepper-btn" data-target="break" data-dir="up" aria-label="Increase break duration">
+                      <i class="fas fa-plus"></i>
+                    </button>
+                    <span class="sr-stepper-unit">min</span>
+                  </div>
+                </div>
+                <button type="button" id="srApplyDurations" class="sr-btn sr-btn-primary" style="width:100%;justify-content:center;margin-top:8px;">
+                  <i class="fas fa-check"></i> Apply
+                </button>
+              </div>
+            </details>
+          </div>
+
+          <!-- Session count & progress -->
+          <div class="sr-session-info">
+            <div class="sr-session-stats">
+              <div class="sr-session-stat">
+                <span class="sr-stat-value" id="srSessionCount">0</span>
+                <span class="sr-stat-label">sessions</span>
+              </div>
+              <div class="sr-session-stat">
+                <span class="sr-stat-value" id="srSessionStreak">0</span>
+                <span class="sr-stat-label">day streak</span>
+              </div>
+            </div>
+            <div class="sr-session-bar">
+              <div class="sr-session-fill" id="srSessionFill" style="width:0%"></div>
+            </div>
+            <p class="sr-session-goal" id="srSessionGoal">0 / 8 sessions today</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ─── Status Bar ─── -->
+      <footer class="sr-status-bar" id="srStatusBar">
+        <span class="sr-status-text" id="srStatusText">
+          <i class="fas fa-info-circle"></i>
+          Pick your sounds, set the timer, and start focusing.
+        </span>
+        <span class="sr-status-meta" id="srStatusMeta"></span>
+      </footer>
+    </main>
+
+    <!-- Footer -->
+    <div id="footer-placeholder"></div>
+
+    <!-- Scripts -->
+    <script src="/script.js"></script>
+    <script src="/theme.js"></script>
+    <script src="study-room.js"></script>
+  </body>
+</html>

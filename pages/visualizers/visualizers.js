@@ -38,7 +38,35 @@ const visualizers = [
     icon: 'fa-network-wired',
     desc: 'Visualize Distributed Transactions and Compensating Actions using the Sagas Pattern.',
   },
+  {
+    name: 'TCP Congestion Control Arena',
+    path: '/pages/visualizers/tcp-congestion-arena/tcp-congestion-arena.html',
+    category: 'Networking',
+    icon: 'fa-network-wired',
+    desc: 'Simulate how CUBIC (loss-based) and BBR (bandwidth-based) handle network congestion and packet loss.',
+  },
+  {
+    name: 'Transactional Outbox Pattern',
+    path: '/pages/visualizers/outbox-pattern/outbox-pattern.html',
+    category: 'Distributed Systems',
+    icon: 'fa-database',
+    desc: 'Visualize the Transactional Outbox Pattern to solve the dual-write problem in microservices.',
+  },
+  {
+    name: 'TLS 1.3 Handshake Simulator',
+    path: '/pages/visualizers/tls13-simulator/tls13-simulator.html',
+    category: 'Security & Crypto',
+    icon: 'fa-lock',
+    desc: 'Interactive visualizer for the TLS 1.3 cryptographic handshake protocol (1-RTT and 0-RTT).',
+  },
   // ── Sorting & Searching ──
+  {
+    name: 'Ternary Search Visualizer',
+    path: '/pages/visualizers/ternary-search-visualizer/ternary-search-visualizer.html',
+    category: 'Sorting & Searching',
+    icon: 'fa-mountain',
+    desc: 'Find the maximum of a unimodal function by shrinking the search space by 1/3.',
+  },
   {
     name: 'Sorting Visualizer',
     path: '/pages/visualizers/sorting-visualizer/sorting-visualizer.html',
@@ -109,6 +137,13 @@ const visualizers = [
     icon: 'fa-arrows-to-dot',
     desc: 'Compare leftmost, rightmost, and insert-position binary search side-by-side with lo/hi/mid and mid±1 rules.',
   },
+  {
+  name: "Diffie Hellman Key Exchange Visualizer",
+  path: "/pages/visualizers/diffie-hellman-key-exchange/diffie-hellman-visualizer.html",
+  category: "Security & Crypto",
+  icon: "fa-key",
+  desc: "Interactive visualization of the Diffie Hellman key exchange protocol."
+},
   {
     name: 'Fast/Slow Pointer Simulator',
     path: '/pages/visualizers/fast-slow-pointer-simulator/fast-slow-pointer-simulator.html',
@@ -196,6 +231,13 @@ const visualizers = [
     desc: 'Explore persistent data structures with versioned segment trees.',
   },
   {
+    name: 'Persistent Segment Tree Visualizer',
+    path: '/pages/visualizers/persistent-segment-tree-visualizer/persistent-segment-tree-visualizer.html',
+    category: 'Trees & BSTs',
+    icon: 'fa-code-branch',
+    desc: 'Interactive versioned segment tree with K-th smallest queries.',
+  },
+  {
     name: 'Heap Percolation Visualizer',
     path: '/pages/visualizers/heap-percolation-visualizer/heap-percolation-visualizer.html',
     category: 'Trees & BSTs',
@@ -239,6 +281,20 @@ const visualizers = [
   },
 
   // ── Graph Algorithms ──
+  {
+    name: 'Bitmask DP: TSP',
+    path: '/pages/visualizers/bitmask-dp-visualizer/bitmask-dp-visualizer.html',
+    category: 'Graph Algorithms',
+    icon: 'fa-microchip',
+    desc: 'Solve Traveling Salesman using integer bit operations.',
+  },
+  {
+    name: 'Max Flow Race: Edmonds-Karp vs Push-Relabel',
+    path: '/pages/visualizers/max-flow-race-visualizer/max-flow-race-visualizer.html',
+    category: 'Graph Algorithms',
+    icon: 'fa-water',
+    desc: 'Race Edmonds-Karp against Push-Relabel on adversarial max flow networks.',
+  },
   {
     name: 'Graph Visualizer',
     path: '/pages/visualizers/graph-visualizer/graph-visualizer.html',
@@ -372,8 +428,22 @@ const visualizers = [
     icon: 'fa-circle-nodes',
     desc: 'Dynamo-style N/W/R tunable consistency — animated write/read quorums, staleness demo, read repair, and strong consistency guarantee.',
   },
+  {
+    name: 'RabbitMQ Messaging Visualizer',
+    path: '/pages/visualizers/rabbitmq-visualizer/rabbitmq-visualizer.html',
+    category: 'System Design',
+    icon: 'fa-envelope-open-text',
+    desc: 'Interactive RabbitMQ simulator demonstrating Direct, Topic (*,#), Fanout, and Headers exchanges, Dead Letter Queues (DLQ), retry backoff, and acknowledgements.',
+  },
 
   // ── Dynamic Programming ──
+  {
+    name: 'Patience Sorting (LIS)',
+    path: '/pages/visualizers/patience-sorting-visualizer/patience-sorting-visualizer.html',
+    category: 'Dynamic Programming',
+    icon: 'fa-layer-group',
+    desc: 'Visualize the O(n log n) Longest Increasing Subsequence algorithm using a beautifully visual card-sorting trick.',
+  },
   {
     name: 'DP Visualizer',
     path: '/pages/visualizers/dp-visualizer/dp-visualizer.html',
@@ -598,6 +668,18 @@ const visualizers = [
 
   // ── Distributed Systems ──
   {
+    name: 'Gossip-Based Failure Detection (SWIM Protocol)',
+    path: '/pages/visualizers/swim-protocol-visualizer/swim-protocol-visualizer.html',
+    category: 'Distributed Systems',
+    icon: 'fa-satellite-dish',
+    desc: 'Detect dead nodes efficiently without a central coordinator.',
+    name: 'Rendezvous Hashing (HRW)',
+    path: '/pages/visualizers/rendezvous-hashing-visualizer/rendezvous-hashing-visualizer.html',
+    category: 'Distributed Systems',
+    icon: 'fa-network-wired',
+    desc: 'Load balance perfectly without using any Consistent Hash Rings.',
+  },
+  {
     name: 'Raft Simulator',
     path: '/pages/ai-features/raft-simulator/raft-simulator.html',
     category: 'Distributed Systems',
@@ -733,6 +815,13 @@ const visualizers = [
 
   // ── Security & Cryptography ──
   {
+    name: 'Chinese Remainder Theorem',
+    path: '/pages/visualizers/chinese-remainder-theorem/chinese-remainder-theorem.html',
+    category: 'Security & Crypto',
+    icon: 'fa-clover',
+    desc: 'Reconstruct secrets from modular shadows and speed up RSA.',
+  },
+  {
     name: 'RSA Cryptography Visualizer',
     path: '/pages/visualizers/rsa-visualizer/rsa-visualizer.html',
     category: 'Security & Crypto',
@@ -784,8 +873,15 @@ const visualizers = [
 
   // ── Math, Geometry & Signals ──
   {
+    name: 'Haar Wavelet Transform',
+    path: '/pages/visualizers/haar-wavelet-visualizer/haar-wavelet-visualizer.html',
+    category: 'Math & Geometry',
+    icon: 'fa-wave-square',
+    desc: 'Visualize multi-resolution signal decomposition and JPEG2000 compression mechanics.',
+  },
+  {
     name: 'FFT Visualizer',
-    path: '/pages/visualizer/fft-visualizer/fft-visualizer.html',
+    path: '/pages/visualizers/fft-visualizer/fft-visualizer.html',
     category: 'Math & Geometry',
     icon: 'fa-chart-line',
     desc: 'Fast Fourier Transform — convert between time and frequency domains.',
@@ -879,6 +975,13 @@ const visualizers = [
 
   // ── Data Structures ──
   {
+    name: 'Deterministic vs Randomized Skip List',
+    path: '/pages/visualizers/deterministic-skip-list-visualizer/deterministic-skip-list-visualizer.html',
+    category: 'Data Structures',
+    icon: 'fa-layer-group',
+    desc: 'See how structural invariants eliminate the need for coin flips.',
+  },
+  {
     name: 'Linked List Visualizer',
     path: '/pages/visualizers/linked-list-visualizer/linked-list-visualizer.html',
     category: 'Data Structures',
@@ -942,6 +1045,13 @@ const visualizers = [
     desc: 'Square-root decomposition for range query optimization.',
   },
   {
+    name: 'Euler Tour + Sparse Table LCA',
+    path: '/pages/visualizers/euler-tour-lca/euler-tour-lca.html',
+    category: 'Data Structures',
+    icon: 'fa-project-diagram',
+    desc: 'Answering "Common Ancestor" queries in O(1) using Euler tour and sparse table.',
+  },
+  {
     name: 'Quadtree Collision Visualizer',
     path: '/pages/visualizers/quadtree-collision/quadtree-collision.html',
     category: 'Data Structures',
@@ -998,11 +1108,11 @@ const visualizers = [
     desc: 'Guaranteed O(1) worst-case lookup via two tables and eviction chains.',
   },
   {
-  name: 'Cuckoo Filter Visualizer',
-  path: '/pages/visualizers/cuckoo-filter/cuckoo-filter.html',
-  category: 'Data Structures',
-  icon: 'fa-filter',
-  desc: 'Bloom Filters that can delete — fingerprint XOR dual-bucket scheme, cuckoo eviction chains, false positive demo, and Bloom vs Cuckoo space comparison.',
+    name: 'Cuckoo Filter Visualizer',
+    path: '/pages/visualizers/cuckoo-filter/cuckoo-filter.html',
+    category: 'Data Structures',
+    icon: 'fa-filter',
+    desc: 'Bloom Filters that can delete — fingerprint XOR dual-bucket scheme, cuckoo eviction chains, false positive demo, and Bloom vs Cuckoo space comparison.',
   },
   {
     name: 'LSH Visualizer',
@@ -1047,11 +1157,32 @@ const visualizers = [
     desc: 'How RAID 6 and QR codes survive missing data — points on a polynomial curve, live disk failures.',
   },
   {
-  name: 'Kalman Filter Visualizer',
-  path: '/pages/visualizers/kalman-filter/kalman-filter.html',
-  category: 'Algorithms',
-  icon: 'fa-chart-line',
-  desc: 'GPS and robotics state estimation — watch predict/update steps, Kalman gain, Gaussian belief narrowing, and sensor noise vs estimation accuracy live.',
+    name: 'Kalman Filter Visualizer',
+    path: '/pages/visualizers/kalman-filter/kalman-filter.html',
+    category: 'Algorithms',
+    icon: 'fa-chart-line',
+    desc: 'GPS and robotics state estimation — watch predict/update steps, Kalman gain, Gaussian belief narrowing, and sensor noise vs estimation accuracy live.',
+  },
+  {
+    name: "Mo's Algorithm Visualizer",
+    path: '/pages/visualizers/mos-algorithm-visualizer/mos-algorithm-visualizer.html',
+    category: 'Graph Algorithms',
+    icon: 'fa-arrows-left-right',
+    desc: 'Answer thousands of offline range queries via sqrt-decomposition block sort and a two-pointer sweep.',
+  },
+  {
+    name: 'DSU on Tree Visualizer',
+    path: '/pages/visualizers/dsu-on-tree-visualizer/dsu-on-tree-visualizer.html',
+    category: 'Data Structures',
+    icon: 'fa-code-merge',
+    desc: 'Small-to-large merging — keep the heavy child, merge only light subtrees, O(n log n) subtree queries.',
+  },
+  {
+    name: 'Convex Hull Trick / Li Chao Tree Visualizer',
+    path: '/pages/visualizers/convex-hull-trick-visualizer/convex-hull-trick-visualizer.html',
+    category: 'Dynamic Programming',
+    icon: 'fa-chart-line',
+    desc: 'Turn O(N) per-query line evaluation into O(log N) — dominated-line envelope, Li Chao Tree, and a real DP optimization demo.',
   },
 
   // ── Special & Creative ──
@@ -1832,12 +1963,15 @@ const clearBtn = document.getElementById('vizClearBtn');
 const filterContainer = document.getElementById('vizFilters');
 const emptyState = document.getElementById('vizEmpty');
 const countDisplay = document.getElementById('vizCountDisplay');
+const paginationContainer = document.getElementById('vizPagination');
 
+const PAGE_SIZE = 20;
 let activeCategory =
   new URLSearchParams(window.location.search).get('category') ||
   localStorage.getItem('vizFilterCategory') ||
   'all';
 let searchQuery = '';
+let vizCurrentPage = 1;
 const pageReferrer = document.referrer;
 
 /* ─── Build filter chips ─── */
@@ -1867,6 +2001,7 @@ function buildFilters() {
         url.searchParams.set('category', activeCategory);
       }
       history.pushState({}, '', url);
+      vizCurrentPage = 1;
       render();
     });
     filterContainer.appendChild(btn);
@@ -1894,11 +2029,19 @@ function render() {
   if (filtered.length === 0) {
     grid.innerHTML = '';
     emptyState.style.display = 'block';
+    renderPagination(0);
     return;
   }
 
   emptyState.style.display = 'none';
-  grid.innerHTML = filtered
+
+  const totalPages = Math.ceil(filtered.length / PAGE_SIZE);
+  if (vizCurrentPage > totalPages) vizCurrentPage = totalPages;
+
+  const start = (vizCurrentPage - 1) * PAGE_SIZE;
+  const pageItems = filtered.slice(start, start + PAGE_SIZE);
+
+  grid.innerHTML = pageItems
     .map(
       (v, i) => `
     <a href="${v.path}" target="_blank" rel="noopener noreferrer" class="viz-card" role="listitem" style="animation-delay:${reducedMotion ? '0s' : Math.min(i * 0.025, 0.8)}s">
@@ -1913,7 +2056,77 @@ function render() {
   `
     )
     .join('');
+
+  renderPagination(filtered.length, totalPages);
 }
+
+/* ─── Render pagination ─── */
+function renderPagination(totalItems, totalPages) {
+  if (!paginationContainer) return;
+
+  if (totalItems <= PAGE_SIZE || totalPages <= 1) {
+    paginationContainer.style.display = 'none';
+    paginationContainer.innerHTML = '';
+    return;
+  }
+
+  paginationContainer.style.display = 'flex';
+
+  const getPageNumbers = (current, total) => {
+    if (total <= 7) {
+      return Array.from({ length: total }, (_, i) => i + 1);
+    }
+    const pages = [];
+    const delta = 1;
+    const rangeStart = Math.max(2, current - delta);
+    const rangeEnd = Math.min(total - 1, current + delta);
+    pages.push(1);
+    if (rangeStart > 2) pages.push('...');
+    for (let i = rangeStart; i <= rangeEnd; i++) pages.push(i);
+    if (rangeEnd < total - 1) pages.push('...');
+    pages.push(total);
+    return pages;
+  };
+
+  const pageNumbers = getPageNumbers(vizCurrentPage, totalPages);
+
+  let html = '';
+  html += `<button type="button" class="viz-page-btn viz-page-prev"${vizCurrentPage === 1 ? ' disabled' : ''} aria-label="Previous page">&laquo; Prev</button>`;
+
+  html += '<div class="viz-page-numbers">';
+  for (const p of pageNumbers) {
+    if (p === '...') {
+      html += '<span class="viz-page-ellipsis">&hellip;</span>';
+    } else {
+      html += `<button type="button" class="viz-page-num${p === vizCurrentPage ? ' active' : ''}" data-page="${p}"${p === vizCurrentPage ? ' aria-current="page"' : ''}>${p}</button>`;
+    }
+  }
+  html += '</div>';
+
+  html += `<button type="button" class="viz-page-btn viz-page-next"${vizCurrentPage === totalPages ? ' disabled' : ''} aria-label="Next page">Next &raquo;</button>`;
+
+  paginationContainer.innerHTML = html;
+}
+
+/* ─── Pagination event delegation ─── */
+paginationContainer.addEventListener('click', (e) => {
+  const btn = e.target.closest('button');
+  if (!btn || btn.disabled) return;
+
+  if (btn.classList.contains('viz-page-prev')) {
+    vizCurrentPage--;
+    render();
+  } else if (btn.classList.contains('viz-page-next')) {
+    vizCurrentPage++;
+    render();
+  } else if (btn.classList.contains('viz-page-num')) {
+    const page = parseInt(btn.dataset.page, 10);
+    if (page && page !== vizCurrentPage) {
+      vizCurrentPage = page;
+      render();
+    }
+  }
+});
 
 function escHtml(str) {
   const d = document.createElement('div');
@@ -1925,6 +2138,7 @@ function escHtml(str) {
 searchInput.addEventListener('input', () => {
   searchQuery = searchInput.value;
   clearBtn.classList.toggle('visible', searchQuery.length > 0);
+  vizCurrentPage = 1;
   render();
 });
 
@@ -1932,6 +2146,7 @@ clearBtn.addEventListener('click', () => {
   searchInput.value = '';
   searchQuery = '';
   clearBtn.classList.remove('visible');
+  vizCurrentPage = 1;
   render();
   searchInput.focus();
 });
@@ -1980,5 +2195,6 @@ window.addEventListener('popstate', () => {
     localStorage.getItem('vizFilterCategory') ||
     'all';
   syncChipFromURL();
+  vizCurrentPage = 1;
   render();
 });

@@ -10,6 +10,7 @@ document.addEventListener('DOMContentLoaded', () => {
 // --- State ---
 const EventStore = [];
 let CurrentProjection = { id: 1, status: 'Pending Creation' };
+let Snapshot = null;
 let messageBusQueue = [];
 
 // DOM Elements
@@ -25,6 +26,8 @@ const els = {
   btnRunQuery: document.getElementById('btnRunQuery'),
   queryResult: document.getElementById('queryResult'),
   btnReplay: document.getElementById('btnReplay'),
+  btnTakeSnapshot: document.getElementById('btnTakeSnapshot'),
+  jsonSnapshot: document.getElementById('jsonSnapshot'),
   engineBadge: document.getElementById('engineBadge'),
   consistencyStatus: document.getElementById('consistencyStatus'),
 };
@@ -36,6 +39,7 @@ function initCQRS() {
   els.btnSubmitCommand.addEventListener('click', handleCommand);
   els.btnRunQuery.addEventListener('click', handleQuery);
   els.btnReplay.addEventListener('click', replayEvents);
+  els.btnTakeSnapshot.addEventListener('click', takeSnapshot);
 
   // Start Message Bus consumer loop
   setInterval(processMessageBus, 500);
@@ -181,17 +185,57 @@ function extractValue(payload) {
   return parts.length > 1 ? parts[1].trim() : payload;
 }
 
-// --- Time Travel Replay ---
+// --- Time Travel Replay & Snapshot ---
+function takeSnapshot() {
+  Snapshot = JSON.parse(JSON.stringify(CurrentProjection));
+
+  // Update Snapshot UI
+  let jsonStr = '{\n';
+  for (const [key, value] of Object.entries(Snapshot)) {
+    let valStr =
+      typeof value === 'number'
+        ? `<span class="number">${value}</span>`
+        : `<span class="string">"${value}"</span>`;
+    jsonStr += `  <span class="key">"${key}"</span>: ${valStr},\n`;
+  }
+  jsonStr = jsonStr.slice(0, -2) + '\n}';
+
+  els.jsonSnapshot.innerHTML = jsonStr;
+
+  // Show visual feedback
+  const btn = els.btnTakeSnapshot;
+  const oldHtml = btn.innerHTML;
+  btn.innerHTML = '<i class="fas fa-check"></i> Saved!';
+  btn.classList.add('success');
+  setTimeout(() => {
+    btn.innerHTML = oldHtml;
+    btn.classList.remove('success');
+  }, 1500);
+}
+
 function replayEvents() {
   if (EventStore.length === 0) return;
 
   // Reset State
-  CurrentProjection = { id: 1, status: 'Pending Creation' };
+  if (Snapshot) {
+    CurrentProjection = JSON.parse(JSON.stringify(Snapshot));
+  } else {
+    CurrentProjection = { id: 1, status: 'Pending Creation' };
+  }
   updateProjectionView();
   messageBusQueue = [];
 
+  // Determine which events to replay based on snapshot version
+  const startIndex = Snapshot && Snapshot.version ? Snapshot.version : 0;
+  const eventsToReplay = EventStore.slice(startIndex);
+
+  if (eventsToReplay.length === 0) {
+    // Already up to date with snapshot
+    return;
+  }
+
   // Push all historical events back onto the bus with a slight delay
-  EventStore.forEach((event, index) => {
+  eventsToReplay.forEach((event, index) => {
     setTimeout(() => {
       publishToBus(event);
     }, index * 300); // staggering them

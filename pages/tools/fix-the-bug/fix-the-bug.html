@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Fix the Bug — Debugging Challenge | Algo Infinity Verse</title>
+  <meta name="description" content="Train your debugging skills with 50+ buggy code snippets across JavaScript, Python, Java, and C++. Find the bug, fix it, and level up." />
+
+  <link rel="stylesheet" href="/styles.css" />
+  <link rel="stylesheet" href="fix-the-bug.css" />
+
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Inter:wght@300;400;500;600;700&family=Fira+Code:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+
+  <script>
+    (function () {
+      try {
+        var storedTheme = localStorage.getItem('theme');
+        var prefersLight = window.matchMedia('(prefers-color-scheme: light)').matches;
+        var theme = storedTheme || (prefersLight ? 'light' : 'dark');
+        if (theme === 'light') {
+          document.documentElement.classList.add('light-mode');
+        } else {
+          document.documentElement.classList.remove('light-mode');
+        }
+      } catch (e) {}
+    })();
+  </script>
+</head>
+<body data-page="fix-the-bug" class="ftb-body">
+  <!-- Skip link -->
+  <a href="#ftb-main" class="skip-link">Skip to main content</a>
+
+  <!-- Navbar placeholder -->
+  <div id="navbar-placeholder"></div>
+
+  <main id="ftb-main" class="ftb-container" tabindex="-1">
+    <!-- ═══ HEADER / STATS BAR ═══ -->
+    <header class="ftb-header">
+      <div class="ftb-header-top">
+        <div class="ftb-brand">
+          <span class="ftb-brand-icon"><i class="fas fa-bug"></i></span>
+          <div>
+            <h1 class="ftb-title">Fix the Bug</h1>
+            <p class="ftb-subtitle">Debugging challenge tool</p>
+          </div>
+        </div>
+
+        <div class="ftb-stats">
+          <div class="ftb-stat" id="ftbStatStreak" title="Current streak">
+            <span class="ftb-stat-icon"><i class="fas fa-fire"></i></span>
+            <span class="ftb-stat-value" id="ftbStreakValue">0</span>
+            <span class="ftb-stat-label">Streak</span>
+          </div>
+          <div class="ftb-stat" id="ftbStatAccuracy" title="Accuracy">
+            <span class="ftb-stat-icon"><i class="fas fa-bullseye"></i></span>
+            <span class="ftb-stat-value" id="ftbAccuracyValue">0%</span>
+            <span class="ftb-stat-label">Accuracy</span>
+          </div>
+          <div class="ftb-stat" id="ftbStatXP" title="XP earned">
+            <span class="ftb-stat-icon"><i class="fas fa-star"></i></span>
+            <span class="ftb-stat-value" id="ftbXPValue">0</span>
+            <span class="ftb-stat-label">XP</span>
+          </div>
+          <div class="ftb-stat" id="ftbStatSolved" title="Challenges solved">
+            <span class="ftb-stat-icon"><i class="fas fa-check"></i></span>
+            <span class="ftb-stat-value" id="ftbSolvedValue">0</span>
+            <span class="ftb-stat-label">Solved</span>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- ═══ FILTERS ═══ -->
+    <section class="ftb-filters" aria-label="Challenge filters">
+      <div class="ftb-filter-group">
+        <label for="ftbFilterLang" class="ftb-filter-label">Language</label>
+        <select id="ftbFilterLang" class="ftb-filter-select" aria-label="Filter by programming language">
+          <option value="all">All Languages</option>
+          <option value="javascript">JavaScript</option>
+          <option value="python">Python</option>
+          <option value="java">Java</option>
+          <option value="cpp">C++</option>
+        </select>
+      </div>
+
+      <div class="ftb-filter-group">
+        <label for="ftbFilterBugType" class="ftb-filter-label">Bug Type</label>
+        <select id="ftbFilterBugType" class="ftb-filter-select" aria-label="Filter by bug type">
+          <option value="all">All Bug Types</option>
+          <option value="off-by-one">Off-by-One</option>
+          <option value="null-reference">Null Reference</option>
+          <option value="infinite-loop">Infinite Loop</option>
+          <option value="wrong-operator">Wrong Operator</option>
+          <option value="logic-error">Logic Error</option>
+          <option value="type-error">Type Error</option>
+          <option value="uninitialized-variable">Uninitialized Variable</option>
+          <option value="edge-case">Edge Case</option>
+          <option value="mutation-bug">Mutation Bug</option>
+          <option value="async-bug">Async Bug</option>
+          <option value="integer-overflow">Integer Overflow</option>
+          <option value="memory-leak">Memory Leak</option>
+        </select>
+      </div>
+
+      <div class="ftb-filter-group">
+        <label for="ftbFilterDiff" class="ftb-filter-label">Difficulty</label>
+        <select id="ftbFilterDiff" class="ftb-filter-select" aria-label="Filter by difficulty">
+          <option value="0">All Levels</option>
+          <option value="1">Beginner</option>
+          <option value="2">Easy</option>
+          <option value="3">Medium</option>
+          <option value="4">Hard</option>
+          <option value="5">Advanced</option>
+        </select>
+      </div>
+
+      <div class="ftb-filter-actions">
+        <button type="button" id="ftbResetFilters" class="ftb-btn ftb-btn-ghost" aria-label="Reset all filters">
+          <i class="fas fa-undo"></i> Reset
+        </button>
+      </div>
+    </section>
+
+    <!-- ═══ CHALLENGE AREA ═══ -->
+    <section class="ftb-challenge" aria-label="Debugging challenge" role="region">
+      <!-- Empty state when no snippets match filters -->
+      <div id="ftbEmptyState" class="ftb-empty hidden" role="status">
+        <div class="ftb-empty-icon"><i class="fas fa-search"></i></div>
+        <h3 class="ftb-empty-title">No matching challenges</h3>
+        <p class="ftb-empty-desc">Try adjusting your filters to find more snippets.</p>
+        <button type="button" id="ftbEmptyReset" class="ftb-btn ftb-btn-primary">Show All Challenges</button>
+      </div>
+
+      <!-- Active challenge -->
+      <div id="ftbChallengeActive" class="ftb-challenge-active">
+        <!-- Challenge header -->
+        <div class="ftb-challenge-header">
+          <div class="ftb-challenge-meta">
+            <span class="ftb-challenge-counter" id="ftbChallengeLabel">Challenge #1</span>
+            <span class="ftb-challenge-badge ftb-diff-badge" id="ftbDiffBadge">Beginner</span>
+          </div>
+          <div class="ftb-challenge-tags" id="ftbChallengeTags">
+            <span class="ftb-challenge-tag ftb-lang-tag" id="ftbLangTag">JavaScript</span>
+            <span class="ftb-challenge-tag ftb-bugtype-tag" id="ftbBugTypeTag">Off-by-One</span>
+          </div>
+        </div>
+
+        <!-- Challenge title -->
+        <h2 class="ftb-challenge-title" id="ftbChallengeTitle">Loading challenge...</h2>
+
+        <!-- Code display -->
+        <div class="ftb-code-section">
+          <div class="ftb-code-header">
+            <span class="ftb-code-label"><i class="fas fa-code"></i> Find the bug</span>
+            <span class="ftb-code-instruction">Click the line with the error</span>
+          </div>
+          <div class="ftb-code-viewport" id="ftbCodeViewport" role="group" aria-label="Code with clickable lines">
+            <!-- Lines rendered by JS -->
+          </div>
+        </div>
+
+        <!-- Action area -->
+        <div class="ftb-actions">
+          <button type="button" id="ftbSubmitBtn" class="ftb-btn ftb-btn-primary" disabled>
+            <i class="fas fa-check"></i> Submit Answer
+          </button>
+          <button type="button" id="ftbHintBtn" class="ftb-btn ftb-btn-hint">
+            <i class="fas fa-lightbulb"></i> Hint <span class="ftb-hint-cost">(-5 XP)</span>
+          </button>
+          <button type="button" id="ftbSkipBtn" class="ftb-btn ftb-btn-ghost">
+            <i class="fas fa-forward"></i> Skip
+          </button>
+        </div>
+
+        <!-- Multiple Choice (shown after skip or as alternative) -->
+        <div class="ftb-mc-section" id="ftbMcSection" style="display:none;">
+          <p class="ftb-mc-heading">Or select from the options below:</p>
+          <div class="ftb-mc-options" id="ftbMcOptions">
+            <!-- Rendered by JS -->
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══ RESULT / EXPLANATION PANEL ═══ -->
+      <div id="ftbResultPanel" class="ftb-result hidden" role="alert" aria-live="polite">
+        <div class="ftb-result-header">
+          <span class="ftb-result-icon" id="ftbResultIcon"><i class="fas fa-check-circle"></i></span>
+          <span class="ftb-result-title" id="ftbResultTitle">Correct!</span>
+        </div>
+
+        <div class="ftb-result-explanation">
+          <p id="ftbResultExplanation">Explanation loading...</p>
+        </div>
+
+        <div class="ftb-result-fix">
+          <div class="ftb-fix-header">
+            <span class="ftb-fix-label"><i class="fas fa-wrench"></i> The Fix</span>
+          </div>
+          <pre class="ftb-fix-code" id="ftbFixCode"></pre>
+        </div>
+
+        <div class="ftb-result-stats">
+          <div class="ftb-result-stat">
+            <span class="ftb-result-stat-value" id="ftbResultXP">+10 XP</span>
+            <span class="ftb-result-stat-label">Earned</span>
+          </div>
+          <div class="ftb-result-stat">
+            <span class="ftb-result-stat-value" id="ftbResultCorrectCount">1</span>
+            <span class="ftb-result-stat-label">in a row</span>
+          </div>
+        </div>
+
+        <div class="ftb-result-actions">
+          <button type="button" id="ftbNextBtn" class="ftb-btn ftb-btn-primary">
+            <i class="fas fa-arrow-right"></i> Next Challenge
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══ SHOW MULTIPLE CHOICE TOGGLE ═══ -->
+    <div class="ftb-mc-toggle">
+      <button type="button" id="ftbShowMcBtn" class="ftb-btn ftb-btn-text">
+        <i class="fas fa-list"></i> Show multiple choice options
+      </button>
+    </div>
+
+    <!-- ═══ STATS DETAIL CARDS ═══ -->
+    <section class="ftb-stats-detail" aria-label="Your debugging statistics">
+      <div class="ftb-stats-card">
+        <h3 class="ftb-stats-card-title"><i class="fas fa-trophy"></i> Your Progress</h3>
+        <div class="ftb-stats-grid">
+          <div class="ftb-stats-item">
+            <span class="ftb-stats-item-value" id="ftbTotalAttempts">0</span>
+            <span class="ftb-stats-item-label">Total Attempts</span>
+          </div>
+          <div class="ftb-stats-item">
+            <span class="ftb-stats-item-value" id="ftbTotalCorrect">0</span>
+            <span class="ftb-stats-item-label">Correct</span>
+          </div>
+          <div class="ftb-stats-item">
+            <span class="ftb-stats-item-value" id="ftbBestStreak">0</span>
+            <span class="ftb-stats-item-label">Best Streak</span>
+          </div>
+          <div class="ftb-stats-item">
+            <span class="ftb-stats-item-value" id="ftbDifficultyBreakdown">—</span>
+            <span class="ftb-stats-item-label">Highest Tier</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="ftb-stats-card">
+        <h3 class="ftb-stats-card-title"><i class="fas fa-filter"></i> By Language</h3>
+        <div class="ftb-stats-breakdown" id="ftbLangBreakdown">
+          <span class="ftb-breakdown-empty">Solve some challenges to see breakdown</span>
+        </div>
+      </div>
+
+      <div class="ftb-stats-card">
+        <h3 class="ftb-stats-card-title"><i class="fas fa-tag"></i> By Bug Type</h3>
+        <div class="ftb-stats-breakdown" id="ftbBugTypeBreakdown">
+          <span class="ftb-breakdown-empty">Solve some challenges to see breakdown</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══ KEYBOARD SHORTCUTS NOTE ═══ -->
+    <div class="ftb-shortcuts-note">
+      <i class="fas fa-keyboard"></i>
+      <span>Tip: Use <kbd>Enter</kbd> to submit, <kbd>H</kbd> for hint, <kbd>N</kbd> for next, <kbd>1</kbd>-<kbd>4</kbd> for options</span>
+    </div>
+  </main>
+
+  <!-- Scripts -->
+  <script src="/auth.js"></script>
+  <script src="/bootstrap-legacy.js"></script>
+  <script src="/script.js"></script>
+  <script type="module" src="/dist/legacy-bundle.mjs"></script>
+  <script src="/theme.js"></script>
+
+  <script src="buggy-snippets.js"></script>
+  <script src="fix-the-bug.js"></script>
+
+  <script>
+    if (typeof loadPartial === 'function') {
+      loadPartial('navbar-placeholder', '/partials/navbar.html');
+    }
+  </script>
+
+  <script>
+    document.addEventListener('partialsLoaded', function () {
+      if (typeof FixTheBug !== 'undefined' && FixTheBug.init) {
+        FixTheBug.init();
+      }
+    });
+    // Also try immediately in case partials are already cached
+    if (document.querySelector('#navbar-placeholder')?.innerHTML?.trim()) {
+      if (typeof FixTheBug !== 'undefined' && FixTheBug.init) {
+        FixTheBug.init();
+      }
+    }
+  </script>
+</body>
+</html>

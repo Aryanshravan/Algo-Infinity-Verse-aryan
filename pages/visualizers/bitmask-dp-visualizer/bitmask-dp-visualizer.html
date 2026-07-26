@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bitmask DP Visualizer (TSP) | Algo Infinity Verse</title>
+    <meta name="description" content="Visualize Traveling Salesman Problem using Bitmask Dynamic Programming. See sets represented as integers and transitions using bitwise operations.">
+    <link rel="stylesheet" href="../../../styles.css">
+    <link rel="stylesheet" href="bitmask-dp-visualizer.css">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Poppins:wght@300;400;500;600;700&family=Fira+Code:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body data-page="bitmask-dp-visualizer">
+
+    <div id="navbar-placeholder"></div>
+
+    <button id="scrollTopBtn" aria-label="Scroll to top" class="scroll-top-btn">
+      <i class="fas fa-circle-chevron-up"></i>
+    </button>
+
+    <section class="bdp-hero">
+      <div class="bdp-hero-bg"><canvas id="bdpHeroCanvas" class="bdp-hero-canvas"></canvas></div>
+      <div class="bdp-hero-inner">
+        <div class="bdp-hero-eyebrow">🧩 Dynamic Programming</div>
+        <h1 class="bdp-hero-title">Bitmask DP: TSP</h1>
+        <p class="bdp-hero-sub">Encoding Sets as Integers. $O(2^N \cdot N^2)$</p>
+        <p class="bdp-hero-desc">When answering "which subset of tasks have been completed", a standard array or Set object is too slow for DP states. Enter <strong>Bitmask DP</strong>: we use the binary bits of an integer to represent set membership. Watch how the Traveling Salesman Problem is solved by tracking the exact bit patterns as they grow!</p>
+        <a href="#lab" class="btn btn-primary bdp-btn-primary"><i class="fas fa-microchip"></i> Enter the Lab</a>
+      </div>
+    </section>
+
+    <section id="lab" class="section bdp-section">
+      <div class="container">
+
+        <div class="bdp-control-card">
+          <div class="bdp-row">
+            <span class="bdp-row-label">Graph Preset</span>
+            <select id="presetSelect" class="bdp-select">
+                <option value="random">Random Map (5 Cities)</option>
+                <option value="pentagon">Pentagon (5 Cities)</option>
+                <option value="star">Star (5 Cities)</option>
+            </select>
+            <button class="btn btn-secondary bdp-btn" id="btnInit"><i class="fas fa-redo"></i> Reset DP</button>
+            
+            <div style="flex:1"></div>
+            
+            <span class="bdp-row-label">Speed</span>
+            <input type="range" id="speedRange" min="1" max="100" value="80" style="width:100px;" />
+          </div>
+          <div class="bdp-row" style="margin-top: 0.5rem; border-top: 1px solid var(--glass-border); padding-top: 0.8rem;">
+            <button class="btn bdp-btn-primary bdp-btn" id="btnStep"><i class="fas fa-step-forward"></i> Step Transition</button>
+            <button class="btn bdp-btn-primary bdp-btn" id="btnPlay"><i class="fas fa-play"></i> Auto Play Full DP</button>
+            <button class="btn btn-secondary bdp-btn" id="btnTour" disabled><i class="fas fa-route"></i> Extract Optimal Tour</button>
+          </div>
+        </div>
+
+        <div class="bdp-status" id="bdpStatus" role="status" aria-live="polite">Graph generated. Click Step or Play to begin Bitmask DP.</div>
+
+        <div class="bdp-main-layout">
+          <!-- Graph & Live Bitmask Panel -->
+          <div class="bdp-panel-card bdp-left-panel">
+            <div class="bdp-panel-title">
+                <span><i class="fas fa-project-diagram" style="color:#a855f7;"></i> Graph & Active State</span>
+            </div>
+            
+            <!-- Graph Canvas -->
+            <div class="bdp-canvas-wrapper">
+                <canvas id="graphCanvas"></canvas>
+            </div>
+            
+            <!-- Live Bitmask Display -->
+            <div class="bdp-bitmask-display">
+                <div class="bdp-bm-title">Active Bitmask (Set Membership)</div>
+                <div class="bdp-bm-strip" id="bmStrip">
+                    <!-- Bits will be injected here via JS -->
+                    <div class="bdp-bit" data-bit="4"><div class="bit-val">0</div><div class="bit-lbl">C4</div></div>
+                    <div class="bdp-bit" data-bit="3"><div class="bit-val">0</div><div class="bit-lbl">C3</div></div>
+                    <div class="bdp-bit" data-bit="2"><div class="bit-val">0</div><div class="bit-lbl">C2</div></div>
+                    <div class="bdp-bit" data-bit="1"><div class="bit-val">0</div><div class="bit-lbl">C1</div></div>
+                    <div class="bdp-bit" data-bit="0"><div class="bit-val">1</div><div class="bit-lbl">C0</div></div>
+                </div>
+                <div class="bdp-bm-math" id="bmMath">Integer Value: <span class="highlight">1</span></div>
+                <div class="bdp-bm-transition" id="bmTransition">Next: mask | (1 << j)</div>
+            </div>
+          </div>
+
+          <!-- DP Table Panel -->
+          <div class="bdp-panel-card bdp-right-panel">
+            <div class="bdp-panel-title">
+                <span><i class="fas fa-table" style="color:#06b6d4;"></i> DP Table <span style="font-family:'Fira Code',monospace; font-size:0.6rem; color:var(--text-secondary);">(Masks ending in 1)</span></span>
+            </div>
+            
+            <div class="bdp-table-container">
+                <table class="bdp-table" id="dpTable">
+                    <thead>
+                        <tr>
+                            <th>Pop</th>
+                            <th>Mask (Int)</th>
+                            <th>Binary</th>
+                            <th>C0</th>
+                            <th>C1</th>
+                            <th>C2</th>
+                            <th>C3</th>
+                            <th>C4</th>
+                        </tr>
+                    </thead>
+                    <tbody id="dpTbody">
+                        <!-- Populated by JS grouped by Pop Count -->
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="bdp-table-legend">
+                <div class="legend-item"><span class="legend-box" style="background:rgba(255,255,255,0.05)"></span> Uncomputed (∞)</div>
+                <div class="legend-item"><span class="legend-box" style="background:rgba(34,197,94,0.3); border:1px solid #22c55e;"></span> Optimal Path</div>
+                <div class="legend-item"><span class="legend-box" style="background:rgba(168,85,247,0.3); border:1px solid #a855f7;"></span> Source State</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <section id="learn" class="section">
+      <div class="container">
+        <h2 class="section-title"><span class="title-icon">✨</span> How Bitmask DP Works</h2>
+        <div class="bdp-learn-grid">
+          <div class="bdp-learn-card" style="--lc:#a855f7">
+            <div class="bdp-learn-icon">🔢</div>
+            <h3>Sets as Integers</h3>
+            <p>Instead of passing a <code>Set(0, 2, 3)</code> through recursion, we use binary: <code>01101</code> (which is 13 in decimal). The $i$-th bit is 1 if city $i$ has been visited. This allows us to use an integer array for lightning-fast DP memoization.</p>
+          </div>
+          <div class="bdp-learn-card" style="--lc:#06b6d4">
+            <div class="bdp-learn-icon">⚙️</div>
+            <h3>Bitwise Transitions</h3>
+            <p>To check if city $j$ is visited: <code>(mask & (1 << j))</code>. To add city $j$ to the visited set: <code>mask | (1 << j)</code>. These bitwise operations compile down to single CPU instructions, making the state transitions incredibly fast.</p>
+          </div>
+          <div class="bdp-learn-card" style="--lc:#22c55e">
+            <div class="bdp-learn-icon">📈</div>
+            <h3>Strict Dependency Order</h3>
+            <p>A state with $K$ visited cities strictly depends on states with $K-1$ visited cities. By grouping masks by their <strong>population count</strong> (number of 1 bits), we naturally satisfy the Topological Sort required for iterative DP.</p>
+          </div>
+          <div class="bdp-learn-card" style="--lc:#f59e0b">
+            <div class="bdp-learn-icon">🗺️</div>
+            <h3>Optimal Tour Extraction</h3>
+            <p>Once <code>dp[full_mask][end_city]</code> is computed, we simply check which incoming transition provided that minimum cost, and trace backwards through the bitmasks (flipping off bits one by one) to extract the path.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div id="footer-placeholder"></div>
+
+    <script src="../../../auth.js"></script>
+    <script src="../../../script.js"></script>
+    <script src="../../../theme.js"></script>
+    <script src="../../../auth-gate.js"></script>
+    <script src="bitmask-dp-visualizer.js"></script>
+    <script>
+      if (typeof loadPartial === 'function') {
+        loadPartial('navbar-placeholder', '/partials/navbar.html').then(function() {
+          if (typeof initNavbar === 'function') initNavbar();
+        });
+        loadPartial('footer-placeholder', '/partials/footer.html');
+      }
+    </script>
+</body>
+</html>

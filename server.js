@@ -20,7 +20,7 @@ import {
   mapSkillsToRoadmapTopics,
 } from './backend/resume-analyzer/skills.js';
 import { getSuggestions } from './backend/resume-analyzer/suggestions.js';
-import { analyzeWorkflow } from './backend/repository-analyzer/cicdValidator.js';
+import { analyzeRepository } from './backend/repository-analyzer/repoAnalyzer.js';
 import { VCSFactory } from './backend/vcs/VCSFactory.js';
 import {
   enqueueBulkAudit,
@@ -141,9 +141,6 @@ const DELETION_LOG_FILE = path.join(DATA_DIR, 'account-deletions.json');
 const protectedPaths = new Set([
   '/community',
   '/community.html',
-  '/support-page',
-  '/support-page/',
-  '/support-page/index.html',
 ]);
 
 const mimeTypes = {
@@ -923,55 +920,17 @@ async function handleApi(req, res, pathname) {
       }
 
       const provider = VCSFactory.getProvider(repoUrl);
-      const workflows = await provider.getNormalizedWorkflows();
 
-      if (workflows.length === 0) {
-        let recommendation =
-          'No GitHub Actions workflows found in .github/workflows. Add a CI/CD pipeline to automate testing.';
-        if (repoUrl.includes('gitlab.com')) {
-          recommendation =
-            'No GitLab CI/CD configuration found (.gitlab-ci.yml). Add a CI/CD pipeline to automate testing.';
-        } else if (repoUrl.includes('bitbucket.org')) {
-          recommendation =
-            'No Bitbucket Pipelines configuration found (bitbucket-pipelines.yml). Add a CI/CD pipeline to automate testing.';
-        }
-        return sendJson(res, 200, {
-          score: 0,
-          workflowsAnalyzed: 0,
-          details: { hasDependencies: false, hasTests: false },
-          recommendations: [recommendation],
-        });
-      }
-
-      let bestScore = -1;
-      let overallDeps = false;
-      let overallTests = false;
-
-      for (const wf of workflows) {
-        const result = analyzeWorkflow(wf.commands);
-        if (result.score > bestScore) bestScore = result.score;
-        if (result.hasDependencies) overallDeps = true;
-        if (result.hasTests) overallTests = true;
-      }
-
-      const recommendations = [];
-      if (bestScore === 20)
-        recommendations.push('Workflows found, but they contain no functional jobs or steps.');
-      if (bestScore === 50)
-        recommendations.push("Add explicit testing commands (like 'npm test') to your workflow.");
-      if (bestScore === 75)
-        recommendations.push('Ensure dependencies are installed securely before running tests.');
-      if (bestScore === 100)
-        recommendations.push('Excellent! Fully functional CI/CD pipeline detected.');
+      const result = await analyzeRepository(provider);
 
       return sendJson(res, 200, {
-        score: bestScore,
-        workflowsAnalyzed: workflows.length,
-        details: {
-          hasDependencies: overallDeps,
-          hasTests: overallTests,
-        },
-        recommendations,
+        overallScore: result.overallScore,
+        ciCd: result.ciCd,
+        codeQuality: result.codeQuality,
+        security: result.security,
+        documentation: result.documentation,
+        recommendations: result.recommendations,
+        warnings: result.warnings,
       });
     } catch (err) {
       console.error('Repository analysis error:', err.message);

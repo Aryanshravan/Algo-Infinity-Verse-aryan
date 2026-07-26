@@ -1,0 +1,294 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Complexity Memory Game | Algo Infinity Verse</title>
+    <meta
+      name="description"
+      content="Flip cards to match algorithm names with their Big-O complexities. A memory game that sharpens your algorithm analysis skills through play."
+    />
+    <link rel="stylesheet" href="../../../styles.css" />
+    <link rel="stylesheet" href="complexity-memory-game.css" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+    />
+    <script>
+      (function () {
+        try {
+          var t = localStorage.getItem("theme");
+          var p = window.matchMedia("(prefers-color-scheme: light)").matches;
+          var theme = t || (p ? "light" : "dark");
+          if (theme === "light")
+            document.documentElement.classList.add("light-mode");
+        } catch (e) {}
+      })();
+    </script>
+  </head>
+  <body data-page="complexity-memory-game">
+    <button
+      type="button"
+      id="scrollTopBtn"
+      class="scroll-top-btn"
+      aria-label="Scroll to top"
+    >
+      <i class="fas fa-circle-chevron-up"></i>
+    </button>
+
+    <div id="navbar-placeholder"></div>
+
+    <!-- ─── Hero ─── -->
+    <section class="cmg-hero">
+      <div class="cmg-hero-bg" aria-hidden="true"></div>
+      <div class="cmg-hero-inner">
+        <h1 class="cmg-hero-title">
+          <span class="cmg-hl-text">Complexity</span>
+          <span class="cmg-hl-match">Memory Match</span>
+        </h1>
+        <p class="cmg-hero-subtitle">
+          Flip cards to pair algorithms with their Big-O complexities.
+          Train your brain — two cards at a time.
+        </p>
+        <div class="cmg-hero-actions">
+          <button type="button" class="cmg-btn cmg-btn-primary" id="cmgStartBtn">
+            <i class="fas fa-play"></i> New Game
+          </button>
+          <button
+            type="button"
+            class="cmg-btn cmg-btn-secondary"
+            id="cmgHowBtn"
+          >
+            <i class="fas fa-question-circle"></i> How to Play
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─── Stats Bar ─── -->
+    <section class="cmg-stats-bar" id="cmgStatsBar">
+      <div class="cmg-stats-inner">
+        <div class="cmg-stat">
+          <span class="cmg-stat-value" id="cmgFlips">0</span>
+          <span class="cmg-stat-label">Flips</span>
+        </div>
+        <div class="cmg-stat-divider"></div>
+        <div class="cmg-stat">
+          <span class="cmg-stat-value" id="cmgMatches">0</span>
+          <span class="cmg-stat-label">Matches</span>
+        </div>
+        <div class="cmg-stat-divider"></div>
+        <div class="cmg-stat">
+          <span class="cmg-stat-value" id="cmgTimer">0s</span>
+          <span class="cmg-stat-label">Time</span>
+        </div>
+        <div class="cmg-stat-divider"></div>
+        <div class="cmg-stat">
+          <span class="cmg-stat-value cmg-stat-streak" id="cmgStreak">0</span>
+          <span class="cmg-stat-label">Streak</span>
+        </div>
+        <div class="cmg-stat-divider"></div>
+        <div class="cmg-stat">
+          <span class="cmg-stat-value" id="cmgScore">0</span>
+          <span class="cmg-stat-label">Score</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─── Controls ─── -->
+    <section class="cmg-controls" id="cmgControls">
+      <div class="cmg-controls-inner">
+        <!-- Difficulty -->
+        <div class="cmg-control-group">
+          <label class="cmg-control-label"
+            ><i class="fas fa-layer-group"></i> Difficulty</label
+          >
+          <div class="cmg-control-chips" id="cmgDifficultyChips">
+            <button
+              type="button"
+              class="cmg-chip active"
+              data-difficulty="easy"
+            >
+              Easy
+            </button>
+            <button type="button" class="cmg-chip" data-difficulty="medium">
+              Medium
+            </button>
+            <button type="button" class="cmg-chip" data-difficulty="hard">
+              Hard
+            </button>
+          </div>
+        </div>
+
+        <!-- High scores -->
+        <div class="cmg-control-group cmg-hs-group">
+          <label class="cmg-control-label"
+            ><i class="fas fa-trophy"></i> Best</label
+          >
+          <div class="cmg-hs-display">
+            <span class="cmg-hs-label" id="cmgHsDifficulty">Easy</span>
+            <span class="cmg-hs-value" id="cmgHighScore">—</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─── Game Area ─── -->
+    <section class="cmg-game-area" id="cmgGameArea">
+      <div class="cmg-game-inner">
+        <!-- Welcome / empty state -->
+        <div class="cmg-empty" id="cmgEmpty">
+          <div class="cmg-empty-icon">
+            <i class="fas fa-layer-group"></i>
+          </div>
+          <h3 class="cmg-empty-title">Ready to Test Your Memory?</h3>
+          <p class="cmg-empty-desc">
+            Match algorithm names with their correct time complexities.
+            Flip two cards per turn — find all pairs to win!
+          </p>
+          <div class="cmg-empty-features">
+            <div class="cmg-feature-item">
+              <i class="fas fa-table-cells"></i>
+              <span>4&times;4 or 6&times;4 grid</span>
+            </div>
+            <div class="cmg-feature-item">
+              <i class="fas fa-bolt"></i>
+              <span>Lightning-fast match bonus</span>
+            </div>
+            <div class="cmg-feature-item">
+              <i class="fas fa-fire"></i>
+              <span>Streak rewards</span>
+            </div>
+            <div class="cmg-feature-item">
+              <i class="fas fa-trophy"></i>
+              <span>Per-difficulty high scores</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Active game -->
+        <div class="cmg-active-game hidden" id="cmgActiveGame">
+          <div class="cmg-grid-wrap">
+            <div class="cmg-grid" id="cmgGrid"></div>
+          </div>
+
+          <!-- Game messages / feedback -->
+          <div class="cmg-message hidden" id="cmgMessage">
+            <span class="cmg-message-icon" id="cmgMessageIcon"></span>
+            <span class="cmg-message-text" id="cmgMessageText"></span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─── Results Modal ─── -->
+    <div class="cmg-modal-overlay hidden" id="cmgResultModal">
+      <div
+        class="cmg-modal"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="cmgResultTitle"
+      >
+        <div class="cmg-modal-header">
+          <span class="cmg-modal-badge">
+            <i class="fas fa-trophy"></i> Game Complete
+          </span>
+          <h3 id="cmgResultTitle">Great Memory!</h3>
+        </div>
+        <div class="cmg-modal-body" id="cmgResultBody">
+          <!-- Dynamic result content -->
+        </div>
+        <div class="cmg-modal-footer">
+          <button type="button" class="cmg-btn cmg-btn-primary" id="cmgPlayAgainBtn">
+            <i class="fas fa-redo-alt"></i> Play Again
+          </button>
+          <button type="button" class="cmg-btn cmg-btn-secondary" id="cmgCloseResultBtn">
+            <i class="fas fa-times"></i> Close
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ─── How-to Modal ─── -->
+    <div class="cmg-modal-overlay hidden" id="cmgHowModal">
+      <div
+        class="cmg-modal"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="cmgHowTitle"
+      >
+        <div class="cmg-modal-header">
+          <span class="cmg-modal-badge">
+            <i class="fas fa-question-circle"></i> Guide
+          </span>
+          <h3 id="cmgHowTitle">How to Play</h3>
+        </div>
+        <div class="cmg-modal-body">
+          <div class="cmg-how-list">
+            <div class="cmg-how-step">
+              <span class="cmg-how-num">1</span>
+              <div>
+                <strong>Select your difficulty</strong>
+                <p>Easy: 4&times;4 grid with basic complexities. Medium: 4&times;4 expanded. Hard: 6&times;4 grid with advanced complexities.</p>
+              </div>
+            </div>
+            <div class="cmg-how-step">
+              <span class="cmg-how-num">2</span>
+              <div>
+                <strong>Flip two cards</strong>
+                <p>Click a card to reveal it — you'll see either an algorithm name or a complexity label.</p>
+              </div>
+            </div>
+            <div class="cmg-how-step">
+              <span class="cmg-how-num">3</span>
+              <div>
+                <strong>Find the match</strong>
+                <p>If the algorithm matches its complexity, the pair stays revealed. If not, they flip back.</p>
+              </div>
+            </div>
+            <div class="cmg-how-step">
+              <span class="cmg-how-num">4</span>
+              <div>
+                <strong>Earn bonuses</strong>
+                <p>Match quickly (&lt;500ms) for a lightning bonus &mdash; consecutive matches build your streak!</p>
+              </div>
+            </div>
+            <div class="cmg-how-step">
+              <span class="cmg-how-num">5</span>
+              <div>
+                <strong>Beat your best</strong>
+                <p>Your best score per difficulty is saved locally. Replay to top it!</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="cmg-modal-footer">
+          <button type="button" class="cmg-btn cmg-btn-primary" id="cmgHowCloseBtn">
+            Got it!
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <script src="../../../auth.js"></script>
+    <script src="../../../bootstrap-legacy.js"></script>
+    <script src="../../../script.js"></script>
+    <script src="../../../theme.js"></script>
+    <script src="complexity-memory-game.js"></script>
+    <script type="module" src="../../../dist/legacy-bundle.mjs"></script>
+    <script>
+      if (typeof loadPartial === "function") {
+        loadPartial("navbar-placeholder", "/partials/navbar.html").then(
+          function () {
+            if (typeof initNavbar === "function") initNavbar();
+          }
+        );
+        // footer removed intentionally
+      }
+    </script>
+  </body>
+</html>

@@ -434,7 +434,17 @@ class CassandraHub {
         const mod = MODULES.find(m => m.id === id);
         
         this.lessonTitle.textContent = mod.title;
-        this.lessonBody.innerHTML = mod.content;
+        
+        // Wrap content with ELI5 toggle support
+        const eli5 = window.eli5Toggle;
+        const simpleContent = (window.eli5CassandraData || {})[id] || '';
+        this.lessonBody.innerHTML = eli5
+            ? eli5.wrapContent(mod.content, simpleContent)
+            : mod.content;
+
+        if (eli5) {
+            eli5.initToggle('cassandra', this.lessonBody);
+        }
 
         copyCode.init(this.lessonBody);
         

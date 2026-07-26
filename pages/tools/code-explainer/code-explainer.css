@@ -1,0 +1,632 @@
+/* ==========================================================================
+   AI CODE EXPLAINER STYLESHEET
+   ========================================================================== */
+
+:root {
+  --explainer-bg: #0b0f19;
+  --explainer-card-bg: rgba(15, 23, 42, 0.7);
+  --explainer-card-border: rgba(255, 255, 255, 0.08);
+  --explainer-text: #f8fafc;
+  --explainer-text-muted: #94a3b8;
+  --explainer-primary: #06b6d4;
+  --explainer-primary-hover: #0891b2;
+  --explainer-accent: #8b5cf6;
+  --explainer-gutter-bg: rgba(2, 6, 23, 0.6);
+  --explainer-editor-bg: #090d16;
+  --explainer-highlight-line: rgba(6, 182, 212, 0.22);
+  --explainer-highlight-line-border: #06b6d4;
+  --explainer-card-highlight: rgba(139, 92, 246, 0.15);
+  --explainer-card-highlight-border: #8b5cf6;
+  --explainer-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+}
+
+html.light-mode {
+  --explainer-bg: #f8fafc;
+  --explainer-card-bg: #ffffff;
+  --explainer-card-border: rgba(0, 0, 0, 0.08);
+  --explainer-text: #0f172a;
+  --explainer-text-muted: #64748b;
+  --explainer-primary: #0284c7;
+  --explainer-primary-hover: #0369a1;
+  --explainer-accent: #7c3aed;
+  --explainer-gutter-bg: #f1f5f9;
+  --explainer-editor-bg: #ffffff;
+  --explainer-highlight-line: rgba(2, 132, 199, 0.15);
+  --explainer-highlight-line-border: #0284c7;
+  --explainer-card-highlight: rgba(124, 58, 237, 0.1);
+  --explainer-card-highlight-border: #7c3aed;
+  --explainer-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+}
+
+body[data-page='code-explainer'] {
+  background-color: var(--explainer-bg);
+  color: var(--explainer-text);
+  font-family: 'Outfit', 'Inter', sans-serif;
+  margin: 0;
+}
+
+/* ── Hero Section ────────────────────────────────────────────────────────── */
+.explainer-hero {
+  padding: 60px 20px 40px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.explainer-gradient {
+  background: linear-gradient(135deg, #06b6d4 0%, #3b82f6 50%, #8b5cf6 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  display: block;
+  font-size: 2.75rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  margin: 10px 0;
+}
+
+.explainer-lang-pills {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 25px;
+}
+
+.lang-pill {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--explainer-card-border);
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--explainer-text-muted);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s ease;
+}
+
+html.light-mode .lang-pill {
+  background: rgba(0, 0, 0, 0.04);
+}
+
+.lang-pill:hover {
+  border-color: var(--explainer-primary);
+  color: var(--explainer-text);
+  transform: translateY(-2px);
+}
+
+/* ── Workspace Split Layout ──────────────────────────────────────────────── */
+.explainer-section {
+  padding: 10px 20px 60px;
+}
+
+.explainer-container {
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.explainer-workspace {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  align-items: start;
+}
+
+@media (max-width: 1024px) {
+  .explainer-workspace {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ── Explainer Cards ─────────────────────────────────────────────────────── */
+.explainer-card {
+  background: var(--explainer-card-bg);
+  border: 1px solid var(--explainer-card-border);
+  border-radius: 16px;
+  box-shadow: var(--explainer-shadow);
+  backdrop-filter: blur(16px);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  height: 680px;
+}
+
+.explainer-card-header {
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--explainer-card-border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(0, 0, 0, 0.15);
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+html.light-mode .explainer-card-header {
+  background: rgba(0, 0, 0, 0.02);
+}
+
+.pane-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--explainer-text);
+}
+
+.pane-title i {
+  color: var(--explainer-primary);
+}
+
+.pane-controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.explainer-select {
+  background: var(--explainer-gutter-bg);
+  border: 1px solid var(--explainer-card-border);
+  color: var(--explainer-text);
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 0.85rem;
+  outline: none;
+  cursor: pointer;
+  transition: border-color 0.2s;
+}
+
+.explainer-select:focus {
+  border-color: var(--explainer-primary);
+}
+
+.icon-action-btn {
+  background: var(--explainer-gutter-bg);
+  border: 1px solid var(--explainer-card-border);
+  color: var(--explainer-text-muted);
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.icon-action-btn:hover {
+  color: #ef4444;
+  border-color: #ef4444;
+  background: rgba(239, 68, 68, 0.1);
+}
+
+/* ── Editor Pane & Line Numbers ──────────────────────────────────────────── */
+.editor-input-wrapper {
+  display: flex;
+  flex: 1;
+  background: var(--explainer-editor-bg);
+  position: relative;
+  overflow: hidden;
+}
+
+.line-numbers-gutter {
+  width: 48px;
+  background: var(--explainer-gutter-bg);
+  border-right: 1px solid var(--explainer-card-border);
+  color: var(--explainer-text-muted);
+  font-family: 'Fira Code', monospace;
+  font-size: 0.85rem;
+  line-height: 1.6rem;
+  padding: 16px 0;
+  text-align: right;
+  user-select: none;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+.line-number-item {
+  padding-right: 10px;
+  height: 1.6rem;
+  cursor: pointer;
+  transition:
+    color 0.15s,
+    background-color 0.15s;
+}
+
+.line-number-item:hover {
+  color: var(--explainer-primary);
+}
+
+.line-number-item.line-highlight-active {
+  background-color: var(--explainer-highlight-line);
+  color: var(--explainer-primary);
+  font-weight: 700;
+  border-right: 3px solid var(--explainer-highlight-line-border);
+}
+
+.code-textarea {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: var(--explainer-text);
+  font-family: 'Fira Code', monospace;
+  font-size: 0.85rem;
+  line-height: 1.6rem;
+  padding: 16px 16px;
+  resize: none;
+  white-space: pre;
+  overflow-x: auto;
+  overflow-y: auto;
+  tab-size: 2;
+  box-sizing: border-box;
+}
+
+.editor-pane-footer {
+  padding: 12px 20px;
+  border-top: 1px solid var(--explainer-card-border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(0, 0, 0, 0.15);
+}
+
+html.light-mode .editor-pane-footer {
+  background: rgba(0, 0, 0, 0.02);
+}
+
+.editor-stats {
+  display: flex;
+  gap: 16px;
+  font-size: 0.8rem;
+  color: var(--explainer-text-muted);
+}
+
+.explain-btn {
+  background: linear-gradient(135deg, #06b6d4, #0891b2);
+  color: white;
+  border: none;
+  padding: 8px 18px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 12px rgba(6, 182, 212, 0.25);
+}
+
+.explain-btn:hover {
+  background: linear-gradient(135deg, #0891b2, #0284c7);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(6, 182, 212, 0.35);
+}
+
+.explain-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* ── Explanation Pane & States ───────────────────────────────────────────── */
+.explanation-pane {
+  padding: 0;
+  position: relative;
+  overflow-y: auto;
+}
+
+/* Empty State */
+.explainer-empty-state {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 40px;
+  box-sizing: border-box;
+}
+
+.empty-state-icon {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: rgba(6, 182, 212, 0.1);
+  border: 1px solid rgba(6, 182, 212, 0.2);
+  color: var(--explainer-primary);
+  font-size: 2.2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+.explainer-empty-state h3 {
+  margin: 0 0 10px;
+  font-size: 1.4rem;
+}
+
+.explainer-empty-state p {
+  color: var(--explainer-text-muted);
+  max-width: 420px;
+  margin: 0 0 24px;
+  line-height: 1.5;
+}
+
+.empty-state-features {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.feature-chip {
+  font-size: 0.85rem;
+  color: var(--explainer-text-muted);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.feature-chip i {
+  color: #10b981;
+}
+
+/* Loading Shimmer State */
+.explainer-loading-state {
+  padding: 30px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.loading-spinner-box {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 10px;
+  color: var(--explainer-primary);
+  font-weight: 600;
+}
+
+.spinner-orbit {
+  width: 24px;
+  height: 24px;
+  border: 3px solid rgba(6, 182, 212, 0.2);
+  border-top-color: var(--explainer-primary);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.skeleton-card {
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.03) 25%,
+    rgba(255, 255, 255, 0.08) 50%,
+    rgba(255, 255, 255, 0.03) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: 12px;
+}
+
+html.light-mode .skeleton-card {
+  background: linear-gradient(
+    90deg,
+    rgba(0, 0, 0, 0.04) 25%,
+    rgba(0, 0, 0, 0.08) 50%,
+    rgba(0, 0, 0, 0.04) 75%
+  );
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+.skeleton-summary {
+  height: 140px;
+}
+.skeleton-block {
+  height: 90px;
+}
+
+/* Active Explanation Output Content */
+.explanation-content {
+  padding: 20px;
+}
+
+.summary-card {
+  background: rgba(6, 182, 212, 0.05);
+  border: 1px solid rgba(6, 182, 212, 0.2);
+  border-radius: 14px;
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+.summary-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.summary-header h3 {
+  margin: 0;
+  font-size: 1.1rem;
+  color: var(--explainer-primary);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ai-badge {
+  background: rgba(139, 92, 246, 0.15);
+  color: #a78bfa;
+  border: 1px solid rgba(139, 92, 246, 0.25);
+  font-size: 0.75rem;
+  padding: 3px 10px;
+  border-radius: 12px;
+  font-weight: 600;
+}
+
+.summary-text {
+  margin: 0 0 16px;
+  line-height: 1.6;
+  font-size: 0.95rem;
+  color: var(--explainer-text);
+}
+
+.complexity-metrics {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.complexity-card {
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid var(--explainer-card-border);
+  padding: 12px 14px;
+  border-radius: 10px;
+}
+
+html.light-mode .complexity-card {
+  background: rgba(0, 0, 0, 0.02);
+}
+
+.metric-header {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--explainer-text-muted);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 6px;
+}
+
+.metric-value {
+  font-size: 0.95rem;
+  font-weight: 700;
+  font-family: 'Fira Code', monospace;
+  color: #38bdf8;
+}
+
+/* Explanation Filter Bar */
+.explanation-filter-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 14px;
+  padding: 0 4px;
+}
+
+.explanation-section-title {
+  font-weight: 700;
+  font-size: 0.95rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--explainer-text);
+}
+
+.highlight-hint {
+  font-size: 0.75rem;
+  color: var(--explainer-text-muted);
+}
+
+/* Line-by-line Cards */
+.explanation-blocks-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.explanation-card-block {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--explainer-card-border);
+  border-left: 4px solid var(--explainer-primary);
+  border-radius: 10px;
+  padding: 14px 16px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+html.light-mode .explanation-card-block {
+  background: #ffffff;
+}
+
+.explanation-card-block:hover {
+  background: rgba(6, 182, 212, 0.06);
+  border-color: var(--explainer-primary);
+  transform: translateX(3px);
+}
+
+.explanation-card-block.card-highlight-active {
+  background: var(--explainer-card-highlight) !important;
+  border-color: var(--explainer-card-highlight-border) !important;
+  border-left-color: var(--explainer-card-highlight-border) !important;
+  box-shadow: 0 4px 14px rgba(139, 92, 246, 0.2);
+}
+
+.block-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.line-range-badge {
+  background: rgba(6, 182, 212, 0.15);
+  color: #38bdf8;
+  border: 1px solid rgba(6, 182, 212, 0.25);
+  font-family: 'Fira Code', monospace;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 6px;
+}
+
+.block-title {
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: var(--explainer-text);
+  margin-bottom: 6px;
+}
+
+.block-explanation {
+  font-size: 0.88rem;
+  line-height: 1.5;
+  color: var(--explainer-text-muted);
+  margin-bottom: 10px;
+}
+
+.concept-tags {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.concept-chip {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--explainer-card-border);
+  font-size: 0.7rem;
+  padding: 2px 8px;
+  border-radius: 10px;
+  color: var(--explainer-text-muted);
+}

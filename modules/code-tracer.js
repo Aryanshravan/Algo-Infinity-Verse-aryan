@@ -31,13 +31,14 @@ class Scope {
 }
 
 function extractNamesFromPattern(pattern, scope) {
-  if (!pattern) return;
+  if (!pattern || !scope) return;
   if (pattern.type === 'Identifier') {
     scope.add(pattern.name);
   } else if (pattern.type === 'AssignmentPattern') {
     extractNamesFromPattern(pattern.left, scope);
   } else if (pattern.type === 'ObjectPattern') {
     for (const prop of pattern.properties) {
+      if (!prop) continue;
       if (prop.type === 'Property') {
         extractNamesFromPattern(prop.value, scope);
       } else if (prop.type === 'RestElement') {
@@ -46,7 +47,7 @@ function extractNamesFromPattern(pattern, scope) {
     }
   } else if (pattern.type === 'ArrayPattern') {
     for (const el of pattern.elements) {
-      extractNamesFromPattern(el, scope);
+      if (el) extractNamesFromPattern(el, scope);
     }
   } else if (pattern.type === 'RestElement') {
     extractNamesFromPattern(pattern.argument, scope);
