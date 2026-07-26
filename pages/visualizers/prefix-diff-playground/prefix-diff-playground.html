@@ -13,7 +13,9 @@
       try {
         var t = localStorage.getItem('theme') || (matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
         if (t === 'light') document.documentElement.classList.add('light-mode');
-      } catch (e) {}
+      } catch (e) {
+        console.warn('Could not load theme preference:', e);
+      }
     })();
   </script>
 </head>
