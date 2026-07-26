@@ -353,8 +353,12 @@ function updateUIState() {
 // 4. CHART.JS INTEGRATION
 // ==========================================
 function initChart() {
-  const canvas = document.getElementById('cwndChart');
-  chartInstance = new Chart(canvas.getContext('2d'), {
+  var canvas = document.getElementById('cwndChart');
+  if (!canvas) return;
+
+  function createChart() {
+    if (typeof Chart === 'undefined') return;
+    chartInstance = new Chart(canvas.getContext('2d'), {
     type: 'line',
     data: {
       labels: simState.labels,
@@ -402,6 +406,13 @@ function initChart() {
       plugins: { legend: { display: false } },
     },
   });
+  }
+
+  if (typeof lazyVisualizer !== 'undefined') {
+    lazyVisualizer.lazyLoadChartJS(canvas, createChart);
+  } else {
+    createChart();
+  }
 }
 
 function recordChartData() {
@@ -420,7 +431,7 @@ function recordChartData() {
 }
 
 function updateChartDirect() {
-  chartInstance.update();
+  if (chartInstance) chartInstance.update();
 }
 
 // ==========================================

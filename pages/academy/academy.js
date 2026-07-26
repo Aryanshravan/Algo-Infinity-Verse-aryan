@@ -189,6 +189,17 @@ const academies = [
     desc: 'Containerize apps with Docker and orchestrate at scale with Kubernetes.',
   },
 
+  // ── Version Control ──
+  {
+    id: 'git-academy',
+    name: 'Git & GitHub Academy',
+    path: '/pages/git-academy/git-academy.html',
+    category: 'DevOps & CI/CD',
+    icon: 'fa-brands fa-git-alt',
+    difficulty: 'Beginner',
+    desc: 'Master Git and GitHub — from version control basics to branching, collaboration, and GitHub Actions CI/CD.',
+  },
+
   // ── Databases ──
   {
     id: 'mongodb',
@@ -273,6 +284,7 @@ const categoryDefs = [
   { label: 'Backend', key: 'backend', count: 10 },
   { label: 'Cloud & DevOps', key: 'cloud-devops', count: 2 },
   { label: 'Databases', key: 'databases', count: 7 },
+  { label: 'DevOps & CI/CD', key: 'devops-ci-cd', count: 1 },
   { label: 'AI / Misc', key: 'ai-misc', count: 1 },
 ];
 
@@ -282,6 +294,7 @@ const categoryColors = {
   backend: '#99f6e4',
   'cloud-devops': '#bfdbfe',
   databases: '#fed7aa',
+  'devops-ci-cd': '#fed7aa',
   'ai-misc': '#fecaca',
 };
 
@@ -524,6 +537,7 @@ function initFlipAnimation() {
     { name: 'SQLite', cat: 'databases' },
     { name: 'Redis', cat: 'databases' },
     { name: 'Cassandra', cat: 'databases' },
+    { name: 'Git & GitHub', cat: 'devops-ci-cd' },
     { name: 'Fail', cat: 'ai-misc' },
   ];
 

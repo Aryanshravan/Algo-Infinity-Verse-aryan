@@ -136,9 +136,16 @@ function stGetRing() {
     let ring = [];
     state.servers.forEach(server => {
         server.hashes.forEach(angle => {
-            ring.push({ angle, serverId: server.id, color: server.color, name: server.name });
-        });
+            ring.push({ angle, serverId: server.id, color: server.color, name: server.name        });
     });
+    };
+
+    if (typeof lazyVisualizer !== 'undefined') {
+        lazyVisualizer.lazyLoadChartJS(els.stdDevValue.parentElement.closest('.telemetry-section') || canvas, createChart);
+    } else {
+        createChart();
+    }
+});
     ring.sort((a, b) => a.angle - b.angle);
     return ring;
 }
@@ -380,8 +387,13 @@ function recalculateKeys() {
 // 4. CHART.JS & TELEMETRY
 // ==========================================
 function initChart() {
-    const canvas = document.getElementById('distributionChart');
-    state.chartInstance = new Chart(canvas.getContext('2d'), {
+    var canvas = document.getElementById('distributionChart');
+    if (!canvas) return;
+    var ctx = canvas.getContext('2d');
+
+    var createChart = function() {
+        if (typeof Chart === 'undefined') return;
+        state.chartInstance = new Chart(ctx, {
         type: 'bar',
         data: { labels: [], datasets: [{ label: 'Keys per Server', data: [], backgroundColor: [] }] },
         options: {

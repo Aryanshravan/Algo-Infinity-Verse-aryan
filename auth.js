@@ -462,11 +462,6 @@
       document.documentElement.classList.add('auth-unverified');
     }
 
-    if (currentSession.authenticated && isAuthPage()) {
-      location.href = getNextDestination();
-      return;
-    }
-
     renderAuthNav();
     syncAuthVisibility();
     wireLogout();

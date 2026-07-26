@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Diffie–Hellman Key Exchange Visualizer</title>
+    <link rel="stylesheet" href="diffie-hellman-visualizer.css">
+</head>
+
+<body>
+
+<h1>Diffie–Hellman Key Exchange Visualizer</h1>
+
+<div class="parameters">
+    <h2>Public Parameters</h2>
+    <p>Prime (p) = 23</p>
+    <p>Generator (g) = 5</p>
+</div>
+
+
+<div class="container">
+
+    <!-- Alice -->
+    <div class="card alice">
+        <h2>Alice 👩</h2>
+
+        <p>
+            Private Key (a):
+            <span class="alice-private">-</span>
+        </p>
+
+        <p>
+            Public Key (A):
+            <span class="alice-public">-</span>
+        </p>
+
+
+        <p id="aliceMessage">
+            Waiting...
+        </p>
+    </div>
+
+
+
+    <!-- Channel -->
+
+    <div class="channel">
+
+        <h2>Public Channel 🔗</h2>
+
+        <div id="packet">
+            🔑
+        </div>
+
+        <p id="channelMessage">
+            No exchange yet
+        </p>
+
+    </div>
+
+
+
+
+    <!-- Bob -->
+
+    <div class="card bob">
+
+        <h2>Bob 👨</h2>
+
+        <p>
+            Private Key (b):
+            <span class="bob-private">-</span>
+        </p>
+
+        <p>
+            Public Key (B):
+            <span class="bob-public">-</span>
+        </p>
+
+
+        <p id="bobMessage">
+            Waiting...
+        </p>
+
+    </div>
+
+
+</div>
+
+
+
+
+<div class="buttons">
+
+<button id="startBtn">
+Start Exchange
+</button>
+
+
+<button id="mitmBtn">
+Enable MITM Attack
+</button>
+
+
+</div>
+
+
+
+
+<div class="calculation">
+
+<h2>Calculation Steps</h2>
+
+<p id="steps">
+Click Start Exchange
+</p>
+
+</div>
+
+
+
+
+<div class="secret">
+
+<h2>
+Shared Secret
+</h2>
+
+<p class="shared-secret">
+🔑 -
+</p>
+
+</div>
+
+
+
+
+
+<!-- Eve -->
+
+<div class="eve">
+
+<h2>
+Eve 🕵️ (Attacker)
+</h2>
+
+
+<p id="mitmMessage">
+No attack detected
+</p>
+
+
+</div>
+
+
+
+
+<script src="diffie-hellman-visualizer.js"></script>
+
+</body>
+</html>

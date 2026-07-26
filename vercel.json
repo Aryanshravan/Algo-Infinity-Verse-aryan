@@ -102,6 +102,14 @@
       "destination": "/pages/leaderboard/preview.html"
     },
     {
+      "source": "/code-explainer",
+      "destination": "/pages/tools/code-explainer/code-explainer.html"
+    },
+    {
+      "source": "/streaks",
+      "destination": "/pages/streaks/streak-dashboard.html"
+    },
+    {
       "source": "/api/battles/:path*",
       "destination": "/api/battles"
     }

@@ -2,33 +2,43 @@ import { VCSProvider } from '../VCSProvider.js';
 import * as yaml from 'js-yaml';
 
 export class GitLabProvider extends VCSProvider {
-  async getCIConfigFiles() {
+  constructor(repoUrl) {
+    super(repoUrl);
     const match = this.repoUrl.match(/gitlab\.com\/([^/]+)\/([^/]+)/);
-    if (!match) throw new Error("Invalid GitLab URL");
+    if (!match) throw new Error('Invalid GitLab URL');
+    this.namespace = match[1];
+    this.project = match[2].replace(/\.git$/, '');
+    this.encodedPath = encodeURIComponent(`${this.namespace}/${this.project}`);
+  }
 
-    const namespace = match[1];
-    const project = match[2].replace(/\.git$/, '');
-    
-    // GitLab API requires URL-encoded namespace/project paths
-    const encodedPath = encodeURIComponent(`${namespace}/${project}`);
-
-    const apiUrl = `https://gitlab.com/api/v4/projects/${encodedPath}/repository/files/.gitlab-ci.yml/raw?ref=main`;
-    
-    const res = await fetch(apiUrl);
-
+  async _fetchText(url) {
+    const res = await fetch(url);
     if (!res.ok) {
-      if (res.status === 404) {
-        // Try master branch if main fails
-        const fallbackRes = await fetch(`https://gitlab.com/api/v4/projects/${encodedPath}/repository/files/.gitlab-ci.yml/raw?ref=master`);
-        if (!fallbackRes.ok) return [];
-        const content = await fallbackRes.text();
+      if (res.status === 404) return null;
+      throw new Error(`GitLab API returned ${res.status} for ${url}`);
+    }
+    return res.text();
+  }
+
+  async _fetchJson(url) {
+    const res = await fetch(url);
+    if (!res.ok) {
+      if (res.status === 404) return null;
+      throw new Error(`GitLab API returned ${res.status} for ${url}`);
+    }
+    return res.json();
+  }
+
+  async getCIConfigFiles() {
+    const branches = ['main', 'master'];
+    for (const branch of branches) {
+      const apiUrl = `https://gitlab.com/api/v4/projects/${this.encodedPath}/repository/files/.gitlab-ci.yml/raw?ref=${branch}`;
+      const content = await this._fetchText(apiUrl);
+      if (content !== null) {
         return [{ name: '.gitlab-ci.yml', content }];
       }
-      throw new Error(`GitLab API returned ${res.status}`);
     }
-
-    const content = await res.text();
-    return [{ name: '.gitlab-ci.yml', content }];
+    return [];
   }
 
   normalizeCIConfig(rawContent) {
@@ -38,9 +48,20 @@ export class GitLabProvider extends VCSProvider {
     const commands = [];
     let hasJobs = false;
 
-    // GitLab CI structure: root keys are either global config or job names
-    const reservedKeys = ['image', 'services', 'stages', 'types', 'before_script', 'after_script', 'variables', 'cache', 'include', 'default', 'workflow'];
-    
+    const reservedKeys = [
+      'image',
+      'services',
+      'stages',
+      'types',
+      'before_script',
+      'after_script',
+      'variables',
+      'cache',
+      'include',
+      'default',
+      'workflow',
+    ];
+
     if (doc.include) hasJobs = true;
 
     for (const key of Object.keys(doc)) {
@@ -55,7 +76,6 @@ export class GitLabProvider extends VCSProvider {
         continue;
       }
 
-      // Assume it's a job if it's not a reserved key and is an object
       const job = doc[key];
       if (typeof job === 'object' && job !== null && !Array.isArray(job)) {
         hasJobs = true;
@@ -63,11 +83,53 @@ export class GitLabProvider extends VCSProvider {
         if (Array.isArray(scripts)) commands.push(...scripts);
       }
     }
-    
+
     if (commands.length === 0 && hasJobs) {
-      commands.push("HAS_JOBS");
+      commands.push('HAS_JOBS');
     }
 
     return commands;
+  }
+
+  /**
+   * Fetch the repository file tree from GitLab's API.
+   * GitLab provides a recursive tree endpoint.
+   */
+  async getRepoFilePaths(_options = {}) {
+    const branches = ['main', 'master'];
+    for (const branch of branches) {
+      const apiUrl = `https://gitlab.com/api/v4/projects/${this.encodedPath}/repository/tree?recursive=true&per_page=100&ref=${branch}`;
+      const data = await this._fetchJson(apiUrl);
+      if (data && Array.isArray(data)) {
+        const paths = [];
+        for (const item of data) {
+          if (item.type === 'blob' && item.path) {
+            paths.push(item.path);
+          }
+        }
+        return paths;
+      }
+    }
+    return [];
+  }
+
+  /**
+   * GitLab API requires file paths to be URL-encoded in a specific way:
+   * each path segment should be individually encoded, then joined with %2F.
+   * See: https://docs.gitlab.com/ee/api/repository_files.html#get-file-from-repository
+   */
+  async getFileContent(filePath) {
+    const encodedFilePath = filePath
+      .split('/')
+      .map(function (seg) { return encodeURIComponent(seg); })
+      .join('%2F');
+
+    const branches = ['main', 'master'];
+    for (const branch of branches) {
+      const apiUrl = `https://gitlab.com/api/v4/projects/${this.encodedPath}/repository/files/${encodedFilePath}/raw?ref=${branch}`;
+      const content = await this._fetchText(apiUrl);
+      if (content !== null) return content;
+    }
+    return null;
   }
 }

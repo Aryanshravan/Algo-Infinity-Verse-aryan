@@ -8,7 +8,8 @@
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
     />
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="/modules/lazyVisualizer.js"></script>
+    <script src="/modules/snippets.js"></script>
     <style>
       @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&display=swap');
 
@@ -182,15 +183,6 @@
       html.light-mode #templateBtn:hover,
       html.light-mode #clearBtn:hover {
         background: rgba(0, 0, 0, 0.02);
-      }
-
-      #editor-container {
-        height: 400px;
-        border-radius: 12px;
-        border: 1px solid var(--border-color);
-        overflow: hidden;
-        margin-top: 15px;
-        box-shadow: 0 8px 24px var(--shadow-color);
       }
 
       .output {
@@ -465,6 +457,621 @@
         color: #047857;
         box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.02);
       }
+
+      /* ===== SNIPPETS PANEL STYLES ===== */
+      #snippetsBtn {
+        background: linear-gradient(135deg, #f59e0b, #d97706);
+        color: white;
+      }
+      #snippetsBtn:hover {
+        background: linear-gradient(135deg, #d97706, #b45309);
+      }
+      #snippetsBtn.active {
+        background: linear-gradient(135deg, #10b981, #059669);
+      }
+
+      .editor-wrapper {
+        display: flex;
+        gap: 0;
+        margin-top: 15px;
+        position: relative;
+        transition: all 0.3s ease;
+      }
+
+      #editor-container {
+        height: 400px;
+        border-radius: 12px;
+        border: 1px solid var(--border-color);
+        overflow: hidden;
+        flex: 1;
+        min-width: 0;
+        box-shadow: 0 8px 24px var(--shadow-color);
+        transition: border-radius 0.3s ease;
+      }
+
+      .editor-wrapper.snippets-open #editor-container {
+        border-radius: 12px 0 0 12px;
+      }
+
+      .snippets-panel {
+        width: 0;
+        overflow: hidden;
+        background: var(--card-bg);
+        border: 1px solid var(--border-color);
+        border-left: none;
+        border-radius: 0 12px 12px 0;
+        display: flex;
+        flex-direction: column;
+        opacity: 0;
+        transition:
+          width 0.3s ease,
+          opacity 0.3s ease;
+        flex-shrink: 0;
+        position: relative;
+      }
+
+      .snippets-panel.open {
+        width: 340px;
+        opacity: 1;
+        overflow: visible;
+      }
+
+      .snippets-panel-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 12px 14px 10px;
+        border-bottom: 1px solid var(--border-color);
+        flex-shrink: 0;
+      }
+
+      .snippets-panel-header h3 {
+        margin: 0;
+        font-size: 1rem;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        color: var(--text-color);
+      }
+
+      .snippets-panel-header h3 i {
+        color: #f59e0b;
+      }
+
+      .snippets-close-btn {
+        background: none;
+        border: none;
+        color: var(--text-muted);
+        font-size: 1.3rem;
+        cursor: pointer;
+        padding: 0 4px;
+        line-height: 1;
+        transition: color 0.2s;
+      }
+      .snippets-close-btn:hover {
+        color: var(--text-color);
+      }
+
+      .snippets-panel-toolbar {
+        padding: 10px 14px 8px;
+        border-bottom: 1px solid var(--border-color);
+        flex-shrink: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      .snippets-search-wrapper {
+        position: relative;
+        display: flex;
+        align-items: center;
+      }
+
+      .snippets-search-icon {
+        position: absolute;
+        left: 10px;
+        color: var(--text-muted);
+        font-size: 0.8rem;
+        pointer-events: none;
+      }
+
+      .snippets-search-input {
+        width: 100%;
+        padding: 8px 32px 8px 32px;
+        border-radius: 8px;
+        border: 1px solid var(--border-color);
+        background: rgba(255, 255, 255, 0.04);
+        color: var(--text-color);
+        font-family: var(--ui-font);
+        font-size: 0.85rem;
+        outline: none;
+        transition: border-color 0.2s;
+      }
+      .snippets-search-input:focus {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 2px rgba(139, 92, 246, 0.12);
+      }
+      .snippets-search-input::placeholder {
+        color: var(--text-muted);
+      }
+      html.light-mode .snippets-search-input {
+        background: rgba(0, 0, 0, 0.02);
+      }
+
+      .snippets-clear-search {
+        position: absolute;
+        right: 6px;
+        background: none;
+        border: none;
+        color: var(--text-muted);
+        cursor: pointer;
+        font-size: 1rem;
+        padding: 2px 6px;
+        display: none;
+        line-height: 1;
+      }
+      .snippets-clear-search.visible {
+        display: block;
+      }
+      .snippets-clear-search:hover {
+        color: var(--text-color);
+      }
+
+      .snippets-filter-row {
+        display: flex;
+        gap: 6px;
+        align-items: center;
+      }
+
+      .snippets-filter-select {
+        flex: 1;
+        padding: 6px 10px;
+        border-radius: 6px;
+        border: 1px solid var(--border-color);
+        background: rgba(255, 255, 255, 0.04);
+        color: var(--text-color);
+        font-family: var(--ui-font);
+        font-size: 0.8rem;
+        outline: none;
+        cursor: pointer;
+        transition: border-color 0.2s;
+      }
+      .snippets-filter-select:focus {
+        border-color: var(--primary-color);
+      }
+      html.light-mode .snippets-filter-select {
+        background: rgba(0, 0, 0, 0.02);
+      }
+
+      .snippets-add-btn {
+        width: 32px;
+        height: 32px;
+        border-radius: 6px;
+        border: 1px solid var(--border-color);
+        background: linear-gradient(135deg, var(--primary-color), #a78bfa);
+        color: white;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.9rem;
+        transition: all 0.2s;
+        flex-shrink: 0;
+      }
+      .snippets-add-btn:hover {
+        background: linear-gradient(135deg, var(--primary-hover), #8b5cf6);
+        transform: scale(1.05);
+      }
+
+      .snippets-action-btn {
+        padding: 5px 10px;
+        border-radius: 6px;
+        border: 1px solid var(--border-color);
+        background: rgba(255, 255, 255, 0.04);
+        color: var(--text-muted);
+        font-family: var(--ui-font);
+        font-size: 0.78rem;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        transition: all 0.2s;
+      }
+      .snippets-action-btn:hover {
+        color: var(--text-color);
+        border-color: var(--text-muted);
+      }
+
+      .snippets-list {
+        flex: 1;
+        overflow-y: auto;
+        padding: 8px 10px;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+      }
+      .snippets-list::-webkit-scrollbar {
+        width: 4px;
+      }
+      .snippets-list::-webkit-scrollbar-track {
+        background: transparent;
+      }
+      .snippets-list::-webkit-scrollbar-thumb {
+        background: var(--border-color);
+        border-radius: 4px;
+      }
+
+      .snippets-empty-state {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 30px 20px;
+        color: var(--text-muted);
+        text-align: center;
+      }
+      .snippets-empty-state i {
+        font-size: 2.5rem;
+        margin-bottom: 12px;
+        opacity: 0.4;
+      }
+      .snippets-empty-state p {
+        margin: 0 0 4px;
+        font-size: 0.95rem;
+      }
+      .snippets-empty-hint {
+        font-size: 0.8rem !important;
+        opacity: 0.7;
+      }
+
+      /* Snippet card */
+      .snippet-card {
+        border-radius: 8px;
+        border: 1px solid var(--border-color);
+        background: rgba(255, 255, 255, 0.03);
+        display: flex;
+        flex-direction: column;
+        transition: all 0.2s;
+        cursor: pointer;
+        position: relative;
+      }
+      .snippet-card:hover {
+        background: rgba(255, 255, 255, 0.06);
+        border-color: rgba(255, 255, 255, 0.15);
+      }
+      html.light-mode .snippet-card {
+        background: rgba(0, 0, 0, 0.02);
+      }
+      html.light-mode .snippet-card:hover {
+        background: rgba(0, 0, 0, 0.04);
+        border-color: rgba(0, 0, 0, 0.15);
+      }
+      .snippet-card.favorite {
+        border-color: rgba(245, 158, 11, 0.3);
+      }
+      .snippet-card.favorite::before {
+        content: '★';
+        position: absolute;
+        top: 4px;
+        right: 6px;
+        font-size: 0.7rem;
+        color: #f59e0b;
+        opacity: 0.6;
+      }
+
+      .snippet-card-main {
+        padding: 10px 12px;
+        flex: 1;
+        min-width: 0;
+      }
+      .snippet-card-main:focus {
+        outline: 2px solid var(--primary-color);
+        outline-offset: -2px;
+        border-radius: 8px;
+      }
+
+      .snippet-card-name {
+        font-weight: 600;
+        font-size: 0.85rem;
+        color: var(--text-color);
+        margin: 0 0 2px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .snippet-card-desc {
+        font-size: 0.75rem;
+        color: var(--text-muted);
+        margin: 0 0 6px;
+        line-height: 1.3;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+      }
+
+      .snippet-card-meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 4px;
+        align-items: center;
+      }
+
+      .snippet-card-tag {
+        font-size: 0.65rem;
+        padding: 1px 6px;
+        border-radius: 4px;
+        background: rgba(139, 92, 246, 0.12);
+        color: #a78bfa;
+        border: 1px solid rgba(139, 92, 246, 0.15);
+        white-space: nowrap;
+      }
+
+      .snippet-card-lang {
+        font-size: 0.65rem;
+        padding: 1px 6px;
+        border-radius: 4px;
+        background: rgba(59, 130, 246, 0.12);
+        color: #60a5fa;
+        border: 1px solid rgba(59, 130, 246, 0.15);
+        text-transform: uppercase;
+        white-space: nowrap;
+      }
+
+      .snippet-card-actions {
+        display: flex;
+        border-top: 1px solid var(--border-color);
+        padding: 0;
+      }
+
+      .snippet-card-actions button {
+        flex: 1;
+        padding: 6px 8px;
+        border: none;
+        background: none;
+        color: var(--text-muted);
+        font-size: 0.75rem;
+        cursor: pointer;
+        transition: all 0.2s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 4px;
+        font-family: var(--ui-font);
+      }
+      .snippet-card-actions button:hover {
+        background: rgba(255, 255, 255, 0.04);
+      }
+      .snippet-card-actions button:not(:last-child) {
+        border-right: 1px solid var(--border-color);
+      }
+
+      .snippet-card-actions .insert-action {
+        color: var(--success-color);
+        font-weight: 600;
+      }
+      .snippet-card-actions .insert-action:hover {
+        background: rgba(16, 185, 129, 0.08);
+      }
+
+      .snippet-card-actions .edit-action:hover {
+        color: var(--secondary-color);
+        background: rgba(59, 130, 246, 0.08);
+      }
+
+      .snippet-card-actions .favorite-action:hover {
+        color: #f59e0b;
+        background: rgba(245, 158, 11, 0.08);
+      }
+      .snippet-card-actions .favorite-action.is-favorite {
+        color: #f59e0b;
+      }
+
+      .snippet-card-actions .delete-action:hover {
+        color: var(--error-color);
+        background: rgba(239, 68, 68, 0.08);
+      }
+
+      /* Snippet Modal */
+      .snippet-modal-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.6);
+        z-index: 2000;
+        align-items: center;
+        justify-content: center;
+        backdrop-filter: blur(4px);
+      }
+      .snippet-modal-overlay.active {
+        display: flex;
+      }
+
+      .snippet-modal-content {
+        background: var(--modal-bg);
+        padding: 24px;
+        border-radius: 16px;
+        max-width: 540px;
+        width: 95%;
+        max-height: 85vh;
+        overflow-y: auto;
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+        border: 1px solid var(--border-color);
+        color: var(--text-color);
+        animation: snippetModalIn 0.25s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+      }
+      @keyframes snippetModalIn {
+        from {
+          opacity: 0;
+          transform: translateY(-20px) scale(0.96);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0) scale(1);
+        }
+      }
+
+      .snippet-modal-content .snippets-close-btn {
+        position: absolute;
+        top: 14px;
+        right: 14px;
+      }
+
+      .snippet-modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 18px;
+      }
+      .snippet-modal-header h3 {
+        margin: 0;
+        font-size: 1.25rem;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .snippet-form-group {
+        margin-bottom: 14px;
+      }
+      .snippet-form-group label {
+        display: block;
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: var(--text-muted);
+        margin-bottom: 4px;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+      }
+      .snippet-form-group label .required {
+        color: var(--error-color);
+      }
+      .snippet-form-group input,
+      .snippet-form-group textarea,
+      .snippet-form-group select {
+        width: 100%;
+        padding: 8px 12px;
+        border-radius: 8px;
+        border: 1px solid var(--border-color);
+        background: rgba(255, 255, 255, 0.04);
+        color: var(--text-color);
+        font-family: var(--ui-font);
+        font-size: 0.9rem;
+        outline: none;
+        transition: border-color 0.2s;
+        box-sizing: border-box;
+      }
+      .snippet-form-group input:focus,
+      .snippet-form-group textarea:focus,
+      .snippet-form-group select:focus {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 2px rgba(139, 92, 246, 0.12);
+      }
+      html.light-mode .snippet-form-group input,
+      html.light-mode .snippet-form-group textarea,
+      html.light-mode .snippet-form-group select {
+        background: rgba(0, 0, 0, 0.02);
+      }
+      .snippet-form-group textarea {
+        font-family: var(--code-font);
+        font-size: 0.8rem;
+        resize: vertical;
+        min-height: 120px;
+      }
+      .snippet-form-group .form-hint {
+        font-size: 0.7rem;
+        color: var(--text-muted);
+        margin-top: 2px;
+      }
+
+      .snippet-form-error {
+        color: var(--error-color);
+        font-size: 0.82rem;
+        padding: 8px 12px;
+        background: rgba(239, 68, 68, 0.08);
+        border: 1px solid rgba(239, 68, 68, 0.15);
+        border-radius: 8px;
+        margin-bottom: 12px;
+        display: none;
+      }
+      .snippet-form-error.visible {
+        display: block;
+      }
+
+      .snippet-form-actions {
+        display: flex;
+        gap: 8px;
+        justify-content: flex-end;
+        margin-top: 18px;
+      }
+      .snippet-form-actions button {
+        padding: 9px 20px;
+        border-radius: 8px;
+        font-family: var(--ui-font);
+        font-weight: 600;
+        font-size: 0.9rem;
+        border: none;
+        cursor: pointer;
+        transition: all 0.2s;
+      }
+      .snippet-form-actions .btn-cancel {
+        background: rgba(255, 255, 255, 0.06);
+        color: var(--text-muted);
+        border: 1px solid var(--border-color);
+      }
+      .snippet-form-actions .btn-cancel:hover {
+        background: rgba(255, 255, 255, 0.1);
+        color: var(--text-color);
+      }
+      .snippet-form-actions .btn-save {
+        background: linear-gradient(135deg, var(--primary-color), #a78bfa);
+        color: white;
+      }
+      .snippet-form-actions .btn-save:hover {
+        background: linear-gradient(135deg, var(--primary-hover), #8b5cf6);
+        transform: translateY(-1px);
+      }
+      .snippet-form-actions .btn-save:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        transform: none;
+      }
+
+      /* Responsive */
+      @media (max-width: 768px) {
+        .snippets-panel.open {
+          position: absolute;
+          right: 0;
+          top: 0;
+          width: 280px;
+          height: 100%;
+          z-index: 100;
+          border-radius: 0 12px 12px 0;
+          box-shadow: -4px 0 20px rgba(0, 0, 0, 0.3);
+        }
+        .editor-wrapper {
+          position: relative;
+        }
+        .snippet-modal-content {
+          max-width: 100%;
+          margin: 10px;
+        }
+      }
+
+      @media (max-width: 480px) {
+        .snippets-panel.open {
+          width: 240px;
+        }
+        #snippetsBtn span {
+          display: none;
+        }
+      }
     </style>
     <script src="/theme.js"></script>
   </head>
@@ -538,6 +1145,7 @@
           <option value="vbnet">VB.NET</option>
           <option value="fsharp">F#</option>
           <option value="prolog">Prolog</option>
+          <option value="elixir">Elixir</option>
         </select>
         <button type="button" id="runBtn" aria-label="Run code">▶ Run</button>
         <button type="button" id="profileBtn" aria-label="Profile time complexity">
@@ -546,12 +1154,106 @@
         <button type="button" id="reviewBtn" aria-label="Request AI review">
           <i class="fas fa-robot"></i> Request AI Review
         </button>
+        <button
+          type="button"
+          id="explainBtn"
+          aria-label="Explain Code line-by-line"
+          style="background: linear-gradient(135deg, #06b6d4, #0891b2); color: white"
+        >
+          <i class="fas fa-wand-magic-sparkles"></i> Explain Code
+        </button>
         <button type="button" id="templateBtn" aria-label="Load template code">
           📄 Load Template
         </button>
         <button type="button" id="clearBtn" aria-label="Clear editor">🗑️ Clear</button>
+        <button
+          type="button"
+          id="snippetsBtn"
+          class="snippets-toggle-btn"
+          aria-label="Toggle snippets library"
+        >
+          <i class="fas fa-code-branch"></i> <span>Snippets</span>
+        </button>
       </div>
-      <div id="editor-container" aria-label="Code editor"></div>
+      <div class="editor-wrapper">
+        <div id="editor-container" aria-label="Code editor"></div>
+        <!-- Snippets Library Side Panel -->
+        <aside
+          id="snippetsPanel"
+          class="snippets-panel"
+          aria-label="Code Snippets Library"
+          role="complementary"
+        >
+          <div class="snippets-panel-header">
+            <h3><i class="fas fa-code-branch"></i> Snippets</h3>
+            <button
+              type="button"
+              id="snippetsPanelClose"
+              class="snippets-close-btn"
+              aria-label="Close snippets panel"
+            >
+              &times;
+            </button>
+          </div>
+
+          <div class="snippets-panel-toolbar">
+            <div class="snippets-search-wrapper">
+              <i class="fas fa-search snippets-search-icon"></i>
+              <input
+                type="text"
+                id="snippetsSearch"
+                class="snippets-search-input"
+                placeholder="Search snippets..."
+                aria-label="Search snippets"
+              />
+              <button
+                type="button"
+                id="snippetsClearSearch"
+                class="snippets-clear-search"
+                aria-label="Clear search"
+              >
+                &times;
+              </button>
+            </div>
+            <div class="snippets-filter-row">
+              <select
+                id="snippetsCategoryFilter"
+                class="snippets-filter-select"
+                aria-label="Filter by category"
+              >
+                <option value="">All Categories</option>
+              </select>
+              <button
+                type="button"
+                id="snippetsAddBtn"
+                class="snippets-add-btn"
+                aria-label="Add new snippet"
+                title="Add new snippet"
+              >
+                <i class="fas fa-plus"></i>
+              </button>
+            </div>
+            <button
+              type="button"
+              id="snippetsEmptyBtn"
+              class="snippets-action-btn hidden"
+              onclick="resetToDefaultSnippets()"
+            >
+              <i class="fas fa-undo"></i> Restore Defaults
+            </button>
+          </div>
+
+          <div id="snippetsList" class="snippets-list" role="list">
+            <!-- Snippet items rendered here -->
+          </div>
+
+          <div id="snippetsEmptyState" class="snippets-empty-state hidden">
+            <i class="fas fa-code-branch"></i>
+            <p>No snippets yet</p>
+            <p class="snippets-empty-hint">Click <strong>+</strong> to create your first snippet</p>
+          </div>
+        </aside>
+      </div>
       <div class="output" id="output" role="status" aria-live="polite" aria-atomic="true">
         Run your code to see output here...
       </div>
@@ -572,8 +1274,6 @@
         </div>
       </div>
     </div>
-
-    <!-- Monaco Editor AMD Loader -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.39.0/min/vs/loader.min.js"></script>
     <script>
       const templates = {
@@ -586,6 +1286,7 @@
         vbnet: `' VB.NET Code Playground\nImports System\n\nModule Program\n    Sub Main()\n        Console.WriteLine("Hello from VB.NET")\n    End Sub\nEnd Module`,
         fsharp: `// F# Code Playground\nlet solve input =\n    printfn "%A" input\n    input\n\n[<EntryPoint>]\nlet main argv =\n    solve "Hello from F#"\n    0`,
         prolog: `% Prolog Code Playground\nparent(john, bob).\nparent(bob, charlie).\nancestor(X, Y) :- parent(X, Y).\nancestor(X, Y) :- parent(X, Z), ancestor(Z, Y).`,
+        elixir: `# Elixir Code Playground\ndefmodule Solver do\n  def solve(input) do\n    IO.puts("Input: #{input}")\n    input\n  end\nend\n\nSolver.solve("Hello from Elixir")`,
       };
 
       let editor;
@@ -644,6 +1345,7 @@
           vbnet: 'vb',
           fsharp: 'fsharp',
           prolog: 'prolog',
+          elixir: 'elixir',
         };
         const lang = modeMap[this.value];
         if (editor && monacoInstance) {
@@ -670,6 +1372,24 @@
         clearReviews();
       });
 
+      const explainBtn = document.getElementById('explainBtn');
+      if (explainBtn) {
+        explainBtn.addEventListener('click', () => {
+          const code = editor ? editor.getValue() : '';
+          const lang = document.getElementById('lang')
+            ? document.getElementById('lang').value
+            : 'javascript';
+          if (!code || !code.trim()) {
+            alert('Please write or load some code first before requesting an explanation.');
+            return;
+          }
+          try {
+            localStorage.setItem('explain_code_data', JSON.stringify({ code, lang }));
+          } catch (e) {}
+          window.location.href = '/pages/tools/code-explainer/code-explainer.html';
+        });
+      }
+
       // Safe output function
       function setOutput(text, type) {
         const output = document.getElementById('output');
@@ -687,6 +1407,12 @@
       function drawProfilerChart(canvas, results) {
         if (!canvas) return;
         if (!window.Chart) {
+          if (typeof lazyVisualizer !== 'undefined') {
+            lazyVisualizer.lazyLoadChartJS(canvas, function () {
+              drawProfilerChart(canvas, results);
+            });
+            return;
+          }
           console.warn('Chart.js is not loaded, falling back to basic rendering.');
           return;
         }
@@ -1314,6 +2040,507 @@
           btn.innerHTML = originalText;
         }
       });
+
+      // ==========================================
+      // QUICK CODE SNIPPETS LIBRARY
+      // ==========================================
+
+      /** Current editor component — managed inside Monaco create */
+      let _snippetsInitialized = false;
+
+      /** Render the snippets list into the panel */
+      function renderSnippets(query, category) {
+        const listEl = document.getElementById('snippetsList');
+        const emptyState = document.getElementById('snippetsEmptyState');
+        if (!listEl) return;
+
+        let snippets;
+        if (query || category) {
+          snippets = window.SnippetsLibrary.search(query || '');
+          if (category) {
+            snippets = snippets.filter((s) => s.category === category);
+          }
+        } else {
+          snippets = window.SnippetsLibrary.getAll();
+        }
+
+        if (snippets.length === 0) {
+          listEl.innerHTML = '';
+          listEl.classList.add('hidden');
+          emptyState.classList.remove('hidden');
+          return;
+        }
+
+        listEl.classList.remove('hidden');
+        emptyState.classList.add('hidden');
+
+        listEl.innerHTML = snippets
+          .map((snippet) => {
+            const favClass = snippet.favorite ? 'favorite' : '';
+            const langLabel = snippet.language || 'js';
+            const tagsHtml = (snippet.tags || [])
+              .slice(0, 3)
+              .map((t) => `            <span class="snippet-card-tag">${escapeHtml(t)}</span>`)
+              .join('');
+            const favActionClass = snippet.favorite ? 'is-favorite' : '';
+            const desc = snippet.description || '';
+            return `<div class="snippet-card ${favClass}" role="listitem">
+            <div class="snippet-card-main" tabindex="0" role="button" aria-label="Insert snippet: ${escapeHtml(snippet.name)}" data-snippet-id="${escapeHtml(snippet.id)}">
+              <div class="snippet-card-name">${escapeHtml(snippet.name)}</div>
+              <div class="snippet-card-desc">${escapeHtml(desc)}</div>
+              <div class="snippet-card-meta">
+                <span class="snippet-card-lang">${escapeHtml(langLabel)}</span>
+                ${tagsHtml}
+              </div>
+            </div>
+            <div class="snippet-card-actions">
+              <button type="button" class="insert-action" data-action="insert" data-id="${escapeHtml(snippet.id)}" title="Insert code into editor"><i class="fas fa-arrow-right"></i> Insert</button>
+              <button type="button" class="edit-action" data-action="edit" data-id="${escapeHtml(snippet.id)}" title="Edit snippet"><i class="fas fa-pen"></i></button>
+              <button type="button" class="favorite-action ${favActionClass}" data-action="favorite" data-id="${escapeHtml(snippet.id)}" title="${snippet.favorite ? 'Remove from favorites' : 'Add to favorites'}"><i class="${snippet.favorite ? 'fas' : 'far'}-star"></i></button>
+              <button type="button" class="delete-action" data-action="delete" data-id="${escapeHtml(snippet.id)}" title="Delete snippet"><i class="fas fa-trash"></i></button>
+            </div>
+          </div>`;
+          })
+          .join('');
+
+        // Attach event listeners via delegation
+        if (!listEl.dataset.listening) {
+          listEl.dataset.listening = 'true';
+          listEl.addEventListener('click', function (e) {
+            const actionBtn = e.target.closest('[data-action]');
+            if (!actionBtn) {
+              // Click on card body — insert snippet
+              const card = e.target.closest('[data-snippet-id]');
+              if (card) {
+                const id = card.dataset.snippetId;
+                handleInsertSnippet(id);
+              }
+              return;
+            }
+
+            const action = actionBtn.dataset.action;
+            const id = actionBtn.dataset.id;
+
+            switch (action) {
+              case 'insert':
+                handleInsertSnippet(id);
+                break;
+              case 'edit':
+                openSnippetModal(id);
+                break;
+              case 'favorite':
+                handleToggleFavorite(id);
+                break;
+              case 'delete':
+                handleDeleteSnippet(id);
+                break;
+            }
+          });
+
+          // Keyboard support for enter/space on card body
+          listEl.addEventListener('keydown', function (e) {
+            const card = e.target.closest('[data-snippet-id]');
+            if (!card) return;
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              const id = card.dataset.snippetId;
+              handleInsertSnippet(id);
+            }
+          });
+        }
+      }
+
+      /** Escape HTML to prevent XSS (safe for both text content and attribute values). */
+      function escapeHtml(str) {
+        if (typeof str !== 'string') return '';
+        return str
+          .replace(/&/g, '&amp;')
+          .replace(/"/g, '&quot;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;');
+      }
+
+      /** Insert snippet code into the Monaco editor */
+      function handleInsertSnippet(id) {
+        const snippet = window.SnippetsLibrary.getById(id);
+        if (!snippet) {
+          showSnippetNotification('Snippet not found.', 'error');
+          return;
+        }
+
+        if (editor && monacoInstance) {
+          const position = editor.getPosition();
+          const range = new monacoInstance.Range(
+            position.lineNumber,
+            position.column,
+            position.lineNumber,
+            position.column
+          );
+          editor.executeEdits('snippets', [{ range, text: snippet.code, forceMoveMarkers: true }]);
+          editor.focus();
+          showSnippetNotification('Snippet inserted!', 'success');
+        }
+      }
+
+      /** Toggle favorite status */
+      function handleToggleFavorite(id) {
+        const result = window.SnippetsLibrary.toggleFavorite(id);
+        if (result.success) {
+          updateSnippetsView();
+          showSnippetNotification(
+            result.favorite ? 'Added to favorites' : 'Removed from favorites',
+            'info'
+          );
+        }
+      }
+
+      /** Delete a snippet with confirmation */
+      function handleDeleteSnippet(id) {
+        const snippet = window.SnippetsLibrary.getById(id);
+        if (!snippet) return;
+
+        if (!confirm(`Delete snippet "${snippet.name}"? This cannot be undone.`)) return;
+
+        const result = window.SnippetsLibrary.remove(id);
+        if (result.success) {
+          updateSnippetsView();
+          showSnippetNotification('Snippet deleted.', 'info');
+        } else {
+          showSnippetNotification(result.error || 'Failed to delete snippet.', 'error');
+        }
+      }
+
+      /** Refresh the snippets list view */
+      function updateSnippetsView() {
+        const searchInput = document.getElementById('snippetsSearch');
+        const categoryFilter = document.getElementById('snippetsCategoryFilter');
+        const query = searchInput ? searchInput.value : '';
+        const category = categoryFilter ? categoryFilter.value : '';
+
+        // Rebuild filter options
+        const categories = window.SnippetsLibrary.getCategories();
+        if (categoryFilter) {
+          const currentVal = categoryFilter.value;
+          categoryFilter.innerHTML =
+            '<option value="">All Categories</option>' +
+            categories
+              .map((c) => `<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`)
+              .join('');
+          if (currentVal && categories.includes(currentVal)) {
+            categoryFilter.value = currentVal;
+          }
+        }
+
+        renderSnippets(query, category);
+      }
+
+      /** Show a small toast notification for snippet actions. Creates a temporary toast that auto-dismisses. */
+      function showSnippetNotification(message, type) {
+        const container =
+          document.getElementById('snippetToastContainer') ||
+          (function () {
+            const el = document.createElement('div');
+            el.id = 'snippetToastContainer';
+            el.style.cssText =
+              'position:fixed;bottom:24px;right:24px;z-index:9999;display:flex;flex-direction:column;gap:8px;pointer-events:none;';
+            document.body.appendChild(el);
+            return el;
+          })();
+
+        const toast = document.createElement('div');
+        const bgColor = type === 'error' ? '#ef4444' : type === 'success' ? '#10b981' : '#3b82f6';
+        toast.style.cssText = `padding:10px 18px;border-radius:10px;background:${bgColor};color:white;font-family:var(--ui-font);font-size:0.85rem;font-weight:600;box-shadow:0 8px 24px rgba(0,0,0,0.3);opacity:0;transform:translateY(12px);transition:all 0.3s cubic-bezier(0.34,1.56,0.64,1);pointer-events:auto;max-width:340px;`;
+        toast.textContent = message;
+        container.appendChild(toast);
+
+        // Animate in
+        requestAnimationFrame(() => {
+          toast.style.opacity = '1';
+          toast.style.transform = 'translateY(0)';
+        });
+
+        // Auto-dismiss after 3s
+        setTimeout(() => {
+          toast.style.opacity = '0';
+          toast.style.transform = 'translateY(12px)';
+          setTimeout(() => toast.remove(), 300);
+        }, 3000);
+      }
+
+      /** Reset snippets to defaults */
+      function resetToDefaultSnippets() {
+        if (!confirm('This will overwrite all your custom snippets with the defaults. Continue?'))
+          return;
+        try {
+          localStorage.setItem(
+            'quickCodeSnippets',
+            JSON.stringify(window.SnippetsLibrary.DEFAULT_SNIPPETS)
+          );
+          updateSnippetsView();
+          showSnippetNotification('Default snippets restored!', 'success');
+        } catch (e) {
+          showSnippetNotification('Failed to restore defaults: ' + e.message, 'error');
+        }
+      }
+
+      /** Open the snippet add/edit modal */
+      function openSnippetModal(editId) {
+        const overlay = document.getElementById('snippetModalOverlay');
+        const titleEl = document.getElementById('snippetModalTitle');
+        const nameInput = document.getElementById('snippetFormName');
+        const descInput = document.getElementById('snippetFormDesc');
+        const codeInput = document.getElementById('snippetFormCode');
+        const langInput = document.getElementById('snippetFormLang');
+        const tagsInput = document.getElementById('snippetFormTags');
+        const categoryInput = document.getElementById('snippetFormCategory');
+        const errorEl = document.getElementById('snippetFormError');
+        const form = document.getElementById('snippetForm');
+
+        if (!overlay) return;
+
+        // Reset form
+        form.reset();
+        errorEl.classList.remove('visible');
+        errorEl.textContent = '';
+
+        if (editId) {
+          const snippet = window.SnippetsLibrary.getById(editId);
+          if (!snippet) return;
+          titleEl.textContent = 'Edit Snippet';
+          nameInput.value = snippet.name;
+          descInput.value = snippet.description || '';
+          codeInput.value = snippet.code;
+          langInput.value = snippet.language || 'javascript';
+          tagsInput.value = (snippet.tags || []).join(', ');
+          categoryInput.value = snippet.category || '';
+          form.dataset.editId = editId;
+        } else {
+          titleEl.textContent = 'Add New Snippet';
+          form.dataset.editId = '';
+          // Pre-fill with current editor code if available
+          if (editor) {
+            codeInput.value = editor.getValue();
+          }
+          langInput.value = document.getElementById('lang').value || 'javascript';
+        }
+
+        overlay.classList.add('active');
+      }
+
+      /** Close the snippet modal */
+      function closeSnippetModal() {
+        const overlay = document.getElementById('snippetModalOverlay');
+        if (overlay) overlay.classList.remove('active');
+      }
+
+      /** Save snippet from modal form */
+      function saveSnippetForm() {
+        const nameInput = document.getElementById('snippetFormName');
+        const descInput = document.getElementById('snippetFormDesc');
+        const codeInput = document.getElementById('snippetFormCode');
+        const langInput = document.getElementById('snippetFormLang');
+        const tagsInput = document.getElementById('snippetFormTags');
+        const categoryInput = document.getElementById('snippetFormCategory');
+        const errorEl = document.getElementById('snippetFormError');
+        const saveBtn = document.getElementById('snippetFormSave');
+        const form = document.getElementById('snippetForm');
+
+        if (!nameInput || !codeInput) return;
+
+        errorEl.classList.remove('visible');
+        errorEl.textContent = '';
+
+        const name = nameInput.value.trim();
+        const code = codeInput.value.trim();
+
+        if (!name) {
+          errorEl.textContent = 'Snippet name is required.';
+          errorEl.classList.add('visible');
+          nameInput.focus();
+          return;
+        }
+        if (!code) {
+          errorEl.textContent = 'Snippet code is required.';
+          errorEl.classList.add('visible');
+          codeInput.focus();
+          return;
+        }
+
+        saveBtn.disabled = true;
+        saveBtn.textContent = 'Saving...';
+
+        const snippetData = {
+          name,
+          description: descInput.value.trim(),
+          code,
+          language: langInput.value,
+          tags: tagsInput.value
+            .split(',')
+            .map((t) => t.trim())
+            .filter(Boolean),
+          category: categoryInput.value.trim() || 'General',
+        };
+
+        const editId = form.dataset.editId;
+        let result;
+
+        if (editId) {
+          result = window.SnippetsLibrary.update(editId, snippetData);
+        } else {
+          result = window.SnippetsLibrary.add(snippetData);
+        }
+
+        saveBtn.disabled = false;
+        saveBtn.innerHTML = '<i class="fas fa-check"></i> Save';
+
+        if (result.success) {
+          closeSnippetModal();
+          updateSnippetsView();
+          showSnippetNotification(editId ? 'Snippet updated!' : 'Snippet created!', 'success');
+        } else {
+          errorEl.textContent = result.error || 'Failed to save snippet.';
+          errorEl.classList.add('visible');
+        }
+      }
+
+      /** Initialize the snippets panel */
+      function initSnippets() {
+        if (_snippetsInitialized) return;
+        _snippetsInitialized = true;
+
+        // Wait for SnippetsLibrary to be available
+        if (!window.SnippetsLibrary) {
+          setTimeout(initSnippets, 200);
+          return;
+        }
+
+        const toggleBtn = document.getElementById('snippetsBtn');
+        const panel = document.getElementById('snippetsPanel');
+        const closeBtn = document.getElementById('snippetsPanelClose');
+        const searchInput = document.getElementById('snippetsSearch');
+        const clearSearchBtn = document.getElementById('snippetsClearSearch');
+        const categoryFilter = document.getElementById('snippetsCategoryFilter');
+        const addBtn = document.getElementById('snippetsAddBtn');
+
+        if (!panel || !toggleBtn) return;
+
+        // Toggle panel
+        toggleBtn.addEventListener('click', function () {
+          const isOpen = panel.classList.toggle('open');
+          this.classList.toggle('active', isOpen);
+          document.querySelector('.editor-wrapper').classList.toggle('snippets-open', isOpen);
+          if (isOpen) {
+            updateSnippetsView();
+            searchInput.focus();
+            // Trigger Monaco re-layout after transition
+            setTimeout(() => {
+              if (editor) editor.layout();
+            }, 350);
+          } else {
+            setTimeout(() => {
+              if (editor) editor.layout();
+            }, 350);
+          }
+        });
+
+        // Close panel
+        if (closeBtn) {
+          closeBtn.addEventListener('click', function () {
+            panel.classList.remove('open');
+            toggleBtn.classList.remove('active');
+            document.querySelector('.editor-wrapper').classList.remove('snippets-open');
+            setTimeout(() => {
+              if (editor) editor.layout();
+            }, 350);
+          });
+        }
+
+        // Search with debounce
+        if (searchInput) {
+          searchInput.addEventListener('input', function () {
+            const query = this.value;
+            const category = categoryFilter ? categoryFilter.value : '';
+            if (clearSearchBtn) {
+              clearSearchBtn.classList.toggle('visible', query.length > 0);
+            }
+            renderSnippets(query, category);
+          });
+        }
+
+        // Clear search
+        if (clearSearchBtn) {
+          clearSearchBtn.addEventListener('click', function () {
+            if (searchInput) {
+              searchInput.value = '';
+              this.classList.remove('visible');
+              const category = categoryFilter ? categoryFilter.value : '';
+              renderSnippets('', category);
+              searchInput.focus();
+            }
+          });
+        }
+
+        // Category filter
+        if (categoryFilter) {
+          categoryFilter.addEventListener('change', function () {
+            const query = searchInput ? searchInput.value : '';
+            renderSnippets(query, this.value);
+          });
+        }
+
+        // Add new snippet
+        if (addBtn) {
+          addBtn.addEventListener('click', function () {
+            openSnippetModal();
+          });
+        }
+
+        // Close modal on overlay click
+        const modalOverlay = document.getElementById('snippetModalOverlay');
+        if (modalOverlay) {
+          modalOverlay.addEventListener('click', function (e) {
+            if (e.target === this) closeSnippetModal();
+          });
+        }
+
+        // Close modal on escape
+        document.addEventListener('keydown', function (e) {
+          if (e.key === 'Escape') {
+            const overlay = document.getElementById('snippetModalOverlay');
+            if (overlay && overlay.classList.contains('active')) {
+              closeSnippetModal();
+            }
+          }
+        });
+
+        // Listen for snippet-insert custom event from other components
+        document.addEventListener('snippet-insert', function (e) {
+          if (e.detail && e.detail.snippet) {
+            handleInsertSnippet(e.detail.snippet.id || e.detail.snippet);
+          }
+        });
+
+        // Initial render
+        updateSnippetsView();
+      }
+
+      // Initialize snippets when DOM is ready
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initSnippets);
+      } else {
+        initSnippets();
+      }
+
+      // Expose functions globally for inline handlers
+      window.renderSnippets = renderSnippets;
+      window.handleInsertSnippet = handleInsertSnippet;
+      window.handleToggleFavorite = handleToggleFavorite;
+      window.handleDeleteSnippet = handleDeleteSnippet;
+      window.openSnippetModal = openSnippetModal;
+      window.closeSnippetModal = closeSnippetModal;
+      window.saveSnippetForm = saveSnippetForm;
+      window.resetToDefaultSnippets = resetToDefaultSnippets;
+      window.updateSnippetsView = updateSnippetsView;
     </script>
   </body>
 </html>

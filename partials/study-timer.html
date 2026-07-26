@@ -1,16 +1,24 @@
-    <section id="study-timer" class="glass-card" style="margin: 20px auto; padding: 20px; text-align: center; max-width: 600px; border-radius: 12px; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1);">
-      <h3 style="margin-bottom: 15px; color: var(--text-primary);">Focus Mode</h3>
-      <div class="timer-display" id="timer-display" role="timer" aria-label="Focus session time remaining" style="font-size: 2.5rem; font-weight: bold; margin-bottom: 15px; font-variant-numeric: tabular-nums;">
-        <span id="timer-minutes" style="display: inline-block; width: 2ch; text-align: center;">25</span>
-        <span style="display: inline-block; width: 1ch; text-align: center;">:</span>
-        <span id="timer-seconds" style="display: inline-block; width: 2ch; text-align: center;">00</span>
-        <span style="display: inline-block; width: 1ch; text-align: center;">:</span>
-        <span id="timer-centiseconds" style="display: inline-block; width: 2ch; text-align: center;">00</span>
-      </div>
-      <div class="timer-controls" style="display: flex; gap: 10px; justify-content: center;">
-        <button type="button" id="start-btn" class="btn btn-primary">Start</button>
-        <button type="button" id="pause-btn" class="btn btn-secondary" style="display: none;">Pause</button>
-        <button type="button" id="resume-btn" class="btn btn-primary" style="display: none;">Resume</button>
-        <button type="button" id="reset-btn" class="btn btn-secondary">Reset</button>
-      </div>
-    </section>
+<section id="study-timer" style="max-width: var(--hp-max-width); margin: 0 auto; padding: 0 32px 60px;">
+  <div class="hp-facts-card" style="background: var(--hp-card); border: 1px solid var(--hp-card-border); text-align: center; padding: 32px;">
+    <div class="hp-section-eyebrow" style="justify-content: center; margin-bottom: 16px;">
+      Focus Mode
+    </div>
+    <h3 class="hp-section-title" style="font-size: 1.4rem; margin-bottom: 24px;">
+      <i class="fas fa-clock" style="color: var(--hp-lavender); margin-right: 8px;"></i>
+      Study Timer
+    </h3>
+    <div class="timer-display" id="timer-display" role="timer" aria-label="Focus session time remaining" style="font-size: 3rem; font-weight: 400; font-family: 'JetBrains Mono', monospace; color: var(--hp-lavender); margin-bottom: 24px; font-variant-numeric: tabular-nums; letter-spacing: 0.05em;">
+      <span id="timer-minutes" style="display: inline-block; width: 2ch; text-align: center;">25</span>
+      <span style="display: inline-block; width: 1ch; text-align: center; color: var(--hp-text-tertiary);">:</span>
+      <span id="timer-seconds" style="display: inline-block; width: 2ch; text-align: center;">00</span>
+      <span style="display: inline-block; width: 1ch; text-align: center; color: var(--hp-text-tertiary);">:</span>
+      <span id="timer-centiseconds" style="display: inline-block; width: 2ch; text-align: center;">00</span>
+    </div>
+    <div class="timer-controls" style="display: flex; gap: 12px; justify-content: center;">
+      <button type="button" id="start-btn" class="hp-btn hp-btn-primary">Start</button>
+      <button type="button" id="pause-btn" class="hp-btn hp-btn-secondary" style="display: none;">Pause</button>
+      <button type="button" id="resume-btn" class="hp-btn hp-btn-primary" style="display: none;">Resume</button>
+      <button type="button" id="reset-btn" class="hp-btn hp-btn-secondary">Reset</button>
+    </div>
+  </div>
+</section>

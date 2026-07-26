@@ -405,6 +405,105 @@
   }
 }
 
+/* ─── Pagination ─── */
+.viz-pagination {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-top: 2.5rem;
+  flex-wrap: wrap;
+}
+
+.viz-page-btn {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.8rem;
+  font-weight: 500;
+  padding: 0.45rem 0.9rem;
+  border-radius: 8px;
+  background: transparent;
+  border: 1px solid var(--viz-border);
+  color: var(--viz-text-muted);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.viz-page-btn:hover:not(:disabled) {
+  border-color: var(--viz-primary);
+  color: var(--viz-primary);
+  background: rgba(var(--viz-primary-rgb), 0.06);
+}
+
+.viz-page-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.viz-page-btn:focus-visible {
+  outline: 2px solid var(--viz-primary);
+  outline-offset: 2px;
+}
+
+.viz-page-numbers {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.viz-page-num {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.8rem;
+  font-weight: 500;
+  min-width: 2rem;
+  height: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  background: transparent;
+  border: 1px solid transparent;
+  color: var(--viz-text-muted);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.viz-page-num:hover {
+  border-color: var(--viz-border-hover);
+  color: var(--viz-text);
+  background: var(--viz-surface);
+}
+
+.viz-page-num.active {
+  background: rgba(245, 158, 11, 0.12);
+  border-color: var(--viz-accent);
+  color: var(--viz-accent);
+  font-weight: 600;
+  cursor: default;
+}
+
+.viz-page-num:focus-visible {
+  outline: 2px solid var(--viz-primary);
+  outline-offset: 2px;
+}
+
+.viz-page-ellipsis {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.75rem;
+  color: var(--viz-text-muted);
+  padding: 0 0.25rem;
+  user-select: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .viz-page-btn {
+    transition: none;
+  }
+  .viz-page-num {
+    transition: none;
+  }
+}
+
 /* ─── Responsive ─── */
 @media (max-width: 768px) {
   [data-page="visualizers"] .viz-hero {

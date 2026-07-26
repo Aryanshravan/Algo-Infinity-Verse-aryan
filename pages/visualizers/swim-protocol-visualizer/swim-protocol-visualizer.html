@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SWIM Protocol Visualizer | Algo Infinity Verse</title>
+    <meta name="description" content="Visualize the SWIM Protocol for Distributed Failure Detection.">
+    <link rel="stylesheet" href="../../../styles.css">
+    <link rel="stylesheet" href="swim-protocol-visualizer.css">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Poppins:wght@300;400;500;600;700&family=Fira+Code:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body data-page="swim-protocol">
+
+    <div id="navbar-placeholder"></div>
+
+    <button id="scrollTopBtn" aria-label="Scroll to top" class="scroll-top-btn">
+      <i class="fas fa-circle-chevron-up"></i>
+    </button>
+
+    <section class="swim-hero">
+      <div class="swim-hero-bg"><canvas id="swimHeroCanvas" class="swim-hero-canvas"></canvas></div>
+      <div class="swim-hero-inner">
+        <div class="swim-hero-eyebrow">🌐 Distributed Systems</div>
+        <h1 class="swim-hero-title">SWIM Protocol</h1>
+        <p class="swim-hero-sub">Scalable Weakly-consistent Infection-style Group Membership</p>
+        <p class="swim-hero-desc">How do massive clusters detect dead nodes without a central monitor? The SWIM protocol uses a clever combination of direct pings and indirect relays. If a direct ping fails, the node asks peers to double-check before declaring a failure, drastically reducing false positives caused by temporary network glitches!</p>
+        <a href="#lab" class="btn btn-primary swim-btn-primary"><i class="fas fa-satellite-dish"></i> Enter the Lab</a>
+      </div>
+    </section>
+
+    <section id="lab" class="section swim-section">
+      <div class="container">
+
+        <div class="swim-control-card">
+          <div class="swim-row">
+            <button class="btn btn-secondary swim-btn" id="btnPingNormal"><i class="fas fa-check-circle"></i> Normal Ping</button>
+            <button class="btn btn-secondary swim-btn" id="btnPingGlitch"><i class="fas fa-bolt"></i> Glitch (False Positive Demo)</button>
+            <button class="btn swim-btn-primary swim-btn" id="btnPingFail"><i class="fas fa-skull"></i> Kill Node (Real Failure Demo)</button>
+            
+            <div style="flex:1"></div>
+            
+            <button class="btn btn-secondary swim-btn" id="btnReset"><i class="fas fa-redo"></i> Reset Cluster</button>
+          </div>
+        </div>
+
+        <div class="swim-status" id="swimStatus" role="status" aria-live="polite">Cluster initialized with 8 healthy nodes. Select an action above to trace a ping cycle.</div>
+
+        <div class="swim-main-layout">
+          
+          <div class="swim-panel-card swim-panel-left">
+            <div class="swim-panel-title">
+                <span><i class="fas fa-network-wired" style="color:#06b6d4;"></i> Cluster Network Topology</span>
+                <span class="badge" id="stateBadge">Idle</span>
+            </div>
+            
+            <div class="swim-canvas-wrapper">
+                <canvas id="swimCanvas"></canvas>
+            </div>
+            
+            <div class="swim-legend">
+                <div class="leg-item"><span class="leg-color" style="background:#22c55e;"></span> Healthy (Alive)</div>
+                <div class="leg-item"><span class="leg-color" style="background:#f59e0b;"></span> Suspected</div>
+                <div class="leg-item"><span class="leg-color" style="background:#ef4444;"></span> Dead</div>
+                <div class="leg-item"><span class="leg-color" style="background:#06b6d4;"></span> Active Prober</div>
+            </div>
+          </div>
+
+          <div class="swim-panel-card swim-panel-right">
+            <div class="swim-panel-title">
+                <span><i class="fas fa-terminal" style="color:#a855f7;"></i> Protocol Execution Log</span>
+            </div>
+            
+            <div class="swim-log-container" id="swimLog">
+                <div class="log-entry log-neutral">System ready. Waiting for events...</div>
+            </div>
+            
+            <div class="swim-state-machine">
+                <div class="sm-node sm-alive">ALIVE</div>
+                <div class="sm-arrow"><i class="fas fa-arrow-right"></i> Timeout</div>
+                <div class="sm-node sm-suspect">SUSPECTED</div>
+                <div class="sm-arrow"><i class="fas fa-arrow-right"></i> Timeout</div>
+                <div class="sm-node sm-dead">DEAD</div>
+            </div>
+          </div>
+          
+        </div>
+
+      </div>
+    </section>
+
+    <section id="learn" class="section">
+      <div class="container">
+        <h2 class="section-title"><span class="title-icon">✨</span> The SWIM Protocol Mechanics</h2>
+        <div class="swim-learn-grid">
+          <div class="swim-learn-card" style="--lc:#22c55e">
+            <div class="swim-learn-icon">📡</div>
+            <h3>Direct Probing</h3>
+            <p>Every node periodically picks one random peer and sends a standard <strong>ping</strong>. If the peer responds with an <strong>ack</strong>, the node is considered healthy. This random probing eventually covers the entire cluster without needing a centralized tracker.</p>
+          </div>
+          <div class="swim-learn-card" style="--lc:#06b6d4">
+            <div class="swim-learn-icon">🔗</div>
+            <h3>Indirect Relays</h3>
+            <p>If the direct ping times out, it doesn't immediately declare failure! The connection might just be glitchy. The prober asks $K$ random peers to send an <strong>indirect ping</strong> on its behalf. If any relay gets an ack, the node is saved from false suspicion.</p>
+          </div>
+          <div class="swim-learn-card" style="--lc:#f59e0b">
+            <div class="swim-learn-icon">⏳</div>
+            <h3>Suspicion Sub-Protocol</h3>
+            <p>If all indirect probes also fail, the node is marked as <strong>Suspected</strong> (not dead yet!). This status is gossiped to the cluster. If the node doesn't refute this suspicion before a final timeout expires, it is permanently marked as <strong>Dead</strong>.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div id="footer-placeholder"></div>
+
+    <script src="../../../auth.js"></script>
+    <script src="../../../script.js"></script>
+    <script src="../../../theme.js"></script>
+    <script src="../../../auth-gate.js"></script>
+    <script src="swim-protocol-visualizer.js"></script>
+    <script>
+      if (typeof loadPartial === 'function') {
+        loadPartial('navbar-placeholder', '/partials/navbar.html').then(function() {
+          if (typeof initNavbar === 'function') initNavbar();
+        });
+        loadPartial('footer-placeholder', '/partials/footer.html');
+      }
+    </script>
+</body>
+</html>

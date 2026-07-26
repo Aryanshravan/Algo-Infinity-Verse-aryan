@@ -10,11 +10,8 @@
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Poppins:wght@300;400;500;600;700&family=Fira+Code:wght@400;500;600&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
   
-  <!-- WebGL Library & Camera Controls -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
-
-    <!-- Theme Initialization Script -->
+  <!-- Theme Initialization Script -->
+  <script src="/modules/lazyVisualizer.js"></script>
     <script>
       (function() {
         try {
@@ -30,6 +27,7 @@
       })();
     </script>
   <script src="/theme.js"></script>
+    <link rel="stylesheet" href="/modules/quick-notes/quick-notes.css" />
 </head>
 <body data-page="global-learning-globe">
   <!-- Loading Screen -->
@@ -177,6 +175,7 @@
     loadPartial('navbar-placeholder', '/partials/navbar.html');
     loadPartial('footer-placeholder', '/partials/footer.html');
   </script>
+    <script src="/modules/quick-notes/quick-notes.js"></script>
 </body>
 </html>
 

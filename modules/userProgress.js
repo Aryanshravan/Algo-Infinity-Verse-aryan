@@ -35,6 +35,9 @@ window.userProgress = {
   lastActive: null,
   quizScores: {},
   dailyGoals: {},
+  weeklyGoals: { targetProblems: 15, targetMinutes: 150, targetQuizzes: 3 },
+  studyTime: { todayMinutes: 0, totalMinutes: 0, sessionLogs: [], lastSessionDate: null },
+  longestStreak: 0,
 
   bestQuizTimes: {},
   activityData: {},
@@ -100,21 +103,19 @@ function updateProfile() {
       userProgress.completedProblems.length >= 25 && userProgress.xp >= 2500,
       (userProgress.battlesWon || 0) >= 1,
       (userProgress.battlesWon || 0) >= 5,
-      !!(userProgress.inventory?.exclusiveBadge),
+      !!userProgress.inventory?.exclusiveBadge,
     ].filter(Boolean).length;
     profileBadges.textContent = badges;
     const profileBadgesSection = document.getElementById('profileBadgesSection');
     if (profileBadgesSection) profileBadgesSection.textContent = badges;
   }
-  document
-    .querySelectorAll('.avatar-icon')
-    .forEach((el) => {
-      if (typeof window.renderProfileAvatar === 'function') {
-        window.renderProfileAvatar(el, userProgress.avatar);
-      } else {
-        renderAvatar(el, userProgress.avatar);
-      }
-    });
+  document.querySelectorAll('.avatar-icon').forEach((el) => {
+    if (typeof window.renderProfileAvatar === 'function') {
+      window.renderProfileAvatar(el, userProgress.avatar);
+    } else {
+      renderAvatar(el, userProgress.avatar);
+    }
+  });
 
   function renderAvatar(el, av) {
     if (!el) return;
@@ -125,9 +126,12 @@ function updateProfile() {
       el.style.fontSize = '0';
       return;
     }
-    const initial = (av && av.initial) ? av.initial : 'L';
-    const themeBg = typeof window.getAvatarThemeBg === 'function' ? window.getAvatarThemeBg(customization.theme, initial) : null;
-    const bg = themeBg || ((av && av.bg) ? av.bg : '#7c3aed');
+    const initial = av && av.initial ? av.initial : 'L';
+    const themeBg =
+      typeof window.getAvatarThemeBg === 'function'
+        ? window.getAvatarThemeBg(customization.theme, initial)
+        : null;
+    const bg = themeBg || (av && av.bg ? av.bg : '#7c3aed');
     const borderStyle = window.AVATAR_BORDER_STYLES?.[customization.border] || '';
     const borderCss = borderStyle ? `border:${borderStyle};` : '';
     const extraClass = customization.border === 'rainbow' ? ' avatar-border-rainbow' : '';
@@ -156,55 +160,11 @@ function updateLevelProgress() {
   if (progressLabelSection) progressLabelSection.textContent = Math.round(progressPercent) + '%';
 }
 
-function updateStreak() {
-  const today = new Date();
-  const lastActive = userProgress.lastActive ? new Date(userProgress.lastActive) : null;
-  if (lastActive) {
-    const diffDays = getDaysDifference(lastActive, today);
-    if (diffDays > 1) userProgress.streak = 1;
-    else if (diffDays === 0) {
-      /* already active today */
-    } else {
-      let daysMissed = diffDays > 0 ? diffDays - 1 : 0;
-      while (daysMissed > 0 && userProgress.freezes > 0) {
-        userProgress.freezes -= 1;
-        daysMissed -= 1;
-        userProgress.freezeHistory.push({
-          date: new Date(today.getTime() - (daysMissed + 1) * 24 * 60 * 60 * 1000).toISOString(),
-          reason: 'Missed day automatically frozen',
-        });
-      }
-      if (daysMissed > 0) userProgress.streak = 1;
-      else {
-        userProgress.streak += 1;
-        if (userProgress.streak > 0 && userProgress.streak % 7 === 0) {
-          userProgress.freezes += 1;
-          if (typeof showNotification === 'function') showNotification('Milestone reached! You earned a Streak Freeze!', 'success');
-        }
-      }
-    }
-  } else userProgress.streak = 1;
-  userProgress.lastActive = today.toISOString();
-}
-
-function getDaysDifference(date1, date2) {
-  const d1 = new Date(date1);
-  d1.setHours(0, 0, 0, 0);
-  const d2 = new Date(date2);
-  d2.setHours(0, 0, 0, 0);
-  return Math.round((d2 - d1) / (1000 * 60 * 60 * 24));
-}
-
 function formatDateKey(date) {
   const y = date.getFullYear();
   const m = String(date.getMonth() + 1).padStart(2, '0');
   const d = String(date.getDate()).padStart(2, '0');
   return `${y}-${m}-${d}`;
-}
-
-function parseDateKey(key) {
-  const [y, m, d] = key.split('-').map(Number);
-  return new Date(y, m - 1, d);
 }
 
 function backfillActivityData() {
@@ -322,165 +282,53 @@ window.saveUserData = async function saveUserData() {
   } catch (e) {
     void 0;
   }
+};
+
+function getStreakMultiplier(streakCount) {
+  const up = window.userProgress || userProgress;
+  const count = typeof streakCount === 'number' ? streakCount : up.streak || 0;
+  if (count >= 100) return 2.0;
+  if (count >= 30) return 1.5;
+  if (count >= 7) return 1.2;
+  return 1.0;
 }
 
-async function loadUserData() {
-  try {
-    if (window.StorageDB) {
-      await window.StorageDB.migrateFromLocalStorage();
-    }
-
-    let saved = null;
-    if (window.StorageDB && window.DB_STORES) {
-      saved = await window.StorageDB.get(window.DB_STORES.USER_DATA, 'algoInfinityVerse');
-    } else {
-      const lsSaved = localStorage.getItem('algoInfinityVerse');
-      if (lsSaved) saved = JSON.parse(lsSaved);
-    }
-
-    if (saved) {
-      Object.assign(userProgress, saved);
-      if (!userProgress.quizScores) userProgress.quizScores = {};
-      if (!userProgress.completedRoadmapSteps) userProgress.completedRoadmapSteps = [];
-      if (!userProgress.activityData) userProgress.activityData = {};
-      if (!userProgress.xpHistory) userProgress.xpHistory = [];
-      if (!userProgress.quizAttempts) userProgress.quizAttempts = [];
-      if (!userProgress.practiceEvents) userProgress.practiceEvents = [];
-      if (!userProgress.codingPersonality)
-        userProgress.codingPersonality = {
-          type: 'brute-force first',
-          bruteForceCount: 1,
-          slowAccurateCount: 0,
-          greedyCount: 0,
-          overOptimizerCount: 0,
-        };
-      if (!Array.isArray(userProgress.bookmarkCollections)) userProgress.bookmarkCollections = [];
-      if (!userProgress.bookmarkCollectionMeta) userProgress.bookmarkCollectionMeta = {};
-      if (!userProgress.mistakeDna)
-        userProgress.mistakeDna = {
-          offByOneCount: 0,
-          recursionBaseCaseCount: 0,
-          wrongLogicCount: 0,
-          recentLogs: [],
-        };
-      if (!userProgress.dailyGoals) userProgress.dailyGoals = {};
-      backfillActivityData();
-    } else {
-      Object.assign(userProgress, {
-        name: 'Learner',
-        avatar: { initial: 'L', bg: '#7c3aed' },
-        completedProblems: [],
-        completedDailyChallenges: [],
-        codingPersonality: {
-          type: 'brute-force first',
-          bruteForceCount: 1,
-          slowAccurateCount: 0,
-          greedyCount: 0,
-          overOptimizerCount: 0,
-        },
-        favoriteProblems: [],
-        bookmarkCollections: [],
-        bookmarkCollectionMeta: {},
-        recentProblems: [],
-        problemNotes: {},
-        xp: 0,
-        level: 1,
-        streak: 0,
-        freezes: 0,
-        freezeHistory: [],
-        badges: [],
-        completedRoadmapSteps: [],
-        lastActive: null,
-        quizScores: {},
-        bestQuizTimes: {},
-        dailyGoals: {},
-        activityData: {},
-        xpHistory: [],
-        quizAttempts: [],
-        practiceEvents: [],
-        mistakeDna: {
-          offByOneCount: 0,
-          recursionBaseCaseCount: 0,
-          wrongLogicCount: 0,
-          recentLogs: [],
-        },
-        revisionSchedule: {
-          arrays: { currentStage: 0, nextReviewDate: null, history: [] },
-          strings: { currentStage: 0, nextReviewDate: null, history: [] },
-          linkedlist: { currentStage: 0, nextReviewDate: null, history: [] },
-          trees: { currentStage: 0, nextReviewDate: null, history: [] },
-          graphs: { currentStage: 0, nextReviewDate: null, history: [] },
-          dp: { currentStage: 0, nextReviewDate: null, history: [] },
-        },
-      });
-      saveUserData();
-    }
-  } catch (e) {
-    console.error('Error loading user data:', e);
-    Object.assign(userProgress, {
-      name: 'Learner',
-      avatar: { initial: 'L', bg: '#7c3aed' },
-      completedProblems: [],
-      completedDailyChallenges: [],
-      codingPersonality: {
-        type: 'brute-force first',
-        bruteForceCount: 1,
-        slowAccurateCount: 0,
-        greedyCount: 0,
-        overOptimizerCount: 0,
-      },
-      favoriteProblems: [],
-      recentProblems: [],
-      problemNotes: {},
-      xp: 0,
-      level: 1,
-      streak: 0,
-      freezes: 0,
-      freezeHistory: [],
-      badges: [],
-      completedRoadmapSteps: [],
-      lastActive: null,
-      quizScores: {},
-      bestQuizTimes: {},
-      dailyGoals: {},
-      activityData: {},
-      xpHistory: [],
-      quizAttempts: [],
-      practiceEvents: [],
-      mistakeDna: {
-        offByOneCount: 0,
-        recursionBaseCaseCount: 0,
-        wrongLogicCount: 0,
-        recentLogs: [],
-      },
-      revisionSchedule: {
-        arrays: { currentStage: 0, nextReviewDate: null, history: [] },
-        strings: { currentStage: 0, nextReviewDate: null, history: [] },
-        linkedlist: { currentStage: 0, nextReviewDate: null, history: [] },
-        trees: { currentStage: 0, nextReviewDate: null, history: [] },
-        graphs: { currentStage: 0, nextReviewDate: null, history: [] },
-        dp: { currentStage: 0, nextReviewDate: null, history: [] },
-      },
-    });
-    saveUserData();
-  }
-  userProgress.loaded = true;
-  updateProfile();
-  if (typeof window.updateDashboard === 'function') window.updateDashboard();
-  getAuthenticatedSession().then((session) => {
-    if (session?.user?.name) {
-      userProgress.name = session.user.name;
-      updateProfile();
-      if (typeof window.updateDashboard === 'function') window.updateDashboard();
-      saveUserData();
-    } else {
-      userProgress.name = 'Learner';
-      updateProfile();
-      if (typeof window.updateDashboard === 'function') window.updateDashboard();
-      saveUserData();
-    }
-    if (typeof window !== 'undefined' && typeof window.initProfile === 'function') {
-      window.initProfile();
-    }
+function useStreakFreeze() {
+  const up = window.userProgress || userProgress;
+  if (!up.freezes || up.freezes <= 0) return false;
+  up.freezes -= 1;
+  if (!Array.isArray(up.freezeHistory)) up.freezeHistory = [];
+  up.freezeHistory.push({
+    date: new Date().toISOString(),
+    reason: 'Manual streak freeze protection activated',
   });
+  if (typeof saveUserData === 'function') saveUserData();
+  return true;
+}
+
+function logStudyTime(minutes) {
+  const up = window.userProgress || userProgress;
+  const mins = Math.max(1, Math.round(Number(minutes) || 0));
+  if (!mins) return;
+  if (!up.studyTime) {
+    up.studyTime = { todayMinutes: 0, totalMinutes: 0, sessionLogs: [], lastSessionDate: null };
+  }
+  const today = formatDateKey(new Date());
+  if (up.studyTime.lastSessionDate !== today) {
+    up.studyTime.todayMinutes = 0;
+    up.studyTime.lastSessionDate = today;
+  }
+  up.studyTime.todayMinutes += mins;
+  up.studyTime.totalMinutes += mins;
+  up.studyTime.sessionLogs.push({ date: new Date().toISOString(), minutes: mins });
+  recordDailyActivity(0); // sync activity log
+  if (typeof saveUserData === 'function') saveUserData();
+}
+
+if (typeof window !== 'undefined') {
+  window.updateProfile = updateProfile;
+  window.backfillActivityData = backfillActivityData;
+  window.getStreakMultiplier = getStreakMultiplier;
+  window.useStreakFreeze = useStreakFreeze;
+  window.logStudyTime = logStudyTime;
 }

@@ -362,8 +362,12 @@ function highlightFinalPath() {
 // ==========================================
 
 function initChart() {
-    const ctx = els.probChart.getContext('2d');
-    state.chartInstance = new Chart(ctx, {
+    if (!els.probChart) return;
+    var ctx = els.probChart.getContext('2d');
+
+    var createChart = function() {
+        if (typeof Chart === 'undefined') return;
+        state.chartInstance = new Chart(ctx, {
         type: 'bar',
         data: {
             labels: ['-', '-', '-', '-', '-'],
@@ -386,9 +390,17 @@ function initChart() {
             plugins: { legend: { display: false } }
         }
     });
+    };
+
+    if (typeof lazyVisualizer !== 'undefined') {
+        lazyVisualizer.lazyLoadChartJS(els.probChart, createChart);
+    } else {
+        createChart();
+    }
 }
 
 function updateChart(probs, algo) {
+    if (!state.chartInstance) return;
     const p_val = parseFloat(els.topP.value);
     let cumulative = 0;
     
