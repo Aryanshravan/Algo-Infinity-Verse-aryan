@@ -171,7 +171,7 @@ function toggleSimulation() {
     simState.state === TCP_STATES.SYN_SENT ||
     simState.state === TCP_STATES.SYN_RECEIVED
   ) {
-    alert('Please complete the 3-Way Handshake first!');
+    window.Toast.warning('Please complete the 3-Way Handshake first!');
     return;
   }
 
