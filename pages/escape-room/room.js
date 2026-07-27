@@ -133,7 +133,7 @@ socket.on('escape-puzzle-solved', (data) => {
 let timeLeft = 15 * 60; // 15 minutes
 const timerDisplay = document.getElementById('mission-timer');
 
-setInterval(() => {
+const missionTimerId = setInterval(() => {
     if (timeLeft <= 0) return;
     timeLeft--;
     const m = Math.floor(timeLeft / 60).toString().padStart(2, '0');
@@ -145,5 +145,6 @@ setInterval(() => {
         statusAlert.innerText = "SECURITY ALERT TRIPPED. YOU HAVE BEEN DISCONNECTED.";
         statusAlert.style.display = "block";
         codeEditor.disabled = true;
+        clearInterval(missionTimerId);
     }
 }, 1000);
