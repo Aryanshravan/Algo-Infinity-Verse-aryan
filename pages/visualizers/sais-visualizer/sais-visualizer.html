@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SA-IS Suffix Array Visualizer | Algo Infinity Verse</title>
+    <meta name="description" content="Discover the legendary SA-IS linear-time Suffix Array construction algorithm using Induced Sorting." />
+    <link rel="stylesheet" href="../../../styles.css" />
+    <link rel="stylesheet" href="sais-visualizer.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Poppins:wght@300;400;500;600;700&family=Fira+Code:wght@400;500;600&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <link rel="stylesheet" href="/modules/quick-notes/quick-notes.css" />
+  </head>
+  <body data-page="sais-visualizer">
+
+    <div id="navbar-placeholder"></div>
+
+    <button id="scrollTopBtn" aria-label="Scroll to top" class="scroll-top-btn">
+      <i class="fas fa-circle-chevron-up"></i>
+    </button>
+
+    <section class="sais-hero">
+      <div class="sais-hero-bg"><canvas id="saisHeroCanvas" class="sais-hero-canvas"></canvas></div>
+      <div class="sais-hero-inner">
+        <div class="sais-hero-eyebrow">🧬 String Processing · Induced Sorting</div>
+        <h1 class="sais-hero-title">SA-IS Algorithm</h1>
+        <p class="sais-hero-sub">The O(n) Algorithm That Replaced O(n log n) Sorting</p>
+        <p class="sais-hero-desc">Building a Suffix Array naively takes O(n² log n). Advanced doubling algorithms take O(n log n). But SA-IS achieves pure O(n) linear time without comparison sorting! By classifying characters into S-types and L-types, shrinking the problem down to just "LMS" substrings, and magically <strong>inducing</strong> the full sorted order in two sweeping passes, it revolutionized bioinformatics and genome indexing.</p>
+        <div class="sais-hero-actions">
+            <a href="#lab" class="btn btn-primary sais-btn-primary"><i class="fas fa-dna"></i> Start Induced Sort</a>
+            <a href="#theory" class="btn sais-btn-outline"><i class="fas fa-book-open"></i> Read Theory</a>
+        </div>
+      </div>
+    </section>
+
+    <section id="lab" class="section sais-section">
+      <div class="container">
+        
+        <div class="sais-control-card">
+          <div class="sais-toolbar">
+            <div class="sais-tool-group" style="flex-wrap: wrap;">
+              <span class="sais-label">Input String (with $ terminator)</span>
+              <select id="selString" class="sais-select">
+                <option value="mmiissiissiippii$">mmiissiissiippii$ (Classic)</option>
+                <option value="abracadabra$">abracadabra$</option>
+                <option value="cabbage$">cabbage$</option>
+                <option value="custom">Custom Input...</option>
+              </select>
+              <input type="text" id="customInput" class="sais-input" value="banana$" style="display:none; width: 150px;" maxlength="20" />
+            </div>
+            
+            <div class="sais-tool-group">
+              <span class="sais-label">Speed</span>
+              <input type="range" id="speedSlider" min="1" max="100" value="80" class="sais-slider">
+            </div>
+
+            <div class="sais-tool-group sais-actions">
+              <button id="btnStep" class="sais-btn sais-btn-ghost"><i class="fas fa-step-forward"></i> Step</button>
+              <button id="btnPlay" class="sais-btn sais-btn-primary"><i class="fas fa-play"></i> Auto Run</button>
+              <button id="btnReset" class="sais-btn sais-btn-ghost"><i class="fas fa-redo"></i> Reset</button>
+            </div>
+          </div>
+          
+          <div class="sais-stats-strip">
+              <div class="sais-stat-box">
+                  <div class="stat-lbl">String Length</div>
+                  <div class="stat-val" id="statLen">0</div>
+              </div>
+              <div class="sais-stat-box">
+                  <div class="stat-lbl">SA-IS Array Writes</div>
+                  <div class="stat-val highlight" id="statWrites">0</div>
+              </div>
+              <div class="sais-stat-box">
+                  <div class="stat-lbl">Theoretical O(N log N) Cmp</div>
+                  <div class="stat-val highlight-danger" id="statCmp">0</div>
+              </div>
+              <div class="sais-stat-box">
+                  <div class="stat-lbl">Recursion Depth</div>
+                  <div class="stat-val" id="statDepth">0</div>
+              </div>
+          </div>
+        </div>
+
+        <div id="saisStatus" class="sais-status-bar">
+            <div class="status-icon"><i class="fas fa-info-circle"></i></div>
+            <div class="status-text" id="statusMsg">Ready. Click Step or Auto Run to begin S/L classification.</div>
+        </div>
+
+        <div class="sais-main-layout">
+            
+            <div class="sais-panel" style="grid-column: 1 / -1;">
+                <div class="panel-header">
+                    <h3 class="panel-title"><i class="fas fa-spell-check"></i> S/L Type Classification & String Scan</h3>
+                    <div class="panel-badges">
+                        <span class="badge badge-ltype">L-Type</span>
+                        <span class="badge badge-stype">S-Type</span>
+                        <span class="badge badge-lms">LMS (*)</span>
+                    </div>
+                </div>
+                
+                <div class="string-wrapper">
+                    <div class="char-grid" id="stringGrid">
+                        <!-- Characters and types injected here -->
+                    </div>
+                </div>
+                
+                <div class="lms-substr-box" id="lmsBox" style="display:none;">
+                    <div class="lms-title">Identified LMS Substrings (Reduced Problem)</div>
+                    <div class="lms-list" id="lmsList"></div>
+                </div>
+            </div>
+
+            <div class="sais-panel" style="grid-column: 1 / span 2;">
+                <div class="panel-header">
+                    <h3 class="panel-title"><i class="fas fa-sort-amount-down"></i> Suffix Array & Induced Sorting Buckets</h3>
+                    <div class="panel-badges">
+                        <span class="badge badge-neutral" id="bucketStatus">Allocating Buckets</span>
+                    </div>
+                </div>
+                
+                <div class="sa-bucket-wrapper">
+                    <div class="bucket-headers" id="bucketHeaders"></div>
+                    <div class="sa-array" id="saArray">
+                        <!-- Suffix Array cells injected here -->
+                    </div>
+                </div>
+                
+                <div class="induced-anim-box" id="indAnimBox" style="display:none;">
+                    <i class="fas fa-arrow-right"></i> Inducing suffix from <span id="indSource" class="ind-hl">?</span> to <span id="indDest" class="ind-hl">?</span>
+                </div>
+            </div>
+            
+            <div class="sais-panel">
+                <div class="panel-header">
+                    <h3 class="panel-title"><i class="fas fa-terminal"></i> SA-IS Trace Log</h3>
+                </div>
+                <div class="log-console" id="saisLogConsole"></div>
+            </div>
+            
+        </div>
+        
+        <div id="theory" class="sais-learn-section">
+            <h2 class="learn-heading"><i class="fas fa-graduation-cap"></i> Theoretical Deep Dive</h2>
+            <div class="sais-learn-grid">
+              <div class="sais-learn-card">
+                <div class="learn-icon">🏷️</div>
+                <h3>S-Type & L-Type Classification</h3>
+                <p>In a single backward linear pass, every suffix is classified. A suffix is <strong>S-type</strong> if it is lexicographically smaller than the suffix starting at the next character, and <strong>L-type</strong> if it is larger. This determines whether it will sort toward the end (S) or the beginning (L) of its character bucket.</p>
+              </div>
+              <div class="sais-learn-card">
+                <div class="learn-icon">🌟</div>
+                <h3>LMS (Leftmost S) Positions</h3>
+                <p>An <strong>LMS position</strong> is any S-type character immediately preceded by an L-type character. The substrings between LMS positions form a tiny, reduced version of the original string. SA-IS magically proves that if we can sort just these LMS substrings, we can build the <em>entire</em> suffix array from them.</p>
+              </div>
+              <div class="sais-learn-card">
+                <div class="learn-icon">🧲</div>
+                <h3>The Magic of Induced Sorting</h3>
+                <p>Instead of comparing strings, SA-IS places the LMS suffixes into the array, and then uses a left-to-right pass to <strong>induce</strong> the positions of all L-type suffixes, followed by a right-to-left pass to induce all S-type suffixes. Because we scan in exactly the right order, everything perfectly slots into its sorted position in O(n) time.</p>
+              </div>
+            </div>
+        </div>
+        
+      </div>
+    </section>
+
+    <script src="../../../components/navbar/navbar.js"></script>
+    <script src="sais-visualizer.js"></script>
+  </body>
+</html>

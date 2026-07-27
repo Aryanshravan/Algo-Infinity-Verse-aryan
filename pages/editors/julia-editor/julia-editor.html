@@ -1,0 +1,219 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Julia Editor -> Live Code Editor | Algo Infinity Verse</title>
+    <link rel="stylesheet" href="/styles.css" />
+    <link rel="stylesheet" href="julia-editor.css" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Poppins:wght@300;400;500;600;700&family=Fira+Code:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+
+    <!-- Theme Initialization Script -->
+    <script>
+      (function () {
+        try {
+          var storedTheme = localStorage.getItem('theme');
+          var prefersLight = window.matchMedia('(prefers-color-scheme: light)').matches;
+          var theme = storedTheme || (prefersLight ? 'light' : 'dark');
+          if (theme === 'light') {
+            document.documentElement.classList.add('light-mode');
+          } else {
+            document.documentElement.classList.remove('light-mode');
+          }
+        } catch (e) {}
+      })();
+    </script>
+  </head>
+  <body data-page="julia-editor" data-no-loading>
+    <div id="loading-screen" class="hidden">
+      <div class="loader">
+        <div class="infinity-loader">∞</div>
+        <h2>Algo Infinity Verse</h2>
+        <div class="loading-bar"><div class="loading-progress"></div></div>
+      </div>
+    </div>
+
+    <button type="button" id="scrollTopBtn" class="scroll-top-btn" aria-label="Scroll to top">
+      <i class="fas fa-arrow-up"></i>
+    </button>
+
+    <div id="navbar-placeholder"></div>
+
+    <section class="hero je-hero">
+      <div class="hero-background">
+        <div class="stars"></div>
+        <div class="stars2"></div>
+        <div class="stars3"></div>
+      </div>
+      <div class="hero-content">
+        <h1 class="hero-title">
+          <span class="title-line">Write Julia.</span>
+          <span class="main-title je-gradient-text">Run It Instantly.</span>
+          <span class="subtitle">In-Browser Julia Editor</span>
+        </h1>
+        <p class="je-hero-desc">
+          Write Julia code and see variables, control flow, functions, and plots evaluated in real
+          time — no install required.
+        </p>
+        <div class="hero-buttons">
+          <a href="#editor" class="btn btn-primary je-cta-btn">
+            <i class="fas fa-play"></i> Open Editor
+          </a>
+        </div>
+        <div class="je-note">
+          <i class="fas fa-info-circle"></i>
+          Runs a defined subset of Julia entirely in your browser — see
+          <button type="button" id="jeOpenSupportBtn" class="je-link-btn">what's supported</button>.
+          Plots are rendered locally from your code's data.
+        </div>
+      </div>
+    </section>
+
+    <section id="editor" class="section je-section">
+      <div class="je-container">
+        <div class="je-toolbar">
+          <div class="je-toolbar-left">
+            <span class="je-label"><i class="fas fa-atom je-julia-icon"></i> Julia Editor</span>
+            <select id="jeExampleSelect" class="je-select" aria-label="Load example">
+              <option value="basics">Variables & Arithmetic</option>
+              <option value="control">Control Flow</option>
+              <option value="loops">Loops</option>
+              <option value="functions">Functions</option>
+              <option value="arrays">Arrays</option>
+              <option value="plot">Plot</option>
+              <option value="histogram">Histogram</option>
+            </select>
+          </div>
+          <div class="je-toolbar-right">
+            <button type="button" id="jeRunBtn" class="btn btn-primary je-run-btn">
+              <i class="fas fa-play"></i> Run
+            </button>
+            <button
+              type="button"
+              id="jeResetBtn"
+              class="je-icon-btn"
+              title="Reset to example"
+              aria-label="Reset to example"
+            >
+              <i class="fas fa-undo"></i>
+            </button>
+            <button
+              type="button"
+              id="jeCopyBtn"
+              class="je-icon-btn"
+              title="Copy code"
+              aria-label="Copy code to clipboard"
+            >
+              <i class="fas fa-copy"></i>
+            </button>
+            <button
+              type="button"
+              id="jeSaveBtn"
+              class="je-icon-btn"
+              title="Save to browser storage"
+              aria-label="Save code to browser storage"
+            >
+              <i class="fas fa-save"></i>
+            </button>
+          </div>
+        </div>
+
+        <div class="je-split">
+          <div class="je-editor-pane">
+            <div class="je-pane-header">
+              <span><i class="fas fa-code"></i> Editor</span>
+              <span class="je-lang-badge">Julia</span>
+            </div>
+            <div class="je-editor-wrap">
+              <div class="je-line-numbers" id="jeLineNumbers">1</div>
+              <textarea
+                id="jeEditor"
+                class="je-editor"
+                spellcheck="false"
+                autocomplete="off"
+                autocorrect="off"
+                autocapitalize="off"
+                aria-label="Julia code editor"
+              ></textarea>
+            </div>
+          </div>
+
+          <div class="je-output-pane">
+            <div class="je-pane-header">
+              <span><i class="fas fa-terminal"></i> Output</span>
+              <span id="jeStatusBadge" class="je-status-badge je-status-ready">Ready</span>
+            </div>
+            <div class="je-output-body" id="jeOutputBody">
+              <span class="je-output-placeholder">Run your code to see output here...</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div id="je-support-modal" class="je-modal" hidden>
+      <div class="je-modal-backdrop" id="jeModalBackdrop"></div>
+      <div class="je-modal-panel" role="dialog" aria-modal="true" aria-labelledby="jeModalTitle">
+        <div class="je-modal-header">
+          <h2 id="jeModalTitle">What this editor supports</h2>
+          <button type="button" id="jeCloseSupportBtn" class="je-icon-btn" aria-label="Close">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        <div class="je-modal-body">
+          <ul>
+            <li>Variables, arithmetic (<code>+ - * / % ^</code>), and comparisons</li>
+            <li>String interpolation: <code>"value is $(x)"</code></li>
+            <li>Control flow: <code>if</code> / <code>elseif</code> / <code>else</code></li>
+            <li>
+              <code>for</code> loops over arrays and ranges (<code>1:10</code>, <code>1:2:10</code>)
+            </li>
+            <li><code>while</code> loops, plus <code>break</code> and <code>continue</code></li>
+            <li>
+              Functions, including recursion, closures, and short form (<code>f(x) = x^2</code>)
+            </li>
+            <li>Arrays: literals, 1-based indexing, <code>push!</code>, <code>pop!</code></li>
+            <li>
+              Built-ins:
+              <code
+                >println, print, length, sum, mean, maximum, minimum, abs, sqrt, round, floor, ceil,
+                collect, reverse, sort, zeros, ones, string, typeof, rand</code
+              >
+            </li>
+            <li>
+              <code>plot()</code>, <code>scatter()</code>, <code>bar()</code>,
+              <code>histogram()</code> rendered on canvas from your actual data
+            </li>
+          </ul>
+          <p class="je-modal-note">
+            Not supported: <code>Pkg.add</code> / package installs, anonymous/lambda functions,
+            multiple dispatch, macros, real <code>Plots.jl</code> rendering, or most of the Julia
+            standard library. This runs a small interpreter built for this editor, not a full Julia
+            engine — Julia has no in-browser runtime, and the backend's live execution path doesn't
+            support Julia.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div id="footer-placeholder"></div>
+
+    <script src="/auth.js"></script>
+    <script src="/bootstrap-legacy.js"></script>
+    <script src="/script.js"></script>
+    <script type="module" src="/dist/legacy-bundle.mjs"></script>
+    <script src="./julia-editor.js"></script>
+
+    <script>
+      loadPartial('navbar-placeholder', '/partials/navbar.html');
+      loadPartial('footer-placeholder', '/partials/footer.html');
+    </script>
+  </body>
+</html>

@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>BWT + MTF + RLE Visualizer | Algo Infinity Verse</title>
+    <meta name="description" content="Explore the full bzip2 compression pipeline. See how the Burrows-Wheeler Transform enables massive compression when combined with MTF and RLE." />
+    <link rel="stylesheet" href="../../../styles.css" />
+    <link rel="stylesheet" href="bwt-mtf-rle-visualizer.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Poppins:wght@300;400;500;600;700&family=Fira+Code:wght@400;500;600&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <link rel="stylesheet" href="/modules/quick-notes/quick-notes.css" />
+  </head>
+  <body data-page="bwt-mtf-rle-visualizer">
+
+    <div id="navbar-placeholder"></div>
+
+    <button id="scrollTopBtn" aria-label="Scroll to top" class="scroll-top-btn">
+      <i class="fas fa-circle-chevron-up"></i>
+    </button>
+
+    <section class="bwt-hero">
+      <div class="bwt-hero-bg"><canvas id="bwtHeroCanvas" class="bwt-hero-canvas"></canvas></div>
+      <div class="bwt-hero-inner">
+        <div class="bwt-hero-eyebrow">🗜️ Data Compression · The bzip2 Pipeline</div>
+        <h1 class="bwt-hero-title">Burrows-Wheeler Transform</h1>
+        <p class="bwt-hero-sub">BWT + Move-to-Front + Run-Length Encoding</p>
+        <p class="bwt-hero-desc">The Burrows-Wheeler Transform doesn't compress data—it <em>rearranges</em> it. By sorting all cyclic rotations of a string, it clusters identical characters together. When this perfectly primed string is passed through a Move-to-Front (MTF) encoder, it produces massive runs of zeros. Finally, a simple Run-Length Encoding (RLE) squashes those zeros, resulting in the legendary compression powering bzip2.</p>
+        <div class="bwt-hero-actions">
+            <a href="#lab" class="btn btn-primary bwt-btn-primary"><i class="fas fa-compress-arrows-alt"></i> Compress Data</a>
+            <a href="#theory" class="btn bwt-btn-outline"><i class="fas fa-book-open"></i> Read Theory</a>
+        </div>
+      </div>
+    </section>
+
+    <section id="lab" class="section bwt-section">
+      <div class="container">
+        
+        <div class="bwt-control-card">
+          <div class="bwt-toolbar">
+            <div class="bwt-tool-group" style="flex-wrap: wrap;">
+              <label class="bwt-label" for="selString">Input String</label>
+              <select id="selString" class="bwt-select">
+                <option value="banana^">banana^</option>
+                <option value="SIX.MIXED.PIXIES.SIFT.SIXTY.PIXIE.DUST.BOXES^">SIX.MIXED.PIXIES...^</option>
+                <option value="abracadabra^">abracadabra^</option>
+                <option value="custom">Custom Input...</option>
+              </select>
+              <input type="text" id="customInput" class="bwt-input" aria-label="Custom input string" value="hello^" style="display:none; width: 150px;" maxlength="40" />
+            </div>
+            
+            <div class="bwt-tool-group">
+              <label class="bwt-label" for="speedSlider">Speed</label>
+              <input type="range" id="speedSlider" min="1" max="100" value="70" class="bwt-slider">
+            </div>
+
+            <div class="bwt-tool-group bwt-actions">
+              <button id="btnStep" class="bwt-btn bwt-btn-ghost"><i class="fas fa-step-forward"></i> Step</button>
+              <button id="btnPlay" class="bwt-btn bwt-btn-primary"><i class="fas fa-play"></i> Auto Run</button>
+              <button id="btnReset" class="bwt-btn bwt-btn-ghost"><i class="fas fa-redo"></i> Reset</button>
+            </div>
+          </div>
+          
+          <div class="bwt-stats-strip">
+              <div class="bwt-stat-box">
+                  <div class="stat-lbl">Original Size</div>
+                  <div class="stat-val" id="statOrig">0 chars</div>
+              </div>
+              <div class="bwt-stat-box">
+                  <div class="stat-lbl">Compressed Size</div>
+                  <div class="stat-val highlight" id="statComp">0 tokens</div>
+              </div>
+              <div class="bwt-stat-box">
+                  <div class="stat-lbl">Compression Ratio</div>
+                  <div class="stat-val highlight-danger" id="statRatio">1.00x</div>
+              </div>
+          </div>
+        </div>
+
+        <div id="bwtStatus" class="bwt-status-bar">
+            <div class="status-icon"><i class="fas fa-info-circle"></i></div>
+            <div class="status-text" id="statusMsg">Ready. Let's begin the compression pipeline.</div>
+        </div>
+
+        <div class="bwt-main-layout">
+            
+            <div class="bwt-panel" style="grid-column: 1 / -1;">
+                <div class="panel-header">
+                    <h3 class="panel-title"><i class="fas fa-sync-alt"></i> Stage 1: Burrows-Wheeler Transform (BWT)</h3>
+                    <div class="panel-badges">
+                        <span class="badge badge-bwt">Rotation Matrix</span>
+                    </div>
+                </div>
+                <div class="matrix-wrapper">
+                    <div class="bwt-matrix" id="bwtMatrix"></div>
+                </div>
+                <div class="bwt-result-bar">
+                    <div class="res-label">BWT Output (L Column):</div>
+                    <div class="res-string" id="bwtOutputStr"></div>
+                </div>
+            </div>
+
+            <div class="bwt-panel">
+                <div class="panel-header">
+                    <h3 class="panel-title"><i class="fas fa-list-ol"></i> Stage 2: Move-to-Front (MTF)</h3>
+                </div>
+                <div class="mtf-layout">
+                    <div class="mtf-alphabet-box">
+                        <div class="mtf-title">Alphabet List (Index 0 is top)</div>
+                        <div class="mtf-list" id="mtfList"></div>
+                    </div>
+                    <div class="mtf-stream-box">
+                        <div class="mtf-title">MTF Encoding Output</div>
+                        <div class="mtf-stream" id="mtfOutput"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bwt-panel">
+                <div class="panel-header">
+                    <h3 class="panel-title"><i class="fas fa-compress"></i> Stage 3: Run-Length Encoding (RLE)</h3>
+                </div>
+                <div class="rle-box">
+                    <div class="rle-desc">Squashing identical numbers into (value, count) pairs. Note how MTF produces massive runs of zeros!</div>
+                    <div class="rle-stream" id="rleOutput"></div>
+                </div>
+            </div>
+            
+            <div class="bwt-panel" style="grid-column: 1 / -1;">
+                <div class="panel-header">
+                    <h3 class="panel-title"><i class="fas fa-terminal"></i> Pipeline Trace Log</h3>
+                </div>
+                <div class="log-console" id="bwtLogConsole"></div>
+            </div>
+            
+        </div>
+        
+        <div id="theory" class="bwt-learn-section">
+            <h2 class="learn-heading"><i class="fas fa-graduation-cap"></i> Theoretical Deep Dive</h2>
+            <div class="bwt-learn-grid">
+              <div class="bwt-learn-card">
+                <div class="learn-icon">🌪️</div>
+                <h3>Why BWT Clusters Data</h3>
+                <p>The BWT sorts all cyclic rotations of a string lexicographically. Because english text has predictable patterns (e.g., 'T' often precedes 'H', 'E' often precedes 'R'), sorting by the prefix naturally groups similar succeeding characters together in the last column. This turns a high-entropy string into a low-entropy string with lots of repeated characters.</p>
+              </div>
+              <div class="bwt-learn-card">
+                <div class="learn-icon">🎯</div>
+                <h3>Move-to-Front's Magic</h3>
+                <p>MTF takes a string with clustered characters and turns it into a sequence of small numbers. Whenever it outputs a character, it moves that character to the front of its alphabet list (index 0). If the same character appears 5 times in a row, MTF outputs <code>index, 0, 0, 0, 0</code>. This perfectly converts character runs into runs of zeros.</p>
+              </div>
+              <div class="bwt-learn-card">
+                <div class="learn-icon">🗜️</div>
+                <h3>Run-Length Encoding</h3>
+                <p>By itself, RLE on english text is terrible because characters rarely repeat. But after BWT and MTF, our data is now primarily long strings of zeros! RLE squashes these zeros into tiny `(0, count)` pairs, resulting in massive final compression ratios. This exact three-step pipeline is the heart of the famous bzip2 compressor.</p>
+              </div>
+            </div>
+        </div>
+        
+      </div>
+    </section>
+
+    <script src="../../../components/navbar/navbar.js"></script>
+    <script src="bwt-mtf-rle-visualizer.js"></script>
+  </body>
+</html>

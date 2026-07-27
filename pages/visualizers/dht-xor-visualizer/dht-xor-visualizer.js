@@ -57,19 +57,46 @@
                 this.bigId = hexToBigInt(this.id);
                 // 160 buckets, each holds up to K nodes
                 this.buckets = Array.from({ length: BIT_LENGTH }, () => []);
+                this.isDead = false;
             }
 
             // Insert a peer into the routing table
-            addPeer(peerNode) {
+            addPeer(peerNode, isBootstrapping = false) {
                 if (peerNode.id === this.id) return;
                 const idx = getBucketIndex(this.id, peerNode.id);
                 const bucket = this.buckets[idx];
                 
-                // If not already in bucket and bucket not full
-                if (!bucket.find(n => n.id === peerNode.id)) {
+                const existingIdx = bucket.findIndex(n => n.id === peerNode.id);
+                
+                if (existingIdx === -1) {
+                    // Not in bucket
                     if (bucket.length < K) {
                         bucket.push(peerNode);
+                    } else if (!isBootstrapping) {
+                        // Bucket is full, ping the LRU node (index 0)
+                        const lruNode = bucket[0];
+                        // Simulate ping (50% failure rate for demo if not already dead)
+                        const failed = lruNode.isDead || Math.random() < 0.5;
+                        
+                        if (failed) {
+                            lruNode.isDead = true;
+                            logSys(`Node [${shortId(this.id)}] bucket [${idx}] full. Pinging LRU [${shortId(lruNode.id)}]... FAILED. Evicting.`, 'error');
+                            bucket.shift(); // Evict LRU
+                            bucket.push(peerNode); // Insert new node at tail
+                            
+                            // Visual update for dead node
+                            const circle = d3.select(`#node-${lruNode.id} circle`);
+                            if (circle) circle.attr("fill", "#e11d48");
+                        } else {
+                            logSys(`Node [${shortId(this.id)}] bucket [${idx}] full. Pinging LRU [${shortId(lruNode.id)}]... ALIVE. Moving to tail.`, 'sys');
+                            bucket.shift();
+                            bucket.push(lruNode); // Move LRU to tail (most recently seen)
+                        }
                     }
+                } else {
+                    // Already in bucket, move to tail (MRU)
+                    const [n] = bucket.splice(existingIdx, 1);
+                    bucket.push(n);
                 }
             }
 
@@ -173,7 +200,7 @@
                 // In a real DHT, this happens progressively via bootstrapping
                 for (let i = 0; i < NUM_NODES; i++) {
                     for (let j = 0; j < NUM_NODES; j++) {
-                        if (i !== j) nodesArray[i].addPeer(nodesArray[j]);
+                        if (i !== j) nodesArray[i].addPeer(nodesArray[j], true);
                     }
                 }
 

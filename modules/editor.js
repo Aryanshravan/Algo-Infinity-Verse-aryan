@@ -36,12 +36,7 @@ function getDefaultCode(lang, problem) {
       }).join(', ')
     : 'params';
 
-  let docComment = '';
-  if (problem.guide) {
-    const lines = problem.guide.split('\n');
-    const prefix = lang === 'python' ? '# ' : '// ';
-    docComment = lines.map(l => prefix + l).join('\n') + '\n';
-  }
+  const docComment = '';
 
   const templates = {
     javascript: docComment + "function " + fnName + "(" + (params.join(', ') || 'params') + ") {\n    \n}",
@@ -58,12 +53,7 @@ function getClassTemplate(lang, problem) {
   const fnName = problem.functionName || "LRUCache";
   const params = problem.params || [];
 
-  let docComment = '';
-  if (problem.guide) {
-    const lines = problem.guide.split('\n');
-    const prefix = lang === 'python' ? '# ' : '// ';
-    docComment = lines.map(l => prefix + l).join('\n') + '\n';
-  }
+  const docComment = '';
 
   const paramStr = params.map((p, i) => {
     const t = mapType('int', lang);
@@ -687,14 +677,15 @@ function openQuizEditor(problem) {
 }
 
 function closeQuizEditor() {
+  if (currentProblem) {
+    clearEditorDraft(currentProblem.id);
+  }
   const el = document.getElementById("quizEditorModal");
   if (el) {
     el.classList.remove("active");
-    // Clean up hidden class added by initModalManager's closeModal overlay handler
     el.classList.remove("hidden");
   }
   currentProblem = null;
-  // Ensure body scroll is always restored, regardless of MutationObserver timing
   document.body.classList.remove("modal-open");
 }
 
@@ -832,7 +823,7 @@ function initializeQuizEditor() {
     }
   });
   wireQuizButtons();
-  if (languageSelect) languageSelect.addEventListener('change', () => { const editor = document.getElementById('codeEditor'); if (editor && currentProblem) { editor.value = getDefaultCode(languageSelect.value, currentProblem); editor.scrollTop = 0; editor.scrollLeft = 0; } syncEditorState(); updateEditorDisplayMode(); });
+  if (languageSelect) languageSelect.addEventListener('change', () => { const editor = document.getElementById('codeEditor'); if (editor && currentProblem) { editor.value = getDefaultCode(languageSelect.value, currentProblem); clearEditorDraft(currentProblem.id); editor.scrollTop = 0; editor.scrollLeft = 0; } syncEditorState(); updateEditorDisplayMode(); });
   syncEditorState();
   initEditorZoom(editor);
 }

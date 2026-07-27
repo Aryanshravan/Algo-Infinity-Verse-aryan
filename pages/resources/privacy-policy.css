@@ -1,0 +1,443 @@
+/* ================================================================
+   Privacy Policy — Dedicated Stylesheet
+   Subtle pastel palette · Light/dark mode · Print-friendly
+   ================================================================ */
+
+/* ── Override global body background to remove purple tint ── */
+body[data-page='privacy-policy'] {
+  background: #0c0e14 !important;
+}
+
+html.light-mode body[data-page='privacy-policy'] {
+  background: #f5f4f1 !important;
+}
+
+/* ── Scoped Design Tokens ─────────────────────────────── */
+body[data-page='privacy-policy'] {
+  /* Dark mode (default) */
+  --pp-accent: #c9956b;
+  --pp-accent-rgb: 201, 149, 107;
+  --pp-accent-soft: #d4a97e;
+  --pp-sage: #8aad9e;
+  --pp-sage-rgb: 138, 173, 158;
+  --pp-sage-soft: #a3c4b6;
+  --pp-card-bg: rgba(255, 255, 255, 0.04);
+  --pp-card-border: rgba(255, 255, 255, 0.08);
+  --pp-card-hover-border: rgba(var(--pp-accent-rgb), 0.25);
+  --pp-heading: #e8d5c4;
+  --pp-body-text: #c8c8d0;
+  --pp-muted: #8888a0;
+  --pp-divider: rgba(255, 255, 255, 0.07);
+  --pp-number-bg: rgba(var(--pp-accent-rgb), 0.15);
+  --pp-number-border: rgba(var(--pp-accent-rgb), 0.3);
+  --pp-link: var(--pp-accent-soft);
+  --pp-link-hover: #e0c0a0;
+  --pp-shadow: 0 4px 24px rgba(0, 0, 0, 0.2);
+}
+
+html.light-mode body[data-page='privacy-policy'] {
+  --pp-accent: #9b6d4a;
+  --pp-accent-rgb: 155, 109, 74;
+  --pp-accent-soft: #b0845e;
+  --pp-sage: #6d9484;
+  --pp-sage-rgb: 109, 148, 132;
+  --pp-sage-soft: #82a99a;
+  --pp-card-bg: #fdfcfa;
+  --pp-card-border: rgba(0, 0, 0, 0.07);
+  --pp-card-hover-border: rgba(var(--pp-accent-rgb), 0.3);
+  --pp-heading: #5a4232;
+  --pp-body-text: #4a4a56;
+  --pp-muted: #7a7a8a;
+  --pp-divider: rgba(0, 0, 0, 0.07);
+  --pp-number-bg: rgba(var(--pp-accent-rgb), 0.1);
+  --pp-number-border: rgba(var(--pp-accent-rgb), 0.25);
+  --pp-link: var(--pp-accent-soft);
+  --pp-link-hover: #7a5535;
+  --pp-shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
+}
+
+/* ── Hero ──────────────────────────────────────────────── */
+body[data-page='privacy-policy'] .pp-hero {
+  min-height: 36vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 7rem 1.5rem 3rem;
+}
+
+body[data-page='privacy-policy'] .pp-hero-inner {
+  max-width: 680px;
+}
+
+body[data-page='privacy-policy'] .pp-hero-title {
+  font-family: 'Orbitron', sans-serif;
+  font-size: clamp(2rem, 5vw, 3rem);
+  font-weight: 900;
+  color: var(--pp-heading);
+  line-height: 1.2;
+  margin-bottom: 1rem;
+}
+
+body[data-page='privacy-policy'] .pp-hero-subtitle {
+  font-size: 1rem;
+  color: var(--pp-muted);
+  line-height: 1.7;
+}
+
+/* ── Article wrapper ───────────────────────────────────── */
+body[data-page='privacy-policy'] .pp-article {
+  max-width: 820px;
+  margin: 0 auto;
+  padding: 0 1.5rem 5rem;
+}
+
+body[data-page='privacy-policy'] .pp-card {
+  background: var(--pp-card-bg);
+  border: 1px solid var(--pp-card-border);
+  border-radius: 20px;
+  padding: 2.5rem;
+  box-shadow: var(--pp-shadow);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  transition: border-color 0.3s ease;
+}
+
+body[data-page='privacy-policy'] .pp-card:hover {
+  border-color: var(--pp-card-hover-border);
+}
+
+/* ── Table of Contents ─────────────────────────────────── */
+body[data-page='privacy-policy'] .pp-toc {
+  margin-bottom: 2rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid var(--pp-divider);
+}
+
+body[data-page='privacy-policy'] .pp-toc-heading {
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--pp-muted);
+  margin-bottom: 0.75rem;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+body[data-page='privacy-policy'] .pp-toc-heading i {
+  font-size: 0.85rem;
+}
+
+body[data-page='privacy-policy'] .pp-toc-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.35rem 1.5rem;
+}
+
+body[data-page='privacy-policy'] .pp-toc-list a {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.88rem;
+  color: var(--pp-body-text);
+  text-decoration: none;
+  padding: 0.3rem 0;
+  transition: color 0.2s ease;
+}
+
+body[data-page='privacy-policy'] .pp-toc-list a:hover {
+  color: var(--pp-link-hover);
+}
+
+body[data-page='privacy-policy'] .pp-toc-list a::before {
+  content: '';
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--pp-accent);
+  opacity: 0.5;
+  flex-shrink: 0;
+}
+
+/* ── Sections ──────────────────────────────────────────── */
+body[data-page='privacy-policy'] .pp-section {
+  margin-bottom: 2rem;
+}
+
+body[data-page='privacy-policy'] .pp-section:last-child {
+  margin-bottom: 0;
+}
+
+body[data-page='privacy-policy'] .pp-section-heading {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  margin-bottom: 0.75rem;
+}
+
+body[data-page='privacy-policy'] .pp-section-num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  background: var(--pp-number-bg);
+  border: 1px solid var(--pp-number-border);
+  font-size: 0.8rem;
+  font-weight: 800;
+  color: var(--pp-accent);
+  flex-shrink: 0;
+}
+
+body[data-page='privacy-policy'] .pp-section-heading h2 {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--pp-heading);
+  margin: 0;
+}
+
+body[data-page='privacy-policy'] .pp-section-text {
+  font-size: 0.93rem;
+  color: var(--pp-body-text);
+  line-height: 1.8;
+  margin-bottom: 0.5rem;
+}
+
+body[data-page='privacy-policy'] .pp-section-text:last-child {
+  margin-bottom: 0;
+}
+
+/* ── Lists ─────────────────────────────────────────────── */
+body[data-page='privacy-policy'] .pp-list {
+  list-style: none;
+  padding: 0;
+  margin: 0.5rem 0 0;
+}
+
+body[data-page='privacy-policy'] .pp-list li {
+  position: relative;
+  padding: 0.4rem 0 0.4rem 1.25rem;
+  font-size: 0.92rem;
+  color: var(--pp-body-text);
+  line-height: 1.7;
+}
+
+body[data-page='privacy-policy'] .pp-list li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0.85rem;
+  width: 6px;
+  height: 6px;
+  border-radius: 2px;
+  background: var(--pp-sage);
+  transform: rotate(45deg);
+  opacity: 0.7;
+}
+
+/* ── Strong emphasis ───────────────────────────────────── */
+body[data-page='privacy-policy'] .pp-card strong {
+  color: var(--pp-accent-soft);
+  font-weight: 600;
+}
+
+/* ── Contact section ───────────────────────────────────── */
+body[data-page='privacy-policy'] .pp-contact {
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--pp-divider);
+  text-align: center;
+}
+
+body[data-page='privacy-policy'] .pp-section-heading--center {
+  justify-content: center;
+}
+
+body[data-page='privacy-policy'] .pp-contact-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: var(--pp-number-bg);
+  border: 1px solid var(--pp-number-border);
+  font-size: 1.1rem;
+  color: var(--pp-accent);
+  margin-bottom: 0.75rem;
+}
+
+body[data-page='privacy-policy'] .pp-contact-text {
+  font-size: 0.92rem;
+  color: var(--pp-body-text);
+  line-height: 1.7;
+}
+
+body[data-page='privacy-policy'] .pp-contact-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-top: 0.5rem;
+  font-size: 0.92rem;
+  color: var(--pp-link);
+  text-decoration: none;
+  font-weight: 600;
+  transition: color 0.2s ease;
+}
+
+body[data-page='privacy-policy'] .pp-contact-link:hover {
+  color: var(--pp-link-hover);
+}
+
+/* ── Last Updated ──────────────────────────────────────── */
+body[data-page='privacy-policy'] .pp-updated {
+  text-align: center;
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--pp-divider);
+  font-size: 0.8rem;
+  color: var(--pp-muted);
+}
+
+/* ── Responsive ────────────────────────────────────────── */
+@media (max-width: 768px) {
+  body[data-page='privacy-policy'] .pp-hero {
+    min-height: 30vh;
+    padding: 6rem 1.25rem 2rem;
+  }
+
+  body[data-page='privacy-policy'] .pp-article {
+    padding: 0 1rem 3.5rem;
+  }
+
+  body[data-page='privacy-policy'] .pp-card {
+    padding: 1.5rem;
+    border-radius: 16px;
+  }
+
+  body[data-page='privacy-policy'] .pp-toc-list {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  body[data-page='privacy-policy'] .pp-hero-title {
+    font-size: 1.75rem;
+  }
+
+  body[data-page='privacy-policy'] .pp-card {
+    padding: 1.25rem;
+  }
+
+  body[data-page='privacy-policy'] .pp-section-heading h2 {
+    font-size: 1rem;
+  }
+}
+
+/* ── Print Styles ──────────────────────────────────────── */
+@media print {
+  *,
+  *::before,
+  *::after {
+    background: transparent !important;
+    color: #1a1a1a !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
+    border-color: #ccc !important;
+  }
+
+  body[data-page='privacy-policy'] .pp-hero {
+    min-height: auto;
+    padding: 1.5rem 0 1rem;
+  }
+
+  body[data-page='privacy-policy'] .pp-hero-title {
+    font-size: 1.8rem;
+    color: #1a1a1a !important;
+  }
+
+  body[data-page='privacy-policy'] .pp-hero-subtitle {
+    color: #555 !important;
+  }
+
+  body[data-page='privacy-policy'] .pp-article {
+    max-width: 100%;
+    padding: 0;
+  }
+
+  body[data-page='privacy-policy'] .pp-card {
+    border: none;
+    border-radius: 0;
+    padding: 0;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+
+  body[data-page='privacy-policy'] .pp-toc {
+    border-bottom-color: #ccc !important;
+  }
+
+  body[data-page='privacy-policy'] .pp-toc-list a {
+    color: #333 !important;
+  }
+
+  body[data-page='privacy-policy'] .pp-section {
+    page-break-inside: avoid;
+  }
+
+  body[data-page='privacy-policy'] .pp-section-heading {
+    page-break-after: avoid;
+  }
+
+  body[data-page='privacy-policy'] .pp-contact {
+    border-top-color: #ccc !important;
+  }
+
+  body[data-page='privacy-policy'] .pp-updated {
+    border-top-color: #ccc !important;
+    color: #555 !important;
+  }
+
+  body[data-page='privacy-policy'] #navbar-placeholder,
+  body[data-page='privacy-policy'] .scroll-top-btn,
+  body[data-page='privacy-policy'] .pp-contact-icon {
+    display: none !important;
+  }
+
+  body[data-page='privacy-policy'] .pp-section-text,
+  body[data-page='privacy-policy'] .pp-list li,
+  body[data-page='privacy-policy'] .pp-contact-text {
+    color: #333 !important;
+  }
+
+  body[data-page='privacy-policy'] .pp-section-heading h2 {
+    color: #1a1a1a !important;
+  }
+
+  body[data-page='privacy-policy'] .pp-section-num {
+    border-color: #ccc !important;
+    color: #555 !important;
+  }
+
+  body[data-page='privacy-policy'] .pp-contact-link {
+    color: #333 !important;
+    text-decoration: underline !important;
+  }
+
+  body[data-page='privacy-policy'] a[href]::after {
+    content: " (" attr(href) ")";
+    font-size: 0.8em;
+    font-weight: normal;
+    color: #555 !important;
+  }
+
+  body[data-page='privacy-policy'] .pp-contact-link::after {
+    content: none;
+  }
+}

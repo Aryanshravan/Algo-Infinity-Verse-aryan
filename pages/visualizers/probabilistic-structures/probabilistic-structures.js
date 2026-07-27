@@ -185,14 +185,18 @@ function resetEngine() {
 
   initGrids();
 
-  state.cardChart.data.labels = [];
-  state.cardChart.data.datasets[0].data = [];
-  state.cardChart.data.datasets[1].data = [];
-  state.cardChart.update();
+  if (state.cardChart) {
+    state.cardChart.data.labels = [];
+    state.cardChart.data.datasets[0].data = [];
+    state.cardChart.data.datasets[1].data = [];
+    state.cardChart.update();
+  }
 
-  state.fpChart.data.labels = [];
-  state.fpChart.data.datasets[0].data = [];
-  state.fpChart.update();
+  if (state.fpChart) {
+    state.fpChart.data.labels = [];
+    state.fpChart.data.datasets[0].data = [];
+    state.fpChart.update();
+  }
 
   updateTelemetryUI();
 }
@@ -452,8 +456,16 @@ function formatBytes(bytes) {
 // 6. CHART.JS VISUALIZATIONS
 // ==========================================
 function initCharts() {
-  const ctxCard = document.getElementById('cardinalityChart').getContext('2d');
-  state.cardChart = new Chart(ctxCard, {
+  var cardCanvas = document.getElementById('cardinalityChart');
+  var fpCanvas = document.getElementById('fpChart');
+  if (!cardCanvas || !fpCanvas) return;
+
+  function createCharts() {
+    if (typeof Chart === 'undefined') return;
+    var ctxCard = cardCanvas.getContext('2d');
+    var ctxFP = fpCanvas.getContext('2d');
+
+    state.cardChart = new Chart(ctxCard, {
     type: 'line',
     data: {
       labels: [],
@@ -491,8 +503,7 @@ function initCharts() {
     },
   });
 
-  const ctxFP = document.getElementById('fpChart').getContext('2d');
-  state.fpChart = new Chart(ctxFP, {
+    state.fpChart = new Chart(ctxFP, {
     type: 'line',
     data: {
       labels: [],
@@ -500,7 +511,7 @@ function initCharts() {
         {
           label: 'False Positives',
           data: [],
-          borderColor: '#f59e0b', // prob-bloom
+          borderColor: '#f59e0b',
           backgroundColor: 'rgba(245, 158, 11, 0.1)',
           borderWidth: 2,
           fill: true,
@@ -520,6 +531,13 @@ function initCharts() {
       plugins: { legend: { display: false } },
     },
   });
+  }
+
+  if (typeof lazyVisualizer !== 'undefined') {
+    lazyVisualizer.lazyLoadChartJS(fpCanvas, createCharts);
+  } else {
+    createCharts();
+  }
 }
 
 function updateCharts() {

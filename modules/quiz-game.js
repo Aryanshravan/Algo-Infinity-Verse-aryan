@@ -12,7 +12,7 @@ function shuffleArray(array) {
 
 function getQuizTopicKey(topic) {
   const normalize = s => String(s).trim().toLowerCase().replace(/\s+/g, " ");
-  const map = { arrays: "arrays", strings: "strings", "linked list": "linkedlist", linkedlist: "linkedlist", trees: "trees", graphs: "graphs", "dynamic programming": "dp", dp: "dp", heaps: "heaps" };
+  const map = { arrays: "arrays", strings: "strings", "linked list": "linkedlist", linkedlist: "linkedlist", trees: "trees", graphs: "graphs", "dynamic programming": "dp", dp: "dp", heaps: "heaps", stacks: "stack", stack: "stack", queues: "queue", queue: "queue" };
   if (typeof topic === "string") return map[normalize(topic)] || null;
   const name = normalize(topic.name);
   return map[name] || null;

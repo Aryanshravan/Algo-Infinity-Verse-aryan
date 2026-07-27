@@ -117,7 +117,7 @@ function setNodeStatus(prefix, id, status, isActive) {
 function createWorkerBlob() {
     const workerCode = `
         self.onmessage = function(e) {
-            const { type, payload, id } = e.data;
+            const { type, payload, id, isStraggler } = e.data;
             
             if (type === 'map') {
                 // Map Phase: Tokenize and emit (Key, 1) pairs
@@ -129,7 +129,9 @@ function createWorkerBlob() {
                 }
                 
                 // Simulate I/O or heavy computation processing delay based on chunk size
-                const delay = Math.min(1500, words.length * 0.1); 
+                let delay = Math.min(1500, words.length * 0.1); 
+                if (isStraggler) delay += 4000; // Inject 4s lag
+                
                 let start = Date.now(); while(Date.now() - start < delay) {}
                 
                 self.postMessage({ type: 'map_done', id, result: localCounts });
@@ -142,7 +144,9 @@ function createWorkerBlob() {
                 }
                 
                 // Simulate reduction delay
-                const delay = Math.min(1000, Object.keys(payload).length * 10);
+                let delay = Math.min(1000, Object.keys(payload).length * 10);
+                if (isStraggler) delay += 4000; // Inject 4s lag
+                
                 let start = Date.now(); while(Date.now() - start < delay) {}
                 
                 self.postMessage({ type: 'reduce_done', id, result: finalCounts });
@@ -279,23 +283,63 @@ function runMapPhase(chunks, numWorkers) {
     return new Promise((resolve) => {
         let completed = 0;
         let results = [];
+        let workersMap = {};
         
         for (let i = 0; i < numWorkers; i++) {
             setNodeStatus('mapper', i, 'Mapping...', true);
             
             const worker = new Worker(workerUrl);
+            workersMap[i] = worker;
+            
             worker.onmessage = (e) => {
                 if (e.data.type === 'map_done') {
+                    if (results[i] !== undefined) return; // Speculative race handled
+                    
                     results[i] = e.data.result;
                     setNodeStatus('mapper', i, 'Done', false);
-                    worker.terminate(); // Clean up
+                    worker.terminate();
+                    
+                    if (workersMap[`${i}_spec`]) workersMap[`${i}_spec`].terminate();
                     
                     completed++;
                     if (completed === numWorkers) resolve(results);
                 }
             };
             
-            worker.postMessage({ type: 'map', id: i, payload: chunks[i] });
+            // Randomly inject a straggler (~20% chance)
+            const isStraggler = (Math.random() < 0.2);
+            if (isStraggler) {
+                setNodeStatus('mapper', i, 'Straggler...', true);
+                logSys(`Node mapper-${i} is experiencing hardware degradation (Straggler).`, 'error');
+            }
+            
+            worker.postMessage({ type: 'map', id: i, payload: chunks[i], isStraggler });
+            
+            // Speculative Execution Check
+            setTimeout(() => {
+                if (results[i] === undefined && completed > numWorkers * 0.3) {
+                    logSys(`Node mapper-${i} is lagging. Launching Speculative Execution...`, 'sys');
+                    
+                    const specWorker = new Worker(workerUrl);
+                    workersMap[`${i}_spec`] = specWorker;
+                    
+                    specWorker.onmessage = (e) => {
+                        if (e.data.type === 'map_done' && results[i] === undefined) {
+                            results[i] = e.data.result;
+                            setNodeStatus('mapper', i, 'Spec. Done', false);
+                            specWorker.terminate();
+                            workersMap[i].terminate(); // Kill straggler
+                            
+                            logSys(`Speculative task for mapper-${i} won! Straggler terminated.`, 'success');
+                            
+                            completed++;
+                            if (completed === numWorkers) resolve(results);
+                        }
+                    };
+                    
+                    specWorker.postMessage({ type: 'map', id: i, payload: chunks[i], isStraggler: false });
+                }
+            }, 2500); // Check after 2.5s
         }
     });
 }
@@ -304,23 +348,62 @@ function runReducePhase(partitions, numWorkers) {
     return new Promise((resolve) => {
         let completed = 0;
         let results = [];
+        let workersMap = {};
         
         for (let i = 0; i < numWorkers; i++) {
             setNodeStatus('reducer', i, 'Reducing...', true);
             
             const worker = new Worker(workerUrl);
+            workersMap[i] = worker;
+            
             worker.onmessage = (e) => {
                 if (e.data.type === 'reduce_done') {
+                    if (results[i] !== undefined) return;
+                    
                     results[i] = e.data.result;
                     setNodeStatus('reducer', i, 'Done', false);
                     worker.terminate();
+                    
+                    if (workersMap[`${i}_spec`]) workersMap[`${i}_spec`].terminate();
                     
                     completed++;
                     if (completed === numWorkers) resolve(results);
                 }
             };
             
-            worker.postMessage({ type: 'reduce', id: i, payload: partitions[i] });
+            const isStraggler = (Math.random() < 0.2);
+            if (isStraggler) {
+                setNodeStatus('reducer', i, 'Straggler...', true);
+                logSys(`Node reducer-${i} is experiencing hardware degradation (Straggler).`, 'error');
+            }
+            
+            worker.postMessage({ type: 'reduce', id: i, payload: partitions[i], isStraggler });
+            
+            // Speculative Execution Check
+            setTimeout(() => {
+                if (results[i] === undefined && completed > numWorkers * 0.3) {
+                    logSys(`Node reducer-${i} is lagging. Launching Speculative Execution...`, 'sys');
+                    
+                    const specWorker = new Worker(workerUrl);
+                    workersMap[`${i}_spec`] = specWorker;
+                    
+                    specWorker.onmessage = (e) => {
+                        if (e.data.type === 'reduce_done' && results[i] === undefined) {
+                            results[i] = e.data.result;
+                            setNodeStatus('reducer', i, 'Spec. Done', false);
+                            specWorker.terminate();
+                            workersMap[i].terminate(); // Kill straggler
+                            
+                            logSys(`Speculative task for reducer-${i} won! Straggler terminated.`, 'success');
+                            
+                            completed++;
+                            if (completed === numWorkers) resolve(results);
+                        }
+                    };
+                    
+                    specWorker.postMessage({ type: 'reduce', id: i, payload: partitions[i], isStraggler: false });
+                }
+            }, 2500); // Check after 2.5s
         }
     });
 }

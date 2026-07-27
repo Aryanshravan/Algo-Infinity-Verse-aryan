@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Code Quality Checker — Lint, DSA Anti-Patterns & Readability | Algo Infinity Verse</title>
+    <meta name="description" content="Analyze JavaScript/Python code for lint errors, DSA anti-patterns, and readability grade with clickable line-level feedback." />
+    <link rel="stylesheet" href="../../../styles.css" />
+    <link rel="stylesheet" href="code-quality-analyzer.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Poppins:wght@300;400;500;600;700&family=Fira+Code:wght@400;500;600&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/acorn/8.10.0/acorn.min.js"></script>
+  </head>
+  <body data-page="code-quality-analyzer">
+
+    <button type="button" id="scrollTopBtn" aria-label="Scroll to top" class="scroll-top-btn">
+      <i class="fas fa-circle-chevron-up"></i>
+    </button>
+
+    <div id="navbar-placeholder"></div>
+
+    <section class="cqa-hero">
+      <div class="hero-background">
+        <div class="stars"></div><div class="stars2"></div><div class="stars3"></div>
+      </div>
+      <div class="cqa-hero-inner">
+        <div class="cqa-hero-badge"><i class="fas fa-shield-halved"></i> Code Quality Analysis</div>
+        <h1 class="cqa-hero-title">Code Quality Checker</h1>
+        <p class="cqa-hero-sub">Lint errors &bull; DSA anti-patterns &bull; Readability grade</p>
+        <p class="cqa-hero-desc">Paste your JavaScript or Python code and get instant feedback on lint errors, DSA-specific anti-patterns (nested loops, missing base cases, O(n&sup2;) traps), and a readability grade with actionable fixes.</p>
+        <a href="#analyzer" class="btn btn-primary cqa-btn-primary">
+          <i class="fas fa-code"></i> Start Checking
+        </a>
+      </div>
+    </section>
+
+    <section id="analyzer" class="section cqa-section">
+      <div class="container">
+        <div class="cqa-layout">
+
+          <div class="cqa-editor-col">
+
+            <div class="cqa-preset-bar">
+              <span class="cqa-preset-label"><i class="fas fa-bolt"></i> Presets:</span>
+              <div class="cqa-preset-btns" id="cqaPresetBtns"></div>
+            </div>
+
+            <div class="cqa-lang-selector" role="radiogroup" aria-label="Programming language">
+              <button type="button" class="cqa-lang-btn active" data-lang="javascript" role="radio" aria-checked="true" aria-pressed="true">
+                <i class="fab fa-js"></i> JavaScript
+              </button>
+              <button type="button" class="cqa-lang-btn" data-lang="python" role="radio" aria-checked="false" aria-pressed="false">
+                <i class="fab fa-python"></i> Python
+              </button>
+            </div>
+
+            <div class="cqa-editor-wrap">
+              <div class="cqa-editor-header">
+                <span class="cqa-editor-title"><i class="fas fa-file-code"></i> Your Code</span>
+                <div class="cqa-editor-actions">
+                  <button type="button" class="cqa-action-btn" id="cqaClearBtn" aria-label="Clear code">
+                    <i class="fas fa-trash"></i> Clear
+                  </button>
+                  <button type="button" class="cqa-action-btn cqa-action-copy" id="cqaCopyBtn" aria-label="Copy code">
+                    <i class="fas fa-copy"></i> Copy
+                  </button>
+                </div>
+              </div>
+              <div class="cqa-editor-body">
+                <div class="cqa-line-nums" id="cqaLineNums" data-lang="javascript"></div>
+                <textarea
+                  id="cqaEditor"
+                  class="cqa-textarea"
+                  spellcheck="false"
+                  autocomplete="off"
+                  autocorrect="off"
+                  aria-label="Code input"
+                  placeholder="Paste your JavaScript or Python code here..."></textarea>
+              </div>
+            </div>
+
+            <button type="button" class="btn cqa-btn-primary cqa-analyze-btn" id="cqaAnalyzeBtn">
+              <i class="fas fa-microscope"></i> Analyze Code
+            </button>
+
+          </div>
+
+          <div class="cqa-results-col">
+
+            <div class="cqa-card" id="cqaSummary">
+              <div class="cqa-card-title"><i class="fas fa-gavel"></i> Analysis Summary</div>
+              <div class="cqa-placeholder"><i class="fas fa-search"></i><p>Click "Analyze Code" to check for issues.</p></div>
+            </div>
+
+            <div class="cqa-card" id="cqaIssuesCard">
+              <div class="cqa-card-title"><i class="fas fa-list"></i> Detected Issues <span class="cqa-issue-count" id="cqaIssueCount"></span></div>
+              <div class="cqa-issues-list" id="cqaIssuesList" role="list">
+                <div class="cqa-placeholder"><p>Issues will appear here after analysis.</p></div>
+              </div>
+            </div>
+
+            <div class="cqa-card" id="cqaReadabilityCol">
+              <div class="cqa-card-title"><i class="fas fa-ruler"></i> Readability Grade</div>
+              <div id="cqaReadability">
+                <div class="cqa-placeholder"><p>Readability grade will appear here.</p></div>
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <script src="../../../auth.js"></script>
+    <script src="/bootstrap-legacy.js"></script>
+
+    <script src="../../../script.js"></script>
+    <script type="module" src="/dist/legacy-bundle.mjs"></script>
+    <script src="../../../theme.js"></script>
+    <script src="../../../auth-gate.js"></script>
+    <script src="code-quality-analyzer.js"></script>
+    <script>
+      if (typeof loadPartial === 'function') {
+        loadPartial('navbar-placeholder', '/partials/navbar.html').then(function() {
+          if (typeof initNavbar === 'function') initNavbar();
+        });
+      }
+    </script>
+  </body>
+</html>

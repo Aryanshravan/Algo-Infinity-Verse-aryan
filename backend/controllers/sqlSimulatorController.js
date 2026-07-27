@@ -1,5 +1,17 @@
 // backend/controllers/sqlSimulatorController.js
+// Issue #2404: standardized response format. All other handlers in the
+// backend route through `sendJson(res, status, body, headers)` from
+// `utils/helpers.js` so the JSON shape is consistent and security
+// middlewares (like `applySecurityHeaders` in apiRoutes.js) get a single
+// chokepoint. This controller was the lone holdout still using
+// `res.status().json()`. The change keeps the controller's outward status
+// codes and payload fields identical: `success`, `error`, `message`,
+// `results`, `info`. The `sendJson` helper asserts the same
+// `Content-Type: application/json; charset=utf-8` that the rest of the
+// API surface emits, and the existing tests have been updated to mock
+// the same surface.
 import { getDb, initDB } from '../services/sqlSimulatorService.js';
+import { sendJson } from '../utils/helpers.js';
 
 /**
  * Verifies a `Database` handle is usable by running a cheap introspection
@@ -39,36 +51,36 @@ export const resetDatabase = (req, res) => {
     }
     const fresh = initDB();
     if (!isDbUsable(fresh)) {
-      return res
-        .status(500)
-        .json({
-          success: false,
-          error: 'Database initialization did not produce a usable handle.',
-        });
+      return sendJson(res, 500, {
+        success: false,
+        error: 'Database initialization did not produce a usable handle.',
+      });
     }
-    return res.json({ success: true, message: 'Database reset successfully' });
+    return sendJson(res, 200, {
+      success: true,
+      message: 'Database reset successfully',
+    });
   } catch (error) {
-    return res
-      .status(500)
-      .json({ success: false, error: error?.message || 'Failed to reset the database.' });
+    return sendJson(res, 500, {
+      success: false,
+      error: error?.message || 'Failed to reset the database.',
+    });
   }
 };
 
 export const executeQuery = (req, res) => {
   const { query } = req.body;
   if (!query) {
-    return res.status(400).json({ error: 'SQL query is required' });
+    return sendJson(res, 400, { error: 'SQL query is required' });
   }
 
   try {
     const db = getDb();
     if (!isDbUsable(db)) {
-      return res
-        .status(503)
-        .json({
-          success: false,
-          error: 'Database is not initialized. Please reset and try again.',
-        });
+      return sendJson(res, 503, {
+        success: false,
+        error: 'Database is not initialized. Please reset and try again.',
+      });
     }
     const isSelect =
       query.trim().toUpperCase().startsWith('SELECT') ||
@@ -76,13 +88,13 @@ export const executeQuery = (req, res) => {
     if (isSelect) {
       const stmt = db.prepare(query);
       const results = stmt.all();
-      return res.json({ success: true, results });
+      return sendJson(res, 200, { success: true, results });
     } else {
       const stmt = db.prepare(query);
       const info = stmt.run();
-      return res.json({ success: true, info });
+      return sendJson(res, 200, { success: true, info });
     }
   } catch (error) {
-    return res.status(400).json({ error: error.message });
+    return sendJson(res, 400, { error: error.message });
   }
 };

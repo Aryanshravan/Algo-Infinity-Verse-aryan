@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Terminal Simulator — Linux Command Learning Tool | Algo Infinity Verse</title>
+  <meta name="description" content="Learn Linux commands interactively with a fake virtual filesystem, real-time terminal output, and progressive challenges." />
+  <link rel="stylesheet" href="../../../styles.css" />
+  <link rel="stylesheet" href="terminal-simulator.css" />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <script>(function(){try{var t=localStorage.getItem('theme');var p=window.matchMedia('(prefers-color-scheme: light)').matches;var theme=t||(p?'light':'dark');if(theme==='light')document.documentElement.classList.add('light-mode');}catch(e){}})();</script>
+</head>
+<body data-page="terminal-simulator" data-no-loading>
+  <div id="navbar-placeholder"></div>
+  <main class="ts-main">
+    <div class="ts-layout">
+      <!-- Terminal -->
+      <section class="ts-terminal-col">
+        <div class="ts-terminal-wrap">
+          <div class="ts-terminal-header">
+            <span class="ts-terminal-dots"><span class="ts-dot ts-dot-red"></span><span class="ts-dot ts-dot-yellow"></span><span class="ts-dot ts-dot-green"></span></span>
+            <span class="ts-terminal-title"><i class="fas fa-terminal"></i> Terminal Simulator</span>
+            <div class="ts-terminal-actions">
+              <button type="button" id="tsResetBtn" title="Reset filesystem"><i class="fas fa-trash-alt"></i></button>
+            </div>
+          </div>
+          <div class="ts-terminal-body" id="tsTerminalBody" role="log" aria-live="polite">
+            <div class="ts-welcome">Welcome to the Terminal Simulator! Type <span class="ts-cmd-inline">help</span> for commands or try the challenges.</div>
+            <div class="ts-line" id="tsPromptLine">
+              <span class="ts-prompt" id="tsPromptLabel">user@algo:~$</span>
+              <span class="ts-input-line">
+                <input type="text" id="tsInput" class="ts-input" autocomplete="off" spellcheck="false" autofocus aria-label="Terminal command input" />
+              </span>
+            </div>
+          </div>
+        </div>
+      </section>
+      <!-- Sidebar: Command Explorer + Challenges -->
+      <aside class="ts-sidebar">
+        <div class="ts-sidebar-tabs" role="tablist">
+          <button type="button" class="ts-tab active" data-tab="commands" role="tab" aria-selected="true">Commands</button>
+          <button type="button" class="ts-tab" data-tab="challenges" role="tab" aria-selected="false">Challenges</button>
+        </div>
+        <div class="ts-sidebar-panels">
+          <div class="ts-panel active" id="tsCommandsPanel" role="tabpanel">
+            <input type="text" class="ts-sidebar-search" id="tsCmdSearch" placeholder="Search commands..." aria-label="Search commands" />
+            <div class="ts-commands-list" id="tsCommandsList"></div>
+          </div>
+          <div class="ts-panel" id="tsChallengesPanel" role="tabpanel">
+            <div class="ts-challenges-list" id="tsChallengesList"></div>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </main>
+  <!-- Reset Confirm Modal -->
+  <div class="ts-modal-overlay" id="tsResetModal">
+    <div class="ts-modal" role="alertdialog" aria-modal="true" aria-labelledby="tsModalTitle">
+      <div class="ts-modal-title" id="tsModalTitle">
+        <i class="fas fa-exclamation-triangle"></i> Reset Filesystem
+      </div>
+      <div class="ts-modal-body">
+        This will delete all files you created, reset the directory structure, and clear your challenge progress. This action cannot be undone.
+      </div>
+      <div class="ts-modal-actions">
+        <button type="button" class="ts-modal-btn cancel" id="tsModalCancel">Cancel</button>
+        <button type="button" class="ts-modal-btn confirm" id="tsModalConfirm">Reset</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="../../../auth.js"></script>
+  <script src="../../../theme.js"></script>
+  <script src="../../../script.js"></script>
+  <script src="terminal-simulator.js"></script>
+  <script>if(typeof loadPartial==='function')loadPartial('navbar-placeholder','/partials/navbar.html').then(function(){if(typeof initNavbar==='function')initNavbar()});</script>
+</body>
+</html>

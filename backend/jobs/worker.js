@@ -72,6 +72,9 @@ async function startWorker() {
     {
       connection: conn,
       concurrency: 5,
+      lockDuration: 30000,
+      stalledInterval: 15000,
+      maxStalledCount: 2,
     }
   );
 
@@ -130,6 +133,9 @@ async function startWorker() {
     {
       connection: conn,
       concurrency: 2, // Puppeteer is heavy, limit concurrency
+      lockDuration: 60000,
+      stalledInterval: 30000,
+      maxStalledCount: 2,
     }
   );
 

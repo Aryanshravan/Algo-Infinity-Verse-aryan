@@ -4,6 +4,34 @@
 
 const visualizers = [
   {
+    name: 'Quotient Filter Data Structure',
+    path: '/pages/visualizers/quotient-filter/quotient-filter.html',
+    category: 'Data Structures',
+    icon: 'fa-filter',
+    desc: 'Space-efficient probabilistic alternative to Bloom Filters.',
+  },
+  {
+    name: 'Roaring Bitmaps Data Compression',
+    path: '/pages/visualizers/roaring-bitmaps/roaring-bitmaps.html',
+    category: 'Data Structures',
+    icon: 'fa-boxes',
+    desc: 'Compress integers using Array, Bitmap, and Run containers.',
+  },
+  {
+    name: 'Chandy-Lamport Distributed Snapshot',
+    path: '/pages/visualizers/chandy-lamport/chandy-lamport.html',
+    category: 'Distributed Systems',
+    icon: 'fa-camera',
+    desc: 'Capture a consistent global state in a distributed system where nodes only have local clocks.',
+  },
+   {
+    name: 'Hopfield Network Associative Memory',
+    path: '/pages/visualizers/hopfield-network/hopfield-network.html',
+    category: 'AI & ML',
+    icon: 'fa-brain',
+    desc: 'Visualize a recurrent neural network acting as a content-addressable memory system.',
+  },
+  {
     name: 'Distributed Tracing Simulator',
     path: '/pages/visualizers/distributed-tracing/distributed-tracing.html',
     category: 'Distributed Systems',
@@ -38,7 +66,35 @@ const visualizers = [
     icon: 'fa-network-wired',
     desc: 'Visualize Distributed Transactions and Compensating Actions using the Sagas Pattern.',
   },
+  {
+    name: 'TCP Congestion Control Arena',
+    path: '/pages/visualizers/tcp-congestion-arena/tcp-congestion-arena.html',
+    category: 'Networking',
+    icon: 'fa-network-wired',
+    desc: 'Simulate how CUBIC (loss-based) and BBR (bandwidth-based) handle network congestion and packet loss.',
+  },
+  {
+    name: 'Transactional Outbox Pattern',
+    path: '/pages/visualizers/outbox-pattern/outbox-pattern.html',
+    category: 'Distributed Systems',
+    icon: 'fa-database',
+    desc: 'Visualize the Transactional Outbox Pattern to solve the dual-write problem in microservices.',
+  },
+  {
+    name: 'TLS 1.3 Handshake Simulator',
+    path: '/pages/visualizers/tls13-simulator/tls13-simulator.html',
+    category: 'Security & Crypto',
+    icon: 'fa-lock',
+    desc: 'Interactive visualizer for the TLS 1.3 cryptographic handshake protocol (1-RTT and 0-RTT).',
+  },
   // ── Sorting & Searching ──
+  {
+    name: 'Ternary Search Visualizer',
+    path: '/pages/visualizers/ternary-search-visualizer/ternary-search-visualizer.html',
+    category: 'Sorting & Searching',
+    icon: 'fa-mountain',
+    desc: 'Find the maximum of a unimodal function by shrinking the search space by 1/3.',
+  },
   {
     name: 'Sorting Visualizer',
     path: '/pages/visualizers/sorting-visualizer/sorting-visualizer.html',
@@ -82,6 +138,13 @@ const visualizers = [
     desc: 'Build and explore suffix arrays for string processing.',
   },
   {
+    name: 'SA-IS Suffix Array (Linear Time)',
+    path: '/pages/visualizers/sais-visualizer/sais-visualizer.html',
+    category: 'Sorting & Searching',
+    icon: 'fa-dna',
+    desc: 'Visualize the SA-IS linear-time algorithm using S/L classification and induced sorting.',
+  },
+  {
     name: 'Big-O Analyzer',
     path: '/pages/visualizers/big-o-analyzer/big-o-analyzer.html',
     category: 'Sorting & Searching',
@@ -108,6 +171,13 @@ const visualizers = [
     category: 'Sorting & Searching',
     icon: 'fa-arrows-to-dot',
     desc: 'Compare leftmost, rightmost, and insert-position binary search side-by-side with lo/hi/mid and mid±1 rules.',
+  },
+  {
+    name: 'Diffie Hellman Key Exchange Visualizer',
+    path: '/pages/visualizers/diffie-hellman-key-exchange/diffie-hellman-visualizer.html',
+    category: 'Security & Crypto',
+    icon: 'fa-key',
+    desc: 'Interactive visualization of the Diffie Hellman key exchange protocol.',
   },
   {
     name: 'Fast/Slow Pointer Simulator',
@@ -196,6 +266,13 @@ const visualizers = [
     desc: 'Explore persistent data structures with versioned segment trees.',
   },
   {
+    name: 'Persistent Segment Tree Visualizer',
+    path: '/pages/visualizers/persistent-segment-tree-visualizer/persistent-segment-tree-visualizer.html',
+    category: 'Trees & BSTs',
+    icon: 'fa-code-branch',
+    desc: 'Interactive versioned segment tree with K-th smallest queries.',
+  },
+  {
     name: 'Heap Percolation Visualizer',
     path: '/pages/visualizers/heap-percolation-visualizer/heap-percolation-visualizer.html',
     category: 'Trees & BSTs',
@@ -239,6 +316,27 @@ const visualizers = [
   },
 
   // ── Graph Algorithms ──
+  {
+    name: "Dinic's Algorithm Visualizer",
+    path: '/pages/visualizers/dinics-algorithm-visualizer/dinics-algorithm-visualizer.html',
+    category: 'Graph Algorithms',
+    icon: 'fa-water',
+    desc: 'Visualize Level Graphs, Blocking Flows, and Pointer Advancement in O(V²E) time.',
+  },
+  {
+    name: 'Bitmask DP: TSP',
+    path: '/pages/visualizers/bitmask-dp-visualizer/bitmask-dp-visualizer.html',
+    category: 'Graph Algorithms',
+    icon: 'fa-microchip',
+    desc: 'Solve Traveling Salesman using integer bit operations.',
+  },
+  {
+    name: 'Max Flow Race: Edmonds-Karp vs Push-Relabel',
+    path: '/pages/visualizers/max-flow-race-visualizer/max-flow-race-visualizer.html',
+    category: 'Graph Algorithms',
+    icon: 'fa-water',
+    desc: 'Race Edmonds-Karp against Push-Relabel on adversarial max flow networks.',
+  },
   {
     name: 'Graph Visualizer',
     path: '/pages/visualizers/graph-visualizer/graph-visualizer.html',
@@ -372,8 +470,22 @@ const visualizers = [
     icon: 'fa-circle-nodes',
     desc: 'Dynamo-style N/W/R tunable consistency — animated write/read quorums, staleness demo, read repair, and strong consistency guarantee.',
   },
+  {
+    name: 'RabbitMQ Messaging Visualizer',
+    path: '/pages/visualizers/rabbitmq-visualizer/rabbitmq-visualizer.html',
+    category: 'System Design',
+    icon: 'fa-envelope-open-text',
+    desc: 'Interactive RabbitMQ simulator demonstrating Direct, Topic (*,#), Fanout, and Headers exchanges, Dead Letter Queues (DLQ), retry backoff, and acknowledgements.',
+  },
 
   // ── Dynamic Programming ──
+  {
+    name: 'Patience Sorting (LIS)',
+    path: '/pages/visualizers/patience-sorting-visualizer/patience-sorting-visualizer.html',
+    category: 'Dynamic Programming',
+    icon: 'fa-layer-group',
+    desc: 'Visualize the O(n log n) Longest Increasing Subsequence algorithm using a beautifully visual card-sorting trick.',
+  },
   {
     name: 'DP Visualizer',
     path: '/pages/visualizers/dp-visualizer/dp-visualizer.html',
@@ -598,6 +710,20 @@ const visualizers = [
 
   // ── Distributed Systems ──
   {
+    name: 'Gossip-Based Failure Detection (SWIM Protocol)',
+    path: '/pages/visualizers/swim-protocol-visualizer/swim-protocol-visualizer.html',
+    category: 'Distributed Systems',
+    icon: 'fa-satellite-dish',
+    desc: 'Detect dead nodes efficiently without a central coordinator.',
+  },
+  {
+    name: 'Rendezvous Hashing (HRW)',
+    path: '/pages/visualizers/rendezvous-hashing-visualizer/rendezvous-hashing-visualizer.html',
+    category: 'Distributed Systems',
+    icon: 'fa-network-wired',
+    desc: 'Load balance perfectly without using any Consistent Hash Rings.',
+  },
+  {
     name: 'Raft Simulator',
     path: '/pages/ai-features/raft-simulator/raft-simulator.html',
     category: 'Distributed Systems',
@@ -733,6 +859,20 @@ const visualizers = [
 
   // ── Security & Cryptography ──
   {
+    name: 'Primality Testing',
+    path: '/pages/visualizers/primality-testing-visualizer/primality-testing-visualizer.html',
+    category: 'Security & Cryptography',
+    icon: 'fa-microscope',
+    desc: 'Visualize Miller-Rabin probabilistic testing vs AKS deterministic certainty.',
+  },
+  {
+    name: 'Chinese Remainder Theorem',
+    path: '/pages/visualizers/chinese-remainder-theorem/chinese-remainder-theorem.html',
+    category: 'Security & Crypto',
+    icon: 'fa-clover',
+    desc: 'Reconstruct secrets from modular shadows and speed up RSA.',
+  },
+  {
     name: 'RSA Cryptography Visualizer',
     path: '/pages/visualizers/rsa-visualizer/rsa-visualizer.html',
     category: 'Security & Crypto',
@@ -784,8 +924,22 @@ const visualizers = [
 
   // ── Math, Geometry & Signals ──
   {
+    name: "Zeller's Congruence & Doomsday Algorithm",
+    path: '/pages/visualizers/zellers-congruence-visualizer/zellers-congruence-visualizer.html',
+    category: 'Math & Geometry',
+    icon: 'fa-calendar-day',
+    desc: 'Compute any day of the week instantly using modular arithmetic or Conway\'s mental-math method.',
+  },
+  {
+    name: 'Haar Wavelet Transform',
+    path: '/pages/visualizers/haar-wavelet-visualizer/haar-wavelet-visualizer.html',
+    category: 'Math & Geometry',
+    icon: 'fa-wave-square',
+    desc: 'Visualize multi-resolution signal decomposition and JPEG2000 compression mechanics.',
+  },
+  {
     name: 'FFT Visualizer',
-    path: '/pages/visualizer/fft-visualizer/fft-visualizer.html',
+    path: '/pages/visualizers/fft-visualizer/fft-visualizer.html',
     category: 'Math & Geometry',
     icon: 'fa-chart-line',
     desc: 'Fast Fourier Transform — convert between time and frequency domains.',
@@ -827,6 +981,13 @@ const visualizers = [
   },
 
   // ── AI & Machine Learning ──
+  {
+    name: 'Simulated Annealing Schedules',
+    path: '/pages/visualizers/simulated-annealing-visualizer/simulated-annealing-visualizer.html',
+    category: 'AI & ML',
+    icon: 'fa-temperature-empty',
+    desc: 'Deep-dive into cooling schedules for SA: Linear, Exponential, Logarithmic, and Adaptive optimization races.',
+  },
   {
     name: 'CNN Layer & Feature Map Explorer',
     path: '/pages/visualizers/cnn-visualizer/cnn-visualizer.html',
@@ -878,6 +1039,13 @@ const visualizers = [
   },
 
   // ── Data Structures ──
+  {
+    name: 'Deterministic vs Randomized Skip List',
+    path: '/pages/visualizers/deterministic-skip-list-visualizer/deterministic-skip-list-visualizer.html',
+    category: 'Data Structures',
+    icon: 'fa-layer-group',
+    desc: 'See how structural invariants eliminate the need for coin flips.',
+  },
   {
     name: 'Linked List Visualizer',
     path: '/pages/visualizers/linked-list-visualizer/linked-list-visualizer.html',
@@ -942,6 +1110,13 @@ const visualizers = [
     desc: 'Square-root decomposition for range query optimization.',
   },
   {
+    name: 'Euler Tour + Sparse Table LCA',
+    path: '/pages/visualizers/euler-tour-lca/euler-tour-lca.html',
+    category: 'Data Structures',
+    icon: 'fa-project-diagram',
+    desc: 'Answering "Common Ancestor" queries in O(1) using Euler tour and sparse table.',
+  },
+  {
     name: 'Quadtree Collision Visualizer',
     path: '/pages/visualizers/quadtree-collision/quadtree-collision.html',
     category: 'Data Structures',
@@ -998,11 +1173,11 @@ const visualizers = [
     desc: 'Guaranteed O(1) worst-case lookup via two tables and eviction chains.',
   },
   {
-  name: 'Cuckoo Filter Visualizer',
-  path: '/pages/visualizers/cuckoo-filter/cuckoo-filter.html',
-  category: 'Data Structures',
-  icon: 'fa-filter',
-  desc: 'Bloom Filters that can delete — fingerprint XOR dual-bucket scheme, cuckoo eviction chains, false positive demo, and Bloom vs Cuckoo space comparison.',
+    name: 'Cuckoo Filter Visualizer',
+    path: '/pages/visualizers/cuckoo-filter/cuckoo-filter.html',
+    category: 'Data Structures',
+    icon: 'fa-filter',
+    desc: 'Bloom Filters that can delete — fingerprint XOR dual-bucket scheme, cuckoo eviction chains, false positive demo, and Bloom vs Cuckoo space comparison.',
   },
   {
     name: 'LSH Visualizer',
@@ -1047,11 +1222,32 @@ const visualizers = [
     desc: 'How RAID 6 and QR codes survive missing data — points on a polynomial curve, live disk failures.',
   },
   {
-  name: 'Kalman Filter Visualizer',
-  path: '/pages/visualizers/kalman-filter/kalman-filter.html',
-  category: 'Algorithms',
-  icon: 'fa-chart-line',
-  desc: 'GPS and robotics state estimation — watch predict/update steps, Kalman gain, Gaussian belief narrowing, and sensor noise vs estimation accuracy live.',
+    name: 'Kalman Filter Visualizer',
+    path: '/pages/visualizers/kalman-filter/kalman-filter.html',
+    category: 'Algorithms',
+    icon: 'fa-chart-line',
+    desc: 'GPS and robotics state estimation — watch predict/update steps, Kalman gain, Gaussian belief narrowing, and sensor noise vs estimation accuracy live.',
+  },
+  {
+    name: "Mo's Algorithm Visualizer",
+    path: '/pages/visualizers/mos-algorithm-visualizer/mos-algorithm-visualizer.html',
+    category: 'Graph Algorithms',
+    icon: 'fa-arrows-left-right',
+    desc: 'Answer thousands of offline range queries via sqrt-decomposition block sort and a two-pointer sweep.',
+  },
+  {
+    name: 'DSU on Tree Visualizer',
+    path: '/pages/visualizers/dsu-on-tree-visualizer/dsu-on-tree-visualizer.html',
+    category: 'Data Structures',
+    icon: 'fa-code-merge',
+    desc: 'Small-to-large merging — keep the heavy child, merge only light subtrees, O(n log n) subtree queries.',
+  },
+  {
+    name: 'Convex Hull Trick / Li Chao Tree Visualizer',
+    path: '/pages/visualizers/convex-hull-trick-visualizer/convex-hull-trick-visualizer.html',
+    category: 'Dynamic Programming',
+    icon: 'fa-chart-line',
+    desc: 'Turn O(N) per-query line evaluation into O(log N) — dominated-line envelope, Li Chao Tree, and a real DP optimization demo.',
   },
 
   // ── Special & Creative ──
@@ -1355,6 +1551,13 @@ const visualizers = [
     category: 'Algorithms',
     icon: 'fa-network-wired',
     desc: 'Interactive SWIM Protocol Simulator - Algo Infinity Verse visualization.',
+  },
+  {
+    name: 'BWT + MTF + RLE Pipeline',
+    path: '/pages/visualizers/bwt-mtf-rle-visualizer/bwt-mtf-rle-visualizer.html',
+    category: 'Algorithms',
+    icon: 'fa-compress-arrows-alt',
+    desc: 'Visualize the full bzip2 compression pipeline: Burrows-Wheeler Transform, Move-to-Front, and RLE.',
   },
   {
     name: 't-Digest Percentile Estimator',
@@ -1832,12 +2035,15 @@ const clearBtn = document.getElementById('vizClearBtn');
 const filterContainer = document.getElementById('vizFilters');
 const emptyState = document.getElementById('vizEmpty');
 const countDisplay = document.getElementById('vizCountDisplay');
+const paginationContainer = document.getElementById('vizPagination');
 
+const PAGE_SIZE = 20;
 let activeCategory =
   new URLSearchParams(window.location.search).get('category') ||
   localStorage.getItem('vizFilterCategory') ||
   'all';
 let searchQuery = '';
+let vizCurrentPage = 1;
 const pageReferrer = document.referrer;
 
 /* ─── Build filter chips ─── */
@@ -1867,6 +2073,7 @@ function buildFilters() {
         url.searchParams.set('category', activeCategory);
       }
       history.pushState({}, '', url);
+      vizCurrentPage = 1;
       render();
     });
     filterContainer.appendChild(btn);
@@ -1874,9 +2081,54 @@ function buildFilters() {
 }
 
 /* ─── Render cards ─── */
+/* ─── Group helper: reorder items so all cards of the same category
+   appear together, following the same order as the `categories` array ─── */
+function groupByCategory(items) {
+  const getSlug = (cat) => cat.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+
+  // Group items by their category slug
+  const grouped = {};
+  items.forEach((v) => {
+    const slug = getSlug(v.category);
+    if (!grouped[slug]) {
+      grouped[slug] = { items: [] };
+    }
+    grouped[slug].items.push(v);
+  });
+
+  // Determine the order of slugs: predefined categories first, then extras
+  const orderedSlugs = [];
+  const seen = new Set();
+
+  categories.forEach((cat) => {
+    if (cat === 'All') return;
+    const slug = getSlug(cat);
+    if (grouped[slug] && !seen.has(slug)) {
+      orderedSlugs.push(slug);
+      seen.add(slug);
+    }
+  });
+
+  // Append any categories that exist in data but aren't in the predefined list
+  Object.keys(grouped).forEach((slug) => {
+    if (!seen.has(slug)) {
+      orderedSlugs.push(slug);
+      seen.add(slug);
+    }
+  });
+
+  // Flatten groups into a single ordered array
+  const result = [];
+  orderedSlugs.forEach((slug) => {
+    result.push(...grouped[slug].items);
+  });
+  return result;
+}
+
 function render() {
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const filtered = visualizers.filter((v) => {
+
+  let filtered = visualizers.filter((v) => {
     const matchCategory =
       activeCategory === 'all' ||
       v.category.toLowerCase().replace(/[^a-z0-9]+/g, '-') === activeCategory;
@@ -1889,19 +2141,43 @@ function render() {
     return matchCategory && matchSearch;
   });
 
+  // When viewing all categories, group cards by category so that related
+  // visualizers appear together rather than scattered by array order.
+  if (activeCategory === 'all') {
+    filtered = groupByCategory(filtered);
+  }
+
   countDisplay.textContent = filtered.length;
 
   if (filtered.length === 0) {
     grid.innerHTML = '';
     emptyState.style.display = 'block';
+    renderPagination(0);
     return;
   }
 
   emptyState.style.display = 'none';
-  grid.innerHTML = filtered
-    .map(
-      (v, i) => `
-    <a href="${v.path}" target="_blank" rel="noopener noreferrer" class="viz-card" role="listitem" style="animation-delay:${reducedMotion ? '0s' : Math.min(i * 0.025, 0.8)}s">
+
+  const totalPages = Math.ceil(filtered.length / PAGE_SIZE);
+  if (vizCurrentPage > totalPages) vizCurrentPage = totalPages;
+
+  const start = (vizCurrentPage - 1) * PAGE_SIZE;
+  const pageItems = filtered.slice(start, start + PAGE_SIZE);
+
+  // Build HTML — insert a category section header before the first card of
+  // each new category when viewing all.
+  let lastCategory = '';
+  let animIndex = 0;
+  const cardHtml = pageItems
+    .map((v) => {
+      let html = '';
+      if (activeCategory === 'all' && v.category !== lastCategory) {
+        html += `<div class="viz-category-header">
+          <h2 class="viz-category-title">${escHtml(v.category)}</h2>
+        </div>`;
+        lastCategory = v.category;
+      }
+      html += `<a href="${v.path}" target="_blank" rel="noopener noreferrer" class="viz-card" role="listitem" style="animation-delay:${reducedMotion ? '0s' : Math.min(animIndex * 0.025, 0.8)}s">
       <span class="viz-card-icon" style="color:${categoryColors[v.category.toLowerCase().replace(/[^a-z0-9]+/g, '-')] || 'var(--viz-cyan)'}"><i class="fas ${v.icon}"></i></span>
       <span class="viz-card-title">${escHtml(v.name)}</span>
       <span class="viz-card-desc">${escHtml(v.desc)}</span>
@@ -1909,11 +2185,84 @@ function render() {
         <span class="viz-card-category">${escHtml(v.category)}</span>
         <span class="viz-card-arrow"><i class="fas fa-arrow-right"></i></span>
       </div>
-    </a>
-  `
-    )
+    </a>`;
+      animIndex++;
+      return html;
+    })
     .join('');
+
+  grid.innerHTML = cardHtml;
+
+  renderPagination(filtered.length, totalPages);
 }
+
+/* ─── Render pagination ─── */
+function renderPagination(totalItems, totalPages) {
+  if (!paginationContainer) return;
+
+  if (totalItems <= PAGE_SIZE || totalPages <= 1) {
+    paginationContainer.style.display = 'none';
+    paginationContainer.innerHTML = '';
+    return;
+  }
+
+  paginationContainer.style.display = 'flex';
+
+  const getPageNumbers = (current, total) => {
+    if (total <= 7) {
+      return Array.from({ length: total }, (_, i) => i + 1);
+    }
+    const pages = [];
+    const delta = 1;
+    const rangeStart = Math.max(2, current - delta);
+    const rangeEnd = Math.min(total - 1, current + delta);
+    pages.push(1);
+    if (rangeStart > 2) pages.push('...');
+    for (let i = rangeStart; i <= rangeEnd; i++) pages.push(i);
+    if (rangeEnd < total - 1) pages.push('...');
+    pages.push(total);
+    return pages;
+  };
+
+  const pageNumbers = getPageNumbers(vizCurrentPage, totalPages);
+
+  let html = '';
+  html += `<button type="button" class="viz-page-btn viz-page-prev"${vizCurrentPage === 1 ? ' disabled' : ''} aria-label="Previous page">&laquo; Prev</button>`;
+
+  html += '<div class="viz-page-numbers">';
+  for (const p of pageNumbers) {
+    if (p === '...') {
+      html += '<span class="viz-page-ellipsis">&hellip;</span>';
+    } else {
+      html += `<button type="button" class="viz-page-num${p === vizCurrentPage ? ' active' : ''}" data-page="${p}"${p === vizCurrentPage ? ' aria-current="page"' : ''}>${p}</button>`;
+    }
+  }
+  html += '</div>';
+
+  html += `<button type="button" class="viz-page-btn viz-page-next"${vizCurrentPage === totalPages ? ' disabled' : ''} aria-label="Next page">Next &raquo;</button>`;
+
+  paginationContainer.innerHTML = html;
+}
+
+/* ─── Pagination event delegation ─── */
+paginationContainer.addEventListener('click', (e) => {
+  const btn = e.target.closest('button');
+  if (!btn || btn.disabled) return;
+
+  if (btn.classList.contains('viz-page-prev')) {
+    vizCurrentPage--;
+    render();
+  } else if (btn.classList.contains('viz-page-next')) {
+    vizCurrentPage++;
+    render();
+  } else if (btn.classList.contains('viz-page-num')) {
+    const page = parseInt(btn.dataset.page, 10);
+    if (page && page !== vizCurrentPage) {
+      vizCurrentPage = page;
+      render();
+    }
+  }
+});
 
 function escHtml(str) {
   const d = document.createElement('div');
@@ -1925,6 +2274,7 @@ function escHtml(str) {
 searchInput.addEventListener('input', () => {
   searchQuery = searchInput.value;
   clearBtn.classList.toggle('visible', searchQuery.length > 0);
+  vizCurrentPage = 1;
   render();
 });
 
@@ -1932,6 +2282,7 @@ clearBtn.addEventListener('click', () => {
   searchInput.value = '';
   searchQuery = '';
   clearBtn.classList.remove('visible');
+  vizCurrentPage = 1;
   render();
   searchInput.focus();
 });
@@ -1980,5 +2331,6 @@ window.addEventListener('popstate', () => {
     localStorage.getItem('vizFilterCategory') ||
     'all';
   syncChipFromURL();
+  vizCurrentPage = 1;
   render();
 });

@@ -1,0 +1,185 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Primality Testing Visualizer | Algo Infinity Verse</title>
+    <meta name="description" content="Discover how cryptography tests for primes. Visualize Miller-Rabin probabilistic testing vs AKS deterministic certainty." />
+    <link rel="stylesheet" href="../../../styles.css" />
+    <link rel="stylesheet" href="primality-testing-visualizer.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Poppins:wght@300;400;500;600;700&family=Fira+Code:wght@400;500;600&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <link rel="stylesheet" href="/modules/quick-notes/quick-notes.css" />
+  </head>
+  <body data-page="primality-testing-visualizer">
+
+    <div id="navbar-placeholder"></div>
+
+    <button id="scrollTopBtn" aria-label="Scroll to top" class="scroll-top-btn">
+      <i class="fas fa-circle-chevron-up"></i>
+    </button>
+
+    <section class="prime-hero">
+      <div class="prime-hero-bg"><canvas id="primeHeroCanvas" class="prime-hero-canvas"></canvas></div>
+      <div class="prime-hero-inner">
+        <div class="prime-hero-eyebrow">🔐 Cryptography Core · Number Theory</div>
+        <h1 class="prime-hero-title">Primality Testing</h1>
+        <p class="prime-hero-sub">Probabilistic Speed vs Deterministic Certainty</p>
+        <p class="prime-hero-desc">Modern cryptography (RSA, ECC, PQC) relies entirely on discovering massive prime numbers. But how do we know a 1024-bit number is prime? The <strong>Miller-Rabin</strong> test is lightning fast but uses probability, risking a tiny chance of a false positive. The <strong>AKS Algorithm</strong> provides absolute mathematical certainty, but is far too slow for cryptographic use. Watch the tradeoff live.</p>
+        <div class="prime-hero-actions">
+            <a href="#lab" class="btn btn-primary prime-btn-primary"><i class="fas fa-microscope"></i> Start Testing</a>
+            <a href="#theory" class="btn prime-btn-outline"><i class="fas fa-book-open"></i> Read Theory</a>
+        </div>
+      </div>
+    </section>
+
+    <section id="lab" class="section prime-section">
+      <div class="container">
+        
+        <div class="prime-control-card">
+          <div class="prime-toolbar">
+            <div class="prime-tool-group" style="flex-wrap: wrap;">
+              <span class="prime-label">Test Subject (n)</span>
+              <select id="selNumber" class="prime-select">
+                <option value="prime1">Small Prime (1009)</option>
+                <option value="prime2">Mersenne Prime (8191)</option>
+                <option value="comp1">Obvious Composite (1000)</option>
+                <option value="pseudo1" selected>Carmichael / Pseudoprime (341)</option>
+                <option value="pseudo2">Tricky Carmichael (561)</option>
+                <option value="custom">Custom Input...</option>
+              </select>
+              <input type="text" id="customInput" class="prime-input" value="341" style="display:none; width: 120px;" />
+            </div>
+            
+            <div class="prime-tool-group">
+              <span class="prime-label">Witness (a)</span>
+              <select id="selWitness" class="prime-select">
+                <option value="random">Random</option>
+                <option value="2">Base 2 (Classic)</option>
+                <option value="3">Base 3</option>
+                <option value="5">Base 5</option>
+              </select>
+            </div>
+
+            <div class="prime-tool-group prime-actions">
+              <button id="btnDecompose" class="prime-btn prime-btn-ghost"><i class="fas fa-layer-group"></i> 1. Decompose</button>
+              <button id="btnWitness" class="prime-btn prime-btn-primary" disabled><i class="fas fa-bolt"></i> 2. Test Witness</button>
+              <button id="btnReset" class="prime-btn prime-btn-ghost"><i class="fas fa-redo"></i> Reset</button>
+            </div>
+          </div>
+          
+          <div class="prime-stats-strip">
+              <div class="prime-stat-box">
+                  <div class="stat-lbl">Test Subject (n)</div>
+                  <div class="stat-val" id="statN">-</div>
+              </div>
+              <div class="prime-stat-box">
+                  <div class="stat-lbl">Witnesses Tested</div>
+                  <div class="stat-val" id="statRounds">0</div>
+              </div>
+              <div class="prime-stat-box">
+                  <div class="stat-lbl">False Positive Prob</div>
+                  <div class="stat-val highlight" id="statProb">100%</div>
+              </div>
+              <div class="prime-stat-box">
+                  <div class="stat-lbl">Ground Truth</div>
+                  <div class="stat-val highlight-danger" id="statTruth">?</div>
+              </div>
+          </div>
+        </div>
+
+        <div id="primeStatus" class="prime-status-bar">
+            <div class="status-icon"><i class="fas fa-info-circle"></i></div>
+            <div class="status-text" id="statusMsg">Select a test subject and click "Decompose" to begin Miller-Rabin.</div>
+        </div>
+
+        <div class="prime-main-layout">
+            
+            <div class="prime-panel" style="grid-column: 1 / span 2;">
+                <div class="panel-header">
+                    <h3 class="panel-title"><i class="fas fa-bolt"></i> Miller-Rabin Testing Arena</h3>
+                    <div class="panel-badges">
+                        <span class="badge badge-neutral">Probabilistic O(k log³ n)</span>
+                    </div>
+                </div>
+                
+                <div class="mr-decomp-box">
+                    <div class="mr-step-title">Step 1: Decomposition</div>
+                    <div class="mr-formula">
+                        n - 1 = 2<sup id="mr-r">r</sup> · <span id="mr-d">d</span>
+                    </div>
+                    <div class="mr-decomp-text" id="decompText">Waiting for decomposition...</div>
+                </div>
+                
+                <div class="mr-witness-box">
+                    <div class="mr-step-title" style="display:flex; justify-content:space-between;">
+                        <span>Step 2: Squaring Sequence</span>
+                        <span id="currWitnessBadge" class="badge badge-neutral">Current Witness a = ?</span>
+                    </div>
+                    <div class="mr-sequence-grid" id="sequenceGrid">
+                        <!-- Sequence blocks injected here -->
+                    </div>
+                    <div class="mr-verdict" id="mrVerdictBox">
+                        <i class="fas fa-question-circle"></i> Awaiting witness test...
+                    </div>
+                </div>
+                
+                <div class="log-console" id="mrLogConsole"></div>
+            </div>
+
+            <div class="prime-panel">
+                <div class="panel-header">
+                    <h3 class="panel-title"><i class="fas fa-check-double"></i> AKS Algorithm Reference</h3>
+                    <div class="panel-badges">
+                        <span class="badge badge-source">Deterministic Polynomial</span>
+                    </div>
+                </div>
+                
+                <div class="aks-box">
+                    <p class="aks-desc">The AKS primality test relies on the polynomial congruence:</p>
+                    <div class="mr-formula" style="font-size:1.1rem; margin:1rem 0;">
+                        (X + a)ⁿ ≡ Xⁿ + a (mod n)
+                    </div>
+                    <p class="aks-desc">If this holds for a specific range of <em>a</em>, <em>n</em> is absolutely guaranteed to be prime. No false positives.</p>
+                    
+                    <div class="aks-run-box">
+                        <button id="btnAKS" class="prime-btn prime-btn-outline" style="width:100%; justify-content:center;"><i class="fas fa-play"></i> Run Deterministic AKS Check</button>
+                        <div id="aksResult" class="aks-result" style="display:none;"></div>
+                    </div>
+                    
+                    <div class="aks-warning">
+                        <i class="fas fa-exclamation-triangle"></i> Note: AKS runs in O(log⁶ n), which is theoretically polynomial but practically far too slow for 2048-bit RSA keys compared to Miller-Rabin's O(k log³ n).
+                    </div>
+                </div>
+            </div>
+            
+        </div>
+        
+        <div id="theory" class="prime-learn-section">
+            <h2 class="learn-heading"><i class="fas fa-graduation-cap"></i> Theoretical Deep Dive</h2>
+            <div class="prime-learn-grid">
+              <div class="prime-learn-card">
+                <div class="learn-icon">🎭</div>
+                <h3>The Carmichael Trap (False Positives)</h3>
+                <p>Try testing <strong>341</strong> with witness <strong>a = 2</strong>. Miller-Rabin will declare it "Probably Prime". But 341 = 11 × 31, making it a composite! 341 is a <em>Fermat pseudoprime to base 2</em>. This is exactly what "probabilistic" means. But test it again with witness <strong>a = 3</strong>, and the illusion shatters—it correctly flags as composite. This is why cryptography runs 40+ random rounds of testing.</p>
+              </div>
+              <div class="prime-learn-card">
+                <div class="learn-icon">📉</div>
+                <h3>Probability Shrinking</h3>
+                <p>If a number is composite, at least 3/4 of all possible witnesses <em>a</em> will correctly expose it. Thus, the probability of a composite surviving <em>k</em> random rounds is at most <strong>(1/4)^k</strong>. After just 40 rounds, the chance of a false positive is less than 1 in 1,208,925,819,614,629,174,706,176. That is absolute cryptographic certainty.</p>
+              </div>
+              <div class="prime-learn-card">
+                <div class="learn-icon">✨</div>
+                <h3>The 2002 Breakthrough (AKS)</h3>
+                <p>For centuries, it was unknown if a deterministic algorithm could prove primality in polynomial time. In 2002, Agrawal, Kayal, and Saxena proved it was possible. While a massive theoretical leap, the high constant factors in its O(log⁶ n) runtime mean OpenSSL and TLS still use Miller-Rabin to generate your secure encryption keys today.</p>
+              </div>
+            </div>
+        </div>
+        
+      </div>
+    </section>
+
+    <script src="../../../components/navbar/navbar.js"></script>
+    <script src="primality-testing-visualizer.js"></script>
+  </body>
+</html>

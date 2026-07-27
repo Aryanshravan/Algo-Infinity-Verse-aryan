@@ -15,7 +15,10 @@ export default async function handler(req, res) {
   }
 
   if (!useFirestore) {
-    return res.status(503).json({ error: 'User store unavailable.' });
+    return res.status(503).json({
+      error:
+        "Firestore is unavailable. Ensure the required FIREBASE_* environment variables are configured."
+    });
   }
 
   try {

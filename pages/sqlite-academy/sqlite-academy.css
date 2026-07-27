@@ -124,6 +124,30 @@
     padding: 0;
 }
 
+.lesson-prose ul {
+    list-style: disc;
+    padding-left: 1.5rem;
+    margin-bottom: 1rem;
+}
+
+.lesson-prose ul li {
+    margin-bottom: 0.25rem;
+    color: #4b5563;
+    line-height: 1.5;
+}
+
+.lesson-prose ol {
+    list-style: decimal;
+    padding-left: 1.5rem;
+    margin-bottom: 1rem;
+}
+
+.lesson-prose ol li {
+    margin-bottom: 0.25rem;
+    color: #4b5563;
+    line-height: 1.5;
+}
+
 /* Data Grid (Table) Styles */
 .data-grid-wrapper {
     width: 100%;
@@ -169,6 +193,50 @@
     padding: 0.5rem 1rem;
     color: #4b5563;
     white-space: nowrap;
+}
+
+/* Summary Box (Takeaways) */
+.summary-box {
+  background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+  border: 1px solid #bae6fd;
+  border-radius: 10px;
+  padding: 1.25rem 1.5rem;
+  margin-top: 2rem;
+}
+
+.summary-box h4 {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #0369a1;
+  margin-bottom: 0.75rem;
+}
+
+.summary-box ul {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 0.75rem 0;
+}
+
+.summary-box ul li {
+  position: relative;
+  padding: 0.35rem 0 0.35rem 1.5rem;
+  color: #0c4a6e;
+  line-height: 1.5;
+}
+
+.summary-box ul li::before {
+  content: '✓';
+  position: absolute;
+  left: 0;
+  color: #0284c7;
+  font-weight: bold;
+}
+
+.summary-box p {
+  color: #0369a1;
+  font-size: 0.9rem;
+  margin-top: 0.5rem;
+  font-style: italic;
 }
 
 /* Error Message in Results Pane */

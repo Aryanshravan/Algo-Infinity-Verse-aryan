@@ -1,0 +1,228 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Lua Editor -> Live Code Editor | Algo Infinity Verse</title>
+    <link rel="stylesheet" href="/styles.css" />
+    <link rel="stylesheet" href="lua-editor.css" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Poppins:wght@300;400;500;600;700&family=Fira+Code:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+
+    <!-- Theme Initialization Script -->
+    <script>
+      (function () {
+        try {
+          var storedTheme = localStorage.getItem('theme');
+          var prefersLight = window.matchMedia('(prefers-color-scheme: light)').matches;
+          var theme = storedTheme || (prefersLight ? 'light' : 'dark');
+          if (theme === 'light') {
+            document.documentElement.classList.add('light-mode');
+          } else {
+            document.documentElement.classList.remove('light-mode');
+          }
+        } catch (e) {}
+      })();
+    </script>
+  </head>
+  <body data-page="lua-editor" data-no-loading>
+    <div id="loading-screen" class="hidden">
+      <div class="loader">
+        <div class="infinity-loader">∞</div>
+        <h2>Algo Infinity Verse</h2>
+        <div class="loading-bar"><div class="loading-progress"></div></div>
+      </div>
+    </div>
+
+    <button type="button" id="scrollTopBtn" class="scroll-top-btn" aria-label="Scroll to top">
+      <i class="fas fa-arrow-up"></i>
+    </button>
+
+    <div id="navbar-placeholder"></div>
+
+    <section class="hero lu-hero">
+      <div class="hero-background">
+        <div class="stars"></div>
+        <div class="stars2"></div>
+        <div class="stars3"></div>
+      </div>
+      <div class="hero-content">
+        <h1 class="hero-title">
+          <span class="title-line">Write Lua.</span>
+          <span class="main-title lu-gradient-text">Run It Instantly.</span>
+          <span class="subtitle">In-Browser Lua Editor</span>
+        </h1>
+        <p class="lu-hero-desc">
+          Write Lua code and see variables, tables, and control flow evaluated in real time — no
+          install required.
+        </p>
+        <div class="hero-buttons">
+          <a href="#editor" class="btn btn-primary lu-cta-btn">
+            <i class="fas fa-play"></i> Open Editor
+          </a>
+        </div>
+        <div class="lu-note">
+          <i class="fas fa-info-circle"></i>
+          Runs a defined subset of Lua entirely in your browser — see
+          <button type="button" id="luOpenSupportBtn" class="lu-link-btn">what's supported</button>.
+        </div>
+      </div>
+    </section>
+
+    <section id="editor" class="section lu-section">
+      <div class="lu-container">
+        <div class="lu-toolbar">
+          <div class="lu-toolbar-left">
+            <span class="lu-label"><i class="fas fa-moon lu-lua-icon"></i> Lua Editor</span>
+            <select id="luExampleSelect" class="lu-select" aria-label="Load example">
+              <option value="hello">Hello World</option>
+              <option value="variables">Variables & Types</option>
+              <option value="loops">Loops & Control Flow</option>
+              <option value="functions">Functions</option>
+              <option value="objects">Tables & Metatables</option>
+            </select>
+          </div>
+          <div class="lu-toolbar-right">
+            <button type="button" id="luRunBtn" class="btn btn-primary lu-run-btn">
+              <i class="fas fa-play"></i> Run
+            </button>
+            <button
+              type="button"
+              id="luResetBtn"
+              class="lu-icon-btn"
+              title="Reset to example"
+              aria-label="Reset to example"
+            >
+              <i class="fas fa-undo"></i>
+            </button>
+            <button
+              type="button"
+              id="luCopyBtn"
+              class="lu-icon-btn"
+              title="Copy code"
+              aria-label="Copy code to clipboard"
+            >
+              <i class="fas fa-copy"></i>
+            </button>
+            <button
+              type="button"
+              id="luSaveBtn"
+              class="lu-icon-btn"
+              title="Save to browser storage"
+              aria-label="Save code to browser storage"
+            >
+              <i class="fas fa-save"></i>
+            </button>
+          </div>
+        </div>
+
+        <div class="lu-split">
+          <div class="lu-editor-pane">
+            <div class="lu-pane-header">
+              <span><i class="fas fa-code"></i> Editor</span>
+              <span class="lu-lang-badge">Lua</span>
+            </div>
+            <div class="lu-editor-wrap">
+              <div class="lu-line-numbers" id="luLineNumbers">1</div>
+              <div class="lu-code-editor">
+                <textarea
+                  id="luEditor"
+                  class="lu-editor-textarea"
+                  spellcheck="false"
+                  autocomplete="off"
+                  autocorrect="off"
+                  autocapitalize="off"
+                  aria-label="Lua code editor"
+                ></textarea>
+                <div class="lu-syntax-highlight" id="luHighlight" aria-hidden="true"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="lu-output-pane">
+            <div class="lu-pane-header">
+              <span><i class="fas fa-terminal"></i> Output</span>
+              <span id="luStatusBadge" class="lu-status-badge lu-status-ready">Ready</span>
+            </div>
+            <div class="lu-output-body" id="luOutputBody">
+              <span class="lu-output-placeholder">Run your code to see output here...</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div id="lu-support-modal" class="lu-modal" hidden>
+      <div class="lu-modal-backdrop" id="luModalBackdrop"></div>
+      <div class="lu-modal-panel" role="dialog" aria-modal="true" aria-labelledby="luModalTitle">
+        <div class="lu-modal-header">
+          <h2 id="luModalTitle">What this editor supports</h2>
+          <button type="button" id="luCloseSupportBtn" class="lu-icon-btn" aria-label="Close">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        <div class="lu-modal-body">
+          <ul>
+            <li>Variables — <code>local</code> and global, multiple assignment</li>
+            <li>
+              All arithmetic, comparison, and logical operators, plus <code>..</code>
+              concatenation
+            </li>
+            <li>
+              Control flow — <code>if</code>/<code>elseif</code>/<code>else</code>,
+              <code>while</code>, <code>repeat</code>/<code>until</code>, numeric and generic
+              <code>for</code>
+            </li>
+            <li>Functions — named, local, anonymous, closures, multiple return values</li>
+            <li>Tables — constructors, indexing, <code>#</code> length, nesting</li>
+            <li>
+              Method-call sugar <code>obj:method()</code> and metatables with <code>__index</code>
+              (enough for classic OOP-style Lua)
+            </li>
+            <li>
+              Built-ins:
+              <code
+                >print, type, tostring, tonumber, pairs, ipairs, next, setmetatable, getmetatable,
+                pcall, error, assert</code
+              >
+            </li>
+            <li>
+              <code>string.*</code> (format, sub, upper, lower, len, rep, byte, char, find,
+              reverse), <code>table.*</code> (insert, remove, concat), <code>math.*</code>
+            </li>
+            <li>Comments — <code>--</code> line and <code>--[[ ]]</code> block</li>
+          </ul>
+          <p class="lu-modal-note">
+            Not supported: varargs (<code>...</code>), <code>goto</code>/labels, coroutines, full
+            Lua pattern matching (<code>string.find</code> here is plain-text only), bitwise
+            operators, multi-level long brackets, and metamethods other than <code>__index</code>.
+            This runs a small interpreter built for this editor, not a full Lua engine — see
+            <a href="https://www.lua.org/manual/5.4/" target="_blank" rel="noopener"
+              >the Lua manual</a
+            >
+            for the complete language.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div id="footer-placeholder"></div>
+
+    <script src="/auth.js"></script>
+    <script src="/bootstrap-legacy.js"></script>
+    <script src="/script.js"></script>
+    <script type="module" src="/dist/legacy-bundle.mjs"></script>
+    <script src="./lua-editor.js"></script>
+
+    <script>
+      loadPartial('navbar-placeholder', '/partials/navbar.html');
+      loadPartial('footer-placeholder', '/partials/footer.html');
+    </script>
+  </body>
+</html>

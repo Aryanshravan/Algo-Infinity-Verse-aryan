@@ -169,6 +169,17 @@ const academies = [
     desc: 'Learn server-side JavaScript with Node.js, event-driven architecture, and npm ecosystem.',
   },
 
+  // ── System Design ──
+  {
+    id: 'system-design',
+    name: 'System Design Academy',
+    path: '/pages/system-design-academy/system-design-academy.html',
+    category: 'System Design',
+    icon: 'fa-solid fa-sitemap',
+    difficulty: 'Advanced',
+    desc: 'Master system design with 10 modules covering distributed systems, microservices, real-time systems, observability, and case studies from Uber to Netflix.',
+  },
+
   // ── Cloud & DevOps ──
   {
     id: 'aws',
@@ -187,6 +198,17 @@ const academies = [
     icon: 'fa-brands fa-docker',
     difficulty: 'Intermediate',
     desc: 'Containerize apps with Docker and orchestrate at scale with Kubernetes.',
+  },
+
+  // ── Version Control ──
+  {
+    id: 'git-academy',
+    name: 'Git & GitHub Academy',
+    path: '/pages/git-academy/git-academy.html',
+    category: 'DevOps & CI/CD',
+    icon: 'fa-brands fa-git-alt',
+    difficulty: 'Beginner',
+    desc: 'Master Git and GitHub — from version control basics to branching, collaboration, and GitHub Actions CI/CD.',
   },
 
   // ── Databases ──
@@ -271,8 +293,10 @@ const categoryDefs = [
   { label: 'All', key: 'all', count: academies.length },
   { label: 'Frontend', key: 'frontend', count: 8 },
   { label: 'Backend', key: 'backend', count: 10 },
+  { label: 'System Design', key: 'system-design', count: 1 },
   { label: 'Cloud & DevOps', key: 'cloud-devops', count: 2 },
   { label: 'Databases', key: 'databases', count: 7 },
+  { label: 'DevOps & CI/CD', key: 'devops-ci-cd', count: 1 },
   { label: 'AI / Misc', key: 'ai-misc', count: 1 },
 ];
 
@@ -280,8 +304,10 @@ const categoryDefs = [
 const categoryColors = {
   frontend: '#bae6fd',
   backend: '#99f6e4',
+  'system-design': '#e9d5ff',
   'cloud-devops': '#bfdbfe',
   databases: '#fed7aa',
+  'devops-ci-cd': '#fed7aa',
   'ai-misc': '#fecaca',
 };
 
@@ -515,6 +541,7 @@ function initFlipAnimation() {
     { name: 'Kafka', cat: 'backend' },
     { name: 'Rust', cat: 'backend' },
     { name: 'Go', cat: 'backend' },
+    { name: 'System Design', cat: 'system-design' },
     { name: 'AWS', cat: 'cloud-devops' },
     { name: 'Docker & K8s', cat: 'cloud-devops' },
     { name: 'PostgreSQL', cat: 'databases' },
@@ -524,6 +551,7 @@ function initFlipAnimation() {
     { name: 'SQLite', cat: 'databases' },
     { name: 'Redis', cat: 'databases' },
     { name: 'Cassandra', cat: 'databases' },
+    { name: 'Git & GitHub', cat: 'devops-ci-cd' },
     { name: 'Fail', cat: 'ai-misc' },
   ];
 

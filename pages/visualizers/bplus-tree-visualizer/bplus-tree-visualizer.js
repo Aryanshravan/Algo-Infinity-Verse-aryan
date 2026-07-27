@@ -72,12 +72,13 @@ function bptCloneForSnapshot(node) {
   };
 }
 
-function bptSnapshot(tree, highlightIds, message, type) {
+function bptSnapshot(tree, highlightIds, message, type, locks = {}) {
   return {
     root: bptCloneForSnapshot(tree.root),
     highlight: highlightIds.slice(),
     type: type || 'active',
-    message: message
+    message: message,
+    locks: Object.assign({}, locks)
   };
 }
 
@@ -195,13 +196,34 @@ function bptDeleteKey(tree, key, steps) {
     return false;
   }
 
+  let oldFirstKey = node.keys[0];
+
   node.keys.splice(idx, 1);
   node.values.splice(idx, 1);
 
   steps.push(bptSnapshot(tree, [node.id], 'Removed ' + key + ' from leaf', 'active'));
 
+  // Update routing key in ancestor if we deleted the first key
+  if (idx === 0 && node.keys.length > 0 && node.parent) {
+    bptUpdateSeparator(tree, node, oldFirstKey, node.keys[0], steps);
+  }
+
   bptFixUnderflow(tree, node, steps);
   return true;
+}
+
+function bptUpdateSeparator(tree, node, oldKey, newKey, steps) {
+  let curr = node;
+  while (curr.parent) {
+    let p = curr.parent;
+    let childIdx = p.children.indexOf(curr);
+    if (childIdx > 0 && p.keys[childIdx - 1] === oldKey) {
+      p.keys[childIdx - 1] = newKey;
+      steps.push(bptSnapshot(tree, [p.id], 'Updated routing key in parent from ' + oldKey + ' to ' + newKey, 'borrow'));
+      return;
+    }
+    curr = p;
+  }
 }
 
 function bptFixUnderflow(tree, node, steps) {
@@ -255,7 +277,7 @@ function bptBorrowFromLeft(tree, parent, idx, steps) {
     parent.keys[idx - 1] = borrowedKey;
   }
 
-  steps.push(bptSnapshot(tree, [node.id, left.id, parent.id], 'Borrowed a key from the left sibling', 'merge'));
+  steps.push(bptSnapshot(tree, [node.id, left.id, parent.id], 'Borrowed a key from the left sibling', 'borrow'));
 }
 
 function bptBorrowFromRight(tree, parent, idx, steps) {
@@ -275,7 +297,7 @@ function bptBorrowFromRight(tree, parent, idx, steps) {
     parent.keys[idx] = borrowedKey;
   }
 
-  steps.push(bptSnapshot(tree, [node.id, right.id, parent.id], 'Borrowed a key from the right sibling', 'merge'));
+  steps.push(bptSnapshot(tree, [node.id, right.id, parent.id], 'Borrowed a key from the right sibling', 'borrow'));
 }
 
 function bptMergeNodes(tree, parent, leftIdx, steps) {
@@ -394,12 +416,20 @@ function bptRenderTree(snapshot) {
       if (snapshot.highlight.indexOf(node.id) > -1) {
         hlClass = ' bpt-hl-' + snapshot.type;
       }
+      if (snapshot.locks && snapshot.locks[node.id]) {
+        hlClass += ' bpt-lock-' + snapshot.locks[node.id].type;
+      }
 
       let box = document.createElement('div');
       box.className = 'bpt-node' + (node.leaf ? ' bpt-leaf' : ' bpt-internal') + hlClass;
       box.id = 'bpt-node-' + node.id;
 
-      box.innerHTML = node.keys.map(function (k) {
+      let badge = '';
+      if (snapshot.locks && snapshot.locks[node.id]) {
+        badge = '<span class="bpt-thread-badge">' + snapshot.locks[node.id].thread + '</span>';
+      }
+
+      box.innerHTML = badge + node.keys.map(function (k) {
         return '<span class="bpt-key">' + k + '</span>';
       }).join('');
 
@@ -597,10 +627,44 @@ function bptReset() {
   let order = parseInt(document.getElementById('bptOrderSelect').value, 10);
   bptTree = bptCreateTree(order);
 
-  bptSteps = [bptSnapshot(bptTree, [], 'Tree reset. Empty B+ Tree with order ' + order + '.', 'active')];
+  bptRenderTree(bptSnapshot(bptTree, [], 'Tree initialized. Ready.'));
+}
+
+function bptSimulateConcurrency() {
+  bptNodeIdCounter = 0;
+  bptTree = bptCreateTree(4);
+  let tempSteps = [];
+  bptInsertKey(bptTree, 10, tempSteps);
+  bptInsertKey(bptTree, 20, tempSteps);
+  bptInsertKey(bptTree, 30, tempSteps);
+  bptSteps = [];
+  
+  let rootId = bptTree.root.id;
+  
+  bptSteps.push(bptSnapshot(bptTree, [], 'Starting Concurrency Control (Crabbing) Simulation', 'active'));
+  bptSteps.push(bptSnapshot(bptTree, [rootId], '[T1] Inserting 15. Acquiring Write Lock on Root.', 'active', { [rootId]: {type: 'write', thread: 'T1'} }));
+  bptSteps.push(bptSnapshot(bptTree, [rootId], '[T1] Root is full (unsafe). T1 holds lock.', 'active', { [rootId]: {type: 'write', thread: 'T1'} }));
+  
+  bptSteps.push(bptSnapshot(bptTree, [rootId], '[T2] Inserting 35. Requests Write Lock on Root... BLOCKED by T1.', 'error', { [rootId]: {type: 'write', thread: 'T1 (T2 Blocked)'} }));
+
+  bptInsertKey(bptTree, 15, tempSteps); 
+  let newRootId = bptTree.root.id;
+  let leftId = bptTree.root.children[0].id;
+  let rightId = bptTree.root.children[1].id;
+
+  bptSteps.push(bptSnapshot(bptTree, [newRootId, leftId, rightId], '[T1] Split complete. Inserted 15. Releasing locks.', 'split', { }));
+  
+  bptSteps.push(bptSnapshot(bptTree, [newRootId], '[T2] T1 released lock. T2 acquires Read Lock on Root (crabbing).', 'active', { [newRootId]: {type: 'read', thread: 'T2'} }));
+  
+  bptSteps.push(bptSnapshot(bptTree, [rightId], '[T2] T2 navigates to right child. Acquires Write Lock. Child is safe. Releases Root.', 'active', { [rightId]: {type: 'write', thread: 'T2'} }));
+  
+  bptInsertKey(bptTree, 35, tempSteps);
+  bptSteps.push(bptSnapshot(bptTree, [rightId], '[T2] Inserted 35. Releasing locks.', 'active', {}));
+  
   bptStepIndex = 0;
-  bptRenderStep();
+  bptPlaying = false;
   bptUpdateMeta();
+  bptRenderStep();
 }
 
 function bptRunPreset() {
@@ -641,7 +705,22 @@ function bptInit() {
   bptReset();
   bptRenderOps();
 
-  let execBtn = document.getElementById('bptExecBtn');
+  let bptExecBtn = document.getElementById('bptExecBtn');
+  if (bptExecBtn) {
+    bptExecBtn.addEventListener('click', function () {
+      let val = parseInt(document.getElementById('bptValueInput').value, 10);
+      if (isNaN(val)) return;
+      bptExecute(bptCurrentOp, val);
+    });
+  }
+
+  let bptConcurrentBtn = document.getElementById('bptConcurrentBtn');
+  if (bptConcurrentBtn) {
+    bptConcurrentBtn.addEventListener('click', function () {
+      bptSimulateConcurrency();
+    });
+  }
+
   let stepBtn = document.getElementById('bptStepBtn');
   let playBtn = document.getElementById('bptPlayBtn');
   let resetBtn = document.getElementById('bptResetBtn');
@@ -650,7 +729,6 @@ function bptInit() {
   let speedSlider = document.getElementById('bptSpeedSlider');
   let valueInput = document.getElementById('bptValueInput');
 
-  if (execBtn) execBtn.addEventListener('click', bptExecute);
   if (stepBtn) stepBtn.addEventListener('click', function () { bptPauseAuto(); bptStepForward(); });
   if (playBtn) playBtn.addEventListener('click', bptTogglePlay);
   if (resetBtn) resetBtn.addEventListener('click', bptReset);

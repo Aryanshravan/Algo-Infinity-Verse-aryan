@@ -1,184 +1,164 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Bulk Repository Analyzer | Algo Infinity Verse</title>
-  <link rel="stylesheet" href="/styles.css" />
+
+  <meta name="description" content="Upload a CSV of GitHub repository URLs to bulk-analyze CI/CD workflows, scores, and best practices." />
+
+  <!-- Fonts: Space Grotesk (display), Inter (body), JetBrains Mono (data) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link
-      href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Poppins:wght@300;400;500;600;700&family=Fira+Code:wght@400;500;600&display=swap"
-      rel="stylesheet"
-    />
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <style>
-    .bulk-container {
-      max-width: 800px;
-      margin: 4rem auto;
-      padding: 2rem;
-    }
-    
-    .upload-area {
-      border: 2px dashed rgba(255, 255, 255, 0.2);
-      border-radius: 12px;
-      padding: 3rem;
-      text-align: center;
-      transition: all 0.3s ease;
-      cursor: pointer;
-      background: rgba(255, 255, 255, 0.05);
-    }
-    
-    .upload-area:hover, .upload-area.dragover {
-      border-color: var(--primary-color);
-      background: rgba(var(--primary-rgb), 0.1);
-    }
+    href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap"
+    rel="stylesheet"
+  />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
 
-    .upload-area i {
-      font-size: 3rem;
-      color: var(--primary-color);
-      margin-bottom: 1rem;
-    }
+  <!-- Project styles -->
+  <link rel="stylesheet" href="/styles.css" />
+  <!-- Dedicated page styles -->
+  <link rel="stylesheet" href="bulk-analyzer.css" />
 
-    .progress-section {
-      display: none;
-      margin-top: 2rem;
-    }
-
-    .progress-bar-container {
-      width: 100%;
-      height: 20px;
-      background: rgba(255, 255, 255, 0.1);
-      border-radius: 10px;
-      overflow: hidden;
-      margin: 1rem 0;
-    }
-
-    .progress-bar {
-      height: 100%;
-      background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
-      width: 0%;
-      transition: width 0.5s ease;
-    }
-
-    .stats-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 1rem;
-      margin-bottom: 2rem;
-    }
-
-    .stat-card {
-      background: rgba(255, 255, 255, 0.05);
-      padding: 1rem;
-      border-radius: 8px;
-      text-align: center;
-    }
-
-    .stat-card h4 { margin: 0; color: #aaa; font-size: 0.9rem; }
-    .stat-card p { margin: 0.5rem 0 0; font-size: 1.5rem; font-weight: bold; }
-
-    .results-table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 2rem;
-    }
-
-    .results-table th, .results-table td {
-      padding: 1rem;
-      text-align: left;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    }
-
-    .results-table th {
-      color: var(--primary-color);
-      font-weight: 600;
-    }
-
-    .score-badge {
-      padding: 0.25rem 0.75rem;
-      border-radius: 20px;
-      font-size: 0.85rem;
-      font-weight: bold;
-    }
-    .score-high { background: rgba(46, 204, 113, 0.2); color: #2ecc71; }
-    .score-med { background: rgba(241, 196, 15, 0.2); color: #f1c40f; }
-    .score-low { background: rgba(231, 76, 60, 0.2); color: #e74c3c; }
-
-    input[type="file"] { display: none; }
-  </style>
-
-    <!-- Theme Initialization Script -->
-    <script>
-      (function() {
-        try {
-          var storedTheme = localStorage.getItem('theme');
-          var prefersLight = window.matchMedia('(prefers-color-scheme: light)').matches;
-          var theme = storedTheme || (prefersLight ? 'light' : 'dark');
-          if (theme === 'light') {
-            document.documentElement.classList.add('light-mode');
-          } else {
-            document.documentElement.classList.remove('light-mode');
-          }
-        } catch (e) {}
-      })();
-    </script>
-  <script src="/theme.js"></script>
+  <!-- Theme initialization -->
+  <script>
+    (function() {
+      try {
+        var storedTheme = localStorage.getItem('theme');
+        var prefersLight = window.matchMedia('(prefers-color-scheme: light)').matches;
+        var theme = storedTheme || (prefersLight ? 'light' : 'dark');
+        if (theme === 'light') {
+          document.documentElement.classList.add('light-mode');
+        } else {
+          document.documentElement.classList.remove('light-mode');
+        }
+      } catch (e) {}
+    })();
+  </script>
+  <script src="/theme.js" defer></script>
 </head>
 <body data-page="bulk-analyzer">
-    <!-- Loading Screen -->
-    <div id="loading-screen">
-      <div class="loader">
-        <div class="infinity-loader">∞</div>
-        <h2>Algo Infinity Verse</h2>
-        <div class="loading-bar">
-          <div class="loading-progress"></div>
-        </div>
+
+  <!-- Loading Screen -->
+  <div id="loading-screen" aria-hidden="true">
+    <div class="loader">
+      <div class="infinity-loader">&infin;</div>
+      <h2>Algo Infinity Verse</h2>
+      <div class="loading-bar">
+        <div class="loading-progress"></div>
       </div>
     </div>
+  </div>
 
-    <!-- Navigation Bar -->
-    <div id="navbar-placeholder"></div>
+  <!-- Navigation Bar -->
+  <div id="navbar-placeholder"></div>
 
-    <div class="spacer" style="height: 100px;"></div>
+  <div class="bulk-analyzer-page">
+    <div class="bra-container">
 
-    <section class="section">
-      <div class="container bulk-container">
-        <div class="text-center mb-5">
-          <h1 class="gradient-text"><i class="fas fa-layer-group"></i> Bulk Repository Analyzer</h1>
-          <p>Upload a CSV file containing a list of GitHub repository URLs. We will analyze their CI/CD workflows asynchronously.</p>
+      <!-- ════════════════════════════════════════ -->
+      <!-- Hero                                     -->
+      <!-- ════════════════════════════════════════ -->
+      <div class="bra-hero">
+        <div class="bra-hero-icon" aria-hidden="true">
+          <i class="fas fa-layer-group"></i>
+        </div>
+        <h1 class="bra-hero-title">
+          <span class="bra-hero-title-accent">Bulk</span> Repository Analyzer
+        </h1>
+        <p class="bra-hero-subtitle">
+          Upload a CSV of GitHub repos to batch-analyze their CI/CD pipelines.
+        </p>
+      </div>
+
+      <!-- ════════════════════════════════════════ -->
+      <!-- Upload Card                              -->
+      <!-- ════════════════════════════════════════ -->
+      <div class="bra-upload-card">
+        <div class="bra-upload-zone" id="dropZone" role="button" tabindex="0" aria-label="Upload CSV file">
+          <div class="bra-upload-icon-wrap" aria-hidden="true">
+            <i class="fas fa-file-csv bra-upload-icon"></i>
+          </div>
+          <h2 class="bra-upload-title">Upload CSV File</h2>
+          <p class="bra-upload-hint">Drag &amp; drop or click to browse</p>
+          <span class="bra-upload-format">
+            <i class="fas fa-check-circle" style="font-size:0.65rem;"></i>
+            .csv accepted
+          </span>
+          <input
+            type="file"
+            id="csvInput"
+            class="bra-file-input"
+            accept=".csv"
+            aria-label="Choose CSV file"
+          />
+        </div>
+      </div>
+
+      <!-- ════════════════════════════════════════ -->
+      <!-- Error Banner                             -->
+      <!-- ════════════════════════════════════════ -->
+      <div class="bra-error-banner" id="errorBanner" role="alert">
+        <i class="fas fa-exclamation-circle"></i>
+        <span id="errorText">Something went wrong. Please try again.</span>
+        <button type="button" class="bra-error-dismiss" id="errorDismiss" aria-label="Dismiss error">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+
+      <!-- ════════════════════════════════════════ -->
+      <!-- Progress Dashboard                       -->
+      <!-- ════════════════════════════════════════ -->
+      <div class="bra-dashboard" id="progressSection">
+
+        <!-- Stats header -->
+        <div class="bra-dashboard-header">
+          <h2 class="bra-dashboard-title">Analysis Progress</h2>
+          <span class="bra-dashboard-badge" id="batchBadge">
+            <i class="fas fa-bolt"></i>
+            <span id="progressText">0%</span>
+          </span>
         </div>
 
-        <div class="glass-card p-4">
-          <div class="upload-area" id="dropZone" onclick="document.getElementById('csvInput').click()">
-            <i class="fas fa-file-csv"></i>
-            <h3>Upload CSV File</h3>
-            <p>Drag & drop or click to browse</p>
-            <input type="file" id="csvInput" accept=".csv">
+        <!-- Stats cards -->
+        <div class="bra-stats-grid">
+          <div class="bra-stat-card bra-stat-card--total">
+            <div class="bra-stat-number" id="totalCount">0</div>
+            <div class="bra-stat-label">Total Jobs</div>
           </div>
+          <div class="bra-stat-card bra-stat-card--done">
+            <div class="bra-stat-number" id="completedCount">0</div>
+            <div class="bra-stat-label">Completed</div>
+          </div>
+          <div class="bra-stat-card bra-stat-card--failed">
+            <div class="bra-stat-number" id="failedCount">0</div>
+            <div class="bra-stat-label">Failed</div>
+          </div>
+        </div>
 
-          <div class="progress-section" id="progressSection">
-            <h3>Analysis Progress</h3>
+        <!-- Progress bar -->
+        <div class="bra-progress-wrap">
+          <div class="bra-progress-header">
+            <span class="bra-progress-label">Overall Progress</span>
+            <span class="bra-progress-pct" id="progressPct">0%</span>
+          </div>
+          <div class="bra-progress-track">
+            <div class="bra-progress-fill" id="progressBar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+          </div>
+        </div>
 
-            <div class="stats-grid">
-              <div class="stat-card">
-                <h4>Total Jobs</h4>
-                <p id="totalCount">0</p>
-              </div>
-              <div class="stat-card">
-                <h4>Completed</h4>
-                <p id="completedCount" style="color: #2ecc71;">0</p>
-              </div>
-              <div class="stat-card">
-                <h4>Failed</h4>
-                <p id="failedCount" style="color: #e74c3c;">0</p>
-              </div>
-            </div>
+        <!-- Per-row status list -->
+        <div class="bra-status-list" id="statusList" role="log" aria-live="polite" aria-label="Live analysis status"></div>
 
-            <div class="progress-bar-container">
-              <div class="progress-bar" id="progressBar"></div>
-            </div>
-            <p style="text-align: right;" id="progressText">0%</p>
-
-            <table class="results-table" id="resultsTable" style="display: none;">
+        <!-- Results table -->
+        <div class="bra-results" id="resultsContainer">
+          <div class="bra-results-header">
+            <h3 class="bra-results-title">Analysis Results</h3>
+            <span class="bra-results-count" id="resultsCount"></span>
+          </div>
+          <div class="bra-table-wrap">
+            <table class="bra-table" id="resultsTable">
               <thead>
                 <tr>
                   <th>Repository</th>
@@ -186,28 +166,31 @@
                   <th>Status</th>
                 </tr>
               </thead>
-              <tbody>
+              <tbody id="resultsBody">
                 <!-- Results will populate here -->
               </tbody>
             </table>
           </div>
         </div>
+
+        <!-- Loading indicator (shown during initial poll wait) -->
+        <div class="bra-loading" id="loadingIndicator">
+          <div class="bra-spinner" aria-hidden="true"></div>
+          <span>Waiting for analysis to begin&hellip;</span>
+        </div>
       </div>
-    </section>
 
-    <!-- Footer -->
-    <div id="footer-placeholder"></div>
+    </div>
+  </div>
 
-    <script src="bulk-analyzer.js"></script>
-    <script src="/auth.js"></script>
-    <script src="/bootstrap-legacy.js"></script>
-
-    <script src="/script.js"></script>
-    <script type="module" src="/dist/legacy-bundle.mjs"></script>
-    <script>
-      loadPartial('navbar-placeholder', '/partials/navbar.html');
-      loadPartial('footer-placeholder', '/partials/footer.html');
-    </script>
-  </body>
+  <!-- Scripts -->
+  <script src="bulk-analyzer.js"></script>
+  <script src="/auth.js"></script>
+  <script src="/bootstrap-legacy.js"></script>
+  <script src="/script.js"></script>
+  <script type="module" src="/dist/legacy-bundle.mjs"></script>
+  <script>
+    loadPartial('navbar-placeholder', '/partials/navbar.html');
+  </script>
+</body>
 </html>
-

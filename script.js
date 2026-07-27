@@ -51,6 +51,9 @@ async function loadPartial(id, url) {
 
     document.getElementById(id).innerHTML = html;
     if (typeof handleActiveNav === 'function') handleActiveNav();
+    if (id === 'navbar-placeholder' && typeof _initNavbar === 'function') {
+      _initNavbar();
+    }
   } catch (e) {
     if (e.name !== 'AbortError') {
       void 0;
@@ -620,6 +623,42 @@ const quizQuestions = {
       correct: 1,
       explanation: 'Edit distance computes minimum insertions, deletions, substitutions.',
     },
+  ],
+  stack: [
+    { id: 'stack-1', question: 'Which principle does a stack follow?', options: ['FIFO (First In, First Out)', 'LIFO (Last In, First Out)', 'Random access', 'Priority-based ordering'], correct: 1, explanation: 'Stacks follow LIFO: the last element pushed is the first one popped.' },
+    { id: 'stack-2', question: 'What is the time complexity of push and pop operations on a stack implemented with a dynamic array?', options: ['O(n) for both', 'O(1) amortized for both', 'O(log n) for push, O(1) for pop', 'O(1) for push, O(n) for pop'], correct: 1, explanation: 'Dynamic array push is O(1) amortized and pop is O(1) since elements are removed from the end.' },
+    { id: 'stack-3', question: 'What is the primary use case of a stack in recursive function calls?', options: ['Storing return values only', 'Managing the call stack with activation records', 'Parallelizing recursive calls', 'Replacing recursion with iteration'], correct: 1, explanation: 'Each recursive call pushes an activation record onto the call stack, storing local variables and return addresses.' },
+    { id: 'stack-4', question: 'Which classic problem is best solved using a stack to match opening and closing delimiters?', options: ['Longest Common Subsequence', 'Balanced Parentheses', 'Shortest Path', 'Merge Sort'], correct: 1, explanation: 'A stack tracks unmatched opening brackets; each closing bracket pops the matching opener.' },
+    { id: 'stack-5', question: 'What does a monotonic stack help efficiently find for each element in an array?', options: ['The smallest element in the array', 'The next greater or smaller element', 'The median of the array', 'The longest increasing subsequence'], correct: 1, explanation: 'Monotonic stacks maintain a sorted order to find next greater/smaller element in O(n) total time.' },
+    { id: 'stack-6', question: 'Which expression notation does a stack naturally evaluate?', options: ['Infix notation', 'Prefix notation only', 'Reverse Polish Notation (postfix)', 'Infix with parentheses'], correct: 2, explanation: 'Postfix expressions are evaluated left to right using a stack: push operands, pop and compute on operators.' },
+    { id: 'stack-7', question: 'What happens when you pop from an empty stack?', options: ['Returns null', 'Returns 0', 'Throws an underflow error', 'Adds a default element'], correct: 2, explanation: 'Popping from an empty stack causes a stack underflow, which is typically an error condition.' },
+    { id: 'stack-8', question: 'Which data structure combination is used to implement a stack that supports getMin() in O(1)?', options: ['A stack and a queue', 'Two stacks', 'A stack and a hash map', 'A stack and a linked list'], correct: 1, explanation: 'A second auxiliary stack tracks the minimum: push/pop mirrors the main stack, keeping the current min on top.' },
+    { id: 'stack-9', question: 'What is the time complexity of reversing the first k elements of a queue using a stack?', options: ['O(1)', 'O(k)', 'O(n)', 'O(n log n)'], correct: 1, explanation: 'Push k elements onto a stack (O(k)), then pop them back to the queue front, re-enqueue remaining n-k elements.' },
+    { id: 'stack-10', question: 'How is DFS (Depth-First Search) on a graph typically implemented iteratively?', options: ['Using a queue', 'Using a stack', 'Using a priority queue', 'Using recursion only'], correct: 1, explanation: 'Iterative DFS uses an explicit stack to simulate the recursive call stack.' },
+  ],
+  queue: [
+    { id: 'queue-1', question: 'Which principle does a queue follow?', options: ['LIFO (Last In, First Out)', 'FIFO (First In, First Out)', 'Random access', 'Priority-based ordering'], correct: 1, explanation: 'Queues follow FIFO: the first element enqueued is the first one dequeued.' },
+    { id: 'queue-2', question: 'What is the time complexity of enqueue and dequeue operations on a linked-list-based queue?', options: ['O(n) for both', 'O(1) for both', 'O(1) enqueue, O(n) dequeue', 'O(n) enqueue, O(1) dequeue'], correct: 1, explanation: 'Both operations modify only the head or tail pointer, making them O(1).' },
+    { id: 'queue-3', question: 'Which graph traversal algorithm uses a queue as its core data structure?', options: ['Depth-First Search (DFS)', 'Breadth-First Search (BFS)', "Dijkstra's Algorithm", 'Topological Sort (DFS-based)'], correct: 1, explanation: 'BFS explores nodes level by level, using a queue to visit nodes in FIFO order.' },
+    { id: 'queue-4', question: 'What problem does a circular buffer solve for array-based queues?', options: ['It allows O(1) search', 'It reuses space after dequeue operations to prevent wasted slots', 'It enables random access', 'It supports priority ordering'], correct: 1, explanation: 'A circular buffer wraps indices around, reclaiming dequeued space without shifting elements.' },
+    { id: 'queue-5', question: 'What is a deque (double-ended queue)?', options: ['A queue with priority ordering', 'A queue allowing insertions and deletions at both ends', 'A queue that only supports dequeue', 'A queue with a fixed capacity'], correct: 1, explanation: 'A deque supports O(1) insertion and deletion at both the front and rear ends.' },
+    { id: 'queue-6', question: 'Which real-world scheduling model does a simple FIFO queue best represent?', options: ['Round-robin scheduling', 'First-come, first-served scheduling', 'Priority-based scheduling', 'Shortest job first'], correct: 1, explanation: 'FCFS scheduling processes tasks in the order they arrive, exactly like a FIFO queue.' },
+    { id: 'queue-7', question: 'What is the time complexity of reversing a queue using recursion?', options: ['O(1)', 'O(log n)', 'O(n)', 'O(n^2)'], correct: 2, explanation: 'Reversing a queue recursively dequeues all n elements, then inserts each at the front, taking O(n) total.' },
+    { id: 'queue-8', question: 'How does a priority queue differ from a simple FIFO queue?', options: ['It has O(1) operations', 'It dequeues elements based on priority, not arrival order', 'It only supports enqueue', 'It uses a linked list exclusively'], correct: 1, explanation: 'A priority queue dequeues the highest-priority element first, regardless of insertion order.' },
+    { id: 'queue-9', question: 'Which operation is NOT typically supported by a standard queue ADT?', options: ['enqueue', 'dequeue', 'peek (front element)', 'insert at arbitrary index'], correct: 3, explanation: 'A standard queue only allows access at the front and rear; inserting in the middle violates FIFO.' },
+    { id: 'queue-10', question: 'Which data structure is used to implement a thread pool task scheduler?', options: ['A stack', 'A queue', 'A binary search tree', 'A hash set'], correct: 1, explanation: 'Task schedulers use a queue to ensure tasks are processed in the order they were submitted.' },
+  ],
+  recursion: [
+    { id: 'recursion-1', question: "What is a 'base case' in a recursive function?", options: ['The first line of the function', 'The condition that stops the recursion', 'The largest input the function handles', 'The initial call that starts recursion'], correct: 1, explanation: 'A base case defines the condition under which the function returns a value without making another recursive call, preventing infinite recursion.' },
+    { id: 'recursion-2', question: 'What happens when a recursive function has no base case?', options: ['The function returns null', 'It causes a stack overflow error', 'The compiler adds one automatically', 'The function runs faster'], correct: 1, explanation: 'Without a base case, the function calls itself indefinitely, consuming all available call stack memory until a stack overflow occurs.' },
+    { id: 'recursion-3', question: 'Which data structure does the system use to manage function calls during recursion?', options: ['Queue', 'Heap', 'Stack', 'Hash Map'], correct: 2, explanation: 'The call stack is a LIFO (stack) data structure that stores activation records for each function call, including local variables and return addresses.' },
+    { id: 'recursion-4', question: 'What is tail recursion?', options: ['Recursion that processes the tail of a list', 'When the recursive call is the last operation in the function', 'Recursion with only one base case', 'A recursive function with no return value'], correct: 1, explanation: 'In tail recursion, the recursive call is the final operation before returning, allowing compilers to optimize by reusing the current stack frame.' },
+    { id: 'recursion-5', question: 'What is the time complexity of naive recursive Fibonacci without memoization?', options: ['O(n)', 'O(n log n)', 'O(2^n)', 'O(n^2)'], correct: 2, explanation: 'Naive Fibonacci makes two recursive calls per invocation, creating an exponential call tree with roughly 2^n total calls.' },
+    { id: 'recursion-6', question: 'What is a recursion tree used for?', options: ['Storing recursive results in a tree data structure', 'Visualizing the hierarchy of recursive calls and their costs', 'Converting recursion to iteration', 'Measuring stack memory usage'], correct: 1, explanation: 'A recursion tree diagrams each recursive call as a node, helping analyze time complexity and identify overlapping subproblems.' },
+    { id: 'recursion-7', question: 'Which technique caches results of expensive recursive calls to avoid redundant computation?', options: ['Divide and conquer', 'Dynamic programming tabulation', 'Memoization', 'Greedy optimization'], correct: 2, explanation: 'Memoization stores previously computed results in a cache (like a hash map or array) so each unique subproblem is solved only once.' },
+    { id: 'recursion-8', question: 'What is the space complexity of a recursive function with maximum call depth n?', options: ['O(1)', 'O(log n)', 'O(n)', 'O(2^n)'], correct: 2, explanation: 'Each recursive call adds a frame to the call stack. With maximum depth n, the space used is O(n) for the stack frames.' },
+    { id: 'recursion-9', question: 'Which sorting algorithm is a classic example of the divide-and-conquer recursive paradigm?', options: ['Bubble Sort', 'Insertion Sort', 'Merge Sort', 'Selection Sort'], correct: 2, explanation: 'Merge Sort recursively divides the array in half, sorts each half, then merges the sorted halves — a textbook divide-and-conquer approach.' },
+    { id: 'recursion-10', question: "What does 'backtracking' in recursion involve?", options: ['Returning the final answer immediately', 'Exploring all possibilities and undoing choices that lead to dead ends', 'Converting recursive code to iterative loops', 'Storing all results in a hash map'], correct: 1, explanation: 'Backtracking explores each branch recursively, and when a dead end is reached, it undoes the last choice (backtracks) to try the next option.' },
   ],
 };
 
@@ -2163,12 +2202,17 @@ function initLoadingScreen() {
 }
 
 // ===== NAVBAR =====
+let navbarInitialized = false;
+
 function initNavbar() {
+  if (navbarInitialized) return;
   const menuToggle = document.getElementById('menuToggle');
   const navLinks = document.getElementById('navLinks');
 
+  if (!menuToggle || !navLinks) return;
+
   let overlay = document.querySelector('.nav-overlay');
-  if (!overlay && menuToggle && navLinks) {
+  if (!overlay) {
     overlay = document.createElement('div');
     overlay.className = 'nav-overlay';
     document.body.appendChild(overlay);
@@ -2192,18 +2236,16 @@ function initNavbar() {
     toggleMenu(false);
   };
 
-  if (menuToggle && navLinks) {
-    menuToggle.addEventListener('click', (e) => {
-      e.stopPropagation();
-      toggleMenu();
-    });
+  menuToggle.addEventListener('click', (e) => {
+    e.stopPropagation();
+    toggleMenu();
+  });
 
-    if (overlay) overlay.addEventListener('click', closeMenu);
+  if (overlay) overlay.addEventListener('click', closeMenu);
 
-    navLinks.querySelectorAll('a').forEach((link) => {
-      link.addEventListener('click', closeMenu);
-    });
-  }
+  navLinks.querySelectorAll('a').forEach((link) => {
+    link.addEventListener('click', closeMenu);
+  });
 
   const dropdownToggles = document.querySelectorAll('.dropdown-toggle');
   const isMobile = () => window.matchMedia('(max-width: 1024px)').matches;
@@ -2287,7 +2329,7 @@ function initNavbar() {
 
   window.addEventListener('resize', () => {
     if (!isMobile()) {
-      if (navLinks.classList.contains('active')) {
+      if (navLinks && navLinks.classList.contains('active')) {
         toggleMenu(false);
       }
     } else {
@@ -2299,7 +2341,11 @@ function initNavbar() {
       });
     }
   });
+
+  navbarInitialized = true;
 }
+
+const _initNavbar = initNavbar;
 
 // ===== HERO SECTION =====
 function initHeroSection() {
@@ -2429,21 +2475,37 @@ function initTopicOfTheDay() {
   const totdIcon = document.getElementById('totdIcon');
   if (!totdIcon) return;
 
-  totdIcon.textContent = topic.icon;
-  document.getElementById('totdTitle').textContent = topic.name;
-  document.getElementById('totdDesc').textContent = topic.description;
+  const topicIcons = {
+    'Arrays': 'fa-layer-group',
+    'Strings': 'fa-font',
+    'Linked List': 'fa-link',
+    'Trees': 'fa-tree',
+    'Graphs': 'fa-project-diagram',
+    'Dynamic Programming': 'fa-puzzle-piece',
+    'Heaps': 'fa-chart-bar',
+  };
+  totdIcon.textContent = '';
+  const icon = document.createElement('i');
+  icon.className = `fas ${topicIcons[topic.name] || 'fa-book'}`;
+  icon.style.fontSize = '2.5rem';
+  totdIcon.appendChild(icon);
+  const totdTitle = document.getElementById('totdTitle');
+  if (totdTitle) totdTitle.textContent = topic.name;
+  const totdDesc = document.getElementById('totdDesc');
+  if (totdDesc) totdDesc.textContent = topic.description;
 
   const diffEl = document.getElementById('totdDifficulty');
-  diffEl.textContent = topic.difficulty;
-  diffEl.className = `totd-difficulty difficulty-badge ${getDifficultyClass(topic.difficulty)}`;
+  if (diffEl) {
+    diffEl.textContent = topic.difficulty;
+    diffEl.className = `totd-difficulty difficulty-badge ${getDifficultyClass(topic.difficulty)}`;
+  }
 
   const progress = getTopicProgress(topic.name);
-  document.getElementById('totdProblems').textContent =
-    `${progress.completed}/${progress.total} solved`;
+  const totdProblems = document.getElementById('totdProblems');
+  if (totdProblems) totdProblems.textContent = `${progress.completed}/${progress.total} solved`;
 
-  document.getElementById('totdBtn').addEventListener('click', () => {
-    openTopicModal(topic);
-  });
+  const totdBtn = document.getElementById('totdBtn');
+  if (totdBtn) totdBtn.addEventListener('click', () => openTopicModal(topic));
 }
 
 function initTopicsSection() {
@@ -2531,6 +2593,12 @@ function getQuizTopicKey(topic) {
       graphs: 'graphs',
       'dynamic programming': 'dp',
       dp: 'dp',
+      heaps: 'heaps',
+      stacks: 'stack',
+      stack: 'stack',
+      queues: 'queue',
+      queue: 'queue',
+      recursion: 'recursion',
     };
     return map[normalize(key)] || null;
   };
@@ -2549,6 +2617,8 @@ function getQuizTopicKey(topic) {
     trees: 'trees',
     graphs: 'graphs',
     'dynamic programming': 'dp',
+    stacks: 'stack',
+    queues: 'queue',
   };
 
   return keyMap[name] || toKnownKey(name) || null;
@@ -3770,15 +3840,36 @@ function updateGamification() {
 }
 
 function showNotification(message, type = 'info') {
+  // Use ToastService if available (provides icon, close button, glassmorphism)
+  if (window.Toast && typeof window.Toast.show === 'function') {
+    window.Toast.show(message, type);
+    return;
+  }
+  // Fallback: dismiss any existing toasts first, then create a new one
+  document.querySelectorAll('.toast-notification').forEach(function(el) {
+    el.classList.remove('toast-visible');
+    if (el.parentNode) el.parentNode.removeChild(el);
+  });
+
   const notification = document.createElement('div');
-  notification.style.cssText = `position:fixed; top:100px; right:20px; padding:1rem 1.5rem; background:${type === 'success' ? 'var(--gradient-4)' : type === 'error' ? '#ef4444' : 'var(--primary)'}; color:${type === 'success' ? 'var(--dark-bg)' : 'white'}; border-radius:10px; box-shadow:var(--glass-shadow); z-index:10000; animation:slideIn 0.3s ease; font-weight:600; max-width:350px;`;
-  notification.textContent = message;
+  notification.className = `toast-notification toast-${type}`;
+
+  const iconEl = document.createElement('div');
+  iconEl.className = 'toast-icon';
+  const iconMap = { success: 'fa-check-circle', error: 'fa-exclamation-circle', warning: 'fa-exclamation-triangle' };
+  iconEl.innerHTML = `<i class="fas ${iconMap[type] || 'fa-info-circle'}"></i>`;
+  notification.appendChild(iconEl);
+
+  const msgEl = document.createElement('div');
+  msgEl.className = 'toast-message';
+  msgEl.textContent = message;
+  notification.appendChild(msgEl);
+
   document.body.appendChild(notification);
+  requestAnimationFrame(() => notification.classList.add('toast-visible'));
   setTimeout(() => {
-    notification.style.opacity = '0';
-    notification.style.transform = 'translateX(100%)';
-    notification.style.transition = 'all 0.3s ease';
-    setTimeout(() => notification.remove(), 300);
+    notification.classList.remove('toast-visible');
+    setTimeout(() => { if (notification.parentNode) notification.remove(); }, 300);
   }, 3000);
 }
 
@@ -4626,12 +4717,7 @@ function getClassTemplate(lang, problem) {
   const fnName = problem.functionName || 'LRUCache';
   const params = problem.params || [];
 
-  let docComment = '';
-  if (problem.guide) {
-    const lines = problem.guide.split('\n');
-    const prefix = lang === 'python' ? '# ' : '// ';
-    docComment = lines.map((l) => prefix + l).join('\n') + '\n';
-  }
+  const docComment = '';
 
   const paramStr = params
     .map((p) => {
@@ -4645,16 +4731,13 @@ function getClassTemplate(lang, problem) {
 
   const templates = {
     javascript:
-      docComment +
       `class ${fnName} {\n    constructor(${paramStr}) {\n        \n    }\n\n    get(key) {\n        \n    }\n\n    put(key, value) {\n        \n    }\n}`,
     python:
-      docComment +
       `class ${fnName}:\n    def __init__(self, ${params.join(', ')}):\n        pass\n\n    def get(self, key: int) -> int:\n        pass\n\n    def put(self, key: int, value: int) -> None:\n        pass\n`,
-    java: `class ${fnName} {\n${docComment.replace(/^(.)/gm, '    $1')}    public ${fnName}(${paramStr}) {\n        \n    }\n\n    public int get(int key) {\n        return 0;\n    }\n\n    public void put(int key, int value) {\n        \n    }\n}`,
-    cpp: `#include <unordered_map>\nusing namespace std;\n\n${docComment}class ${fnName} {\npublic:\n    ${fnName}(${paramStr}) {\n        \n    }\n\n    int get(int key) {\n        return 0;\n    }\n\n    void put(int key, int value) {\n        \n    }\n};`,
-    c: `${docComment}// Use a struct with function pointers:\ntypedef struct {\n    int capacity;\n} LRUCache;\n\nLRUCache* createLRUCache(int capacity) {\n    return NULL;\n}\n\nint get(LRUCache* cache, int key) {\n    return 0;\n}\n\nvoid put(LRUCache* cache, int key, int value) {\n    \n}`,
+    java: `class ${fnName} {\n    public ${fnName}(${paramStr}) {\n        \n    }\n\n    public int get(int key) {\n        return 0;\n    }\n\n    public void put(int key, int value) {\n        \n    }\n}`,
+    cpp: `#include <unordered_map>\nusing namespace std;\n\nclass ${fnName} {\npublic:\n    ${fnName}(${paramStr}) {\n        \n    }\n\n    int get(int key) {\n        return 0;\n    }\n\n    void put(int key, int value) {\n        \n    }\n};`,
+    c: `// Use a struct with function pointers:\ntypedef struct {\n    int capacity;\n} LRUCache;\n\nLRUCache* createLRUCache(int capacity) {\n    return NULL;\n}\n\nint get(LRUCache* cache, int key) {\n    return 0;\n}\n\nvoid put(LRUCache* cache, int key, int value) {\n    \n}`,
     swift:
-      docComment +
       `class ${fnName} {\n    init(${paramStr}) {\n        \n    }\n\n    func get(_ key: Int) -> Int {\n        return 0\n    }\n\n    func put(_ key: Int, _ value: Int) {\n        \n    }\n}`,
   };
   return templates[lang] || templates.javascript;
@@ -4693,20 +4776,14 @@ function getDefaultCode(lang, problem) {
         .join(', ')
     : 'params';
 
-  let docComment = '';
-  if (problem.guide) {
-    const lines = problem.guide.split('\n');
-    const prefix = lang === 'python' ? '# ' : '// ';
-    docComment = lines.map((l) => prefix + l).join('\n') + '\n';
-  }
+  const docComment = '';
 
   const templates = {
     javascript:
-      docComment + 'function ' + fnName + '(' + (params.join(', ') || 'params') + ') {\n    \n}',
-    python: docComment + 'def ' + fnName + '(' + (params.join(', ') || 'params') + '):\n    pass\n',
+      'function ' + fnName + '(' + (params.join(', ') || 'params') + ') {\n    \n}',
+    python: 'def ' + fnName + '(' + (params.join(', ') || 'params') + '):\n    pass\n',
     java:
       'class Solution {\n' +
-      docComment.replace(/^(.)/gm, '    $1') +
       '    public ' +
       retType +
       ' ' +
@@ -4716,7 +4793,6 @@ function getDefaultCode(lang, problem) {
       ') {\n        \n    }\n}',
     cpp:
       '#include <string>\n#include <stack>\nusing namespace std;\n\n' +
-      docComment +
       retType +
       ' ' +
       fnName +
@@ -4725,14 +4801,13 @@ function getDefaultCode(lang, problem) {
       ') {\n    \n}',
     c:
       '#include <stdio.h>\n#include <stdlib.h>\n#include <string.h>\n#include <stdbool.h>\n\n' +
-      docComment +
       retType +
       ' ' +
       fnName +
       '(' +
       paramStr +
       ') {\n    \n}',
-    swift: docComment + 'func ' + fnName + '(' + paramStr + ') -> ' + retType + ' {\n    \n}',
+    swift: 'func ' + fnName + '(' + paramStr + ') -> ' + retType + ' {\n    \n}'
   };
   return templates[lang] || templates.javascript;
 }
@@ -5339,6 +5414,42 @@ document.addEventListener('keydown', function (e) {
   if (e.altKey && e.key === 'd') {
     e.preventDefault();
     window.location.href = '#dashboard';
+  }
+
+  // Alt+S: Settings dropdown
+  if (e.altKey && e.key === 's') {
+    e.preventDefault();
+    const settingsParent = document.querySelector('.nav-settings-dropdown');
+    if (settingsParent) {
+      document.querySelectorAll('.has-dropdown.open').forEach(function (el) {
+        if (el !== settingsParent) {
+          el.classList.remove('open');
+          const btn = el.querySelector('.dropdown-toggle');
+          if (btn) btn.setAttribute('aria-expanded', 'false');
+        }
+      });
+      var isOpen = settingsParent.classList.toggle('open');
+      var toggle = settingsParent.querySelector('.dropdown-toggle');
+      if (toggle) toggle.setAttribute('aria-expanded', isOpen);
+    }
+  }
+
+  // Alt+L: Learn dropdown
+  if (e.altKey && e.key === 'l') {
+    e.preventDefault();
+    const learnParent = document.querySelector('.nav-learn-dropdown');
+    if (learnParent) {
+      document.querySelectorAll('.has-dropdown.open').forEach(function (el) {
+        if (el !== learnParent) {
+          el.classList.remove('open');
+          const btn = el.querySelector('.dropdown-toggle');
+          if (btn) btn.setAttribute('aria-expanded', 'false');
+        }
+      });
+      var isOpen = learnParent.classList.toggle('open');
+      var toggle = learnParent.querySelector('.dropdown-toggle');
+      if (toggle) toggle.setAttribute('aria-expanded', isOpen);
+    }
   }
 
   // Escape: Close modal

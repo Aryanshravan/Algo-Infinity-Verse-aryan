@@ -1,70 +1,145 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Consistent Hashing Visualizer | Algo Infinity Verse</title>
-    <link rel="stylesheet" href="/styles.css">
-    <link rel="stylesheet" href="consistent-hashing-simulator.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-</head>
-<body>
+    <meta
+      name="description"
+      content="Visualize consistent hashing on a ring, showing how nodes and keys are mapped and how minimal remapping occurs when nodes join or leave."
+    />
+    <link rel="stylesheet" href="/styles.css" />
+    <link rel="stylesheet" href="consistent-hashing-simulator.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <link rel="stylesheet" href="/modules/quick-notes/quick-notes.css" />
+  </head>
+  <body>
     <nav class="navbar">
-        <div class="logo">Algo Infinity Verse</div>
-        <div class="nav-links">
-            <a href="/">Home</a>
-            <a href="/pages/visualizers/visualizers.html">Visualizers</a>
-        </div>
+      <div class="logo">Algo Infinity Verse</div>
+      <div class="nav-links">
+        <a href="/">Home</a>
+        <a href="/pages/visualizers/visualizers.html">Visualizers</a>
+      </div>
     </nav>
 
     <div class="container">
-        <header class="header">
-            <h1>Consistent Hashing & Distributed Cache Simulator</h1>
-            <p>Understand how distributed systems balance load and handle node failures with minimal key remapping.</p>
-        </header>
+      <header class="header">
+        <h1>Consistent Hashing & Distributed Cache Simulator</h1>
+        <p>
+          Understand how distributed systems balance load and handle node failures with minimal key
+          remapping.
+        </p>
+      </header>
 
-        <main class="simulator-layout">
-            <aside class="controls-panel">
-                <div class="control-group">
-                    <label>Node Management</label>
-                    <div class="button-group">
-                        <button id="add-node-btn" class="primary-btn"><i class="fa-solid fa-server"></i> Add Node</button>
-                        <button id="remove-node-btn" class="secondary-btn"><i class="fa-solid fa-trash"></i> Remove Node</button>
-                    </div>
-                </div>
-                
-                <div class="control-group" style="margin-top: 1rem;">
-                    <label for="key-input">Cache Data Key</label>
-                    <div style="display: flex; gap: 0.5rem;">
-                        <input type="text" id="key-input" placeholder="e.g., user_123" style="flex: 1;">
-                        <button id="route-key-btn" class="primary-btn">Route</button>
-                    </div>
-                </div>
+      <main class="simulator-layout">
+        <aside class="controls-panel">
+          <div class="control-group">
+            <label>Node Management</label>
+            <div class="button-group">
+              <button id="add-node-btn" class="primary-btn">
+                <i class="fa-solid fa-server"></i> Add Node
+              </button>
+              <button id="remove-node-btn" class="secondary-btn">
+                <i class="fa-solid fa-trash"></i> Remove Node
+              </button>
+            </div>
+          </div>
 
-                <div class="stats-container">
-                    <h3>Current State</h3>
-                    <p>Total Nodes: <span id="stat-nodes">3</span></p>
-                    <p>Total Keys Cached: <span id="stat-keys">0</span></p>
-                </div>
+          <div class="control-group" style="margin-top: 1rem">
+            <label for="key-input">Cache Data Key</label>
+            <div style="display: flex; gap: 0.5rem">
+              <input type="text" id="key-input" placeholder="e.g., user_123" style="flex: 1" />
+              <button id="route-key-btn" class="primary-btn">Route</button>
+            </div>
+          </div>
 
-                <div class="logs-container">
-                    <h3>Event Logs</h3>
-                    <div id="logs-area" class="logs-area"></div>
-                </div>
-            </aside>
+          <div class="control-group" style="margin-top: 1rem">
+            <label>Bounded Loads</label>
+            <div style="display: flex; align-items: center; gap: 0.5rem; margin-top: 0.5rem;">
+              <input type="checkbox" id="bounded-loads-toggle" />
+              <label for="bounded-loads-toggle" style="font-size: 0.85rem; cursor: pointer;">Enable Capacity Constraints</label>
+            </div>
+            <div id="c-factor-group" style="display: none; margin-top: 0.75rem;">
+              <div style="display: flex; justify-content: space-between; font-size: 0.85rem; color: #666;">
+                <span>Load Factor (c)</span>
+                <span id="c-factor-val">1.25</span>
+              </div>
+              <input type="range" id="c-factor-slider" min="1.0" max="2.0" step="0.05" value="1.25" style="width: 100%;" />
+            </div>
+          </div>
 
-            <section class="visualization-panel">
-                <div class="ring-container" id="ring-container">
-                    <svg width="400" height="400" viewBox="-200 -200 400 400" id="hash-ring-svg">
-                        <circle cx="0" cy="0" r="160" fill="none" stroke="#e2e8f0" stroke-width="20" />
-                        <circle cx="0" cy="0" r="160" fill="none" stroke="#4facfe" stroke-width="4" stroke-dasharray="1000" class="ring-active" />
-                    </svg>
-                    <!-- Nodes and Keys will be positioned absolutely here -->
-                </div>
-            </section>
-        </main>
+          <div class="stats-container">
+            <h3>Current State</h3>
+            <p>Total Nodes: <span id="stat-nodes">3</span></p>
+            <p>Total Keys Cached: <span id="stat-keys">0</span></p>
+          </div>
+
+          <div class="logs-container">
+            <h3>Event Logs</h3>
+            <div id="logs-area" class="logs-area"></div>
+          </div>
+        </aside>
+
+        <section class="visualization-panel">
+          <div class="ring-container" id="ring-container">
+            <svg width="400" height="400" viewBox="-200 -200 400 400" id="hash-ring-svg">
+              <circle cx="0" cy="0" r="160" fill="none" stroke="#e2e8f0" stroke-width="20" />
+              <circle
+                cx="0"
+                cy="0"
+                r="160"
+                fill="none"
+                stroke="#4facfe"
+                stroke-width="4"
+                stroke-dasharray="1000"
+                class="ring-active"
+              />
+            </svg>
+            <!-- Nodes and Keys will be positioned absolutely here -->
+          </div>
+
+          <div
+            class="variance-container"
+            style="
+              margin-top: 2rem;
+              padding: 1rem;
+              background: #fff;
+              border-radius: 8px;
+              box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            "
+          >
+            <h3>Key Distribution Variance</h3>
+            <p style="font-size: 0.9rem; color: #666; margin-bottom: 1rem">
+              Shows the load balance across all nodes. Lower variance is better.
+            </p>
+            <div
+              id="variance-chart"
+              style="
+                display: flex;
+                align-items: flex-end;
+                gap: 0.5rem;
+                height: 120px;
+                border-bottom: 2px solid #e2e8f0;
+                padding-bottom: 0.5rem;
+              "
+            >
+              <!-- Bars will be injected here dynamically -->
+            </div>
+            <div
+              id="variance-stats"
+              style="margin-top: 1rem; font-weight: 600; font-family: monospace"
+            >
+              Variance: 0.00
+            </div>
+          </div>
+        </section>
+      </main>
     </div>
 
     <script src="consistent-hashing-simulator.js"></script>
-</body>
+    <script src="/modules/quick-notes/quick-notes.js"></script>
+  </body>
 </html>

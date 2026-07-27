@@ -20,7 +20,7 @@ const els = {
 };
 
 let currentTrace = [];
-const TOTAL_TIMELINE_MS = 200; // Total width of the timeline in ms
+let TOTAL_TIMELINE_MS = 200; // Dynamically computed per trace
 
 function initTracing() {
   els.btnTrigger.addEventListener('click', triggerRequest);
@@ -39,43 +39,125 @@ function triggerRequest() {
 
   els.btnTrigger.disabled = true;
 
-  // Simulate the trace waterfall
-  // Root span: API Gateway (0 to 180ms)
-  const gwSpanId = generateId();
-  addSpan('gw', 'GET /api/checkout', traceId, gwSpanId, null, 0, 180);
-  animateNode('gw', 0, 180);
+  // Simulate dynamic trace timings
+  const timings = generateTraceTimings();
+  TOTAL_TIMELINE_MS = timings.gwEnd;
 
-  // Child 1: Auth Service (10 to 40ms)
+  // Update timeline header dynamically
+  const timelineHeader = document.getElementById('timelineHeader');
+  if (timelineHeader) {
+    timelineHeader.innerHTML = '';
+    for (let i = 0; i <= 4; i++) {
+      const span = document.createElement('span');
+      span.textContent = Math.floor((TOTAL_TIMELINE_MS * i) / 4) + 'ms';
+      timelineHeader.appendChild(span);
+    }
+  }
+
+  const VISUAL_MULTIPLIER = 10; // Slow down for visualization
+  const gwSpanId = generateId();
+
+  // Start GW span
+  addSpan('gw', 'GET /api/checkout', traceId, gwSpanId, null, 0, timings.gwEnd);
+  animateNode('gw', 0, timings.gwEnd);
+
+  // Auth Service Call
   setTimeout(() => {
     animatePacket('gw', 'auth', () => {
       const authSpanId = generateId();
-      addSpan('auth', 'POST /verify_token', traceId, authSpanId, gwSpanId, 10, 30);
-      animateNode('auth', 10, 30);
+      addSpan(
+        'auth',
+        'POST /verify_token',
+        traceId,
+        authSpanId,
+        gwSpanId,
+        timings.authStart,
+        timings.authProc
+      );
+      animateNode('auth', timings.authStart, timings.authProc);
     });
-  }, 100); // UI visual delay for packet
+  }, timings.authStart * VISUAL_MULTIPLIER);
 
-  // Child 2: Billing Service (50 to 160ms)
+  // Billing Service Call
   setTimeout(() => {
     animatePacket('gw', 'billing', () => {
       const billingSpanId = generateId();
-      addSpan('billing', 'POST /process_payment', traceId, billingSpanId, gwSpanId, 50, 110);
-      animateNode('billing', 50, 110);
+      addSpan(
+        'billing',
+        'POST /process_payment',
+        traceId,
+        billingSpanId,
+        gwSpanId,
+        timings.billStart,
+        timings.billEnd - timings.billStart
+      );
+      animateNode('billing', timings.billStart, timings.billEnd - timings.billStart);
 
-      // Grandchild: DB Service called by Billing (80 to 140ms)
-      setTimeout(() => {
-        animatePacket('billing', 'db', () => {
-          const dbSpanId = generateId();
-          addSpan('db', 'UPDATE users_balance', traceId, dbSpanId, billingSpanId, 80, 60);
-          animateNode('db', 80, 60);
-        });
-      }, 300); // nested delay
+      // DB Service Call
+      setTimeout(
+        () => {
+          animatePacket('billing', 'db', () => {
+            const dbSpanId = generateId();
+            addSpan(
+              'db',
+              'UPDATE users_balance',
+              traceId,
+              dbSpanId,
+              billingSpanId,
+              timings.dbStart,
+              timings.dbProc
+            );
+            animateNode('db', timings.dbStart, timings.dbProc);
+          });
+        },
+        (timings.dbStart - timings.billStart) * VISUAL_MULTIPLIER
+      );
     });
-  }, 500);
+  }, timings.billStart * VISUAL_MULTIPLIER);
 
   // Re-enable button after trace completes
-  setTimeout(() => {
-    els.btnTrigger.disabled = false;
-  }, 2000);
+  setTimeout(
+    () => {
+      els.btnTrigger.disabled = false;
+    },
+    timings.gwEnd * VISUAL_MULTIPLIER + 500
+  );
+}
+
+function generateTraceTimings() {
+  const authNetReq = 5 + Math.floor(Math.random() * 15);
+  const authProc = 20 + Math.floor(Math.random() * 30);
+  const authNetRes = 5 + Math.floor(Math.random() * 15);
+
+  const authStart = authNetReq;
+  const authEnd = authStart + authProc;
+  const gwAfterAuth = authEnd + authNetRes;
+
+  const billNetReq = 5 + Math.floor(Math.random() * 15);
+  const billStart = gwAfterAuth + billNetReq;
+
+  const dbNetReq = 5 + Math.floor(Math.random() * 10);
+  const dbStart = billStart + dbNetReq;
+  const dbProc = 30 + Math.floor(Math.random() * 40);
+  const dbEnd = dbStart + dbProc;
+  const dbNetRes = 5 + Math.floor(Math.random() * 10);
+
+  const billEnd = dbEnd + dbNetRes + 5 + Math.floor(Math.random() * 15);
+  const billNetRes = 5 + Math.floor(Math.random() * 15);
+
+  const gwEnd = billEnd + billNetRes + Math.floor(Math.random() * 10);
+
+  return {
+    authStart,
+    authProc,
+    authEnd,
+    billStart,
+    billEnd,
+    dbStart,
+    dbProc,
+    dbEnd,
+    gwEnd,
+  };
 }
 
 function addSpan(serviceId, operationName, traceId, spanId, parentId, startMs, durationMs) {
@@ -161,5 +243,14 @@ function animatePacket(fromId, toId, onComplete) {
   animation.onfinish = () => {
     packet.classList.add('hidden');
     onComplete();
+  };
+}
+
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = {
+    generateTraceTimings,
+    addSpan,
+    generateId,
+    getTrace: () => currentTrace,
   };
 }

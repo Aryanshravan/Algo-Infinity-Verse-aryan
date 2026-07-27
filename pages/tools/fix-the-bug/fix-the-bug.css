@@ -1,0 +1,1092 @@
+/* ============================================================
+   Fix the Bug — Pastel-Themed Debugging Challenge Tool
+   Palette: warm cream base, coral accent, amber highlights,
+            sage success, rose errors, slate neutrals
+   No purple, no cyan, no lime.
+   ============================================================ */
+
+/* ═══ DESIGN TOKENS ═══ */
+:root,
+.light-mode {
+  /* Background — warm cream/paper tones */
+  --ftb-bg: #F5F0EB;
+  --ftb-bg-alt: #EDE8E0;
+  --ftb-surface: #FCFAF7;
+  --ftb-surface-hover: #F7F3ED;
+  --ftb-surface-active: #F0EBE4;
+
+  /* Text — warm dark tones */
+  --ftb-text: #2D2A24;
+  --ftb-text-secondary: #7A7582;
+  --ftb-text-tertiary: #A5A0AD;
+  --ftb-text-inverse: #FCFAF7;
+
+  /* Accent — warm pastels */
+  --ftb-coral: #E8B4A0;
+  --ftb-coral-hover: #DFA690;
+  --ftb-coral-light: rgba(232, 180, 160, 0.15);
+  --ftb-amber: #EDCA8A;
+  --ftb-amber-hover: #E4BE78;
+  --ftb-amber-light: rgba(237, 202, 138, 0.15);
+  --ftb-sage: #B0C8B8;
+  --ftb-sage-hover: #A0BCA8;
+  --ftb-sage-light: rgba(176, 200, 184, 0.15);
+  --ftb-rose: #E0BAC0;
+  --ftb-rose-hover: #D6ACB2;
+  --ftb-rose-light: rgba(224, 186, 192, 0.15);
+  --ftb-slate: #B8BCC8;
+  --ftb-slate-hover: #A8ACB8;
+
+  /* Borders */
+  --ftb-border: rgba(45, 42, 36, 0.08);
+  --ftb-border-hover: rgba(45, 42, 36, 0.15);
+  --ftb-border-focus: var(--ftb-coral);
+
+  /* Shadows */
+  --ftb-shadow-sm: 0 1px 3px rgba(45, 42, 36, 0.06);
+  --ftb-shadow-md: 0 4px 12px rgba(45, 42, 36, 0.08);
+  --ftb-shadow-lg: 0 8px 28px rgba(45, 42, 36, 0.10);
+
+  /* Code */
+  --ftb-code-bg: #F8F6F2;
+  --ftb-code-line-hover: rgba(232, 180, 160, 0.08);
+  --ftb-code-line-selected: rgba(232, 180, 160, 0.18);
+  --ftb-code-bug-highlight: rgba(224, 186, 192, 0.20);
+  --ftb-code-correct-highlight: rgba(176, 200, 184, 0.20);
+  --ftb-line-number-color: #C0BDCA;
+  --ftb-code-text: #2D2A24;
+
+  /* Difficulty badges */
+  --ftb-diff-1: #B0C8B8;
+  --ftb-diff-2: #C5D5B0;
+  --ftb-diff-3: #EDCA8A;
+  --ftb-diff-4: #E8B4A0;
+  --ftb-diff-5: #E0BAC0;
+}
+
+/* ═══ DARK MODE TOKENS ═══ */
+.dark-mode,
+:root:not(.light-mode) {
+  --ftb-bg: #1C1B24;
+  --ftb-bg-alt: #24232E;
+  --ftb-surface: #262533;
+  --ftb-surface-hover: #2E2D3B;
+  --ftb-surface-active: #363548;
+
+  --ftb-text: #E8E4DE;
+  --ftb-text-secondary: #9894A0;
+  --ftb-text-tertiary: #716D7A;
+  --ftb-text-inverse: #1C1B24;
+
+  --ftb-coral: #D6A894;
+  --ftb-coral-hover: #C69A86;
+  --ftb-coral-light: rgba(214, 168, 148, 0.12);
+
+  --ftb-amber: #D4B67A;
+  --ftb-amber-hover: #C8AA6E;
+  --ftb-amber-light: rgba(212, 182, 122, 0.12);
+
+  --ftb-sage: #9CB4A4;
+  --ftb-sage-hover: #8EA896;
+  --ftb-sage-light: rgba(156, 180, 164, 0.12);
+
+  --ftb-rose: #C8A6AC;
+  --ftb-rose-hover: #BA989E;
+  --ftb-rose-light: rgba(200, 166, 172, 0.12);
+
+  --ftb-slate: #7A7685;
+  --ftb-slate-hover: #8A8695;
+
+  --ftb-border: rgba(232, 228, 222, 0.08);
+  --ftb-border-hover: rgba(232, 228, 222, 0.15);
+  --ftb-border-focus: var(--ftb-coral);
+
+  --ftb-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.2);
+  --ftb-shadow-md: 0 4px 12px rgba(0, 0, 0, 0.3);
+  --ftb-shadow-lg: 0 8px 28px rgba(0, 0, 0, 0.35);
+
+  --ftb-code-bg: #1E1D28;
+  --ftb-code-line-hover: rgba(214, 168, 148, 0.06);
+  --ftb-code-line-selected: rgba(214, 168, 148, 0.14);
+  --ftb-code-bug-highlight: rgba(200, 166, 172, 0.16);
+  --ftb-code-correct-highlight: rgba(156, 180, 164, 0.16);
+  --ftb-line-number-color: #5A5665;
+  --ftb-code-text: #E8E4DE;
+
+  --ftb-diff-1: #9CB4A4;
+  --ftb-diff-2: #A8BC9A;
+  --ftb-diff-3: #D4B67A;
+  --ftb-diff-4: #D6A894;
+  --ftb-diff-5: #C8A6AC;
+}
+
+/* ═══ BASE LAYOUT ═══ */
+.ftb-body {
+  background: var(--ftb-bg);
+  color: var(--ftb-text);
+  font-family: 'Inter', sans-serif;
+  line-height: 1.6;
+}
+
+.ftb-container {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 5.5rem 1.5rem 4rem;
+}
+
+/* ═══ HEADER ═══ */
+.ftb-header {
+  margin-bottom: 2rem;
+  animation: ftbFadeIn 0.6s ease-out;
+}
+
+.ftb-header-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.ftb-brand {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.ftb-brand-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  background: var(--ftb-coral-light);
+  border: 1px solid var(--ftb-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.3rem;
+  color: var(--ftb-coral);
+  flex-shrink: 0;
+}
+
+.ftb-title {
+  font-family: 'DM Serif Display', Georgia, serif;
+  font-size: 1.8rem;
+  font-weight: 400;
+  line-height: 1.2;
+  margin: 0;
+  color: var(--ftb-text);
+  letter-spacing: -0.02em;
+}
+
+.ftb-subtitle {
+  font-size: 0.85rem;
+  color: var(--ftb-text-tertiary);
+  margin: 0;
+  font-weight: 400;
+}
+
+/* ═══ STATS ROW ═══ */
+.ftb-stats {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.ftb-stat {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.5rem 0.85rem;
+  background: var(--ftb-surface);
+  border: 1px solid var(--ftb-border);
+  border-radius: 10px;
+  font-size: 0.85rem;
+  transition: border-color 0.2s, transform 0.2s;
+}
+
+.ftb-stat:hover {
+  border-color: var(--ftb-border-hover);
+  transform: translateY(-1px);
+}
+
+.ftb-stat-icon {
+  color: var(--ftb-coral);
+  font-size: 0.9rem;
+}
+
+.ftb-stat-value {
+  font-weight: 600;
+  font-size: 1rem;
+  color: var(--ftb-text);
+  font-variant-numeric: tabular-nums;
+}
+
+.ftb-stat-label {
+  color: var(--ftb-text-tertiary);
+  font-size: 0.78rem;
+}
+
+/* ═══ FILTERS ═══ */
+.ftb-filters {
+  display: flex;
+  gap: 0.75rem;
+  align-items: flex-end;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+  padding: 1rem 1.25rem;
+  background: var(--ftb-surface);
+  border: 1px solid var(--ftb-border);
+  border-radius: 14px;
+  animation: ftbFadeIn 0.6s ease-out 0.1s both;
+}
+
+.ftb-filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.ftb-filter-label {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--ftb-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.ftb-filter-select {
+  padding: 0.45rem 0.75rem;
+  border-radius: 8px;
+  border: 1px solid var(--ftb-border);
+  background: var(--ftb-bg);
+  color: var(--ftb-text);
+  font-family: 'Inter', sans-serif;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  min-width: 130px;
+  appearance: auto;
+}
+
+.ftb-filter-select:hover {
+  border-color: var(--ftb-border-hover);
+}
+
+.ftb-filter-select:focus-visible {
+  outline: none;
+  border-color: var(--ftb-border-focus);
+  box-shadow: 0 0 0 3px var(--ftb-coral-light);
+}
+
+.ftb-filter-actions {
+  display: flex;
+  align-items: center;
+  margin-left: auto;
+}
+
+/* ═══ BUTTONS ═══ */
+.ftb-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.55rem 1.1rem;
+  border-radius: 10px;
+  border: 1px solid transparent;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.88rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.ftb-btn:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--ftb-coral-light);
+}
+
+.ftb-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+.ftb-btn-primary {
+  background: var(--ftb-coral);
+  color: var(--ftb-text-inverse);
+  border-color: var(--ftb-coral);
+}
+
+.ftb-btn-primary:hover:not(:disabled) {
+  background: var(--ftb-coral-hover);
+  border-color: var(--ftb-coral-hover);
+  transform: translateY(-1px);
+  box-shadow: var(--ftb-shadow-sm);
+}
+
+.ftb-btn-primary:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.ftb-btn-hint {
+  background: var(--ftb-amber-light);
+  color: var(--ftb-amber-hover);
+  border-color: transparent;
+}
+
+.ftb-btn-hint:hover:not(:disabled) {
+  background: var(--ftb-amber);
+  color: var(--ftb-text-inverse);
+  transform: translateY(-1px);
+}
+
+.ftb-btn-hint:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.ftb-btn-ghost {
+  background: transparent;
+  color: var(--ftb-text-secondary);
+  border-color: var(--ftb-border);
+}
+
+.ftb-btn-ghost:hover:not(:disabled) {
+  background: var(--ftb-surface-hover);
+  color: var(--ftb-text);
+  border-color: var(--ftb-border-hover);
+}
+
+.ftb-btn-text {
+  background: none;
+  color: var(--ftb-text-tertiary);
+  border: none;
+  padding: 0.4rem 0.6rem;
+  font-size: 0.85rem;
+}
+
+.ftb-btn-text:hover {
+  color: var(--ftb-text-secondary);
+}
+
+.ftb-hint-cost {
+  font-size: 0.78rem;
+  opacity: 0.8;
+}
+
+/* ═══ CHALLENGE HEADER ═══ */
+.ftb-challenge {
+  animation: ftbFadeIn 0.5s ease-out 0.2s both;
+}
+
+.ftb-challenge-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.ftb-challenge-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.ftb-challenge-counter {
+  font-size: 0.82rem;
+  color: var(--ftb-text-tertiary);
+  font-variant-numeric: tabular-nums;
+}
+
+.ftb-challenge-badge {
+  display: inline-block;
+  padding: 0.15rem 0.55rem;
+  border-radius: 6px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.ftb-diff-badge[data-level="1"] {
+  background: var(--ftb-diff-1);
+  color: var(--ftb-text-inverse);
+}
+.ftb-diff-badge[data-level="2"] {
+  background: var(--ftb-diff-2);
+  color: var(--ftb-text-inverse);
+}
+.ftb-diff-badge[data-level="3"] {
+  background: var(--ftb-diff-3);
+  color: var(--ftb-text);
+}
+.ftb-diff-badge[data-level="4"] {
+  background: var(--ftb-diff-4);
+  color: var(--ftb-text-inverse);
+}
+.ftb-diff-badge[data-level="5"] {
+  background: var(--ftb-diff-5);
+  color: var(--ftb-text-inverse);
+}
+
+.ftb-challenge-tags {
+  display: flex;
+  gap: 0.4rem;
+}
+
+.ftb-challenge-tag {
+  display: inline-block;
+  padding: 0.15rem 0.5rem;
+  border-radius: 6px;
+  font-size: 0.72rem;
+  font-weight: 500;
+  background: var(--ftb-surface-hover);
+  color: var(--ftb-text-secondary);
+  border: 1px solid var(--ftb-border);
+}
+
+.ftb-challenge-title {
+  font-family: 'DM Serif Display', Georgia, serif;
+  font-size: 1.35rem;
+  font-weight: 400;
+  margin: 0 0 1rem;
+  color: var(--ftb-text);
+  line-height: 1.3;
+}
+
+/* ═══ CODE DISPLAY ═══ */
+.ftb-code-section {
+  background: var(--ftb-code-bg);
+  border: 1px solid var(--ftb-border);
+  border-radius: 14px;
+  overflow: hidden;
+  margin-bottom: 1rem;
+}
+
+.ftb-code-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.6rem 1rem;
+  border-bottom: 1px solid var(--ftb-border);
+  background: var(--ftb-surface);
+}
+
+.ftb-code-label {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--ftb-text-secondary);
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.ftb-code-instruction {
+  font-size: 0.72rem;
+  color: var(--ftb-text-tertiary);
+}
+
+.ftb-code-viewport {
+  font-family: 'Fira Code', 'JetBrains Mono', 'Consolas', monospace;
+  font-size: 0.85rem;
+  line-height: 1.65;
+  padding: 0.25rem 0;
+  overflow-x: auto;
+  counter-reset: ftb-line;
+}
+
+.ftb-code-line {
+  display: flex;
+  align-items: stretch;
+  cursor: pointer;
+  transition: background 0.15s ease;
+  min-height: 1.65em;
+  position: relative;
+}
+
+.ftb-code-line:hover {
+  background: var(--ftb-code-line-hover);
+}
+
+.ftb-code-line:focus-visible {
+  outline: none;
+  box-shadow: inset 3px 0 0 var(--ftb-coral);
+  background: var(--ftb-code-line-hover);
+}
+
+.ftb-code-line.selected {
+  background: var(--ftb-code-line-selected);
+  box-shadow: inset 3px 0 0 var(--ftb-coral);
+}
+
+.ftb-code-line.selected::after {
+  content: '← Selected';
+  position: absolute;
+  right: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 0.65rem;
+  color: var(--ftb-coral);
+  font-family: 'Inter', sans-serif;
+  font-weight: 500;
+  opacity: 0;
+  animation: ftbFadeIn 0.3s ease-out 0.1s forwards;
+}
+
+.ftb-code-line.bug-highlight {
+  background: var(--ftb-code-bug-highlight);
+  box-shadow: inset 3px 0 0 var(--ftb-rose);
+}
+
+.ftb-code-line.bug-highlight::after {
+  content: '← Bug is here!';
+  position: absolute;
+  right: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 0.65rem;
+  color: var(--ftb-rose);
+  font-family: 'Inter', sans-serif;
+  font-weight: 600;
+  opacity: 0;
+  animation: ftbFadeIn 0.4s ease-out 0.3s forwards;
+}
+
+.ftb-code-line.correct-highlight {
+  background: var(--ftb-code-correct-highlight);
+  box-shadow: inset 3px 0 0 var(--ftb-sage);
+}
+
+.ftb-code-line.correct-highlight::after {
+  content: '✓ You picked this!';
+  position: absolute;
+  right: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 0.65rem;
+  color: var(--ftb-sage);
+  font-family: 'Inter', sans-serif;
+  font-weight: 600;
+  opacity: 0;
+  animation: ftbFadeIn 0.4s ease-out 0.3s forwards;
+}
+
+.ftb-code-line.wrong-highlight {
+  background: var(--ftb-code-bug-highlight);
+  box-shadow: inset 3px 0 0 var(--ftb-rose);
+}
+
+.ftb-code-line.wrong-highlight::after {
+  content: '← Bug was here';
+  position: absolute;
+  right: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 0.65rem;
+  color: var(--ftb-rose);
+  font-family: 'Inter', sans-serif;
+  font-weight: 500;
+  opacity: 0;
+  animation: ftbFadeIn 0.4s ease-out 0.3s forwards;
+}
+
+.ftb-line-number {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  width: 3rem;
+  min-width: 3rem;
+  padding: 0 0.75rem 0 1rem;
+  color: var(--ftb-line-number-color);
+  font-size: 0.78rem;
+  user-select: none;
+  border-right: 1px solid var(--ftb-border);
+  margin-right: 1rem;
+}
+
+.ftb-line-content {
+  padding: 0 1rem 0 0;
+  white-space: pre;
+  color: var(--ftb-code-text);
+}
+
+/* Line reveal animation */
+.ftb-code-line {
+  opacity: 0;
+  transform: translateY(4px);
+  animation: ftbLineReveal 0.3s ease-out forwards;
+}
+
+@keyframes ftbLineReveal {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ═══ ACTIONS BAR ═══ */
+.ftb-actions {
+  display: flex;
+  gap: 0.6rem;
+  margin-bottom: 0.75rem;
+  flex-wrap: wrap;
+}
+
+/* ═══ MULTIPLE CHOICE ═══ */
+.ftb-mc-section {
+  margin-bottom: 1rem;
+  padding: 1rem 1.25rem;
+  background: var(--ftb-surface);
+  border: 1px solid var(--ftb-border);
+  border-radius: 12px;
+  animation: ftbFadeIn 0.3s ease-out;
+}
+
+.ftb-mc-heading {
+  font-size: 0.85rem;
+  color: var(--ftb-text-secondary);
+  margin: 0 0 0.65rem;
+}
+
+.ftb-mc-options {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.ftb-mc-option {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.6rem 0.85rem;
+  border-radius: 8px;
+  border: 1px solid var(--ftb-border);
+  background: var(--ftb-bg);
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 0.88rem;
+  line-height: 1.4;
+}
+
+.ftb-mc-option:hover {
+  border-color: var(--ftb-border-hover);
+  background: var(--ftb-surface-hover);
+}
+
+.ftb-mc-option input[type="radio"] {
+  accent-color: var(--ftb-coral);
+  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+}
+
+.ftb-mc-option label {
+  cursor: pointer;
+  flex: 1;
+  color: var(--ftb-text);
+}
+
+.ftb-mc-option.selected {
+  border-color: var(--ftb-coral);
+  background: var(--ftb-coral-light);
+}
+
+.ftb-mc-option.correct-mc {
+  border-color: var(--ftb-sage);
+  background: var(--ftb-sage-light);
+}
+
+.ftb-mc-option.wrong-mc {
+  border-color: var(--ftb-rose);
+  background: var(--ftb-rose-light);
+}
+
+.ftb-mc-submit {
+  margin-top: 0.65rem;
+}
+
+.ftb-mc-toggle {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 1.5rem;
+}
+
+/* ═══ RESULT PANEL ═══ */
+.ftb-result {
+  background: var(--ftb-surface);
+  border: 1px solid var(--ftb-border);
+  border-radius: 16px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  animation: ftbSlideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.ftb-result-header {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  margin-bottom: 1rem;
+}
+
+.ftb-result-icon {
+  font-size: 1.5rem;
+}
+
+.ftb-result-icon.correct {
+  color: var(--ftb-sage);
+}
+
+.ftb-result-icon.wrong {
+  color: var(--ftb-rose);
+}
+
+.ftb-result-title {
+  font-family: 'DM Serif Display', Georgia, serif;
+  font-size: 1.25rem;
+  color: var(--ftb-text);
+}
+
+.ftb-result-explanation {
+  padding: 0.85rem 1rem;
+  background: var(--ftb-bg);
+  border-radius: 10px;
+  border: 1px solid var(--ftb-border);
+  margin-bottom: 1rem;
+  font-size: 0.92rem;
+  line-height: 1.65;
+  color: var(--ftb-text);
+}
+
+.ftb-result-fix {
+  margin-bottom: 1rem;
+}
+
+.ftb-fix-header {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-bottom: 0.5rem;
+}
+
+.ftb-fix-label {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--ftb-sage);
+}
+
+.ftb-fix-code {
+  background: var(--ftb-code-bg);
+  border: 1px solid var(--ftb-border);
+  border-radius: 10px;
+  padding: 0.75rem 1rem;
+  font-family: 'Fira Code', 'JetBrains Mono', monospace;
+  font-size: 0.85rem;
+  line-height: 1.6;
+  overflow-x: auto;
+  color: var(--ftb-sage-hover);
+  white-space: pre;
+}
+
+.ftb-result-stats {
+  display: flex;
+  gap: 1.5rem;
+  margin-bottom: 1rem;
+  padding: 0.75rem;
+  background: var(--ftb-bg);
+  border-radius: 10px;
+}
+
+.ftb-result-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.15rem;
+}
+
+.ftb-result-stat-value {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--ftb-coral);
+  font-variant-numeric: tabular-nums;
+}
+
+.ftb-result-stat-label {
+  font-size: 0.72rem;
+  color: var(--ftb-text-tertiary);
+}
+
+.ftb-result-actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+/* ═══ EMPTY STATE ═══ */
+.ftb-empty {
+  text-align: center;
+  padding: 3rem 1.5rem;
+  background: var(--ftb-surface);
+  border: 1px dashed var(--ftb-border);
+  border-radius: 16px;
+  animation: ftbFadeIn 0.3s ease-out;
+}
+
+.ftb-empty-icon {
+  font-size: 2.5rem;
+  color: var(--ftb-text-tertiary);
+  margin-bottom: 0.75rem;
+}
+
+.ftb-empty-title {
+  font-family: 'DM Serif Display', Georgia, serif;
+  font-size: 1.3rem;
+  margin: 0 0 0.4rem;
+  color: var(--ftb-text);
+}
+
+.ftb-empty-desc {
+  color: var(--ftb-text-secondary);
+  margin: 0 0 1rem;
+  font-size: 0.9rem;
+}
+
+/* ═══ STATS DETAIL ═══ */
+.ftb-stats-detail {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1rem;
+  margin-top: 2rem;
+  animation: ftbFadeIn 0.6s ease-out 0.4s both;
+}
+
+.ftb-stats-card {
+  background: var(--ftb-surface);
+  border: 1px solid var(--ftb-border);
+  border-radius: 14px;
+  padding: 1.15rem 1.25rem;
+}
+
+.ftb-stats-card-title {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--ftb-text-secondary);
+  margin: 0 0 0.85rem;
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.ftb-stats-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+}
+
+.ftb-stats-item {
+  text-align: center;
+}
+
+.ftb-stats-item-value {
+  display: block;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--ftb-text);
+  font-variant-numeric: tabular-nums;
+}
+
+.ftb-stats-item-label {
+  font-size: 0.72rem;
+  color: var(--ftb-text-tertiary);
+}
+
+.ftb-stats-breakdown {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.ftb-stats-breakdown .ftb-breakdown-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.25rem 0.55rem;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  background: var(--ftb-bg);
+  border: 1px solid var(--ftb-border);
+  color: var(--ftb-text-secondary);
+}
+
+.ftb-breakdown-empty {
+  font-size: 0.82rem;
+  color: var(--ftb-text-tertiary);
+  font-style: italic;
+}
+
+/* ═══ SHORTCUTS NOTE ═══ */
+.ftb-shortcuts-note {
+  margin-top: 1.5rem;
+  padding: 0.65rem 1rem;
+  background: var(--ftb-surface);
+  border: 1px solid var(--ftb-border);
+  border-radius: 10px;
+  font-size: 0.78rem;
+  color: var(--ftb-text-tertiary);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  justify-content: center;
+}
+
+.ftb-shortcuts-note kbd {
+  display: inline-block;
+  padding: 0.1rem 0.4rem;
+  border-radius: 4px;
+  background: var(--ftb-bg);
+  border: 1px solid var(--ftb-border);
+  font-family: 'Fira Code', monospace;
+  font-size: 0.75rem;
+  color: var(--ftb-text-secondary);
+}
+
+/* ═══ ANIMATIONS ═══ */
+@keyframes ftbFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes ftbSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes ftbPulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+
+@keyframes ftbXPFloat {
+  0% {
+    opacity: 0;
+    transform: translateY(0) scale(0.5);
+  }
+  30% {
+    opacity: 1;
+    transform: translateY(-8px) scale(1.1);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-20px) scale(1);
+  }
+}
+
+/* ═══ RESPONSIVE ═══ */
+@media (max-width: 768px) {
+  .ftb-container {
+    padding: 5rem 1rem 3rem;
+  }
+
+  .ftb-header-top {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .ftb-stats {
+    justify-content: center;
+  }
+
+  .ftb-stat {
+    flex: 1;
+    justify-content: center;
+    min-width: 0;
+  }
+
+  .ftb-filters {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .ftb-filter-select {
+    min-width: 100%;
+  }
+
+  .ftb-filter-actions {
+    margin-left: 0;
+  }
+
+  .ftb-stats-detail {
+    grid-template-columns: 1fr;
+  }
+
+  .ftb-code-viewport {
+    font-size: 0.78rem;
+  }
+
+  .ftb-line-number {
+    width: 2.5rem;
+    min-width: 2.5rem;
+    padding: 0 0.5rem;
+  }
+
+  .ftb-code-line.selected::after,
+  .ftb-code-line.bug-highlight::after,
+  .ftb-code-line.correct-highlight::after,
+  .ftb-code-line.wrong-highlight::after {
+    display: none;
+  }
+}
+
+/* ═══ REDUCED MOTION ═══ */
+@media (prefers-reduced-motion: reduce) {
+  .ftb-code-line,
+  .ftb-header,
+  .ftb-filters,
+  .ftb-challenge,
+  .ftb-result,
+  .ftb-stats-detail {
+    animation: none;
+  }
+
+  .ftb-code-line {
+    opacity: 1;
+    transform: none;
+  }
+
+  .ftb-btn:hover:not(:disabled) {
+    transform: none;
+  }
+
+  .ftb-stat:hover {
+    transform: none;
+  }
+}
+
+/* ═══ PRINT ═══ */
+@media print {
+  .ftb-filters,
+  .ftb-actions,
+  .ftb-mc-toggle,
+  .ftb-shortcuts-note,
+  .ftb-btn-hint,
+  .ftb-btn-ghost,
+  #navbar-placeholder {
+    display: none !important;
+  }
+
+  .ftb-body {
+    background: #fff;
+    color: #000;
+  }
+
+  .ftb-code-section {
+    break-inside: avoid;
+  }
+}

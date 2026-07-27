@@ -5,15 +5,26 @@
  */
 
 document.addEventListener("DOMContentLoaded", () => {
-    try {
-        if (typeof THREE === "undefined") {
-            throw new Error("Three.js not loaded.");
+    var container = document.getElementById('threejs-container');
+    if (typeof lazyVisualizer !== 'undefined') {
+        lazyVisualizer.lazyLoadThree(container, function () {
+            try {
+                initPathfinder();
+            } catch (error) {
+                console.error("Failed to initialize visualizer:", error);
+                showError("3D visualization could not be loaded on this device.");
+            }
+        });
+    } else {
+        try {
+            if (typeof THREE === "undefined") {
+                throw new Error("Three.js not loaded.");
+            }
+            initPathfinder();
+        } catch (error) {
+            console.error("Failed to initialize visualizer:", error);
+            showError("3D visualization could not be loaded on this device.");
         }
-
-        initPathfinder();
-    } catch (error) {
-        console.error("Failed to initialize visualizer:", error);
-        showError("3D visualization could not be loaded on this device.");
     }
 });
 

@@ -32,6 +32,13 @@ const aiTools = [
     icon: 'fa-face-smile',
     desc: 'Real-time facial tracking and body language analysis for interview prep using TensorFlow.js.',
   },
+  {
+    name: 'OpenAPI Playground',
+    path: '/pages/tools/openapi-playground/index.html',
+    category: 'Learning Assistants',
+    icon: 'fa-file-code',
+    desc: 'Write OpenAPI specs in YAML/JSON with live syntax highlighting and see them render as interactive Swagger-style documentation in real-time.',
+  },
 
   // ── Analysis & Profiling ──
   {

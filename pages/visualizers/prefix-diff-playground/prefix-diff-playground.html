@@ -13,9 +13,12 @@
       try {
         var t = localStorage.getItem('theme') || (matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
         if (t === 'light') document.documentElement.classList.add('light-mode');
-      } catch (e) {}
+      } catch (e) {
+        console.warn('Could not load theme preference:', e);
+      }
     })();
   </script>
+    <link rel="stylesheet" href="/modules/quick-notes/quick-notes.css" />
 </head>
 <body class="pdp-body" data-page="prefix-diff-playground">
   <a href="#pdp-main" class="pdp-skip">Skip to main content</a>
@@ -107,5 +110,6 @@
   </main>
 
   <script src="prefix-diff-playground.js"></script>
+    <script src="/modules/quick-notes/quick-notes.js"></script>
 </body>
 </html>

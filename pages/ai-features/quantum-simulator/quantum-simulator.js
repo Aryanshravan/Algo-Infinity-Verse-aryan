@@ -63,8 +63,25 @@ let sphereArrows = []; // The state vectors mapped to the 3D spheres
 // 2. INITIALIZATION
 // ==========================================
 async function initQuantumSimulator() {
-    initChart();
-    initThreeJS();
+    // Lazy-load Chart.js when the probability chart container is near the viewport
+    var chartCanvas = els.probChart;
+    if (typeof lazyVisualizer !== 'undefined') {
+        lazyVisualizer.lazyLoadChartJS(chartCanvas, function () {
+            if (!probChartInstance) initChart();
+        });
+    } else {
+        initChart();
+    }
+
+    // Lazy-load Three.js when the Bloch sphere container is near the viewport
+    if (typeof lazyVisualizer !== 'undefined') {
+        lazyVisualizer.lazyLoadThree(els.blochContainer, function () {
+            if (!renderer) initThreeJS();
+        });
+    } else {
+        initThreeJS();
+    }
+
     setupDragAndDrop();
     
     els.btnClearCircuit.addEventListener('click', clearCircuit);

@@ -2,7 +2,16 @@
 // modal. Keeping a single source of truth avoids the arrays drifting apart,
 // and clampLevel() guards every array access below (#2494).
 const LEVEL_THRESHOLDS = [0, 1000, 2500, 5000, 10000, 20000, 50000, 100000];
-const LEVEL_NAMES = ["Beginner", "Novice", "Intermediate", "Advanced", "Expert", "Master", "Grandmaster", "Legend"];
+const LEVEL_NAMES = [
+  'Beginner',
+  'Novice',
+  'Intermediate',
+  'Advanced',
+  'Expert',
+  'Master',
+  'Grandmaster',
+  'Legend',
+];
 
 /**
  * Clamp a level value to the valid [1, LEVEL_THRESHOLDS.length] range.
@@ -14,24 +23,36 @@ function clampLevel(level) {
   return Math.min(Math.max(Math.trunc(numericLevel), 1), LEVEL_THRESHOLDS.length);
 }
 
-function initGamification() { updateXPBar(); }
+function initGamification() {
+  updateXPBar();
+}
 
 function initDailyChallenge() {
   const dailyChallenges = window.dailyChallenges || [];
   const userProgress = window.userProgress || {};
-  const card = document.getElementById("dailyChallengeCard");
-  const textEl = document.getElementById("dailyChallengeText");
-  const btn = document.getElementById("completeChallengeBtn");
+  const card = document.getElementById('dailyChallengeCard');
+  const textEl = document.getElementById('dailyChallengeText');
+  const btn = document.getElementById('completeChallengeBtn');
   if (!card || !textEl || !btn) return;
   const challenge = dailyChallenges[getDayOfYear() % dailyChallenges.length];
   const completedChallenges = userProgress.completedDailyChallenges || [];
   const alreadyCompleted = completedChallenges.includes(challenge.id);
   textEl.textContent = `${challenge.title}: ${challenge.description}`;
   btn.disabled = alreadyCompleted;
-  btn.innerHTML = alreadyCompleted ? "Challenge Completed ✓" : `<i class="fas fa-bolt"></i> Complete Challenge (+${challenge.xpReward} XP)`;
-  btn.addEventListener("click", () => {
+  btn.innerHTML = alreadyCompleted
+    ? 'Challenge Completed ✓'
+    : `<i class="fas fa-bolt"></i> Complete Challenge (+${challenge.xpReward} XP)`;
+  btn.addEventListener('click', () => {
     if (!userProgress.completedDailyChallenges) userProgress.completedDailyChallenges = [];
-    if (!userProgress.completedDailyChallenges.includes(challenge.id)) { userProgress.completedDailyChallenges.push(challenge.id); if (typeof addXP === 'function') addXP(challenge.xpReward); if (typeof saveUserData === 'function') saveUserData(); if (typeof showNotification === 'function') showNotification(`Challenge completed! +${challenge.xpReward} XP earned! 🚀`, "success"); btn.disabled = true; btn.textContent = "Challenge Completed ✓"; }
+    if (!userProgress.completedDailyChallenges.includes(challenge.id)) {
+      userProgress.completedDailyChallenges.push(challenge.id);
+      if (typeof addXP === 'function') addXP(challenge.xpReward);
+      if (typeof saveUserData === 'function') saveUserData();
+      if (typeof showNotification === 'function')
+        showNotification(`Challenge completed! +${challenge.xpReward} XP earned! 🚀`, 'success');
+      btn.disabled = true;
+      btn.textContent = 'Challenge Completed ✓';
+    }
   });
 }
 
@@ -41,8 +62,21 @@ function getDayOfYear() {
   return Math.floor((now - start) / (1000 * 60 * 60 * 24));
 }
 
-function addXP(amount, source = "general", meta = {}) {
+function addXP(amount, source = 'general', meta = {}) {
   const userProgress = window.userProgress || {};
+  // Apply Streak Multiplier (7d -> 1.2x, 30d -> 1.5x, 100d -> 2.0x)
+  const streakMultiplier =
+    typeof window.getStreakMultiplier === 'function'
+      ? window.getStreakMultiplier(userProgress.streak || 0)
+      : userProgress.streak >= 100
+        ? 2.0
+        : userProgress.streak >= 30
+          ? 1.5
+          : userProgress.streak >= 7
+            ? 1.2
+            : 1.0;
+  amount = Math.round(amount * streakMultiplier);
+
   // Apply XP Booster if active
   if (userProgress.inventory?.xpBoostersTimer?.problemsRemaining > 0) {
     amount = amount * 2;
@@ -54,15 +88,20 @@ function addXP(amount, source = "general", meta = {}) {
       }
     } else {
       if (typeof showNotification === 'function') {
-        setTimeout(() => showNotification(
-          `⚡ Booster active! ${userProgress.inventory.xpBoostersTimer.problemsRemaining} problems remaining.`,
-          'info'
-        ), 300);
+        setTimeout(
+          () =>
+            showNotification(
+              `⚡ Booster active! ${userProgress.inventory.xpBoostersTimer.problemsRemaining} problems remaining.`,
+              'info'
+            ),
+          300
+        );
       }
     }
   }
   userProgress.xp += amount;
-  if (typeof recordAnalyticsEvent === 'function') recordAnalyticsEvent("xp", { amount, source, ...meta });
+  if (typeof recordAnalyticsEvent === 'function')
+    recordAnalyticsEvent('xp', { amount, source, streakMultiplier, ...meta });
   checkLevelUp();
   if (typeof saveUserData === 'function') saveUserData();
 }
@@ -70,28 +109,44 @@ function addXP(amount, source = "general", meta = {}) {
 function checkLevelUp() {
   const userProgress = window.userProgress || {};
   let newLevel = 1;
-  for (let i = LEVEL_THRESHOLDS.length - 1; i >= 0; i--) { if (userProgress.xp >= LEVEL_THRESHOLDS[i]) { newLevel = i + 1; break; } }
+  for (let i = LEVEL_THRESHOLDS.length - 1; i >= 0; i--) {
+    if (userProgress.xp >= LEVEL_THRESHOLDS[i]) {
+      newLevel = i + 1;
+      break;
+    }
+  }
   newLevel = clampLevel(newLevel);
   const currentLevel = clampLevel(userProgress.level);
-  if (newLevel > currentLevel) { if (typeof showNotification === 'function') showNotification(`🎉 Level Up! You're now Level ${newLevel} - ${LEVEL_NAMES[newLevel - 1]}`, "success"); }
+  if (newLevel > currentLevel) {
+    if (typeof showNotification === 'function')
+      showNotification(
+        `🎉 Level Up! You're now Level ${newLevel} - ${LEVEL_NAMES[newLevel - 1]}`,
+        'success'
+      );
+  }
   userProgress.level = newLevel;
-  const levelBadge = document.getElementById("levelBadge");
+  const levelBadge = document.getElementById('levelBadge');
   if (levelBadge) levelBadge.textContent = `Level ${newLevel} - ${LEVEL_NAMES[newLevel - 1]}`;
 }
 
-function updateGamification() { updateXPBar(); if (typeof updateBadges === 'function') updateBadges(); }
+function updateGamification() {
+  updateXPBar();
+  if (typeof window !== 'undefined' && typeof window.updateBadges === 'function')
+    window.updateBadges();
+}
 
 function updateXPBar() {
   const userProgress = window.userProgress || {};
   const currentLevel = clampLevel(userProgress.level);
   const currentLevelXP = LEVEL_THRESHOLDS[currentLevel - 1] || 0;
-  const nextLevelXP = LEVEL_THRESHOLDS[currentLevel] || LEVEL_THRESHOLDS[LEVEL_THRESHOLDS.length - 1];
+  const nextLevelXP =
+    LEVEL_THRESHOLDS[currentLevel] || LEVEL_THRESHOLDS[LEVEL_THRESHOLDS.length - 1];
   const xpProgress = ((userProgress.xp - currentLevelXP) / (nextLevelXP - currentLevelXP)) * 100;
-  setTimeout(() => { 
-    const xpBar = document.getElementById("xpBar");
-    const xpText = document.getElementById("xpText");
-    if (xpBar) xpBar.style.width = `${Math.min(xpProgress, 100)}%`; 
-    if (xpText) xpText.textContent = `${userProgress.xp} / ${nextLevelXP} XP`; 
+  setTimeout(() => {
+    const xpBar = document.getElementById('xpBar');
+    const xpText = document.getElementById('xpText');
+    if (xpBar) xpBar.style.width = `${Math.min(xpProgress, 100)}%`;
+    if (xpText) xpText.textContent = `${userProgress.xp} / ${nextLevelXP} XP`;
   }, 300);
 }
 
@@ -99,102 +154,132 @@ if (typeof window !== 'undefined') {
   window.addXP = addXP;
 }
 
-export { initGamification, initDailyChallenge, checkLevelUp, updateGamification, updateXPBar, addXP, clampLevel, LEVEL_THRESHOLDS, LEVEL_NAMES };
+export {
+  initGamification,
+  initDailyChallenge,
+  checkLevelUp,
+  updateGamification,
+  updateXPBar,
+  addXP,
+  clampLevel,
+  LEVEL_THRESHOLDS,
+  LEVEL_NAMES,
+};
 
 let currentGame = {
-  type: null, topic: null, questions: [],
-  currentIndex: 0, score: 0, correct: 0,
-  total: 0, timer: null, timeLeft: 30, xpEarned: 0,
+  type: null,
+  topic: null,
+  questions: [],
+  currentIndex: 0,
+  score: 0,
+  correct: 0,
+  total: 0,
+  timer: null,
+  timeLeft: 30,
+  xpEarned: 0,
 };
 
 const complexityQuestions = [
   {
-    question: "What is the time complexity?\n\nfor(let i=0; i<n; i++) {\n  for(let j=0; j<n; j++) {\n    console.log(i,j);\n  }\n}",
-    options: ["O(n)", "O(n log n)", "O(n²)", "O(2^n)"],
+    question:
+      'What is the time complexity?\n\nfor(let i=0; i<n; i++) {\n  for(let j=0; j<n; j++) {\n    console.log(i,j);\n  }\n}',
+    options: ['O(n)', 'O(n log n)', 'O(n²)', 'O(2^n)'],
     correct: 2,
-    explanation: "Nested loops both running n times = O(n²)"
+    explanation: 'Nested loops both running n times = O(n²)',
   },
   {
-    question: "What is the time complexity?\n\nlet i = n;\nwhile(i > 1) {\n  i = Math.floor(i/2);\n}",
-    options: ["O(1)", "O(log n)", "O(n)", "O(n²)"],
+    question:
+      'What is the time complexity?\n\nlet i = n;\nwhile(i > 1) {\n  i = Math.floor(i/2);\n}',
+    options: ['O(1)', 'O(log n)', 'O(n)', 'O(n²)'],
     correct: 1,
-    explanation: "Halving n each time = O(log n)"
+    explanation: 'Halving n each time = O(log n)',
   },
   {
-    question: "What is the space complexity?\n\nfunction sum(n) {\n  if(n <= 0) return 0;\n  return n + sum(n-1);\n}",
-    options: ["O(1)", "O(log n)", "O(n)", "O(n²)"],
+    question:
+      'What is the space complexity?\n\nfunction sum(n) {\n  if(n <= 0) return 0;\n  return n + sum(n-1);\n}',
+    options: ['O(1)', 'O(log n)', 'O(n)', 'O(n²)'],
     correct: 2,
-    explanation: "Recursive calls stack n frames = O(n) space"
+    explanation: 'Recursive calls stack n frames = O(n) space',
   },
   {
-    question: "What is the time complexity of binary search?",
-    options: ["O(1)", "O(log n)", "O(n)", "O(n log n)"],
+    question: 'What is the time complexity of binary search?',
+    options: ['O(1)', 'O(log n)', 'O(n)', 'O(n log n)'],
     correct: 1,
-    explanation: "Binary search halves search space each step = O(log n)"
+    explanation: 'Binary search halves search space each step = O(log n)',
   },
   {
-    question: "What is the time complexity?\n\nconst map = {};\nfor(let i=0; i<n; i++) {\n  map[arr[i]] = i;\n}",
-    options: ["O(1)", "O(log n)", "O(n)", "O(n²)"],
+    question:
+      'What is the time complexity?\n\nconst map = {};\nfor(let i=0; i<n; i++) {\n  map[arr[i]] = i;\n}',
+    options: ['O(1)', 'O(log n)', 'O(n)', 'O(n²)'],
     correct: 2,
-    explanation: "Single loop with O(1) hash operations = O(n)"
+    explanation: 'Single loop with O(1) hash operations = O(n)',
   },
   {
-    question: "What is the time complexity of merge sort?",
-    options: ["O(n)", "O(n log n)", "O(n²)", "O(log n)"],
+    question: 'What is the time complexity of merge sort?',
+    options: ['O(n)', 'O(n log n)', 'O(n²)', 'O(log n)'],
     correct: 1,
-    explanation: "Merge sort divides and merges = O(n log n)"
+    explanation: 'Merge sort divides and merges = O(n log n)',
   },
   {
-    question: "What is the space complexity of an array of size n?",
-    options: ["O(1)", "O(log n)", "O(n)", "O(n²)"],
+    question: 'What is the space complexity of an array of size n?',
+    options: ['O(1)', 'O(log n)', 'O(n)', 'O(n²)'],
     correct: 2,
-    explanation: "Array stores n elements = O(n) space"
+    explanation: 'Array stores n elements = O(n) space',
   },
   {
-    question: "What is the time complexity of accessing a hash map?",
-    options: ["O(1)", "O(log n)", "O(n)", "O(n²)"],
+    question: 'What is the time complexity of accessing a hash map?',
+    options: ['O(1)', 'O(log n)', 'O(n)', 'O(n²)'],
     correct: 0,
-    explanation: "Hash map provides O(1) average access time"
+    explanation: 'Hash map provides O(1) average access time',
   },
   {
-    question: "What is the time complexity?\n\nfor(let i=1; i<n; i*=2) {\n  console.log(i);\n}",
-    options: ["O(1)", "O(log n)", "O(n)", "O(n²)"],
+    question: 'What is the time complexity?\n\nfor(let i=1; i<n; i*=2) {\n  console.log(i);\n}',
+    options: ['O(1)', 'O(log n)', 'O(n)', 'O(n²)'],
     correct: 1,
-    explanation: "Multiplying by 2 each time = O(log n)"
-  }
+    explanation: 'Multiplying by 2 each time = O(log n)',
+  },
 ];
 
 function openGameModal() {
-  const modal = document.getElementById("gameModal");
+  const modal = document.getElementById('gameModal');
   if (!modal) return;
   const userProgress = window.userProgress || {};
   const level = clampLevel(userProgress.level);
-  document.getElementById("gameModalTitle").textContent = 
+  document.getElementById('gameModalTitle').textContent =
     `🎮 Level ${level} - ${LEVEL_NAMES[level - 1]} Games`;
   showGameTypeSelector();
-  modal.classList.add("active");
+  modal.classList.add('active');
 }
 
 function closeGameModal() {
-  const modal = document.getElementById("gameModal");
-  if (modal) modal.classList.remove("active");
+  const modal = document.getElementById('gameModal');
+  if (modal) modal.classList.remove('active');
   clearInterval(currentGame.timer);
   resetGame();
 }
 
 function showGameTypeSelector() {
-  document.getElementById("gameTypeSelector").style.display = "block";
-  document.getElementById("gamePlayArea").style.display = "none";
-  document.getElementById("gameResults").style.display = "none";
+  document.getElementById('gameTypeSelector').style.display = 'block';
+  document.getElementById('gamePlayArea').style.display = 'none';
+  document.getElementById('gameResults').style.display = 'none';
   clearInterval(currentGame.timer);
 }
 
-const LEVEL_TOPICS = ["arrays","strings","linkedlist","trees","graphs","dp","arrays","strings"];
+const LEVEL_TOPICS = [
+  'arrays',
+  'strings',
+  'linkedlist',
+  'trees',
+  'graphs',
+  'dp',
+  'arrays',
+  'strings',
+];
 
 function getTopicForLevel() {
   const userProgress = window.userProgress || {};
   const level = clampLevel(userProgress.level);
-  return LEVEL_TOPICS[level - 1] || "arrays";
+  return LEVEL_TOPICS[level - 1] || 'arrays';
 }
 
 function startGame(type) {
@@ -206,18 +291,21 @@ function startGame(type) {
 
   const topic = getTopicForLevel();
 
-  if (type === "complexity") {
+  if (type === 'complexity') {
     currentGame.questions = [...complexityQuestions].sort(() => Math.random() - 0.5).slice(0, 10);
   } else {
-    const topicQuestions = (window.quizQuestions && window.quizQuestions[topic]) || (window.quizQuestions && window.quizQuestions.arrays) || [];
+    const topicQuestions =
+      (window.quizQuestions && window.quizQuestions[topic]) ||
+      (window.quizQuestions && window.quizQuestions.arrays) ||
+      [];
     currentGame.questions = [...topicQuestions].sort(() => Math.random() - 0.5).slice(0, 10);
   }
 
   currentGame.total = currentGame.questions.length;
 
-  document.getElementById("gameTypeSelector").style.display = "none";
-  document.getElementById("gamePlayArea").style.display = "block";
-  document.getElementById("gameResults").style.display = "none";
+  document.getElementById('gameTypeSelector').style.display = 'none';
+  document.getElementById('gamePlayArea').style.display = 'block';
+  document.getElementById('gameResults').style.display = 'none';
 
   loadGameQuestion();
 }
@@ -229,33 +317,33 @@ function loadGameQuestion() {
   }
 
   const q = currentGame.questions[currentGame.currentIndex];
-  document.getElementById("gameQuestion").textContent = currentGame.currentIndex + 1;
-  document.getElementById("gameScore").textContent = currentGame.score;
-  document.getElementById("gameQuestionText").textContent = q.question;
-  document.getElementById("gameExplanation").style.display = "none";
+  document.getElementById('gameQuestion').textContent = currentGame.currentIndex + 1;
+  document.getElementById('gameScore').textContent = currentGame.score;
+  document.getElementById('gameQuestionText').textContent = q.question;
+  document.getElementById('gameExplanation').style.display = 'none';
 
-  const optionsGrid = document.getElementById("gameOptionsGrid");
-  optionsGrid.innerHTML = q.options.map((opt, i) =>
-    `<button class="game-option" onclick="selectGameAnswer(${i})">${opt}</button>`
-  ).join("");
+  const optionsGrid = document.getElementById('gameOptionsGrid');
+  optionsGrid.innerHTML = q.options
+    .map((opt, i) => `<button class="game-option" onclick="selectGameAnswer(${i})">${opt}</button>`)
+    .join('');
 
   // Start timer
   clearInterval(currentGame.timer);
-  currentGame.timeLeft = currentGame.type === "speed" ? 60 : 30;
-  
-  if (currentGame.type === "speed" && currentGame.currentIndex === 0) {
+  currentGame.timeLeft = currentGame.type === 'speed' ? 60 : 30;
+
+  if (currentGame.type === 'speed' && currentGame.currentIndex === 0) {
     currentGame.timeLeft = 60;
   }
 
-  document.getElementById("gameTimer").textContent = currentGame.timeLeft;
+  document.getElementById('gameTimer').textContent = currentGame.timeLeft;
 
-  if (currentGame.type !== "speed" || currentGame.currentIndex === 0) {
+  if (currentGame.type !== 'speed' || currentGame.currentIndex === 0) {
     currentGame.timer = setInterval(() => {
       currentGame.timeLeft--;
-      document.getElementById("gameTimer").textContent = currentGame.timeLeft;
+      document.getElementById('gameTimer').textContent = currentGame.timeLeft;
       if (currentGame.timeLeft <= 0) {
         clearInterval(currentGame.timer);
-        if (currentGame.type === "speed") {
+        if (currentGame.type === 'speed') {
           endGame();
         } else {
           // Time's up — move to next
@@ -269,32 +357,35 @@ function loadGameQuestion() {
 function selectGameAnswer(index) {
   clearInterval(currentGame.timer);
   const q = currentGame.questions[currentGame.currentIndex];
-  const options = document.querySelectorAll(".game-option");
-  const xpPerQ = currentGame.type === "quiz" ? 20 : currentGame.type === "speed" ? 10 : 15;
+  const options = document.querySelectorAll('.game-option');
+  const xpPerQ = currentGame.type === 'quiz' ? 20 : currentGame.type === 'speed' ? 10 : 15;
 
-  options.forEach(opt => opt.style.pointerEvents = "none");
+  options.forEach((opt) => (opt.style.pointerEvents = 'none'));
 
   if (index === q.correct) {
-    if (options[index]) options[index].classList.add("correct");
+    if (options[index]) options[index].classList.add('correct');
     currentGame.score += 10;
     currentGame.correct++;
     currentGame.xpEarned += xpPerQ;
-    document.getElementById("gameScore").textContent = currentGame.score;
+    document.getElementById('gameScore').textContent = currentGame.score;
   } else {
-    if (options[index]) options[index].classList.add("wrong");
-    if (options[q.correct]) options[q.correct].classList.add("correct");
+    if (options[index]) options[index].classList.add('wrong');
+    if (options[q.correct]) options[q.correct].classList.add('correct');
   }
 
   // Show explanation
-  const expEl = document.getElementById("gameExplanation");
+  const expEl = document.getElementById('gameExplanation');
   expEl.textContent = `💡 ${q.explanation}`;
-  expEl.style.display = "block";
+  expEl.style.display = 'block';
 
   currentGame.currentIndex++;
 
-  setTimeout(() => {
-    loadGameQuestion();
-  }, currentGame.type === "speed" ? 800 : 1500);
+  setTimeout(
+    () => {
+      loadGameQuestion();
+    },
+    currentGame.type === 'speed' ? 800 : 1500
+  );
 }
 
 function endGame() {
@@ -304,26 +395,27 @@ function endGame() {
   addXP(currentGame.xpEarned);
   updateGamification();
 
-  const accuracy = currentGame.total > 0 ? Math.round((currentGame.correct / currentGame.total) * 100) : 0;
+  const accuracy =
+    currentGame.total > 0 ? Math.round((currentGame.correct / currentGame.total) * 100) : 0;
 
-  document.getElementById("gamePlayArea").style.display = "none";
-  document.getElementById("gameResults").style.display = "block";
+  document.getElementById('gamePlayArea').style.display = 'none';
+  document.getElementById('gameResults').style.display = 'block';
 
   const titles = {
-    quiz: "Quiz Complete! 🧩",
-    speed: "Speed Round Over! ⚡",
-    complexity: "Complexity Master! 🎯"
+    quiz: 'Quiz Complete! 🧩',
+    speed: 'Speed Round Over! ⚡',
+    complexity: 'Complexity Master! 🎯',
   };
 
-  document.getElementById("gameResultsTitle").textContent = titles[currentGame.type];
-  document.getElementById("resultScore").textContent = currentGame.score;
-  document.getElementById("resultXP").textContent = `+${currentGame.xpEarned}`;
-  document.getElementById("resultAccuracy").textContent = `${accuracy}%`;
+  document.getElementById('gameResultsTitle').textContent = titles[currentGame.type];
+  document.getElementById('resultScore').textContent = currentGame.score;
+  document.getElementById('resultXP').textContent = `+${currentGame.xpEarned}`;
+  document.getElementById('resultAccuracy').textContent = `${accuracy}%`;
 
   if (typeof window.showNotification === 'function') {
     window.showNotification(
       `🎮 Game Over! Score: ${currentGame.score} | +${currentGame.xpEarned} XP earned!`,
-      "success"
+      'success'
     );
   }
 }
@@ -334,9 +426,16 @@ function restartGame() {
 
 function resetGame() {
   currentGame = {
-    type: null, topic: null, questions: [],
-    currentIndex: 0, score: 0, correct: 0,
-    total: 0, timer: null, timeLeft: 30, xpEarned: 0,
+    type: null,
+    topic: null,
+    questions: [],
+    currentIndex: 0,
+    score: 0,
+    correct: 0,
+    total: 0,
+    timer: null,
+    timeLeft: 30,
+    xpEarned: 0,
   };
 }
 

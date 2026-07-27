@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Simulated Annealing Visualizer | Algo Infinity Verse</title>
+    <meta name="description" content="Explore Simulated Annealing for TSP. Discover why cooling schedules matter, from linear and exponential to logarithmic and adaptive." />
+    <link rel="stylesheet" href="../../../styles.css" />
+    <link rel="stylesheet" href="simulated-annealing-visualizer.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Poppins:wght@300;400;500;600;700&family=Fira+Code:wght@400;500;600&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <link rel="stylesheet" href="/modules/quick-notes/quick-notes.css" />
+  </head>
+  <body data-page="simulated-annealing-visualizer">
+
+    <div id="navbar-placeholder"></div>
+
+    <button id="scrollTopBtn" aria-label="Scroll to top" class="scroll-top-btn">
+      <i class="fas fa-circle-chevron-up"></i>
+    </button>
+
+    <section class="sa-hero">
+      <div class="sa-hero-bg"><canvas id="saHeroCanvas" class="sa-hero-canvas"></canvas></div>
+      <div class="sa-hero-inner">
+        <div class="sa-hero-eyebrow">🔥 Metropolis Algorithm · Optimization</div>
+        <h1 class="sa-hero-title">Simulated Annealing</h1>
+        <p class="sa-hero-sub">The Science of Cooling: Why the Schedule is Everything</p>
+        <p class="sa-hero-desc">Many know Simulated Annealing can escape local minima by occasionally accepting worse solutions. But the true mathematical magic lies in the <strong>Cooling Schedule</strong>. Choose wrong, and it freezes prematurely. Choose perfectly (Hajek's Theorem), and global optimality is guaranteed. Watch 4 different schedules race on the Traveling Salesperson Problem.</p>
+        <a href="#lab" class="btn btn-primary sa-btn-primary"><i class="fas fa-temperature-empty"></i> Start Cooling</a>
+      </div>
+    </section>
+
+    <section id="lab" class="section sa-section">
+      <div class="container">
+        <div class="sa-control-card">
+          <div class="sa-row" style="justify-content: space-between;">
+            <div class="sa-row">
+              <label class="sa-label" for="selScenario">Scenario</label>
+              <select id="selScenario" class="sa-select">
+                <option value="standard">Standard TSP (50 Cities)</option>
+                <option value="trap">The Trap (Classic Premature Convergence)</option>
+              </select>
+            </div>
+            <div class="sa-row">
+              <button id="btnNew" class="sa-btn sa-btn-outline"><i class="fas fa-shuffle"></i> Generate Cities</button>
+              <button id="btnRun" class="sa-btn sa-btn-primary"><i class="fas fa-play"></i> Run All Schedules</button>
+            </div>
+          </div>
+        </div>
+
+        <div id="saStatus" class="sa-status" role="status" aria-live="polite">Ready. Select a scenario and Run All Schedules to observe the race.</div>
+
+        <div class="sa-main-layout">
+            <div class="sa-arena-grid" id="arenaGrid">
+                <div class="sa-schedule-card" id="cardLinear">
+                    <div class="sa-sched-header">
+                        <div>
+                            <div class="sa-sched-title">Linear Cooling</div>
+                            <div class="sa-sched-formula">T(t) = T₀ - α·t</div>
+                        </div>
+                        <div class="sa-sched-cost" id="costLinear">Cost: 0</div>
+                    </div>
+                    <div class="sa-canvas-wrap"><canvas id="canvasLinear"></canvas></div>
+                    <div class="sa-stat-row"><span>Temp (T)</span><span id="tempLinear">0.00</span></div>
+                    <div class="sa-stat-row"><span>Accept Prob</span><span id="probLinear">0%</span></div>
+                </div>
+                
+                <div class="sa-schedule-card" id="cardExp">
+                    <div class="sa-sched-header">
+                        <div>
+                            <div class="sa-sched-title">Exponential (Aggressive)</div>
+                            <div class="sa-sched-formula">T(t) = T₀ · αᵗ</div>
+                        </div>
+                        <div class="sa-sched-cost" id="costExp">Cost: 0</div>
+                    </div>
+                    <div class="sa-canvas-wrap"><canvas id="canvasExp"></canvas></div>
+                    <div class="sa-stat-row"><span>Temp (T)</span><span id="tempExp">0.00</span></div>
+                    <div class="sa-stat-row"><span>Accept Prob</span><span id="probExp">0%</span></div>
+                </div>
+
+                <div class="sa-schedule-card" id="cardLog">
+                    <div class="sa-sched-header">
+                        <div>
+                            <div class="sa-sched-title">Logarithmic (Hajek)</div>
+                            <div class="sa-sched-formula">T(t) = C / log(1+t)</div>
+                        </div>
+                        <div class="sa-sched-cost" id="costLog">Cost: 0</div>
+                    </div>
+                    <div class="sa-canvas-wrap"><canvas id="canvasLog"></canvas></div>
+                    <div class="sa-stat-row"><span>Temp (T)</span><span id="tempLog">0.00</span></div>
+                    <div class="sa-stat-row"><span>Accept Prob</span><span id="probLog">0%</span></div>
+                </div>
+
+                <div class="sa-schedule-card" id="cardAdapt">
+                    <div class="sa-sched-header">
+                        <div>
+                            <div class="sa-sched-title">Adaptive Reheating</div>
+                            <div class="sa-sched-formula">T(t) ↑ if stuck</div>
+                        </div>
+                        <div class="sa-sched-cost" id="costAdapt">Cost: 0</div>
+                    </div>
+                    <div class="sa-canvas-wrap"><canvas id="canvasAdapt"></canvas></div>
+                    <div class="sa-stat-row"><span>Temp (T)</span><span id="tempAdapt">0.00</span></div>
+                    <div class="sa-stat-row"><span>Accept Prob</span><span id="probAdapt">0%</span></div>
+                </div>
+            </div>
+            
+            <div class="sa-charts-card">
+                <div class="sa-panel-title"><i class="fas fa-chart-line"></i> Acceptance Probability e^(-Δ/T) over Time</div>
+                <div class="sa-chart-wrap" style="height: 250px;">
+                    <canvas id="chartCanvas"></canvas>
+                </div>
+                <div class="sa-legend">
+                    <div class="leg-item"><span class="leg-color" style="background:#ef4444;"></span> Linear</div>
+                    <div class="leg-item"><span class="leg-color" style="background:#06b6d4;"></span> Exponential</div>
+                    <div class="leg-item"><span class="leg-color" style="background:#22c55e;"></span> Logarithmic</div>
+                    <div class="leg-item"><span class="leg-color" style="background:#a855f7;"></span> Adaptive</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="sa-learn-grid">
+          <div class="sa-learn-card">
+            <div class="sa-learn-icon">❄️</div>
+            <h3>Premature Convergence</h3>
+            <p>If you run the <strong>Exponential</strong> schedule on the "Trap" scenario, watch it closely. It cools down too fast, driving the Acceptance Probability to near 0%. It will get stuck in a suboptimal local minimum and stay perfectly frozen while the others escape.</p>
+          </div>
+          <div class="sa-learn-card">
+            <div class="sa-learn-icon">📜</div>
+            <h3>Hajek's Theorem</h3>
+            <p>The <strong>Logarithmic</strong> schedule guarantees finding the global optimum as time approaches infinity. Because <code>T</code> decays so slowly, the algorithm maintains enough thermal energy to escape ANY local minimum. It's theoretically perfect, but incredibly slow in practice.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <script src="../../../components/navbar/navbar.js"></script>
+    <script src="simulated-annealing-visualizer.js"></script>
+  </body>
+</html>

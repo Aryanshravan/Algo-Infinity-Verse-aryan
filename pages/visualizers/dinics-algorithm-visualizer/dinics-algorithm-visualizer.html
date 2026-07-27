@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dinic's Algorithm Visualizer | Algo Infinity Verse</title>
+    <meta name="description" content="Master Dinic's Algorithm for Maximum Flow. Visualize Level Graphs, Blocking Flows, and Pointer Advancement in O(V²E) time." />
+    <link rel="stylesheet" href="../../../styles.css" />
+    <link rel="stylesheet" href="dinics-algorithm-visualizer.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Poppins:wght@300;400;500;600;700&family=Fira+Code:wght@400;500;600&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <link rel="stylesheet" href="/modules/quick-notes/quick-notes.css" />
+  </head>
+  <body data-page="dinics-algorithm-visualizer">
+
+    <div id="navbar-placeholder"></div>
+
+    <button id="scrollTopBtn" aria-label="Scroll to top" class="scroll-top-btn">
+      <i class="fas fa-circle-chevron-up"></i>
+    </button>
+
+    <section class="dinic-hero">
+      <div class="dinic-hero-bg"><canvas id="dinicHeroCanvas" class="dinic-hero-canvas"></canvas></div>
+      <div class="dinic-hero-inner">
+        <div class="dinic-hero-eyebrow">🌊 Max Flow · Level Graphs · Blocking Flows</div>
+        <h1 class="dinic-hero-title">Dinic's Algorithm</h1>
+        <p class="dinic-hero-sub">The Elegance of Simultaneous Shortest Paths</p>
+        <p class="dinic-hero-desc">While Ford-Fulkerson / Edmonds-Karp pushes flow one path at a time, Dinic's Algorithm brilliantly splits the work into phases. First, a BFS builds a <strong>Level Graph</strong>. Then, a DFS finds a <strong>Blocking Flow</strong> through all shortest paths simultaneously using <strong>Pointer Advancement</strong> to never re-traverse dead ends. The result? A massive theoretical jump to O(V²E).</p>
+        <div class="dinic-hero-actions">
+            <a href="#lab" class="btn btn-primary dinic-btn-primary"><i class="fas fa-water"></i> Start Flowing</a>
+            <a href="#theory" class="btn dinic-btn-outline"><i class="fas fa-book-open"></i> Read Theory</a>
+        </div>
+      </div>
+    </section>
+
+    <section id="lab" class="section dinic-section">
+      <div class="container">
+        
+        <div class="dinic-control-card">
+          <div class="dinic-toolbar">
+            <div class="dinic-tool-group">
+              <span class="dinic-label">Network Scenario</span>
+              <select id="selGraph" class="dinic-select">
+                <option value="standard">Standard Network</option>
+                <option value="bipartite">Bipartite Matching (Unit Capacity)</option>
+                <option value="worstcase">Edmonds-Karp Worst Case</option>
+                <option value="bottleneck">The Bottleneck Trap</option>
+              </select>
+            </div>
+            
+            <div class="dinic-tool-group">
+              <span class="dinic-label">Animation Speed</span>
+              <input type="range" id="speedSlider" min="1" max="100" value="70" class="dinic-slider">
+            </div>
+
+            <div class="dinic-tool-group dinic-actions">
+              <button id="btnStep" class="dinic-btn dinic-btn-ghost"><i class="fas fa-step-forward"></i> Step</button>
+              <button id="btnPlay" class="dinic-btn dinic-btn-primary"><i class="fas fa-play"></i> Auto Run</button>
+              <button id="btnReset" class="dinic-btn dinic-btn-ghost"><i class="fas fa-redo"></i> Reset</button>
+            </div>
+          </div>
+          
+          <div class="dinic-stats-strip">
+              <div class="dinic-stat-box">
+                  <div class="stat-lbl">Max Flow</div>
+                  <div class="stat-val" id="statFlow">0</div>
+              </div>
+              <div class="dinic-stat-box">
+                  <div class="stat-lbl">Current Phase</div>
+                  <div class="stat-val" id="statPhase">1</div>
+              </div>
+              <div class="dinic-stat-box">
+                  <div class="stat-lbl">Dinic Operations</div>
+                  <div class="stat-val highlight" id="statDinicOps">0</div>
+              </div>
+              <div class="dinic-stat-box">
+                  <div class="stat-lbl">Ford-Fulkerson Ops</div>
+                  <div class="stat-val highlight-danger" id="statFFOps">0</div>
+              </div>
+          </div>
+        </div>
+
+        <div id="dinicStatus" class="dinic-status-bar">
+            <div class="status-icon"><i class="fas fa-info-circle"></i></div>
+            <div class="status-text" id="statusMsg">Network initialized. Ready to begin Phase 1: BFS Level Graph Construction.</div>
+        </div>
+
+        <div class="dinic-main-layout">
+            
+            <div class="dinic-canvas-panel">
+                <div class="panel-header">
+                    <h3 class="panel-title"><i class="fas fa-project-diagram"></i> Residual Network & Flow</h3>
+                    <div class="panel-badges">
+                        <span class="badge badge-source">S = Source</span>
+                        <span class="badge badge-sink">T = Sink</span>
+                    </div>
+                </div>
+                <div class="canvas-wrap" id="mainCanvasWrap">
+                    <canvas id="mainCanvas"></canvas>
+                </div>
+                <div class="legend-strip">
+                    <div class="leg-item"><span class="leg-line normal"></span> Forward Edge (Flow / Cap)</div>
+                    <div class="leg-item"><span class="leg-line residual"></span> Residual Edge</div>
+                    <div class="leg-item"><span class="leg-line active"></span> Augmenting Path</div>
+                </div>
+            </div>
+
+            <div class="dinic-canvas-panel">
+                <div class="panel-header">
+                    <h3 class="panel-title"><i class="fas fa-layer-group"></i> BFS Level Graph & DFS Pointer</h3>
+                    <div class="panel-badges">
+                        <span id="levelGraphStatus" class="badge badge-neutral">Awaiting BFS</span>
+                    </div>
+                </div>
+                <div class="canvas-wrap" id="levelCanvasWrap">
+                    <canvas id="levelCanvas"></canvas>
+                </div>
+                <div class="legend-strip">
+                    <div class="leg-item"><span class="leg-node level-0"></span> L0</div>
+                    <div class="leg-item"><span class="leg-node level-1"></span> L1</div>
+                    <div class="leg-item"><span class="leg-node level-2"></span> L2</div>
+                    <div class="leg-item"><span class="leg-line dead"></span> Dead End / Saturated (Crossed Off)</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="dinic-log-panel">
+            <div class="panel-header">
+                <h3 class="panel-title"><i class="fas fa-terminal"></i> Algorithm Trace Log</h3>
+            </div>
+            <div class="log-console" id="logConsole"></div>
+        </div>
+        
+        <div id="theory" class="dinic-learn-section">
+            <h2 class="learn-heading"><i class="fas fa-graduation-cap"></i> Theoretical Deep Dive</h2>
+            <div class="dinic-learn-grid">
+              <div class="dinic-learn-card">
+                <div class="learn-icon">🔍</div>
+                <h3>BFS: The Level Graph</h3>
+                <p>Instead of finding <em>any</em> path, Dinic's performs a BFS from the source in the residual graph to assign a shortest-path distance (level) to every node. Only edges that go strictly from <strong>Level L to Level L+1</strong> are kept. This prevents the DFS from ever wandering backward or sideways, heavily pruning the search space.</p>
+              </div>
+              <div class="dinic-learn-card">
+                <div class="learn-icon">🌊</div>
+                <h3>DFS: The Blocking Flow</h3>
+                <p>Once the level graph is built, we use DFS to send flow. But we don't just find one path and stop! We keep running DFS to find paths until the sink is unreachable in the current level graph. This saturated state is called a <strong>Blocking Flow</strong>.</p>
+              </div>
+              <div class="dinic-learn-card">
+                <div class="learn-icon">✂️</div>
+                <h3>Pointer Advancement</h3>
+                <p>The true magic of Dinic's is <strong>Pointer Advancement</strong>. If the DFS discovers an edge is fully saturated, or that it leads to a dead end where no more flow can reach the sink, it permanently crosses that edge off for the rest of the phase. It is never checked again, ensuring O(VE) time per phase.</p>
+              </div>
+              <div class="dinic-learn-card">
+                <div class="learn-icon">⏱️</div>
+                <h3>O(V²E) Complexity</h3>
+                <p>Because the shortest path distance from Source to Sink strictly increases after every blocking flow phase, there can be at most <strong>V phases</strong>. Each phase takes at most <strong>O(VE)</strong> time thanks to pointer advancement, resulting in the brilliant overall bound of <strong>O(V²E)</strong>.</p>
+              </div>
+            </div>
+        </div>
+        
+      </div>
+    </section>
+
+    <script src="../../../components/navbar/navbar.js"></script>
+    <script src="dinics-algorithm-visualizer.js"></script>
+  </body>
+</html>

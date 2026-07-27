@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>TCP Congestion Control Arena | Algo Infinity Verse</title>
+    <meta
+      name="description"
+      content="Race TCP congestion control algorithms (CUBIC vs BBR) and visualize packet loss recovery."
+    />
+
+    <link
+      href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Poppins:wght@300;400;500;600;700&family=Fira+Code:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+
+    <link rel="stylesheet" href="tcp-congestion-arena.css" />
+    <script src="/modules/lazyVisualizer.js"></script>
+    <script src="/theme.js"></script>
+    <link rel="stylesheet" href="/modules/quick-notes/quick-notes.css" />
+  </head>
+  <body class="tcp-body">
+    <nav class="navbar tcp-nav">
+      <div class="nav-logo">
+        <span class="logo-text">∞</span>
+        <span class="logo-title">Algo Infinity Verse</span>
+      </div>
+      <div class="engine-badge"><i class="fas fa-network-wired"></i> Network Engineering</div>
+    </nav>
+
+    <main class="tcp-workspace">
+      <header class="workspace-header">
+        <h1>TCP Congestion Control Arena</h1>
+        <p class="subtitle">
+          Simulate how CUBIC (loss-based) and BBR (bandwidth-based) handle network congestion and
+          packet loss.
+        </p>
+
+        <div class="control-panel">
+          <button id="btnStart" class="btn btn-primary">
+            <i class="fas fa-play"></i> Start Simulation
+          </button>
+          <button id="btnDropPacket" class="btn btn-danger" disabled>
+            <i class="fas fa-bomb"></i> Inject Packet Loss
+          </button>
+          <button id="btnReset" class="btn btn-secondary"><i class="fas fa-redo"></i> Reset</button>
+        </div>
+      </header>
+
+      <div class="visualizer-content">
+        <!-- Network Pipes Section -->
+        <section class="pipes-panel">
+          <!-- Lane 1: TCP CUBIC -->
+          <div class="lane-container">
+            <div class="lane-header">
+              <h2>
+                <i class="fas fa-server"></i> TCP CUBIC
+                <span class="badge badge-loss">Loss-Based</span>
+              </h2>
+              <div class="stats-box">
+                <span class="stat-label">cwnd:</span>
+                <span class="stat-value" id="cubicCwnd">1</span>
+              </div>
+            </div>
+            <div class="network-pipe" id="cubicPipe">
+              <!-- Packets -->
+            </div>
+          </div>
+
+          <!-- Lane 2: TCP BBR -->
+          <div class="lane-container">
+            <div class="lane-header">
+              <h2>
+                <i class="fas fa-server"></i> TCP BBR
+                <span class="badge badge-bw">Bandwidth-Based</span>
+              </h2>
+              <div class="stats-box">
+                <span class="stat-label">cwnd:</span> <span class="stat-value" id="bbrCwnd">1</span>
+              </div>
+            </div>
+            <div class="network-pipe" id="bbrPipe">
+              <!-- Packets -->
+            </div>
+          </div>
+        </section>
+
+        <!-- Graph Section -->
+        <section class="graph-panel">
+          <div class="panel-header">
+            <h2><i class="fas fa-chart-line"></i> Congestion Window (cwnd) Over Time</h2>
+          </div>
+          <div class="graph-container">
+            <canvas id="cwndChart"></canvas>
+          </div>
+          <div class="explanation-box" id="algoExplanation">
+            <p>
+              <strong>CUBIC:</strong> Scales window rapidly until packet loss occurs, then
+              aggressively cuts it (Multiplicative Decrease). The recovery curve is cubic.
+            </p>
+            <p>
+              <strong>BBR:</strong> Probes for Bottleneck Bandwidth and Round-Trip Time. Ignores
+              random packet loss and maintains high throughput.
+            </p>
+          </div>
+        </section>
+      </div>
+    </main>
+
+    <script src="tcp-congestion-arena.js"></script>
+    <script src="/modules/quick-notes/quick-notes.js"></script>
+  </body>
+</html>
