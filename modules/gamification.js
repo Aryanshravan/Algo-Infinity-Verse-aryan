@@ -84,14 +84,17 @@ function updateGamification() { updateXPBar(); if (typeof updateBadges === 'func
 function updateXPBar() {
   const userProgress = window.userProgress || {};
   const currentLevel = clampLevel(userProgress.level);
+  const isMaxLevel = currentLevel >= LEVEL_THRESHOLDS.length;
   const currentLevelXP = LEVEL_THRESHOLDS[currentLevel - 1] || 0;
-  const nextLevelXP = LEVEL_THRESHOLDS[currentLevel] || LEVEL_THRESHOLDS[LEVEL_THRESHOLDS.length - 1];
-  const xpProgress = ((userProgress.xp - currentLevelXP) / (nextLevelXP - currentLevelXP)) * 100;
+  const nextLevelXP = LEVEL_THRESHOLDS[currentLevel] ?? LEVEL_THRESHOLDS[LEVEL_THRESHOLDS.length - 1];
+  const xpProgress = isMaxLevel
+    ? 100
+    : ((userProgress.xp - currentLevelXP) / (nextLevelXP - currentLevelXP)) * 100;
   setTimeout(() => { 
     const xpBar = document.getElementById("xpBar");
     const xpText = document.getElementById("xpText");
     if (xpBar) xpBar.style.width = `${Math.min(xpProgress, 100)}%`; 
-    if (xpText) xpText.textContent = `${userProgress.xp} / ${nextLevelXP} XP`; 
+    if (xpText) xpText.textContent = isMaxLevel ? `${userProgress.xp} XP (Max Level)` : `${userProgress.xp} / ${nextLevelXP} XP`; 
   }, 300);
 }
 
