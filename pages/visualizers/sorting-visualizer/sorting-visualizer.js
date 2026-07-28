@@ -58,6 +58,13 @@ const complexityData = {
     avg: "O(n²)",
     worst: "O(n²)",
     space: "O(1)"
+  },
+  quick: {
+    title: "Quick Sort (Hoare Partition)",
+    best: "O(n log n)",
+    avg: "O(n log n)",
+    worst: "O(n²)",
+    space: "O(log n)"
   }
 };
 
@@ -347,6 +354,71 @@ async function insertionSort(runId) {
   markAllSorted(runId);
 }
 
+// 4. Quick Sort (Hoare Partitioning with strict boundary checks)
+async function quickSort(runId) {
+  const n = array.length;
+
+  async function partition(low, high) {
+    let pivot = array[low];
+    let i = low - 1;
+    let j = high + 1;
+
+    highlight(low, "swapping");
+    playTone(pivot, 'swap');
+    await sleep(speed);
+
+    while (true) {
+      do {
+        i++;
+        if (i > high) break; // Bounds check protection
+      } while (array[i] < pivot);
+
+      do {
+        j--;
+        if (j < low) break; // Bounds check protection
+      } while (array[j] > pivot);
+
+      if (runId !== currentRunId || !isSorting) return j;
+      await checkPause(runId);
+
+      if (i >= j) {
+        unhighlight(low);
+        return j;
+      }
+
+      highlight(i, "swapping");
+      highlight(j, "swapping");
+      playTone(array[i], 'swap');
+      await sleep(speed);
+      if (runId !== currentRunId || !isSorting) return j;
+
+      let temp = array[i];
+      array[i] = array[j];
+      array[j] = temp;
+      renderBars();
+
+      highlight(i, "swapping");
+      highlight(j, "swapping");
+      await sleep(speed);
+
+      unhighlight(i);
+      unhighlight(j);
+    }
+  }
+
+  async function helper(low, high) {
+    if (low < high) {
+      if (runId !== currentRunId || !isSorting) return;
+      let p = await partition(low, high);
+      await helper(low, p);
+      await helper(p + 1, high);
+    }
+  }
+
+  await helper(0, n - 1);
+  markAllSorted(runId);
+}
+
 // ===== CONTROLLER LOGIC =====
 async function startSorting() {
   // Resume AudioContext on user interaction
@@ -384,6 +456,8 @@ async function startSorting() {
     await selectionSort(runId);
   } else if (currentAlgorithm === "insertion") {
     await insertionSort(runId);
+  } else if (currentAlgorithm === "quick") {
+    await quickSort(runId);
   }
   
   // Restore control states when sorting completes naturally
@@ -598,8 +672,102 @@ const pseudoCodes = {
     "  while j >= 0 and array[j] > key:",
     "    array[j+1] = array[j]; j--",
     "  array[j+1] = key"
+  ],
+  quick: [
+    "quickSort(arr, low, high):",
+    "  if low < high:",
+    "    pivotIdx = partition(arr, low, high)",
+    "    quickSort(arr, low, pivotIdx)",
+    "    quickSort(arr, pivotIdx + 1, high)",
+    "partition(arr, low, high):",
+    "  pivot = arr[low]",
+    "  i = low - 1, j = high + 1",
+    "  while true:",
+    "    do i++ while arr[i] < pivot and i <= high",
+    "    do j-- while arr[j] > pivot and j >= low",
+    "    if i >= j: return j",
+    "    swap(arr[i], arr[j])"
   ]
 };
+
+function generateQuickSortTrace(arr) {
+  const trace = [];
+  const tempArr = [...arr];
+  const n = tempArr.length;
+
+  trace.push({
+    stateSnapshot: [...tempArr],
+    highlights: {},
+    explanation: "Initial array state before Quick Sort starts.",
+    pseudoCodeLine: 0
+  });
+
+  function partition(low, high) {
+    let pivot = tempArr[low];
+    let i = low - 1;
+    let j = high + 1;
+
+    trace.push({
+      stateSnapshot: [...tempArr],
+      highlights: { swapping: [low] },
+      explanation: `Chosen pivot = ${pivot} at index ${low} for range [${low}..${high}].`,
+      pseudoCodeLine: 6
+    });
+
+    while (true) {
+      do {
+        i++;
+        if (i > high) break; // Explicit upper boundary check
+      } while (tempArr[i] < pivot);
+
+      do {
+        j--;
+        if (j < low) break; // Explicit lower boundary check
+      } while (tempArr[j] > pivot);
+
+      if (i >= j) {
+        trace.push({
+          stateSnapshot: [...tempArr],
+          highlights: { comparing: [j] },
+          explanation: `Pointers met/crossed (i=${i}, j=${j}). Partition index returned: ${j}.`,
+          pseudoCodeLine: 11
+        });
+        return j;
+      }
+
+      let val1 = tempArr[i];
+      let val2 = tempArr[j];
+      tempArr[i] = val2;
+      tempArr[j] = val1;
+
+      trace.push({
+        stateSnapshot: [...tempArr],
+        highlights: { swapping: [i, j] },
+        explanation: `Swap element at index ${i} (${val1}) with element at index ${j} (${val2}).`,
+        pseudoCodeLine: 12
+      });
+    }
+  }
+
+  function helper(low, high) {
+    if (low < high) {
+      let p = partition(low, high);
+      helper(low, p);
+      helper(p + 1, high);
+    }
+  }
+
+  helper(0, n - 1);
+
+  trace.push({
+    stateSnapshot: [...tempArr],
+    highlights: { sorted: Array.from({ length: n }, (_, idx) => idx) },
+    explanation: "Quick Sort complete! The entire array is sorted.",
+    pseudoCodeLine: 0
+  });
+
+  return trace;
+}
 
 function generateBubbleSortTrace(arr) {
   const trace = [];
@@ -904,6 +1072,8 @@ function initDebuggerMode() {
     dbgTrace = generateSelectionSortTrace(array);
   } else if (algo === "insertion") {
     dbgTrace = generateInsertionSortTrace(array);
+  } else if (algo === "quick") {
+    dbgTrace = generateQuickSortTrace(array);
   }
   
   dbgCurrentStep = 0;

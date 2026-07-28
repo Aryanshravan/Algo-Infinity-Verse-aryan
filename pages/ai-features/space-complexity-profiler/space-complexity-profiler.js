@@ -77,10 +77,12 @@ function initEditors() {
 }
 
 function initChart() {
-    const ctx = document.getElementById('memoryChart');
+    var ctx = document.getElementById('memoryChart');
     if (!ctx) return;
 
-    memoryChart = new Chart(ctx, {
+    function createChart() {
+        if (typeof Chart === 'undefined') return;
+        memoryChart = new Chart(ctx, {
         type: 'line',
         data: {
             labels: Array.from({ length: 100 }, (_, i) => i + 1),
@@ -271,8 +273,15 @@ function runWorker(code, sizes, editorId) {
             resolve({ results: sizes.map(function(n) { return { n: n, maxMemory: 0 }; }), timeline: new Array(100).fill(0) });
         };
 
-        worker.postMessage({ code: code, sizes: sizes, editorId: editorId });
+        worker.postMessage({ code: code, sizes: sizes, editorId: editorId        });
     });
+    }
+
+    if (typeof lazyVisualizer !== 'undefined') {
+        lazyVisualizer.lazyLoadChartJS(ctx, createChart);
+    } else {
+        createChart();
+    }
 }
 
 // ─── Main Run ──────────────────────────────────────────────────────────────

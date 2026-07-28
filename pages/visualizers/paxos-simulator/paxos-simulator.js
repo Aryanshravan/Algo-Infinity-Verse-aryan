@@ -60,6 +60,7 @@ class Node {
         this.acceptedValue = null;
         
         this.status = 'active'; // 'active', 'partitioned'
+        this.isLeader = false; // Multi-Paxos stable leader
     }
 
     draw(ctx) {
@@ -85,6 +86,10 @@ class Node {
         ctx.font = '9px Fira Code';
         if (this.type === 'proposer') {
             ctx.fillText(`Bal: ${this.ballotNum}`, this.x, this.y + 12);
+            if (this.isLeader) {
+                ctx.fillStyle = '#f1e05a'; // Gold star for leader
+                ctx.fillText('★ LEADER', this.x, this.y + 22);
+            }
         } else if (this.type === 'acceptor') {
             ctx.fillText(`P:${this.promisedBallot} A:${this.acceptedBallot}`, this.x, this.y + 10);
             ctx.fillText(this.acceptedValue ? `V:${this.acceptedValue}` : 'V:null', this.x, this.y + 18);
@@ -174,9 +179,21 @@ function sendPacket(from, to, phase, data, color) {
 
 function startPaxosRound(proposerId, val) {
     const proposer = nodes.find(n => n.id === proposerId);
-    proposer.ballotNum = proposer.ballotNum + Math.floor(Math.random() * 3) + 1; // Increment ballot
     proposer.proposalVal = val;
     proposer.promises = [];
+    
+    // Multi-Paxos: If this proposer is already the stable leader, skip PREPARE
+    if (proposer.isLeader) {
+        log(`[Multi-Paxos] Proposer ${proposer.name} is stable leader. Skipping PREPARE phase.`, "info");
+        log(`[Phase 2a] Proposer ${proposer.name} broadcasts ACCEPT(${proposer.ballotNum}, "${proposer.proposalVal}")`, "info");
+        
+        nodes.filter(n => n.type === 'acceptor').forEach(acceptor => {
+            sendPacket(proposer, acceptor, 'accept', { ballot: proposer.ballotNum, value: proposer.proposalVal }, '#0366d6');
+        });
+        return;
+    }
+    
+    proposer.ballotNum = proposer.ballotNum + Math.floor(Math.random() * 3) + 1; // Increment ballot
     
     log(`[Phase 1a] Proposer ${proposer.name} broadcasts PREPARE with Ballot ID: ${proposer.ballotNum}`, "info");
     UI.statRound.innerText = proposer.ballotNum;
@@ -213,9 +230,11 @@ function deliverPacket(packet) {
         to.promises.push(data);
         log(`Proposer ${to.name} received PROMISE from Acceptor ${from.name} (Count: ${to.promises.length}/3)`);
 
-        const majority = 2;
+            const majority = 2;
         if (to.promises.length === majority) {
-            log(`Proposer ${to.name} achieved majority promises. Analyzing highest accepted value...`, "success");
+            // Upon achieving majority, this proposer becomes the stable leader (Multi-Paxos)
+            to.isLeader = true;
+            log(`Proposer ${to.name} achieved majority promises. Elected as Stable Leader!`, "success");
             
             // Find promise with highest acceptedBallot
             let highestBallot = -1;
@@ -227,7 +246,7 @@ function deliverPacket(packet) {
                 }
             });
 
-            if (valueToPropose !== to.proposalVal) {
+            if (valueToPropose !== to.proposalVal && highestBallot !== -1) {
                 log(`[Phase 2a] Proposer ${to.name} must respect previous value: ${valueToPropose} (overriding local choice ${to.proposalVal})`, "warn");
                 to.proposalVal = valueToPropose;
             } else {
@@ -254,6 +273,11 @@ function deliverPacket(packet) {
             sendPacket(to, learner, 'accepted', { ballot: data.ballot, value: data.value }, '#3fb950');
         } else {
             log(`Acceptor ${to.name} rejected ACCEPT (ballot ${data.ballot} is less than promised ${to.promisedBallot})`, "error");
+            // If an ACCEPT is rejected, it means another proposer became leader with a higher ballot.
+            if (from.isLeader) {
+                from.isLeader = false;
+                log(`Proposer ${from.name} lost leadership status!`, "error");
+            }
         }
     } 
     else if (packet.phase === 'accepted') {

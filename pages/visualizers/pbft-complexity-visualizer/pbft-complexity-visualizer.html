@@ -1,0 +1,220 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>PBFT Message Complexity Visualizer | Algo Infinity Verse</title>
+    <meta
+      name="description"
+      content="Understand why Byzantine Consensus doesn't scale. Visualize PBFT's O(n²) message explosion vs Raft's O(n) scaling."
+    />
+    <link rel="stylesheet" href="../../../styles.css" />
+    <link rel="stylesheet" href="pbft-complexity-visualizer.css" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Poppins:wght@300;400;500;600;700&family=Fira+Code:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <link rel="stylesheet" href="/modules/quick-notes/quick-notes.css" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  </head>
+  <body data-page="pbft-complexity-visualizer">
+    <div id="navbar-placeholder"></div>
+
+    <button id="scrollTopBtn" aria-label="Scroll to top" class="scroll-top-btn">
+      <i class="fas fa-circle-chevron-up"></i>
+    </button>
+
+    <section class="pbft-hero">
+      <div class="pbft-hero-bg"><canvas id="pbftHeroCanvas" class="pbft-hero-canvas"></canvas></div>
+      <div class="pbft-hero-inner">
+        <div class="pbft-hero-eyebrow">⛓️ Distributed Systems · Consensus Mechanics</div>
+        <h1 class="pbft-hero-title">PBFT Complexity Wall</h1>
+        <p class="pbft-hero-sub">The O(n²) Scalability Wall of Byzantine Consensus</p>
+        <p class="pbft-hero-desc">
+          Why do blockchain nodes use Proof-of-Work or Proof-of-Stake instead of classic consensus?
+          Because Practical Byzantine Fault Tolerance (PBFT) requires an explosive
+          <strong>O(n²)</strong> message overhead to guarantee truth when nodes lie. Watch the
+          intense cross-communication required for a single request, compare it directly to Raft's
+          lightweight <strong>O(n)</strong> traffic, and test the <em>3f+1</em> Byzantine safety
+          thresholds in real time.
+        </p>
+        <div class="pbft-hero-actions">
+          <a href="#lab" class="btn btn-primary pbft-btn-primary"
+            ><i class="fas fa-network-wired"></i> Launch Cluster</a
+          >
+          <a href="#theory" class="btn pbft-btn-outline"
+            ><i class="fas fa-book-open"></i> Read Theory</a
+          >
+        </div>
+      </div>
+    </section>
+
+    <section id="lab" class="section pbft-section">
+      <div class="container">
+        <div class="pbft-control-card">
+          <div class="pbft-toolbar">
+            <div class="pbft-tool-group">
+              <span class="pbft-label"
+                >Total Nodes (N): <span id="lblN" style="color: #fff">4</span></span
+              >
+              <input type="range" id="sliderN" min="4" max="13" value="4" class="pbft-slider" />
+            </div>
+
+            <div class="pbft-tool-group">
+              <span class="pbft-label"
+                >Byzantine Traitors: <span id="lblF" style="color: #ef4444">0</span></span
+              >
+              <input
+                type="range"
+                id="sliderF"
+                min="0"
+                max="6"
+                value="0"
+                class="pbft-slider danger"
+              />
+            </div>
+
+            <div class="pbft-tool-group">
+              <span class="pbft-label">Speed</span>
+              <input
+                type="range"
+                id="speedSlider"
+                min="1"
+                max="100"
+                value="80"
+                class="pbft-slider"
+              />
+            </div>
+
+            <div class="pbft-tool-group pbft-actions">
+              <button id="btnRunPBFT" class="pbft-btn pbft-btn-primary">
+                <i class="fas fa-play"></i> Run PBFT
+              </button>
+              <button id="btnRunRaft" class="pbft-btn pbft-btn-ghost">
+                <i class="fas fa-ship"></i> Run Raft
+              </button>
+            </div>
+          </div>
+
+          <div class="pbft-stats-strip">
+            <div class="pbft-stat-box">
+              <div class="stat-lbl">Fault Tolerance (f)</div>
+              <div class="stat-val" id="statMaxF">1 (N=4)</div>
+            </div>
+            <div class="pbft-stat-box">
+              <div class="stat-lbl">Consensus State</div>
+              <div class="stat-val highlight" id="statConsensus">Ready</div>
+            </div>
+            <div class="pbft-stat-box">
+              <div class="stat-lbl">Messages Sent</div>
+              <div class="stat-val highlight-warn" id="statMsgs">0</div>
+            </div>
+            <div class="pbft-stat-box">
+              <div class="stat-lbl">Theoretical O()</div>
+              <div class="stat-val" id="statO">-</div>
+            </div>
+          </div>
+        </div>
+
+        <div id="pbftStatus" class="pbft-status-bar">
+          <div class="status-icon"><i class="fas fa-info-circle"></i></div>
+          <div class="status-text" id="statusMsg">
+            Cluster initialized. Adjust N and F, then run a consensus protocol.
+          </div>
+        </div>
+
+        <div class="pbft-main-layout">
+          <div class="pbft-panel pbft-graph-panel">
+            <div class="panel-header">
+              <h3 class="panel-title">
+                <i class="fas fa-project-diagram"></i> Network Communication
+              </h3>
+              <div class="panel-badges">
+                <span class="badge badge-primary">Primary/Leader</span>
+                <span class="badge badge-replica">Replica</span>
+                <span class="badge badge-byz">Byzantine</span>
+              </div>
+            </div>
+
+            <div class="canvas-wrap" id="mainCanvasWrap">
+              <canvas id="networkCanvas"></canvas>
+            </div>
+
+            <div class="legend-strip">
+              <div class="leg-item"><span class="leg-line req"></span> Request/Reply</div>
+              <div class="leg-item"><span class="leg-line pre"></span> Pre-Prepare</div>
+              <div class="leg-item"><span class="leg-line prep"></span> Prepare</div>
+              <div class="leg-item"><span class="leg-line com"></span> Commit</div>
+              <div class="leg-item"><span class="leg-line byz-msg"></span> Corrupted Msg</div>
+            </div>
+          </div>
+
+          <div class="pbft-side-layout">
+            <div class="pbft-panel">
+              <div class="panel-header">
+                <h3 class="panel-title">
+                  <i class="fas fa-chart-line"></i> Message Complexity O(n²)
+                </h3>
+              </div>
+              <div class="chart-container">
+                <canvas id="complexityChart"></canvas>
+              </div>
+            </div>
+
+            <div class="pbft-panel" style="flex: 1">
+              <div class="panel-header">
+                <h3 class="panel-title"><i class="fas fa-terminal"></i> Consensus Trace</h3>
+              </div>
+              <div class="log-console" id="pbftLogConsole"></div>
+            </div>
+          </div>
+        </div>
+
+        <div id="theory" class="pbft-learn-section">
+          <h2 class="learn-heading"><i class="fas fa-graduation-cap"></i> Theoretical Deep Dive</h2>
+          <div class="pbft-learn-grid">
+            <div class="pbft-learn-card">
+              <div class="learn-icon">😈</div>
+              <h3>The 3f+1 Byzantine Threshold</h3>
+              <p>
+                In crash-fault systems like Raft, tolerating <em>f</em> dead nodes requires
+                <strong>2f+1</strong> total nodes. But Byzantine nodes actively lie and send
+                conflicting information. To defeat this, PBFT requires <strong>3f+1</strong> total
+                nodes. If you set N=4, you can only tolerate f=1 Byzantine node. If you set F=2 when
+                N=4, consensus will intentionally fail!
+              </p>
+            </div>
+            <div class="pbft-learn-card">
+              <div class="learn-icon">💥</div>
+              <h3>Why O(n²) Messages?</h3>
+              <p>
+                Because nodes might lie about what the Primary leader told them, every backup node
+                must verify the request with <em>every other backup node</em> (the Prepare phase).
+                Then, to guarantee that a quorum has agreed to execute, they must tell
+                <em>every other backup node</em> that they are committing (the Commit phase). This
+                causes a quadratic explosion in network traffic.
+              </p>
+            </div>
+            <div class="pbft-learn-card">
+              <div class="learn-icon">🚀</div>
+              <h3>Raft Comparison</h3>
+              <p>
+                Raft inherently assumes all nodes are honest. The Leader simply broadcasts an
+                AppendEntries RPC to everyone (O(n)), and they reply to the Leader (O(n)). There is
+                zero peer-to-peer cross-communication. This makes Raft lightning fast, but utterly
+                defenseless if a node gets hacked or turns malicious.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <script src="../../../components/navbar/navbar.js"></script>
+    <script src="pbft-complexity-visualizer.js"></script>
+  </body>
+</html>

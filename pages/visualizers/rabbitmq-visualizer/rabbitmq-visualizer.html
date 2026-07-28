@@ -1,0 +1,942 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>RabbitMQ Messaging Visualizer | Algo Infinity Verse</title>
+    <meta
+      name="description"
+      content="Interactive RabbitMQ Simulator demonstrating Exchanges (Direct, Topic, Fanout, Headers), Queues, Consumers, Acknowledgements, Retry Queues, and Dead Letter Queues (DLQ)."
+    />
+
+    <!-- Fonts & Icons -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Poppins:wght@300;400;500;600;700&family=Fira+Code:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+
+    <!-- Stylesheet -->
+    <link rel="stylesheet" href="rabbitmq-visualizer.css" />
+    <script src="/theme.js"></script>
+    <link rel="stylesheet" href="/modules/quick-notes/quick-notes.css" />
+  </head>
+  <body class="rmq-body">
+    <!-- Navigation Bar -->
+    <nav class="navbar rmq-nav">
+      <div class="nav-left">
+        <a href="/pages/visualizers/visualizers.html" class="back-link" title="Back to Visualizers">
+          <i class="fas fa-arrow-left"></i>
+        </a>
+        <div class="nav-logo">
+          <span class="logo-symbol">🐇</span>
+          <span class="logo-title">RabbitMQ <span class="highlight">Visualizer</span></span>
+        </div>
+      </div>
+      <div class="nav-center">
+        <div class="preset-selector-bar">
+          <label for="scenarioPreset"><i class="fas fa-play-circle"></i> Scenario:</label>
+          <select id="scenarioPreset" class="preset-select">
+            <option value="direct">1. Direct Exchange (Exact Key Routing)</option>
+            <option value="topic">2. Topic Exchange (Wildcards '*' & '#')</option>
+            <option value="fanout">3. Fanout Exchange (Broadcast All)</option>
+            <option value="headers">4. Headers Exchange (x-match All/Any)</option>
+            <option value="dlq">5. Retry Backoff & Dead Letter Queue (DLQ)</option>
+          </select>
+          <button type="button" id="btnLoadPreset" class="btn btn-preset">
+            <i class="fas fa-magic"></i> Load Scenario
+          </button>
+        </div>
+      </div>
+      <div class="nav-right">
+        <div class="engine-badge active" id="brokerStatusBadge">
+          <span class="pulse-dot"></span>
+          <i class="fas fa-server"></i> AMQP Broker Online
+        </div>
+      </div>
+    </nav>
+
+    <!-- Main Workspace -->
+    <main class="rmq-workspace">
+      <!-- SVG Interactive Cable / Connection Flow Layer -->
+      <svg class="flow-svg-layer" id="flowSvgLayer"></svg>
+
+      <!-- Left Column: Controls & Producer -->
+      <aside class="panel panel-left">
+        <div class="panel-header">
+          <h3><i class="fas fa-paper-plane"></i> Producer & Message Publisher</h3>
+        </div>
+
+        <div class="panel-content scrollable">
+          <div class="control-section">
+            <p class="section-desc">
+              Publish AMQP messages to Exchanges with routing keys or headers. Messages are
+              evaluated and routed instantly to matching queues.
+            </p>
+
+            <!-- Exchange Selector -->
+            <div class="input-group">
+              <label for="pubExchange"><i class="fas fa-random"></i> Target Exchange</label>
+              <select id="pubExchange">
+                <option value="amq.direct">amq.direct (Direct Exchange)</option>
+                <option value="amq.topic">amq.topic (Topic Exchange)</option>
+                <option value="amq.fanout">amq.fanout (Fanout Exchange)</option>
+                <option value="amq.headers">amq.headers (Headers Exchange)</option>
+              </select>
+            </div>
+
+            <!-- Routing Key -->
+            <div class="input-group" id="routingKeyGroup">
+              <label for="pubRoutingKey"><i class="fas fa-key"></i> Routing Key</label>
+              <input
+                type="text"
+                id="pubRoutingKey"
+                value="orders.created"
+                placeholder="e.g. orders.created or logs.europe.error"
+              />
+            </div>
+
+            <!-- Headers Editor -->
+            <div class="input-group hidden" id="headersGroup">
+              <label for="pubHeaders"
+                ><i class="fas fa-tags"></i> Message Headers (JSON format)</label
+              >
+              <input
+                type="text"
+                id="pubHeaders"
+                value='{"format":"pdf", "type":"invoice"}'
+                placeholder='{"format":"pdf", "type":"invoice"}'
+              />
+            </div>
+
+            <!-- Payload -->
+            <div class="input-group">
+              <label for="pubPayload"><i class="fas fa-file-code"></i> Payload</label>
+              <input
+                type="text"
+                id="pubPayload"
+                value="Order #10842 - $149.99"
+                placeholder="Message content..."
+              />
+            </div>
+
+            <!-- Priority, TTL & Retry Params -->
+            <div class="input-group-row">
+              <div class="input-group">
+                <label for="pubPriority"><i class="fas fa-arrow-up-9-1"></i> Priority (0-10)</label>
+                <input
+                  type="number"
+                  id="pubPriority"
+                  value="0"
+                  min="0"
+                  max="10"
+                  placeholder="0 (Default)"
+                />
+              </div>
+              <div class="input-group">
+                <label for="pubTTL"><i class="fas fa-clock"></i> Message TTL (sec)</label>
+                <input
+                  type="number"
+                  id="pubTTL"
+                  value="0"
+                  min="0"
+                  max="60"
+                  placeholder="0 = infinite"
+                />
+              </div>
+              <div class="input-group">
+                <label for="pubDeliveryMode"><i class="fas fa-flag"></i> Mode</label>
+                <select id="pubDeliveryMode">
+                  <option value="persistent">Persistent (2)</option>
+                  <option value="transient">Transient (1)</option>
+                </select>
+              </div>
+            </div>
+            <!-- Action Grid -->
+            <div class="action-grid mt-2">
+              <button type="button" class="btn btn-primary" id="btnPublishMsg">
+                <i class="fas fa-paper-plane"></i> Publish Msg
+              </button>
+              <button type="button" class="btn btn-accent" id="btnBurstStream">
+                <i class="fas fa-bolt"></i> Burst Stream (5)
+              </button>
+            </div>
+
+            <!-- Broker Resource Pressure & Backpressure Control -->
+            <div class="resource-pressure-box mt-3">
+              <div class="box-title">
+                <span><i class="fas fa-gauge-high"></i> Broker Memory/Disk Watermark</span>
+                <span class="watermark-status-badge normal" id="watermarkStatusBadge"
+                  >Normal (20%)</span
+                >
+              </div>
+              <div class="input-group">
+                <input type="range" id="brokerPressureSlider" min="0" max="100" value="20" />
+                <div class="slider-labels">
+                  <span>0%</span>
+                  <span style="color: var(--rmq-amber)">80% (Alarm Threshold)</span>
+                  <span>100%</span>
+                </div>
+              </div>
+              <div class="buffer-status-row mt-2" id="outboundBufferRow">
+                <span class="buffer-count-tag" id="outboundBufferTag"
+                  ><i class="fas fa-box-archive"></i> Outbound Buffer: 0</span
+                >
+                <span class="confirm-status-tag" id="confirmStatusTag"
+                  ><i class="fas fa-shield-check"></i> basic.ack (Confirms)</span
+                >
+              </div>
+            </div>
+          </div>
+
+          <!-- Binding Manager Accordion -->
+          <div class="binding-manager-section mt-3">
+            <div class="section-title">
+              <h4><i class="fas fa-link"></i> Binding Manager</h4>
+              <button type="button" class="btn-icon" id="btnToggleBindingForm" title="Add Binding">
+                <i class="fas fa-plus"></i>
+              </button>
+            </div>
+
+            <div class="binding-form hidden" id="bindingForm">
+              <div class="input-group">
+                <label for="bindExchange">Source Exchange</label>
+                <select id="bindExchange">
+                  <option value="amq.direct">amq.direct</option>
+                  <option value="amq.topic">amq.topic</option>
+                  <option value="amq.fanout">amq.fanout</option>
+                  <option value="amq.headers">amq.headers</option>
+                </select>
+              </div>
+              <div class="input-group">
+                <label for="bindQueue">Target Queue</label>
+                <select id="bindQueue">
+                  <option value="orders_queue">orders_queue</option>
+                  <option value="payments_queue">payments_queue</option>
+                  <option value="logs_queue">logs_queue</option>
+                  <option value="notifications_queue">notifications_queue</option>
+                </select>
+              </div>
+              <div class="input-group" id="bindKeyContainer">
+                <label for="bindRoutingKey">Binding Key / Pattern</label>
+                <input
+                  type="text"
+                  id="bindRoutingKey"
+                  value="orders.*"
+                  placeholder="e.g. orders.* or logs.#"
+                />
+              </div>
+              <div class="input-group hidden" id="bindMatchContainer">
+                <label for="bindXMatch">x-match Header Condition</label>
+                <select id="bindXMatch">
+                  <option value="all">all (AND match all headers)</option>
+                  <option value="any">any (OR match any header)</option>
+                </select>
+              </div>
+              <button type="button" class="btn btn-sm btn-outline w-100" id="btnCreateBinding">
+                <i class="fas fa-link"></i> Add Binding Rule
+              </button>
+            </div>
+
+            <div class="bindings-list" id="bindingsList">
+              <!-- Active bindings populated dynamically -->
+            </div>
+          </div>
+
+          <!-- Shovel & Federation Plugin Control Box -->
+          <div class="shovel-config-box mt-3">
+            <div class="section-title">
+              <h4><i class="fas fa-route"></i> Shovel & Federation</h4>
+              <label class="toggle-switch sm-toggle">
+                <input type="checkbox" id="chkEnableShovel" />
+                <span class="slider"></span>
+              </label>
+            </div>
+            <div class="shovel-body mt-2">
+              <div class="input-group-row">
+                <div class="input-group">
+                  <label for="wanLatencySlider"><i class="fas fa-clock"></i> WAN Latency</label>
+                  <input
+                    type="range"
+                    id="wanLatencySlider"
+                    min="50"
+                    max="1000"
+                    value="200"
+                    step="50"
+                  />
+                  <span class="slider-val" id="wanLatencyVal">200ms</span>
+                </div>
+                <div class="input-group">
+                  <label for="wanDropRateSlider"><i class="fas fa-dumpster"></i> WAN Loss</label>
+                  <input type="range" id="wanDropRateSlider" min="0" max="30" value="5" step="1" />
+                  <span class="slider-val" id="wanDropVal">5%</span>
+                </div>
+              </div>
+              <div class="shovel-telemetry mt-2">
+                <span class="shovel-tag" id="tagShoveledMsgs"
+                  ><i class="fas fa-truck-ramp-box"></i> Shoveled: 0</span
+                >
+                <span class="shovel-tag tag-drop" id="tagWanDropped"
+                  ><i class="fas fa-triangle-exclamation"></i> Dropped: 0</span
+                >
+              </div>
+            </div>
+          </div>
+        </div>
+      </aside>
+
+      <!-- Center Column: Visualization Stage & Canvas -->
+      <section class="panel panel-center">
+        <!-- Cluster Topology Nodes Bar -->
+        <div class="cluster-nodes-bar" id="clusterNodesBar">
+          <div class="cluster-title"><i class="fas fa-network-wired"></i> RabbitMQ HA Cluster:</div>
+          <div class="node-cards-row">
+            <div class="cluster-node-card online" id="card-node-a">
+              <div class="c-node-head">
+                <span class="c-node-name"><i class="fas fa-server"></i> Node-A</span>
+                <span class="c-node-badge healthy" id="status-node-a">HEALTHY</span>
+              </div>
+              <div class="c-node-actions">
+                <button
+                  type="button"
+                  class="btn-kill-node"
+                  data-node="node-a"
+                  title="Simulate Node Crash / Offline"
+                >
+                  <i class="fas fa-power-off"></i> <span class="lbl-kill">Kill Node</span>
+                </button>
+              </div>
+            </div>
+
+            <div class="cluster-node-card online" id="card-node-b">
+              <div class="c-node-head">
+                <span class="c-node-name"><i class="fas fa-server"></i> Node-B</span>
+                <span class="c-node-badge healthy" id="status-node-b">HEALTHY</span>
+              </div>
+              <div class="c-node-actions">
+                <button
+                  type="button"
+                  class="btn-kill-node"
+                  data-node="node-b"
+                  title="Simulate Node Crash / Offline"
+                >
+                  <i class="fas fa-power-off"></i> <span class="lbl-kill">Kill Node</span>
+                </button>
+              </div>
+            </div>
+
+            <div class="cluster-node-card online" id="card-node-c">
+              <div class="c-node-head">
+                <span class="c-node-name"><i class="fas fa-server"></i> Node-C</span>
+                <span class="c-node-badge healthy" id="status-node-c">HEALTHY</span>
+              </div>
+              <div class="c-node-actions">
+                <button
+                  type="button"
+                  class="btn-kill-node"
+                  data-node="node-c"
+                  title="Simulate Node Crash / Offline"
+                >
+                  <i class="fas fa-power-off"></i> <span class="lbl-kill">Kill Node</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Topology Controls Bar -->
+        <div class="topology-toolbar">
+          <div class="toolbar-left">
+            <button
+              type="button"
+              class="btn btn-sm btn-outline"
+              id="btnPlayPauseSim"
+              title="Play/Pause Simulation"
+            >
+              <i class="fas fa-pause"></i> <span id="lblPlayPause">Pause</span>
+            </button>
+            <button
+              type="button"
+              class="btn btn-sm btn-outline"
+              id="btnStepSim"
+              title="Single Step Consumer"
+            >
+              <i class="fas fa-step-forward"></i> Consumer Step
+            </button>
+            <button
+              type="button"
+              class="btn btn-sm btn-outline"
+              id="btnResetSim"
+              title="Reset All Queues & Stats"
+            >
+              <i class="fas fa-rotate-left"></i> Reset Engine
+            </button>
+          </div>
+
+          <div class="toolbar-center">
+            <div class="speed-control">
+              <label for="selTopologyMode"><i class="fas fa-globe"></i> Mode:</label>
+              <select
+                id="selTopologyMode"
+                style="
+                  background: #091120;
+                  color: #fff;
+                  border: 1px solid var(--glass-border);
+                  border-radius: 4px;
+                  padding: 0.2rem 0.4rem;
+                  font-size: 0.75rem;
+                "
+              >
+                <option value="single">Single Cluster</option>
+                <option value="multi-region">Multi-Region WAN (US-East ➔ EU-West)</option>
+              </select>
+            </div>
+            <div class="speed-control ms-2">
+              <label for="simSpeed"><i class="fas fa-tachometer-alt"></i> Speed:</label>
+              <input type="range" id="simSpeed" min="1" max="5" value="3" />
+              <span id="speedVal">1.0x</span>
+            </div>
+          </div>
+
+          <div class="toolbar-right">
+            <label class="toggle-switch">
+              <input type="checkbox" id="chkAutoConsume" checked />
+              <span class="slider"></span>
+              <span class="toggle-label"><i class="fas fa-robot"></i> Auto-Consume</span>
+            </label>
+            <label class="toggle-switch">
+              <input type="checkbox" id="chkSimulateFailures" />
+              <span class="slider red-slider"></span>
+              <span class="toggle-label"><i class="fas fa-bug"></i> Sim Worker Failures</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- AMQP Routing Playback Debugger Bar -->
+        <div class="debugger-toolbar" id="debuggerToolbar">
+          <div class="debugger-status">
+            <span class="debug-badge" id="debugStatusBadge"
+              ><i class="fas fa-bug"></i> Debugger Idle</span
+            >
+            <span class="frame-counter" id="frameCounter">Frame 0 / 0</span>
+          </div>
+          <div class="debugger-controls">
+            <button
+              type="button"
+              class="btn btn-sm btn-accent"
+              id="btnStepBack"
+              title="Step Backward Frame"
+              disabled
+            >
+              <i class="fas fa-step-backward"></i> Step Backward
+            </button>
+            <button
+              type="button"
+              class="btn btn-sm btn-accent"
+              id="btnStepForward"
+              title="Step Forward Frame"
+              disabled
+            >
+              <i class="fas fa-step-forward"></i> Step Forward
+            </button>
+            <button
+              type="button"
+              class="btn btn-sm btn-outline"
+              id="btnOpenMatcherModal"
+              title="Open Pattern Inspector Modal"
+            >
+              <i class="fas fa-microscope"></i> Pattern Inspector
+            </button>
+          </div>
+          <div class="debugger-info" id="debuggerInfo">
+            <span
+              >No active evaluation frame. Publish a message or toggle an exchange breakpoint to
+              step frame-by-frame.</span
+            >
+          </div>
+        </div>
+
+        <!-- Cluster Failover Election Notification Banner -->
+        <div class="cluster-election-banner hidden" id="clusterElectionBanner">
+          <span class="election-title"
+            ><i class="fas fa-vote-yea"></i> RAFT/QUORUM ELECTION PROTOCOL:</span
+          >
+          <span class="election-msg" id="clusterElectionMsg"
+            >Node-A crashed! Node-B promoted to LEADER with zero message loss.</span
+          >
+        </div>
+
+        <!-- Interactive Stage Grid -->
+        <div class="topology-stage" id="topologyStage">
+          <!-- Flow Control Waves / Backpressure Barrier Layer -->
+          <div class="flow-barrier-overlay hidden" id="flowBarrierOverlay">
+            <div class="flow-wave-line"></div>
+            <div class="flow-wave-line"></div>
+            <div class="flow-wave-line"></div>
+            <div class="flow-barrier-badge">
+              <i class="fas fa-hand"></i> CONNECTION BLOCKED (HIGH WATERMARK ALARM)
+            </div>
+          </div>
+
+          <!-- Producer Column -->
+          <div class="stage-column col-producers">
+            <div class="column-header"><i class="fas fa-broadcast-tower"></i> Producers</div>
+            <div class="node producer-node" id="producerNode">
+              <div class="node-icon"><i class="fas fa-paper-plane"></i></div>
+              <div class="node-title">Publisher</div>
+              <div class="node-badge" id="producerPulse">Ready</div>
+              <div class="producer-confirm-badge" id="producerConfirmBadge">basic.ack</div>
+            </div>
+          </div>
+
+          <!-- Exchanges Column -->
+          <div class="stage-column col-exchanges">
+            <div class="column-header"><i class="fas fa-random"></i> Exchanges</div>
+
+            <div class="node exchange-node" id="ex-direct" data-exchange="amq.direct">
+              <div class="node-header">
+                <span class="ex-tag tag-direct">DIRECT</span>
+                <span class="ex-name">amq.direct</span>
+                <button
+                  type="button"
+                  class="btn-breakpoint"
+                  data-ex="amq.direct"
+                  title="Toggle Breakpoint on Exchange"
+                >
+                  <i class="fas fa-circle-dot"></i>
+                </button>
+              </div>
+              <div class="ex-desc">Exact match routing key</div>
+            </div>
+
+            <div class="node exchange-node" id="ex-topic" data-exchange="amq.topic">
+              <div class="node-header">
+                <span class="ex-tag tag-topic">TOPIC</span>
+                <span class="ex-name">amq.topic</span>
+                <button
+                  type="button"
+                  class="btn-breakpoint"
+                  data-ex="amq.topic"
+                  title="Toggle Breakpoint on Exchange"
+                >
+                  <i class="fas fa-circle-dot"></i>
+                </button>
+              </div>
+              <div class="ex-desc">Wildcards (*: 1 word, #: 0+ words)</div>
+            </div>
+
+            <div class="node exchange-node" id="ex-fanout" data-exchange="amq.fanout">
+              <div class="node-header">
+                <span class="ex-tag tag-fanout">FANOUT</span>
+                <span class="ex-name">amq.fanout</span>
+                <button
+                  type="button"
+                  class="btn-breakpoint"
+                  data-ex="amq.fanout"
+                  title="Toggle Breakpoint on Exchange"
+                >
+                  <i class="fas fa-circle-dot"></i>
+                </button>
+              </div>
+              <div class="ex-desc">Broadcasts to all bound queues</div>
+            </div>
+
+            <div class="node exchange-node" id="ex-headers" data-exchange="amq.headers">
+              <div class="node-header">
+                <span class="ex-tag tag-headers">HEADERS</span>
+                <span class="ex-name">amq.headers</span>
+                <button
+                  type="button"
+                  class="btn-breakpoint"
+                  data-ex="amq.headers"
+                  title="Toggle Breakpoint on Exchange"
+                >
+                  <i class="fas fa-circle-dot"></i>
+                </button>
+              </div>
+              <div class="ex-desc">Match header key-value pairs</div>
+            </div>
+
+            <div class="node exchange-node dlx-node" id="ex-dlx" data-exchange="amq.dlx">
+              <div class="node-header">
+                <span class="ex-tag tag-dlx">DLX</span>
+                <span class="ex-name">amq.dlx</span>
+                <button
+                  type="button"
+                  class="btn-breakpoint"
+                  data-ex="amq.dlx"
+                  title="Toggle Breakpoint on Exchange"
+                >
+                  <i class="fas fa-circle-dot"></i>
+                </button>
+              </div>
+              <div class="ex-desc">Dead Letter Exchange</div>
+            </div>
+          </div>
+
+          <!-- Queues Column -->
+          <div class="stage-column col-queues">
+            <div class="column-header"><i class="fas fa-layer-group"></i> Queues</div>
+
+            <!-- Queue 1: Orders -->
+            <div class="node queue-node" id="q-orders" data-queue="orders_queue">
+              <div class="queue-header">
+                <span class="q-title"><i class="fas fa-shopping-cart"></i> orders_queue</span>
+                <button
+                  type="button"
+                  class="btn-queue-config"
+                  data-queue="orders_queue"
+                  title="Configure Queue Arguments & Policy"
+                >
+                  <i class="fas fa-gear"></i>
+                </button>
+                <span class="q-count-badge" id="count-orders">0</span>
+              </div>
+              <div class="queue-ha-tags" id="ha-tags-orders">
+                <!-- Leader & Follower badges rendered dynamically -->
+              </div>
+              <div class="queue-policy-tags" id="policy-tags-orders"></div>
+              <div class="queue-depth-bar">
+                <div class="queue-depth-fill" id="fill-orders" style="width: 0%"></div>
+              </div>
+              <div class="messages-container" id="container-orders">
+                <!-- Message pills added dynamically -->
+              </div>
+            </div>
+
+            <!-- Queue 2: Payments / Retry -->
+            <div class="node queue-node retry-queue-node" id="q-retry" data-queue="retry_queue">
+              <div class="queue-header">
+                <span class="q-title"
+                  ><i class="fas fa-clock-rotate-left"></i> retry_queue (TTL 3s)</span
+                >
+                <button
+                  type="button"
+                  class="btn-queue-config"
+                  data-queue="retry_queue"
+                  title="Configure Queue Arguments & Policy"
+                >
+                  <i class="fas fa-gear"></i>
+                </button>
+                <span class="q-count-badge count-retry" id="count-retry">0</span>
+              </div>
+              <div class="queue-ha-tags" id="ha-tags-retry"></div>
+              <div class="queue-policy-tags" id="policy-tags-retry"></div>
+              <div class="queue-depth-bar">
+                <div class="queue-depth-fill fill-retry" id="fill-retry" style="width: 0%"></div>
+              </div>
+              <div class="messages-container" id="container-retry"></div>
+            </div>
+
+            <!-- Queue 3: Logs -->
+            <div class="node queue-node" id="q-logs" data-queue="logs_queue">
+              <div class="queue-header">
+                <span class="q-title"><i class="fas fa-terminal"></i> logs_queue</span>
+                <button
+                  type="button"
+                  class="btn-queue-config"
+                  data-queue="logs_queue"
+                  title="Configure Queue Arguments & Policy"
+                >
+                  <i class="fas fa-gear"></i>
+                </button>
+                <span class="q-count-badge" id="count-logs">0</span>
+              </div>
+              <div class="queue-ha-tags" id="ha-tags-logs"></div>
+              <div class="queue-policy-tags" id="policy-tags-logs"></div>
+              <div class="queue-depth-bar">
+                <div class="queue-depth-fill" id="fill-logs" style="width: 0%"></div>
+              </div>
+              <div class="messages-container" id="container-logs"></div>
+            </div>
+
+            <!-- Queue 4: Notifications -->
+            <div class="node queue-node" id="q-notifications" data-queue="notifications_queue">
+              <div class="queue-header">
+                <span class="q-title"><i class="fas fa-bell"></i> notifications_queue</span>
+                <button
+                  type="button"
+                  class="btn-queue-config"
+                  data-queue="notifications_queue"
+                  title="Configure Queue Arguments & Policy"
+                >
+                  <i class="fas fa-gear"></i>
+                </button>
+                <span class="q-count-badge" id="count-notifications">0</span>
+              </div>
+              <div class="queue-ha-tags" id="ha-tags-notifications"></div>
+              <div class="queue-policy-tags" id="policy-tags-notifications"></div>
+              <div class="queue-depth-bar">
+                <div class="queue-depth-fill" id="fill-notifications" style="width: 0%"></div>
+              </div>
+              <div class="messages-container" id="container-notifications"></div>
+            </div>
+
+            <!-- Queue 5: Dead Letter Queue (DLQ) -->
+            <div class="node queue-node dlq-node" id="q-dlq" data-queue="dlq_queue">
+              <div class="queue-header">
+                <span class="q-title"
+                  ><i class="fas fa-skull-crossbones"></i> dead_letter_queue</span
+                >
+                <button
+                  type="button"
+                  class="btn-queue-config"
+                  data-queue="dlq_queue"
+                  title="Configure Queue Arguments & Policy"
+                >
+                  <i class="fas fa-gear"></i>
+                </button>
+                <span class="q-count-badge count-dlq" id="count-dlq">0</span>
+              </div>
+              <div class="queue-ha-tags" id="ha-tags-dlq"></div>
+              <div class="queue-policy-tags" id="policy-tags-dlq"></div>
+              <div class="queue-depth-bar">
+                <div class="queue-depth-fill fill-dlq" id="fill-dlq" style="width: 0%"></div>
+              </div>
+              <div class="messages-container" id="container-dlq"></div>
+            </div>
+          </div>
+
+          <!-- Consumers Column -->
+          <div class="stage-column col-consumers">
+            <div class="column-header"><i class="fas fa-users-gear"></i> Consumers</div>
+            <div class="consumers-container" id="consumersContainer">
+              <!-- Consumer nodes dynamically created -->
+            </div>
+            <button type="button" class="btn btn-sm btn-outline mt-2 w-100" id="btnAddConsumer">
+              <i class="fas fa-user-plus"></i> Spawn Consumer
+            </button>
+          </div>
+        </div>
+
+        <!-- Real-Time Activity Log Drawer -->
+        <div class="activity-log-bar">
+          <div class="log-header">
+            <span><i class="fas fa-list-check"></i> AMQP Routing & Diagnostics Log</span>
+            <button type="button" class="btn-text" id="btnClearLogs">Clear Log</button>
+          </div>
+          <div class="log-entries" id="logConsole">
+            <div class="log-line sys">
+              <span class="timestamp">[00:00:00]</span> AMQP Broker Initialized. Topology ready for
+              messages.
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Right Column: Queue Telemetry & Message Inspector -->
+      <aside class="panel panel-right">
+        <div class="panel-header">
+          <h3><i class="fas fa-chart-line"></i> Statistics & Inspector</h3>
+        </div>
+
+        <div class="panel-content scrollable">
+          <!-- Metrics Grid -->
+          <div class="metrics-grid">
+            <div class="metric-card">
+              <div class="metric-val" id="metricPublished">0</div>
+              <div class="metric-lbl"><i class="fas fa-upload"></i> Published</div>
+            </div>
+            <div class="metric-card">
+              <div class="metric-val text-success" id="metricAcked">0</div>
+              <div class="metric-lbl"><i class="fas fa-check-circle"></i> Acked</div>
+            </div>
+            <div class="metric-card">
+              <div class="metric-val text-warning" id="metricRetried">0</div>
+              <div class="metric-lbl"><i class="fas fa-rotate"></i> Retried</div>
+            </div>
+            <div class="metric-card">
+              <div class="metric-val text-danger" id="metricDLQ">0</div>
+              <div class="metric-lbl"><i class="fas fa-skull"></i> Dead Lettered</div>
+            </div>
+          </div>
+
+          <!-- Throughput Gauge -->
+          <div class="telemetry-box mt-3">
+            <div class="box-title">
+              <span><i class="fas fa-gauge-high"></i> Broker Throughput</span>
+              <span class="rate-val" id="rateVal">0.0 msg/s</span>
+            </div>
+            <div class="meter-bar">
+              <div class="meter-fill" id="rateFill" style="width: 0%"></div>
+            </div>
+          </div>
+
+          <!-- Selected Message Inspector -->
+          <div class="inspector-box mt-3">
+            <div class="box-title">
+              <span><i class="fas fa-search"></i> Message Inspector</span>
+              <span class="msg-id-tag" id="inspectMsgId">None</span>
+            </div>
+            <div class="inspector-details" id="inspectorContent">
+              <p class="placeholder-text">
+                Click on any message pill in a queue to inspect payload, headers, routing history,
+                and trigger manual ACK/NACK/REJECT.
+              </p>
+            </div>
+            <div class="inspector-actions hidden" id="inspectorActions">
+              <button type="button" class="btn btn-sm btn-success" id="btnManualAck">
+                <i class="fas fa-check"></i> ACK
+              </button>
+              <button type="button" class="btn btn-sm btn-warning" id="btnManualNack">
+                <i class="fas fa-rotate-left"></i> NACK (Retry)
+              </button>
+              <button type="button" class="btn btn-sm btn-danger" id="btnManualReject">
+                <i class="fas fa-times"></i> REJECT (DLQ)
+              </button>
+            </div>
+          </div>
+
+          <!-- Educational Info Box -->
+          <div class="edu-card mt-3">
+            <h4><i class="fas fa-graduation-cap"></i> RabbitMQ Core Concepts</h4>
+            <ul class="edu-list">
+              <li><strong>Direct:</strong> Exact key equality (`key === binding`).</li>
+              <li>
+                <strong>Topic:</strong> Pattern matching where `*` matches 1 word & `#` matches 0 or
+                more words.
+              </li>
+              <li>
+                <strong>Fanout:</strong> Ignores routing keys; sends to all queues bound to it.
+              </li>
+              <li><strong>Headers:</strong> Match header key/values (`x-match: all` or `any`).</li>
+              <li>
+                <strong>DLQ:</strong> Captures messages exceeding retries, expired TTL, or rejected.
+              </li>
+            </ul>
+          </div>
+        </div>
+      </aside>
+    </main>
+
+    <!-- Interactive Matcher Modal -->
+    <div class="modal-overlay hidden" id="patternMatcherModal">
+      <div class="modal-card">
+        <div class="modal-header">
+          <h3><i class="fas fa-microscope"></i> AMQP Routing Pattern Inspector</h3>
+          <button type="button" class="btn-close-modal" id="btnCloseMatcherModal">&times;</button>
+        </div>
+        <div class="modal-body">
+          <div class="inspector-workbench">
+            <div class="workbench-row">
+              <div class="input-group">
+                <label for="inspectorExchangeType"
+                  ><i class="fas fa-random"></i> Exchange Type</label
+                >
+                <select id="inspectorExchangeType">
+                  <option value="amq.topic">Topic Exchange (Wildcards '*' and '#')</option>
+                  <option value="amq.direct">Direct Exchange (Exact Key Match)</option>
+                  <option value="amq.headers">Headers Exchange (x-match All / Any)</option>
+                </select>
+              </div>
+              <div class="input-group" id="inspectorKeyGroup">
+                <label for="inspectorRoutingKey"><i class="fas fa-key"></i> Published Key</label>
+                <input
+                  type="text"
+                  id="inspectorRoutingKey"
+                  value="logs.europe.error"
+                  placeholder="e.g. logs.europe.error"
+                />
+              </div>
+              <div class="input-group" id="inspectorPatternGroup">
+                <label for="inspectorBindingPattern"
+                  ><i class="fas fa-filter"></i> Binding Pattern</label
+                >
+                <input
+                  type="text"
+                  id="inspectorBindingPattern"
+                  value="logs.*.error"
+                  placeholder="e.g. logs.*.error or logs.#"
+                />
+              </div>
+              <button
+                type="button"
+                class="btn btn-primary"
+                id="btnTestPatternMatch"
+                style="align-self: flex-end; height: 38px"
+              >
+                <i class="fas fa-flask"></i> Test Match
+              </button>
+            </div>
+          </div>
+
+          <div class="matcher-result-container" id="matcherBreakdownOutput">
+            <!-- Tokenization breakdown & matrix populated dynamically -->
+    <!-- Queue Configuration Modal -->
+    <div class="modal-overlay hidden" id="queueConfigModal">
+      <div class="modal-card">
+        <div class="modal-header">
+          <h3><i class="fas fa-sliders"></i> RabbitMQ Queue Policy & Arguments Settings</h3>
+          <button type="button" class="btn-close-modal" id="btnCloseQueueConfigModal">
+            &times;
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="inspector-workbench">
+            <h4
+              id="configQueueNameTitle"
+              style="margin: 0 0 0.8rem; font-size: 0.95rem; color: var(--rmq-orange)"
+            >
+              Target Queue: orders_queue
+            </h4>
+            <div class="input-group-row">
+              <div class="input-group">
+                <label for="cfgQueueType"><i class="fas fa-layer-group"></i> Queue Type</label>
+                <select id="cfgQueueType">
+                  <option value="classic">Classic Queue</option>
+                  <option value="quorum">Quorum Queue (Raft Replicated)</option>
+                  <option value="stream">Stream Queue (Append-Only Log)</option>
+                </select>
+              </div>
+              <div class="input-group">
+                <label for="cfgMaxPriority"
+                  ><i class="fas fa-arrow-up-9-1"></i> x-max-priority (Max Priority)</label
+                >
+                <input
+                  type="number"
+                  id="cfgMaxPriority"
+                  value="10"
+                  min="0"
+                  max="10"
+                  placeholder="0 = disabled"
+                />
+              </div>
+            </div>
+            <div class="input-group-row mt-2">
+              <div class="input-group">
+                <label for="cfgMaxLength"
+                  ><i class="fas fa-ruler-horizontal"></i> x-max-length (Max Queue Depth)</label
+                >
+                <input
+                  type="number"
+                  id="cfgMaxLength"
+                  value="10"
+                  min="0"
+                  max="20"
+                  placeholder="0 = unlimited"
+                />
+              </div>
+              <div class="input-group">
+                <label for="cfgOverflowPolicy"><i class="fas fa-water"></i> Overflow Policy</label>
+                <select id="cfgOverflowPolicy">
+                  <option value="drop-head">drop-head (Drop oldest message)</option>
+                  <option value="reject-publish">reject-publish (Reject incoming publish)</option>
+                </select>
+              </div>
+            </div>
+            <button type="button" class="btn btn-primary w-100 mt-3" id="btnSaveQueueConfig">
+              <i class="fas fa-save"></i> Save Policy Settings
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Script File -->
+    <script src="rabbitmq-visualizer.js"></script>
+    <script src="/modules/quick-notes/quick-notes.js"></script>
+  </body>
+</html>

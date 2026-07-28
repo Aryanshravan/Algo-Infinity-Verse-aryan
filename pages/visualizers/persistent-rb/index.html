@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Persistent Red-Black Tree Visualizer - Algo-Infinity-Verse</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="app-container">
+    <header class="header">
+      <div class="brand">
+        <a href="../../../index.html" class="back-btn"><i class="fas fa-arrow-left"></i> Home</a>
+        <h1><i class="fas fa-code-branch icon-glow"></i> Persistent Red-Black Tree Visualizer</h1>
+      </div>
+      <div class="stats-pills">
+        <div class="pill"><span class="label">Current Version:</span> <span id="stat-version">V0</span></div>
+        <div class="pill"><span class="label">Total Versions:</span> <span id="stat-total-v">1</span></div>
+        <div class="pill"><span class="label">Structural Memory Saved:</span> <span id="stat-memory-saved">0%</span></div>
+      </div>
+    </header>
+
+    <main class="main-content">
+      <!-- Control Panel -->
+      <section class="control-panel glass-card">
+        <div class="input-group">
+          <input type="number" id="val-input" placeholder="Value e.g. 42" style="width: 120px;">
+          <button id="btn-insert" class="btn btn-primary"><i class="fas fa-plus"></i> Insert (New V)</button>
+          <button id="btn-delete" class="btn btn-danger"><i class="fas fa-minus"></i> Delete (New V)</button>
+          <button id="btn-random" class="btn btn-secondary"><i class="fas fa-random"></i> Add Random</button>
+          <button id="btn-reset" class="btn btn-outline"><i class="fas fa-redo"></i> Reset All</button>
+        </div>
+
+        <div class="version-slider-group">
+          <label for="version-slider"><i class="fas fa-history"></i> Time Travel Slider:</label>
+          <input type="range" id="version-slider" min="0" max="0" value="0">
+          <span id="slider-version-label" class="version-badge">V0</span>
+        </div>
+
+        <div class="legend">
+          <span class="legend-item"><span class="color-box node-red"></span> Red Node</span>
+          <span class="legend-item"><span class="color-box node-black"></span> Black Node</span>
+          <span class="legend-item"><span class="color-box node-copied"></span> Path Copied Node (New)</span>
+          <span class="legend-item"><span class="color-box node-shared"></span> Shared Subtree Node</span>
+        </div>
+      </section>
+
+      <!-- Main Visualizer Area -->
+      <section class="visualizer-area glass-card">
+        <div class="canvas-header">
+          <h3><i class="fas fa-sitemap"></i> Tree View for <span id="tree-version-title" style="color: var(--accent-cyan);">Version V0</span></h3>
+          <div class="view-controls">
+            <button id="btn-toggle-sharing" class="btn btn-sm btn-outline"><i class="fas fa-eye"></i> Highlight Structural Sharing</button>
+          </div>
+        </div>
+        <div class="canvas-container">
+          <canvas id="rb-canvas"></canvas>
+        </div>
+      </section>
+
+      <!-- Bottom Analytics Cards -->
+      <div class="info-grid">
+        <section class="info-card glass-card">
+          <h3><i class="fas fa-memory"></i> Structural Sharing & Memory Calculator</h3>
+          <div class="metrics-grid">
+            <div class="metric">
+              <span class="m-val" id="metric-allocated">0</span>
+              <span class="m-lbl">Actual Nodes Allocated</span>
+            </div>
+            <div class="metric">
+              <span class="m-val" id="metric-naive">0</span>
+              <span class="m-lbl">Naive Full Copy Nodes</span>
+            </div>
+            <div class="metric">
+              <span class="m-val" id="metric-saved-nodes">0</span>
+              <span class="m-lbl">Nodes Saved by Path Copying</span>
+            </div>
+          </div>
+        </section>
+
+        <section class="info-card glass-card">
+          <h3><i class="fas fa-list-ol"></i> Version History Log</h3>
+          <div id="version-log" class="log-container">
+            <div class="log-entry">V0: Initialized empty Persistent Red-Black Tree</div>
+          </div>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <script type="module" src="persistent-rb.js"></script>
+</body>
+</html>

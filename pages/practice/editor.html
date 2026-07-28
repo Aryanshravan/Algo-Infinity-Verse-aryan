@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Code Editor — Algo Infinity Verse</title>
+    <meta
+      name="description"
+      content="Full-featured code editor with Monaco. Solve DSA problems with syntax highlighting, autocomplete, and instant execution feedback."
+    />
+
+    <!-- Preconnect to CDN for Monaco Editor -->
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" />
+    <link rel="dns-prefetch" href="https://cdn.jsdelivr.net" />
+
+    <link rel="stylesheet" href="/styles.css" />
+    <link rel="stylesheet" href="/pages/practice/editor.css" />
+
+    <link
+      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+
+    <script>
+      (function () {
+        try {
+          var t = localStorage.getItem('theme');
+          var p = window.matchMedia('(prefers-color-scheme: light)').matches;
+          var theme = t || (p ? 'light' : 'dark');
+          if (theme === 'light') document.documentElement.classList.add('light-mode');
+        } catch (e) {}
+      })();
+    </script>
+  </head>
+  <body data-page="editor" data-no-loading>
+    <!-- Offline Status Banner -->
+    <div id="offline-banner" class="offline-banner hidden" aria-live="polite">
+      <i class="fas fa-wifi-slash"></i> You are currently offline. Some features may be limited.
+    </div>
+
+    <!-- Loading Screen -->
+    <div id="editorLoadingScreen" class="editor-loading" role="status" aria-live="polite">
+      <div class="editor-loading-content">
+        <div class="editor-loading-spinner">
+          <div class="spinner-ring"></div>
+          <div class="spinner-ring spinner-ring-inner"></div>
+        </div>
+        <p class="editor-loading-text">Loading editor...</p>
+        <p class="editor-loading-sub" id="editorLoadingSub">Preparing Monaco Editor</p>
+      </div>
+    </div>
+
+    <!-- Main Application Shell -->
+    <div id="editorApp" class="editor-app hidden">
+      <!-- Top Navigation Bar -->
+      <header class="editor-navbar">
+        <div class="editor-nav-left">
+          <button
+            type="button"
+            class="editor-nav-btn editor-back-btn"
+            id="editorBackBtn"
+            aria-label="Back to problems"
+            title="Back to problems"
+          >
+            <i class="fas fa-arrow-left"></i>
+          </button>
+          <div class="editor-problem-meta" id="editorProblemMeta">
+            <span class="editor-problem-title" id="editorProblemTitle">Loading...</span>
+            <span class="editor-problem-difficulty" id="editorProblemDifficulty"></span>
+          </div>
+        </div>
+
+        <div class="editor-nav-center">
+          <div class="editor-lang-selector">
+            <select id="editorLanguageSelect" class="editor-lang-select" aria-label="Select language">
+              <option value="javascript">JavaScript</option>
+              <option value="python">Python</option>
+            </select>
+            <i class="fas fa-chevron-down editor-lang-chevron"></i>
+          </div>
+        </div>
+
+        <div class="editor-nav-right">
+          <button
+            type="button"
+            class="editor-nav-btn"
+            id="editorResetBtn"
+            title="Reset to starter code"
+            aria-label="Reset to starter code"
+          >
+            <i class="fas fa-undo"></i>
+          </button>
+          <button
+            type="button"
+            class="editor-nav-btn"
+            id="editorThemeBtn"
+            title="Toggle theme"
+            aria-label="Toggle editor theme"
+          >
+            <i class="fas fa-palette"></i>
+          </button>
+          <button type="button" class="editor-btn editor-btn-run" id="editorRunBtn">
+            <i class="fas fa-play"></i>
+            <span>Run</span>
+            <kbd>Ctrl+Enter</kbd>
+          </button>
+          <button type="button" class="editor-btn editor-btn-submit" id="editorSubmitBtn">
+            <i class="fas fa-paper-plane"></i>
+            <span>Submit</span>
+          </button>
+        </div>
+      </header>
+
+      <!-- Main Content: Editor + Results Panel -->
+      <div class="editor-main">
+        <!-- Editor Panel -->
+        <div class="editor-panel" id="editorPanel">
+          <div class="editor-container" id="monacoEditor"></div>
+          <div class="editor-statusbar">
+            <span class="editor-status-item" id="editorCursorStatus">Ln 1, Col 1</span>
+            <span class="editor-status-item" id="editorLangStatus">JavaScript</span>
+            <span class="editor-status-item" id="editorEncodingStatus">UTF-8</span>
+            <span class="editor-status-item" id="editorTabStatus">Spaces: 2</span>
+          </div>
+        </div>
+
+        <!-- Results Panel -->
+        <div class="results-panel" id="resultsPanel">
+          <!-- Running Indicator -->
+          <div class="results-running-bar" id="runningIndicator" style="display:none">
+            <i class="fas fa-spinner fa-spin"></i>
+            <span id="runningIndicatorText">Running code...</span>
+          </div>
+          <!-- Problem Description Tab -->
+          <div class="results-tabs">
+            <button
+              class="results-tab active"
+              data-tab="description"
+              id="resultsTabDescription"
+              type="button"
+            >
+              <i class="fas fa-info-circle"></i>
+              <span>Description</span>
+            </button>
+            <button class="results-tab" data-tab="testcases" id="resultsTabTestcases" type="button">
+              <i class="fas fa-vial"></i>
+              <span>Test Cases</span>
+            </button>
+            <button class="results-tab" data-tab="output" id="resultsTabOutput" type="button">
+              <i class="fas fa-terminal"></i>
+              <span>Output</span>
+              <span class="results-tab-badge hidden" id="outputBadge">!</span>
+            </button>
+          </div>
+
+          <!-- Tab Content -->
+          <div class="results-content">
+            <!-- Description Panel -->
+            <div class="results-tab-content active" id="resultsDescription">
+              <div class="problem-header">
+                <h2 class="problem-title" id="problemDescTitle">Problem Title</h2>
+                <div class="problem-meta-row">
+                  <span class="problem-topic-badge" id="problemTopicBadge"></span>
+                  <span class="problem-difficulty-badge" id="problemDifficultyBadge"></span>
+                  <span class="problem-acceptance" id="problemAcceptance"></span>
+                </div>
+              </div>
+              <div class="problem-description" id="problemDescription">
+                <p>Loading problem description...</p>
+              </div>
+              <div class="problem-constraints" id="problemConstraints" style="display: none">
+                <h4><i class="fas fa-list"></i> Constraints</h4>
+                <ul id="constraintsList"></ul>
+              </div>
+              <div class="problem-examples" id="problemExamples">
+                <h4><i class="fas fa-lightbulb"></i> Examples</h4>
+                <div id="examplesContent"></div>
+              </div>
+              <div class="problem-followup" id="problemFollowup" style="display: none">
+                <h4><i class="fas fa-forward"></i> Follow-up</h4>
+                <p id="followupContent"></p>
+              </div>
+            </div>
+
+            <!-- Test Cases Panel -->
+            <div class="results-tab-content" id="resultsTestCases">
+              <div class="testcases-header">
+                <span class="testcases-title">Test Cases</span>
+                <span class="testcases-summary" id="testCasesSummary">
+                  <span id="testCasesPassed">0</span>/<span id="testCasesTotal">0</span> passed
+                </span>
+              </div>
+              <div class="testcases-container" id="testCasesContainer">
+                <div class="testcases-placeholder">
+                  <i class="fas fa-flask"></i>
+                  <p>Run your code to see test results</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Output Panel -->
+            <div class="results-tab-content" id="resultsOutput">
+              <div class="output-header-row">
+                <span class="output-title">Console Output</span>
+                <button type="button" class="output-clear-btn" id="outputClearBtn" aria-label="Clear output">
+                  <i class="fas fa-trash-alt"></i>
+                </button>
+              </div>
+              <div class="output-content" id="outputContent">
+                <div class="output-placeholder">
+                  <i class="fas fa-terminal"></i>
+                  <p>Run your code to see output here</p>
+                </div>
+              </div>
+              <div class="output-metrics hidden" id="outputMetrics">
+                <span id="metricsTime"><i class="fas fa-clock"></i> <span id="cpuTime">-</span></span>
+                <span id="metricsMemory"><i class="fas fa-memory"></i> <span id="memUsage">-</span></span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Panel Resizer -->
+        <div class="panel-resizer" id="panelResizer" role="separator" aria-label="Resize panels" tabindex="0"></div>
+      </div>
+    </div>
+
+    <!-- Error toast container -->
+    <div id="toastContainer" class="toast-container" aria-live="polite"></div>
+
+    <!-- Reset confirmation modal -->
+    <div id="resetModal" class="editor-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="resetModalTitle" hidden>
+      <div class="editor-modal-dialog">
+        <div class="editor-modal-header">
+          <i class="fas fa-undo editor-modal-icon"></i>
+          <h3 id="resetModalTitle" class="editor-modal-title">Reset code?</h3>
+        </div>
+        <p class="editor-modal-msg">Your current code will be lost.</p>
+        <div class="editor-modal-actions">
+          <button type="button" class="editor-modal-btn editor-modal-btn-cancel" id="resetModalCancel">Cancel</button>
+          <button type="button" class="editor-modal-btn editor-modal-btn-confirm" id="resetModalConfirm">Reset</button>
+        </div>
+      </div>
+    </div>
+
+    <script src="/data/practice-problems.js"></script>
+    <script src="/auth.js"></script>
+    <script src="/theme.js"></script>
+    <script type="module" src="/pages/practice/editor.js"></script>
+  </body>
+</html>

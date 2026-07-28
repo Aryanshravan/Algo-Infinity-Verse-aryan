@@ -39,7 +39,12 @@ export async function saveQuizResult(req, _res) {
   const cookies = parseCookies(req.headers.cookie || "");
   const session = verifySessionToken(cookies[SESSION_COOKIE]);
   if (!session) return { status: 401, body: { error: "Authentication required." } };
-  if (!useFirestore) return { status: 503, body: { error: "User store unavailable." } };
+  if (!useFirestore) {
+    return res.status(503).json({
+      error:
+        "Firestore is unavailable. Ensure the required FIREBASE_* environment variables are configured."
+    });
+  }
 
   let payload;
   try {
@@ -98,7 +103,12 @@ export async function getQuizResults(req, _res) {
   const cookies = parseCookies(req.headers.cookie || "");
   const session = verifySessionToken(cookies[SESSION_COOKIE]);
   if (!session) return { status: 401, body: { error: "Authentication required." } };
-  if (!useFirestore) return { status: 503, body: { error: "User store unavailable." } };
+  if (!useFirestore) {
+    return res.status(503).json({
+      error:
+        "Firestore is unavailable. Ensure the required FIREBASE_* environment variables are configured."
+    });
+  }
 
   try {
     const url = new URL(req.url, `http://${req.headers.host}`);

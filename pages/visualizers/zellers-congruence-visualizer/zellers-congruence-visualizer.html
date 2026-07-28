@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Zeller's Congruence & Doomsday Algorithm | Algo Infinity Verse</title>
+    <meta
+      name="description"
+      content="Compute any day of the week instantly using Zeller's modular arithmetic or Conway's mental-math Doomsday method."
+    />
+    <link rel="stylesheet" href="../../../styles.css" />
+    <link rel="stylesheet" href="zellers-congruence-visualizer.css" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Poppins:wght@300;400;500;600;700&family=Fira+Code:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <link rel="stylesheet" href="/modules/quick-notes/quick-notes.css" />
+  </head>
+  <body data-page="zellers-congruence-visualizer">
+    <div id="navbar-placeholder"></div>
+
+    <button id="scrollTopBtn" aria-label="Scroll to top" class="scroll-top-btn">
+      <i class="fas fa-circle-chevron-up"></i>
+    </button>
+
+    <section class="zel-hero">
+      <div class="zel-hero-bg"><canvas id="zelHeroCanvas" class="zel-hero-canvas"></canvas></div>
+      <div class="zel-hero-inner">
+        <div class="zel-hero-eyebrow">🗓️ Modular Arithmetic · Mental Math</div>
+        <h1 class="zel-hero-title">Calendar Algorithms</h1>
+        <p class="zel-hero-sub">Zeller's Congruence & The Doomsday Method</p>
+        <p class="zel-hero-desc">
+          Discover the mathematical elegance of computing the exact day of the week for any date in
+          history or the future. Watch <strong>Zeller's Congruence</strong> crunch the raw modular
+          arithmetic, and learn John Conway's legendary <strong>Doomsday Algorithm</strong>—the
+          mental-math trick used by competitive calendar calculators to find the answer in under 2
+          seconds.
+        </p>
+        <div class="zel-hero-actions">
+          <a href="#lab" class="btn btn-primary zel-btn-primary"
+            ><i class="fas fa-calendar-day"></i> Calculate Date</a
+          >
+          <a href="#challenge" class="btn zel-btn-outline"
+            ><i class="fas fa-stopwatch"></i> Speed Challenge</a
+          >
+        </div>
+      </div>
+    </section>
+
+    <section id="lab" class="section zel-section">
+      <div class="container">
+        <div class="zel-control-card">
+          <div class="zel-toolbar">
+            <div class="zel-tool-group" style="flex-wrap: wrap">
+              <span class="zel-label" id="dateLabel">Select Date</span>
+              <input type="date" id="datePicker" class="zel-input" aria-labelledby="dateLabel" value="1969-07-20" />
+              <select id="selPreset" class="zel-select" aria-label="Preset historical dates">
+                <option value="1969-07-20">Apollo 11 Moon Landing (July 20, 1969)</option>
+                <option value="1776-07-04">US Independence (July 4, 1776)</option>
+                <option value="1900-02-28">1900 Leap Year Exception (Feb 28, 1900)</option>
+                <option value="2000-02-29">2000 Leap Year Rule (Feb 29, 2000)</option>
+                <option value="custom" disabled>Custom (Use Date Picker)</option>
+              </select>
+            </div>
+
+            <div class="zel-tool-group zel-actions">
+              <button id="btnCompute" class="zel-btn zel-btn-primary">
+                <i class="fas fa-magic"></i> Compute
+              </button>
+            </div>
+          </div>
+
+          <div class="zel-stats-strip">
+            <div class="zel-stat-box">
+              <div class="stat-lbl">Target Date</div>
+              <div class="stat-val" id="statDate">July 20, 1969</div>
+            </div>
+            <div class="zel-stat-box">
+              <div class="stat-lbl">Zeller's Result</div>
+              <div class="stat-val highlight" id="statZeller">?</div>
+            </div>
+            <div class="zel-stat-box">
+              <div class="stat-lbl">Doomsday Result</div>
+              <div class="stat-val highlight-danger" id="statDoomsday">?</div>
+            </div>
+            <div class="zel-stat-box">
+              <div class="stat-lbl">Native JS Verification</div>
+              <div class="stat-val" id="statJS">?</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="zel-main-layout">
+          <div class="zel-panel zel-panel-zeller">
+            <div class="panel-header">
+              <h2 class="panel-title"><i class="fas fa-calculator"></i> Zeller's Congruence</h2>
+              <div class="panel-badges">
+                <span class="badge badge-zeller">Modular Formula</span>
+              </div>
+            </div>
+
+            <div class="zel-formula-box">
+              <div class="z-formula">h = (q + ⌊13(m+1)/5⌋ + K + ⌊K/4⌋ + ⌊J/4⌋ - 2J) mod 7</div>
+            </div>
+
+            <div class="z-steps-container" id="zellerSteps">
+              <!-- Steps injected by JS -->
+            </div>
+
+            <div class="z-final-result" id="zellerResultBox">
+              <div class="z-res-circle" id="zellerResNum">?</div>
+              <div class="z-res-day" id="zellerResDay">Awaiting Computation</div>
+            </div>
+          </div>
+
+          <div class="zel-panel zel-panel-doom">
+            <div class="panel-header">
+              <h2 class="panel-title"><i class="fas fa-brain"></i> The Doomsday Algorithm</h2>
+              <div class="panel-badges">
+                <span class="badge badge-doom">Mental Math</span>
+              </div>
+            </div>
+
+            <div class="d-intro">
+              Every year has a "Doomsday" (e.g., 4/4, 6/6, 8/8, 10/10, 12/12, PI-day 3/14). Find the
+              century anchor, offset the year, and count to the nearest Doomsday!
+            </div>
+
+            <div class="d-steps-container" id="doomSteps">
+              <!-- Steps injected by JS -->
+            </div>
+
+            <div class="z-final-result doom" id="doomResultBox">
+              <div class="z-res-circle" id="doomResNum">?</div>
+              <div class="z-res-day" id="doomResDay">Awaiting Computation</div>
+            </div>
+          </div>
+        </div>
+
+        <div id="challenge" class="zel-panel challenge-panel">
+          <div class="panel-header">
+            <h2 class="panel-title"><i class="fas fa-stopwatch"></i> Speed Calculator Challenge</h2>
+          </div>
+          <div class="challenge-layout">
+            <div class="c-prompt">
+              <div class="c-target" id="cTargetDate">---- --, ----</div>
+              <button id="btnNewChallenge" class="zel-btn zel-btn-ghost">
+                <i class="fas fa-random"></i> Generate Random Date
+              </button>
+            </div>
+            <div class="c-options">
+              <button class="c-day-btn" data-day="0">Saturday</button>
+              <button class="c-day-btn" data-day="1">Sunday</button>
+              <button class="c-day-btn" data-day="2">Monday</button>
+              <button class="c-day-btn" data-day="3">Tuesday</button>
+              <button class="c-day-btn" data-day="4">Wednesday</button>
+              <button class="c-day-btn" data-day="5">Thursday</button>
+              <button class="c-day-btn" data-day="6">Friday</button>
+            </div>
+            <div class="c-feedback" id="cFeedback"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <script src="../../../components/navbar/navbar.js"></script>
+    <script src="zellers-congruence-visualizer.js"></script>
+  </body>
+</html>

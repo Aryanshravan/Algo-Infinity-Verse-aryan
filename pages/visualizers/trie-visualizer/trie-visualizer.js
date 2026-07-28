@@ -190,6 +190,102 @@ Trie.prototype.search = function (word) {
   );
   return false;
 };
+Trie.prototype.delete = function (word) {
+  this.steps = [];
+  word = (word || '').trim().toLowerCase();
+  if (!word) {
+    this.recordStep('Please enter a word.', 'Word input cannot be empty.', 'failed', []);
+    return false;
+  }
+
+  let path = [this.root.id];
+  this.recordStep(
+    'Starting deletion for "' + word + '"',
+    'Begin traversal from root to locate word for deletion.',
+    'info',
+    path
+  );
+
+  let current = this.root;
+  let nodesOnPath = [this.root];
+
+  for (let i = 0; i < word.length; i++) {
+    let ch = word[i];
+    if (!current.children[ch]) {
+      this.recordStep(
+        "Deletion failed: '" + ch + "' not found",
+        "Word '" + word + "' does not exist in the Trie.",
+        'failed',
+        path
+      );
+      return false;
+    }
+    current = current.children[ch];
+    nodesOnPath.push(current);
+    path.push(current.id);
+    this.recordStep(
+      "Traversing character '" + ch + "'",
+      "Found node for '" + ch + "'.",
+      'current',
+      path
+    );
+  }
+
+  if (!current.isEnd) {
+    this.recordStep(
+      'Deletion failed: non-terminal node',
+      "Path for '" + word + "' exists, but it is not marked as a complete word.",
+      'failed',
+      path
+    );
+    return false;
+  }
+
+  current.isEnd = false;
+  this.recordStep(
+    'Unmarked terminal node',
+    "Removed terminal flag from node '" + current.char + "'.",
+    'terminal',
+    path
+  );
+
+  function hasChildren(node) {
+    return Object.keys(node.children).length > 0;
+  }
+
+  let prunedPath = path.slice();
+  for (let i = nodesOnPath.length - 1; i > 0; i--) {
+    let node = nodesOnPath[i];
+    let parentNode = nodesOnPath[i - 1];
+
+    if (!node.isEnd && !hasChildren(node)) {
+      delete parentNode.children[node.char];
+      prunedPath.pop();
+      this.recordStep(
+        "Pruned unreferenced branch node '" + node.char + "'",
+        "Node '" + node.char + "' has no children and is not a word end. Garbage collecting node from DOM/SVG tree.",
+        'failed',
+        prunedPath
+      );
+    } else {
+      this.recordStep(
+        "Retaining branch node '" + node.char + "'",
+        "Node '" + node.char + "' is either part of another word or has child branches.",
+        'info',
+        prunedPath
+      );
+      break;
+    }
+  }
+
+  this.recordStep(
+    'Word deleted successfully',
+    "Deletion of '" + word + "' and recursive branch pruning completed.",
+    'info',
+    prunedPath
+  );
+  return true;
+};
 Trie.prototype.layout = function () {
   let levels = [];
   let queue = [{ node: this.root, depth: 0 }];
@@ -359,6 +455,11 @@ function initTrieVisualizer() {
     trie.search(input.value);
     loadSteps();
   }
+  function runDelete() {
+    stopPlayback();
+    trie.delete(input.value);
+    loadSteps();
+  }
   function resetTrie() {
     stopPlayback();
     trie = new Trie();
@@ -367,6 +468,8 @@ function initTrieVisualizer() {
   }
   document.getElementById('insertBtn').addEventListener('click', runInsert);
   document.getElementById('searchBtn').addEventListener('click', runSearch);
+  let deleteBtn = document.getElementById('deleteBtn');
+  if (deleteBtn) deleteBtn.addEventListener('click', runDelete);
   document.getElementById('resetBtn').addEventListener('click', resetTrie);
   document.getElementById('previousBtn').addEventListener('click', function () {
     stopPlayback();

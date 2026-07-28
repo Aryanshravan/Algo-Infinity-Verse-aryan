@@ -107,6 +107,61 @@
     visibility 0.6s ease;
 }
 
+/* ── Skip Button ── */
+.splash-skip-btn {
+  position: fixed;
+  bottom: 28px;
+  right: 28px;
+  z-index: 10002;
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 0.78rem;
+  font-weight: 400;
+  color: rgba(255, 255, 255, 0.35);
+  background: none;
+  border: none;
+  padding: 6px 12px;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-color: rgba(255, 255, 255, 0.15);
+  transition: color 0.25s ease, text-decoration-color 0.25s ease;
+  letter-spacing: 0.3px;
+  line-height: 1;
+}
+
+.splash-skip-btn .skip-key-hint {
+  display: inline-block;
+  margin-left: 4px;
+  font-size: 0.7rem;
+  opacity: 0.5;
+  font-family: 'JetBrains Mono', monospace;
+  transition: opacity 0.25s ease;
+}
+
+.splash-skip-btn:hover .skip-key-hint {
+  opacity: 0.85;
+}
+
+.splash-skip-btn:hover {
+  color: rgba(255, 255, 255, 0.75);
+  text-decoration-color: rgba(255, 255, 255, 0.55);
+}
+
+.splash-skip-btn:focus-visible {
+  outline: 2px solid rgba(255, 255, 255, 0.4);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+
+@media (max-width: 480px) {
+  .splash-skip-btn {
+    bottom: 18px;
+    right: 18px;
+    font-size: 0.7rem;
+    padding: 4px 10px;
+  }
+}
+
 /* ── Reduced motion ── */
 @media (prefers-reduced-motion: reduce) {
   .cursor {

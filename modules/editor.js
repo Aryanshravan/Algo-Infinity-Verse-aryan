@@ -36,12 +36,7 @@ function getDefaultCode(lang, problem) {
       }).join(', ')
     : 'params';
 
-  let docComment = '';
-  if (problem.guide) {
-    const lines = problem.guide.split('\n');
-    const prefix = lang === 'python' ? '# ' : '// ';
-    docComment = lines.map(l => prefix + l).join('\n') + '\n';
-  }
+  const docComment = '';
 
   const templates = {
     javascript: docComment + "function " + fnName + "(" + (params.join(', ') || 'params') + ") {\n    \n}",
@@ -54,16 +49,24 @@ function getDefaultCode(lang, problem) {
   return templates[lang] || templates.javascript;
 }
 
+function extractMethods(problem) {
+  const map = new Map();
+  for (const tc of (problem.testCases || [])) {
+    if (tc.methods && Array.isArray(tc.methods)) {
+      for (const m of tc.methods) {
+        const name = m[0];
+        const argc = Math.max(0, m.length - 1);
+        if (!map.has(name) || map.get(name) < argc) map.set(name, argc);
+      }
+    }
+  }
+  return map;
+}
+
 function getClassTemplate(lang, problem) {
   const fnName = problem.functionName || "LRUCache";
   const params = problem.params || [];
-
-  let docComment = '';
-  if (problem.guide) {
-    const lines = problem.guide.split('\n');
-    const prefix = lang === 'python' ? '# ' : '// ';
-    docComment = lines.map(l => prefix + l).join('\n') + '\n';
-  }
+  const docComment = '';
 
   const paramStr = params.map((p, i) => {
     const t = mapType('int', lang);
@@ -73,13 +76,45 @@ function getClassTemplate(lang, problem) {
     return p;
   }).join(', ');
 
+  const methods = extractMethods(problem);
+  const pn = (n) => n === 0 ? '' : n === 1 ? 'val' : n === 2 ? 'key, value' : Array.from({length: n}, (_, i) => `val${i + 1}`).join(', ');
+  const getterSet = new Set(['get', 'getMin', 'getMax', 'top', 'peek', 'peekMin', 'peekMax']);
+  for (const tc of (problem.testCases || [])) {
+    if (tc.methods && tc.methods.length > 0 && tc.expected !== undefined && tc.expected !== null) {
+      getterSet.add(tc.methods[tc.methods.length - 1][0]);
+    }
+  }
+  const getter = (n) => getterSet.has(n);
+
+  const has = methods.size > 0;
+  const js = has ? [...methods].map(([n, a]) => `\n\n    ${n}(${pn(a)}) {\n        \n    }`).join('') : '\n\n    get(key) {\n        \n    }\n\n    put(key, value) {\n        \n    }';
+  const py = has ? [...methods].map(([n, a]) => {
+    const p = a === 0 ? 'self' : a === 1 ? 'self, val' : a === 2 ? 'self, key: int, value: int' : `self, ${Array.from({length: a}, (_, i) => `param${i + 1}: int`).join(', ')}`;
+    return `\n\n    def ${n}(${p})${getter(n) ? ' -> int' : ' -> None'}:\n        pass`;
+  }).join('') : '\n\n    def get(self, key: int) -> int:\n        pass\n\n    def put(self, key: int, value: int) -> None:\n        pass';
+  const java = has ? [...methods].map(([n, a]) => {
+    const rt = getter(n) ? 'int' : 'void';
+    const p = a === 0 ? '' : a === 1 ? 'int val' : a === 2 ? 'int key, int value' : Array.from({length: a}, (_, i) => `int val${i + 1}`).join(', ');
+    return `\n\n    public ${rt} ${n}(${p})${rt === 'void' ? ' {\n        \n    }' : ' {\n        return 0;\n    }'}`;
+  }).join('') : '\n\n    public int get(int key) {\n        return 0;\n    }\n\n    public void put(int key, int value) {\n        \n    }';
+  const cpp = has ? [...methods].map(([n, a]) => {
+    const rt = getter(n) ? 'int' : 'void';
+    const p = a === 0 ? '' : a === 1 ? 'int val' : a === 2 ? 'int key, int value' : Array.from({length: a}, (_, i) => `int val${i + 1}`).join(', ');
+    return `\n\n    ${rt} ${n}(${p})${rt === 'void' ? ' {\n        \n    }' : ' {\n        return 0;\n    }'}`;
+  }).join('') : '\n\n    int get(int key) {\n        return 0;\n    }\n\n    void put(int key, int value) {\n        \n    }';
+  const swift = has ? [...methods].map(([n, a]) => {
+    const p = a === 0 ? '' : a === 1 ? '_ val: Int' : a === 2 ? '_ key: Int, _ value: Int' : Array.from({length: a}, (_, i) => `_ val${i + 1}: Int`).join(', ');
+    const rt = getter(n) ? ' -> Int' : '';
+    return `\n\n    func ${n}(${p})${rt}${rt ? ' {\n        return 0\n    }' : ' {\n        \n    }'}`;
+  }).join('') : '\n\n    func get(_ key: Int) -> Int {\n        return 0\n    }\n\n    func put(_ key: Int, _ value: Int) {\n        \n    }';
+
   const templates = {
-    javascript: docComment + `class ${fnName} {\n    constructor(${paramStr}) {\n        \n    }\n\n    get(key) {\n        \n    }\n\n    put(key, value) {\n        \n    }\n}`,
-    python: docComment + `class ${fnName}:\n    def __init__(self, ${params.join(', ')}):\n        pass\n\n    def get(self, key: int) -> int:\n        pass\n\n    def put(self, key: int, value: int) -> None:\n        pass\n`,
-    java: `class ${fnName} {\n${docComment.replace(/^(.)/gm, '    $1')}    public ${fnName}(${paramStr}) {\n        \n    }\n\n    public int get(int key) {\n        return 0;\n    }\n\n    public void put(int key, int value) {\n        \n    }\n}`,
-    cpp: `#include <unordered_map>\nusing namespace std;\n\n${docComment}class ${fnName} {\npublic:\n    ${fnName}(${paramStr}) {\n        \n    }\n\n    int get(int key) {\n        return 0;\n    }\n\n    void put(int key, int value) {\n        \n    }\n};`,
+    javascript: docComment + `class ${fnName} {\n    constructor(${paramStr}) {\n        \n    }` + js + '\n}',
+    python: docComment + `class ${fnName}:\n    def __init__(self, ${params.join(', ')}):\n        pass` + py + '\n',
+    java: `class ${fnName} {\n${docComment.replace(/^(.)/gm, '    $1')}    public ${fnName}(${paramStr}) {\n        \n    }` + java + '\n}',
+    cpp: `#include <unordered_map>\nusing namespace std;\n\n${docComment}class ${fnName} {\npublic:\n    ${fnName}(${paramStr}) {\n        \n    }` + cpp + '\n};',
     c: `${docComment}// Use a struct with function pointers:\ntypedef struct {\n    int capacity;\n} LRUCache;\n\nLRUCache* createLRUCache(int capacity) {\n    return NULL;\n}\n\nint get(LRUCache* cache, int key) {\n    return 0;\n}\n\nvoid put(LRUCache* cache, int key, int value) {\n    \n}`,
-    swift: docComment + `class ${fnName} {\n    init(${paramStr}) {\n        \n    }\n\n    func get(_ key: Int) -> Int {\n        return 0\n    }\n\n    func put(_ key: Int, _ value: Int) {\n        \n    }\n}`
+    swift: docComment + `class ${fnName} {\n    init(${paramStr}) {` + swift + '\n}'
   };
   return templates[lang] || templates.javascript;
 }
@@ -687,14 +722,15 @@ function openQuizEditor(problem) {
 }
 
 function closeQuizEditor() {
+  if (currentProblem) {
+    clearEditorDraft(currentProblem.id);
+  }
   const el = document.getElementById("quizEditorModal");
   if (el) {
     el.classList.remove("active");
-    // Clean up hidden class added by initModalManager's closeModal overlay handler
     el.classList.remove("hidden");
   }
   currentProblem = null;
-  // Ensure body scroll is always restored, regardless of MutationObserver timing
   document.body.classList.remove("modal-open");
 }
 
@@ -832,7 +868,7 @@ function initializeQuizEditor() {
     }
   });
   wireQuizButtons();
-  if (languageSelect) languageSelect.addEventListener('change', () => { const editor = document.getElementById('codeEditor'); if (editor && currentProblem) { editor.value = getDefaultCode(languageSelect.value, currentProblem); editor.scrollTop = 0; editor.scrollLeft = 0; } syncEditorState(); updateEditorDisplayMode(); });
+  if (languageSelect) languageSelect.addEventListener('change', () => { const editor = document.getElementById('codeEditor'); if (editor && currentProblem) { editor.value = getDefaultCode(languageSelect.value, currentProblem); clearEditorDraft(currentProblem.id); editor.scrollTop = 0; editor.scrollLeft = 0; } syncEditorState(); updateEditorDisplayMode(); });
   syncEditorState();
   initEditorZoom(editor);
 }

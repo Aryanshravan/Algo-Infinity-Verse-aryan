@@ -96,8 +96,8 @@ function bindEvents() {
         els.presetSelect.value = 'custom';
     });
 
-    els.drawBtn.addEventListener('click', () => draw(false));
-    els.animateBtn.addEventListener('click', () => draw(true));
+    els.drawBtn.addEventListener('click', () => { draw(false); });
+    els.animateBtn.addEventListener('click', () => { draw(true); });
 
     els.axiomInput.addEventListener('input', () => els.presetSelect.value = 'custom');
 }
@@ -157,40 +157,54 @@ function parseRules() {
     });
 }
 
-function expandLSystem() {
+async function expandLSystem() {
     let axiom = els.axiomInput.value.trim();
     const iterations = parseInt(els.iterSlider.value);
     
-    // Safety check for massive strings
+    els.drawBtn.disabled = true;
+    els.animateBtn.disabled = true;
+    els.strLengthStat.textContent = "Generating String...";
+
     let curr = axiom;
     for (let i = 0; i < iterations; i++) {
         let next = "";
+        let t0 = performance.now();
         for (let j = 0; j < curr.length; j++) {
             const c = curr[j];
             next += rulesObj[c] || c;
+            
+            if (j % 50000 === 0 && performance.now() - t0 > 16) {
+                els.strLengthStat.textContent = `Generating (Iter ${i+1}/${iterations})...`;
+                await new Promise(r => setTimeout(r, 0));
+                t0 = performance.now();
+            }
         }
         curr = next;
         
-        // Anti-crash safety limit (strings > 2M chars will lag DOM severely)
-        if (curr.length > 2000000) {
-            void 0;
+        if (curr.length > 5000000) {
+            console.warn("L-System reached memory limit");
             break;
         }
     }
     
     currentString = curr;
     els.strLengthStat.textContent = currentString.length.toLocaleString();
+    els.drawBtn.disabled = false;
+    els.animateBtn.disabled = false;
 }
 
 // ==========================================
 // TURTLE GRAPHICS ENGINE
 // ==========================================
 
-function calculateBounds(commands, angleRad) {
+async function calculateBounds(commands, angleRad) {
     let x = 0, y = 0, currentAngle = -Math.PI / 2; // Face UP initially
     let minX = 0, maxX = 0, minY = 0, maxY = 0;
     const stack = [];
     const step = 1; // Arbitrary unit
+
+    els.strLengthStat.textContent = "Calculating Bounds...";
+    let t0 = performance.now();
 
     for (let i = 0; i < commands.length; i++) {
         const cmd = commands[i];
@@ -216,16 +230,22 @@ function calculateBounds(commands, angleRad) {
                 x = state.x; y = state.y; currentAngle = state.a;
             }
         }
+
+        if (i % 50000 === 0 && performance.now() - t0 > 16) {
+            await new Promise(r => setTimeout(r, 0));
+            t0 = performance.now();
+        }
     }
 
+    els.strLengthStat.textContent = currentString.length.toLocaleString();
     return { minX, maxX, minY, maxY };
 }
 
-function draw(animate = false) {
+async function draw(animate = false) {
     if (animationId) cancelAnimationFrame(animationId);
     
     parseRules();
-    expandLSystem();
+    await expandLSystem();
 
     const canvasWidth = els.canvas.clientWidth;
     const canvasHeight = els.canvas.clientHeight;
@@ -239,7 +259,7 @@ function draw(animate = false) {
     const angleRad = angleDeg * (Math.PI / 180);
 
     // Dry Run to auto-scale
-    const bounds = calculateBounds(currentString, angleRad);
+    const bounds = await calculateBounds(currentString, angleRad);
     
     const bWidth = bounds.maxX - bounds.minX;
     const bHeight = bounds.maxY - bounds.minY;
@@ -268,9 +288,12 @@ function draw(animate = false) {
     const step = scale; // Actual line length
 
     if (!animate) {
-        // Draw Instantaneously
+        // Draw Instantaneously but yielding to prevent UI lockup
         ctx.beginPath();
         ctx.moveTo(x, y);
+
+        let t0 = performance.now();
+        els.strLengthStat.textContent = "Drawing...";
 
         for (let i = 0; i < currentString.length; i++) {
             const cmd = currentString[i];
@@ -295,8 +318,17 @@ function draw(animate = false) {
                     ctx.moveTo(x, y); // Jump back
                 }
             }
+            
+            if (i % 20000 === 0 && performance.now() - t0 > 16) {
+                ctx.stroke();
+                await new Promise(r => setTimeout(r, 0));
+                ctx.beginPath();
+                ctx.moveTo(x, y);
+                t0 = performance.now();
+            }
         }
         ctx.stroke();
+        els.strLengthStat.textContent = currentString.length.toLocaleString();
     } else {
         // Animated Drawing
         let index = 0;

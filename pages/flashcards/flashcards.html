@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Flashcards Revision — Algo Infinity Verse</title>
+    <meta
+      name="description"
+      content="Master DSA concepts with interactive flashcards. Review arrays, trees, graphs, and dynamic programming with spaced repetition."
+    />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Poppins:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+
+    <link rel="stylesheet" href="/styles.css" />
+    <link rel="stylesheet" href="flashcards.css" />
+
+    <script>
+      (function() {
+        try {
+          var storedTheme = localStorage.getItem('theme');
+          var prefersLight = window.matchMedia('(prefers-color-scheme: light)').matches;
+          var theme = storedTheme || (prefersLight ? 'light' : 'dark');
+          if (theme === 'light') {
+            document.documentElement.classList.add('light-mode');
+          } else {
+            document.documentElement.classList.remove('light-mode');
+          }
+        } catch (e) {}
+      })();
+    </script>
+  </head>
+  <body data-page="flashcards">
+    <!-- Skip to main content link -->
+    <a href="#fp-main" class="skip-link">Skip to main content</a>
+
+    <div id="navbar-placeholder"></div>
+
+    <main id="fp-main" tabindex="-1" class="fp-page">
+
+      <!-- ═══════════════════════════════════════════════════════ -->
+      <!-- 1. HERO SECTION                                        -->
+      <!-- ═══════════════════════════════════════════════════════ -->
+      <section class="fp-hero">
+        <div class="fp-hero-shapes" aria-hidden="true">
+          <div class="fp-shape"></div>
+          <div class="fp-shape"></div>
+          <div class="fp-shape"></div>
+          <div class="fp-shape"></div>
+          <div class="fp-shape"></div>
+        </div>
+
+        <div class="fp-hero-content">
+          <h1 class="fp-hero-title">
+            Master DSA with<br />
+            <span class="fp-gradient-text">Flashcard Revision</span>
+          </h1>
+
+          <p class="fp-hero-subtitle">
+            Reinforce data structures and algorithms through active recall.
+            Choose a topic, review concepts, and track your progress over time.
+          </p>
+
+          <div class="fp-hero-stats">
+            <div class="fp-stat-item">
+              <span class="fp-stat-number" id="fpStatCards">0</span>
+              <span class="fp-stat-label">Cards reviewed</span>
+            </div>
+            <div class="fp-stat-item">
+              <span class="fp-stat-number" id="fpStatStreak">0</span>
+              <span class="fp-stat-label">Day streak</span>
+            </div>
+            <div class="fp-stat-item">
+              <span class="fp-stat-number" id="fpStatTopics">4</span>
+              <span class="fp-stat-label">Topics</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ═══════════════════════════════════════════════════════ -->
+      <!-- 2. TOPIC CATEGORY GRID                                 -->
+      <!-- ═══════════════════════════════════════════════════════ -->
+      <section class="fp-section">
+        <div class="fp-section-header">
+          <div class="fp-section-eyebrow">Topics</div>
+          <h2 class="fp-section-title">Choose a topic to review</h2>
+          <p class="fp-section-subtitle">
+            Select a category below to begin reviewing. Each topic has a
+            curated set of questions to reinforce your understanding.
+          </p>
+        </div>
+
+        <div class="fp-topics-grid" role="group" aria-label="Flashcard topic categories">
+          <button type="button"
+            class="fp-topic-card active"
+            data-category="arrays"
+            aria-pressed="true"
+            tabindex="0">
+            <div class="fp-topic-icon"><i class="fas fa-chart-bar"></i></div>
+            <span class="fp-topic-name">Arrays</span>
+            <div class="fp-topic-meta">
+              <span class="fp-topic-count" data-topic-count="arrays">— questions</span>
+            </div>
+          </button>
+
+          <button type="button"
+            class="fp-topic-card"
+            data-category="trees"
+            aria-pressed="false"
+            tabindex="0">
+            <div class="fp-topic-icon"><i class="fas fa-tree"></i></div>
+            <span class="fp-topic-name">Trees</span>
+            <div class="fp-topic-meta">
+              <span class="fp-topic-count" data-topic-count="trees">— questions</span>
+            </div>
+          </button>
+
+          <button type="button"
+            class="fp-topic-card"
+            data-category="graphs"
+            aria-pressed="false"
+            tabindex="0">
+            <div class="fp-topic-icon"><i class="fas fa-project-diagram"></i></div>
+            <span class="fp-topic-name">Graphs</span>
+            <div class="fp-topic-meta">
+              <span class="fp-topic-count" data-topic-count="graphs">— questions</span>
+            </div>
+          </button>
+
+          <button type="button"
+            class="fp-topic-card"
+            data-category="dp"
+            aria-pressed="false"
+            tabindex="0">
+            <div class="fp-topic-icon"><i class="fas fa-bullseye"></i></div>
+            <span class="fp-topic-name">Dynamic Programming</span>
+            <div class="fp-topic-meta">
+              <span class="fp-topic-count" data-topic-count="dp">— questions</span>
+            </div>
+          </button>
+        </div>
+
+        <!-- Toolbar -->
+        <div class="fp-toolbar">
+          <button type="button" id="flashcardsSoundToggle" class="fp-sound-btn" title="Toggle sound">
+            <i class="fas fa-volume-up"></i>
+          </button>
+        </div>
+
+        <!-- ═══════════════════════════════════════════════════ -->
+        <!-- 3. FLASHCARD SHELL                                  -->
+        <!-- ═══════════════════════════════════════════════════ -->
+        <div class="fp-flashcard-shell" id="fpFlashcardShell" data-current-category="arrays">
+          <div class="fp-flashcard-header">
+            <div class="fp-flashcard-meta">
+              <div class="fp-flashcard-progress">
+                <span id="flashcardsProgressText">Reviewed 0 / 0</span>
+                <div class="fp-progress-bar-wrap">
+                  <div class="fp-progress-bar">
+                    <div class="fp-progress-fill" id="fpProgressFill" style="width: 0%;"></div>
+                  </div>
+                </div>
+              </div>
+              <span class="fp-flashcard-total" id="flashcardsTotalText"></span>
+            </div>
+            <div class="fp-flashcard-nav">
+              <button type="button" id="flashcardsPrevBtn" class="fp-nav-btn" disabled>
+                <i class="fas fa-chevron-left"></i>
+                <span>Prev</span>
+              </button>
+              <button type="button" id="flashcardsNextBtn" class="fp-nav-btn">
+                <span>Next</span>
+                <i class="fas fa-chevron-right"></i>
+              </button>
+            </div>
+          </div>
+
+          <div class="fp-flashcard-stage">
+            <div class="fp-flashcard" id="flashcardRoot" aria-live="polite">
+              <div class="fp-flashcard-inner">
+                <div class="fp-flashcard-face fp-flashcard-front" id="flashcardQuestion">
+                  <div class="fp-flashcard-front-label">
+                    <i class="fas fa-lightbulb"></i>
+                    Question
+                  </div>
+                  <p class="fp-flashcard-question-text"></p>
+                </div>
+                <div class="fp-flashcard-face fp-flashcard-back" id="flashcardAnswer"></div>
+              </div>
+            </div>
+
+            <div class="fp-actions">
+              <button type="button" id="flashcardsRevealBtn" class="fp-reveal-btn">
+                <i class="fas fa-eye"></i>
+                Reveal Options
+              </button>
+              <span class="fp-small-hint" id="flashcardsSmallHint"></span>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <div id="footer-placeholder"></div>
+
+    <!-- Data -->
+    <script src="/data/quiz-questions.js"></script>
+
+    <!-- Dependencies -->
+    <script src="/script.js"></script>
+    <script src="/auth.js"></script>
+    <script type="module" src="/modules/flashcards.js"></script>
+
+    <!-- Partials & Init -->
+    <script>
+      async function loadAllPartials() {
+        await Promise.all([
+          loadPartial('navbar-placeholder', '/partials/navbar.html'),
+          loadPartial('footer-placeholder', '/partials/footer.html'),
+        ]);
+      }
+      loadAllPartials();
+    </script>
+  </body>
+</html>

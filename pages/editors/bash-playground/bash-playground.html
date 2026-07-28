@@ -1,0 +1,259 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Bash Shell Playground – In-Browser Terminal | Algo Infinity Verse</title>
+    <meta
+      name="description"
+      content="Write and run real Bash scripts in a sandboxed in-browser terminal. Multiple script files, environment variables, and ready-made templates for learning shell scripting."
+    />
+    <link rel="stylesheet" href="/styles.css" />
+    <link rel="stylesheet" href="bash-playground.css" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Poppins:wght@300;400;500;600;700&family=Fira+Code:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+
+    <!-- Theme Initialization Script -->
+    <script>
+      (function () {
+        try {
+          var storedTheme = localStorage.getItem('theme');
+          var prefersLight = window.matchMedia('(prefers-color-scheme: light)').matches;
+          var theme = storedTheme || (prefersLight ? 'light' : 'dark');
+          if (theme === 'light') {
+            document.documentElement.classList.add('light-mode');
+          } else {
+            document.documentElement.classList.remove('light-mode');
+          }
+        } catch (e) {}
+      })();
+    </script>
+  </head>
+  <body data-page="bash-playground" data-no-loading>
+    <div id="loading-screen" class="hidden">
+      <div class="loader">
+        <div class="infinity-loader">∞</div>
+        <h2>Algo Infinity Verse</h2>
+        <div class="loading-bar"><div class="loading-progress"></div></div>
+      </div>
+    </div>
+
+    <button type="button" id="scrollTopBtn" class="scroll-top-btn" aria-label="Scroll to top">
+      <i class="fas fa-arrow-up"></i>
+    </button>
+
+    <div id="navbar-placeholder"></div>
+
+    <section class="hero bp-hero">
+      <div class="hero-background">
+        <div class="stars"></div>
+        <div class="stars2"></div>
+        <div class="stars3"></div>
+      </div>
+      <div class="hero-content">
+        <h1 class="hero-title">
+          <span class="title-line">Write Bash.</span>
+          <span
+            class="main-title"
+            style="
+              background: linear-gradient(135deg, #4eaa25 0%, #06b6d4 100%);
+              -webkit-background-clip: text;
+              background-clip: text;
+              -webkit-text-fill-color: transparent;
+              color: transparent;
+            "
+            >Run It Instantly.</span
+          >
+          <span class="subtitle">In-Browser Shell Playground</span>
+        </h1>
+        <p class="bp-hero-desc">
+          Write real Bash scripts, manage multiple files, set environment variables, and run them in
+          a sandboxed terminal — no setup required.
+        </p>
+        <div class="hero-buttons">
+          <a
+            href="#playground"
+            class="btn btn-primary"
+            style="
+              background: linear-gradient(135deg, #4eaa25 0%, #06b6d4 100%);
+              border: none;
+              color: #fff;
+              font-weight: 600;
+            "
+          >
+            <i class="fas fa-play"></i> Open Playground
+          </a>
+        </div>
+        <div class="bp-note">
+          <i class="fas fa-info-circle"></i>
+          Execution runs in an isolated, network-disabled sandbox. You need to be signed in to run
+          scripts.
+        </div>
+      </div>
+    </section>
+
+    <section id="playground" class="section bp-section">
+      <div class="bp-container">
+        <div class="bp-toolbar">
+          <div class="bp-toolbar-left">
+            <span class="bp-label"
+              ><i class="fas fa-terminal bp-bash-icon"></i> Bash Shell Playground</span
+            >
+            <select id="bpTemplateSelect" class="bp-select" aria-label="Load script template">
+              <option value="hello">Hello World</option>
+              <option value="variables">Variables & Arithmetic</option>
+              <option value="loops">Loops</option>
+              <option value="conditionals">Conditionals</option>
+              <option value="functions">Functions</option>
+              <option value="files">File Operations</option>
+            </select>
+          </div>
+          <div class="bp-toolbar-right">
+            <button type="button" id="bpRunBtn" class="btn btn-primary bp-run-btn">
+              <i class="fas fa-play"></i> Run
+            </button>
+            <button
+              type="button"
+              id="bpResetBtn"
+              class="bp-icon-btn"
+              title="Reset current file to template"
+              aria-label="Reset current file to template"
+            >
+              <i class="fas fa-undo"></i>
+            </button>
+            <button
+              type="button"
+              id="bpCopyBtn"
+              class="bp-icon-btn"
+              title="Copy code"
+              aria-label="Copy code to clipboard"
+            >
+              <i class="fas fa-copy"></i>
+            </button>
+            <button
+              type="button"
+              id="bpSaveBtn"
+              class="bp-icon-btn"
+              title="Save to browser storage"
+              aria-label="Save code to browser storage"
+            >
+              <i class="fas fa-save"></i>
+            </button>
+            <button
+              type="button"
+              id="bpSidebarToggle"
+              class="bp-icon-btn bp-sidebar-toggle"
+              title="Toggle file explorer"
+              aria-label="Toggle file explorer"
+            >
+              <i class="fas fa-folder-open"></i>
+            </button>
+          </div>
+        </div>
+
+        <div class="bp-workspace">
+          <aside class="bp-sidebar" id="bpSidebar">
+            <div class="bp-sidebar-tabs">
+              <button type="button" class="bp-sidebar-tab active" data-tab="files" id="bpTabFiles">
+                <i class="fas fa-folder"></i> Files
+              </button>
+              <button type="button" class="bp-sidebar-tab" data-tab="env" id="bpTabEnv">
+                <i class="fas fa-sliders-h"></i> Env Vars
+              </button>
+            </div>
+
+            <div class="bp-sidebar-panel active" id="bpFilesPanel">
+              <div class="bp-file-list" id="bpFileList"></div>
+              <button type="button" id="bpNewFileBtn" class="bp-new-file-btn">
+                <i class="fas fa-plus"></i> New File
+              </button>
+              <p class="bp-sidebar-hint">
+                Only the open file runs when you hit Run. Files aren't saved to a server — they live
+                in this browser.
+              </p>
+            </div>
+
+            <div class="bp-sidebar-panel" id="bpEnvPanel">
+              <div class="bp-env-list" id="bpEnvList"></div>
+              <button type="button" id="bpNewEnvBtn" class="bp-new-env-btn">
+                <i class="fas fa-plus"></i> Add Variable
+              </button>
+              <p class="bp-sidebar-hint">
+                Variables are injected as <code>export KEY="value"</code> at the top of the script
+                before it runs.
+              </p>
+            </div>
+          </aside>
+
+          <div class="bp-editor-pane">
+            <div class="bp-pane-header">
+              <span><i class="fas fa-code"></i> <span id="bpActiveFileName">script.sh</span></span>
+              <span class="bp-lang-badge">Bash</span>
+            </div>
+            <div class="bp-editor-wrap">
+              <div class="bp-line-numbers" id="bpLineNumbers">1</div>
+              <textarea
+                id="bpEditor"
+                class="bp-editor"
+                spellcheck="false"
+                autocomplete="off"
+                autocorrect="off"
+                autocapitalize="off"
+                aria-label="Bash script editor"
+              ></textarea>
+            </div>
+          </div>
+
+          <div class="bp-terminal-pane">
+            <div class="bp-terminal-chrome">
+              <span class="bp-dot bp-dot-red"></span>
+              <span class="bp-dot bp-dot-yellow"></span>
+              <span class="bp-dot bp-dot-green"></span>
+              <span class="bp-terminal-title">terminal</span>
+              <span id="bpStatusBadge" class="bp-status-badge bp-status-ready">Ready</span>
+            </div>
+            <div class="bp-terminal-body" id="bpTerminalBody">
+              <span class="bp-terminal-placeholder">Run your script to see output here...</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="bp-console">
+          <div class="bp-console-header">
+            <span><i class="fas fa-exclamation-triangle"></i> Errors / stderr</span>
+            <button
+              type="button"
+              class="bp-console-clear"
+              id="bpConsoleClear"
+              aria-label="Clear error console"
+            >
+              <i class="fas fa-trash"></i> Clear
+            </button>
+          </div>
+          <div class="bp-console-body" id="bpConsoleBody">
+            <span class="bp-console-placeholder">No errors detected.</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div id="footer-placeholder"></div>
+
+    <script src="/auth.js"></script>
+    <script src="/bootstrap-legacy.js"></script>
+    <script src="/script.js"></script>
+    <script type="module" src="/dist/legacy-bundle.mjs"></script>
+    <script src="./bash-playground.js"></script>
+
+    <script>
+      loadPartial('navbar-placeholder', '/partials/navbar.html');
+      loadPartial('footer-placeholder', '/partials/footer.html');
+    </script>
+  </body>
+</html>

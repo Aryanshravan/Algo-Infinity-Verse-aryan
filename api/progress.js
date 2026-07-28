@@ -22,7 +22,12 @@ export default async function handler(req, res) {
     const cookies = parseCookies(req.headers.cookie || '');
     const session = verifySessionToken(cookies[SESSION_COOKIE]);
     if (!session) return res.status(401).json({ error: 'Authentication required.' });
-    if (!useFirestore) return res.status(503).json({ error: 'User store unavailable.' });
+    if (!useFirestore) {
+      return res.status(503).json({
+        error:
+          "Firestore is unavailable. Ensure the required FIREBASE_* environment variables are configured."
+      });
+    }
 
     const snapshot = await db.collection('users').where('id', '==', session.sub).limit(1).get();
     if (snapshot.empty) return res.status(404).json({ error: 'User not found.' });

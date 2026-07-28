@@ -241,6 +241,71 @@ const learningTopics = [
     icon: 'fa-skull',
     desc: "Explore obsolete, retired, and historically significant algorithms from computing's past.",
   },
+
+  // ── Orphaned pages linked (#2024) ──
+  {
+    name: 'Recursion vs Iteration',
+    path: '/pages/learning/recursion-vs-iteration-learning/recursion-vs-iteration-learning.html',
+    category: 'Core Algorithms',
+    icon: 'fa-arrows-rotate',
+    desc: 'Compare recursive and iterative solutions side by side to build intuition for when to use each.',
+  },
+  {
+    name: 'Computational Geometry',
+    path: '/pages/learning/computational-geometry/computational-geometry.html',
+    category: 'Advanced Algorithms',
+    icon: 'fa-draw-polygon',
+    desc: 'Learn computational geometry with interactive lessons on convex hulls, intersections, and sweep lines.',
+  },
+  {
+    name: 'Suffix Trees',
+    path: '/pages/learning/suffix-tree-learning/suffix-tree-learning.html',
+    category: 'Advanced Algorithms',
+    icon: 'fa-sitemap',
+    desc: 'Learn suffix trees from beginner to advanced — construction, generalized trees, and substring queries.',
+  },
+  {
+    name: 'Computer Architecture',
+    path: '/pages/learning/computer-architecture/computer-architecture.html',
+    category: 'Special',
+    icon: 'fa-microchip',
+    desc: 'Free beginner-friendly tutorial covering the Von Neumann model, CPU organization, memory hierarchy, registers, and assembly cycles.',
+  },
+  {
+    name: 'System Design Sandbox',
+    path: '/pages/learning/system-design-canvas/index.html',
+    category: 'Special',
+    icon: 'fa-diagram-project',
+    desc: 'Drag-and-drop canvas for sketching and reasoning about system design architectures.',
+  },
+  {
+    name: 'Three.js Academy',
+    path: '/pages/learning/threejs-academy/threejs-academy.html',
+    category: 'Special',
+    icon: 'fa-cube',
+    desc: 'Master 3D web development, scene graphs, cameras, lighting setups, materials, and complex mesh animations.',
+  },
+  {
+    name: 'Learn WebGL',
+    path: '/pages/learning/webgl-learning/webgl-learning.html',
+    category: 'Special',
+    icon: 'fa-display',
+    desc: 'Master low-level graphics programming, GPU pipeline control, shaders, and hardware-accelerated rendering configurations.',
+  },
+  {
+    name: 'Learn Django',
+    path: '/pages/learning/django-learning/django-learning.html',
+    category: 'Special',
+    icon: 'fa-server',
+    desc: 'Learn the Django web framework — models, views, templates, and the ORM.',
+  },
+  {
+    name: 'Learn Flask',
+    path: '/pages/learning/flask-learning/flask-learning.html',
+    category: 'Special',
+    icon: 'fa-flask',
+    desc: 'Learn the Flask micro web framework — routing, templating, and building lightweight APIs.',
+  },
 ];
 
 /* ─── Categories ─── */
@@ -340,7 +405,7 @@ function render() {
       const catKey = v.category.toLowerCase().replace(/[^a-z0-9]+/g, '-');
       const displayCat = categoryDisplayNames[catKey] || v.category;
       return `
-    <a href="${v.path}" class="lt-card" role="listitem" data-category="${catKey}" style="animation-delay:0s">
+    <a href="${v.path}" class="lt-card" role="listitem" data-category="${catKey}" style="animation-delay:${reducedMotion ? '0s' : Math.min(i * 0.025, 0.8)}s">
       <span class="lt-card-icon" style="color:${categoryColors[catKey] || 'var(--lt-primary)'}"><i class="fas ${v.icon}"></i></span>
       <span class="lt-card-title">${escHtml(v.name)}</span>
       <span class="lt-card-desc">${escHtml(v.desc)}</span>

@@ -1,0 +1,225 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Interpolation Search Visualizer | Algo Infinity Verse</title>
+    <meta
+      name="description"
+      content="Watch Interpolation Search achieve O(log log n) speed on uniform data, but completely collapse to O(n) on skewed data compared to Binary Search."
+    />
+    <link rel="stylesheet" href="../../../styles.css" />
+    <link rel="stylesheet" href="interpolation-search-visualizer.css" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Poppins:wght@300;400;500;600;700&family=Fira+Code:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <link rel="stylesheet" href="/modules/quick-notes/quick-notes.css" />
+  </head>
+  <body data-page="interpolation-search-visualizer">
+    <div id="navbar-placeholder"></div>
+
+    <button id="scrollTopBtn" aria-label="Scroll to top" class="scroll-top-btn">
+      <i class="fas fa-circle-chevron-up"></i>
+    </button>
+
+    <section class="isv-hero">
+      <div class="isv-hero-bg"><canvas id="heroCanvas" class="isv-hero-canvas"></canvas></div>
+      <div class="isv-hero-inner">
+        <div class="isv-hero-eyebrow">🔍 Search Algorithms · O(log log N) vs O(N)</div>
+        <h1 class="isv-hero-title">Interpolation Search</h1>
+        <p class="isv-hero-sub">Binary Search's Smarter (But Riskier) Cousin</p>
+        <p class="isv-hero-desc">
+          Instead of blindly guessing the middle, Interpolation Search predicts exactly where a
+          value should be by analyzing the dataset's numerical bounds—like opening a dictionary to
+          'Z' right at the end. On uniform data, it crushes Binary Search with a lightning-fast
+          <strong>O(log log n)</strong>. But what happens if the data is highly skewed? Watch a live
+          race to see the fatal flaw in prediction.
+        </p>
+        <div class="isv-hero-actions">
+          <a href="#lab" class="btn btn-primary isv-btn-primary"
+            ><i class="fas fa-play"></i> Start the Race</a
+          >
+          <a href="#theory" class="btn isv-btn-outline"
+            ><i class="fas fa-book-open"></i> How the Formula Works</a
+          >
+        </div>
+      </div>
+    </section>
+
+    <section id="lab" class="section isv-section">
+      <div class="container">
+        <div class="isv-control-card">
+          <div class="isv-toolbar">
+            <div class="isv-tool-group">
+              <label class="isv-label" for="selDistribution">Distribution:</label>
+              <select id="selDistribution" class="isv-select">
+                <option value="uniform">Uniform (Linear Spacing)</option>
+                <option value="exponential">Exponential (Right Skewed)</option>
+                <option value="logarithmic">Logarithmic (Left Skewed)</option>
+              </select>
+            </div>
+
+            <div class="isv-tool-group">
+              <label class="isv-label" for="sliderSize"
+                >Array Size: <span id="lblSize" style="color: `#fff`">100</span></label
+              >
+              <input
+                type="range"
+                id="sliderSize"
+                min="20"
+                max="250"
+                value="100"
+                class="isv-slider"
+              />
+            </div>
+
+            <div class="isv-tool-group">
+              <label class="isv-label" for="sliderTarget"
+                >Target (Index): <span id="lblTarget" style="color: `#fff`">80</span></label
+              >
+              <input
+                type="range"
+                id="sliderTarget"
+                min="0"
+                max="99"
+                value="80"
+                class="isv-slider"
+              />
+            </div>
+
+            <div class="isv-tool-group">
+              <label class="isv-label" for="sliderSpeed">Speed</label>
+              <input
+                type="range"
+                id="sliderSpeed"
+                min="1"
+                max="100"
+                value="70"
+                class="isv-slider"
+              />
+            </div>
+
+            <div class="isv-tool-group isv-actions">
+              <button id="btnRace" class="isv-btn isv-btn-primary">
+                <i class="fas fa-flag-checkered"></i> Start Search Race
+              </button>
+            </div>
+          </div>
+
+          <div class="isv-stats-strip">
+            <div class="isv-stat-box bs-box">
+              <div class="stat-lbl"><i class="fas fa-code-branch"></i> Binary Search Probes</div>
+              <div class="stat-val" id="statBsProbes">0</div>
+            </div>
+            <div class="isv-stat-box is-box">
+              <div class="stat-lbl"><i class="fas fa-chart-line"></i> Interpolation Probes</div>
+              <div class="stat-val" id="statIsProbes">0</div>
+            </div>
+            <div class="isv-stat-box target-box">
+              <div class="stat-lbl">Target Value to Find</div>
+              <div class="stat-val highlight" id="statTargetVal">-</div>
+            </div>
+          </div>
+        </div>
+
+        <div id="isvStatus" class="isv-status-bar">
+          <div class="status-icon"><i class="fas fa-info-circle"></i></div>
+          <div class="status-text" id="statusMsg">
+            Select a data distribution and adjust the target to begin the algorithm race.
+          </div>
+        </div>
+
+        <div class="isv-main-layout">
+          <div class="isv-panel isv-canvas-panel">
+            <div class="panel-header">
+              <h3 class="panel-title" style="color: #3b82f6">
+                <i class="fas fa-code-branch"></i> Binary Search Tracker
+              </h3>
+              <div class="panel-badges">
+                <span class="badge badge-bs">O(log n)</span>
+              </div>
+            </div>
+            <div class="canvas-wrap bs-wrap" id="bsCanvasWrap">
+              <canvas id="bsCanvas"></canvas>
+            </div>
+
+            <div class="panel-header" style="margin-top: 1.5rem">
+              <h3 class="panel-title" style="color: #f59e0b">
+                <i class="fas fa-chart-line"></i> Interpolation Search Tracker
+              </h3>
+              <div class="panel-badges">
+                <span class="badge badge-is">O(log log n) to O(n)</span>
+              </div>
+            </div>
+            <div class="canvas-wrap is-wrap" id="isCanvasWrap">
+              <canvas id="isCanvas"></canvas>
+            </div>
+          </div>
+
+          <div class="isv-side-layout">
+            <div class="isv-panel" style="flex: 1">
+              <div class="panel-header">
+                <h3 class="panel-title"><i class="fas fa-terminal"></i> Probe Log & Formulas</h3>
+              </div>
+              <div class="formula-box">
+                <div class="fb-title">Interpolation Position Formula:</div>
+                <code
+                  >pos = lo + ⌊<span style="color: #f59e0b">(t - A[lo])</span> /
+                  <span style="color: #10b981">(A[hi] - A[lo])</span> *
+                  <span style="color: #0ea5e9">(hi - lo)</span>⌋</code
+                >
+              </div>
+              <div class="log-console" id="logConsole"></div>
+            </div>
+          </div>
+        </div>
+
+        <div id="theory" class="isv-learn-section">
+          <h2 class="learn-heading">
+            <i class="fas fa-graduation-cap"></i> The Mechanics of Prediction
+          </h2>
+          <div class="isv-learn-grid">
+            <div class="isv-learn-card">
+              <div class="learn-icon">📈</div>
+              <h3>Linear Interpolation (The Math)</h3>
+              <p>
+                Instead of blind halving, it assumes the data grows steadily in a straight line. By
+                finding the slope between the current `low` and `high` values, it mathematically
+                projects exactly where the `target` value should intersect that line, directly
+                jumping to that calculated index.
+              </p>
+            </div>
+            <div class="isv-learn-card">
+              <div class="learn-icon">⚡</div>
+              <h3>The O(log log n) Best Case</h3>
+              <p>
+                If the data is truly uniformly distributed (like a perfectly spaced sequence 10, 20,
+                30...), the formula becomes a hyper-accurate oracle. The algorithm jumps almost
+                directly to the exact target instantly, yielding an average performance of O(log log
+                n), far faster than Binary Search.
+              </p>
+            </div>
+            <div class="isv-learn-card">
+              <div class="learn-icon">⚠️</div>
+              <h3>The O(n) Skewed Trap</h3>
+              <p>
+                When data is skewed (e.g., exponentially growing), the straight-line assumption
+                fails catastrophically. The formula chronically underestimates or overestimates the
+                position, forcing the algorithm to creep forward index-by-index in tiny increments.
+                It degrades to O(n)—slower than a simple linear scan!
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <script src="../../../components/navbar/navbar.js"></script>
+    <script src="interpolation-search-visualizer.js"></script>
+  </body>
+</html>

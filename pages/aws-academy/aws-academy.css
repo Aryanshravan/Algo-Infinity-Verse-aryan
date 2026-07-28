@@ -1,4 +1,3 @@
-/* General custom scrollbar */
 .custom-scrollbar::-webkit-scrollbar {
     width: 6px;
     height: 6px;
@@ -7,14 +6,13 @@
     background: transparent;
 }
 .custom-scrollbar::-webkit-scrollbar-thumb {
-    background: #cbd5e1; /* slate-300 */
+    background: #cbd5e1;
     border-radius: 3px;
 }
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-    background: #94a3b8; /* slate-400 */
+    background: #94a3b8;
 }
 
-/* Fade-in animations */
 @keyframes fadeIn {
     from { opacity: 0; transform: translateY(5px); }
     to { opacity: 1; transform: translateY(0); }
@@ -24,14 +22,13 @@
     animation: fadeIn 0.3s ease-out forwards;
 }
 
-/* Active sidebar item styling */
 .sidebar-module {
     margin-bottom: 1rem;
 }
 
 .sidebar-module-title {
     font-weight: 600;
-    color: #c2410c; /* orange-700 */
+    color: #c2410c;
     text-transform: uppercase;
     font-size: 0.75rem;
     letter-spacing: 0.05em;
@@ -42,7 +39,7 @@
 .sidebar-lesson {
     display: block;
     padding: 0.5rem 0.5rem 0.5rem 1rem;
-    color: #4b5563; /* gray-600 */
+    color: #4b5563;
     border-radius: 0.375rem;
     cursor: pointer;
     transition: all 0.2s;
@@ -51,27 +48,25 @@
 }
 
 .sidebar-lesson:hover {
-    background-color: #fff7ed; /* orange-50 */
-    color: #ea580c; /* orange-600 */
+    background-color: #fff7ed;
+    color: #ea580c;
 }
 
 .sidebar-lesson.active {
-    background-color: #fff7ed; /* orange-50 */
-    color: #ea580c; /* orange-600 */
+    background-color: #fff7ed;
+    color: #ea580c;
     font-weight: 500;
     border-left: 3px solid #ea580c;
 }
 
-/* Blueprint Grid Background for Architecture Canvas */
 .blueprint-bg {
-    background-color: #f1f5f9; /* slate-100 */
+    background-color: #f1f5f9;
     background-image: 
         linear-gradient(rgba(148, 163, 184, 0.3) 1px, transparent 1px),
         linear-gradient(90deg, rgba(148, 163, 184, 0.3) 1px, transparent 1px);
     background-size: 20px 20px;
 }
 
-/* Service Node Card Styling */
 .service-node {
     background: white;
     border: 1px solid #e5e7eb;
@@ -130,7 +125,7 @@
     right: -8px;
     width: 24px;
     height: 24px;
-    background: #ef4444; /* red-500 */
+    background: #ef4444;
     color: white;
     border-radius: 50%;
     display: flex;
@@ -148,18 +143,170 @@
 }
 
 .service-node .remove-btn:hover {
-    background: #dc2626; /* red-600 */
+    background: #dc2626;
 }
 
-/* Service Colors */
 .service-ec2 .icon-container { background-color: #fff7ed; color: #f97316; border: 1px solid #fdba74; }
 .service-s3 .icon-container { background-color: #f0fdf4; color: #16a34a; border: 1px solid #86efac; }
 .service-rds .icon-container { background-color: #eff6ff; color: #2563eb; border: 1px solid #93c5fd; }
 .service-lambda .icon-container { background-color: #faf5ff; color: #9333ea; border: 1px solid #d8b4fe; }
+.service-apigateway .icon-container { background-color: #fefce8; color: #ca8a04; border: 1px solid #fde68a; }
+.service-dynamodb .icon-container { background-color: #f0fdf4; color: #059669; border: 1px solid #6ee7b7; }
+.service-ecs .icon-container { background-color: #fef2f2; color: #dc2626; border: 1px solid #fca5a5; }
+.service-cloudfront .icon-container { background-color: #f0f9ff; color: #0284c7; border: 1px solid #7dd3fc; }
+.service-kinesis .icon-container { background-color: #f5f3ff; color: #7c3aed; border: 1px solid #c4b5fd; }
 
-/* Lesson Prose Styling */
 .lesson-prose h2 { font-size: 1.5rem; font-weight: 700; color: #111827; margin-bottom: 1rem; }
 .lesson-prose h3 { font-size: 1.25rem; font-weight: 600; color: #374151; margin-top: 1.5rem; margin-bottom: 0.75rem; }
 .lesson-prose p { margin-bottom: 1rem; line-height: 1.6; color: #4b5563; }
 .lesson-prose ul { list-style-type: disc; margin-left: 1.5rem; margin-bottom: 1rem; color: #4b5563; }
 .lesson-prose li { margin-bottom: 0.5rem; }
+
+.learning-objectives {
+    background: #eff6ff;
+    border-left: 4px solid #3b82f6;
+    border-radius: 0.5rem;
+    padding: 1rem 1.25rem;
+    margin-bottom: 1.5rem;
+}
+
+.learning-objectives h3 {
+    margin-top: 0;
+    margin-bottom: 0.75rem;
+    color: #1e40af;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.learning-objectives ul {
+    list-style-type: none;
+    margin-left: 0;
+    margin-bottom: 0;
+}
+
+.learning-objectives li {
+    padding-left: 1.5rem;
+    position: relative;
+    margin-bottom: 0.35rem;
+    font-size: 0.9rem;
+    color: #1e3a5f;
+}
+
+.learning-objectives li::before {
+    content: '\f140';
+    font-family: 'Font Awesome 6 Free';
+    font-weight: 900;
+    position: absolute;
+    left: 0;
+    color: #3b82f6;
+}
+
+.scenario-exercise {
+    background: #f0fdf4;
+    border: 1px solid #bbf7d0;
+    border-radius: 0.5rem;
+    padding: 1.25rem;
+    margin-bottom: 1.5rem;
+}
+
+.scenario-exercise h3 {
+    margin-top: 0;
+    margin-bottom: 0.75rem;
+    color: #166534;
+    font-size: 0.95rem;
+}
+
+.scenario-exercise p {
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+    color: #14532d;
+}
+
+.scenario-exercise ul {
+    margin-bottom: 0;
+    font-size: 0.9rem;
+    color: #14532d;
+}
+
+.lab-takeaways {
+    background: #faf5ff;
+    border: 1px solid #e9d5ff;
+    border-radius: 0.5rem;
+    padding: 1.25rem;
+    margin-bottom: 1.5rem;
+}
+
+.lab-takeaways h3 {
+    margin-top: 0;
+    margin-bottom: 0.75rem;
+    color: #6b21a8;
+    font-size: 0.95rem;
+}
+
+.lab-takeaways ul {
+    margin-bottom: 0;
+    font-size: 0.9rem;
+    color: #3b0764;
+}
+
+.review-checklist {
+    background: #fefce8;
+    border: 1px solid #fef08a;
+    border-radius: 0.5rem;
+    padding: 1.25rem;
+    margin-bottom: 1.5rem;
+}
+
+.review-checklist h3 {
+    margin-top: 0;
+    margin-bottom: 0.75rem;
+    color: #854d0e;
+    font-size: 0.95rem;
+}
+
+.review-checklist ul {
+    list-style-type: none;
+    margin-left: 0;
+    margin-bottom: 0;
+}
+
+.review-checklist li {
+    padding-left: 1.75rem;
+    position: relative;
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+    color: #422006;
+}
+
+.review-checklist li::before {
+    content: '\f14a';
+    font-family: 'Font Awesome 6 Free';
+    font-weight: 400;
+    position: absolute;
+    left: 0;
+    color: #ca8a04;
+}
+
+.architecture-diagram {
+    background: #f8fafc;
+    border: 2px dashed #94a3b8;
+    border-radius: 0.5rem;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    text-align: center;
+    font-family: 'SFMono-Regular', Consolas, monospace;
+    font-size: 0.8rem;
+    color: #475569;
+    line-height: 1.4;
+    overflow-x: auto;
+}
+
+.architecture-diagram h3 {
+    margin-top: 0;
+    margin-bottom: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-size: 0.8rem;
+    color: #64748b;
+}

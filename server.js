@@ -20,7 +20,7 @@ import {
   mapSkillsToRoadmapTopics,
 } from './backend/resume-analyzer/skills.js';
 import { getSuggestions } from './backend/resume-analyzer/suggestions.js';
-import { analyzeWorkflow } from './backend/repository-analyzer/cicdValidator.js';
+import { analyzeRepository } from './backend/repository-analyzer/repoAnalyzer.js';
 import { VCSFactory } from './backend/vcs/VCSFactory.js';
 import {
   enqueueBulkAudit,
@@ -141,9 +141,6 @@ const DELETION_LOG_FILE = path.join(DATA_DIR, 'account-deletions.json');
 const protectedPaths = new Set([
   '/community',
   '/community.html',
-  '/support-page',
-  '/support-page/',
-  '/support-page/index.html',
 ]);
 
 const mimeTypes = {
@@ -923,55 +920,17 @@ async function handleApi(req, res, pathname) {
       }
 
       const provider = VCSFactory.getProvider(repoUrl);
-      const workflows = await provider.getNormalizedWorkflows();
 
-      if (workflows.length === 0) {
-        let recommendation =
-          'No GitHub Actions workflows found in .github/workflows. Add a CI/CD pipeline to automate testing.';
-        if (repoUrl.includes('gitlab.com')) {
-          recommendation =
-            'No GitLab CI/CD configuration found (.gitlab-ci.yml). Add a CI/CD pipeline to automate testing.';
-        } else if (repoUrl.includes('bitbucket.org')) {
-          recommendation =
-            'No Bitbucket Pipelines configuration found (bitbucket-pipelines.yml). Add a CI/CD pipeline to automate testing.';
-        }
-        return sendJson(res, 200, {
-          score: 0,
-          workflowsAnalyzed: 0,
-          details: { hasDependencies: false, hasTests: false },
-          recommendations: [recommendation],
-        });
-      }
-
-      let bestScore = -1;
-      let overallDeps = false;
-      let overallTests = false;
-
-      for (const wf of workflows) {
-        const result = analyzeWorkflow(wf.commands);
-        if (result.score > bestScore) bestScore = result.score;
-        if (result.hasDependencies) overallDeps = true;
-        if (result.hasTests) overallTests = true;
-      }
-
-      const recommendations = [];
-      if (bestScore === 20)
-        recommendations.push('Workflows found, but they contain no functional jobs or steps.');
-      if (bestScore === 50)
-        recommendations.push("Add explicit testing commands (like 'npm test') to your workflow.");
-      if (bestScore === 75)
-        recommendations.push('Ensure dependencies are installed securely before running tests.');
-      if (bestScore === 100)
-        recommendations.push('Excellent! Fully functional CI/CD pipeline detected.');
+      const result = await analyzeRepository(provider);
 
       return sendJson(res, 200, {
-        score: bestScore,
-        workflowsAnalyzed: workflows.length,
-        details: {
-          hasDependencies: overallDeps,
-          hasTests: overallTests,
-        },
-        recommendations,
+        overallScore: result.overallScore,
+        ciCd: result.ciCd,
+        codeQuality: result.codeQuality,
+        security: result.security,
+        documentation: result.documentation,
+        recommendations: result.recommendations,
+        warnings: result.warnings,
       });
     } catch (err) {
       console.error('Repository analysis error:', err.message);
@@ -2918,6 +2877,14 @@ CRITICAL RULES:
     }
   }
 
+  // ── Code Execution (local dev) ──────────────────────────────────────
+  if (pathname === '/api/execute/problem' && req.method === 'POST') {
+    return sendJson(res, 200, {
+      success: false,
+      message: 'Server-side execution not available in local dev',
+    });
+  }
+
   return sendJson(res, 404, { error: 'Not found.' });
 }
 
@@ -2953,6 +2920,8 @@ function resolveStaticPath(pathname) {
     '/algorithm-timeline': 'pages/visualizers/algorithm-timeline/algorithm-timeline.html',
     '/practice': 'pages/practice/problems.html',
     '/practice.html': 'pages/practice/problems.html',
+    '/practice/editor': 'pages/practice/editor.html',
+    '/practice/editor.html': 'pages/practice/editor.html',
     '/support-page': 'support-page/index.html',
     '/support-page/': 'support-page/index.html',
     '/leaderboard': 'pages/leaderboard/leaderboard.html',
@@ -3083,8 +3052,9 @@ async function serveStatic(req, res, pathname) {
       headers['Content-Security-Policy'] =
         `default-src 'self'; ` +
         `script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.gstatic.com https://apis.google.com https://cdn.tailwindcss.com https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://esm.sh https://cdn.socket.io; ` +
-        `style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com https://cdn.tailwindcss.com; ` +
-        `font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com; ` +
+        `worker-src 'self' blob:; ` +
+        `style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com https://cdn.tailwindcss.com https://cdn.jsdelivr.net; ` +
+        `font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; ` +
         `img-src 'self' data: https: blob:; ` +
         `connect-src 'self' https: wss:; ` +
         `frame-src 'self' blob: https://*.firebaseapp.com; ` +
@@ -4233,7 +4203,7 @@ if (process.env.VERCEL !== '1' && process.env.NODE_ENV !== 'test') {
       const host = process.env.HOST || '127.0.0.1';
 
       server.listen(port, host, () => {
-        // listening started
+        console.log(`\n\x1b[38;5;183mServer running at\x1b[0m \x1b[38;5;228mhttp://${host}:${port}\x1b[0m\n`);
       });
 
       server.on('error', (err) => {

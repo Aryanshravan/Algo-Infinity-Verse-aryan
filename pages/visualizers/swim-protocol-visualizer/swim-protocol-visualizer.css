@@ -1,0 +1,75 @@
+.swim-hero {
+  position: relative; min-height: 56vh;
+  display: flex; align-items: center; justify-content: center;
+  padding: 7rem 1.5rem 3rem; overflow: hidden;
+  background: radial-gradient(ellipse at 50% 0%, rgba(34,197,94,0.07) 0%, rgba(6,182,212,0.05) 55%, transparent 80%);
+}
+.swim-hero-bg { position: absolute; inset: 0; z-index: 0; opacity: 0.5; }
+.swim-hero-canvas { display: block; width: 100%; height: 100%; }
+.swim-hero-inner { position: relative; z-index: 2; text-align: center; max-width: 780px; margin: 0 auto; }
+.swim-hero-eyebrow {
+  display: inline-block; font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em;
+  padding: 0.35rem 1.1rem; border-radius: 999px;
+  background: rgba(34,197,94,0.1); border: 1px solid rgba(34,197,94,0.3); color: #22c55e;
+  margin-bottom: 1.25rem;
+}
+.swim-hero-title {
+  font-family: Orbitron, sans-serif;
+  font-size: clamp(1.7rem, 5vw, 3.2rem); font-weight: 900;
+  background: linear-gradient(135deg, #22c55e 0%, #06b6d4 55%, #a855f7 100%);
+  background-clip: text; -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  line-height: 1.12; margin-bottom: 0.6rem;
+}
+.swim-hero-sub  { font-family: Fira Code, monospace; font-size: 0.85rem; color: #06b6d4; font-style: italic; margin-bottom: 0.9rem; }
+.swim-hero-desc { font-size: 0.9rem; color: var(--text-secondary); line-height: 1.8; margin-bottom: 1.85rem; }
+.swim-btn-primary { background: linear-gradient(135deg, #22c55e 0%, #06b6d4 100%); border: none; color: #fff; font-weight: 700; display: inline-flex; align-items: center; gap: 0.5rem; box-shadow: 0 4px 20px rgba(34,197,94,0.25); cursor:pointer; padding: 0.5rem 1rem; border-radius: 6px;}
+
+.swim-section { padding: 1.5rem 0 4rem; }
+
+.swim-control-card { background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 18px; padding: 1.1rem 1.25rem; backdrop-filter: blur(10px); margin-bottom: 0.85rem; display: flex; flex-direction: column; gap: 0.65rem; }
+.swim-row { display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap; }
+.swim-btn { padding: 0.42rem 0.85rem; font-size: 0.78rem; font-weight: 600; display: flex; align-items: center; gap: 0.32rem; cursor: pointer; border-radius: 6px; }
+.swim-btn:disabled { opacity: 0.5; filter: grayscale(100%); cursor: not-allowed; transform: none !important; box-shadow: none !important; }
+
+.swim-status { padding: 0.65rem 1rem; border-radius: 10px; font-size: 0.84rem; color: var(--text-secondary); margin-bottom: 0.85rem; min-height: 2.4rem; background: rgba(34,197,94,0.05); border: 1px solid rgba(34,197,94,0.18); transition: all 0.3s ease; line-height: 1.5; display: flex; align-items: center;}
+.swim-status.good { border-color: rgba(34,197,94,0.4); background: rgba(34,197,94,0.09); color: #22c55e; }
+.swim-status.warn { border-color: rgba(245,158,11,0.4); background: rgba(245,158,11,0.09); color: #f59e0b; }
+.swim-status.err { border-color: rgba(239,68,68,0.4); background: rgba(239,68,68,0.09); color: #ef4444; }
+
+.swim-main-layout { display: grid; grid-template-columns: 1.3fr 1fr; gap: 0.85rem; margin-bottom: 0.85rem; }
+@media (max-width: 900px) { .swim-main-layout { grid-template-columns: 1fr; } }
+
+.swim-panel-card { background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 16px; padding: 1.1rem 1.25rem; backdrop-filter: blur(10px); display: flex; flex-direction: column; position: relative;}
+.swim-panel-title { font-size: 0.85rem; font-weight: 700; letter-spacing: 0.04em; color: var(--text-primary); margin-bottom: 0.85rem; display: flex; align-items: center; justify-content: space-between; gap: 0.4rem; }
+
+.swim-canvas-wrapper { width: 100%; height: 350px; border-radius: 12px; overflow: hidden; background: #0f172a; position: relative; border: 1px solid rgba(255,255,255,0.05); margin-bottom: 0.8rem; }
+.swim-canvas-wrapper canvas { width: 100%; height: 100%; display: block; }
+
+.badge { font-family: 'Fira Code', monospace; font-size: 0.65rem; background: rgba(128,128,128,0.1); padding: 0.2rem 0.5rem; border-radius: 4px; color: var(--text-secondary); border: 1px solid var(--glass-border); text-transform: uppercase;}
+
+.swim-legend { display: flex; gap: 1rem; justify-content: center; font-size: 0.7rem; color: var(--text-secondary); font-family: 'Fira Code', monospace;}
+.leg-item { display: flex; align-items: center; gap: 4px; }
+.leg-color { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+
+.swim-log-container { flex: 1; min-height: 250px; background: rgba(0,0,0,0.2); border: 1px solid var(--glass-border); border-radius: 8px; padding: 0.8rem; overflow-y: auto; display: flex; flex-direction: column; gap: 0.4rem; font-family: 'Fira Code', monospace; font-size: 0.7rem; margin-bottom: 0.8rem;}
+.log-entry { padding: 0.4rem; border-radius: 4px; border-left: 3px solid transparent; background: rgba(128,128,128,0.05); color: var(--text-primary); }
+.log-neutral { border-left-color: #64748b; }
+.log-good { border-left-color: #22c55e; background: rgba(34,197,94,0.05); }
+.log-warn { border-left-color: #f59e0b; background: rgba(245,158,11,0.05); }
+.log-err { border-left-color: #ef4444; background: rgba(239,68,68,0.05); }
+.log-info { border-left-color: #06b6d4; background: rgba(6,182,212,0.05); }
+
+.swim-state-machine { display: flex; align-items: center; justify-content: center; gap: 0.4rem; background: rgba(128,128,128,0.05); padding: 0.6rem; border-radius: 8px; border: 1px solid var(--glass-border); }
+.sm-node { font-family: 'Fira Code', monospace; font-size: 0.65rem; font-weight: 700; padding: 0.3rem 0.5rem; border-radius: 4px; }
+.sm-alive { background: rgba(34,197,94,0.1); color: #22c55e; border: 1px solid #22c55e; }
+.sm-suspect { background: rgba(245,158,11,0.1); color: #f59e0b; border: 1px solid #f59e0b; }
+.sm-dead { background: rgba(239,68,68,0.1); color: #ef4444; border: 1px solid #ef4444; }
+.sm-arrow { font-size: 0.6rem; color: var(--text-secondary); display: flex; flex-direction: column; align-items: center; }
+
+.swim-learn-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.25rem; }
+.swim-learn-card { background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 16px; padding: 1.5rem; backdrop-filter: blur(10px); position: relative; overflow: hidden; transition: transform 0.2s ease; }
+.swim-learn-card:hover { transform: translateY(-3px); }
+.swim-learn-card::before { content:""; position:absolute; top:0;left:0;width:100%;height:3px; background:var(--lc,#06b6d4); }
+.swim-learn-icon { font-size: 1.75rem; margin-bottom: 0.5rem; }
+.swim-learn-card h3 { font-size: 0.9rem; font-weight: 700; margin-bottom: 0.5rem; color: var(--text-primary); }
+.swim-learn-card p  { font-size: 0.8rem; color: var(--text-secondary); line-height: 1.65; }

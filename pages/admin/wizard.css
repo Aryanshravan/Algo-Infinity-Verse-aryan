@@ -33,6 +33,13 @@ body {
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
 }
 
+@media (max-width: 768px) {
+  .wizard-container {
+    margin: 20px auto;
+    padding: 20px;
+  }
+}
+
 .wizard-header {
   text-align: center;
   margin-bottom: 30px;
@@ -44,6 +51,76 @@ body {
   background: linear-gradient(135deg, #a8c0ff 0%, #3f2b96 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
+}
+
+/* Back Button */
+.back-btn {
+  position: absolute;
+  top: 2rem;
+  left: 1.5rem;
+  z-index: 10;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.55rem 1rem 0.55rem 0.85rem;
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 100px;
+  color: var(--text-muted);
+  font-family: 'Inter', sans-serif;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.back-btn i {
+  font-size: 0.85rem;
+  transition: transform 0.2s ease;
+}
+
+.back-btn:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+  background: rgba(108, 92, 231, 0.08);
+}
+
+.back-btn:hover i {
+  transform: translateX(-3px);
+}
+
+.back-btn:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+/* Responsive Back Button */
+@media (max-width: 768px) {
+  .back-btn {
+    top: 1rem;
+    left: 0.75rem;
+    padding: 0.45rem 0.75rem 0.45rem 0.65rem;
+    font-size: 0.8rem;
+  }
+  
+  .back-btn span {
+    display: none;
+  }
+}
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  .back-btn {
+    transition: none;
+  }
+  .back-btn i {
+    transition: none;
+  }
+  .back-btn:hover i {
+    transform: none;
+  }
 }
 
 /* Progress Bar */

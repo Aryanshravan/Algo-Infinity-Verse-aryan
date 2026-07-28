@@ -1,0 +1,368 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Learning Streaks & Goal Tracker — Algo Infinity Verse</title>
+
+    <!-- Core Styles -->
+    <link rel="stylesheet" href="../../styles.css" />
+    <link rel="stylesheet" href="streak-dashboard.css" />
+
+    <!-- Fonts & Icons -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Poppins:wght@300;400;500;600;700&family=Fira+Code:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+  </head>
+  <body data-page="streak-dashboard">
+    <!-- Navbar Placeholder -->
+    <div id="navbar-placeholder"></div>
+
+    <main class="streak-dashboard-container">
+      <!-- Hero Header -->
+      <header class="streak-hero">
+        <div class="streak-hero-content">
+          <div class="streak-fire-badge">
+            <i class="fas fa-fire streak-fire-icon glow"></i>
+            <div class="streak-counter-wrapper">
+              <span class="streak-number" id="currentStreakVal">0</span>
+              <span class="streak-label">Day Streak</span>
+            </div>
+          </div>
+
+          <div class="streak-meta-details">
+            <h1 class="hero-title">Streak & Goal Tracker</h1>
+            <p class="hero-subtitle">
+              Consistently master Data Structures & Algorithms. Build daily habits, crush goals,
+              earn multipliers.
+            </p>
+
+            <div class="streak-badges-row">
+              <div class="meta-pill multiplier-pill" id="multiplierPill">
+                <i class="fas fa-bolt"></i> <span id="multiplierVal">1.0x</span> XP Multiplier
+              </div>
+              <div class="meta-pill freeze-pill">
+                <i class="fas fa-snowflake"></i> <span id="freezeCountVal">0</span> Freezes
+                Available
+              </div>
+              <div class="meta-pill longest-pill">
+                <i class="fas fa-trophy"></i> Best: <span id="longestStreakVal">0</span> Days
+              </div>
+            </div>
+          </div>
+
+          <div class="streak-actions">
+            <button
+              id="useFreezeBtn"
+              class="btn btn-freeze"
+              title="Activate streak freeze to protect against a missed day"
+            >
+              <i class="fas fa-snowflake"></i> Use Streak Freeze
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <!-- Motivational Nudge Banner -->
+      <div id="motivationalNudge" class="nudge-banner">
+        <div class="nudge-icon"><i class="fas fa-lightbulb"></i></div>
+        <div class="nudge-text" id="nudgeText">
+          Keep your momentum going! Complete at least 1 problem or study session today.
+        </div>
+        <button class="nudge-dismiss" id="dismissNudgeBtn" aria-label="Dismiss">&times;</button>
+      </div>
+
+      <!-- Main Grid Layout -->
+      <div class="dashboard-grid">
+        <!-- Heatmap Section -->
+        <section class="dashboard-card heatmap-card full-width">
+          <div class="card-header">
+            <h2><i class="fas fa-calendar-alt"></i> Activity Heatmap</h2>
+            <span class="card-hint">Past 52 weeks of contributions & study sessions</span>
+          </div>
+          <div class="card-body">
+            <div id="heatmapContainer"></div>
+          </div>
+        </section>
+
+        <!-- Goal Tracker Card -->
+        <section class="dashboard-card goals-card">
+          <div class="card-header">
+            <h2><i class="fas fa-bullseye"></i> Learning Goals</h2>
+            <button id="openGoalModalBtn" class="btn btn-sm btn-primary">
+              <i class="fas fa-plus"></i> Set Custom Goal
+            </button>
+          </div>
+          <div class="card-body">
+            <!-- Daily Goals List -->
+            <div class="goals-section">
+              <h3 class="goals-subheading"><i class="fas fa-sun"></i> Daily Targets</h3>
+              <div class="goal-item" id="dailyProblemsGoal">
+                <div class="goal-info">
+                  <div class="goal-title-row">
+                    <span class="goal-title">Solve Problems</span>
+                    <span class="goal-progress-text" id="dailyProblemsText">0 / 3</span>
+                  </div>
+                  <div class="progress-bar-bg">
+                    <div class="progress-bar-fill" id="dailyProblemsBar" style="width: 0%"></div>
+                  </div>
+                </div>
+                <button class="goal-check-btn" data-goal="dailyProblems" title="Log problem solved">
+                  +1
+                </button>
+              </div>
+
+              <div class="goal-item" id="dailyMinutesGoal">
+                <div class="goal-info">
+                  <div class="goal-title-row">
+                    <span class="goal-title">Study Duration (Minutes)</span>
+                    <span class="goal-progress-text" id="dailyMinutesText">0 / 30 mins</span>
+                  </div>
+                  <div class="progress-bar-bg">
+                    <div
+                      class="progress-bar-fill cyan"
+                      id="dailyMinutesBar"
+                      style="width: 0%"
+                    ></div>
+                  </div>
+                </div>
+                <button
+                  class="goal-check-btn"
+                  data-goal="dailyMinutes"
+                  title="Add 15 mins study time"
+                >
+                  +15m
+                </button>
+              </div>
+
+              <div class="goal-item" id="dailyQuizzesGoal">
+                <div class="goal-info">
+                  <div class="goal-title-row">
+                    <span class="goal-title">Quizzes / Flashcards</span>
+                    <span class="goal-progress-text" id="dailyQuizzesText">0 / 1</span>
+                  </div>
+                  <div class="progress-bar-bg">
+                    <div
+                      class="progress-bar-fill emerald"
+                      id="dailyQuizzesBar"
+                      style="width: 0%"
+                    ></div>
+                  </div>
+                </div>
+                <button class="goal-check-btn" data-goal="dailyQuizzes" title="Log quiz completed">
+                  +1
+                </button>
+              </div>
+            </div>
+
+            <!-- Weekly Goals List -->
+            <div class="goals-section mt-4">
+              <h3 class="goals-subheading"><i class="fas fa-calendar-week"></i> Weekly Targets</h3>
+              <div class="goal-item" id="weeklyProblemsGoal">
+                <div class="goal-info">
+                  <div class="goal-title-row">
+                    <span class="goal-title">Weekly Problems Target</span>
+                    <span class="goal-progress-text" id="weeklyProblemsText">0 / 15</span>
+                  </div>
+                  <div class="progress-bar-bg">
+                    <div class="progress-bar-fill" id="weeklyProblemsBar" style="width: 0%"></div>
+                  </div>
+                </div>
+              </div>
+              <div class="goal-item" id="weeklyMinutesGoal">
+                <div class="goal-info">
+                  <div class="goal-title-row">
+                    <span class="goal-title">Weekly Study Hours</span>
+                    <span class="goal-progress-text" id="weeklyMinutesText">0 / 150 mins</span>
+                  </div>
+                  <div class="progress-bar-bg">
+                    <div
+                      class="progress-bar-fill cyan"
+                      id="weeklyMinutesBar"
+                      style="width: 0%"
+                    ></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Study Session Timer Card -->
+        <section class="dashboard-card timer-card">
+          <div class="card-header">
+            <h2><i class="fas fa-stopwatch"></i> Study Session Timer</h2>
+            <span class="badge-live">LIVE TRACKER</span>
+          </div>
+          <div class="card-body text-center">
+            <div class="timer-display" id="timerDisplay">00:00:00</div>
+            <div class="timer-controls">
+              <button id="startTimerBtn" class="btn btn-success">
+                <i class="fas fa-play"></i> Start
+              </button>
+              <button id="pauseTimerBtn" class="btn btn-warning" disabled>
+                <i class="fas fa-pause"></i> Pause
+              </button>
+              <button id="stopTimerBtn" class="btn btn-danger" disabled>
+                <i class="fas fa-stop"></i> Log Session
+              </button>
+            </div>
+
+            <div class="quick-add-section">
+              <span class="quick-add-label">Quick Log Minutes:</span>
+              <div class="quick-add-buttons">
+                <button class="btn btn-outline btn-sm quick-log-btn" data-mins="15">
+                  +15 mins
+                </button>
+                <button class="btn btn-outline btn-sm quick-log-btn" data-mins="30">
+                  +30 mins
+                </button>
+                <button class="btn btn-outline btn-sm quick-log-btn" data-mins="60">
+                  +60 mins
+                </button>
+              </div>
+            </div>
+
+            <div class="study-stats-summary">
+              <div class="study-stat">
+                <span class="study-stat-number" id="todayStudyMins">0</span>
+                <span class="study-stat-label">Mins Today</span>
+              </div>
+              <div class="study-stat">
+                <span class="study-stat-number" id="totalStudyMins">0</span>
+                <span class="study-stat-label">Total Mins Studied</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Streak Milestones & Multipliers -->
+        <section class="dashboard-card milestones-card full-width">
+          <div class="card-header">
+            <h2><i class="fas fa-medal"></i> Streak Milestones & XP Multipliers</h2>
+          </div>
+          <div class="card-body">
+            <div class="milestones-grid">
+              <div class="milestone-box" id="milestone7">
+                <div class="milestone-icon"><i class="fas fa-shield-alt"></i></div>
+                <div class="milestone-title">7-Day Streak</div>
+                <div class="milestone-reward">+1.2x XP Multiplier & +1 Streak Freeze</div>
+                <div class="milestone-status" id="msStatus7">Locked</div>
+              </div>
+
+              <div class="milestone-box" id="milestone30">
+                <div class="milestone-icon"><i class="fas fa-crown"></i></div>
+                <div class="milestone-title">30-Day Streak</div>
+                <div class="milestone-reward">+1.5x XP Multiplier & Special Badge</div>
+                <div class="milestone-status" id="msStatus30">Locked</div>
+              </div>
+
+              <div class="milestone-box" id="milestone100">
+                <div class="milestone-icon"><i class="fas fa-gem"></i></div>
+                <div class="milestone-title">100-Day Streak</div>
+                <div class="milestone-reward">+2.0x XP Multiplier & Master Avatar Border</div>
+                <div class="milestone-status" id="msStatus100">Locked</div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Personalized Study Recommendations -->
+        <section class="dashboard-card recommendations-card full-width">
+          <div class="card-header">
+            <h2><i class="fas fa-magic"></i> Personalized Study Recommendations</h2>
+          </div>
+          <div class="card-body">
+            <div class="recommendations-grid" id="recommendationsContainer">
+              <div class="recommendation-card">
+                <div class="rec-icon"><i class="fas fa-code"></i></div>
+                <div class="rec-body">
+                  <div class="rec-title">Arrays & Strings Spaced Repetition</div>
+                  <div class="rec-desc">
+                    You have 2 problems due for review today based on your memory retention curve.
+                  </div>
+                </div>
+                <a href="../practice/practice.html" class="btn btn-sm btn-primary"
+                  >Start Practice</a
+                >
+              </div>
+
+              <div class="recommendation-card">
+                <div class="rec-icon cyan"><i class="fas fa-brain"></i></div>
+                <div class="rec-body">
+                  <div class="rec-title">Daily Challenge</div>
+                  <div class="rec-desc">
+                    Earn extra XP and maintain your streak by completing today's challenge problem.
+                  </div>
+                </div>
+                <a href="../../index.html#daily-challenge" class="btn btn-sm btn-primary"
+                  >View Challenge</a
+                >
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+    </main>
+
+    <!-- Custom Goal Modal -->
+    <div id="goalModal" class="modal-overlay hidden">
+      <div class="modal-card">
+        <div class="modal-header">
+          <h3><i class="fas fa-bullseye"></i> Set Custom Learning Goal</h3>
+          <button id="closeGoalModalBtn" class="modal-close-btn">&times;</button>
+        </div>
+        <div class="modal-body">
+          <form id="customGoalForm">
+            <div class="form-group">
+              <label for="goalTypeSelect">Goal Type</label>
+              <select id="goalTypeSelect" class="form-control">
+                <option value="dailyProblems">Daily Solved Problems Target</option>
+                <option value="dailyMinutes">Daily Study Minutes Target</option>
+                <option value="weeklyProblems">Weekly Solved Problems Target</option>
+                <option value="weeklyMinutes">Weekly Study Minutes Target</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="goalTargetInput">Target Value</label>
+              <input
+                type="number"
+                id="goalTargetInput"
+                class="form-control"
+                min="1"
+                max="1000"
+                value="5"
+                required
+              />
+            </div>
+            <div class="modal-actions">
+              <button type="button" id="cancelGoalBtn" class="btn btn-outline">Cancel</button>
+              <button type="submit" class="btn btn-primary">Save Goal</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="../../modules/userProgress.js"></script>
+    <script src="../../bootstrap-legacy.js"></script>
+    <script>
+      if (typeof loadPartial === 'function') {
+        loadPartial('navbar-placeholder', '/partials/navbar.html').then(function () {
+          import('/modules/navbar.js').then(function (m) {
+            m.initNavbar();
+          });
+        });
+      }
+    </script>
+    <script src="../../modules/gamification.js"></script>
+    <script type="module" src="../../modules/activityHeatmap.js"></script>
+    <script type="module" src="streak-dashboard.js"></script>
+  </body>
+</html>

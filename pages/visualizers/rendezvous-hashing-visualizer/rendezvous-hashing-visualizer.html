@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rendezvous Hashing (HRW) | Algo Infinity Verse</title>
+    <meta name="description" content="Visualize Rendezvous Hashing (Highest-Random-Weight). See how it achieves optimal load balancing without the complexity of virtual nodes in consistent hashing rings.">
+    <link rel="stylesheet" href="../../../styles.css">
+    <link rel="stylesheet" href="rendezvous-hashing-visualizer.css">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Poppins:wght@300;400;500;600;700&family=Fira+Code:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body data-page="rendezvous-hashing">
+
+    <div id="navbar-placeholder"></div>
+
+    <button id="scrollTopBtn" aria-label="Scroll to top" class="scroll-top-btn">
+      <i class="fas fa-circle-chevron-up"></i>
+    </button>
+
+    <section class="hrw-hero">
+      <div class="hrw-hero-bg"><canvas id="hrwHeroCanvas" class="hrw-hero-canvas"></canvas></div>
+      <div class="hrw-hero-inner">
+        <div class="hrw-hero-eyebrow">🌐 Distributed Systems</div>
+        <h1 class="hrw-hero-title">Rendezvous Hashing</h1>
+        <p class="hrw-hero-sub">Highest-Random-Weight (HRW): The Ringless Alternative</p>
+        <p class="hrw-hero-desc">Consistent Hashing is famous for using a "ring" and requiring hundreds of "virtual nodes" to balance traffic. Rendezvous Hashing completely discards the ring. Instead, every key evaluates a unique hash score against every server, and the server with the highest score wins. It naturally achieves perfect balance and minimal disruption on scaling, with zero tuning required!</p>
+        <a href="#lab" class="btn btn-primary hrw-btn-primary"><i class="fas fa-network-wired"></i> Enter the Lab</a>
+      </div>
+    </section>
+
+    <section id="lab" class="section hrw-section">
+      <div class="container">
+
+        <div class="hrw-control-card">
+          <div class="hrw-row">
+            <button class="btn btn-secondary hrw-btn" id="btnAddServer"><i class="fas fa-server"></i> Add Server</button>
+            <button class="btn btn-secondary hrw-btn" id="btnRemoveServer"><i class="fas fa-trash"></i> Remove Server</button>
+            
+            <div style="flex:1"></div>
+            
+            <button class="btn hrw-btn-primary hrw-btn" id="btnGenKeys"><i class="fas fa-bolt"></i> Generate 1,000 Keys</button>
+            <button class="btn btn-secondary hrw-btn" id="btnReset"><i class="fas fa-redo"></i> Reset System</button>
+          </div>
+        </div>
+
+        <div class="hrw-status" id="hrwStatus" role="status" aria-live="polite">System initialized with 3 Servers and 0 Keys. Click Generate Keys to begin.</div>
+
+        <div class="hrw-main-layout">
+          
+          <!-- How It Works (Scoreboards) -->
+          <div class="hrw-panel-card" style="grid-column: 1 / -1;">
+            <div class="hrw-panel-title">
+                <span><i class="fas fa-list-ol" style="color:#06b6d4;"></i> How it works: Per-Key Scoreboards</span>
+                <span style="font-family:'Fira Code', monospace; font-size: 0.7rem; color:var(--text-secondary);">Score = hash(key + server)</span>
+            </div>
+            
+            <div class="hrw-scoreboards-container" id="scoreboardsContainer">
+                <!-- Injected via JS -->
+                <div style="text-align:center; padding: 2rem; color:var(--text-secondary); width: 100%;">
+                    Generate keys to see the scoring mechanism.
+                </div>
+            </div>
+          </div>
+          
+          <!-- Comparison Panel -->
+          <div class="hrw-panel-card" style="grid-column: 1 / -1;">
+            <div class="hrw-panel-title">
+                <span><i class="fas fa-balance-scale" style="color:#a855f7;"></i> Load Balance & Migration Comparison</span>
+            </div>
+            
+            <div class="hrw-charts-grid">
+                
+                <div class="hrw-chart-col">
+                    <h3 class="chart-title">Rendezvous Hashing (HRW)</h3>
+                    <p class="chart-sub">No V-Nodes needed. O(N) lookup.</p>
+                    <div class="chart-canvas-wrapper">
+                        <canvas id="chartHRW"></canvas>
+                    </div>
+                    <div class="chart-stats" id="statsHRW">
+                        <div>Keys: 0</div>
+                        <div>Migrated: 0</div>
+                    </div>
+                </div>
+                
+                <div class="hrw-chart-col">
+                    <h3 class="chart-title">Consistent Hashing <span style="color:#ef4444;">(No V-Nodes)</span></h3>
+                    <p class="chart-sub">Terrible load balance. O(log N) lookup.</p>
+                    <div class="chart-canvas-wrapper">
+                        <canvas id="chartCHBase"></canvas>
+                    </div>
+                    <div class="chart-stats" id="statsCHBase">
+                        <div>Keys: 0</div>
+                        <div>Migrated: 0</div>
+                    </div>
+                </div>
+                
+                <div class="hrw-chart-col">
+                    <h3 class="chart-title">Consistent Hashing (100 V-Nodes)</h3>
+                    <p class="chart-sub">Complex configuration. O(log N) lookup.</p>
+                    <div class="chart-canvas-wrapper">
+                        <canvas id="chartCHVNode"></canvas>
+                    </div>
+                    <div class="chart-stats" id="statsCHVNode">
+                        <div>Keys: 0</div>
+                        <div>Migrated: 0</div>
+                    </div>
+                </div>
+                
+            </div>
+          </div>
+          
+        </div>
+
+      </div>
+    </section>
+
+    <section id="learn" class="section">
+      <div class="container">
+        <h2 class="section-title"><span class="title-icon">✨</span> The Architecture Tradeoff</h2>
+        <div class="hrw-learn-grid">
+          <div class="hrw-learn-card" style="--lc:#06b6d4">
+            <div class="hrw-learn-icon">🎯</div>
+            <h3>Natural Uniformity</h3>
+            <p>Because HRW computes a hash of the <code>key + server_id</code>, the scores are uniformly distributed pseudorandom numbers. The law of large numbers guarantees that every server will "win" the max-score contest an equal amount of times, yielding perfect balance automatically.</p>
+          </div>
+          <div class="hrw-learn-card" style="--lc:#a855f7">
+            <div class="hrw-learn-icon">🔄</div>
+            <h3>Minimal Disruption</h3>
+            <p>If you add Server D, it rolls new scores for all keys. It only steals a key if its new score beats the existing winner. Statistically, it will only win $1/N$ of the time. This perfectly matches Consistent Hashing's minimal disruption guarantee without needing a ring!</p>
+          </div>
+          <div class="hrw-learn-card" style="--lc:#ef4444">
+            <div class="hrw-learn-icon">⏱️</div>
+            <h3>The Cost: $O(N)$ Lookup</h3>
+            <p>Why do giant companies still use Consistent Hashing? Because HRW requires computing $N$ hashes per request to find the winner. For 50 servers, this is fast. For 10,000 servers, it's too slow. Consistent Hashing solves this by using binary search $O(\log N)$ on the ring, but trades away HRW's zero-configuration simplicity.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div id="footer-placeholder"></div>
+
+    <script src="../../../auth.js"></script>
+    <script src="../../../script.js"></script>
+    <script src="../../../theme.js"></script>
+    <script src="../../../auth-gate.js"></script>
+    <script src="rendezvous-hashing-visualizer.js"></script>
+    <script>
+      if (typeof loadPartial === 'function') {
+        loadPartial('navbar-placeholder', '/partials/navbar.html').then(function() {
+          if (typeof initNavbar === 'function') initNavbar();
+        });
+        loadPartial('footer-placeholder', '/partials/footer.html');
+      }
+    </script>
+</body>
+</html>

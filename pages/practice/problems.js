@@ -207,19 +207,11 @@ grid.addEventListener('click', (e) => {
   if (!card) return;
   const id = parseInt(card.dataset.id, 10);
   const problem = getProblems().find((p) => p.id === id);
-  if (problem && typeof window.openQuizEditor === 'function') {
-    sessionStorage.setItem('_ppSkipLoading', '1');
-    window.openQuizEditor(problem);
-    // Push history state so browser back closes the modal instead of navigating away
-    const modal = document.getElementById('quizEditorModal');
-    if (modal && modal.classList.contains('active')) {
-      history.pushState({ quizModalOpen: true }, '');
-    }
-  } else if (problem) {
-    // Fallback: navigate to the code playground with the problem ID
-    // This is a safety net — the editor module should be loaded on this page
-    window.location.href = '/code-playground.html?problem=' + problem.id;
-  }
+  if (!problem) return;
+
+  // Navigate to the new global Monaco editor in a new tab
+  const preferredLang = localStorage.getItem('preferredLanguage') || 'javascript';
+  window.open(`/practice/editor?problemId=${problem.id}&lang=${preferredLang}`, '_blank', 'noopener,noreferrer');
 });
 
 /* ─── History API: browser back closes modal instead of leaving page ─── */

@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Patience Sorting Visualizer | Algo Infinity Verse</title>
+    <meta name="description" content="Discover the O(n log n) Longest Increasing Subsequence algorithm using a beautifully visual card-sorting trick called Patience Sorting." />
+    <link rel="stylesheet" href="../../../styles.css" />
+    <link rel="stylesheet" href="patience-sorting-visualizer.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Poppins:wght@300;400;500;600;700&family=Fira+Code:wght@400;500;600&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <link rel="stylesheet" href="/modules/quick-notes/quick-notes.css" />
+  </head>
+  <body data-page="patience-sorting-visualizer">
+
+    <div id="navbar-placeholder"></div>
+
+    <button id="scrollTopBtn" aria-label="Scroll to top" class="scroll-top-btn">
+      <i class="fas fa-circle-chevron-up"></i>
+    </button>
+
+    <section class="ps-hero">
+      <div class="ps-hero-bg"><canvas id="psHeroCanvas" class="ps-hero-canvas"></canvas></div>
+      <div class="ps-hero-inner">
+        <div class="ps-hero-eyebrow">🃏 O(n log n) Algorithm · Solitaire Strategy</div>
+        <h1 class="ps-hero-title">Patience Sorting (LIS)</h1>
+        <p class="ps-hero-sub">The Card Game That Solves Longest Increasing Subsequence</p>
+        <p class="ps-hero-desc">Most DP approaches for LIS take O(n²), checking every previous element. But Patience Sorting deals the sequence like cards into descending piles using binary search, achieving O(n log n) time. The number of piles exactly equals the LIS length, and tracing back-pointers reconstructs the optimal sequence!</p>
+        <a href="#lab" class="btn btn-primary ps-btn-primary"><i class="fas fa-play"></i> Start Dealing</a>
+      </div>
+    </section>
+
+    <section id="lab" class="section ps-section">
+      <div class="container">
+        <div class="ps-control-card">
+          <div class="ps-row" style="justify-content: space-between;">
+            <div class="ps-row">
+              <span class="ps-label">Data Sequence</span>
+              <select id="selSeq" class="ps-select">
+                <option value="random">Random Hand (12 Cards)</option>
+                <option value="asc">Ascending (Worst for Piles)</option>
+                <option value="desc">Descending (Best for Piles)</option>
+                <option value="custom">Custom Input...</option>
+              </select>
+              <input type="text" id="customInput" class="ps-input" value="3,1,4,1,5,9,2,6,5" style="display:none;" />
+            </div>
+            <div class="ps-row">
+              <button id="btnNew" class="ps-btn ps-btn-outline"><i class="fas fa-shuffle"></i> Deal Hand</button>
+              <button id="btnStep" class="ps-btn ps-btn-outline"><i class="fas fa-step-forward"></i> Step</button>
+              <button id="btnPlay" class="ps-btn ps-btn-primary"><i class="fas fa-play"></i> Auto Deal</button>
+            </div>
+          </div>
+        </div>
+
+        <div id="psStatus" class="ps-status">Ready to deal cards. The number of piles will equal the Longest Increasing Subsequence.</div>
+
+        <div class="ps-main-layout">
+          <div class="ps-panel-card" style="grid-column: 1 / -1;">
+            <div class="ps-panel-title">
+              <span><i class="fas fa-layer-group"></i> Patience Sorting Arena</span>
+              <span id="pileCountBadge" class="ps-badge">0 Piles</span>
+            </div>
+            <div class="ps-queue-wrapper">
+              <div id="deckContainer" class="ps-deck-container"></div>
+            </div>
+            <div class="ps-arena" id="pilesContainer">
+            </div>
+            <div class="ps-arena-footer" id="lisResult" style="display:none;">
+              <div class="ps-lis-title">Longest Increasing Subsequence found:</div>
+              <div class="ps-lis-sequence" id="lisSequenceBox"></div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="ps-learn-grid">
+          <div class="ps-learn-card">
+            <div class="ps-learn-icon">🔍</div>
+            <h3>Binary Search Placement</h3>
+            <p>For each incoming card, we don't scan piles one-by-one. Since the top card of every pile forms a strictly increasing sequence from left to right, we use binary search to instantly find the leftmost pile whose top card is larger or equal.</p>
+          </div>
+          <div class="ps-learn-card">
+            <div class="ps-learn-icon">🔗</div>
+            <h3>Back-Pointer Magic</h3>
+            <p>Knowing the length is easy (it's just the number of piles), but what is the actual subsequence? We link each placed card to whatever card was sitting on top of the pile immediately to its left at the time of placement.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <script src="../../../components/navbar/navbar.js"></script>
+    <script src="patience-sorting-visualizer.js"></script>
+  </body>
+</html>

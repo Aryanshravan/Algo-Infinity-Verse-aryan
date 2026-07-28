@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Held-Karp TSP Visualizer | Algo Infinity Verse</title>
+    <meta name="description" content="Watch the dramatic difference between Factorial O(N!) and Exponential O(N²·2ᴺ) complexity in solving the Traveling Salesperson Problem." />
+    <link rel="stylesheet" href="../../../styles.css" />
+    <link rel="stylesheet" href="held-karp-visualizer.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Poppins:wght@300;400;500;600;700&family=Fira+Code:wght@400;500;600&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <link rel="stylesheet" href="/modules/quick-notes/quick-notes.css" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  </head>
+  <body data-page="held-karp-visualizer">
+
+    <div id="navbar-placeholder"></div>
+
+    <button id="scrollTopBtn" aria-label="Scroll to top" class="scroll-top-btn">
+      <i class="fas fa-circle-chevron-up"></i>
+    </button>
+
+    <section class="hk-hero">
+      <div class="hk-hero-bg"><canvas id="heroCanvas" class="hk-hero-canvas"></canvas></div>
+      <div class="hk-hero-inner">
+        <div class="hk-hero-eyebrow">⚙️ Dynamic Programming · NP-Hard Problems</div>
+        <h1 class="hk-hero-title">Held-Karp Algorithm</h1>
+        <p class="hk-hero-sub">The Bitmask DP That Makes TSP "Only" Exponential</p>
+        <p class="hk-hero-desc">The Traveling Salesperson Problem (TSP) is famously NP-Hard. A naive brute-force search checks every possible permutation, resulting in a devastating <strong>O(n!)</strong> factorial complexity. The Held-Karp algorithm uses Bitmask Dynamic Programming to remember subpaths, dropping the complexity to <strong>O(n² · 2ⁿ)</strong>. It doesn't make TSP magically fast for massive graphs, but the astronomical difference between factorial and exponential growth is a landmark lesson in algorithmic limits.</p>
+        <div class="hk-hero-actions">
+            <a href="#lab" class="btn btn-primary hk-btn-primary"><i class="fas fa-microchip"></i> Boot Simulator</a>
+            <a href="#theory" class="btn hk-btn-outline"><i class="fas fa-book-open"></i> The "Still Exponential" Truth</a>
+        </div>
+      </div>
+    </section>
+
+    <section id="lab" class="section hk-section">
+      <div class="container">
+        
+        <div class="hk-main-layout">
+            <div class="hk-panel chart-panel">
+                <div class="panel-header">
+                    <h3 class="panel-title" style="color: #10b981;"><i class="fas fa-chart-line"></i> The Complexity Chasm: O(N!) vs O(N²·2ᴺ)</h3>
+                </div>
+                <div class="chart-container">
+                    <canvas id="complexityChart"></canvas>
+                </div>
+                <p style="font-size: 0.75rem; color: #9ca3af; margin-top: 0.5rem; text-align: center;">Logarithmic Scale (Base 10) — Notice how rapidly Factorial explodes past Exponential after N=9.</p>
+            </div>
+        </div>
+
+        <div class="hk-control-card">
+          <div class="hk-toolbar">
+            
+            <div class="hk-tool-group">
+              <label class="hk-label" for="sliderNodes">Cities (N): <span id="lblNodes" style="color:`#fff`;">6</span></label>
+              <input type="range" id="sliderNodes" min="4" max="10" value="6" step="1" class="hk-slider">
+            </div>
+
+            <div class="hk-tool-group">
+              <label class="hk-label" for="sliderSpeed">Animation Speed</label>
+              <input type="range" id="sliderSpeed" min="1" max="100" value="80" class="hk-slider" style="accent-color: `#d946ef`;">
+            </div>
+
+            <div class="hk-tool-group hk-actions">
+              <button id="btnGenerate" class="hk-btn hk-btn-ghost"><i class="fas fa-random"></i> Generate Graph</button>
+              <button id="btnRace" class="hk-btn hk-btn-primary"><i class="fas fa-flag-checkered"></i> Race Solvers</button>
+            </div>
+          </div>
+          
+          <div class="hk-stats-strip">
+              <div class="hk-stat-box bf-box">
+                  <div class="stat-lbl"><i class="fas fa-bomb"></i> Brute Force Ops</div>
+                  <div class="stat-val" id="statBfOps">0</div>
+              </div>
+              <div class="hk-stat-box hk-box">
+                  <div class="stat-lbl"><i class="fas fa-brain"></i> Held-Karp Ops</div>
+                  <div class="stat-val" id="statHkOps">0</div>
+              </div>
+              <div class="hk-stat-box target-box">
+                  <div class="stat-lbl">Optimal Tour Cost</div>
+                  <div class="stat-val highlight" id="statOptimal">-</div>
+              </div>
+          </div>
+        </div>
+
+        <div id="hkStatus" class="hk-status-bar" role="status" aria-live="polite">
+            <div class="status-icon"><i class="fas fa-info-circle"></i></div>
+            <div class="status-text" id="statusMsg">Graph generated. Click 'Race Solvers' to compute the shortest tour.</div>
+        </div>
+
+        <div class="hk-bottom-layout">
+            
+            <div class="hk-panel map-panel">
+                <div class="panel-header">
+                    <h3 class="panel-title"><i class="fas fa-map-marked-alt"></i> Complete Graph Map</h3>
+                    <div class="panel-badges">
+                        <span class="badge badge-bf" id="badgeBf">Brute Force</span>
+                        <span class="badge badge-hk" id="badgeHk">Held-Karp</span>
+                    </div>
+                </div>
+                <div class="canvas-wrap" id="graphCanvasWrap">
+                    <canvas id="graphCanvas"></canvas>
+                </div>
+            </div>
+
+            <div class="hk-panel log-panel">
+                <div class="panel-header">
+                    <h3 class="panel-title"><i class="fas fa-terminal"></i> Live Operation Log</h3>
+                </div>
+                <div class="log-console" id="logConsole"></div>
+            </div>
+            
+        </div>
+        
+        <div id="theory" class="hk-learn-section">
+            <h2 class="learn-heading"><i class="fas fa-balance-scale-right"></i> The "Still Exponential" Truth</h2>
+            <div class="hk-learn-grid">
+              <div class="hk-learn-card">
+                <div class="learn-icon">🤯</div>
+                <h3>The Factorial Nightmare</h3>
+                <p>Brute force TSP requires checking every permutation of cities to find the shortest loop. For N cities, that's <code>(N-1)! / 2</code> paths. Factorial growth is uniquely terrifying. At N=12, it's 20 million operations. At N=20, it's 60 quadrillion operations. The universe will end before a standard computer solves N=25 via brute force.</p>
+              </div>
+              <div class="hk-learn-card">
+                <div class="learn-icon">🧠</div>
+                <h3>The DP Bitmask Solution</h3>
+                <p>Held and Karp realized that if you're evaluating paths, the specific <em>order</em> of the cities in the middle of a route doesn't matter for future decisions—only <em>which cities you've visited</em> and <em>where you currently are</em>. By using a binary bitmask (e.g., <code>1011</code> means cities 0, 1, and 3 are visited) to memorize the shortest path to every sub-state, redundant work is completely eliminated.</p>
+              </div>
+              <div class="hk-learn-card">
+                <div class="learn-icon">🚧</div>
+                <h3>The Honesty Panel: The 25-City Wall</h3>
+                <p>Held-Karp reduces the complexity to <code>O(N²·2ᴺ)</code>. Is it fast? Compared to factorial, it's a miracle (N=15 takes seconds instead of centuries). However, <strong>it is still strictly exponential</strong>. Because the algorithm must store <code>N·2ᴺ</code> states in memory, it rapidly consumes gigabytes of RAM. In practice, exact Held-Karp hits a hard wall around N=20-25. It does not "solve" TSP for massive maps—it just buys us a bounded, numerical improvement.</p>
+              </div>
+            </div>
+        </div>
+        
+      </div>
+    </section>
+
+    <script src="../../../components/navbar/navbar.js"></script>
+    <script src="held-karp-visualizer.js"></script>
+  </body>
+</html>

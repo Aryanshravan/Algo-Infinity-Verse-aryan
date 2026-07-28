@@ -169,22 +169,20 @@ function initSidebarSpy() {
   const NAV_HEIGHT = 80;
 
   function getActiveId() {
-    let bestId = null;
-    let bestDist = Infinity;
+    let activeId = lessons[0].id;
 
     lessons.forEach((lesson) => {
       const rect = lesson.getBoundingClientRect();
-      const dist = Math.abs(rect.top - NAV_HEIGHT);
-      if (dist < bestDist) {
-        bestDist = dist;
-        bestId = lesson.getAttribute("id");
+
+      if (rect.top <= NAV_HEIGHT && rect.bottom > NAV_HEIGHT) {
+        activeId = lesson.id;
       }
     });
 
-    return bestId;
+    return activeId;
   }
-
   let ticking = false;
+  let currentActiveId = null;
 
   function onScroll() {
     if (ticking) return;
@@ -192,13 +190,21 @@ function initSidebarSpy() {
 
     requestAnimationFrame(() => {
       const id = getActiveId();
-      if (id) {
+
+      if (id && id !== currentActiveId) {
+        currentActiveId = id;
+
         links.forEach((l) => l.classList.remove("active"));
+
         const active = document.querySelector(
           `.java-sidebar-nav a[href="#${id}"]`
         );
-        if (active) active.classList.add("active");
+
+        if (active) {
+          active.classList.add("active");
+        }
       }
+
       ticking = false;
     });
   }
@@ -233,6 +239,16 @@ function initProgressTracker() {
     fill.style.width = pct + "%";
     count.textContent = completed.size;
     if (bar) bar.setAttribute("aria-valuenow", pct);
+      const pct = Math.round((completed.size / TOTAL_TOPICS) * 100);
+      fill.style.width = pct + "%";
+      count.textContent = completed.size;
+    if (bar) {
+      bar.setAttribute("aria-valuenow", pct);
+    }
+    if (announcement) {
+      announcement.textContent =
+          `Learning progress updated. ${completed.size} of ${TOTAL_TOPICS} topics completed.`;
+    }
   }
 
   updateUI();

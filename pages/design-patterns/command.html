@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Command Pattern — Advanced Design Patterns</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <link rel="stylesheet" href="pattern-detail.css" />
+  </head>
+  <body>
+    <nav>
+      <div class="nav-left">
+        <a href="design-patterns.html"><i class="fas fa-arrow-left"></i></a>
+        <span class="nav-title">Algo Infinity Verse</span>
+      </div>
+      <button id="theme-toggle" aria-label="Toggle dark mode">
+        <i class="fas fa-moon"></i>
+      </button>
+    </nav>
+
+    <div class="pattern-hero behavioral">
+      <span class="pattern-category behavioral">Behavioral</span>
+      <h1>Command</h1>
+      <p class="pattern-subtitle">
+        Turn a request into a stand-alone object that contains all information about the request, enabling parameterization, queuing, logging, and undo.
+      </p>
+    </div>
+
+    <main class="pattern-content">
+      <section class="info-card intent">
+        <h2><i class="fas fa-bullseye"></i> Intent</h2>
+        <p>
+          The Command pattern encapsulates a request as an object, letting you parameterize
+          clients with different requests, queue or log requests, and support undoable operations.
+          It turns a method call into a stand-alone object that contains everything needed to
+          execute the call.
+        </p>
+      </section>
+
+      <section class="info-card problem">
+        <h2><i class="fas fa-exclamation-triangle"></i> Problem</h2>
+        <p>
+          Direct method invocation couples the sender of a request to the receiver. This makes it
+          impossible to queue requests, log them, schedule them for later execution, or undo them.
+          For example, a UI toolbar that calls methods directly on application objects cannot
+          easily implement undo/redo, macro recording, or task scheduling without significant
+          coupling and duplication.
+        </p>
+      </section>
+
+      <section class="info-card solution">
+        <h2><i class="fas fa-lightbulb"></i> Solution</h2>
+        <p>
+          Define a command interface with a single <code>execute()</code> method. Concrete command
+          classes wrap a receiver and the parameters needed to perform an action. The invoker
+          (e.g., a toolbar button or queue processor) works only with the command interface and
+          knows nothing about the receiver. For undo support, add an <code>undo()</code> method
+          to the command interface.
+        </p>
+      </section>
+
+      <section class="info-card structure">
+        <h2><i class="fas fa-diagram-project"></i> Structure</h2>
+        <div class="structure-diagram">
+┌──────────────┐     ┌────────────────┐
+│   Invoker    │────>│   Command      │
+├──────────────┤     ├────────────────┤
+│ - history    │     │ + execute()    │
+│              │     │ + undo()       │
+├──────────────┤     └────────┬───────┘
+│ + execute(cmd)│             │
+└──────────────┘     ┌────────┴────────┐
+                     │  ConcreteCmd   │
+                ┌────┤                │
+                │    ├────────────────┤
+                │    │ - receiver     │
+                │    │ - params       │
+                │    │ + execute()    │
+                │    └────────────────┘
+                │
+          ┌─────┴──────┐
+          │  Receiver   │
+          ├─────────────┤
+          │ + action()  │
+          └─────────────┘</div>
+      </section>
+
+      <section class="info-card code">
+        <h2><i class="fas fa-code"></i> Code Example — JavaScript</h2>
+        <pre><code>class Light {
+  on() { console.log('Light ON'); }
+  off() { console.log('Light OFF'); }
+}
+
+class LightOnCommand {
+  constructor(light) { this.light = light; }
+  execute() { this.light.on(); }
+  undo() { this.light.off(); }
+}
+
+class LightOffCommand {
+  constructor(light) { this.light = light; }
+  execute() { this.light.off(); }
+  undo() { this.light.on(); }
+}
+
+class RemoteControl {
+  constructor() { this.history = []; }
+  submit(command) {
+    command.execute();
+    this.history.push(command);
+  }
+  undo() {
+    const cmd = this.history.pop();
+    if (cmd) cmd.undo();
+  }
+}
+
+const light = new Light();
+const remote = new RemoteControl();
+
+remote.submit(new LightOnCommand(light));  // "Light ON"
+remote.submit(new LightOffCommand(light)); // "Light OFF"
+remote.undo();                             // "Light ON"</code></pre>
+      </section>
+
+      <section class="info-card use-cases">
+        <h2><i class="fas fa-globe"></i> Real-World Use Cases</h2>
+        <ul>
+          <li><strong>Undo/Redo Systems</strong> — Text editors, image editors, and IDEs use command history for undo.</li>
+          <li><strong>Task Queues & Job Scheduling</strong> — Encapsulate work units for delayed or distributed execution.</li>
+          <li><strong>GUI Button Actions</strong> — Each toolbar or menu item holds a command object.</li>
+          <li><strong>Macro Recording</strong> — Record a sequence of commands and replay them later.</li>
+          <li><strong>Transactional Systems</strong> — Commands can be committed or rolled back as a unit.</li>
+        </ul>
+      </section>
+
+      <div class="back-link">
+        <a href="design-patterns.html"><i class="fas fa-arrow-left"></i> Back to All Patterns</a>
+      </div>
+    </main>
+
+    <script>
+      const toggle = document.getElementById('theme-toggle');
+      const stored = localStorage.getItem('theme');
+      if (stored === 'dark') {
+        document.body.classList.add('dark-mode');
+        toggle.innerHTML = '<i class="fas fa-sun"></i>';
+      }
+      toggle.addEventListener('click', () => {
+        document.body.classList.toggle('dark-mode');
+        const isDark = document.body.classList.contains('dark-mode');
+        toggle.innerHTML = isDark ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
+        localStorage.setItem('theme', isDark ? 'dark' : 'light');
+      });
+    </script>
+  </body>
+</html>

@@ -1,0 +1,218 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Chord vs Skip Graph DHT Routing | Algo Infinity Verse</title>
+    <meta
+      name="description"
+      content="Race Chord DHT against Skip Graph. Two distinct P2P lookup philosophies head-to-head."
+    />
+    <link rel="stylesheet" href="../../../styles.css" />
+    <link rel="stylesheet" href="chord-vs-skip-graph.css" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Poppins:wght@300;400;500;600;700&family=Fira+Code:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <link rel="stylesheet" href="/modules/quick-notes/quick-notes.css" />
+  </head>
+  <body data-page="chord-vs-skip-graph">
+    <div id="navbar-placeholder"></div>
+
+    <button id="scrollTopBtn" aria-label="Scroll to top" class="scroll-top-btn">
+      <i class="fas fa-circle-chevron-up"></i>
+    </button>
+
+    <section class="cvs-hero">
+      <div class="cvs-hero-bg"><canvas id="heroCanvas" class="cvs-hero-canvas"></canvas></div>
+      <div class="cvs-hero-inner">
+        <div class="cvs-hero-eyebrow">🌐 Distributed Systems · P2P Networks</div>
+        <h1 class="cvs-hero-title">Chord vs Skip Graph</h1>
+        <p class="cvs-hero-sub">The Clash of Distributed Hash Tables</p>
+        <p class="cvs-hero-desc">
+          Watch two fundamentally different decentralized routing philosophies go head-to-head.
+          <strong>Chord</strong> achieves O(log n) lookups using a consistent hash ring and
+          exponentially spaced <em>Finger Tables</em>. <strong>Skip Graph</strong> achieves it using
+          membership-vector levels and distributed skip lists. Race them side-by-side to witness how
+          their routing topologies inherently differ despite identical performance bounds.
+        </p>
+        <div class="cvs-hero-actions">
+          <a href="#lab" class="btn btn-primary cvs-btn-primary"
+            ><i class="fas fa-network-wired"></i> Enter Network Lab</a
+          >
+        </div>
+      </div>
+    </section>
+
+    <section id="lab" class="section cvs-section">
+      <div class="container">
+        <div class="cvs-control-card">
+          <div class="cvs-toolbar">
+            <div class="cvs-tool-group">
+              <span class="cvs-label"
+                >Nodes: <span id="lblNodes" style="color: #fff">16</span></span
+              >
+              <input
+                type="range"
+                id="sliderNodes"
+                min="8"
+                max="64"
+                value="16"
+                step="1"
+                class="cvs-slider"
+              />
+            </div>
+
+            <div class="cvs-tool-group">
+              <span class="cvs-label"
+                >Key to Lookup (0-255): <span id="lblKey" style="color: #fff">120</span></span
+              >
+              <input
+                type="range"
+                id="sliderKey"
+                min="0"
+                max="255"
+                value="120"
+                class="cvs-slider"
+                style="accent-color: #10b981"
+              />
+            </div>
+
+            <div class="cvs-tool-group">
+              <span class="cvs-label">Speed</span>
+              <input
+                type="range"
+                id="sliderSpeed"
+                min="1"
+                max="100"
+                value="80"
+                class="cvs-slider"
+              />
+            </div>
+
+            <div class="cvs-tool-group cvs-actions">
+              <button id="btnRace" class="cvs-btn cvs-btn-primary">
+                <i class="fas fa-bolt"></i> Race Lookup
+              </button>
+              <button id="btnAddNode" class="cvs-btn cvs-btn-ghost">
+                <i class="fas fa-plus"></i> Add Random Node
+              </button>
+              <button id="btnKillNode" class="cvs-btn cvs-btn-ghost" style="color: #ef4444">
+                <i class="fas fa-skull"></i> Kill Random Node
+              </button>
+            </div>
+          </div>
+
+          <div class="cvs-stats-strip">
+            <div class="cvs-stat-box chord-box">
+              <div class="stat-lbl"><i class="fas fa-ring"></i> Chord Hops</div>
+              <div class="stat-val" id="statChordHops">0</div>
+            </div>
+            <div class="cvs-stat-box skip-box">
+              <div class="stat-lbl"><i class="fas fa-layer-group"></i> Skip Graph Hops</div>
+              <div class="stat-val" id="statSkipHops">0</div>
+            </div>
+            <div class="cvs-stat-box target-box">
+              <div class="stat-lbl">Target Key Owner</div>
+              <div class="stat-val highlight" id="statOwner">-</div>
+            </div>
+          </div>
+        </div>
+
+        <div id="cvsStatus" class="cvs-status-bar">
+          <div class="status-icon"><i class="fas fa-satellite-dish"></i></div>
+          <div class="status-text" id="statusMsg">
+            Network initialized. Select a target key and race the lookups.
+          </div>
+        </div>
+
+        <div class="cvs-main-layout">
+          <div class="cvs-panel chord-panel">
+            <div class="panel-header">
+              <h3 class="panel-title" style="color: #3b82f6">
+                <i class="fas fa-ring"></i> Chord DHT
+              </h3>
+              <div class="panel-badges">
+                <span class="badge badge-chord">O(log n) Ring</span>
+              </div>
+            </div>
+            <div class="canvas-wrap chord-wrap" id="chordCanvasWrap">
+              <canvas id="chordCanvas"></canvas>
+            </div>
+          </div>
+
+          <div class="cvs-panel skip-panel">
+            <div class="panel-header">
+              <h3 class="panel-title" style="color: #d946ef">
+                <i class="fas fa-layer-group"></i> Skip Graph
+              </h3>
+              <div class="panel-badges">
+                <span class="badge badge-skip">O(log n) Levels</span>
+              </div>
+            </div>
+            <div class="canvas-wrap skip-wrap" id="skipCanvasWrap">
+              <canvas id="skipCanvas"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <div class="cvs-bottom-layout">
+          <div class="cvs-panel" style="flex: 1">
+            <div class="panel-header">
+              <h3 class="panel-title"><i class="fas fa-table"></i> Chord Finger Table Viewer</h3>
+            </div>
+            <div class="finger-table-view" id="fingerTableContainer">
+              <p style="color: #64748b; font-size: 0.8rem">
+                Hover over a node in the Chord ring to view its Finger Table here.
+              </p>
+            </div>
+          </div>
+          <div class="cvs-panel" style="flex: 1">
+            <div class="panel-header">
+              <h3 class="panel-title"><i class="fas fa-terminal"></i> P2P Network Log</h3>
+            </div>
+            <div class="log-console" id="logConsole"></div>
+          </div>
+        </div>
+
+        <div id="theory" class="cvs-learn-section">
+          <h2 class="learn-heading">
+            <i class="fas fa-graduation-cap"></i> Routing Philosophies Explained
+          </h2>
+          <div class="cvs-learn-grid">
+            <div class="cvs-learn-card">
+              <div class="learn-icon">⭕</div>
+              <h3>Chord: The Ring and the Fingers</h3>
+              <p>
+                Nodes and keys are mapped onto a circular identifier space (a consistent hash ring).
+                Instead of keeping track of every node, a node maintains a
+                <strong>Finger Table</strong> containing up to <em>m</em> entries (where 2^m is the
+                ring size). The <em>i</em>-th finger points to the first node that succeeds the ID
+                by at least 2^(i-1). This creates exponentially growing jump distances, allowing
+                O(log n) greedy leaps toward any key.
+              </p>
+            </div>
+            <div class="cvs-learn-card">
+              <div class="learn-icon">📶</div>
+              <h3>Skip Graph: Vector-Guided Levels</h3>
+              <p>
+                Skip Graphs distribute the idea of Skip Lists over a network. Every node receives a
+                random binary "membership vector". Nodes are organized into layered linked lists
+                based on how much of their prefix matches. Routing starts at the highest shared
+                prefix level and drops down whenever it overshoots the target. Unlike Chord, it
+                natively supports range queries and doesn't rely on consistent hashing.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <script src="../../../components/navbar/navbar.js"></script>
+    <script src="chord-vs-skip-graph.js"></script>
+  </body>
+</html>

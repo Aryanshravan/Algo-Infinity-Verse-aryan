@@ -1,0 +1,191 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Delaunay Triangulation Visualizer | Algo Infinity Verse</title>
+    <meta
+      name="description"
+      content="Explore Randomized Incremental Delaunay Triangulation and its Voronoi Dual. See optimal meshing in action."
+    />
+    <link rel="stylesheet" href="../../../styles.css" />
+    <link rel="stylesheet" href="delaunay-triangulation-visualizer.css" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Poppins:wght@300;400;500;600;700&family=Fira+Code:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <link rel="stylesheet" href="/modules/quick-notes/quick-notes.css" />
+  </head>
+  <body data-page="delaunay-triangulation-visualizer">
+    <div id="navbar-placeholder"></div>
+
+    <button id="scrollTopBtn" aria-label="Scroll to top" class="scroll-top-btn">
+      <i class="fas fa-circle-chevron-up"></i>
+    </button>
+
+    <section class="dt-hero">
+      <div class="dt-hero-bg"><canvas id="dtHeroCanvas" class="dt-hero-canvas"></canvas></div>
+      <div class="dt-hero-inner">
+        <div class="dt-hero-eyebrow">📐 Computational Geometry · Mesh Generation</div>
+        <h1 class="dt-hero-title">Delaunay Triangulation</h1>
+        <p class="dt-hero-sub">Randomized Incremental Construction & Voronoi Duality</p>
+        <p class="dt-hero-desc">
+          Delaunay Triangulation generates the optimal mathematical mesh for any point set by
+          maximizing the minimum angle of all triangles, preventing "slivers". Watch the famously
+          elegant <strong>Randomized Incremental Algorithm</strong> dynamically split triangles and
+          perform localized edge-flips to restore the strict "Empty Circumcircle" property one point
+          at a time.
+        </p>
+        <div class="dt-hero-actions">
+          <a href="#lab" class="btn btn-primary dt-btn-primary"
+            ><i class="fas fa-draw-polygon"></i> Enter Geometry Lab</a
+          >
+          <a href="#theory" class="btn dt-btn-outline"
+            ><i class="fas fa-book-open"></i> Read Theory</a
+          >
+        </div>
+      </div>
+    </section>
+
+    <section id="lab" class="section dt-section">
+      <div class="container">
+        <div class="dt-control-card">
+          <div class="dt-toolbar">
+            <div class="dt-tool-group">
+              <span class="dt-label"
+                >Generate Points: <span id="lblPts" style="color: #fff">20</span></span
+              >
+              <input type="range" id="sliderPts" min="5" max="200" value="20" class="dt-slider" />
+            </div>
+
+            <div class="dt-tool-group toggle-group">
+              <label class="toggle-label">
+                <input type="checkbox" id="chkCircumcircles" />
+                <span class="toggle-slider"></span>
+                <span class="toggle-text">Show Circumcircles</span>
+              </label>
+
+              <label class="toggle-label">
+                <input type="checkbox" id="chkVoronoi" />
+                <span class="toggle-slider primary"></span>
+                <span class="toggle-text">Voronoi Dual Overlay</span>
+              </label>
+            </div>
+
+            <div class="dt-tool-group">
+              <span class="dt-label">Speed</span>
+              <input type="range" id="speedSlider" min="1" max="100" value="85" class="dt-slider" />
+            </div>
+
+            <div class="dt-tool-group dt-actions">
+              <button id="btnTriangulate" class="dt-btn dt-btn-primary">
+                <i class="fas fa-play"></i> Auto Triangulate
+              </button>
+              <button id="btnClear" class="dt-btn dt-btn-ghost">
+                <i class="fas fa-trash"></i> Clear
+              </button>
+            </div>
+          </div>
+
+          <div class="dt-stats-strip">
+            <div class="dt-stat-box">
+              <div class="stat-lbl">Points</div>
+              <div class="stat-val" id="statPts">0</div>
+            </div>
+            <div class="dt-stat-box">
+              <div class="stat-lbl">Triangles</div>
+              <div class="stat-val highlight" id="statTris">0</div>
+            </div>
+            <div class="dt-stat-box">
+              <div class="stat-lbl">Edge Flips Performed</div>
+              <div class="stat-val highlight-warn" id="statFlips">0</div>
+            </div>
+          </div>
+        </div>
+
+        <div id="dtStatus" class="dt-status-bar">
+          <div class="status-icon"><i class="fas fa-info-circle"></i></div>
+          <div class="status-text" id="statusMsg">
+            Click on the canvas to add points manually, or auto-generate points.
+          </div>
+        </div>
+
+        <div class="dt-main-layout">
+          <div class="dt-panel dt-canvas-panel">
+            <div class="panel-header">
+              <h3 class="panel-title"><i class="fas fa-vector-square"></i> Geometry Workspace</h3>
+              <div class="panel-badges">
+                <span class="badge badge-primary">Delaunay</span>
+                <span class="badge badge-secondary">Voronoi</span>
+              </div>
+            </div>
+
+            <div class="canvas-wrap" id="mainCanvasWrap">
+              <canvas id="geometryCanvas"></canvas>
+              <div class="canvas-hint">
+                <i class="fas fa-mouse-pointer"></i> Click to insert a point. Hover to inspect empty
+                circumcircles.
+              </div>
+            </div>
+          </div>
+
+          <div class="dt-side-layout">
+            <div class="dt-panel" style="flex: 1">
+              <div class="panel-header">
+                <h3 class="panel-title">
+                  <i class="fas fa-terminal"></i> Incremental Construction Log
+                </h3>
+              </div>
+              <div class="log-console" id="dtLogConsole"></div>
+            </div>
+          </div>
+        </div>
+
+        <div id="theory" class="dt-learn-section">
+          <h2 class="learn-heading"><i class="fas fa-graduation-cap"></i> Theoretical Deep Dive</h2>
+          <div class="dt-learn-grid">
+            <div class="dt-learn-card">
+              <div class="learn-icon">⭕</div>
+              <h3>The Empty Circumcircle Rule</h3>
+              <p>
+                A triangulation is strictly "Delaunay" if and only if the circumcircle of EVERY
+                triangle contains absolutely no other points from the set. This simple geometric
+                rule guarantees the triangulation avoids long, thin slivers, making it the
+                mathematical gold standard for physics simulations and 3D modeling.
+              </p>
+            </div>
+            <div class="dt-learn-card">
+              <div class="learn-icon">🔄</div>
+              <h3>Randomized Incremental Construction</h3>
+              <p>
+                Finding the Delaunay Triangulation seems hard, but the incremental algorithm is
+                brilliantly simple. Insert points one by one. Find the triangle it lands in, split
+                it into 3 new triangles, then recursively check the outer edges of the new triangles
+                against the empty-circumcircle rule. If an edge violates it, perform an "Edge Flip".
+                Expected runtime: <strong>O(n log n)</strong>.
+              </p>
+            </div>
+            <div class="dt-learn-card">
+              <div class="learn-icon">🧬</div>
+              <h3>Voronoi Duality</h3>
+              <p>
+                The Voronoi Diagram and the Delaunay Triangulation are mathematical soulmates—exact
+                geometric duals of each other. If you draw a dot at the circumcenter of every
+                Delaunay triangle, and connect the circumcenters of adjacent triangles, you
+                perfectly generate the Voronoi Diagram (regions defining the closest space to a
+                point). Turn on the Voronoi overlay to witness this duality!
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <script src="../../../components/navbar/navbar.js"></script>
+    <script src="delaunay-triangulation-visualizer.js"></script>
+  </body>
+</html>

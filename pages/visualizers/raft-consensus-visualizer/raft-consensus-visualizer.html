@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Raft Consensus Visualizer | Algo Infinity Verse</title>
+    <meta name="description" content="Visualize Raft leader election, log replication, Pre-Vote extension, and log compaction (snapshotting) step by step." />
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Poppins:wght@300;400;500;600;700&family=Fira+Code:wght@400;500;600&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <script src="/modules/lazyVisualizer.js"></script>
+    <link rel="stylesheet" href="/styles.css" />
+    <link rel="stylesheet" href="raft-consensus-visualizer.css" />
+    <script src="/theme.js"></script>
+    <script src="/modules/toast.js"></script>
+  </head>
+  <body class="raft-body">
+    <nav class="navbar raft-nav">
+      <div class="nav-logo">
+        <span class="logo-text">∞</span>
+        <span class="logo-title">Algo Infinity Verse</span>
+      </div>
+      <div class="engine-badge" id="engineBadge">
+        <i class="fas fa-circle-nodes"></i> Raft Consensus Engine
+      </div>
+    </nav>
+
+    <main class="raft-workspace">
+
+      <!-- Left Panel: Controls -->
+      <aside class="raft-sidebar">
+        <div class="sidebar-section">
+          <h3><i class="fas fa-sliders-h"></i> Cluster Config</h3>
+          <div class="config-row">
+            <label>Nodes</label>
+            <select id="nodeCountSelect">
+              <option value="3">3 Nodes</option>
+              <option value="5" selected>5 Nodes</option>
+              <option value="7">7 Nodes</option>
+            </select>
+          </div>
+          <div class="config-row">
+            <label>Election Timeout</label>
+            <input type="range" id="electionTimeout" min="1000" max="5000" value="2500" step="500" />
+            <span class="slider-val" id="electionTimeoutVal">2500ms</span>
+          </div>
+          <div class="config-row">
+            <label>Pre-Vote Extension</label>
+            <div class="toggle-wrap">
+              <input type="checkbox" id="preVoteToggle" checked />
+              <label for="preVoteToggle" class="toggle-label"></label>
+              <span class="toggle-desc" id="preVoteDesc">Enabled</span>
+            </div>
+          </div>
+          <button type="button" class="btn btn-primary w-100" id="btnInit">
+            <i class="fas fa-power-off"></i> Initialize Cluster
+          </button>
+        </div>
+
+        <div class="sidebar-section">
+          <h3><i class="fas fa-bolt"></i> Cluster Events</h3>
+          <button type="button" class="btn btn-secondary w-100 mt-sm" id="btnAppendLog">
+            <i class="fas fa-plus"></i> Append Client Command
+          </button>
+          <button type="button" class="btn btn-warning w-100 mt-sm" id="btnPartitionLeader">
+            <i class="fas fa-network-wired"></i> Partition Leader
+          </button>
+          <button type="button" class="btn btn-success w-100 mt-sm" id="btnHealPartition">
+            <i class="fas fa-heart-pulse"></i> Heal Partition
+          </button>
+          <button type="button" class="btn btn-info w-100 mt-sm" id="btnCompactLog">
+            <i class="fas fa-compress-arrows-alt"></i> Trigger Snapshot
+          </button>
+        </div>
+
+        <div class="sidebar-section">
+          <h3><i class="fas fa-gauge-high"></i> Cluster Stats</h3>
+          <div class="stats-grid">
+            <div class="stat-item"><span class="stat-label">Term</span><strong id="statTerm">–</strong></div>
+            <div class="stat-item"><span class="stat-label">Leader</span><strong id="statLeader">–</strong></div>
+            <div class="stat-item"><span class="stat-label">Log Entries</span><strong id="statLog">0</strong></div>
+            <div class="stat-item"><span class="stat-label">Snapshot</span><strong id="statSnapshot">None</strong></div>
+          </div>
+        </div>
+      </aside>
+
+      <!-- Center: Canvas -->
+      <div class="raft-center">
+        <div class="canvas-wrap">
+          <canvas id="raftCanvas"></canvas>
+        </div>
+
+        <!-- Log panel -->
+        <div class="log-panel">
+          <div class="log-header">
+            <h4><i class="fas fa-scroll"></i> Replicated Log</h4>
+            <span class="log-count" id="logCount">0 entries</span>
+          </div>
+          <div class="log-entries" id="logEntries"></div>
+        </div>
+      </div>
+
+      <!-- Right Panel: Event Log -->
+      <aside class="raft-sidebar right-sidebar">
+        <div class="sidebar-section full-height">
+          <h3><i class="fas fa-terminal"></i> Event Log</h3>
+          <div class="event-log" id="eventLog"></div>
+        </div>
+      </aside>
+    </main>
+
+    <script src="raft-consensus-visualizer.js"></script>
+  </body>
+</html>

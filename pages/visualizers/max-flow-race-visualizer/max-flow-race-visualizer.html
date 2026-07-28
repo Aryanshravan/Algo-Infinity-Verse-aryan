@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Max Flow Race: Edmonds-Karp vs Push-Relabel | Algo Infinity Verse</title>
+    <meta name="description" content="Visualizing Ford-Fulkerson (Edmonds-Karp) against Push-Relabel for Max Flow graph algorithms.">
+    <link rel="stylesheet" href="../../../styles.css">
+    <link rel="stylesheet" href="max-flow-race-visualizer.css">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Poppins:wght@300;400;500;600;700&family=Fira+Code:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body data-page="max-flow-race-visualizer">
+
+    <div id="navbar-placeholder"></div>
+
+    <button id="scrollTopBtn" aria-label="Scroll to top" class="scroll-top-btn">
+      <i class="fas fa-circle-chevron-up"></i>
+    </button>
+
+    <section class="mfr-hero">
+      <div class="mfr-hero-bg"><canvas id="mfrHeroCanvas" class="mfr-hero-canvas"></canvas></div>
+      <div class="mfr-hero-inner">
+        <div class="mfr-hero-eyebrow">🌊 Max Flow / Min Cut</div>
+        <h1 class="mfr-hero-title">Edmonds-Karp <span style="color:#06b6d4;">vs</span> Push-Relabel</h1>
+        <p class="mfr-hero-sub">Global Paths vs Local Excess. Race them side-by-side.</p>
+        <p class="mfr-hero-desc">Watch two fundamentally different algorithmic philosophies tackle the exact same problem. Edmonds-Karp uses BFS to find global augmenting paths. Push-Relabel greedily pushes flow downhill based on local node heights. See how they perform on adversarial networks!</p>
+        <a href="#lab" class="btn btn-primary mfr-btn-primary"><i class="fas fa-flag-checkered"></i> Go to Arena</a>
+      </div>
+    </section>
+
+    <section id="lab" class="section mfr-section">
+      <div class="container">
+
+        <div class="mfr-control-card">
+          <div class="mfr-row">
+            <label class="mfr-row-label" for="presetSelect">Graph Preset</label>
+            <select id="presetSelect" class="mfr-select">
+                <option value="adversarial">Adversarial Bipartite (EK Trap)</option>
+                <option value="classic">Classic 6-Node</option>
+                <option value="dense">Dense Random</option>
+            </select>
+            <button class="btn mfr-btn-primary mfr-btn" id="btnInit"><i class="fas fa-random"></i> Load Graph</button>
+            <button class="btn btn-secondary mfr-btn" id="btnRace"><i class="fas fa-flag-checkered"></i> Start Race</button>
+            <button class="btn btn-secondary mfr-btn" id="btnReset"><i class="fas fa-undo"></i> Reset</button>
+            
+            <label class="mfr-row-label" style="margin-left:auto" for="speedRange">Speed</label>
+            <input type="range" id="speedRange" min="10" max="1500" value="300" style="width:120px;" aria-describedby="speedLabel" />
+            <span class="mfr-row-label" id="speedLabel" style="text-transform:none; font-family: Fira Code, monospace;">300ms</span>
+          </div>
+        </div>
+
+        <div class="mfr-status" id="mfrStatus" role="status" aria-live="polite">Click 'Start Race' to begin the algorithms!</div>
+
+        <div class="mfr-main-layout">
+          <!-- Edmonds Karp -->
+          <div class="mfr-panel-card">
+            <div class="mfr-panel-title">
+                <i class="fas fa-route" style="color:#a855f7;"></i> Edmonds-Karp (BFS)
+                <span class="badge badge-waiting" id="ekBadge">Waiting</span>
+            </div>
+            <div class="mfr-canvas-wrapper"><canvas id="ekCanvas"></canvas></div>
+            <div class="mfr-stats">
+                <div class="stat-box"><span class="stat-lbl">Max Flow</span><span class="stat-val" id="ekFlow">0</span></div>
+                <div class="stat-box"><span class="stat-lbl">BFS Paths</span><span class="stat-val" id="ekPaths">0</span></div>
+                <div class="stat-box"><span class="stat-lbl">Operations</span><span class="stat-val" id="ekOps">0</span></div>
+            </div>
+          </div>
+
+          <!-- Push Relabel -->
+          <div class="mfr-panel-card">
+            <div class="mfr-panel-title">
+                <i class="fas fa-water" style="color:#06b6d4;"></i> Push-Relabel
+                <span class="badge badge-waiting" id="prBadge">Waiting</span>
+            </div>
+            <div class="mfr-canvas-wrapper"><canvas id="prCanvas"></canvas></div>
+            <div class="mfr-stats">
+                <div class="stat-box"><span class="stat-lbl">Max Flow</span><span class="stat-val" id="prFlow">0</span></div>
+                <div class="stat-box"><span class="stat-lbl">Pushes</span><span class="stat-val" id="prPushes">0</span></div>
+                <div class="stat-box"><span class="stat-lbl">Relabels</span><span class="stat-val" id="prRelabels">0</span></div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <section id="learn" class="section">
+      <div class="container">
+        <h2 class="section-title"><span class="title-icon">⚔️</span> The Algorithms</h2>
+        <div class="mfr-learn-grid">
+          <div class="mfr-learn-card" style="--lc:#a855f7">
+            <div class="mfr-learn-icon">🔍</div>
+            <h3>Edmonds-Karp (Ford-Fulkerson)</h3>
+            <p>Maintains a residual graph. In each iteration, it runs a full Breadth-First Search (BFS) to find the shortest augmenting path from Source to Sink. It then pushes the maximum possible flow along this entire path. It is O(V E^2).</p>
+          </div>
+          <div class="mfr-learn-card" style="--lc:#06b6d4">
+            <div class="mfr-learn-icon">🌊</div>
+            <h3>Push-Relabel</h3>
+            <p>Maintains a "preflow" where nodes can have excess flow. Nodes have a "height". Flow is pushed greedily to lower neighbors. If stuck, the node increases its height (relabel). It works entirely locally, achieving O(V^2 E) or better.</p>
+          </div>
+          <div class="mfr-learn-card" style="--lc:#ef4444">
+            <div class="mfr-learn-icon">💥</div>
+            <h3>Adversarial Graphs</h3>
+            <p>On bipartite graphs with many small cross edges, Edmonds-Karp is forced to do many full BFS sweeps, pushing tiny amounts of flow each time. Push-Relabel simply pools the flow and pushes it across locally, vastly outperforming EK.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div id="footer-placeholder"></div>
+
+    <script src="../../../auth.js"></script>
+    <script src="../../../script.js"></script>
+    <script src="../../../theme.js"></script>
+    <script src="../../../auth-gate.js"></script>
+    <script src="max-flow-race-visualizer.js"></script>
+    <script>
+      if (typeof loadPartial === 'function') {
+        loadPartial('navbar-placeholder', '/partials/navbar.html').then(function() {
+          if (typeof initNavbar === 'function') initNavbar();
+        });
+        loadPartial('footer-placeholder', '/partials/footer.html');
+      }
+    </script>
+</body>
+</html>

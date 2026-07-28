@@ -9,6 +9,7 @@
   <link rel="stylesheet" href="trie-visualizer.css" />
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Poppins:wght@300;400;500;600;700&family=Fira+Code:wght@400;500;600&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <link rel="stylesheet" href="/modules/quick-notes/quick-notes.css" />
 </head>
 <body data-page="trie-visualizer">
   <div id="navbar-placeholder"></div>
@@ -39,6 +40,7 @@
         <div class="button-grid trie-action-grid">
           <button type="button" class="btn-vis btn-insert" id="insertBtn"><i class="fas fa-plus"></i> Insert</button>
           <button type="button" class="btn-vis btn-search" id="searchBtn"><i class="fas fa-search"></i> Search</button>
+          <button type="button" class="btn-vis btn-danger" id="deleteBtn" style="grid-column: span 2;"><i class="fas fa-trash"></i> Delete</button>
         </div>
         <div class="button-grid trie-playback-grid">
           <button type="button" class="btn-vis" id="previousBtn"><i class="fas fa-step-backward"></i> Previous</button>
@@ -93,5 +95,6 @@
       loadPartial('footer-placeholder', '/partials/footer.html');
     }
   </script>
+    <script src="/modules/quick-notes/quick-notes.js"></script>
 </body>
 </html>

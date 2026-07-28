@@ -1,0 +1,285 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Persistent Segment Tree | Algo Infinity Verse</title>
+    <meta
+      name="description"
+      content="Visualizing Persistent Segment Trees for historical range queries and K-th smallest elements."
+    />
+    <link rel="stylesheet" href="../../../styles.css" />
+    <link rel="stylesheet" href="persistent-segment-tree-visualizer.css" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Poppins:wght@300;400;500;600;700&family=Fira+Code:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <link rel="stylesheet" href="/modules/quick-notes/quick-notes.css" />
+  </head>
+  <body data-page="persistent-segment-tree-visualizer">
+    <div id="navbar-placeholder"></div>
+
+    <button id="scrollTopBtn" aria-label="Scroll to top" class="scroll-top-btn">
+      <i class="fas fa-circle-chevron-up"></i>
+    </button>
+
+    <section class="pst-hero">
+      <div class="pst-hero-bg"><canvas id="pstHeroCanvas" class="pst-hero-canvas"></canvas></div>
+      <div class="pst-hero-inner">
+        <div class="pst-hero-eyebrow">⏳ Time-Travel Data Structure</div>
+        <h1 class="pst-hero-title">Persistent Segment Tree</h1>
+        <p class="pst-hero-sub">Query the past. Branch the future. K-th smallest in O(log N).</p>
+        <p class="pst-hero-desc">
+          Instead of copying the entire array for every update, a Persistent Segment Tree creates a
+          new root and shares unmodified subtrees with previous versions. It only takes O(log n) new
+          nodes per update! This allows you to query any historical version effortlessly, unlocking
+          powerful algorithms like finding the K-th smallest element in a range.
+        </p>
+        <a href="#lab" class="btn btn-primary pst-btn-primary"
+          ><i class="fas fa-project-diagram"></i> Explore Visualizer</a
+        >
+      </div>
+    </section>
+
+    <section id="lab" class="section pst-section">
+      <div class="container">
+        <div class="pst-control-card">
+          <div class="pst-row">
+            <span class="pst-row-label">Mode</span>
+            <select id="modeSelect" class="pst-select">
+              <option value="standard">Standard (Range Sum)</option>
+              <option value="kth">Application: K-th Smallest</option>
+            </select>
+            <button class="btn pst-btn-primary pst-btn" id="btnInit">
+              <i class="fas fa-random"></i> Initialize
+            </button>
+            <button class="btn btn-secondary pst-btn" id="btnReset">
+              <i class="fas fa-undo"></i> Reset
+            </button>
+
+            <span class="pst-row-label" style="margin-left: auto">Animation Speed</span>
+            <input
+              type="range"
+              id="speedRange"
+              min="50"
+              max="1500"
+              value="500"
+              style="width: 120px"
+            />
+            <span
+              class="pst-row-label"
+              id="speedLabel"
+              style="
+                text-transform: none;
+                font-family:
+                  Fira Code,
+                  monospace;
+              "
+              >500ms</span
+            >
+          </div>
+
+          <div class="pst-row" id="standardControls">
+            <span class="pst-row-label">Point Update</span>
+            <input
+              type="number"
+              id="updateIdx"
+              min="0"
+              max="7"
+              placeholder="Idx (0-7)"
+              class="pst-input"
+            />
+            <input type="number" id="updateVal" placeholder="Val" class="pst-input" />
+            <button class="btn btn-secondary pst-btn" id="btnUpdate">
+              <i class="fas fa-pen"></i> Update
+            </button>
+
+            <span class="pst-row-label" style="margin-left: auto">Range Query</span>
+            <input type="number" id="queryL" min="0" max="7" placeholder="L" class="pst-input" />
+            <input type="number" id="queryR" min="0" max="7" placeholder="R" class="pst-input" />
+            <button class="btn btn-secondary pst-btn" id="btnQuery">
+              <i class="fas fa-search"></i> Query Sum
+            </button>
+          </div>
+
+          <div class="pst-row" id="kthControls" style="display: none">
+            <button class="btn btn-secondary pst-btn" id="btnBuildAll">
+              <i class="fas fa-hammer"></i> Build Prefix-Frequency Versions
+            </button>
+
+            <span class="pst-row-label" style="margin-left: auto">K-th Smallest Query</span>
+            <input type="number" id="kthL" min="0" max="7" placeholder="L" class="pst-input" />
+            <input type="number" id="kthR" min="0" max="7" placeholder="R" class="pst-input" />
+            <input type="number" id="kthK" min="1" max="8" placeholder="K" class="pst-input" />
+            <button class="btn btn-secondary pst-btn" id="btnQueryKth">
+              <i class="fas fa-search"></i> Find K-th
+            </button>
+          </div>
+        </div>
+
+        <div class="pst-status" id="pstStatus" role="status" aria-live="polite">
+          Click Initialize to start!
+        </div>
+
+        <!-- Version Timeline -->
+        <div class="pst-array-section">
+          <div class="pst-panel-title"><i class="fas fa-code-branch"></i> Version Timeline</div>
+          <div class="pst-timeline" id="versionTimeline">
+            <span style="color: var(--text-secondary); font-size: 0.8rem; font-style: italic"
+              >No versions yet.</span
+            >
+          </div>
+        </div>
+
+        <!-- Version Diff Panel -->
+        <div
+          class="pst-array-section pst-diff-panel"
+          id="diffPanelContainer"
+          style="
+            display: none;
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid var(--border-color);
+            padding: 10px;
+            border-radius: 8px;
+          "
+        >
+          <div class="pst-panel-title" style="margin-bottom: 10px">
+            <i class="fas fa-code-compare"></i> Version Diff
+          </div>
+          <div style="display: flex; gap: 15px; align-items: center; flex-wrap: wrap">
+            <select id="diffBaseVersion" class="pst-select" style="min-width: 120px"></select>
+            <span style="color: var(--text-secondary)">vs</span>
+            <select id="diffCompareVersion" class="pst-select" style="min-width: 120px"></select>
+            <button class="btn pst-btn-primary pst-btn" id="btnCompareDiff">
+              <i class="fas fa-code-compare"></i> Compare
+            </button>
+            <button class="btn btn-secondary pst-btn" id="btnClearDiff" style="display: none">
+              <i class="fas fa-xmark"></i> Clear Diff
+            </button>
+          </div>
+          <div
+            id="diffSummary"
+            style="
+              margin-top: 15px;
+              display: none;
+              font-family:
+                Fira Code,
+                monospace;
+              font-size: 0.85rem;
+              color: var(--text-secondary);
+              white-space: pre-wrap;
+              background: rgba(0, 0, 0, 0.3);
+              padding: 10px;
+              border-radius: 5px;
+            "
+          ></div>
+        </div>
+
+        <div class="pst-main-layout">
+          <div class="pst-left-panel">
+            <div
+              class="pst-array-section"
+              style="margin-bottom: 0; flex: 1; display: flex; flex-direction: column"
+            >
+              <div class="pst-panel-title">
+                <i class="fas fa-tree"></i> Segment Tree View (Version
+                <span id="lblCurrentVersion">-</span>)
+                <div style="margin-left: auto; display: flex; gap: 10px; font-size: 0.65rem">
+                  <span><span style="color: #a855f7">●</span> New Nodes</span>
+                  <span><span style="color: rgba(255, 255, 255, 0.4)">●</span> Shared Nodes</span>
+                </div>
+              </div>
+              <div class="pst-canvas-wrapper">
+                <canvas id="treeCanvas"></canvas>
+              </div>
+            </div>
+          </div>
+
+          <div class="pst-right-panel">
+            <div class="pst-panel-card">
+              <div class="pst-panel-title">
+                <i class="fas fa-list-ol"></i>
+                <span id="arrayTitle"
+                  >Base Array (Version <span id="lblArrayVersion">0</span>)</span
+                >
+              </div>
+              <div class="pst-array-track" id="mainArrayTrack"></div>
+            </div>
+
+            <div class="pst-panel-card" style="flex: 1">
+              <div class="pst-panel-title"><i class="fas fa-terminal"></i> Operation Log</div>
+              <div class="pst-answers-grid" id="queryLog">
+                <div class="pst-answer-row"><span>Ready.</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="learn" class="section">
+      <div class="container">
+        <h2 class="section-title"><span class="title-icon">⏳</span> The Magic of Persistence</h2>
+        <div class="pst-learn-grid">
+          <div class="pst-learn-card" style="--lc: #06b6d4">
+            <div class="pst-learn-icon">🌲</div>
+            <h3>Path Copying</h3>
+            <p>
+              During an update, instead of mutating existing nodes, we create a new node. Since a
+              segment tree has depth O(log N), only the nodes on the path to the updated leaf need
+              to be copied. This is only log(N) new nodes!
+            </p>
+          </div>
+          <div class="pst-learn-card" style="--lc: #a855f7">
+            <div class="pst-learn-icon">🔗</div>
+            <h3>Subtree Sharing</h3>
+            <p>
+              For any node not on the direct path to the update, the new version simply points to
+              the old node. The old version remains perfectly intact. Both versions share the
+              unmodified subtrees in memory.
+            </p>
+          </div>
+          <div class="pst-learn-card" style="--lc: #22c55e">
+            <div class="pst-learn-icon">📚</div>
+            <h3>Prefix-Frequency Arrays</h3>
+            <p>
+              For the K-th smallest problem, we build the tree such that Version $i$ holds the
+              frequency of elements in $A[0 \dots i]$. Therefore, $Version[R] - Version[L-1]$ gives
+              the exact frequencies for the subarray $A[L \dots R]$.
+            </p>
+          </div>
+          <div class="pst-learn-card" style="--lc: #f59e0b">
+            <div class="pst-learn-icon">🎯</div>
+            <h3>K-th Smallest Query</h3>
+            <p>
+              To find the K-th smallest, we traverse both $Version[R]$ and $Version[L-1]$
+              simultaneously. We look at the left child's sum. If it's $\ge K$, the answer is in the
+              left subtree. Otherwise, we subtract that sum from $K$ and go right.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div id="footer-placeholder"></div>
+
+    <script src="../../../auth.js"></script>
+    <script src="../../../script.js"></script>
+    <script src="../../../theme.js"></script>
+    <script src="../../../auth-gate.js"></script>
+    <script src="persistent-segment-tree-visualizer.js"></script>
+    <script>
+      if (typeof loadPartial === 'function') {
+        loadPartial('navbar-placeholder', '/partials/navbar.html').then(function () {
+          if (typeof initNavbar === 'function') initNavbar();
+        });
+        loadPartial('footer-placeholder', '/partials/footer.html');
+      }
+    </script>
+    <script src="/modules/quick-notes/quick-notes.js"></script>
+  </body>
+</html>

@@ -72,6 +72,23 @@ class RecursionNode {
   }
 }
 
+const MAX_TREE_DEPTH = 500;
+const MAX_TREE_NODES = 10000;
+let totalNodeCount = 0;
+
+function createPrunedNode(depth, parentId) {
+  const node = new RecursionNode({
+    name: '⋯',
+    args: {},
+    depth,
+    parentId,
+    computeFn: () => 'pruned'
+  });
+  node.returnValue = 'pruned';
+  node.isPruned = true;
+  return node;
+}
+
 /* ══════════════════════════════════════════════════════════════════════════
    Algorithm Definitions
    Each algorithm provides:
@@ -95,12 +112,18 @@ const ALGORITHMS = {
     inputMax: 15,
 
     buildTree(n, depth = 0, parentId = null) {
+      totalNodeCount++;
+      if (depth > MAX_TREE_DEPTH || totalNodeCount > MAX_TREE_NODES) return createPrunedNode(depth, parentId);
+
       const node = new RecursionNode({
         name: 'fib',
         args: { n },
         depth,
         parentId,
-        computeFn: (childVals) => childVals.reduce((a, b) => a + b, 0),
+        computeFn: (childVals) => childVals.reduce((a, b) => {
+          if (a === 'pruned' || b === 'pruned') return 'pruned';
+          return a + b;
+        }, 0),
       });
       if (n <= 1) {
         node.returnValue = n;
@@ -109,7 +132,11 @@ const ALGORITHMS = {
       const left = this.buildTree(n - 1, depth + 1, node.id);
       const right = this.buildTree(n - 2, depth + 1, node.id);
       node.children = [left, right];
-      node.returnValue = left.returnValue + right.returnValue;
+      if (left.isPruned || right.isPruned) {
+        node.returnValue = 'pruned';
+      } else {
+        node.returnValue = left.returnValue + right.returnValue;
+      }
       return node;
     },
   },
@@ -127,12 +154,18 @@ const ALGORITHMS = {
     inputMax: 12,
 
     buildTree(n, depth = 0, parentId = null) {
+      totalNodeCount++;
+      if (depth > MAX_TREE_DEPTH || totalNodeCount > MAX_TREE_NODES) return createPrunedNode(depth, parentId);
+
       const node = new RecursionNode({
         name: 'fact',
         args: { n },
         depth,
         parentId,
-        computeFn: (childVals) => n * (childVals[0] || 1),
+        computeFn: (childVals) => {
+          if (childVals[0] === 'pruned') return 'pruned';
+          return n * (childVals[0] || 1);
+        },
       });
       if (n <= 1) {
         node.returnValue = 1;
@@ -140,7 +173,11 @@ const ALGORITHMS = {
       }
       const child = this.buildTree(n - 1, depth + 1, node.id);
       node.children = [child];
-      node.returnValue = n * child.returnValue;
+      if (child.isPruned) {
+        node.returnValue = 'pruned';
+      } else {
+        node.returnValue = n * child.returnValue;
+      }
       return node;
     },
   },
@@ -174,6 +211,9 @@ const ALGORITHMS = {
     },
 
     _buildFromArray(arr, depth = 0, parentId = null) {
+      totalNodeCount++;
+      if (depth > MAX_TREE_DEPTH || totalNodeCount > MAX_TREE_NODES) return createPrunedNode(depth, parentId);
+
       const nodeWidth = Math.max(NODE_W, arr.length * 36 + 80);
       const node = new RecursionNode({
         name: 'mergeSort',
@@ -184,6 +224,7 @@ const ALGORITHMS = {
         computeFn: (childVals) => {
           const left = childVals[0] || [];
           const right = childVals[1] || [];
+          if (left === 'pruned' || right === 'pruned') return 'pruned';
           return this._merge(left, right);
         },
         displayFn: () => `[${arr.join(',')}]`,
@@ -198,7 +239,11 @@ const ALGORITHMS = {
       const leftChild = this._buildFromArray(leftArr, depth + 1, node.id);
       const rightChild = this._buildFromArray(rightArr, depth + 1, node.id);
       node.children = [leftChild, rightChild];
-      node.returnValue = this._merge(leftChild.returnValue, rightChild.returnValue);
+      if (leftChild.isPruned || rightChild.isPruned) {
+        node.returnValue = 'pruned';
+      } else {
+        node.returnValue = this._merge(leftChild.returnValue, rightChild.returnValue);
+      }
       return node;
     },
 
@@ -756,6 +801,7 @@ const Controller = {
       statusMsg.textContent = `Enter a value between ${algo.inputMin} and ${algo.inputMax}`;
       return;
     }
+    totalNodeCount = 0;
     const root = algo.buildTree(n);
     window.__rtvRoot = root;
     this.engine.load(root);
@@ -776,6 +822,7 @@ const Controller = {
     if (!algo) return;
     const n = parseInt(inputVal.value);
     if (isNaN(n) || n < algo.inputMin || n > algo.inputMax) return;
+    totalNodeCount = 0;
     const root = algo.buildTree(n);
     window.__rtvRoot = root;
     this.engine.load(root);
