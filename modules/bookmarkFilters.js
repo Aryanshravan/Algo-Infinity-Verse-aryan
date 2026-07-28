@@ -9,22 +9,31 @@ function filterCollectionsByQuery(collections, query = '') {
 
 function filterCollections(collections, filters = {}) {
   let result = [...collections];
+  const problemMap = new Map((filters.problems || []).map(problem => [String(problem.id), problem]));
+  const completedIds = new Set((filters.completedProblems || []).map(String));
+
   if (filters.topic) {
     result = result.filter(collection => {
       const problemIds = collection.problemIds || [];
-      return problemIds.some(id => String(id).includes(filters.topic));
+      return problemIds.some(id => {
+        const problem = problemMap.get(String(id));
+        return problem?.category?.toLowerCase() === filters.topic.toLowerCase();
+      });
     });
   }
   if (filters.solved) {
-    result = result.filter(collection => (collection.problemIds || []).length > 0);
+    result = result.filter(collection =>
+      (collection.problemIds || []).some(id => completedIds.has(String(id)))
+    );
   }
   if (filters.unsolved) {
-    result = result.filter(collection => (collection.problemIds || []).length === 0);
+    result = result.filter(collection =>
+      (collection.problemIds || []).some(id => !completedIds.has(String(id)))
+    );
   }
   if (filters.recentlyAdded) {
     result = result.filter(collection => collection.updatedAt);
   }
   return result;
 }
-
 export { filterCollectionsByQuery, filterCollections };
