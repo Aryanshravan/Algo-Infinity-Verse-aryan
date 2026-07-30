@@ -2,6 +2,14 @@
   "name": "algo-infinity-verse",
   "version": "1.0.0",
   "description": "Interactive DSA learning platform with secure local authentication.",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Eshajha19/Algo-Infinity-Verse.git"
+  },
+  "homepage": "https://algo-infinity-verse.vercel.app/",
+  "bugs": {
+    "url": "https://github.com/Eshajha19/Algo-Infinity-Verse/issues"
+  },
   "main": "server.js",
   "type": "module",
   "scripts": {
