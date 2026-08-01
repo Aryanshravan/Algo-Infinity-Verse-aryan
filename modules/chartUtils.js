@@ -42,7 +42,7 @@ export function drawLineChart(svg, points, color = "#38bdf8") {
     <polyline points="${areaPoints}" fill="url(#xpGradient)" stroke="none"></polyline>
     <polyline points="${linePoints}" fill="none" stroke="${color}" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"></polyline>
     ${mapped.map(item => `<circle cx="${item.x}" cy="${item.y}" r="5.5" fill="${color}" stroke="#020617" stroke-width="2"></circle>`).join("")}
-    ${points.map((point, index) => `<text x="${mapped[index].x}" y="${height - 10}" text-anchor="middle" fill="rgba(226,232,240,0.7)" font-size="12">${point.label}</text>`).join("")}
+    ${points.map((point, index) => `<text x="${mapped[index].x}" y="${height - 10}" text-anchor="middle" fill="rgba(226,232,240,0.7)" font-size="12">${String(point.label).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")}</text>`).join("")}
   `;
 }
 
