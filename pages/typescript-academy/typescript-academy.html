@@ -46,7 +46,7 @@ TypeScript Academy
     </aside>
 
     <main class="flex-1 flex flex-col h-full overflow-hidden relative">
-        <header class="bg-white shadow-sm border-b p-4 flex items-center justify-between">
+        <header class="academy-header">
             <div class="flex items-center gap-4">
                 <button id="open-sidebar" class="lg:hidden text-gray-600 hover:text-blue-600 transition-colors">
                     <i class="fa-solid fa-bars text-xl"></i>
@@ -67,7 +67,7 @@ TypeScript Academy
         </header>
 
         <div class="flex-1 overflow-hidden bg-gray-50 p-4 md:p-6 relative">
-            <div class="bg-white rounded-xl shadow-sm border border-gray-200 w-full h-full overflow-hidden relative">
+            <div class="visualizer-panel visualizer-panel-interactive">
 
                 <div id="tab-lesson" class="tab-content h-full overflow-y-auto p-6 md:p-10 active">
                 </div>
@@ -76,7 +76,7 @@ TypeScript Academy
                     <div class="w-full md:w-1/2 h-1/2 md:h-full flex flex-col border-b md:border-b-0 md:border-r border-gray-300">
                         <div class="bg-gray-800 text-gray-200 text-xs py-2 px-4 flex justify-between items-center font-mono border-b border-gray-700">
                             <span class="flex items-center gap-1.5"><svg viewBox="0 0 512 512" fill="currentColor" width="1em" height="1em" class="text-blue-400"><path d="M232.78 284.082h64.22v-41.082h-179v41.082h63.906v182.918h50.874z"/><path d="M316.939 407.424v50.061c8.138 4.172 17.763 7.3 28.875 9.386s22.823 3.129 35.135 3.129c11.999 0 23.397-1.147 34.196-3.442 10.799-2.294 20.268-6.075 28.406-11.342 8.138-5.266 14.581-12.15 19.328-20.65s7.121-19.007 7.121-31.522c0-9.074-1.356-17.026-4.069-23.857s-6.625-12.906-11.738-18.225c-5.112-5.319-11.242-10.091-18.389-14.315s-15.207-8.213-24.18-11.967c-6.573-2.712-12.468-5.345-17.685-7.9-5.217-2.556-9.651-5.163-13.303-7.822-3.652-2.66-6.469-5.476-8.451-8.448-1.982-2.973-2.974-6.336-2.974-10.091 0-3.441.887-6.544 2.661-9.308s4.278-5.136 7.512-7.118c3.235-1.981 7.199-3.52 11.894-4.615 4.696-1.095 9.912-1.642 15.651-1.642 4.173 0 8.581.313 13.224.938 4.643.626 9.312 1.591 14.008 2.894 4.695 1.304 9.259 2.947 13.694 4.928 4.434 1.982 8.529 4.276 12.285 6.884v-46.776c-7.616-2.92-15.937-5.084-24.962-6.492s-19.381-2.112-31.066-2.112c-11.895 0-23.163 1.278-33.805 3.833s-20.006 6.544-28.093 11.967c-8.086 5.424-14.476 12.333-19.171 20.729-4.695 8.395-7.043 18.433-7.043 30.114 0 14.914 4.304 27.638 12.912 38.172 8.607 10.533 21.675 19.45 39.204 26.751 6.886 2.816 13.303 5.579 19.25 8.291s11.086 5.528 15.415 8.448c4.33 2.92 7.747 6.101 10.252 9.543 2.504 3.441 3.756 7.352 3.756 11.733 0 3.233-.783 6.231-2.348 8.995s-3.939 5.162-7.121 7.196-7.147 3.624-11.894 4.771c-4.748 1.148-10.303 1.721-16.668 1.721-10.851 0-21.597-1.903-32.24-5.71-10.642-3.806-20.502-9.516-29.579-17.13z"/></svg> index.ts</span>
-                            <button id="run-code-btn" class="bg-blue-600 hover:bg-blue-500 text-white px-3 py-1 rounded shadow-sm text-xs font-sans transition-colors font-bold flex items-center gap-1">
+                            <button id="run-code-btn" class="btn-simulator btn-simulator-primary text-xs font-sans font-bold flex items-center gap-1">
                                 <i class="fa-solid fa-play"></i> Run Code
                             </button>
                         </div>
@@ -84,17 +84,22 @@ TypeScript Academy
                     </div>
 
                     <div class="w-full md:w-1/2 h-1/2 md:h-full flex flex-col bg-white">
-                        <div class="bg-gray-100 text-gray-600 text-xs py-2 px-4 border-b border-gray-200 flex items-center font-sans">
-                            <div class="flex space-x-1.5 mr-3">
-                                <div class="w-2.5 h-2.5 rounded-full bg-red-400"></div>
-                                <div class="w-2.5 h-2.5 rounded-full bg-yellow-400"></div>
-                                <div class="w-2.5 h-2.5 rounded-full bg-green-400"></div>
+                        <div class="flex-1 flex flex-col min-h-0 border-b border-gray-200">
+                            <div class="bg-gray-100 text-gray-600 text-xs py-2 px-4 border-b border-gray-200 flex items-center font-sans">
+                                <div class="flex space-x-1.5 mr-3">
+                                    <div class="w-2.5 h-2.5 rounded-full bg-red-400"></div>
+                                    <div class="w-2.5 h-2.5 rounded-full bg-yellow-400"></div>
+                                    <div class="w-2.5 h-2.5 rounded-full bg-green-400"></div>
+                                </div>
+                                <div class="bg-white px-3 py-0.5 rounded border text-[10px] flex-1 text-center text-gray-400 mx-2 shadow-inner">
+                                    <i class="fa-solid fa-lock text-gray-300 mr-1"></i> TypeScript Playground
+                                </div>
                             </div>
-                            <div class="bg-white px-3 py-0.5 rounded border text-[10px] flex-1 text-center text-gray-400 mx-2 shadow-inner">
-                                <i class="fa-solid fa-lock text-gray-300 mr-1"></i> TypeScript Playground
-                            </div>
+                            <iframe id="preview-frame" class="flex-1 w-full border-none" sandbox="allow-scripts allow-popups allow-modals"></iframe>
                         </div>
-                        <iframe id="preview-frame" class="flex-1 w-full border-none" sandbox="allow-scripts allow-popups allow-modals"></iframe>
+                        <div class="h-1/3 min-h-[150px] flex flex-col">
+                            <div id="ts-terminal" class="h-full w-full"></div>
+                        </div>
                     </div>
                 </div>
 
@@ -106,6 +111,7 @@ TypeScript Academy
     </main>
 
       <script src="/modules/eli5-toggle.js"></script>
+      <script src="/modules/mini-terminal.js"></script>
 <script src="/modules/eli5-ts-data.js"></script>
 <script src="typescript-academy.js"></script>
   <script src="/modules/copy-code.js"></script>

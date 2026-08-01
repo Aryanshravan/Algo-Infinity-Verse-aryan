@@ -1,0 +1,286 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CRISPR Gene Drive Simulator | Algo Infinity Verse</title>
+    <link rel="stylesheet" href="/styles.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <!-- Monaco Editor -->
+    <script src="https://unpkg.com/monaco-editor@0.36.1/min/vs/loader.js"></script>
+    <style>
+      body { margin: 0; overflow: hidden; background: #000; font-family: 'Poppins', sans-serif; color: #fff; }
+      .app-container { display: flex; height: 100vh; }
+      
+      .sidebar { width: 450px; background: rgba(15, 23, 42, 0.95); border-right: 1px solid #14b8a6; display: flex; flex-direction: column; z-index: 10; }
+      .header { padding: 20px; border-bottom: 1px solid #334155; }
+      .header h2 { margin: 0; color: #14b8a6; font-family: 'Orbitron', sans-serif; font-size: 1.2rem; }
+      .header p { margin: 5px 0 0 0; font-size: 0.8rem; color: #94a3b8; }
+      
+      #editor-container { flex: 1; min-height: 300px; }
+      
+      .controls { padding: 20px; border-top: 1px solid #334155; background: rgba(0,0,0,0.5); }
+      .btn { background: linear-gradient(90deg, #0d9488, #0f766e); color: #fff; border: none; padding: 10px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; transition: 0.3s; }
+      .btn:hover { background: #14b8a6; transform: translateY(-2px); box-shadow: 0 0 15px rgba(20, 184, 166, 0.5); }
+      
+      .sim-container { flex: 1; position: relative; background: radial-gradient(circle at center, #064e3b 0%, #000 100%); overflow: hidden; }
+      canvas { width: 100%; height: 100%; display: block; filter: contrast(1.2); }
+      
+      .hud { position: absolute; top: 20px; right: 20px; background: rgba(0,0,0,0.8); padding: 15px; border-radius: 8px; border: 1px solid #14b8a6; width: 260px; z-index: 10; pointer-events: none; }
+      .hud h3 { margin: 0 0 10px 0; color: #14b8a6; font-size: 1rem; font-family: 'Orbitron', sans-serif; }
+      .metric { display: flex; justify-content: space-between; font-size: 0.8rem; color: #cbd5e1; margin-bottom: 5px; }
+      .val { font-weight: bold; font-family: monospace; }
+      .val-wild { color: #facc15; }
+      .val-mutant { color: #5eead4; }
+      
+      .chart-container { position: absolute; bottom: 20px; left: 20px; background: rgba(0,0,0,0.8); border: 1px solid #334155; border-radius: 8px; padding: 10px; width: 300px; height: 100px; pointer-events: none; display: flex; align-items: flex-end; }
+      .chart-bar-wild { width: 50%; background: #facc15; transition: height 0.2s; }
+      .chart-bar-mutant { width: 50%; background: #5eead4; transition: height 0.2s; }
+    </style>
+  </head>
+  <body>
+    
+    <div class="app-container">
+      <div class="sidebar">
+        <div class="header">
+          <h2><i class="fas fa-dna"></i> CRISPR-Cas9 Gene Drive</h2>
+          <p>Propagate a sterilizing mutation to eradicate disease vectors</p>
+        </div>
+        
+        <div id="editor-container"></div>
+        
+        <div class="controls">
+          <button class="btn" onclick="releaseMutants()"><i class="fas fa-bug"></i> Release Modified Organisms</button>
+        </div>
+      </div>
+      
+      <div class="sim-container">
+        <!-- Jungle / petri dish background -->
+        <div style="position: absolute; inset:0; background: url('https://images.unsplash.com/photo-1542385151-efd9000785a0?q=80&w=2500&auto=format&fit=crop') center/cover; opacity: 0.15; pointer-events: none; mix-blend-mode: color-dodge;"></div>
+        
+        <canvas id="popCanvas" style="position: relative; z-index: 1;"></canvas>
+        
+        <div class="hud">
+          <h3>Ecosystem Telemetry</h3>
+          <div class="metric"><span>Generation:</span> <span class="val" id="genVal">0</span></div>
+          <div class="metric"><span>Wild-Type (Carrier):</span> <span class="val val-wild" id="wildVal">1000</span></div>
+          <div class="metric"><span>CRISPR Modified:</span> <span class="val val-mutant" id="mutantVal">0</span></div>
+          <div class="metric" style="margin-top: 10px; border-top: 1px solid #334155; padding-top: 5px;">
+            <span>Ecosystem Status:</span> <span class="val" id="statusVal" style="color:#facc15">STABLE</span>
+          </div>
+        </div>
+        
+        <div class="chart-container">
+            <div class="chart-bar-wild" id="barWild" style="height: 100%;"></div>
+            <div class="chart-bar-mutant" id="barMutant" style="height: 0%;"></div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      let editor;
+      require.config({ paths: { 'vs': 'https://unpkg.com/monaco-editor@0.36.1/min/vs' }});
+      require(['vs/editor/editor.main'], function() {
+        editor = monaco.editor.create(document.getElementById('editor-container'), {
+          value: `// Mendelian Inheritance vs Gene Drive AI
+// Define what happens when a Wild-Type organism breeds with a CRISPR Modified organism.
+
+function calculateOffspringGenetics(parentA, parentB) {
+    // Return an array representing the genetic makeup of the offspring.
+    // Standard Mendelian: 50% chance to pass on a trait.
+    // Gene Drive (CRISPR): The modified gene forces itself onto the other chromosome, guaranteeing 100% inheritance!
+    
+    // Naive Mendelian Logic (Will NOT eradicate the population):
+    let hasMutantParent = (parentA.type === 'MUTANT' || parentB.type === 'MUTANT');
+    
+    // Simulate 4 offspring
+    let offspring = [];
+    for(let i=0; i<4; i++) {
+        if(hasMutantParent && Math.random() < 0.5) {
+            offspring.push('MUTANT');
+        } else {
+            offspring.push('WILD');
+        }
+    }
+    
+    return offspring;
+}`,
+          language: 'javascript',
+          theme: 'vs-dark',
+          minimap: { enabled: false },
+          automaticLayout: true
+        });
+      });
+
+      const canvas = document.getElementById('popCanvas');
+      const ctx = canvas.getContext('2d');
+      
+      let isSimulating = false;
+      let organisms = [];
+      let generation = 0;
+      
+      function resize() { canvas.width = canvas.clientWidth; canvas.height = canvas.clientHeight; }
+      window.addEventListener('resize', resize);
+      resize();
+
+      function initPopulation() {
+          organisms = [];
+          for(let i=0; i<1000; i++) {
+              organisms.push({
+                  type: 'WILD',
+                  x: Math.random() * canvas.width,
+                  y: Math.random() * canvas.height,
+                  vx: (Math.random() - 0.5) * 3,
+                  vy: (Math.random() - 0.5) * 3,
+                  age: 0
+              });
+          }
+      }
+      initPopulation();
+
+      function animate() {
+          // Trail effect
+          ctx.fillStyle = 'rgba(2, 44, 34, 0.3)';
+          ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+          let wildCount = 0;
+          let mutantCount = 0;
+
+          if (isSimulating) {
+              // Aging and Death
+              for(let i = organisms.length - 1; i >= 0; i--) {
+                  let o = organisms[i];
+                  o.age++;
+                  
+                  // Movement
+                  o.x += o.vx;
+                  o.y += o.vy;
+                  
+                  // Jitter
+                  o.vx += (Math.random() - 0.5) * 0.5;
+                  o.vy += (Math.random() - 0.5) * 0.5;
+                  
+                  // Speed limit
+                  let speed = Math.hypot(o.vx, o.vy);
+                  if(speed > 4) { o.vx = (o.vx/speed)*4; o.vy = (o.vy/speed)*4; }
+                  
+                  // Wrap
+                  if(o.x < 0) o.x = canvas.width;
+                  if(o.x > canvas.width) o.x = 0;
+                  if(o.y < 0) o.y = canvas.height;
+                  if(o.y > canvas.height) o.y = 0;
+
+                  // Old age death
+                  if(o.age > 100 && Math.random() < 0.1) {
+                      organisms.splice(i, 1);
+                      continue;
+                  }
+                  
+                  // Breeding logic (Every ~50 frames, if near another)
+                  if(o.age > 20 && Math.random() < 0.05 && organisms.length < 2000) {
+                      for(let j = 0; j < organisms.length; j++) {
+                          if (i !== j && organisms[j].age > 20) {
+                              if (Math.hypot(o.x - organisms[j].x, o.y - organisms[j].y) < 20) {
+                                  // Breed!
+                                  try {
+                                      eval(editor.getValue());
+                                      let newGenetics = calculateOffspringGenetics(o, organisms[j]);
+                                      
+                                      if(newGenetics && Array.isArray(newGenetics)) {
+                                          for(let g of newGenetics) {
+                                              organisms.push({
+                                                  type: g === 'MUTANT' ? 'MUTANT' : 'WILD',
+                                                  x: o.x + (Math.random()-0.5)*10,
+                                                  y: o.y + (Math.random()-0.5)*10,
+                                                  vx: (Math.random() - 0.5) * 3,
+                                                  vy: (Math.random() - 0.5) * 3,
+                                                  age: 0
+                                              });
+                                          }
+                                      }
+                                  } catch(e) {}
+                                  
+                                  // Both parents die after breeding to prevent exponential blowup in browser
+                                  organisms.splice(Math.max(i, j), 1);
+                                  organisms.splice(Math.min(i, j), 1);
+                                  generation++;
+                                  break;
+                              }
+                          }
+                      }
+                  }
+              }
+          }
+
+          // Draw Organisms
+          for(let o of organisms) {
+              if (o.type === 'WILD') {
+                  wildCount++;
+                  ctx.fillStyle = '#facc15';
+              } else {
+                  mutantCount++;
+                  ctx.fillStyle = '#5eead4';
+                  ctx.shadowBlur = 8;
+                  ctx.shadowColor = '#5eead4';
+              }
+              
+              ctx.beginPath();
+              ctx.arc(o.x, o.y, 3, 0, Math.PI*2);
+              ctx.fill();
+              ctx.shadowBlur = 0;
+          }
+
+          // Update HUD
+          document.getElementById('wildVal').innerText = wildCount;
+          document.getElementById('mutantVal').innerText = mutantCount;
+          document.getElementById('genVal').innerText = generation;
+          
+          let total = wildCount + mutantCount;
+          if (total > 0) {
+              document.getElementById('barWild').style.height = (wildCount / total * 100) + "%";
+              document.getElementById('barMutant').style.height = (mutantCount / total * 100) + "%";
+          } else {
+              document.getElementById('barWild').style.height = "0%";
+              document.getElementById('barMutant').style.height = "0%";
+          }
+
+          if (isSimulating) {
+              if (total === 0) {
+                  document.getElementById('statusVal').innerText = "ERADICATION COMPLETE";
+                  document.getElementById('statusVal').style.color = "#10b981";
+                  isSimulating = false;
+              } else if (total > 3000) {
+                   document.getElementById('statusVal').innerText = "OVERPOPULATION CRASH";
+                   document.getElementById('statusVal').style.color = "#ef4444";
+                   isSimulating = false; // Kill sim before browser crashes
+              } else if (mutantCount > wildCount) {
+                  document.getElementById('statusVal').innerText = "GENE DRIVE DOMINANT";
+                  document.getElementById('statusVal').style.color = "#5eead4";
+              }
+          }
+
+          requestAnimationFrame(animate);
+      }
+      animate();
+
+      function releaseMutants() {
+          if(isSimulating) return;
+          // Introduce 50 mutants to the wild population
+          for(let i=0; i<50; i++) {
+              organisms.push({
+                  type: 'MUTANT',
+                  x: canvas.width / 2 + (Math.random()-0.5)*50,
+                  y: canvas.height / 2 + (Math.random()-0.5)*50,
+                  vx: (Math.random() - 0.5) * 5,
+                  vy: (Math.random() - 0.5) * 5,
+                  age: 0
+              });
+          }
+          isSimulating = true;
+          document.getElementById('statusVal').innerText = "DRIVE RELEASED";
+          document.getElementById('statusVal').style.color = "#5eead4";
+      }
+    </script>
+  </body>
+</html>

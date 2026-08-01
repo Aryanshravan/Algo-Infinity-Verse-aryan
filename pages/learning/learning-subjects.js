@@ -342,6 +342,8 @@
 
   // Keyboard shortcut: Ctrl+K or Cmd+K to focus search
   document.addEventListener('keydown', (e) => {
+    // Keyboard shortcuts are desktop-only — no-op on mobile viewports (< 768px).
+    if (!window.areKeyboardShortcutsEnabled()) return;
     if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
       e.preventDefault();
       searchInput.focus();

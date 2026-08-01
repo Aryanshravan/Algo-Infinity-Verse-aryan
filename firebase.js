@@ -84,4 +84,5 @@ export const COLLECTIONS = {
   PROBLEMS: 'problems',
   TEAM_PROFILES: 'teamProfiles',
   PLAGIARISM_REPORTS: 'plagiarism_reports',
+  SHARED_SNIPPETS: 'shared_snippets',
 };

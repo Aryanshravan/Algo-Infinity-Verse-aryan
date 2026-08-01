@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Bézier Curve & De Casteljau Visualizer | Algo Infinity Verse</title>
+    <meta
+      name="description"
+      content="Interactive Bézier Curve & De Casteljau Algorithm Sandbox demonstrating recursive linear interpolation, tangents, and spline construction."
+    />
+
+    <link
+      href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Fira+Code:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+
+    <!-- External Stylesheets -->
+    <link rel="stylesheet" href="/styles.css" />
+    <link rel="stylesheet" href="bezier-curve.css" />
+    <link rel="stylesheet" href="/modules/quick-notes/quick-notes.css" />
+  </head>
+  <body class="bezier-body">
+    <!-- Navbar Placeholder -->
+    <div id="navbar-placeholder"></div>
+
+    <main class="workspace">
+      <!-- Left Panel: Controls -->
+      <div class="panel-left">
+        <div class="panel-header">
+          <h3><i class="fas fa-bezier-curve"></i> Bézier & De Casteljau</h3>
+        </div>
+
+        <div class="control-section">
+          <p class="desc-text">
+            Explore Bézier curves and De Casteljau's recursive linear interpolation algorithm
+            step-by-step. Drag control points to shape the curve!
+          </p>
+
+          <!-- Presets -->
+          <div class="input-group">
+            <label for="presetSelect">Presets</label>
+            <select id="presetSelect" class="styled-select">
+              <option value="quadratic">Quadratic (3 Points)</option>
+              <option value="cubic">Cubic (4 Points)</option>
+              <option value="scurve">S-Curve</option>
+              <option value="loop">Loop-de-Loop</option>
+              <option value="fontGlyph">Font Glyph Outline</option>
+              <option value="custom">Custom</option>
+            </select>
+          </div>
+
+          <!-- Parameters -->
+          <div class="sliders-container">
+            <div class="slider-group">
+              <div class="slider-header">
+                <label for="tSlider">Interpolation Parameter (t)</label>
+                <span id="tVal" class="val-badge">0.50</span>
+              </div>
+              <input type="range" id="tSlider" min="0" max="1" step="0.01" value="0.5" />
+            </div>
+
+            <div class="slider-group">
+              <div class="slider-header">
+                <label for="speedSlider">Animation Speed</label>
+                <span id="speedVal" class="val-badge">1.0x</span>
+              </div>
+              <input type="range" id="speedSlider" min="0.2" max="3" step="0.1" value="1.0" />
+            </div>
+          </div>
+
+          <!-- Visual Toggles -->
+          <div class="toggles-container">
+            <label class="toggle-item">
+              <input type="checkbox" id="showDeCasteljauToggle" checked />
+              <span>Show De Casteljau Construction</span>
+            </label>
+            <label class="toggle-item">
+              <input type="checkbox" id="showPolygonToggle" checked />
+              <span>Show Control Polygon</span>
+            </label>
+            <label class="toggle-item">
+              <input type="checkbox" id="showTangentsToggle" />
+              <span>Show Tangent Vectors</span>
+            </label>
+          </div>
+
+          <!-- Action Buttons -->
+          <div class="action-buttons">
+            <button type="button" id="animateTBtn" class="btn btn-primary">
+              <i class="fas fa-play"></i> Animate (t)
+            </button>
+            <button type="button" id="addPointBtn" class="btn btn-secondary">
+              <i class="fas fa-plus"></i> Add Point
+            </button>
+            <button type="button" id="resetBtn" class="btn btn-outline">
+              <i class="fas fa-undo"></i> Reset
+            </button>
+          </div>
+
+          <!-- Live Telemetry -->
+          <div class="stats-panel">
+            <div class="stat-row">
+              <span>Point Count:</span>
+              <strong id="pointCountStat">4</strong>
+            </div>
+            <div class="stat-row">
+              <span>Curve Degree:</span>
+              <strong id="degreeStat">3 (Cubic)</strong>
+            </div>
+            <div class="legend-hint">
+              <small
+                ><strong>Tip:</strong> Drag any control point to reshape the curve. Double-click a
+                point to remove it!</small
+              >
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Panel: Canvas -->
+      <div class="panel-right">
+        <div class="canvas-wrapper" id="canvasWrapper">
+          <canvas id="bezierCanvas"></canvas>
+        </div>
+      </div>
+    </main>
+
+    <!-- Footer Placeholder -->
+    <div id="footer-placeholder"></div>
+
+    <script src="/auth.js"></script>
+    <script src="/bootstrap-legacy.js"></script>
+    <script src="/script.js"></script>
+    <script type="module" src="/dist/legacy-bundle.mjs"></script>
+    <script src="/theme.js"></script>
+    <script src="bezier-curve.js"></script>
+    <script>
+      loadPartial('navbar-placeholder', '/partials/navbar.html');
+      loadPartial('footer-placeholder', '/partials/footer.html');
+    </script>
+    <script src="/modules/quick-notes/quick-notes.js"></script>
+  </body>
+</html>

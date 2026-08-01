@@ -88,6 +88,10 @@
               <input type="checkbox" id="tspAutoRun" />
               Auto-run
             </label>
+            <label class="tsp-auto-toggle">
+              <input type="checkbox" id="tspVimToggle" />
+              Vim Mode
+            </label>
             <button
               type="button"
               id="tspCopyBtn"
@@ -152,6 +156,7 @@
               <span><kbd>Ctrl</kbd>+<kbd>S</kbd> Save Project</span>
               <span><kbd>Ctrl</kbd>+<kbd>Space</kbd> Trigger Autocomplete</span>
             </div>
+            <div id="vim-status-bar" class="vim-status-bar hidden"></div>
           </div>
         </div>
       </div>
@@ -209,6 +214,7 @@
 
     <!-- Monaco Editor AMD Loader (same version already used by code-playground.html) -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.39.0/min/vs/loader.min.js"></script>
+    <script src="https://unpkg.com/monaco-vim/dist/monaco-vim.js"></script>
 
     <script src="typescript-playground.js"></script>
     <script src="/auth.js"></script>

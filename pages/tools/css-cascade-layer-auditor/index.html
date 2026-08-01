@@ -1,0 +1,203 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CSS Cascade Layer Auditor | Algo Infinity Verse</title>
+  <meta name="description" content="Paste CSS, detect specificity conflicts and !important debt, plan @layer migration, flag :has() performance risks, and export a cascade audit report." />
+  <link rel="stylesheet" href="/styles.css" />
+  <link rel="stylesheet" href="style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Poppins:wght@300;400;500;600;700&family=Fira+Code:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <script>
+    (function () {
+      try {
+        var storedTheme = localStorage.getItem('theme');
+        var prefersLight = window.matchMedia('(prefers-color-scheme: light)').matches;
+        var theme = storedTheme || (prefersLight ? 'light' : 'dark');
+        if (theme === 'light') {
+          document.documentElement.classList.add('light-mode');
+        } else {
+          document.documentElement.classList.remove('light-mode');
+        }
+      } catch (e) {}
+    })();
+  </script>
+</head>
+<body data-page="css-cascade-layer-auditor">
+  <a href="#cascade-main" class="cascade-skip-link">Skip to main content</a>
+  <button type="button" id="scrollTopBtn" class="scroll-top-btn" aria-label="Scroll to top">
+    <i class="fas fa-arrow-up" aria-hidden="true"></i>
+  </button>
+
+  <div id="navbar-placeholder"></div>
+
+  <header class="cascade-hero">
+    <div class="cascade-hero-badge">
+      <i class="fas fa-layer-group" aria-hidden="true"></i>
+      CSS Architecture Lab
+    </div>
+    <h1>
+      CSS Cascade Layer
+      <span class="cascade-hero-accent">Auditor</span>
+    </h1>
+    <p>
+      Paste stylesheets, detect specificity wars and <code>!important</code> debt,
+      plan an <code>@layer</code> migration, and flag costly <code>:has()</code> patterns.
+    </p>
+    <div class="cascade-hero-stats" aria-live="polite">
+      <div class="cascade-stat">
+        <span class="cascade-stat-val" id="statDebt">—</span>
+        <span class="cascade-stat-label">!important debt</span>
+      </div>
+      <div class="cascade-stat">
+        <span class="cascade-stat-val" id="statConflicts">—</span>
+        <span class="cascade-stat-label">Spec conflicts</span>
+      </div>
+      <div class="cascade-stat">
+        <span class="cascade-stat-val" id="statHasRisk">—</span>
+        <span class="cascade-stat-label">:has() risks</span>
+      </div>
+      <div class="cascade-stat">
+        <span class="cascade-stat-val" id="statLayers">—</span>
+        <span class="cascade-stat-label">Layer plan</span>
+      </div>
+    </div>
+  </header>
+
+  <main id="cascade-main" class="cascade-main">
+    <div class="container">
+      <div class="cascade-workspace">
+        <section class="cascade-panel" aria-labelledby="cascade-source-title">
+          <div class="cascade-panel-header">
+            <div class="cascade-panel-title">
+              <i class="fas fa-code cascade-panel-icon" aria-hidden="true"></i>
+              <h2 id="cascade-source-title">Stylesheet input</h2>
+            </div>
+          </div>
+
+          <label class="cascade-label" for="cssInput">Paste CSS (rules, selectors, layers)</label>
+          <textarea
+            id="cssInput"
+            class="cascade-textarea"
+            rows="16"
+            spellcheck="false"
+            aria-describedby="cssHint"
+            placeholder="/* e.g. nested selectors, !important, :has()… */"
+          ></textarea>
+          <p class="cascade-hint" id="cssHint">
+            Static cascade audit: specificity conflicts, <code>!important</code> scoring,
+            deep selector depth, and <code>:has()</code> cost hints. Not a live browser cascade.
+          </p>
+
+          <div class="cascade-controls">
+            <button type="button" id="loadDemoBtn" class="btn btn-secondary">
+              <i class="fas fa-flask" aria-hidden="true"></i> Load demo CSS
+            </button>
+            <button type="button" id="analyzeBtn" class="btn btn-primary">
+              <i class="fas fa-magnifying-glass" aria-hidden="true"></i> Audit cascade
+            </button>
+            <button type="button" id="clearBtn" class="btn btn-outline">
+              <i class="fas fa-eraser" aria-hidden="true"></i> Clear
+            </button>
+            <button type="button" id="exportMdBtn" class="btn btn-outline" disabled>
+              <i class="fas fa-file-lines" aria-hidden="true"></i> Export .md
+            </button>
+            <button type="button" id="exportTxtBtn" class="btn btn-outline" disabled>
+              <i class="fas fa-file-alt" aria-hidden="true"></i> Export .txt
+            </button>
+          </div>
+        </section>
+
+        <section class="cascade-panel" aria-labelledby="cascade-findings-title">
+          <div class="cascade-panel-header">
+            <div class="cascade-panel-title">
+              <i class="fas fa-triangle-exclamation cascade-panel-icon" aria-hidden="true"></i>
+              <h2 id="cascade-findings-title">Cascade findings</h2>
+            </div>
+            <span class="cascade-status-live" id="analysisStatus" role="status" aria-live="polite">Ready</span>
+          </div>
+          <div id="findingsList" class="cascade-findings" aria-live="polite">
+            <p class="cascade-empty">Load demo CSS or paste a stylesheet, then audit.</p>
+          </div>
+        </section>
+      </div>
+
+      <div class="cascade-workspace">
+        <section class="cascade-panel" aria-labelledby="cascade-debt-title">
+          <div class="cascade-panel-header">
+            <div class="cascade-panel-title">
+              <i class="fas fa-scale-balanced cascade-panel-icon" aria-hidden="true"></i>
+              <h2 id="cascade-debt-title">!important debt &amp; specificity</h2>
+            </div>
+          </div>
+          <div id="debtSummary" class="cascade-debt-summary" aria-live="polite">
+            <p class="cascade-empty">Debt score and conflict pairs appear after analysis.</p>
+          </div>
+          <ul id="conflictList" class="cascade-conflict-list" aria-live="polite"></ul>
+        </section>
+
+        <section class="cascade-panel" aria-labelledby="cascade-has-title">
+          <div class="cascade-panel-header">
+            <div class="cascade-panel-title">
+              <i class="fas fa-bolt cascade-panel-icon" aria-hidden="true"></i>
+              <h2 id="cascade-has-title">:has() performance hints</h2>
+            </div>
+          </div>
+          <div id="hasHints" class="cascade-findings" aria-live="polite">
+            <p class="cascade-empty">:has() risk notes appear after analysis.</p>
+          </div>
+        </section>
+      </div>
+
+      <div class="cascade-workspace">
+        <section class="cascade-panel" aria-labelledby="cascade-layer-title">
+          <div class="cascade-panel-header">
+            <div class="cascade-panel-title">
+              <i class="fas fa-sitemap cascade-panel-icon" aria-hidden="true"></i>
+              <h2 id="cascade-layer-title">@layer migration planner</h2>
+            </div>
+          </div>
+          <ol id="layerPlan" class="cascade-layer-plan" aria-live="polite">
+            <li class="cascade-empty-li">Suggested layer order appears after analysis.</li>
+          </ol>
+        </section>
+
+        <section class="cascade-panel" aria-labelledby="cascade-refactor-title">
+          <div class="cascade-panel-header">
+            <div class="cascade-panel-title">
+              <i class="fas fa-wand-magic-sparkles cascade-panel-icon" aria-hidden="true"></i>
+              <h2 id="cascade-refactor-title">Before / after layered CSS</h2>
+            </div>
+          </div>
+          <div class="cascade-refactor-grid">
+            <div>
+              <h3 class="cascade-subhead">Before (unlayered debt)</h3>
+              <pre class="cascade-mono-block" id="beforeOut" aria-live="polite">—</pre>
+            </div>
+            <div>
+              <h3 class="cascade-subhead">After (@layer suggestion)</h3>
+              <pre class="cascade-mono-block" id="afterOut" aria-live="polite">—</pre>
+            </div>
+          </div>
+        </section>
+      </div>
+    </div>
+  </main>
+
+  <div id="footer-placeholder"></div>
+
+  <script src="/auth.js"></script>
+  <script src="/bootstrap-legacy.js"></script>
+  <script src="/script.js"></script>
+  <script type="module" src="/dist/legacy-bundle.mjs"></script>
+  <script src="/theme.js"></script>
+  <script src="script.js"></script>
+  <script>
+    if (typeof loadPartial === 'function') {
+      loadPartial('navbar-placeholder', '/partials/navbar.html');
+      loadPartial('footer-placeholder', '/partials/footer.html');
+    }
+  </script>
+</body>
+</html>

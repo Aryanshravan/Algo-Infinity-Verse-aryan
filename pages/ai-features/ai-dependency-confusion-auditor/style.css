@@ -1,0 +1,406 @@
+/* ===== AI Dependency Confusion Auditor ===== */
+:root {
+  --depconf-glass: rgba(255, 255, 255, 0.04);
+  --depconf-border: rgba(255, 255, 255, 0.1);
+  --depconf-muted: rgba(255, 255, 255, 0.62);
+  --depconf-accent: #fb7185;
+  --depconf-accent-2: #c084fc;
+  --depconf-accent-dim: rgba(251, 113, 133, 0.14);
+  --depconf-error: #f87171;
+  --depconf-warn: #fbbf24;
+  --depconf-info: #60a5fa;
+  --depconf-ok: #4ade80;
+  --depconf-safe: #2dd4bf;
+}
+
+html.light-mode {
+  --depconf-glass: rgba(15, 23, 42, 0.04);
+  --depconf-border: rgba(15, 23, 42, 0.12);
+  --depconf-muted: rgba(15, 23, 42, 0.65);
+  --depconf-accent-dim: rgba(244, 63, 94, 0.1);
+}
+
+.depconf-skip-link {
+  position: absolute;
+  left: 1rem;
+  top: -100px;
+  z-index: 10000;
+  padding: 0.6rem 1rem;
+  background: var(--depconf-accent);
+  color: #0a0a14;
+  font-weight: 700;
+  border-radius: 8px;
+  text-decoration: none;
+}
+
+.depconf-skip-link:focus {
+  top: 1rem;
+  outline: 3px solid #fff;
+  outline-offset: 2px;
+}
+
+.depconf-hero {
+  position: relative;
+  overflow: hidden;
+  padding: 7.5rem 1.5rem 4rem;
+  text-align: center;
+  border-bottom: 1px solid var(--depconf-border);
+  background:
+    radial-gradient(ellipse at top right, rgba(251, 113, 133, 0.16), transparent 55%),
+    radial-gradient(ellipse at bottom left, rgba(192, 132, 252, 0.12), transparent 50%);
+}
+
+.depconf-hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1.1rem;
+  padding: 0.35rem 0.9rem;
+  border-radius: 999px;
+  border: 1px solid rgba(251, 113, 133, 0.4);
+  background: var(--depconf-accent-dim);
+  color: var(--depconf-accent);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.depconf-hero h1 {
+  margin: 0 0 1rem;
+  font-family: 'Orbitron', sans-serif;
+  font-size: clamp(1.9rem, 5vw, 3rem);
+  font-weight: 900;
+  line-height: 1.15;
+}
+
+.depconf-hero-accent {
+  display: inline-block;
+  background: linear-gradient(135deg, #fb7185, #c084fc);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.depconf-hero p {
+  max-width: 740px;
+  margin: 0 auto 2rem;
+  color: var(--depconf-muted);
+  font-size: 1.05rem;
+  line-height: 1.65;
+  font-family: 'Poppins', sans-serif;
+}
+
+.depconf-hero-stats {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1rem;
+}
+
+.depconf-stat {
+  min-width: 120px;
+  padding: 0.85rem 1.1rem;
+  border: 1px solid var(--depconf-border);
+  border-radius: 14px;
+  background: var(--depconf-glass);
+}
+
+.depconf-stat-val {
+  display: block;
+  font-family: 'Orbitron', sans-serif;
+  font-size: 1.45rem;
+  font-weight: 700;
+}
+
+.depconf-stat-label {
+  font-size: 0.75rem;
+  color: var(--depconf-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+#statPackages { color: var(--depconf-info); }
+#statUnscoped { color: var(--depconf-error); }
+#statTypos { color: var(--depconf-warn); }
+#statRisk { color: var(--depconf-accent); }
+
+.depconf-main {
+  padding: 2rem 0 4rem;
+  font-family: 'Poppins', sans-serif;
+}
+
+.depconf-workspace {
+  display: grid;
+  grid-template-columns: minmax(300px, 1fr) minmax(320px, 1.05fr);
+  gap: 1.5rem;
+  align-items: start;
+  margin-bottom: 1.5rem;
+}
+
+@media (max-width: 980px) {
+  .depconf-workspace {
+    grid-template-columns: 1fr;
+  }
+}
+
+.depconf-panel {
+  padding: 1.4rem;
+  border: 1px solid var(--depconf-border);
+  border-radius: 18px;
+  background: var(--depconf-glass);
+  backdrop-filter: blur(12px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
+}
+
+.depconf-panel-header {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1.2rem;
+  padding-bottom: 0.9rem;
+  border-bottom: 1px solid var(--depconf-border);
+}
+
+.depconf-panel-title {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.depconf-panel-title h2 {
+  margin: 0;
+  font-size: 1.15rem;
+  font-weight: 700;
+}
+
+.depconf-panel-icon {
+  color: var(--depconf-accent);
+}
+
+.depconf-label {
+  display: block;
+  margin-bottom: 0.4rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.depconf-textarea {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0.85rem 1rem;
+  border: 1px solid var(--depconf-border);
+  border-radius: 12px;
+  background: rgba(0, 0, 0, 0.25);
+  color: inherit;
+  font-family: 'Fira Code', monospace;
+  font-size: 0.78rem;
+  line-height: 1.5;
+  resize: vertical;
+  min-height: 220px;
+}
+
+html.light-mode .depconf-textarea {
+  background: rgba(255, 255, 255, 0.85);
+}
+
+.depconf-textarea:focus {
+  outline: 2px solid var(--depconf-accent);
+  outline-offset: 2px;
+  border-color: var(--depconf-accent);
+}
+
+.depconf-hint {
+  margin: 0.5rem 0 0;
+  font-size: 0.8rem;
+  color: var(--depconf-muted);
+  line-height: 1.5;
+}
+
+.depconf-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  align-items: center;
+  margin-top: 1.1rem;
+}
+
+.depconf-status {
+  margin-top: 0.85rem;
+  min-height: 1.25rem;
+  font-size: 0.85rem;
+  color: var(--depconf-muted);
+}
+
+.depconf-status.is-error { color: var(--depconf-error); }
+.depconf-status.is-ok { color: var(--depconf-ok); }
+
+.depconf-empty {
+  text-align: center;
+  padding: 2.5rem 1rem;
+  color: var(--depconf-muted);
+}
+
+.depconf-empty i {
+  font-size: 2rem;
+  margin-bottom: 0.75rem;
+  color: var(--depconf-accent);
+  opacity: 0.85;
+}
+
+.depconf-section {
+  margin-bottom: 1.5rem;
+}
+
+.depconf-section h3 {
+  margin: 0 0 0.85rem;
+  font-size: 0.95rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--depconf-accent);
+}
+
+.depconf-muted {
+  margin: 0.25rem 0 0;
+  font-size: 0.82rem;
+  color: var(--depconf-muted);
+  line-height: 1.5;
+}
+
+.depconf-score-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.4rem;
+  padding: 1rem 1.1rem;
+  border: 1px solid var(--depconf-border);
+  border-radius: 14px;
+  background: rgba(0, 0, 0, 0.15);
+}
+
+html.light-mode .depconf-score-card {
+  background: rgba(255, 255, 255, 0.55);
+}
+
+.depconf-score-card h3 {
+  margin: 0;
+  font-size: 0.95rem;
+}
+
+.depconf-score-ring {
+  flex-shrink: 0;
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  border: 3px solid var(--depconf-warn);
+  background: var(--depconf-accent-dim);
+  font-family: 'Orbitron', sans-serif;
+  font-size: 1.35rem;
+  font-weight: 700;
+}
+
+.depconf-score-ring.is-low { border-color: var(--depconf-ok); color: var(--depconf-ok); }
+.depconf-score-ring.is-mid { border-color: var(--depconf-warn); color: var(--depconf-warn); }
+.depconf-score-ring.is-high { border-color: var(--depconf-error); color: var(--depconf-error); }
+
+.depconf-findings {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.depconf-finding {
+  padding: 0.85rem 1rem;
+  border: 1px solid var(--depconf-border);
+  border-left: 4px solid var(--depconf-warn);
+  border-radius: 12px;
+  background: rgba(0, 0, 0, 0.15);
+}
+
+html.light-mode .depconf-finding {
+  background: rgba(255, 255, 255, 0.55);
+}
+
+.depconf-finding.is-critical { border-left-color: var(--depconf-error); }
+.depconf-finding.is-high { border-left-color: var(--depconf-accent); }
+.depconf-finding.is-medium { border-left-color: var(--depconf-warn); }
+.depconf-finding.is-ok { border-left-color: var(--depconf-ok); }
+
+.depconf-finding-title {
+  margin: 0 0 0.3rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.depconf-finding-body {
+  margin: 0;
+  font-size: 0.82rem;
+  color: var(--depconf-muted);
+  line-height: 1.5;
+}
+
+.depconf-badge {
+  display: inline-block;
+  margin-bottom: 0.35rem;
+  padding: 0.12rem 0.45rem;
+  border-radius: 6px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  background: rgba(251, 113, 133, 0.18);
+  color: var(--depconf-accent);
+}
+
+.depconf-badge.is-critical {
+  background: rgba(248, 113, 113, 0.18);
+  color: var(--depconf-error);
+}
+
+.depconf-badge.is-ok {
+  background: rgba(74, 222, 128, 0.18);
+  color: var(--depconf-ok);
+}
+
+.depconf-policy-out {
+  padding: 0.9rem 1rem;
+  border: 1px solid var(--depconf-border);
+  border-radius: 12px;
+  background: rgba(0, 0, 0, 0.12);
+  font-size: 0.84rem;
+  line-height: 1.55;
+}
+
+html.light-mode .depconf-policy-out {
+  background: rgba(255, 255, 255, 0.5);
+}
+
+.depconf-policy-out ul {
+  margin: 0.5rem 0 0;
+  padding-left: 1.2rem;
+}
+
+.depconf-empty[hidden],
+#depconfResults[hidden] {
+  display: none !important;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .depconf-finding {
+    animation: depconf-fade 0.35s ease both;
+  }
+
+  @keyframes depconf-fade {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: none; }
+  }
+}

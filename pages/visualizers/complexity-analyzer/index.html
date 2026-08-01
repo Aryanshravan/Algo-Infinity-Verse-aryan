@@ -283,6 +283,7 @@
       }
     </style>
     <script src="/theme.js"></script>
+    <link rel="stylesheet" href="/modules/quick-notes/quick-notes.css" />
   </head>
   <body>
     <header class="navbar-header">
@@ -366,7 +367,7 @@
     </main>
 
     <!-- Chart.js & Monaco Editor AMD Loaders -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="/modules/lazyVisualizer.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.39.0/min/vs/loader.min.js"></script>
     <script>
       const presets = {
@@ -439,105 +440,72 @@
         });
       }
 
-      // Initialize Chart.js
+      // Initialize Chart.js (lazy-loaded)
       function initCharts() {
-        const isLight = document.documentElement.classList.contains('light-mode');
-        const gridColor = isLight ? 'rgba(0, 0, 0, 0.08)' : 'rgba(255, 255, 255, 0.08)';
-        const textColor = isLight ? '#0f172a' : '#f8fafc';
+        var timeCanvas = document.getElementById('timeChart');
+        var memCanvas = document.getElementById('memoryChart');
+        if (!timeCanvas || !memCanvas) return;
 
-        const commonOptions = {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: {
-            legend: {
-              labels: { color: textColor, font: { family: 'var(--ui-font)' } },
+        var createChartsFn = function() {
+          if (typeof Chart === 'undefined') return;
+          var isLight = document.documentElement.classList.contains('light-mode');
+          var gridColor = isLight ? 'rgba(0, 0, 0, 0.08)' : 'rgba(255, 255, 255, 0.08)';
+          var textColor = isLight ? '#0f172a' : '#f8fafc';
+
+          var commonOptions = {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: {
+                labels: { color: textColor, font: { family: 'var(--ui-font)' } },
+              },
             },
-          },
-          scales: {
-            x: {
-              grid: { color: gridColor },
-              ticks: { color: textColor },
-              title: { display: true, text: 'Input Size (N)', color: textColor },
+            scales: {
+              x: {
+                grid: { color: gridColor },
+                ticks: { color: textColor },
+                title: { display: true, text: 'Input Size (N)', color: textColor },
+              },
+              y: {
+                grid: { color: gridColor },
+                ticks: { color: textColor },
+                title: { display: true, text: '', color: textColor },
+              },
             },
-            y: {
-              grid: { color: gridColor },
-              ticks: { color: textColor },
-              title: { display: true, text: '', color: textColor },
+          };
+
+          var ctxTime = timeCanvas.getContext('2d');
+          timeChart = new Chart(ctxTime, {
+            type: 'line',
+            data: {
+              labels: [],
+              datasets: [
+                { label: 'Implementation A', data: [], borderColor: '#3b82f6', backgroundColor: 'rgba(59, 130, 246, 0.1)', tension: 0.2, borderWith: 2 },
+                { label: 'Implementation B', data: [], borderColor: '#8b5cf6', backgroundColor: 'rgba(139, 92, 246, 0.1)', tension: 0.2, borderWith: 2 },
+              ],
             },
-          },
+            options: Object.assign({}, commonOptions, { scales: Object.assign({}, commonOptions.scales, { y: Object.assign({}, commonOptions.scales.y, { title: Object.assign({}, commonOptions.scales.y.title, { text: 'Time (ms)' }) }) }) })
+          });
+
+          var ctxMem = memCanvas.getContext('2d');
+          memoryChart = new Chart(ctxMem, {
+            type: 'line',
+            data: {
+              labels: [],
+              datasets: [
+                { label: 'Implementation A', data: [], borderColor: '#3b82f6', backgroundColor: 'rgba(59, 130, 246, 0.1)', tension: 0.2, borderWith: 2 },
+                { label: 'Implementation B', data: [], borderColor: '#8b5cf6', backgroundColor: 'rgba(139, 92, 246, 0.1)', tension: 0.2, borderWith: 2 },
+              ],
+            },
+            options: Object.assign({}, commonOptions, { scales: Object.assign({}, commonOptions.scales, { y: Object.assign({}, commonOptions.scales.y, { title: Object.assign({}, commonOptions.scales.y.title, { text: 'Allocated memory (KB)' }) }) }) })
+          });
         };
 
-        const ctxTime = document.getElementById('timeChart').getContext('2d');
-        timeChart = new Chart(ctxTime, {
-          type: 'line',
-          data: {
-            labels: [],
-            datasets: [
-              {
-                label: 'Implementation A',
-                data: [],
-                borderColor: '#3b82f6',
-                backgroundColor: 'rgba(59, 130, 246, 0.1)',
-                tension: 0.2,
-                borderWith: 2,
-              },
-              {
-                label: 'Implementation B',
-                data: [],
-                borderColor: '#8b5cf6',
-                backgroundColor: 'rgba(139, 92, 246, 0.1)',
-                tension: 0.2,
-                borderWith: 2,
-              },
-            ],
-          },
-          options: {
-            ...commonOptions,
-            scales: {
-              ...commonOptions.scales,
-              y: {
-                ...commonOptions.scales.y,
-                title: { ...commonOptions.scales.y.title, text: 'Time (ms)' },
-              },
-            },
-          },
-        });
-
-        const ctxMem = document.getElementById('memoryChart').getContext('2d');
-        memoryChart = new Chart(ctxMem, {
-          type: 'line',
-          data: {
-            labels: [],
-            datasets: [
-              {
-                label: 'Implementation A',
-                data: [],
-                borderColor: '#3b82f6',
-                backgroundColor: 'rgba(59, 130, 246, 0.1)',
-                tension: 0.2,
-                borderWith: 2,
-              },
-              {
-                label: 'Implementation B',
-                data: [],
-                borderColor: '#8b5cf6',
-                backgroundColor: 'rgba(139, 92, 246, 0.1)',
-                tension: 0.2,
-                borderWith: 2,
-              },
-            ],
-          },
-          options: {
-            ...commonOptions,
-            scales: {
-              ...commonOptions.scales,
-              y: {
-                ...commonOptions.scales.y,
-                title: { ...commonOptions.scales.y.title, text: 'Allocated memory (KB)' },
-              },
-            },
-          },
-        });
+        if (typeof lazyVisualizer !== 'undefined') {
+          lazyVisualizer.lazyLoadChartJS(timeCanvas, createChartsFn);
+        } else {
+          createChartsFn();
+        }
       }
 
       function updateChartThemes() {
@@ -663,5 +631,6 @@
         initCharts();
       });
     </script>
+    <script src="/modules/quick-notes/quick-notes.js"></script>
   </body>
 </html>

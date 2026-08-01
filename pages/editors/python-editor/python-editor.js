@@ -2,8 +2,55 @@ document.addEventListener("DOMContentLoaded", () => {
   initLoadingScreen();
   initNavbar();
   initScrollTop();
+  initBiometricNavigation();
   try { initPythonEditor(); } catch(e) { console.error("PythonEditor:", e); }
 });
+
+// --- Biometric Predictive Code Navigation (Eye-Tracking) ---
+function initBiometricNavigation() {
+  const toggle = document.getElementById("enableWebGazer");
+  if (!toggle) return;
+  
+  toggle.addEventListener("change", async (e) => {
+    if (e.target.checked) {
+      if (typeof webgazer !== "undefined") {
+        try {
+          await webgazer.setRegression('ridge') 
+            .setGazeListener(function(data, clock) {
+              if (data == null) return;
+              
+              // If user is looking at the top 20% of the screen, scroll up
+              if (data.y < window.innerHeight * 0.2) {
+                window.scrollBy(0, -10);
+              } 
+              // If user is looking at the bottom 20% of the screen, scroll down
+              else if (data.y > window.innerHeight * 0.8) {
+                window.scrollBy(0, 10);
+              }
+            }).begin();
+            
+            webgazer.showVideoPreview(true).showPredictionPoints(true);
+            
+            // Alert user that BCI is active
+            const notif = document.createElement("div");
+            notif.innerHTML = "<i class='fas fa-brain'></i> Biometric Eye-Tracking Active. Gaze at the top/bottom of the screen to auto-scroll.";
+            notif.style.cssText = "position:fixed; top:20px; left:50%; transform:translateX(-50%); background:#10b981; color:#fff; padding:10px 20px; border-radius:50px; z-index:9999; font-weight:bold;";
+            document.body.appendChild(notif);
+            setTimeout(() => notif.remove(), 5000);
+            
+        } catch (err) {
+          console.error("WebGazer failed to initialize:", err);
+          e.target.checked = false;
+        }
+      }
+    } else {
+      if (typeof webgazer !== "undefined") {
+        webgazer.pause();
+        webgazer.showVideoPreview(false).showPredictionPoints(false);
+      }
+    }
+  });
+}
 
 function initLoadingScreen() {
   setTimeout(() => {
@@ -108,53 +155,44 @@ for skill in person['skills']:
     print(f"- {skill}")`
 };
 
-/* ─── Piston API Executor ─── */
+/* ─── WebAssembly (Pyodide) Executor ─── */
+let pyodideReadyPromise = null;
+
+async function initPyodide() {
+  if (!pyodideReadyPromise) {
+    pyodideReadyPromise = loadPyodide({
+      indexURL: "https://cdn.jsdelivr.net/pyodide/v0.25.0/full/"
+    });
+  }
+  return pyodideReadyPromise;
+}
+
 async function executePython(code) {
   if (!code.trim()) {
     return { output: [], errors: ["No code to execute."] };
   }
 
+  const output = [];
+  const errors = [];
+
   try {
-    const response = await fetch("https://emkc.org/api/v2/piston/execute", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        language: "python",
-        version: "3.10.0",
-        files: [{ name: "main.py", content: code }],
-        stdin: "",
-        args: [],
-        compile_timeout: 10000,
-        run_timeout: 3000,
-        compile_memory_limit: -1,
-        run_memory_limit: -1
-      })
-    });
+    const pyodide = await initPyodide();
+    
+    // Redirect stdout to our output array
+    pyodide.setStdout({ batched: (msg) => output.push(msg) });
+    pyodide.setStderr({ batched: (msg) => errors.push(msg) });
 
-    if (!response.ok) {
-      throw new Error("API request failed with status " + response.status);
-    }
-
-    const data = await response.json();
-    const output = [];
-    const errors = [];
-
-    if (data.run && data.run.stderr) {
-      errors.push(...data.run.stderr.split("\n").filter(l => l.trim()));
-    }
-
-    if (data.run && data.run.stdout) {
-      output.push(...data.run.stdout.split("\n").filter(l => l.trim()));
-    }
+    await pyodide.runPythonAsync(code);
 
     if (output.length === 0 && errors.length === 0) {
-      output.push("Process finished with no output.");
+      output.push("Execution completed with no output.");
     }
 
     return { output, errors };
-
-  } catch (error) {
-    return { output: [], errors: ["Execution Error: " + error.message] };
+  } catch (e) {
+    console.error("Pyodide Error:", e);
+    errors.push(e.message || String(e));
+    return { output, errors };
   }
 }
 

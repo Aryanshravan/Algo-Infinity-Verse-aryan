@@ -4,84 +4,18 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Repository Analyzer - Algo Infinity Verse</title>
-    <link rel="stylesheet" href="/styles.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Poppins:wght@300;400;500;600;700&family=Fira+Code:wght@400;500;600&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500;600;700&display=swap"
       rel="stylesheet"
     />
     <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
     />
-    <style>
-      .repo-analyzer-container {
-        max-width: 800px;
-        margin: 0 auto;
-        padding: 2rem;
-      }
-      .repo-input-group {
-        display: flex;
-        gap: 1rem;
-        margin-bottom: 2rem;
-      }
-      .repo-input-group input {
-        flex: 1;
-        padding: 1rem;
-        border-radius: 8px;
-        border: 1px solid rgba(255, 255, 255, 0.2);
-        background: rgba(255, 255, 255, 0.05);
-        color: var(--text-color);
-        font-family: 'Fira Code', monospace;
-      }
-      .score-circle {
-        width: 150px;
-        height: 150px;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 3rem;
-        font-weight: 700;
-        margin: 0 auto 2rem auto;
-        background: rgba(255, 255, 255, 0.05);
-        border: 4px solid var(--primary-color);
-        box-shadow: 0 0 20px rgba(96, 165, 250, 0.3);
-      }
-      .results-grid {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 1.5rem;
-        margin-bottom: 2rem;
-      }
-      .result-card {
-        background: rgba(255, 255, 255, 0.03);
-        padding: 1.5rem;
-        border-radius: 12px;
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        text-align: center;
-      }
-      .result-icon {
-        font-size: 2rem;
-        margin-bottom: 1rem;
-      }
-      .icon-success {
-        color: #4ade80;
-      }
-      .icon-error {
-        color: #f87171;
-      }
-      .recommendations-list {
-        list-style: none;
-        padding: 0;
-      }
-      .recommendations-list li {
-        padding: 1rem;
-        background: rgba(255, 255, 255, 0.03);
-        margin-bottom: 0.5rem;
-        border-radius: 8px;
-        border-left: 4px solid var(--primary-color);
-      }
-    </style>
+    <link rel="stylesheet" href="/styles.css" />
+    <link rel="stylesheet" href="repo-analyzer.css" />
 
     <!-- Theme Initialization Script -->
     <script>
@@ -112,71 +46,155 @@
     <!-- Navigation Bar -->
     <div id="navbar-placeholder"></div>
 
-    <div class="spacer" style="height: 100px"></div>
-
-    <section class="section">
-      <div class="container repo-analyzer-container">
-        <div class="text-center mb-5">
-          <h1 class="gradient-text"><i class="fas fa-code-branch"></i> Repository Analyzer</h1>
-          <p>
-            Scan your GitHub, GitLab, or Bitbucket repository for functional CI/CD automation and
-            best practices.
-          </p>
+    <main class="repo-analyzer-page">
+      <!-- Hero -->
+      <div class="ra-hero">
+        <div class="ra-hero-icon">
+          <i class="fas fa-code-branch"></i>
         </div>
+        <h1 class="ra-hero-title">Repository Analyzer</h1>
+        <p class="ra-hero-subtitle">
+          Scan any GitHub, GitLab, or Bitbucket repository for
+          CI/CD automation, code quality, security scanning, and
+          documentation coverage best practices.
+        </p>
+      </div>
 
-        <div class="glass-card p-4">
-          <div class="repo-input-group">
-            <input
-              type="url"
-              id="repoUrlInput"
-              placeholder="Enter GitHub, GitLab, or Bitbucket repository URL"
-              required
-            />
-            <button type="button" id="analyzeBtn" class="btn btn-primary">
-              <i class="fas fa-search"></i> Analyze
-            </button>
-          </div>
-
-          <div id="loadingIndicator" style="display: none; text-align: center; margin: 2rem 0">
-            <i class="fas fa-spinner fa-spin fa-3x gradient-text"></i>
-            <p class="mt-3">Analyzing Workflows...</p>
-          </div>
-
-          <div id="resultsContainer" style="display: none">
-            <div class="score-circle gradient-text" id="scoreDisplay">0</div>
-
-            <div class="results-grid">
-              <div class="result-card">
-                <div class="result-icon" id="depsIcon"><i class="fas fa-box"></i></div>
-                <h4>Dependencies</h4>
-                <p id="depsText">Pending</p>
-              </div>
-              <div class="result-card">
-                <div class="result-icon" id="testsIcon"><i class="fas fa-vial"></i></div>
-                <h4>Automated Tests</h4>
-                <p id="testsText">Pending</p>
-              </div>
-            </div>
-
-            <h3 class="mb-3"><i class="fas fa-lightbulb"></i> Recommendations</h3>
-            <ul class="recommendations-list" id="recommendationsList"></ul>
-          </div>
+      <!-- Input Card -->
+      <div class="ra-input-card">
+        <div class="ra-input-group">
+          <input
+            type="url"
+            id="repoUrlInput"
+            class="ra-input"
+            placeholder="https://github.com/user/repo"
+            autocomplete="off"
+            spellcheck="false"
+          />
+          <button type="button" id="analyzeBtn" class="ra-btn">
+            <i class="fas fa-search"></i> Analyze
+          </button>
         </div>
       </div>
-    </section>
 
-    <!-- Footer -->
-    <div id="footer-placeholder"></div>
 
-    <script type="module" src="repo-analyzer.js"></script>
+
+      <!-- Results -->
+      <div id="resultsContainer" class="ra-results" aria-live="polite">
+        <div class="ra-score-wrapper">
+          <div class="ra-score-circle" id="scoreCircle">
+            <span class="ra-score-number" id="scoreDisplay">0</span>
+          </div>
+          <span class="ra-score-label" id="scoreLabel">Overall Health Score</span>
+        </div>
+
+        <!-- Category Scores -->
+        <div class="ra-category-scores">
+          <div class="ra-category-score" data-category="ci-cd">
+            <span class="ra-category-dot" style="--cat-color: var(--ra-cyan)"></span>
+            <span class="ra-category-name">CI/CD</span>
+            <span class="ra-category-value" id="ciCdScore">-</span>
+          </div>
+          <div class="ra-category-score" data-category="code-quality">
+            <span class="ra-category-dot" style="--cat-color: var(--ra-emerald)"></span>
+            <span class="ra-category-name">Code Quality</span>
+            <span class="ra-category-value" id="codeQualityScore">-</span>
+          </div>
+          <div class="ra-category-score" data-category="security">
+            <span class="ra-category-dot" style="--cat-color: var(--ra-warning)"></span>
+            <span class="ra-category-name">Security</span>
+            <span class="ra-category-value" id="securityScore">-</span>
+          </div>
+          <div class="ra-category-score" data-category="docs">
+            <span class="ra-category-dot" style="--cat-color: #a78bfa"></span>
+            <span class="ra-category-name">Documentation</span>
+            <span class="ra-category-value" id="docsScore">-</span>
+          </div>
+        </div>
+
+        <!-- Warnings Banner (shown when API errors occur, e.g. rate limiting) -->
+        <div id="warningsBanner" class="ra-warnings-banner" role="alert" style="display: none;">
+          <i class="fas fa-exclamation-triangle"></i>
+          <div id="warningsList"></div>
+        </div>
+
+        <div class="ra-results-grid">
+          <!-- CI/CD Card -->
+          <div class="ra-result-card">
+            <div class="ra-result-icon" id="depsIcon">
+              <i class="fas fa-box"></i>
+            </div>
+            <h4>Dependencies</h4>
+            <p id="depsText">Pending</p>
+          </div>
+          <div class="ra-result-card">
+            <div class="ra-result-icon" id="testsIcon">
+              <i class="fas fa-vial"></i>
+            </div>
+            <h4>Automated Tests</h4>
+            <p id="testsText">Pending</p>
+          </div>
+          <!-- Code Quality Card -->
+          <div class="ra-result-card">
+            <div class="ra-result-icon" id="linterIcon">
+              <i class="fas fa-code"></i>
+            </div>
+            <h4>Linter</h4>
+            <p id="linterText">Pending</p>
+          </div>
+          <div class="ra-result-card">
+            <div class="ra-result-icon" id="formatterIcon">
+              <i class="fas fa-paint-brush"></i>
+            </div>
+            <h4>Formatter</h4>
+            <p id="formatterText">Pending</p>
+          </div>
+          <!-- Security Card -->
+          <div class="ra-result-card">
+            <div class="ra-result-icon" id="sastIcon">
+              <i class="fas fa-shield-alt"></i>
+            </div>
+            <h4>SAST Scanning</h4>
+            <p id="sastText">Pending</p>
+          </div>
+          <div class="ra-result-card">
+            <div class="ra-result-icon" id="depScanIcon">
+              <i class="fas fa-search"></i>
+            </div>
+            <h4>Dep. Scanning</h4>
+            <p id="depScanText">Pending</p>
+          </div>
+          <!-- Documentation Card -->
+          <div class="ra-result-card">
+            <div class="ra-result-icon" id="readmeIcon">
+              <i class="fas fa-book"></i>
+            </div>
+            <h4>README</h4>
+            <p id="readmeText">Pending</p>
+          </div>
+          <div class="ra-result-card">
+            <div class="ra-result-icon" id="licenseIcon">
+              <i class="fas fa-file-alt"></i>
+            </div>
+            <h4>License</h4>
+            <p id="licenseText">Pending</p>
+          </div>
+        </div>
+
+        <div class="ra-recommendations-section">
+          <h3><i class="fas fa-lightbulb"></i> Recommendations</h3>
+          <ul class="ra-recommendations-list" id="recommendationsList"></ul>
+        </div>
+      </div>
+    </main>
+
+    <script src="repo-analyzer.js"></script>
     <script src="/auth.js"></script>
     <script src="/bootstrap-legacy.js"></script>
-
     <script src="/script.js"></script>
     <script type="module" src="/dist/legacy-bundle.mjs"></script>
     <script>
       loadPartial('navbar-placeholder', '/partials/navbar.html');
-      loadPartial('footer-placeholder', '/partials/footer.html');
     </script>
   </body>
 </html>

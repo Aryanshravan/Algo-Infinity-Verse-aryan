@@ -1,0 +1,219 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SSE Fan-out Backpressure Lab | Algo Infinity Verse</title>
+  <meta name="description" content="Simulate multi-client SSE fan-out, gauge backpressure and drop policies, detect Last-Event-ID replay gaps, and export an SSE reliability report." />
+  <link rel="stylesheet" href="/styles.css" />
+  <link rel="stylesheet" href="style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Poppins:wght@300;400;500;600;700&family=Fira+Code:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <script>
+    (function () {
+      try {
+        var storedTheme = localStorage.getItem('theme');
+        var prefersLight = window.matchMedia('(prefers-color-scheme: light)').matches;
+        var theme = storedTheme || (prefersLight ? 'light' : 'dark');
+        if (theme === 'light') {
+          document.documentElement.classList.add('light-mode');
+        } else {
+          document.documentElement.classList.remove('light-mode');
+        }
+      } catch (e) {}
+    })();
+  </script>
+</head>
+<body data-page="sse-fanout-backpressure-lab">
+  <a href="#sse-main" class="sse-skip-link">Skip to main content</a>
+  <button type="button" id="scrollTopBtn" class="scroll-top-btn" aria-label="Scroll to top">
+    <i class="fas fa-arrow-up" aria-hidden="true"></i>
+  </button>
+
+  <div id="navbar-placeholder"></div>
+
+  <header class="sse-hero">
+    <div class="sse-hero-badge">
+      <i class="fas fa-broadcast-tower" aria-hidden="true"></i>
+      Realtime Reliability Lab
+    </div>
+    <h1>
+      SSE Fan-out
+      <span class="sse-hero-accent">Backpressure Lab</span>
+    </h1>
+    <p>
+      Fan events to many clients, watch drop policies under backpressure, detect
+      Last-Event-ID replay gaps, and export reconnect + cursor guidance.
+    </p>
+    <div class="sse-hero-stats" aria-live="polite">
+      <div class="sse-stat">
+        <span class="sse-stat-val" id="sse-statClients">—</span>
+        <span class="sse-stat-label">Clients</span>
+      </div>
+      <div class="sse-stat">
+        <span class="sse-stat-val" id="sse-statPressure">—</span>
+        <span class="sse-stat-label">Backpressure</span>
+      </div>
+      <div class="sse-stat">
+        <span class="sse-stat-val" id="sse-statDropped">—</span>
+        <span class="sse-stat-label">Dropped</span>
+      </div>
+      <div class="sse-stat">
+        <span class="sse-stat-val" id="sse-statGap">—</span>
+        <span class="sse-stat-label">Replay gap</span>
+      </div>
+    </div>
+  </header>
+
+  <main id="sse-main" class="sse-main">
+    <div class="container">
+      <div class="sse-workspace">
+        <section class="sse-panel" aria-labelledby="sse-config-title">
+          <div class="sse-panel-header">
+            <div class="sse-panel-title">
+              <i class="fas fa-sliders sse-panel-icon" aria-hidden="true"></i>
+              <h2 id="sse-config-title">Multi-client fan-out simulator</h2>
+            </div>
+          </div>
+
+          <div class="sse-field-grid">
+            <div class="sse-field">
+              <label class="sse-label" for="sse-clients">Connected clients</label>
+              <input type="number" id="sse-clients" class="sse-input" min="1" max="500" value="25" />
+            </div>
+            <div class="sse-field">
+              <label class="sse-label" for="sse-rate">Event rate (evt/s)</label>
+              <input type="number" id="sse-rate" class="sse-input" min="1" max="1000" value="40" />
+            </div>
+            <div class="sse-field">
+              <label class="sse-label" for="sse-buf">Per-client buffer (events)</label>
+              <input type="number" id="sse-buf" class="sse-input" min="1" max="10000" value="64" />
+            </div>
+            <div class="sse-field">
+              <label class="sse-label" for="sse-policy">Drop policy</label>
+              <select id="sse-policy" class="sse-select">
+                <option value="drop-oldest">Drop oldest</option>
+                <option value="drop-newest" selected>Drop newest</option>
+                <option value="disconnect">Disconnect slow clients</option>
+                <option value="block">Block producer (no drop)</option>
+              </select>
+            </div>
+            <div class="sse-field">
+              <label class="sse-label" for="sse-retain">Server retain window (events)</label>
+              <input type="number" id="sse-retain" class="sse-input" min="0" max="100000" value="200" />
+            </div>
+            <div class="sse-field">
+              <label class="sse-label" for="sse-lastId">Client Last-Event-ID on reconnect</label>
+              <input type="number" id="sse-lastId" class="sse-input" min="0" max="1000000" value="150" />
+            </div>
+          </div>
+
+          <div class="sse-preset-grid" role="group" aria-label="Scenario presets">
+            <button type="button" class="sse-preset-btn" data-preset="stall" aria-pressed="false">
+              <i class="fas fa-pause" aria-hidden="true"></i>
+              <span>Stall</span>
+              <small>Slow consumers fill buffers</small>
+            </button>
+            <button type="button" class="sse-preset-btn" data-preset="burst" aria-pressed="false">
+              <i class="fas fa-bolt" aria-hidden="true"></i>
+              <span>Burst</span>
+              <small>Spike above drain rate</small>
+            </button>
+            <button type="button" class="sse-preset-btn" data-preset="disconnect" aria-pressed="false">
+              <i class="fas fa-plug-circle-xmark" aria-hidden="true"></i>
+              <span>Disconnect</span>
+              <small>Drop + Last-Event-ID gap</small>
+            </button>
+          </div>
+
+          <div class="sse-controls">
+            <button type="button" id="sse-runBtn" class="btn btn-primary">
+              <i class="fas fa-play" aria-hidden="true"></i> Run fan-out
+            </button>
+            <button type="button" id="sse-clearBtn" class="btn btn-secondary">
+              <i class="fas fa-eraser" aria-hidden="true"></i> Clear preset
+            </button>
+            <button type="button" id="sse-exportBtn" class="btn btn-outline" disabled>
+              <i class="fas fa-download" aria-hidden="true"></i> Export reliability report
+            </button>
+          </div>
+          <p class="sse-status" id="sse-status" role="status" aria-live="polite">Idle — configure clients and run.</p>
+        </section>
+
+        <section class="sse-panel" aria-labelledby="sse-gauge-title">
+          <div class="sse-panel-header">
+            <div class="sse-panel-title">
+              <i class="fas fa-tachometer-alt sse-panel-icon" aria-hidden="true"></i>
+              <h2 id="sse-gauge-title">Backpressure / drop-policy gauge</h2>
+            </div>
+            <span class="sse-live" id="sse-pressureLabel">0%</span>
+          </div>
+          <div class="sse-gauge-wrap">
+            <div
+              class="sse-gauge"
+              id="sse-gauge"
+              role="meter"
+              aria-valuemin="0"
+              aria-valuemax="100"
+              aria-valuenow="0"
+              aria-label="Average client buffer fill percent"
+            >
+              <div class="sse-gauge-fill" id="sse-gaugeFill" style="width: 0%"></div>
+            </div>
+            <div class="sse-gauge-meta">
+              <span>Empty</span>
+              <span>High water</span>
+              <span>Limit</span>
+            </div>
+          </div>
+          <div id="sse-policyOut" class="sse-policy-out">
+            <p class="sse-empty">Run the simulator to see drop-policy outcomes.</p>
+          </div>
+        </section>
+      </div>
+
+      <div class="sse-workspace">
+        <section class="sse-panel" aria-labelledby="sse-replay-title">
+          <div class="sse-panel-header">
+            <div class="sse-panel-title">
+              <i class="fas fa-clock-rotate-left sse-panel-icon" aria-hidden="true"></i>
+              <h2 id="sse-replay-title">Last-Event-ID replay gap detector</h2>
+            </div>
+          </div>
+          <div id="sse-replayOut" class="sse-replay" aria-live="polite">
+            <p class="sse-empty">Replay gap analysis appears after a run.</p>
+          </div>
+          <pre class="sse-log" id="sse-eventLog" aria-live="polite">Awaiting simulation…</pre>
+        </section>
+
+        <section class="sse-panel" aria-labelledby="sse-recs-title">
+          <div class="sse-panel-header">
+            <div class="sse-panel-title">
+              <i class="fas fa-lightbulb sse-panel-icon" aria-hidden="true"></i>
+              <h2 id="sse-recs-title">Safe reconnect + cursor recommendations</h2>
+            </div>
+          </div>
+          <ul id="sse-recs" class="sse-recs" aria-live="polite">
+            <li class="sse-empty-li">Recommendations appear after a simulation.</li>
+          </ul>
+        </section>
+      </div>
+    </div>
+  </main>
+
+  <div id="footer-placeholder"></div>
+
+  <script src="/auth.js"></script>
+  <script src="/bootstrap-legacy.js"></script>
+  <script src="/script.js"></script>
+  <script type="module" src="/dist/legacy-bundle.mjs"></script>
+  <script src="/theme.js"></script>
+  <script src="script.js"></script>
+  <script>
+    if (typeof loadPartial === 'function') {
+      loadPartial('navbar-placeholder', '/partials/navbar.html');
+      loadPartial('footer-placeholder', '/partials/footer.html');
+    }
+  </script>
+</body>
+</html>

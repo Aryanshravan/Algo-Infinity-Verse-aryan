@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>TCP Nagle & Delayed ACK Deadlock | Algo Infinity Verse</title>
+    <meta
+      name="description"
+      content="Simulate the deadlock between Nagle's Algorithm and Delayed ACK."
+    />
+
+    <link
+      href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Poppins:wght@300;400;500;600;700&family=Fira+Code:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+
+    <link rel="stylesheet" href="tcp-nagle-visualizer.css" />
+    <script src="/theme.js"></script>
+    <script src="/modules/lazyVisualizer.js"></script>
+    <link rel="stylesheet" href="/modules/quick-notes/quick-notes.css" />
+  </head>
+  <body class="tcp-body">
+    <nav class="navbar tcp-nav">
+      <div class="nav-logo">
+        <span class="logo-text">∞</span>
+        <span class="logo-title">Algo Infinity Verse</span>
+      </div>
+      <div class="engine-badge"><i class="fas fa-network-wired"></i> TCP Nagle Deadlock</div>
+    </nav>
+
+    <main class="tcp-workspace">
+      <header class="workspace-header">
+        <h1>Nagle's Algorithm vs Delayed ACK</h1>
+        <p class="subtitle">
+          Observe the infamous 40ms-200ms latency spike when the sender buffers small packets
+          (Nagle) and the receiver waits to piggyback ACKs (Delayed ACK).
+        </p>
+
+        <div class="control-panel">
+          <button id="btnSendChunk" class="btn btn-primary">
+            <i class="fas fa-paper-plane"></i> Send Small Chunk
+          </button>
+          <button id="btnToggleNagle" class="btn btn-secondary">
+            Nagle: <span id="nagleStatus" class="status-on">ON</span>
+          </button>
+          <button id="btnToggleDelayedAck" class="btn btn-secondary">
+            Delayed ACK: <span id="delayedAckStatus" class="status-on">ON</span>
+          </button>
+          <button id="btnReset" class="btn btn-danger"><i class="fas fa-redo"></i> Reset</button>
+        </div>
+      </header>
+
+      <div class="visualizer-content">
+        <section class="pipes-panel">
+          <div class="lane-container">
+            <div class="lane-header">
+              <h2>
+                <i class="fas fa-laptop"></i> Sender (Client)
+                <span class="badge badge-info" id="senderState">Idle</span>
+              </h2>
+              <div class="stats-box">
+                <span class="stat-label">Buffer:</span>
+                <span class="stat-value" id="senderBuffer">0</span> chunks
+                <span class="stat-label ml-3">UnACKed:</span>
+                <span class="stat-value" id="unackedCount">0</span>
+              </div>
+            </div>
+
+            <div class="network-area">
+              <div class="network-pipe" id="dataPipe">
+                <div class="pipe-label">Data Packets (&#8594;)</div>
+              </div>
+              <div class="network-pipe" id="ackPipe">
+                <div class="pipe-label">ACK Packets (&#8592;)</div>
+              </div>
+            </div>
+
+            <div class="lane-header mt-4">
+              <h2>
+                <i class="fas fa-server"></i> Receiver (Server)
+                <span class="badge badge-info" id="receiverState">Idle</span>
+              </h2>
+              <div class="stats-box">
+                <span class="stat-label">Delayed ACK Timer:</span>
+                <span class="stat-value" id="ackTimer">0</span> ms
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="graph-panel">
+          <div class="panel-header">
+            <h2><i class="fas fa-info-circle"></i> What's Happening?</h2>
+          </div>
+          <div class="explanation-box" id="algoExplanation">
+            <p>
+              <strong>Nagle's Algorithm:</strong> If there is unacknowledged data in flight, buffer
+              small chunks until an ACK is received (or buffer fills up).
+            </p>
+            <p>
+              <strong>Delayed ACK:</strong> When a packet is received, wait up to 200ms before
+              sending an ACK, hoping to piggyback it on a response.
+            </p>
+            <p class="deadlock-alert" id="deadlockAlert" style="display: none">
+              <i class="fas fa-exclamation-triangle"></i> <strong>Deadlock Detected:</strong> Sender
+              is waiting for an ACK to send the buffer. Receiver is waiting for more data to send
+              the ACK. They wait until the Delayed ACK timer expires!
+            </p>
+          </div>
+        </section>
+      </div>
+    </main>
+
+    <script src="tcp-nagle-visualizer.js"></script>
+    <script src="/modules/quick-notes/quick-notes.js"></script>
+  </body>
+</html>

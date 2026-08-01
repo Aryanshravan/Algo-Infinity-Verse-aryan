@@ -1,0 +1,232 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Antimatter Penning Trap | Algo Infinity Verse</title>
+    <link rel="stylesheet" href="/styles.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <!-- Monaco Editor -->
+    <script src="https://unpkg.com/monaco-editor@0.36.1/min/vs/loader.js"></script>
+    <style>
+      body { margin: 0; overflow: hidden; background: #000; font-family: 'Poppins', sans-serif; color: #fff; }
+      .app-container { display: flex; height: 100vh; }
+      
+      .sidebar { width: 450px; background: rgba(15, 23, 42, 0.95); border-right: 1px solid #06b6d4; display: flex; flex-direction: column; z-index: 10; }
+      .header { padding: 20px; border-bottom: 1px solid #334155; }
+      .header h2 { margin: 0; color: #06b6d4; font-family: 'Orbitron', sans-serif; font-size: 1.2rem; }
+      .header p { margin: 5px 0 0 0; font-size: 0.8rem; color: #94a3b8; }
+      
+      #editor-container { flex: 1; min-height: 300px; }
+      
+      .controls { padding: 20px; border-top: 1px solid #334155; background: rgba(0,0,0,0.5); }
+      .btn { background: linear-gradient(90deg, #0891b2, #0e7490); color: #fff; border: none; padding: 10px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; transition: 0.3s; }
+      .btn:hover { background: #06b6d4; transform: translateY(-2px); box-shadow: 0 0 15px rgba(6, 182, 212, 0.5); }
+      
+      .sim-container { flex: 1; position: relative; background: radial-gradient(circle at center, #082f49 0%, #000 100%); overflow: hidden; }
+      canvas { width: 100%; height: 100%; display: block; filter: contrast(1.2); }
+      
+      .hud { position: absolute; top: 20px; left: 20px; background: rgba(0,0,0,0.8); padding: 15px; border-radius: 8px; border: 1px solid #06b6d4; width: 280px; z-index: 10; pointer-events: none; }
+      .hud h3 { margin: 0 0 10px 0; color: #06b6d4; font-size: 1rem; font-family: 'Orbitron', sans-serif; }
+      .metric { display: flex; justify-content: space-between; font-size: 0.8rem; color: #cbd5e1; margin-bottom: 5px; }
+      .val { font-weight: bold; font-family: monospace; }
+      .val-pos { color: #facc15; }
+      .val-mag { color: #22d3ee; }
+      .val-alert { color: #ef4444; }
+    </style>
+  </head>
+  <body>
+    
+    <div class="app-container">
+      <div class="sidebar">
+        <div class="header">
+          <h2><i class="fas fa-magnet"></i> Penning Trap Stabilizer</h2>
+          <p>Contain volatile antihydrogen via magnetic fields</p>
+        </div>
+        
+        <div id="editor-container"></div>
+        
+        <div class="controls">
+          <button class="btn" onclick="startContainment()"><i class="fas fa-atom"></i> Inject Antimatter</button>
+        </div>
+      </div>
+      
+      <div class="sim-container">
+        <!-- Lab background grid -->
+        <div style="position: absolute; inset:0; background-image: linear-gradient(rgba(6,182,212,0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(6,182,212,0.05) 1px, transparent 1px); background-size: 50px 50px; pointer-events: none;"></div>
+        
+        <canvas id="trapCanvas" style="position: relative; z-index: 1;"></canvas>
+        
+        <div class="hud">
+          <h3>Containment Telemetry</h3>
+          <div class="metric"><span>Antimatter Offset:</span> <span class="val val-pos" id="posVal">0.00 nm</span></div>
+          <div class="metric"><span>Applied B-Field:</span> <span class="val val-mag" id="magVal">0.00 T</span></div>
+          <div class="metric" style="margin-top: 10px; border-top: 1px solid #334155; padding-top: 5px;">
+            <span>Facility Status:</span> <span class="val" id="statusVal" style="color:#94a3b8">STANDBY</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      let editor;
+      require.config({ paths: { 'vs': 'https://unpkg.com/monaco-editor@0.36.1/min/vs' }});
+      require(['vs/editor/editor.main'], function() {
+        editor = monaco.editor.create(document.getElementById('editor-container'), {
+          value: `// Penning Trap High-Frequency PID Controller
+// Antimatter naturally drifts outward due to quantum fluctuations.
+// You must dynamically adjust the opposing magnetic field (B-Field) to keep it perfectly centered (offset = 0).
+// If offset > 100nm, it hits the matter wall and annihilates.
+
+let integral = 0;
+let prevError = 0;
+
+function calculateMagneticField(offset) {
+    // offset: distance from absolute center (-100 to +100 nm)
+    // Return the required magnetic field strength (Tesla) to push it back.
+    
+    // Naive Controller (oscillates wildly and explodes)
+    let kp = 0.05; // Proportional gain
+    
+    // Try implementing full PID: P*error + I*integral + D*derivative
+    
+    return -offset * kp;
+}`,
+          language: 'javascript',
+          theme: 'vs-dark',
+          minimap: { enabled: false },
+          automaticLayout: true
+        });
+      });
+
+      const canvas = document.getElementById('trapCanvas');
+      const ctx = canvas.getContext('2d');
+      
+      let isSimulating = false;
+      let time = 0;
+      let particleX = 0; // offset from center
+      let particleV = 0; // velocity
+      let appliedField = 0;
+      
+      function resize() { canvas.width = canvas.clientWidth; canvas.height = canvas.clientHeight; }
+      window.addEventListener('resize', resize);
+      resize();
+
+      function animate() {
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+          
+          let cx = canvas.width / 2;
+          let cy = canvas.height / 2;
+
+          if (isSimulating) {
+              time += 0.016;
+              
+              // Quantum fluctuations add random drift (noise)
+              particleV += (Math.random() - 0.5) * 0.5;
+              
+              // Natural drift outward if off-center
+              particleV += particleX * 0.005;
+              
+              try {
+                  eval(editor.getValue());
+                  appliedField = calculateMagneticField(particleX);
+              } catch(e) {
+                  appliedField = 0;
+              }
+              
+              // Apply magnetic field force (Lorentz proxy)
+              particleV += appliedField * 0.1;
+              
+              // Update position
+              particleX += particleV;
+              
+              // UI Updates
+              document.getElementById('posVal').innerText = Math.abs(particleX).toFixed(2) + " nm";
+              document.getElementById('magVal').innerText = appliedField.toFixed(3) + " T";
+              
+              if (Math.abs(particleX) > 100) {
+                  // ANNIHILATION
+                  isSimulating = false;
+                  document.getElementById('statusVal').innerText = "CATASTROPHIC ANNIHILATION";
+                  document.getElementById('statusVal').style.color = "#ef4444";
+                  
+                  // Draw explosion
+                  let grad = ctx.createRadialGradient(cx, cy, 10, cx, cy, 500);
+                  grad.addColorStop(0, '#ffffff');
+                  grad.addColorStop(0.1, '#38bdf8');
+                  grad.addColorStop(1, 'transparent');
+                  
+                  ctx.fillStyle = grad;
+                  ctx.fillRect(0, 0, canvas.width, canvas.height);
+              } else if (Math.abs(particleX) < 1) {
+                  document.getElementById('statusVal').innerText = "CONTAINMENT STABLE";
+                  document.getElementById('statusVal').style.color = "#10b981";
+              } else {
+                  document.getElementById('statusVal').innerText = "ADJUSTING FIELD...";
+                  document.getElementById('statusVal').style.color = "#facc15";
+              }
+          }
+
+          if (isSimulating || document.getElementById('statusVal').innerText === "STANDBY") {
+              // Draw Trap Hardware
+              ctx.strokeStyle = '#334155';
+              ctx.lineWidth = 10;
+              
+              // Left electrode
+              ctx.beginPath();
+              ctx.moveTo(cx - 150, cy - 100);
+              ctx.lineTo(cx - 150, cy + 100);
+              ctx.stroke();
+              
+              // Right electrode
+              ctx.beginPath();
+              ctx.moveTo(cx + 150, cy - 100);
+              ctx.lineTo(cx + 150, cy + 100);
+              ctx.stroke();
+              
+              // Draw Magnetic Field Lines based on appliedField
+              ctx.strokeStyle = \`rgba(6, 182, 212, \${Math.min(Math.abs(appliedField)*0.5, 0.8)})\`;
+              ctx.lineWidth = 2;
+              for(let y = cy - 80; y <= cy + 80; y += 20) {
+                  ctx.beginPath();
+                  ctx.moveTo(cx - 150, y);
+                  // Curve based on field
+                  ctx.quadraticCurveTo(cx, y + appliedField*20, cx + 150, y);
+                  ctx.stroke();
+              }
+              
+              if(isSimulating) {
+                  // Draw Antimatter particle (cyan glow)
+                  let px = cx + (particleX * 1.5); // scale for visibility
+                  
+                  ctx.beginPath();
+                  ctx.arc(px, cy, 8, 0, Math.PI*2);
+                  ctx.fillStyle = '#fff';
+                  ctx.fill();
+                  
+                  ctx.shadowBlur = 20;
+                  ctx.shadowColor = '#06b6d4';
+                  ctx.beginPath();
+                  ctx.arc(px, cy, 12, 0, Math.PI*2);
+                  ctx.fillStyle = 'rgba(6, 182, 212, 0.5)';
+                  ctx.fill();
+                  ctx.shadowBlur = 0;
+              }
+          }
+
+          requestAnimationFrame(animate);
+      }
+      animate();
+
+      function startContainment() {
+          if(isSimulating) return;
+          isSimulating = true;
+          time = 0;
+          particleX = 0.1; // slight initial perturbation
+          particleV = 0;
+          appliedField = 0;
+      }
+    </script>
+  </body>
+</html>

@@ -1,0 +1,392 @@
+/* ===== HTTP/2 Request Smuggling Lab ===== */
+:root {
+  --h2smug-glass: rgba(255, 255, 255, 0.04);
+  --h2smug-border: rgba(255, 255, 255, 0.1);
+  --h2smug-muted: rgba(255, 255, 255, 0.62);
+  --h2smug-accent: #38bdf8;
+  --h2smug-accent-2: #a78bfa;
+  --h2smug-accent-dim: rgba(56, 189, 248, 0.14);
+  --h2smug-warn: #fbbf24;
+  --h2smug-danger: #f87171;
+  --h2smug-ok: #4ade80;
+  --h2smug-info: #60a5fa;
+  --h2smug-code-bg: rgba(0, 0, 0, 0.35);
+}
+
+html.light-mode {
+  --h2smug-glass: rgba(15, 23, 42, 0.04);
+  --h2smug-border: rgba(15, 23, 42, 0.12);
+  --h2smug-muted: rgba(15, 23, 42, 0.65);
+  --h2smug-accent-dim: rgba(14, 165, 233, 0.1);
+  --h2smug-code-bg: rgba(15, 23, 42, 0.06);
+}
+
+.h2smug-skip-link {
+  position: absolute;
+  left: 1rem;
+  top: -100px;
+  z-index: 10000;
+  padding: 0.6rem 1rem;
+  background: var(--h2smug-accent);
+  color: #0a0a14;
+  font-weight: 700;
+  border-radius: 8px;
+  text-decoration: none;
+}
+
+.h2smug-skip-link:focus {
+  top: 1rem;
+  outline: 3px solid #fff;
+  outline-offset: 2px;
+}
+
+.h2smug-hero {
+  position: relative;
+  overflow: hidden;
+  padding: 7.5rem 1.5rem 4rem;
+  text-align: center;
+  border-bottom: 1px solid var(--h2smug-border);
+  background:
+    radial-gradient(ellipse at top right, rgba(56, 189, 248, 0.18), transparent 55%),
+    radial-gradient(ellipse at bottom left, rgba(167, 139, 250, 0.12), transparent 50%);
+}
+
+.h2smug-hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1.1rem;
+  padding: 0.35rem 0.9rem;
+  border-radius: 999px;
+  border: 1px solid rgba(56, 189, 248, 0.45);
+  background: var(--h2smug-accent-dim);
+  color: var(--h2smug-accent);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.h2smug-hero h1 {
+  margin: 0 0 1rem;
+  font-family: 'Orbitron', sans-serif;
+  font-size: clamp(1.9rem, 5vw, 3rem);
+  font-weight: 900;
+  line-height: 1.15;
+}
+
+.h2smug-hero-accent {
+  display: inline-block;
+  background: linear-gradient(135deg, #38bdf8, #a78bfa);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.h2smug-hero p {
+  max-width: 740px;
+  margin: 0 auto 2rem;
+  color: var(--h2smug-muted);
+  font-size: 1.05rem;
+  line-height: 1.65;
+  font-family: 'Poppins', sans-serif;
+}
+
+.h2smug-hero-stats {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1rem;
+}
+
+.h2smug-stat {
+  min-width: 120px;
+  padding: 0.85rem 1.1rem;
+  border: 1px solid var(--h2smug-border);
+  border-radius: 14px;
+  background: var(--h2smug-glass);
+}
+
+.h2smug-stat-val {
+  display: block;
+  font-family: 'Orbitron', sans-serif;
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: var(--h2smug-accent);
+}
+
+.h2smug-stat-label {
+  font-size: 0.75rem;
+  color: var(--h2smug-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+#h2smug-statRisk { color: var(--h2smug-danger); }
+#h2smug-statAmbiguity { color: var(--h2smug-warn); }
+#h2smug-statFindings { color: var(--h2smug-accent-2); }
+#h2smug-statH2c { color: var(--h2smug-info); }
+
+.h2smug-main {
+  padding: 2rem 0 4rem;
+  font-family: 'Poppins', sans-serif;
+}
+
+.h2smug-workspace {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+@media (max-width: 900px) {
+  .h2smug-workspace {
+    grid-template-columns: 1fr;
+  }
+}
+
+.h2smug-panel {
+  padding: 1.4rem;
+  border: 1px solid var(--h2smug-border);
+  border-radius: 18px;
+  background: var(--h2smug-glass);
+  backdrop-filter: blur(12px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
+}
+
+.h2smug-panel-header {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1.2rem;
+  padding-bottom: 0.9rem;
+  border-bottom: 1px solid var(--h2smug-border);
+}
+
+.h2smug-panel-title {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.h2smug-panel-title h2 {
+  margin: 0;
+  font-size: 1.15rem;
+  font-weight: 700;
+}
+
+.h2smug-panel-icon {
+  color: var(--h2smug-accent);
+}
+
+.h2smug-inline-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--h2smug-muted);
+}
+
+.h2smug-label {
+  display: block;
+  margin-bottom: 0.45rem;
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+.h2smug-hint {
+  margin: 0.5rem 0 0;
+  font-size: 0.78rem;
+  color: var(--h2smug-muted);
+  line-height: 1.45;
+}
+
+.h2smug-subhead {
+  margin: 0.85rem 0 0.45rem;
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.h2smug-select,
+.h2smug-textarea {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--h2smug-border);
+  border-radius: 12px;
+  background: var(--h2smug-code-bg);
+  color: inherit;
+  font-family: 'Fira Code', ui-monospace, monospace;
+  font-size: 0.82rem;
+  line-height: 1.5;
+}
+
+.h2smug-textarea {
+  resize: vertical;
+  min-height: 160px;
+}
+
+.h2smug-select:focus,
+.h2smug-textarea:focus {
+  outline: 2px solid var(--h2smug-accent);
+  outline-offset: 2px;
+}
+
+.h2smug-field-row {
+  margin-bottom: 0.75rem;
+}
+
+.h2smug-fieldset {
+  margin: 0 0 1rem;
+  padding: 0.85rem 1rem;
+  border: 1px solid var(--h2smug-border);
+  border-radius: 12px;
+}
+
+.h2smug-fieldset legend {
+  padding: 0 0.35rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.h2smug-radio,
+.h2smug-check {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  margin: 0.35rem 0;
+  font-size: 0.85rem;
+  line-height: 1.4;
+  cursor: pointer;
+}
+
+.h2smug-toggles {
+  margin-bottom: 0.75rem;
+}
+
+.h2smug-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  margin-top: 1rem;
+}
+
+.h2smug-status,
+.h2smug-status-live {
+  margin-top: 0.75rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--h2smug-accent);
+}
+
+.h2smug-status.is-error { color: var(--h2smug-danger); }
+.h2smug-status.is-ok { color: var(--h2smug-ok); }
+
+.h2smug-empty {
+  color: var(--h2smug-muted);
+  font-size: 0.9rem;
+  list-style: none;
+}
+
+.h2smug-split {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.85rem;
+  margin-top: 0.75rem;
+}
+
+@media (max-width: 640px) {
+  .h2smug-split {
+    grid-template-columns: 1fr;
+  }
+}
+
+.h2smug-mono {
+  margin: 0;
+  padding: 0.9rem 1rem;
+  border-radius: 12px;
+  border: 1px solid var(--h2smug-border);
+  background: var(--h2smug-code-bg);
+  font-family: 'Fira Code', ui-monospace, monospace;
+  font-size: 0.72rem;
+  line-height: 1.5;
+  overflow-x: auto;
+  white-space: pre-wrap;
+  word-break: break-word;
+  min-height: 100px;
+}
+
+.h2smug-verdict {
+  margin: 0.85rem 0 0;
+  padding: 0.75rem 1rem;
+  border-radius: 10px;
+  border-left: 4px solid var(--h2smug-warn);
+  background: rgba(251, 191, 36, 0.08);
+  font-size: 0.88rem;
+  line-height: 1.45;
+  min-height: 1.2em;
+}
+
+.h2smug-verdict.is-safe {
+  border-left-color: var(--h2smug-ok);
+  background: rgba(74, 222, 128, 0.08);
+}
+
+.h2smug-verdict.is-danger {
+  border-left-color: var(--h2smug-danger);
+  background: rgba(248, 113, 113, 0.1);
+}
+
+.h2smug-findings {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.h2smug-finding {
+  padding: 0.8rem 0.95rem;
+  border-radius: 12px;
+  border: 1px solid var(--h2smug-border);
+  border-left: 4px solid var(--h2smug-warn);
+  font-size: 0.85rem;
+  line-height: 1.45;
+}
+
+.h2smug-finding.sev-high { border-left-color: var(--h2smug-danger); }
+.h2smug-finding.sev-medium { border-left-color: var(--h2smug-warn); }
+.h2smug-finding.sev-low { border-left-color: var(--h2smug-info); }
+
+.h2smug-finding strong {
+  display: block;
+  margin-bottom: 0.25rem;
+}
+
+.h2smug-sev {
+  display: inline-block;
+  margin-right: 0.4rem;
+  padding: 0.1rem 0.45rem;
+  border-radius: 6px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.h2smug-checklist,
+.h2smug-tips {
+  margin: 0;
+  padding-left: 1.2rem;
+  font-size: 0.88rem;
+  line-height: 1.55;
+  color: var(--h2smug-muted);
+}
+
+.h2smug-checklist li,
+.h2smug-tips li {
+  margin-bottom: 0.45rem;
+}
+
+.h2smug-checklist .pass { color: var(--h2smug-ok); }
+.h2smug-checklist .fail { color: var(--h2smug-danger); }
+.h2smug-checklist .warn { color: var(--h2smug-warn); }

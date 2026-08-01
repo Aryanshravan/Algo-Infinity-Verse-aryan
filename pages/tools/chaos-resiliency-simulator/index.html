@@ -1,0 +1,202 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Chaos Resiliency Simulator | Algo Infinity Verse</title>
+  <meta name="description" content="Interactive chaos and disaster-recovery simulator: inject region outages, replication lag, split-brain, and DNS faults — then measure RTO, RPO, and resilience score." />
+  <link rel="stylesheet" href="/styles.css" />
+  <link rel="stylesheet" href="style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Poppins:wght@300;400;500;600;700&family=Fira+Code:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <script>
+    (function () {
+      try {
+        var storedTheme = localStorage.getItem('theme');
+        var prefersLight = window.matchMedia('(prefers-color-scheme: light)').matches;
+        var theme = storedTheme || (prefersLight ? 'light' : 'dark');
+        if (theme === 'light') {
+          document.documentElement.classList.add('light-mode');
+        } else {
+          document.documentElement.classList.remove('light-mode');
+        }
+      } catch (e) {}
+    })();
+  </script>
+</head>
+<body data-page="chaos-resiliency-simulator">
+  <a href="#chaos-main" class="chaos-skip-link">Skip to main content</a>
+  <button type="button" id="scrollTopBtn" class="scroll-top-btn" aria-label="Scroll to top">
+    <i class="fas fa-arrow-up" aria-hidden="true"></i>
+  </button>
+
+  <div id="navbar-placeholder"></div>
+
+  <header class="chaos-hero">
+    <div class="chaos-hero-badge">
+      <i class="fas fa-bolt" aria-hidden="true"></i>
+      Chaos Engineering Lab
+    </div>
+    <h1>
+      Chaos Resiliency
+      <span class="chaos-hero-accent">Simulator</span>
+    </h1>
+    <p>
+      Configure multi-region topology, inject faults, and measure RTO, RPO,
+      circuit-breaker policy outcomes, and a resilience score — then export an audit.
+    </p>
+    <div class="chaos-hero-stats" aria-live="polite">
+      <div class="chaos-stat">
+        <span class="chaos-stat-val" id="statRto">—</span>
+        <span class="chaos-stat-label">RTO</span>
+      </div>
+      <div class="chaos-stat">
+        <span class="chaos-stat-val" id="statRpo">—</span>
+        <span class="chaos-stat-label">RPO</span>
+      </div>
+      <div class="chaos-stat">
+        <span class="chaos-stat-val" id="statScore">—</span>
+        <span class="chaos-stat-label">Score</span>
+      </div>
+    </div>
+  </header>
+
+  <main id="chaos-main" class="chaos-main">
+    <div class="container">
+      <div class="chaos-workspace">
+        <!-- Config -->
+        <section class="chaos-panel" aria-labelledby="chaos-config-title">
+          <div class="chaos-panel-header">
+            <div class="chaos-panel-title">
+              <i class="fas fa-sliders chaos-panel-icon" aria-hidden="true"></i>
+              <h2 id="chaos-config-title">Architecture &amp; regions</h2>
+            </div>
+          </div>
+
+          <fieldset class="chaos-fieldset">
+            <legend class="chaos-label">Architecture mode</legend>
+            <div class="chaos-radio-row" role="radiogroup" aria-label="Architecture mode">
+              <label class="chaos-radio">
+                <input type="radio" name="archMode" value="active-active" checked />
+                Active-Active
+              </label>
+              <label class="chaos-radio">
+                <input type="radio" name="archMode" value="active-passive" />
+                Active-Passive
+              </label>
+            </div>
+            <p class="chaos-hint">Active-Active shares load; Active-Passive fails over to a standby region.</p>
+          </fieldset>
+
+          <div class="chaos-regions" id="regionsList" aria-label="Region configuration"></div>
+
+          <div class="chaos-region-actions">
+            <button type="button" id="addRegionBtn" class="btn btn-secondary" aria-label="Add region">
+              <i class="fas fa-plus" aria-hidden="true"></i> Add region
+            </button>
+            <button type="button" id="resetRegionsBtn" class="btn btn-outline" aria-label="Reset regions to defaults">
+              <i class="fas fa-rotate-left" aria-hidden="true"></i> Reset
+            </button>
+          </div>
+        </section>
+
+        <!-- Faults & simulate -->
+        <section class="chaos-panel" aria-labelledby="chaos-faults-title">
+          <div class="chaos-panel-header">
+            <div class="chaos-panel-title">
+              <i class="fas fa-virus chaos-panel-icon" aria-hidden="true"></i>
+              <h2 id="chaos-faults-title">Fault injection</h2>
+            </div>
+          </div>
+
+          <div class="chaos-fault-grid" role="group" aria-label="Fault injection options">
+            <button type="button" class="chaos-fault-btn" data-fault="outage" aria-pressed="false">
+              <i class="fas fa-server" aria-hidden="true"></i>
+              <span>Region Outage</span>
+            </button>
+            <button type="button" class="chaos-fault-btn" data-fault="replication" aria-pressed="false">
+              <i class="fas fa-database" aria-hidden="true"></i>
+              <span>DB Replication Lag</span>
+            </button>
+            <button type="button" class="chaos-fault-btn" data-fault="splitbrain" aria-pressed="false">
+              <i class="fas fa-code-branch" aria-hidden="true"></i>
+              <span>Split-Brain</span>
+            </button>
+            <button type="button" class="chaos-fault-btn" data-fault="dns" aria-pressed="false">
+              <i class="fas fa-globe" aria-hidden="true"></i>
+              <span>DNS Stale Records</span>
+            </button>
+          </div>
+          <p class="chaos-hint" id="faultHint">Select one or more faults, then run the simulation.</p>
+
+          <div class="chaos-controls">
+            <button type="button" id="simulateBtn" class="btn btn-primary">
+              <i class="fas fa-play" aria-hidden="true"></i> Simulate
+            </button>
+            <button type="button" id="clearFaultsBtn" class="btn btn-secondary">
+              <i class="fas fa-eraser" aria-hidden="true"></i> Clear faults
+            </button>
+            <button type="button" id="exportBtn" class="btn btn-outline" disabled>
+              <i class="fas fa-download" aria-hidden="true"></i> Export audit
+            </button>
+          </div>
+        </section>
+      </div>
+
+      <!-- Region status cards -->
+      <section class="chaos-panel chaos-status-section" aria-labelledby="chaos-status-title">
+        <div class="chaos-panel-header">
+          <div class="chaos-panel-title">
+            <i class="fas fa-map-location-dot chaos-panel-icon" aria-hidden="true"></i>
+            <h2 id="chaos-status-title">Region status</h2>
+          </div>
+          <span class="chaos-status-live" id="simStatus" role="status" aria-live="polite">Idle — configure and simulate</span>
+        </div>
+        <div class="chaos-status-grid" id="statusCards" aria-live="polite"></div>
+      </section>
+
+      <!-- Results -->
+      <div class="chaos-results-grid">
+        <section class="chaos-panel" aria-labelledby="chaos-policy-title">
+          <div class="chaos-panel-header">
+            <div class="chaos-panel-title">
+              <i class="fas fa-shield-halved chaos-panel-icon" aria-hidden="true"></i>
+              <h2 id="chaos-policy-title">Policy evaluation</h2>
+            </div>
+          </div>
+          <div id="policyResults" class="chaos-policy-list">
+            <p class="chaos-empty">Run a simulation to evaluate circuit breaker and failover policies.</p>
+          </div>
+        </section>
+
+        <section class="chaos-panel" aria-labelledby="chaos-recs-title">
+          <div class="chaos-panel-header">
+            <div class="chaos-panel-title">
+              <i class="fas fa-lightbulb chaos-panel-icon" aria-hidden="true"></i>
+              <h2 id="chaos-recs-title">Hardening recommendations</h2>
+            </div>
+          </div>
+          <ul id="recommendationsList" class="chaos-recs" aria-live="polite">
+            <li class="chaos-empty-li">Recommendations appear after simulation.</li>
+          </ul>
+        </section>
+      </div>
+    </div>
+  </main>
+
+  <div id="footer-placeholder"></div>
+
+  <script src="/auth.js"></script>
+  <script src="/bootstrap-legacy.js"></script>
+  <script src="/script.js"></script>
+  <script type="module" src="/dist/legacy-bundle.mjs"></script>
+  <script src="/theme.js"></script>
+  <script src="script.js"></script>
+  <script>
+    if (typeof loadPartial === 'function') {
+      loadPartial('navbar-placeholder', '/partials/navbar.html');
+      loadPartial('footer-placeholder', '/partials/footer.html');
+    }
+  </script>
+</body>
+</html>

@@ -27,7 +27,7 @@
           if (CLIPBOARD_SUPPORTED) {
             return navigator.clipboard.writeText(code)
           }
-          return new Promise(function (_, reject) {
+          return new Promise(function (resolve, reject) {
             try {
               var ta = document.createElement('textarea')
               ta.value = code
@@ -38,6 +38,7 @@
               ta.select()
               document.execCommand('copy')
               document.body.removeChild(ta)
+              resolve()
             } catch (err) {
               reject(err)
             }

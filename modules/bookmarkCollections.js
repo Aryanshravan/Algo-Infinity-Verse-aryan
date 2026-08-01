@@ -153,10 +153,10 @@ function getCollectionsForProblem(userProgress, problemId) {
 function getCollectionStats(userProgress, problems = []) {
   const state = ensureBookmarkCollectionsState(userProgress);
   if (!state) return { totalCollections: 0, largestCollection: null, mostPracticedCollection: null, problemsCompleted: 0, completionPercent: 0, recentlyUsedCollections: [], collections: [] };
-  const problemMap = new Map((problems || []).map(problem => [String(problem.id), problem]));
+  const completedIds = new Set((state.completedProblems || userProgress.completedProblems || []).map(String));
   const collections = (state.bookmarkCollections || []).map(collection => {
     const problemIds = Array.isArray(collection.problemIds) ? collection.problemIds : [];
-    const completed = problemIds.filter(id => problemMap.has(String(id))).length;
+    const completed = problemIds.filter(id => completedIds.has(String(id))).length;
     const total = problemIds.length;
     const percent = total ? Math.round((completed / total) * 100) : 0;
     return { ...collection, problemCount: total, completedCount: completed, completionPercent: percent };

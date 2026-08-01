@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Layout Thrashing Profiler | Algo Infinity Verse</title>
+  <meta name="description" content="Detect interleaved style/layout reads and writes in DOM snippets, score forced reflow risk, suggest batched rAF refactors, and export an audit report." />
+  <link rel="stylesheet" href="/styles.css" />
+  <link rel="stylesheet" href="style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Poppins:wght@300;400;500;600;700&family=Fira+Code:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <script>
+    (function () {
+      try {
+        var storedTheme = localStorage.getItem('theme');
+        var prefersLight = window.matchMedia('(prefers-color-scheme: light)').matches;
+        var theme = storedTheme || (prefersLight ? 'light' : 'dark');
+        if (theme === 'light') {
+          document.documentElement.classList.add('light-mode');
+        } else {
+          document.documentElement.classList.remove('light-mode');
+        }
+      } catch (e) {}
+    })();
+  </script>
+</head>
+<body data-page="layout-thrashing-profiler">
+  <a href="#thrash-main" class="thrash-skip-link">Skip to main content</a>
+  <button type="button" id="scrollTopBtn" class="scroll-top-btn" aria-label="Scroll to top">
+    <i class="fas fa-arrow-up" aria-hidden="true"></i>
+  </button>
+
+  <div id="navbar-placeholder"></div>
+
+  <header class="thrash-hero">
+    <div class="thrash-hero-badge">
+      <i class="fas fa-wave-square" aria-hidden="true"></i>
+      Performance Lab
+    </div>
+    <h1>
+      Layout Thrashing
+      <span class="thrash-hero-accent">Profiler</span>
+    </h1>
+    <p>
+      Paste DOM JavaScript, detect interleaved layout reads and style writes,
+      score forced-reflow risk, and get batched <code>requestAnimationFrame</code> refactor suggestions.
+    </p>
+    <div class="thrash-hero-stats" aria-live="polite">
+      <div class="thrash-stat">
+        <span class="thrash-stat-val" id="statRisk">—</span>
+        <span class="thrash-stat-label">Risk score</span>
+      </div>
+      <div class="thrash-stat">
+        <span class="thrash-stat-val" id="statThrash">—</span>
+        <span class="thrash-stat-label">Thrash pairs</span>
+      </div>
+      <div class="thrash-stat">
+        <span class="thrash-stat-val" id="statReads">—</span>
+        <span class="thrash-stat-label">Layout reads</span>
+      </div>
+      <div class="thrash-stat">
+        <span class="thrash-stat-val" id="statSeverity">—</span>
+        <span class="thrash-stat-label">Severity</span>
+      </div>
+    </div>
+  </header>
+
+  <main id="thrash-main" class="thrash-main">
+    <div class="container">
+      <div class="thrash-workspace">
+        <section class="thrash-panel" aria-labelledby="thrash-source-title">
+          <div class="thrash-panel-header">
+            <div class="thrash-panel-title">
+              <i class="fas fa-code thrash-panel-icon" aria-hidden="true"></i>
+              <h2 id="thrash-source-title">DOM snippet</h2>
+            </div>
+          </div>
+
+          <label class="thrash-label" for="codeInput">Paste JavaScript that touches the DOM</label>
+          <textarea
+            id="codeInput"
+            class="thrash-textarea"
+            rows="16"
+            spellcheck="false"
+            aria-describedby="codeHint"
+            placeholder="// e.g. loops that read offsetWidth then write style.width…"
+          ></textarea>
+          <p class="thrash-hint" id="codeHint">
+            Heuristic static scan for layout reads (<code>offsetWidth</code>, <code>getComputedStyle</code>, <code>clientHeight</code>…) interleaved with writes (<code>style.</code>, <code>classList</code>, <code>appendChild</code>).
+          </p>
+
+          <div class="thrash-controls">
+            <button type="button" id="loadDemoBtn" class="btn btn-secondary">
+              <i class="fas fa-flask" aria-hidden="true"></i> Load demo thrashing code
+            </button>
+            <button type="button" id="analyzeBtn" class="btn btn-primary">
+              <i class="fas fa-magnifying-glass" aria-hidden="true"></i> Analyze
+            </button>
+            <button type="button" id="clearBtn" class="btn btn-outline">
+              <i class="fas fa-eraser" aria-hidden="true"></i> Clear
+            </button>
+            <button type="button" id="exportMdBtn" class="btn btn-outline" disabled>
+              <i class="fas fa-file-lines" aria-hidden="true"></i> Export .md
+            </button>
+            <button type="button" id="exportTxtBtn" class="btn btn-outline" disabled>
+              <i class="fas fa-file-alt" aria-hidden="true"></i> Export .txt
+            </button>
+          </div>
+        </section>
+
+        <section class="thrash-panel" aria-labelledby="thrash-findings-title">
+          <div class="thrash-panel-header">
+            <div class="thrash-panel-title">
+              <i class="fas fa-triangle-exclamation thrash-panel-icon" aria-hidden="true"></i>
+              <h2 id="thrash-findings-title">Forced reflow findings</h2>
+            </div>
+            <span class="thrash-status-live" id="analysisStatus" role="status" aria-live="polite">Ready</span>
+          </div>
+          <div id="findingsList" class="thrash-findings" aria-live="polite">
+            <p class="thrash-empty">Load demo code or paste a snippet, then analyze.</p>
+          </div>
+        </section>
+      </div>
+
+      <div class="thrash-workspace">
+        <section class="thrash-panel" aria-labelledby="thrash-timeline-title">
+          <div class="thrash-panel-header">
+            <div class="thrash-panel-title">
+              <i class="fas fa-chart-bar thrash-panel-icon" aria-hidden="true"></i>
+              <h2 id="thrash-timeline-title">Invalidation timeline</h2>
+            </div>
+          </div>
+          <p class="thrash-hint">Heuristic order of read/write operations (not a real Performance timeline).</p>
+          <div id="timelineBars" class="thrash-timeline" aria-live="polite" role="list">
+            <p class="thrash-empty">Timeline appears after analysis.</p>
+          </div>
+          <ul id="timelineList" class="thrash-timeline-list" aria-live="polite"></ul>
+        </section>
+
+        <section class="thrash-panel" aria-labelledby="thrash-refactor-title">
+          <div class="thrash-panel-header">
+            <div class="thrash-panel-title">
+              <i class="fas fa-wand-magic-sparkles thrash-panel-icon" aria-hidden="true"></i>
+              <h2 id="thrash-refactor-title">Batched rAF refactor</h2>
+            </div>
+          </div>
+          <div class="thrash-refactor-grid">
+            <div>
+              <h3 class="thrash-subhead">Before (thrashing)</h3>
+              <pre class="thrash-mono-block" id="beforeOut" aria-live="polite">—</pre>
+            </div>
+            <div>
+              <h3 class="thrash-subhead">After (batched reads → writes)</h3>
+              <pre class="thrash-mono-block" id="afterOut" aria-live="polite">—</pre>
+            </div>
+          </div>
+        </section>
+      </div>
+    </div>
+  </main>
+
+  <div id="footer-placeholder"></div>
+
+  <script src="/auth.js"></script>
+  <script src="/bootstrap-legacy.js"></script>
+  <script src="/script.js"></script>
+  <script type="module" src="/dist/legacy-bundle.mjs"></script>
+  <script src="/theme.js"></script>
+  <script src="script.js"></script>
+  <script>
+    if (typeof loadPartial === 'function') {
+      loadPartial('navbar-placeholder', '/partials/navbar.html');
+      loadPartial('footer-placeholder', '/partials/footer.html');
+    }
+  </script>
+</body>
+</html>

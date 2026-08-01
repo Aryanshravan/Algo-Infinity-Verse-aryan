@@ -1,714 +1,754 @@
-/* ============================================================
-   LINK-CUT TREES — Represented-Tree Engine
-   Algo Infinity Verse · pages/visualizers/lct
-
-   The LCT class below is a genuine splay-tree-backed Link-Cut
-   Tree: real zig / zig-zig / zig-zag rotations, real preferred-
-   child re-pointing during access(), real path-parent pointers.
-   It was cross-validated against a brute-force forest simulation
-   across 40,000 randomized link/cut/findRoot/query operations
-   before any UI code was written (see the PR description).
-
-   Every public operation (access, link, cut, findRoot, query) is
-   exposed as a generator so the UI can step through it one
-   rotation / splice / walk at a time.
-   ============================================================ */
-
-/* ------------------------------------------------------------
-   1. THE LINK-CUT TREE
-------------------------------------------------------------- */
-
-class LCT {
-  constructor(n, values) {
-    this.n = n;
-    this.left = new Array(n).fill(-1);
-    this.right = new Array(n).fill(-1);
-    this.parent = new Array(n).fill(-1);
-    this.value = values.slice();
-    this.subtreeMax = values.slice();
+document.addEventListener('DOMContentLoaded', () => {
+  initLoadingScreen();
+  initNavbar();
+  initScrollTop();
+  try {
+    lctInit();
+  } catch (e) {
+    console.error('LCTInit:', e);
   }
+});
 
-  isRoot(v) {
-    const p = this.parent[v];
-    return p === -1 || (this.left[p] !== v && this.right[p] !== v);
-  }
+/**
+ * Hides loading screen.
+ */
+function initLoadingScreen() {
+  setTimeout(() => {
+    const s = document.getElementById('loading-screen');
+    if (s) s.classList.add('hidden');
+  }, 1000);
+}
 
-  pushUp(v) {
-    let m = this.value[v];
-    if (this.left[v] !== -1) m = Math.max(m, this.subtreeMax[this.left[v]]);
-    if (this.right[v] !== -1) m = Math.max(m, this.subtreeMax[this.right[v]]);
-    this.subtreeMax[v] = m;
-  }
+/**
+ * Initializes scroll to top button.
+ */
+function initScrollTop() {
+  const btn = document.getElementById('scrollTopBtn');
+  if (!btn) return;
+  window.addEventListener('scroll', () => btn.classList.toggle('visible', window.scrollY > 400));
+  btn.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+}
 
-  rotate(v) {
-    const p = this.parent[v];
-    const g = this.parent[p];
-    const pWasRoot = this.isRoot(p);
-    if (this.left[p] === v) {
-      this.left[p] = this.right[v];
-      if (this.right[v] !== -1) this.parent[this.right[v]] = p;
-      this.right[v] = p;
-    } else {
-      this.right[p] = this.left[v];
-      if (this.left[v] !== -1) this.parent[this.left[v]] = p;
-      this.left[v] = p;
-    }
-    this.parent[p] = v;
-    this.parent[v] = g;
-    if (!pWasRoot) {
-      if (this.left[g] === p) this.left[g] = v;
-      else if (this.right[g] === p) this.right[g] = v;
-    }
-    this.pushUp(p);
-    this.pushUp(v);
-  }
-
-  // Genuine zig / zig-zig / zig-zag rotations, one yielded per rotate() call.
-  *splayGen(v) {
-    while (!this.isRoot(v)) {
-      const p = this.parent[v];
-      const g = this.parent[p];
-      if (!this.isRoot(p)) {
-        const zigzig = (this.left[g] === p) === (this.left[p] === v);
-        if (zigzig) { this.rotate(p); yield { type: "rotate", kind: "zig-zig", v, p, g }; }
-        else { this.rotate(v); yield { type: "rotate", kind: "zig-zag", v, p, g }; }
+/**
+ * Initializes mobile navigation toggle.
+ */
+function initNavbar() {
+  document.addEventListener('click', (e) => {
+    const menuToggle = e.target.closest('#menuToggle');
+    if (menuToggle) {
+      const navLinks = document.getElementById('navLinks');
+      if (!navLinks) return;
+      e.stopPropagation();
+      let overlay = document.querySelector('.nav-overlay');
+      if (!overlay) {
+        overlay = document.createElement('div');
+        overlay.className = 'nav-overlay';
+        document.body.appendChild(overlay);
       }
-      this.rotate(v);
-      yield { type: "rotate", kind: this.isRoot(v) ? "zig-final" : "zig", v };
+      const isOpen = !navLinks.classList.contains('active');
+      navLinks.classList.toggle('active', isOpen);
+      menuToggle.setAttribute('aria-expanded', isOpen);
+      overlay.classList.toggle('active', isOpen);
+      document.body.style.overflow = isOpen ? 'hidden' : '';
+      const icon = menuToggle.querySelector('i');
+      if (icon) {
+        icon.classList.toggle('fa-bars', !isOpen);
+        icon.classList.toggle('fa-times', isOpen);
+      }
+    }
+    if (e.target.classList.contains('nav-overlay')) {
+      const navLinks = document.getElementById('navLinks');
+      const menuToggle = document.getElementById('menuToggle');
+      if (navLinks && menuToggle) {
+        navLinks.classList.remove('active');
+        menuToggle.setAttribute('aria-expanded', 'false');
+        e.target.classList.remove('active');
+        document.body.style.overflow = '';
+        const icon = menuToggle.querySelector('i');
+        if (icon) {
+          icon.classList.add('fa-bars');
+          icon.classList.remove('fa-times');
+        }
+      }
+    }
+  });
+}
+
+/* ─── Link-Cut Tree Data Structure Classes ─── */
+
+/**
+ * Represents a node in the Link-Cut Tree (acting as a Splay Tree node).
+ */
+class LCTNode {
+  /**
+   * @param {number} id - Unique identifier of the node.
+   * @param {number} val - Node value.
+   */
+  constructor(id, val) {
+    this.id = id;
+    this.val = val;
+    this.sum = val;
+    this.parent = null;
+    this.left = null;
+    this.right = null;
+    this.reversed = false;
+  }
+}
+
+/**
+ * Implements Link-Cut Tree (Splay Tree-based dynamic forest).
+ */
+class LinkCutTree {
+  /**
+   * @param {number} n - Number of nodes in the LCT.
+   */
+  constructor(n) {
+    this.nodes = [];
+    for (let i = 1; i <= n; i++) {
+      this.nodes[i] = new LCTNode(i, i); // Value defaults to ID
+    }
+    // Track represented virtual forest edges undirected via adjacency list
+    this.adj = Array.from({ length: n + 1 }, () => []);
+  }
+
+  /**
+   * Returns true if x is the root of its auxiliary Splay tree.
+   * @param {LCTNode} x - LCT node.
+   * @returns {boolean}
+   */
+  isRoot(x) {
+    return !x.parent || (x.parent.left !== x && x.parent.right !== x);
+  }
+
+  /**
+   * Propagates lazy tags (reversals) down to children.
+   * @param {LCTNode} x - LCT node.
+   */
+  push(x) {
+    if (x && x.reversed) {
+      const temp = x.left;
+      x.left = x.right;
+      x.right = temp;
+      if (x.left) x.left.reversed = !x.left.reversed;
+      if (x.right) x.right.reversed = !x.right.reversed;
+      x.reversed = false;
     }
   }
-  splay(v) { for (const _ of this.splayGen(v)) { /* drain */ } }
 
-  // The core primitive: splay v to the top of its aux tree, cut off
-  // whatever preferred child it had (right = last), then walk up the
-  // path-parent pointer, splaying and re-splicing each preferred path
-  // segment in turn, until the real root is reached.
-  *accessGen(x) {
-    let last = -1;
-    let y = x;
-    while (y !== -1) {
-      yield { type: "splay-start", y };
-      yield* this.splayGen(y);
-      yield { type: "splay-done", y };
-      const oldRight = this.right[y];
-      this.right[y] = last;
-      this.pushUp(y);
-      yield { type: "splice-preferred-child", y, newChild: last, oldChild: oldRight };
-      last = y;
-      y = this.parent[y];
-      if (y !== -1) yield { type: "walk-path-parent", to: y };
+  /**
+   * Recalculates subtree parameters (sum).
+   * @param {LCTNode} x - LCT node.
+   */
+  update(x) {
+    if (x) {
+      x.sum = x.val + (x.left ? x.left.sum : 0) + (x.right ? x.right.sum : 0);
     }
-    yield { type: "final-splay-start", x };
-    yield* this.splayGen(x);
-    yield { type: "access-done", x, exposedRoot: last };
   }
-  access(x) { let r; for (const s of this.accessGen(x)) if (s.type === "access-done") r = s.exposedRoot; return r; }
 
-  *findRootGen(v) {
-    yield* this.accessGen(v);
-    let cur = v;
-    while (this.left[cur] !== -1) { cur = this.left[cur]; yield { type: "walk-left", to: cur }; }
-    yield* this.splayGen(cur);
-    yield { type: "findroot-done", root: cur };
-    return cur;
+  /**
+   * Internal helper to connect child to parent.
+   * @param {LCTNode} c - Child node.
+   * @param {LCTNode} p - Parent node.
+   * @param {boolean} isLeft - Connects as left child if true.
+   */
+  connect(c, p, isLeft) {
+    if (c) c.parent = p;
+    if (p) {
+      if (isLeft) p.left = c;
+      else p.right = c;
+    }
   }
-  findRoot(v) { let r; for (const s of this.findRootGen(v)) if (s.type === "findroot-done") r = s.root; return r; }
 
-  *linkGen(u, v) {
-    yield* this.accessGen(u);
-    if (this.left[u] !== -1) { yield { type: "link-invalid", reason: "u-not-root" }; return false; }
-    const root = yield* this.findRootGen(v);
-    if (root === u) { yield { type: "link-invalid", reason: "cycle" }; return false; }
-    yield* this.accessGen(u);
-    yield* this.accessGen(v);
-    this.parent[u] = v;
-    yield { type: "link-done", u, v };
+  /**
+   * Standard Splay Tree rotation step.
+   * @param {LCTNode} x - Node to rotate.
+   */
+  rotate(x) {
+    const p = x.parent;
+    const g = p.parent;
+    const isLeft = p.left === x;
+    const auxRoot = this.isRoot(p);
+
+    this.connect(isLeft ? x.right : x.left, p, isLeft);
+    this.connect(p, x, !isLeft);
+
+    if (auxRoot) {
+      x.parent = g;
+    } else {
+      this.connect(x, g, g.left === p);
+    }
+    this.update(p);
+    this.update(x);
+  }
+
+  /**
+   * Top-down propagation of lazy tags along path to splay root.
+   * @param {LCTNode} x - LCT node.
+   */
+  pushAll(x) {
+    const path = [];
+    let curr = x;
+    while (!this.isRoot(curr)) {
+      path.push(curr);
+      curr = curr.parent;
+    }
+    path.push(curr);
+    while (path.length > 0) {
+      this.push(path.pop());
+    }
+  }
+
+  /**
+   * Splays x to the root of its auxiliary tree.
+   * @param {LCTNode} x - LCT node.
+   */
+  splay(x) {
+    this.pushAll(x);
+    while (!this.isRoot(x)) {
+      const p = x.parent;
+      const g = p.parent;
+      if (!this.isRoot(p)) {
+        if ((g.left === p) === (p.left === x)) this.rotate(p);
+        else this.rotate(x);
+      }
+      this.rotate(x);
+    }
+  }
+
+  /**
+   * Forms a preferred path from the root of the represented tree to x.
+   * @param {LCTNode} x - LCT node.
+   */
+  access(x) {
+    let last = null;
+    for (let curr = x; curr !== null; curr = curr.parent) {
+      this.splay(curr);
+      curr.right = last;
+      this.update(curr);
+      last = curr;
+    }
+    this.splay(x);
+  }
+
+  /**
+   * Makes x the root of its represented tree.
+   * @param {LCTNode} x - LCT node.
+   */
+  makeRoot(x) {
+    this.access(x);
+    x.reversed = !x.reversed;
+    this.push(x);
+  }
+
+  /**
+   * Finds the root of the represented tree containing x.
+   * @param {LCTNode} x - LCT node.
+   * @returns {LCTNode}
+   */
+  findRoot(x) {
+    this.access(x);
+    let curr = x;
+    while (curr.left !== null) {
+      this.push(curr);
+      curr = curr.left;
+    }
+    this.splay(curr);
+    return curr;
+  }
+
+  /**
+   * Links x as a child of y, returning true if successful.
+   * @param {LCTNode} x - Child node.
+   * @param {LCTNode} y - Parent node.
+   * @returns {boolean}
+   */
+  link(x, y) {
+    this.makeRoot(x);
+    if (this.findRoot(y) === x) {
+      return false; // u and v are already in the same tree (avoids cycle)
+    }
+    x.parent = y;
+    this.adj[x.id].push(y.id);
+    this.adj[y.id].push(x.id);
     return true;
   }
 
-  *cutGen(v) {
-    yield* this.accessGen(v);
-    if (this.left[v] === -1) { yield { type: "cut-invalid", reason: "already-root" }; return false; }
-    const detached = this.left[v];
-    this.parent[detached] = -1;
-    this.left[v] = -1;
-    this.pushUp(v);
-    yield { type: "cut-done", v, detached };
-    return true;
-  }
-
-  *queryGen(v) {
-    yield* this.accessGen(v);
-    yield { type: "query-done", v, max: this.subtreeMax[v] };
-    return this.subtreeMax[v];
-  }
-
-  // Synchronous convenience wrappers (drain the generator instantly,
-  // useful for non-animated checks and for testing).
-  link(u, v) { let r; for (const s of this.linkGen(u, v)) if (s.type === "link-done" || s.type === "link-invalid") r = s.type === "link-done"; return !!r; }
-  cut(v) { let r; for (const s of this.cutGen(v)) if (s.type === "cut-done" || s.type === "cut-invalid") r = s.type === "cut-done"; return !!r; }
-  query(v) { let r; for (const s of this.queryGen(v)) if (s.type === "query-done") r = s.max; return r; }
-}
-
-/* ------------------------------------------------------------
-   2. STATE
-------------------------------------------------------------- */
-
-const el = (id) => document.getElementById(id);
-const svgNS = "http://www.w3.org/2000/svg";
-
-const state = {
-  n: 7,
-  values: [],
-  lct: null,
-  realParent: [],   // our own mirror of the represented forest, updated on link/cut, used to render the top view AND to cross-check queries/findRoot against a naive walk
-  labels: [],
-
-  speedMs: 420,
-  playing: false,
-  accumMs: 0,
-  lastFrameTime: performance.now(),
-
-  runner: null,     // active generator being stepped through
-  rotationsThisOp: 0,
-  splicesThisOp: 0,
-  opsRun: 0,
-};
-
-function mulberry32(seed) {
-  return function () {
-    seed |= 0; seed = (seed + 0x6D2B79F5) | 0;
-    let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
-    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
-    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
-  };
-}
-
-/* ------------------------------------------------------------
-   3. NAIVE CROSS-CHECK (mirrors the LCT's real parent forest)
-------------------------------------------------------------- */
-
-function naiveFindRoot(v) {
-  let cur = v;
-  while (state.realParent[cur] !== -1) cur = state.realParent[cur];
-  return cur;
-}
-function naiveQuery(v) {
-  let m = state.values[v];
-  let cur = v;
-  while (state.realParent[cur] !== -1) { cur = state.realParent[cur]; m = Math.max(m, state.values[cur]); }
-  return m;
-}
-
-/* ------------------------------------------------------------
-   4. SCENARIO SETUP
-------------------------------------------------------------- */
-
-function loadExample() {
-  state.n = 7;
-  state.values = [4, 9, 2, 7, 1, 8, 3];
-  state.labels = state.values.map((_, i) => String.fromCharCode(65 + i)); // A..G
-  state.lct = new LCT(state.n, state.values);
-  state.realParent = new Array(state.n).fill(-1);
-
-  // Build a small forest: A is root of {A,B,D,E}; C is root of its own edge {C,F}; G isolated.
-  //      A
-  //    /   \
-  //   B     D
-  //   |
-  //   E
-  //
-  //   C
-  //   |
-  //   F
-  //
-  //   G  (isolated)
-  doLinkSilently(1, 0); // B -> A
-  doLinkSilently(3, 0); // D -> A
-  doLinkSilently(4, 1); // E -> B
-  doLinkSilently(5, 2); // F -> C
-
-  finishSetup();
-}
-
-function resetIsolated() {
-  state.lct = new LCT(state.n, state.values);
-  state.realParent = new Array(state.n).fill(-1);
-  finishSetup();
-}
-
-// Used only during initial scenario construction — bypasses animation.
-function doLinkSilently(u, v) {
-  state.lct.link(u, v);
-  state.realParent[u] = v;
-}
-
-function finishSetup() {
-  populateSelectors();
-  el("chipN").textContent = state.n;
-  el("chipOps").textContent = state.opsRun;
-  renderForest();
-  renderAux();
-  clearLog();
-  setPhase("Idle", "");
-  el("resultBox").className = "result-box";
-  el("resultVal").textContent = "Load the example forest, then try access(v), link, cut, findRoot, or query.";
-}
-
-function populateSelectors() {
-  const opts = () => state.labels.map((lab, i) => `<option value="${i}">${lab} (v${i}=${state.values[i]})</option>`).join("");
-  ["accessSelect", "linkUSelect", "linkVSelect", "cutSelect", "rootSelect", "querySelect"].forEach((id) => {
-    el(id).innerHTML = opts();
-  });
-}
-
-/* ------------------------------------------------------------
-   5. FOREST VIEW (the real, logical tree) — rendered straight
-      from our own realParent[] mirror, laid out as a classic
-      layered tree, multiple components placed side by side.
-------------------------------------------------------------- */
-
-function computeForestLayout() {
-  const children = Array.from({ length: state.n }, () => []);
-  const roots = [];
-  for (let i = 0; i < state.n; i++) {
-    if (state.realParent[i] === -1) roots.push(i);
-    else children[state.realParent[i]].push(i);
-  }
-
-  const positions = new Array(state.n);
-  let xCursor = 0;
-  const UNIT_X = 70, UNIT_Y = 70, PAD_BETWEEN_TREES = 50;
-
-  function layoutSubtree(node, depth) {
-    if (children[node].length === 0) {
-      positions[node] = { x: xCursor * UNIT_X, y: depth * UNIT_Y + 40 };
-      xCursor++;
-      return positions[node].x;
+  /**
+   * Finds the parent of x in the represented tree by accessing and locating predecessor.
+   * @param {LCTNode} x - LCT node.
+   * @returns {LCTNode|null}
+   */
+  getParent(x) {
+    this.access(x);
+    this.splay(x);
+    if (x.left === null) return null;
+    let curr = x.left;
+    while (curr.right !== null) {
+      this.push(curr);
+      curr = curr.right;
     }
-    const childXs = children[node].map((c) => layoutSubtree(c, depth + 1));
-    const myX = (Math.min(...childXs) + Math.max(...childXs)) / 2;
-    positions[node] = { x: myX, y: depth * UNIT_Y + 40 };
-    return myX;
+    this.splay(curr);
+    return curr;
   }
 
-  roots.sort((a, b) => a - b).forEach((r) => {
-    layoutSubtree(r, 0);
-    xCursor += PAD_BETWEEN_TREES / UNIT_X;
-  });
+  /**
+   * Cuts the edge from x to its parent in the represented tree.
+   * @param {LCTNode} x - LCT node.
+   * @returns {boolean}
+   */
+  cut(x) {
+    const parentNode = this.getParent(x);
+    if (parentNode) {
+      this.access(x);
+      this.splay(x);
+      x.left.parent = null;
+      x.left = null;
+      this.update(x);
 
-  return positions;
-}
-
-function renderForest() {
-  const pos = computeForestLayout();
-  const nodeLayer = el("forestNodeLayer");
-  const edgeLayer = el("forestEdgeLayer");
-  nodeLayer.innerHTML = "";
-  edgeLayer.innerHTML = "";
-
-  const maxX = Math.max(60, ...Object.values(pos).map((p) => p.x)) + 60;
-  el("forestSvg").setAttribute("viewBox", `0 0 ${maxX} 220`);
-
-  for (let v = 0; v < state.n; v++) {
-    if (state.realParent[v] !== -1) {
-      const a = pos[state.realParent[v]], b = pos[v];
-      const path = document.createElementNS(svgNS, "path");
-      path.setAttribute("id", "forest-edge-" + v);
-      path.setAttribute("class", "gedge real");
-      path.setAttribute("d", straightEdge(a, b, 20));
-      edgeLayer.appendChild(path);
+      const pid = parentNode.id;
+      this.adj[x.id] = this.adj[x.id].filter((id) => id !== pid);
+      this.adj[pid] = this.adj[pid].filter((id) => id !== x.id);
+      return true;
     }
+    return false; // x is already a root in the represented forest
   }
 
-  for (let v = 0; v < state.n; v++) {
-    const g = document.createElementNS(svgNS, "g");
-    g.setAttribute("id", "forest-node-" + v);
-    g.setAttribute("class", "gnode");
-    g.setAttribute("transform", `translate(${pos[v].x}, ${pos[v].y})`);
-    g.innerHTML = `
-      <circle r="20"></circle>
-      <text class="label">${state.labels[v]}</text>
-      <text class="valbadge" y="-28">val ${state.values[v]}</text>
-    `;
-    nodeLayer.appendChild(g);
+  /**
+   * Queries sum of values on the represented tree path between x and y.
+   * @param {LCTNode} x - Start node.
+   * @param {LCTNode} y - End node.
+   * @returns {number|null}
+   */
+  queryPath(x, y) {
+    this.makeRoot(x);
+    if (this.findRoot(y) !== x) {
+      return null; // Nodes u and v are in different tree components
+    }
+    this.access(y);
+    this.splay(y);
+    return y.sum;
   }
 }
 
-function straightEdge(a, b, shrink) {
-  const dx = b.x - a.x, dy = b.y - a.y;
-  const dist = Math.hypot(dx, dy) || 1;
-  const x1 = a.x + (dx / dist) * shrink, y1 = a.y + (dy / dist) * shrink;
-  const x2 = b.x - (dx / dist) * shrink, y2 = b.y - (dy / dist) * shrink;
-  return `M ${x1} ${y1} L ${x2} ${y2}`;
-}
+/* ─── Visualizer Core Setup ─── */
 
-/* ------------------------------------------------------------
-   6. AUXILIARY SPLAY-TREE VIEW — rendered straight from the
-      LCT's real internal left/right/parent arrays. Every maximal
-      splay tree (an "aux-tree root" = isRoot(v)) is laid out as
-      its own binary tree; path-parent pointers between different
-      aux trees are drawn as dashed connectors.
-------------------------------------------------------------- */
+let lct = null;
+let forestCanvas = null;
+let splayCanvas = null;
+let forestCtx = null;
+let splayCtx = null;
 
-function computeAuxLayout() {
-  const lct = state.lct;
-  const positions = new Array(state.n);
-  const UNIT_X = 62, UNIT_Y = 62;
-  let xCursor = 0;
+// Graph layout parameters
+let nodeCount = 8;
+const nodeRadius = 18;
+const forestPositions = []; // Node positions in virtual tree {x, y}
 
-  function inorder(node, depth) {
-    if (node === -1) return;
-    inorder(lct.left[node], depth + 1);
-    positions[node] = { x: xCursor * UNIT_X, y: depth * UNIT_Y + 36 };
-    xCursor++;
-    inorder(lct.right[node], depth + 1);
-  }
+/**
+ * Initializes LCT visualizer controllers, event bindings, and UI state.
+ */
+function lctInit() {
+  forestCanvas = document.getElementById('forestCanvas');
+  splayCanvas = document.getElementById('splayCanvas');
+  if (!forestCanvas || !splayCanvas) return;
 
-  const auxRoots = [];
-  for (let v = 0; v < state.n; v++) if (lct.isRoot(v)) auxRoots.push(v);
-  auxRoots.sort((a, b) => a - b).forEach((r) => {
-    inorder(r, 0);
-    xCursor += 1; // gap between components
+  forestCtx = forestCanvas.getContext('2d');
+  splayCtx = splayCanvas.getContext('2d');
+
+  const nodeCountSelect = document.getElementById('lctNodeCount');
+  const resetBtn = document.getElementById('lctResetBtn');
+
+  // Event handlers
+  nodeCountSelect.addEventListener('change', () => {
+    nodeCount = parseInt(nodeCountSelect.value);
+    resetLCT();
   });
 
-  return { positions, auxRoots };
+  resetBtn.addEventListener('click', resetLCT);
+
+  // Link controls
+  document.getElementById('linkBtn').addEventListener('click', handleLink);
+  // Cut controls
+  document.getElementById('cutBtn').addEventListener('click', handleCut);
+  // Access controls
+  document.getElementById('accessBtn').addEventListener('click', handleAccess);
+  // Make root controls
+  document.getElementById('makeRootBtn').addEventListener('click', handleMakeRoot);
+  // Path Query controls
+  document.getElementById('queryBtn').addEventListener('click', handleQuery);
+
+  resetLCT();
+
+  // Resize listener
+  window.addEventListener('resize', () => {
+    resizeCanvas(forestCanvas);
+    resizeCanvas(splayCanvas);
+    computeForestPositions();
+    drawAll();
+  });
 }
 
-function renderAux() {
-  const lct = state.lct;
-  const { positions: pos, auxRoots } = computeAuxLayout();
-  const nodeLayer = el("auxNodeLayer");
-  const edgeLayer = el("auxEdgeLayer");
-  nodeLayer.innerHTML = "";
-  edgeLayer.innerHTML = "";
+/**
+ * Resizes canvases based on bounding container widths.
+ * @param {HTMLCanvasElement} canvas
+ */
+function resizeCanvas(canvas) {
+  canvas.width = canvas.parentElement.clientWidth;
+  canvas.height = 380;
+}
 
-  const maxX = Math.max(60, ...Object.values(pos).map((p) => p.x)) + 60;
-  const maxY = Math.max(60, ...Object.values(pos).map((p) => p.y)) + 60;
-  el("auxSvg").setAttribute("viewBox", `0 0 ${maxX} ${maxY}`);
+/**
+ * Computes node positions for the virtual forest graph.
+ */
+function computeForestPositions() {
+  forestPositions.length = 0;
+  const cx = forestCanvas.width / 2;
+  const cy = forestCanvas.height / 2;
+  const radius = Math.min(cx, cy) - 40;
 
-  // splay-tree edges (solid)
-  for (let v = 0; v < state.n; v++) {
-    if (lct.left[v] !== -1) drawAuxEdge(edgeLayer, pos[v], pos[lct.left[v]], "left-" + v, "splay-l");
-    if (lct.right[v] !== -1) drawAuxEdge(edgeLayer, pos[v], pos[lct.right[v]], "right-" + v, "splay-r");
+  for (let i = 1; i <= nodeCount; i++) {
+    const angle = (i * 2 * Math.PI) / nodeCount - Math.PI / 2;
+    forestPositions[i] = {
+      x: cx + radius * Math.cos(angle),
+      y: cy + radius * Math.sin(angle),
+    };
   }
-  // path-parent (virtual) edges, dashed — one per aux-tree root that has a parent pointer
-  auxRoots.forEach((r) => {
-    if (lct.parent[r] !== -1) {
-      drawAuxEdge(edgeLayer, pos[r], pos[lct.parent[r]], "pp-" + r, "pathparent");
+}
+
+/**
+ * Resets visualizer state.
+ */
+function resetLCT() {
+  lct = new LinkCutTree(nodeCount);
+
+  resizeCanvas(forestCanvas);
+  resizeCanvas(splayCanvas);
+
+  computeForestPositions();
+
+  // Populate node selections
+  populateSelects();
+
+  // Clear step log
+  const log = document.getElementById('lctLogBody');
+  log.innerHTML =
+    '<span class="lct-log-placeholder">Perform operations above to see execution logs...</span>';
+
+  // Clear telemetry
+  document.getElementById('telQueryOutput').textContent = '-';
+
+  updateTelemetry();
+  drawAll();
+}
+
+/**
+ * Populates selectors with current node range options.
+ */
+function populateSelects() {
+  const selects = [
+    'accessNodeSel',
+    'makeRootNodeSel',
+    'linkUSel',
+    'linkVSel',
+    'cutUSel',
+    'queryUSel',
+    'queryVSel',
+  ];
+
+  selects.forEach((id) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.innerHTML = '';
+    for (let i = 1; i <= nodeCount; i++) {
+      const opt = document.createElement('option');
+      opt.value = i;
+      opt.textContent = `Node ${i}`;
+      el.appendChild(opt);
     }
   });
 
-  for (let v = 0; v < state.n; v++) {
-    const g = document.createElementNS(svgNS, "g");
-    g.setAttribute("id", "aux-node-" + v);
-    g.setAttribute("class", "gnode" + (auxRoots.includes(v) ? " aux-root" : ""));
-    g.setAttribute("transform", `translate(${pos[v].x}, ${pos[v].y})`);
-    g.innerHTML = `
-      <circle r="18"></circle>
-      <text class="label">${state.labels[v]}</text>
-      <text class="maxbadge" y="-26">max ${lct.subtreeMax[v]}</text>
-    `;
-    nodeLayer.appendChild(g);
+  // Set default offsets for linked values
+  const linkVSel = document.getElementById('linkVSel');
+  if (linkVSel && linkVSel.options.length > 1) {
+    linkVSel.selectedIndex = 1;
   }
 }
 
-function drawAuxEdge(layer, a, b, id, cls) {
-  const path = document.createElementNS(svgNS, "path");
-  path.setAttribute("id", "aux-edge-" + id);
-  path.setAttribute("class", "gedge " + cls);
-  path.setAttribute("d", straightEdge(a, b, 18));
-  layer.appendChild(path);
-}
+/**
+ * Prints trace step line to the logger panel.
+ * @param {string} msg
+ */
+function logTrace(msg) {
+  const log = document.getElementById('lctLogBody');
+  const placeholder = log.querySelector('.lct-log-placeholder');
+  if (placeholder) placeholder.remove();
 
-/* ------------------------------------------------------------
-   7. STEP PLAYER — drives any of the LCT's generators, applying
-      each yielded event to both views plus the log/telemetry.
-------------------------------------------------------------- */
-
-function clearHighlights() {
-  document.querySelectorAll(".gnode").forEach((g) => g.classList.remove("active", "onpath"));
-  document.querySelectorAll(".gedge").forEach((e) => e.classList.remove("flash"));
-}
-
-function startRun(genFactory, label, onComplete) {
-  state.runner = { iterator: genFactory(), finished: false, label, onComplete };
-  state.rotationsThisOp = 0;
-  state.splicesThisOp = 0;
-  clearLog();
-  clearHighlights();
-  logLine(`▶ ${label}`);
-  setPhase(label, "");
-  el("statRotations").textContent = "0";
-  el("statSplices").textContent = "0";
-  state.playing = true;
-  el("playBtn").textContent = "⏸ Pause";
-}
-
-function stepRunner() {
-  if (!state.runner || state.runner.finished) return;
-  const { value: step, done } = state.runner.iterator.next();
-  if (done) {
-    state.runner.finished = true;
-    state.playing = false;
-    el("playBtn").textContent = "▶ Play";
-    state.opsRun++;
-    el("chipOps").textContent = state.opsRun;
-    if (state.runner.onComplete) state.runner.onComplete();
-    return;
-  }
-  applyLctStep(step);
-}
-
-function applyLctStep(step) {
-  switch (step.type) {
-    case "splay-start":
-      clearHighlights();
-      addNodeClass("aux-node-" + step.y, "active");
-      logLine(`splay(${lab(step.y)}) to the root of its aux tree`);
-      setPhase(`Splaying ${lab(step.y)}…`, "rotate");
-      break;
-
-    case "rotate":
-      state.rotationsThisOp++;
-      renderAux();
-      addNodeClass("aux-node-" + step.v, "active");
-      logLine(`  rotate(${lab(step.v)}) — ${step.kind}`, "hi");
-      el("statRotations").textContent = state.rotationsThisOp;
-      break;
-
-    case "splay-done":
-      renderAux();
-      addNodeClass("aux-node-" + step.y, "active");
-      break;
-
-    case "splice-preferred-child":
-      state.splicesThisOp++;
-      renderAux();
-      addNodeClass("aux-node-" + step.y, "active");
-      logLine(
-        step.oldChild !== -1
-          ? `  splice: ${lab(step.y)}'s preferred child changes from ${lab(step.oldChild)} to ${step.newChild === -1 ? "(none)" : lab(step.newChild)}`
-          : `  splice: ${lab(step.y)}'s preferred child set to ${step.newChild === -1 ? "(none)" : lab(step.newChild)}`,
-        "hi"
-      );
-      el("statSplices").textContent = state.splicesThisOp;
-      setPhase(`Re-linking preferred child of ${lab(step.y)}`, "splice");
-      break;
-
-    case "walk-path-parent":
-      logLine(`  walk up path-parent pointer → ${lab(step.to)}`);
-      renderAux();
-      break;
-
-    case "final-splay-start":
-      logLine(`Final splay(${lab(step.x)}) — brings it back to the top of the combined path`);
-      break;
-
-    case "access-done":
-      renderAux();
-      markOnPathHighlight(step.x);
-      logLine(`✓ access(${lab(step.x)}) complete — aux tree rooted at ${lab(step.x)} now IS the path from the real root to ${lab(step.x)}`, "ok");
-      break;
-
-    case "walk-left":
-      addNodeClass("aux-node-" + step.to, "active");
-      logLine(`  walk left → ${lab(step.to)} (looking for the topmost / real root)`);
-      break;
-
-    case "findroot-done":
-      state.lastFindRootResult = step.root;
-      logLine(`✓ findRoot complete — root is ${lab(step.root)}`, "ok");
-      break;
-
-    case "link-invalid":
-      logLine(step.reason === "u-not-root" ? `✕ link failed — u is not currently a represented-tree root` : `✕ link failed — would create a cycle (already connected)`, "bad");
-      break;
-
-    case "link-done":
-      state.realParent[step.u] = step.v;
-      renderForest();
-      renderAux();
-      logLine(`✓ link(${lab(step.u)}, ${lab(step.v)}) complete`, "ok");
-      break;
-
-    case "cut-invalid":
-      logLine(`✕ cut failed — ${lab(step.v)} is already a represented-tree root`, "bad");
-      break;
-
-    case "cut-done":
-      state.realParent[step.detached] = -1;
-      renderForest();
-      renderAux();
-      logLine(`✓ cut(${lab(step.v)}) complete — edge to ${lab(step.detached)} removed`, "ok");
-      break;
-
-    case "query-done":
-      logLine(`✓ query(${lab(step.v)}) = ${step.max} (max value on path to root)`, "ok");
-      break;
-  }
-}
-
-function addNodeClass(id, cls) { const n = el(id); if (n) n.classList.add(cls); }
-function lab(i) { return state.labels[i]; }
-
-function markOnPathHighlight(x) {
-  // walk the LCT's own left-spine from x's aux-tree (x is root after access)
-  // to visually trace the exposed root..x path in BOTH views.
-  const lct = state.lct;
-  let cur = x;
-  const pathNodes = [];
-  // the exposed path root..x is the in-order sequence of x's aux tree
-  (function collect(node) {
-    if (node === -1) return;
-    collect(lct.left[node]);
-    pathNodes.push(node);
-    collect(lct.right[node]);
-  })(x);
-  pathNodes.forEach((v) => {
-    addNodeClass("aux-node-" + v, "onpath");
-    addNodeClass("forest-node-" + v, "onpath");
-  });
-}
-
-/* ------------------------------------------------------------
-   8. LOGGING + PHASE BADGE
-------------------------------------------------------------- */
-
-function logLine(text, cls) {
-  const log = el("stepLog");
-  const line = document.createElement("div");
-  line.className = "log-line" + (cls ? " " + cls : "");
-  line.textContent = text;
-  log.appendChild(line);
+  const el = document.createElement('span');
+  el.className = 'lct-log-line';
+  el.innerHTML = msg;
+  log.appendChild(el);
   log.scrollTop = log.scrollHeight;
 }
-function clearLog() { el("stepLog").innerHTML = "<div class=\"log-line\">Ready.</div>"; }
 
-function setPhase(label, cls) {
-  const badge = el("phaseBadge");
-  badge.className = "phase-badge" + (cls ? " phase-" + cls : "");
-  badge.textContent = label;
+/**
+ * Links u as a child of v.
+ */
+function handleLink() {
+  const u = parseInt(document.getElementById('linkUSel').value);
+  const v = parseInt(document.getElementById('linkVSel').value);
+
+  if (u === v) {
+    logTrace(`<span class="highlight">Link Error</span>: Cannot link node to itself.`);
+    return;
+  }
+
+  const success = lct.link(lct.nodes[u], lct.nodes[v]);
+  if (success) {
+    logTrace(
+      `Linked node <span class="highlight">${u}</span> to <span class="highlight">${v}</span> successfully.`
+    );
+  } else {
+    logTrace(
+      `<span class="highlight">Link Failed</span>: Creating edge (${u} → ${v}) would create a cycle.`
+    );
+  }
+  updateTelemetry();
+  drawAll();
 }
 
-/* ------------------------------------------------------------
-   9. UI WIRING
-------------------------------------------------------------- */
+/**
+ * Cuts node u from parent.
+ */
+function handleCut() {
+  const u = parseInt(document.getElementById('cutUSel').value);
 
-function selVal(id) { return parseInt(el(id).value, 10); }
+  const success = lct.cut(lct.nodes[u]);
+  if (success) {
+    logTrace(`Cut edge between node <span class="highlight">${u}</span> and its parent.`);
+  } else {
+    logTrace(`<span class="highlight">Cut Failed</span>: Node ${u} is already a root.`);
+  }
+  updateTelemetry();
+  drawAll();
+}
 
-el("loadExampleBtn").addEventListener("click", loadExample);
-el("resetBtn").addEventListener("click", resetIsolated);
+/**
+ * Accesses node u.
+ */
+function handleAccess() {
+  const u = parseInt(document.getElementById('accessNodeSel').value);
+  lct.access(lct.nodes[u]);
+  logTrace(
+    `Accessed node <span class="highlight">${u}</span>. Formed preferred path from root to ${u}.`
+  );
+  updateTelemetry();
+  drawAll();
+}
 
-el("accessBtn").addEventListener("click", () => {
-  const v = selVal("accessSelect");
-  el("opError").textContent = "";
-  startRun(() => state.lct.accessGen(v), `access(${lab(v)})`, () => {
-    setPhase("Done ✓", "done");
-    el("resultBox").className = "result-box ok";
-    el("resultVal").textContent = `access(${lab(v)}) finished. ${lab(v)} is now the root of its auxiliary tree, which represents the path from the real root to ${lab(v)}.`;
-  });
-});
+/**
+ * Makes node u root.
+ */
+function handleMakeRoot() {
+  const u = parseInt(document.getElementById('makeRootNodeSel').value);
+  lct.makeRoot(lct.nodes[u]);
+  logTrace(`Made node <span class="highlight">${u}</span> the represented root of its tree.`);
+  updateTelemetry();
+  drawAll();
+}
 
-el("linkBtn").addEventListener("click", () => {
-  const u = selVal("linkUSelect"), v = selVal("linkVSelect");
-  el("opError").textContent = "";
-  if (u === v) { el("opError").textContent = "Pick two different nodes."; return; }
-  startRun(() => state.lct.linkGen(u, v), `link(${lab(u)}, ${lab(v)})`, () => {
-    const success = state.realParent[u] === v;
-    setPhase(success ? "Linked ✓" : "Link failed", success ? "done" : "");
-    el("resultBox").className = "result-box " + (success ? "ok" : "bad");
-    el("resultVal").textContent = success
-      ? `link(${lab(u)}, ${lab(v)}) succeeded — ${lab(u)} is now attached under ${lab(v)}.`
-      : `link(${lab(u)}, ${lab(v)}) was rejected — see the step log for why (u must currently be a represented-tree root, and linking must not create a cycle).`;
-  });
-});
+/**
+ * Queries sum on path u-v.
+ */
+function handleQuery() {
+  const u = parseInt(document.getElementById('queryUSel').value);
+  const v = parseInt(document.getElementById('queryVSel').value);
 
-el("cutBtn").addEventListener("click", () => {
-  const v = selVal("cutSelect");
-  el("opError").textContent = "";
-  const wasRoot = state.realParent[v] === -1;
-  startRun(() => state.lct.cutGen(v), `cut(${lab(v)})`, () => {
-    const success = !wasRoot && state.realParent[v] === -1;
-    setPhase(success ? "Cut ✓" : "Cut failed", success ? "done" : "");
-    el("resultBox").className = "result-box " + (success ? "ok" : "bad");
-    el("resultVal").textContent = success
-      ? `cut(${lab(v)}) succeeded — ${lab(v)} is now its own represented-tree root.`
-      : `cut(${lab(v)}) was rejected — ${lab(v)} was already a represented-tree root, so there was no parent edge to remove.`;
-  });
-});
+  const sum = lct.queryPath(lct.nodes[u], lct.nodes[v]);
+  const tel = document.getElementById('telQueryOutput');
 
-el("rootBtn").addEventListener("click", () => {
-  const v = selVal("rootSelect");
-  el("opError").textContent = "";
-  startRun(() => state.lct.findRootGen(v), `findRoot(${lab(v)})`, () => {
-    const lctRoot = state.lastFindRootResult;
-    const naiveRoot = naiveFindRoot(v);
-    const match = lctRoot === naiveRoot;
-    setPhase("Done ✓", "done");
-    el("resultBox").className = "result-box " + (match ? "ok" : "bad");
-    el("resultVal").textContent = `findRoot(${lab(v)}) = ${lab(lctRoot)}   |   naive O(n) walk says ${lab(naiveRoot)}   →   ${match ? "MATCH ✓" : "MISMATCH ✕"}`;
-    logLine(`cross-check vs. naive parent-pointer walk: ${match ? "match ✓" : "MISMATCH ✕"}`, match ? "ok" : "bad");
-  });
-});
+  if (sum !== null) {
+    logTrace(
+      `Path query between <span class="highlight">${u}</span> and <span class="highlight">${v}</span> returned value sum: <span class="highlight">${sum}</span>`
+    );
+    tel.textContent = sum;
+  } else {
+    logTrace(
+      `<span class="highlight">Query Failed</span>: Nodes ${u} and ${v} are in disconnected components.`
+    );
+    tel.textContent = 'Disconnected';
+  }
+  updateTelemetry();
+  drawAll();
+}
 
-el("queryBtn").addEventListener("click", () => {
-  const v = selVal("querySelect");
-  el("opError").textContent = "";
-  startRun(() => state.lct.queryGen(v), `query(${lab(v)})`, () => {
-    const lctVal = state.lct.subtreeMax[v];
-    const naiveVal = naiveQuery(v);
-    const match = lctVal === naiveVal;
-    setPhase("Done ✓", "done");
-    el("resultBox").className = "result-box " + (match ? "ok" : "bad");
-    el("resultVal").textContent = `query(${lab(v)}) = ${lctVal}   |   naive O(n) path walk says ${naiveVal}   →   ${match ? "MATCH ✓" : "MISMATCH ✕"}`;
-    logLine(`cross-check vs. naive path walk: ${match ? "match ✓" : "MISMATCH ✕"}`, match ? "ok" : "bad");
-  });
-});
-
-el("speedSlider").addEventListener("input", (e) => {
-  state.speedMs = parseInt(e.target.value, 10);
-  el("speedVal").textContent = `${state.speedMs}ms/step`;
-});
-
-el("stepBtn").addEventListener("click", () => { state.playing = false; el("playBtn").textContent = "▶ Play"; stepRunner(); });
-el("playBtn").addEventListener("click", () => {
-  if (!state.runner || state.runner.finished) return;
-  state.playing = !state.playing;
-  el("playBtn").textContent = state.playing ? "⏸ Pause" : "▶ Play";
-});
-
-/* ------------------------------------------------------------
-   10. ANIMATION LOOP
-------------------------------------------------------------- */
-
-function animate() {
-  requestAnimationFrame(animate);
-  const now = performance.now();
-  const dt = now - state.lastFrameTime;
-  state.lastFrameTime = now;
-
-  if (state.playing && state.runner && !state.runner.finished) {
-    state.accumMs += dt;
-    if (state.accumMs >= state.speedMs) {
-      state.accumMs = 0;
-      stepRunner();
+/**
+ * Refreshes telemetry panel state.
+ */
+function updateTelemetry() {
+  let preferredCount = 0;
+  let healthy = true;
+  for (let i = 1; i <= nodeCount; i++) {
+    const node = lct.nodes[i];
+    if (node.left) {
+      preferredCount++;
+      if (node.left.parent !== node) healthy = false;
     }
+    if (node.right) {
+      preferredCount++;
+      if (node.right.parent !== node) healthy = false;
+    }
+  }
+
+  document.getElementById('telPreferredPaths').textContent = `${preferredCount} splay edges`;
+  const telStatus = document.getElementById('telStatus');
+  if (telStatus) {
+    telStatus.textContent = healthy ? 'Healthy' : 'Error';
+    telStatus.className = healthy ? 'value text-success' : 'value text-danger';
   }
 }
 
-/* ------------------------------------------------------------
-   11. BOOT
-------------------------------------------------------------- */
+/**
+ * Redraws both virtual and auxiliary splay canvases.
+ */
+function drawAll() {
+  drawForest();
+  drawSplays();
+}
 
-function boot() {
-  el("speedVal").textContent = `${state.speedMs}ms/step`;
-  loadExample();
-  animate();
+/**
+ * Draws the represented virtual forest.
+ */
+function drawForest() {
+  if (!forestCtx) return;
+  forestCtx.clearRect(0, 0, forestCanvas.width, forestCanvas.height);
 
-  requestAnimationFrame(() => {
-    setTimeout(() => el("loadingVeil").classList.add("hidden"), 350);
+  // 1. Draw represented tree edges
+  const drawnEdges = new Set();
+  for (let i = 1; i <= nodeCount; i++) {
+    lct.adj[i].forEach((neighbor) => {
+      const edgeKey = Math.min(i, neighbor) + '-' + Math.max(i, neighbor);
+      if (!drawnEdges.has(edgeKey)) {
+        drawnEdges.add(edgeKey);
+        const uPos = forestPositions[i];
+        const vPos = forestPositions[neighbor];
+
+        // Check if it is a preferred splay path edge
+        const uNode = lct.nodes[i];
+        const vNode = lct.nodes[neighbor];
+        const isPreferred =
+          (uNode.parent === vNode && (vNode.left === uNode || vNode.right === uNode)) ||
+          (vNode.parent === uNode && (uNode.left === vNode || uNode.right === vNode));
+
+        forestCtx.beginPath();
+        forestCtx.moveTo(uPos.x, uPos.y);
+        forestCtx.lineTo(vPos.x, vPos.y);
+        forestCtx.strokeStyle = isPreferred ? '#c084fc' : 'rgba(255, 255, 255, 0.15)';
+        forestCtx.lineWidth = isPreferred ? 3.5 : 1.5;
+        forestCtx.stroke();
+      }
+    });
+  }
+
+  // 2. Draw nodes
+  for (let i = 1; i <= nodeCount; i++) {
+    const pos = forestPositions[i];
+    forestCtx.beginPath();
+    forestCtx.arc(pos.x, pos.y, nodeRadius, 0, 2 * Math.PI);
+    forestCtx.fillStyle = '#1e1b4b';
+    forestCtx.strokeStyle = '#a855f7';
+    forestCtx.lineWidth = 2.5;
+    forestCtx.fill();
+    forestCtx.stroke();
+
+    forestCtx.fillStyle = '#ffffff';
+    forestCtx.font = 'bold 11px "Fira Code", monospace';
+    forestCtx.textAlign = 'center';
+    forestCtx.textBaseline = 'middle';
+    forestCtx.fillText(i, pos.x, pos.y);
+  }
+}
+
+/**
+ * Draws the auxiliary splay tree binary structures.
+ */
+function drawSplays() {
+  if (!splayCtx) return;
+  splayCtx.clearRect(0, 0, splayCanvas.width, splayCanvas.height);
+
+  // Locate splay component roots
+  const roots = new Set();
+  for (let i = 1; i <= nodeCount; i++) {
+    let curr = lct.nodes[i];
+    while (!lct.isRoot(curr)) {
+      curr = curr.parent;
+    }
+    roots.add(curr);
+  }
+
+  const splayRoots = Array.from(roots);
+  const totalTrees = splayRoots.length;
+  const colWidth = splayCanvas.width / Math.max(1, totalTrees);
+
+  splayRoots.forEach((root, idx) => {
+    const cx = (idx + 0.5) * colWidth;
+    const cy = 40;
+    // Layout binary tree levels
+    drawSplayTreeBranch(root, cx, cy, colWidth / 2.2, 55);
   });
 }
 
-boot();
+/**
+ * Recursively renders splay tree tree branch.
+ * @param {LCTNode} node
+ * @param {number} x
+ * @param {number} y
+ * @param {number} dx
+ * @param {number} dy
+ */
+function drawSplayTreeBranch(node, x, y, dx, dy) {
+  if (!node) return;
+
+  // Render left edge
+  if (node.left) {
+    splayCtx.beginPath();
+    splayCtx.moveTo(x, y);
+    splayCtx.lineTo(x - dx, y + dy);
+    splayCtx.strokeStyle = 'rgba(168, 85, 247, 0.4)';
+    splayCtx.lineWidth = 2;
+    splayCtx.stroke();
+    drawSplayTreeBranch(node.left, x - dx, y + dy, dx / 2, dy);
+  }
+
+  // Render right edge
+  if (node.right) {
+    splayCtx.beginPath();
+    splayCtx.moveTo(x, y);
+    splayCtx.lineTo(x + dx, y + dy);
+    splayCtx.strokeStyle = 'rgba(168, 85, 247, 0.4)';
+    splayCtx.lineWidth = 2;
+    splayCtx.stroke();
+    drawSplayTreeBranch(node.right, x + dx, y + dy, dx / 2, dy);
+  }
+
+  // Render splay node circle
+  splayCtx.beginPath();
+  splayCtx.arc(x, y, nodeRadius, 0, 2 * Math.PI);
+  splayCtx.fillStyle = '#111827';
+  splayCtx.strokeStyle = '#c084fc';
+  splayCtx.lineWidth = 2.5;
+  splayCtx.fill();
+  splayCtx.stroke();
+
+  splayCtx.fillStyle = '#ffffff';
+  splayCtx.font = 'bold 11px "Fira Code", monospace';
+  splayCtx.textAlign = 'center';
+  splayCtx.textBaseline = 'middle';
+  splayCtx.fillText(node.id, x, y);
+}
+
+/* ─── ESM Module Exports for testing ─── */
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = {
+    LCTNode,
+    LinkCutTree,
+  };
+}

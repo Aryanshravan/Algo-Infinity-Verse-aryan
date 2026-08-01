@@ -1,0 +1,307 @@
+/* 
+  Redis Cluster Hash Slot Migration Storm Visualizer Styles
+*/
+
+.rc-hero {
+  position: relative;
+  overflow: hidden;
+  padding-bottom: 3rem;
+}
+
+.rc-gradient {
+  background: linear-gradient(135deg, #e53935, #ff8a65);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.rc-control-card {
+  background: var(--card-bg, #ffffff);
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border: 1px solid var(--border-color, #e0e0e0);
+}
+
+.rc-actions-row {
+  display: flex;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.rc-action-btn {
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+  border: none;
+  cursor: pointer;
+}
+
+.rc-btn-primary {
+  background: linear-gradient(135deg, #e53935, #d32f2f);
+  color: white;
+  box-shadow: 0 4px 15px rgba(229, 57, 53, 0.3);
+}
+
+.rc-btn-primary:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(229, 57, 53, 0.4);
+}
+
+.rc-btn-primary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.rc-status-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  background: var(--card-bg, #ffffff);
+  border: 1px solid var(--border-color, #e0e0e0);
+  border-radius: 8px;
+  padding: 1rem 1.5rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s ease;
+}
+
+.rc-status-container.status-healthy {
+  border-left: 4px solid #43a047;
+}
+
+.rc-status-container.status-fail {
+  border-left: 4px solid #e53935;
+}
+
+.rc-status-container.status-recover {
+  border-left: 4px solid #fb8c00;
+}
+
+.rc-status-icon {
+  font-size: 1.5rem;
+}
+
+.status-healthy .rc-status-icon {
+  color: #43a047;
+}
+.status-fail .rc-status-icon {
+  color: #e53935;
+}
+.status-recover .rc-status-icon {
+  color: #fb8c00;
+}
+
+.rc-status-text {
+  font-size: 1.1rem;
+  font-weight: 500;
+  color: var(--text-color, #333333);
+}
+
+.rc-main-layout {
+  position: relative;
+  width: 100%;
+  min-height: 500px;
+  background: var(--bg-color, #f9fafb);
+  border-radius: 12px;
+  border: 1px solid var(--border-color, #e0e0e0);
+  overflow: hidden;
+  padding: 2rem;
+  box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.02);
+}
+
+.rc-cluster-area {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  min-height: 400px;
+}
+
+.rc-connections {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.rc-node-layer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 2;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+}
+
+.rc-node-col {
+  display: flex;
+  flex-direction: column;
+  gap: 3rem;
+  align-items: center;
+}
+
+.rc-node {
+  width: 220px;
+  background: var(--card-bg, #ffffff);
+  border: 2px solid var(--border-color, #e0e0e0);
+  border-radius: 10px;
+  padding: 1.5rem;
+  text-align: center;
+  position: relative;
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+}
+
+.rc-node.master {
+  border-color: #43a047;
+  box-shadow: 0 0 15px rgba(67, 160, 71, 0.2);
+}
+
+.rc-node.slave {
+  border-color: #1e88e5;
+}
+
+.rc-node.failed {
+  border-color: #e53935;
+  background: #ffebee;
+  transform: scale(0.95);
+  opacity: 0.6;
+  box-shadow: none;
+}
+
+.rc-node.promoting {
+  animation: pulse-promote 1.5s infinite;
+}
+
+@keyframes pulse-promote {
+  0% {
+    box-shadow: 0 0 0 0 rgba(30, 136, 229, 0.7);
+    border-color: #1e88e5;
+  }
+  50% {
+    box-shadow: 0 0 0 15px rgba(30, 136, 229, 0);
+    border-color: #43a047;
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(30, 136, 229, 0);
+    border-color: #43a047;
+  }
+}
+
+.rc-node-icon {
+  font-size: 2.5rem;
+  margin-bottom: 1rem;
+}
+
+.rc-node.master .rc-node-icon {
+  color: #43a047;
+}
+.rc-node.slave .rc-node-icon {
+  color: #1e88e5;
+}
+.rc-node.failed .rc-node-icon {
+  color: #e53935;
+}
+
+.rc-node-title {
+  font-weight: 700;
+  font-size: 1.2rem;
+  margin-bottom: 0.25rem;
+  color: var(--text-color, #333);
+}
+
+.rc-node-type {
+  font-size: 0.85rem;
+  color: var(--text-muted, #757575);
+  margin-bottom: 1rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.rc-node-slots {
+  background: var(--bg-color, #f5f5f5);
+  border-radius: 6px;
+  padding: 0.75rem;
+  font-family: 'Fira Code', monospace;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-color, #333);
+  border: 1px solid var(--border-color, #e0e0e0);
+}
+
+.rc-node.failed .rc-node-slots {
+  text-decoration: line-through;
+  color: #e53935;
+}
+
+/* Connection Lines */
+.rc-conn-line {
+  stroke: var(--border-color, #bdbdbd);
+  stroke-width: 2;
+  stroke-dasharray: 5, 5;
+  fill: none;
+  transition: all 0.5s ease;
+}
+
+.rc-conn-line.active {
+  stroke: #43a047;
+  stroke-width: 3;
+  stroke-dasharray: none;
+}
+
+.rc-conn-line.migrating {
+  stroke: #fb8c00;
+  stroke-width: 3;
+  animation: dash-flow 1s linear infinite;
+}
+
+@keyframes dash-flow {
+  from {
+    stroke-dashoffset: 10;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+/* Particles for Migration */
+.rc-particle {
+  fill: #fb8c00;
+  filter: drop-shadow(0 0 4px #fb8c00);
+}
+
+/* Dark Mode Overrides */
+[data-theme='dark'] .rc-control-card,
+[data-theme='dark'] .rc-status-container,
+[data-theme='dark'] .rc-node {
+  background: var(--card-bg, #1e1e1e);
+  border-color: var(--border-color, #333);
+}
+
+[data-theme='dark'] .rc-main-layout {
+  background: var(--bg-color, #121212);
+}
+
+[data-theme='dark'] .rc-node.failed {
+  background: rgba(229, 57, 53, 0.1);
+}
+
+[data-theme='dark'] .rc-node-slots {
+  background: rgba(0, 0, 0, 0.2);
+}

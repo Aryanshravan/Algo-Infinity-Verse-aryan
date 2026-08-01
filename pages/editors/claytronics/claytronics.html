@@ -1,0 +1,283 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Programmable Matter Simulator | Algo Infinity Verse</title>
+    <link rel="stylesheet" href="/styles.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <!-- Monaco Editor -->
+    <script src="https://unpkg.com/monaco-editor@0.36.1/min/vs/loader.js"></script>
+    <style>
+      body { margin: 0; overflow: hidden; background: #000; font-family: 'Poppins', sans-serif; color: #fff; }
+      .app-container { display: flex; height: 100vh; }
+      
+      .sidebar { width: 450px; background: rgba(15, 23, 42, 0.95); border-right: 1px solid #eab308; display: flex; flex-direction: column; z-index: 10; }
+      .header { padding: 20px; border-bottom: 1px solid #334155; }
+      .header h2 { margin: 0; color: #eab308; font-family: 'Orbitron', sans-serif; font-size: 1.2rem; }
+      .header p { margin: 5px 0 0 0; font-size: 0.8rem; color: #94a3b8; }
+      
+      #editor-container { flex: 1; min-height: 300px; }
+      
+      .controls { padding: 20px; border-top: 1px solid #334155; background: rgba(0,0,0,0.5); }
+      .btn { background: linear-gradient(90deg, #ca8a04, #a16207); color: #fff; border: none; padding: 10px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; transition: 0.3s; }
+      .btn:hover { background: #eab308; transform: translateY(-2px); box-shadow: 0 0 15px rgba(234, 179, 8, 0.5); }
+      
+      .sim-container { flex: 1; position: relative; background: radial-gradient(circle at center, #1e293b 0%, #000 100%); overflow: hidden; }
+      canvas { width: 100%; height: 100%; display: block; filter: contrast(1.2); }
+      
+      .hud { position: absolute; top: 20px; right: 20px; background: rgba(0,0,0,0.8); padding: 15px; border-radius: 8px; border: 1px solid #eab308; width: 280px; z-index: 10; pointer-events: none; }
+      .hud h3 { margin: 0 0 10px 0; color: #eab308; font-size: 1rem; font-family: 'Orbitron', sans-serif; }
+      .metric { display: flex; justify-content: space-between; font-size: 0.8rem; color: #cbd5e1; margin-bottom: 5px; }
+      .val { font-weight: bold; font-family: monospace; }
+      .val-solid { color: #10b981; }
+      .val-liquid { color: #38bdf8; }
+      .val-stress { color: #ef4444; }
+    </style>
+  </head>
+  <body>
+    
+    <div class="app-container">
+      <div class="sidebar">
+        <div class="header">
+          <h2><i class="fas fa-cubes"></i> Claytronics Swarm</h2>
+          <p>Self-assemble programmable matter into rigid tools</p>
+        </div>
+        
+        <div id="editor-container"></div>
+        
+        <div class="controls">
+          <button class="btn" onclick="startAssembly()"><i class="fas fa-hammer"></i> Upload Holographic Blueprint</button>
+        </div>
+      </div>
+      
+      <div class="sim-container">
+        <!-- Blueprint overlay -->
+        <div id="blueprint" style="position: absolute; inset: 0; background-image: radial-gradient(circle at center, rgba(234, 179, 8, 0.1) 0%, transparent 60%); pointer-events: none; opacity: 0; transition: opacity 2s;"></div>
+        
+        <canvas id="clayCanvas" style="position: relative; z-index: 1;"></canvas>
+        
+        <div class="hud">
+          <h3>Swarm Telemetry</h3>
+          <div class="metric"><span>Total Catoms:</span> <span class="val">2,000</span></div>
+          <div class="metric"><span>Locked (Solid):</span> <span class="val val-solid" id="solidVal">0</span></div>
+          <div class="metric"><span>Flowing (Liquid):</span> <span class="val val-liquid" id="liquidVal">2,000</span></div>
+          <div class="metric"><span>Structural Stress:</span> <span class="val val-stress" id="stressVal">0%</span></div>
+          <div class="metric" style="margin-top: 10px; border-top: 1px solid #334155; padding-top: 5px;">
+            <span>State:</span> <span class="val" id="statusVal" style="color:#94a3b8">AMORPHOUS</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      let editor;
+      require.config({ paths: { 'vs': 'https://unpkg.com/monaco-editor@0.36.1/min/vs' }});
+      require(['vs/editor/editor.main'], function() {
+        editor = monaco.editor.create(document.getElementById('editor-container'), {
+          value: `// Distributed Catom State Machine
+// Each microscopic robot (catom) reads its local coordinates relative to the holographic blueprint.
+// Return true if the catom should lock its magnetic bonds (turn Solid), or false to keep flowing (Liquid).
+
+function evaluateCatomState(x, y, blueprintTargetX, blueprintTargetY) {
+    // If true, the catom locks into a rigid lattice.
+    // If false, it acts like a fluid to flow toward the blueprint.
+    
+    let distToTarget = Math.hypot(x - blueprintTargetX, y - blueprintTargetY);
+    
+    // Naive logic: Lock everything instantly!
+    // This creates a fragile, porous structure that will shatter under physics stress.
+    return true; 
+}`,
+          language: 'javascript',
+          theme: 'vs-dark',
+          minimap: { enabled: false },
+          automaticLayout: true
+        });
+      });
+
+      const canvas = document.getElementById('clayCanvas');
+      const ctx = canvas.getContext('2d');
+      
+      let isSimulating = false;
+      let catoms = [];
+      let totalCatoms = 2000;
+      
+      // We will define a "Wrench" shape as the blueprint
+      // Represented as an array of target points
+      let blueprintTargets = [];
+      let cx = 0; let cy = 0;
+      
+      function resize() { 
+          canvas.width = canvas.clientWidth; 
+          canvas.height = canvas.clientHeight;
+          cx = canvas.width / 2;
+          cy = canvas.height / 2;
+          
+          generateBlueprint();
+          
+          if (!isSimulating) {
+              // Reset pool at bottom
+              catoms = [];
+              for(let i=0; i<totalCatoms; i++) {
+                  catoms.push({
+                      id: i,
+                      x: cx + (Math.random()-0.5)*400,
+                      y: canvas.height - 20 - Math.random()*100,
+                      vx: (Math.random()-0.5)*2,
+                      vy: (Math.random()-0.5)*2,
+                      isLocked: false,
+                      targetIdx: i % blueprintTargets.length
+                  });
+              }
+          }
+      }
+
+      function generateBlueprint() {
+          blueprintTargets = [];
+          // Wrench handle
+          for(let y=-100; y<=100; y+=5) {
+              for(let x=-15; x<=15; x+=5) {
+                  blueprintTargets.push({x: cx + x, y: cy + y});
+              }
+          }
+          // Wrench head top
+          for(let a=Math.PI; a<=Math.PI*2; a+=0.1) {
+              for(let r=20; r<=40; r+=5) {
+                  blueprintTargets.push({x: cx + Math.cos(a)*r, y: cy - 100 + Math.sin(a)*r});
+              }
+          }
+          // Wrench head bottom (crescent)
+          for(let a=Math.PI*0.2; a<=Math.PI*0.8; a+=0.1) {
+              for(let r=20; r<=40; r+=5) {
+                  blueprintTargets.push({x: cx + Math.cos(a)*r, y: cy + 100 + Math.sin(a)*r});
+              }
+          }
+      }
+      
+      setTimeout(resize, 100);
+      window.addEventListener('resize', resize);
+
+      function animate() {
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+          let lockedCount = 0;
+          let flowingCount = 0;
+          let avgStress = 0;
+
+          if (isSimulating) {
+              // Draw Blueprint hologram
+              ctx.fillStyle = 'rgba(234, 179, 8, 0.1)';
+              for(let pt of blueprintTargets) {
+                  ctx.fillRect(pt.x-2, pt.y-2, 4, 4);
+              }
+              
+              for(let i=0; i<catoms.length; i++) {
+                  let c = catoms[i];
+                  let target = blueprintTargets[c.targetIdx];
+                  
+                  try {
+                      eval(editor.getValue());
+                      let shouldLock = evaluateCatomState(c.x, c.y, target.x, target.y);
+                      c.isLocked = !!shouldLock;
+                  } catch(e) {
+                      c.isLocked = false;
+                  }
+                  
+                  if (c.isLocked) {
+                      lockedCount++;
+                      // Stop moving, lock into lattice
+                      c.vx *= 0.1;
+                      c.vy *= 0.1;
+                      
+                      // Calculate stress based on distance to actual target
+                      let distToTarget = Math.hypot(c.x - target.x, c.y - target.y);
+                      avgStress += distToTarget;
+                      
+                  } else {
+                      flowingCount++;
+                      // Flow toward target
+                      let dx = target.x - c.x;
+                      let dy = target.y - c.y;
+                      let dist = Math.hypot(dx, dy);
+                      
+                      if (dist > 5) {
+                          c.vx += (dx/dist) * 0.5;
+                          c.vy += (dy/dist) * 0.5;
+                      }
+                      
+                      // Add noise/fluid dynamics
+                      c.vx += (Math.random()-0.5)*1;
+                      c.vy += (Math.random()-0.5)*1;
+                      
+                      // Fluid drag
+                      c.vx *= 0.9;
+                      c.vy *= 0.9;
+                  }
+                  
+                  c.x += c.vx;
+                  c.y += c.vy;
+                  
+                  // Floor bounds
+                  if(c.y > canvas.height - 5) { c.y = canvas.height - 5; c.vy *= -0.5; }
+              }
+              
+              // Normalize stress
+              avgStress = lockedCount > 0 ? (avgStress / lockedCount) : 0;
+              
+              if(avgStress > 50 && lockedCount > 500) {
+                  // SHATTER!
+                  document.getElementById('statusVal').innerText = "STRUCTURAL SHATTER";
+                  document.getElementById('statusVal').style.color = "#ef4444";
+                  isSimulating = false;
+                  
+                  // Explode outwards
+                  for(let c of catoms) {
+                      c.isLocked = false;
+                      c.vx = (Math.random()-0.5)*20;
+                      c.vy = (Math.random()-0.5)*20 - 10;
+                  }
+              } else if (lockedCount > totalCatoms * 0.8 && avgStress < 10) {
+                  document.getElementById('statusVal').innerText = "TOOL ASSEMBLED. RIGID.";
+                  document.getElementById('statusVal').style.color = "#10b981";
+              }
+          }
+
+          // Draw Catoms
+          ctx.beginPath();
+          for(let c of catoms) {
+              if(c.isLocked) {
+                  ctx.fillStyle = '#10b981'; // Solid green
+              } else {
+                  ctx.fillStyle = 'rgba(56, 189, 248, 0.6)'; // Flowing cyan
+              }
+              ctx.fillRect(c.x, c.y, 3, 3);
+          }
+
+          // Update HUD
+          if(isSimulating) {
+              document.getElementById('solidVal').innerText = lockedCount;
+              document.getElementById('liquidVal').innerText = flowingCount;
+              
+              let stressPct = Math.min((avgStress / 50) * 100, 100);
+              document.getElementById('stressVal').innerText = stressPct.toFixed(1) + "%";
+              
+              if(stressPct > 80) document.getElementById('stressVal').style.color = "#ef4444";
+              else document.getElementById('stressVal').style.color = "#10b981";
+          }
+
+          requestAnimationFrame(animate);
+      }
+      animate();
+
+      function startAssembly() {
+          if(isSimulating) return;
+          isSimulating = true;
+          document.getElementById('blueprint').style.opacity = "1";
+          document.getElementById('statusVal').innerText = "SELF-ASSEMBLING...";
+          document.getElementById('statusVal').style.color = "#facc15";
+      }
+    </script>
+  </body>
+</html>

@@ -1,0 +1,1324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Learn Dart – The Language Behind Flutter | Algo Infinity Verse</title>
+  <meta name="description" content="Free interactive Dart tutorial covering syntax, null safety, functions, classes & mixins, collections, async/await & streams, and how Dart powers Flutter." />
+
+  <link rel="stylesheet" href="/styles.css" />
+  <link rel="stylesheet" href="dart-learning.css" />
+
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+
+  <script>
+    (function() {
+      try {
+        var t = localStorage.getItem('theme');
+        var p = window.matchMedia('(prefers-color-scheme: light)').matches;
+        var theme = t || (p ? 'light' : 'dark');
+        if (theme === 'light') document.documentElement.classList.add('light-mode');
+      } catch (e) {}
+    })();
+  </script>
+</head>
+<body data-page="dart-learning" data-no-loading>
+  <div id="loading-screen" class="hidden">
+    <div class="loader">
+      <div class="infinity-loader">&#x221E;</div>
+      <h2>Loading Dart Learning...</h2>
+    </div>
+  </div>
+
+  <main>
+    <!-- ════════════════════════════════════════
+         HERO SECTION
+         ════════════════════════════════════════ -->
+    <section class="dl-hero">
+      <div class="dl-hero-bg">
+        <div class="dl-hero-glow"></div>
+      </div>
+
+      <a href="/pages/learning/languages.html" class="dl-back-btn" id="dlBackBtn" aria-label="Go back to languages">
+        <i class="fas fa-arrow-left"></i>
+        <span>Languages</span>
+      </a>
+
+      <div class="dl-hero-content">
+        <!-- Dart main() signature motif -->
+        <div class="dl-main-tag" aria-hidden="true">
+          <span class="dl-main-kw">void</span>
+          <span class="dl-main-name">main</span>
+          <span class="dl-main-parens">()</span>
+          <span class="dl-main-brace">{ print('Hello, Dart!'); }</span>
+        </div>
+
+        <h1 class="dl-hero-title" id="dlHeroTitle">
+          <span class="dl-title-line">Learn Dart</span>
+          <span class="dl-title-line">The Flutter Language</span>
+        </h1>
+
+        <p class="dl-hero-subtitle">
+          Master the fast, client-optimized language that powers Flutter apps everywhere. From syntax and null safety to classes, streams, and async — <strong>9 interactive lessons</strong> to ship production-ready code.
+        </p>
+
+        <!-- Stats -->
+        <div class="dl-hero-stats">
+          <div class="dl-stat">
+            <span class="dl-stat-value" id="topicCount">9</span>
+            <span class="dl-stat-label">Topics</span>
+          </div>
+          <div class="dl-stat">
+            <span class="dl-stat-value">30+</span>
+            <span class="dl-stat-label">Examples</span>
+          </div>
+          <div class="dl-stat">
+            <span class="dl-stat-value">9</span>
+            <span class="dl-stat-label">Exercises</span>
+          </div>
+        </div>
+
+        <!-- CTA -->
+        <div class="dl-hero-actions">
+          <a href="#topic-introduction" class="dl-btn dl-btn-primary">
+            <i class="fas fa-play"></i> Start Learning
+          </a>
+          <a href="/pages/learning/languages.html" class="dl-btn dl-btn-secondary">
+            <i class="fas fa-th"></i> Browse Languages
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- ════════════════════════════════════════
+         TOPIC NAVIGATION PILLS
+         ════════════════════════════════════════ -->
+    <section class="dl-section">
+      <nav class="dl-topic-nav" id="dlTopicNav" aria-label="Lesson topics">
+        <a href="#topic-introduction" class="dl-topic-pill active">Introduction</a>
+        <a href="#topic-variables" class="dl-topic-pill">Variables &amp; Types</a>
+        <a href="#topic-control" class="dl-topic-pill">Control Flow</a>
+        <a href="#topic-null" class="dl-topic-pill">Null Safety</a>
+        <a href="#topic-functions" class="dl-topic-pill">Functions</a>
+        <a href="#topic-classes" class="dl-topic-pill">Classes &amp; Mixins</a>
+        <a href="#topic-collections" class="dl-topic-pill">Collections</a>
+        <a href="#topic-async" class="dl-topic-pill">Async &amp; Streams</a>
+        <a href="#topic-flutter" class="dl-topic-pill">Dart &amp; Flutter</a>
+      </nav>
+
+      <!-- Progress dots -->
+      <div class="dl-progress" id="dlProgress" aria-hidden="true">
+        <span class="dl-progress-dot active" data-topic="0"></span>
+        <span class="dl-progress-line" data-topic="0"></span>
+        <span class="dl-progress-dot" data-topic="1"></span>
+        <span class="dl-progress-line" data-topic="1"></span>
+        <span class="dl-progress-dot" data-topic="2"></span>
+        <span class="dl-progress-line" data-topic="2"></span>
+        <span class="dl-progress-dot" data-topic="3"></span>
+        <span class="dl-progress-line" data-topic="3"></span>
+        <span class="dl-progress-dot" data-topic="4"></span>
+        <span class="dl-progress-line" data-topic="4"></span>
+        <span class="dl-progress-dot" data-topic="5"></span>
+        <span class="dl-progress-line" data-topic="5"></span>
+        <span class="dl-progress-dot" data-topic="6"></span>
+        <span class="dl-progress-line" data-topic="6"></span>
+        <span class="dl-progress-dot" data-topic="7"></span>
+        <span class="dl-progress-line" data-topic="7"></span>
+        <span class="dl-progress-dot" data-topic="8"></span>
+      </div>
+
+      <!-- ════════════════════════════════════════
+           LESSON 1: INTRODUCTION TO DART
+           ════════════════════════════════════════ -->
+      <article class="dl-lesson" id="topic-introduction" data-topic="0">
+        <div class="dl-lesson-header">
+          <span class="dl-lesson-number">01</span>
+          <h3>Introduction to Dart</h3>
+        </div>
+
+        <p>
+          <strong>Dart</strong> is a client-optimized, object-oriented programming language developed by Google and first released in 2011. It is the language behind <strong>Flutter</strong>, Google's UI toolkit for building natively compiled apps for mobile, web, and desktop from a single codebase.
+        </p>
+
+        <p>
+          Dart is compiled with <strong>AOT (ahead-of-time)</strong> compilation to fast, predictable native machine code, and supports <strong>JIT (just-in-time)</strong> compilation with a hot-reload development loop. Its type system is sound — your code runs with type safety baked in.
+        </p>
+
+        <div class="dl-concept">
+          <h4>Why Learn Dart?</h4>
+          <ul>
+            <li><strong>Everything is an object:</strong> Even numbers and functions are objects, giving you a consistent, powerful model.</li>
+            <li><strong>Sound null safety:</strong> The type system eliminates null reference errors at compile time.</li>
+            <li><strong>Fast development:</strong> JIT + hot reload makes Flutter's iterative workflow lightning fast.</li>
+            <li><strong>Great for UI:</strong> Declarative widget trees and reactive state management feel natural in Dart.</li>
+            <li><strong>Runs anywhere:</strong> Mobile (Flutter), web (dart2js), desktop, and server-side (dart:io).</li>
+          </ul>
+        </div>
+
+        <div class="dl-code-block">
+          <div class="dl-code-header">
+            <span class="dl-code-lang">Dart</span>
+            <button type="button" class="dl-code-copy" aria-label="Copy code" data-code='// Hello, World!
+void main() {
+  print("Hello, Dart!");
+  print("Fast. Productive. Everywhere.");
+}'>Copy</button>
+          </div>
+          <pre><code><span class="cmt">// Hello, World!</span>
+<span class="kw">void</span> <span class="fn">main</span>() {
+  <span class="fn">print</span>(<span class="str">"Hello, Dart!"</span>);
+  <span class="fn">print</span>(<span class="str">"Fast. Productive. Everywhere."</span>);
+}</code></pre>
+        </div>
+
+        <!-- Exercise -->
+        <div class="dl-exercise" id="exercise-introduction">
+          <div class="dl-exercise-title">
+            Practice: Introduction to Dart
+          </div>
+          <p>Which organization created Dart, and what well-known UI toolkit is it the language of?</p>
+          <ol>
+            <li>Apple, UIKit</li>
+            <li>Google, Flutter</li>
+            <li>Microsoft, .NET MAUI</li>
+            <li>JetBrains, Compose</li>
+          </ol>
+          <button type="button" class="dl-exercise-toggle" aria-expanded="false" aria-controls="solution-introduction">Show Solution</button>
+          <div class="dl-exercise-solution" id="solution-introduction">
+            <p><strong>Correct Answer: B</strong></p>
+            <p>Dart was created by Google and is the language behind Flutter, Google's cross-platform UI toolkit. Flutter renders its own UI, allowing pixel-perfect, natively compiled apps across mobile, web, and desktop.</p>
+          </div>
+        </div>
+      </article>
+
+      <!-- ════════════════════════════════════════
+           LESSON 2: VARIABLES & DATA TYPES
+           ════════════════════════════════════════ -->
+      <article class="dl-lesson" id="topic-variables" data-topic="1">
+        <div class="dl-lesson-header">
+          <span class="dl-lesson-number">02</span>
+          <h3>Variables &amp; Data Types</h3>
+        </div>
+
+        <p>
+          Dart offers several ways to declare variables: <code>var</code> for type inference, <code>final</code> for single-assignment values, and <code>const</code> for compile-time constants. You can also annotate types explicitly for clarity.
+        </p>
+
+        <div class="dl-concept">
+          <h4>var vs final vs const</h4>
+          <ul>
+            <li><strong>var</strong> — Type inferred at declaration. The variable can be reassigned later.</li>
+            <li><strong>final</strong> — A value set once at runtime. Cannot be reassigned after initialization.</li>
+            <li><strong>const</strong> — A compile-time constant. Must be computable before the program runs.</li>
+          </ul>
+        </div>
+
+        <div class="dl-code-block">
+          <div class="dl-code-header">
+            <span class="dl-code-lang">Dart</span>
+            <button type="button" class="dl-code-copy" aria-label="Copy code" data-code='// Type inference with var
+var name = "Alice";           // inferred as String
+var score = 95;               // inferred as int
+
+// Explicit types
+String greeting = "Hello";
+int year = 2026;
+double pi = 3.14159;
+bool isActive = true;
+
+// final: assigned once at runtime
+final int timestamp = DateTime.now().millisecondsSinceEpoch;
+
+// const: compile-time constant
+const double gravity = 9.8;
+
+// String interpolation
+final message = "User: $name, Score: ${score + 5}";
+print(message);               // User: Alice, Score: 100
+
+void main() {}'>Copy</button>
+          </div>
+          <pre><code><span class="cmt">// Type inference with var</span>
+<span class="kw">var</span> name = <span class="str">"Alice"</span>;           <span class="cmt">// inferred as String</span>
+<span class="kw">var</span> score = <span class="num">95</span>;               <span class="cmt">// inferred as int</span>
+
+<span class="cmt">// Explicit types</span>
+<span class="type">String</span> greeting = <span class="str">"Hello"</span>;
+<span class="kw">int</span> year = <span class="num">2026</span>;
+<span class="kw">double</span> pi = <span class="num">3.14159</span>;
+<span class="kw">bool</span> isActive = <span class="kw">true</span>;
+
+<span class="cmt">// final: assigned once at runtime</span>
+<span class="kw">final int</span> timestamp = <span class="type">DateTime</span>.<span class="fn">now</span>().millisecondsSinceEpoch;
+
+<span class="cmt">// const: compile-time constant</span>
+<span class="kw">const double</span> gravity = <span class="num">9.8</span>;
+
+<span class="cmt">// String interpolation</span>
+<span class="kw">final</span> message = <span class="str">"User: $name, Score: ${score + 5}"</span>;
+<span class="fn">print</span>(message);               <span class="cmt">// User: Alice, Score: 100</span></code></pre>
+        </div>
+
+        <div class="dl-output">
+          <div class="dl-output-label">Output</div>
+          <pre>User: Alice, Score: 100</pre>
+        </div>
+
+        <div class="dl-callout">
+          <p>Prefer <code>final</code> by default and reserve <code>var</code> for variables that genuinely change. Use <code>const</code> whenever a value can be computed at compile time — it improves performance and prevents accidental mutation.</p>
+        </div>
+
+        <div class="dl-table-wrap">
+          <table class="dl-table" aria-label="Dart built-in data types">
+            <thead>
+              <tr>
+                <th scope="col">Type</th>
+                <th scope="col">Example</th>
+                <th scope="col">Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td><code>int</code></td><td><code>42</code></td><td>Whole numbers, any size</td></tr>
+              <tr><td><code>double</code></td><td><code>3.14159</code></td><td>64-bit floating point</td></tr>
+              <tr><td><code>num</code></td><td><code>5</code> or <code>2.5</code></td><td>Supertype of int and double</td></tr>
+              <tr><td><code>String</code></td><td><code>"hello"</code></td><td>Sequence of Unicode characters</td></tr>
+              <tr><td><code>bool</code></td><td><code>true</code></td><td>true or false</td></tr>
+              <tr><td><code>List</code></td><td><code>[1, 2, 3]</code></td><td>Ordered, indexable collection</td></tr>
+              <tr><td><code>Set</code></td><td><code>{1, 2, 3}</code></td><td>Unique, unordered elements</td></tr>
+              <tr><td><code>Map</code></td><td><code>{'k': 1}</code></td><td>Key-value pairs</td></tr>
+              <tr><td><code>Object</code></td><td><code>any</code></td><td>Base of every Dart type</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Exercise -->
+        <div class="dl-exercise" id="exercise-variables">
+          <div class="dl-exercise-title">
+            Practice: Variables &amp; Types
+          </div>
+          <p>Which keyword declares a value that is assigned once at runtime but is NOT a compile-time constant?</p>
+          <ol>
+            <li><code>var</code></li>
+            <li><code>const</code></li>
+            <li><code>final</code></li>
+            <li><code>static</code></li>
+          </ol>
+          <button type="button" class="dl-exercise-toggle" aria-expanded="false" aria-controls="solution-variables">Show Solution</button>
+          <div class="dl-exercise-solution" id="solution-variables">
+            <p><strong>Correct Answer: C</strong></p>
+            <p><code>final</code> binds a variable to a value once, but that value can be computed at runtime. <code>const</code> requires the value to be known at compile time, and <code>var</code> allows reassignment.</p>
+          </div>
+        </div>
+      </article>
+
+      <!-- ════════════════════════════════════════
+           LESSON 3: CONTROL FLOW
+           ════════════════════════════════════════ -->
+      <article class="dl-lesson" id="topic-control" data-topic="2">
+        <div class="dl-lesson-header">
+          <span class="dl-lesson-number">03</span>
+          <h3>Control Flow</h3>
+        </div>
+
+        <p>
+          Dart's control flow will feel familiar — <code>if</code>/<code>else</code>, <code>switch</code>, and all the standard loops — with a few modern conveniences like collection <code>if</code> and pattern-matching <code>switch</code> statements.
+        </p>
+
+        <div class="dl-code-block">
+          <div class="dl-code-header">
+            <span class="dl-code-lang">Dart</span>
+            <button type="button" class="dl-code-copy" aria-label="Copy code" data-code='void main() {
+  final score = 85;
+
+  // if / else if / else
+  final grade = score >= 90
+      ? "A"
+      : score >= 80 ? "B" : "C";
+  print("Grade: $grade");
+
+  // switch statement with modern pattern syntax
+  switch (grade) {
+    case "A":
+      print("Excellent!");
+      break;
+    case "B":
+      print("Good job!");
+      break;
+    default:
+      print("Keep practicing.");
+  }
+
+  // for loop with ranges
+  for (var i = 1; i <= 3; i++) {
+    print("Count: $i");
+  }
+
+  // for-in over a collection
+  for (final lang in ["Dart", "Flutter", "Firebase"]) {
+    print(lang);
+  }
+
+  // while loop
+  var x = 3;
+  while (x > 0) {
+    print(x);
+    x--;
+  }
+}'>Copy</button>
+          </div>
+          <pre><code><span class="kw">void</span> <span class="fn">main</span>() {
+  <span class="kw">final</span> score = <span class="num">85</span>;
+
+  <span class="cmt">// if / else if / else</span>
+  <span class="kw">final</span> grade = score >= <span class="num">90</span>
+      ? <span class="str">"A"</span>
+      : score >= <span class="num">80</span> ? <span class="str">"B"</span> : <span class="str">"C"</span>;
+  <span class="fn">print</span>(<span class="str">"Grade: $grade"</span>);
+
+  <span class="cmt">// switch statement</span>
+  <span class="kw">switch</span> (grade) {
+    <span class="kw">case</span> <span class="str">"A"</span>:
+      <span class="fn">print</span>(<span class="str">"Excellent!"</span>);
+      <span class="kw">break</span>;
+    <span class="kw">case</span> <span class="str">"B"</span>:
+      <span class="fn">print</span>(<span class="str">"Good job!"</span>);
+      <span class="kw">break</span>;
+    <span class="kw">default</span>:
+      <span class="fn">print</span>(<span class="str">"Keep practicing."</span>);
+  }
+
+  <span class="cmt">// for loop with ranges</span>
+  <span class="kw">for</span> (<span class="kw">var</span> i = <span class="num">1</span>; i <= <span class="num">3</span>; i++) {
+    <span class="fn">print</span>(<span class="str">"Count: $i"</span>);
+  }
+
+  <span class="cmt">// for-in over a collection</span>
+  <span class="kw">for</span> (<span class="kw">final</span> lang <span class="kw">in</span> [<span class="str">"Dart"</span>, <span class="str">"Flutter"</span>, <span class="str">"Firebase"</span>]) {
+    <span class="fn">print</span>(lang);
+  }
+
+  <span class="cmt">// while loop</span>
+  <span class="kw">var</span> x = <span class="num">3</span>;
+  <span class="kw">while</span> (x > <span class="num">0</span>) {
+    <span class="fn">print</span>(x);
+    x--;
+  }
+}</code></pre>
+        </div>
+
+        <div class="dl-output">
+          <div class="dl-output-label">Output</div>
+          <pre>Grade: B
+Good job!
+Count: 1
+Count: 2
+Count: 3
+Dart
+Flutter
+Firebase
+3
+2
+1</pre>
+        </div>
+
+        <div class="dl-concept">
+          <h4>Modern Switch Patterns</h4>
+          <ul>
+            <li><strong>Pattern matching:</strong> Newer Dart switch statements can match object shapes, e.g. <code>case [1, 2]:</code>.</li>
+            <li><strong>Logical-or patterns:</strong> <code>case "A" || "B":</code> combines cases without falling through.</li>
+            <li><strong>Switch expressions:</strong> <code>final s = switch (grade) { "A" => "Top", _ => "Other" };</code> returns a value directly.</li>
+          </ul>
+        </div>
+
+        <!-- Exercise -->
+        <div class="dl-exercise" id="exercise-control">
+          <div class="dl-exercise-title">
+            Practice: Control Flow
+          </div>
+          <p>What is the output of <code>for (final c in "ab") { print(c); }</code>?</p>
+          <ol>
+            <li><code>ab</code></li>
+            <li><code>a</code> then <code>b</code> on separate lines</li>
+            <li><code>b</code> then <code>a</code></li>
+            <li>An error, because <code>String</code> is not iterable</li>
+          </ol>
+          <button type="button" class="dl-exercise-toggle" aria-expanded="false" aria-controls="solution-control">Show Solution</button>
+          <div class="dl-exercise-solution" id="solution-control">
+            <p><strong>Correct Answer: B</strong></p>
+            <p>In Dart, a <code>String</code> is iterable and iterates over its runes/characters. The <code>for-in</code> loop visits <code>"a"</code> then <code>"b"</code>, printing each on its own line.</p>
+          </div>
+        </div>
+      </article>
+
+      <!-- ════════════════════════════════════════
+           LESSON 4: NULL SAFETY
+           ════════════════════════════════════════ -->
+      <div class="dl-divider">
+        <span class="dl-divider-inner">Next Topic</span>
+      </div>
+
+      <article class="dl-lesson" id="topic-null" data-topic="3">
+        <div class="dl-lesson-header">
+          <span class="dl-lesson-number">04</span>
+          <h3>Null Safety</h3>
+        </div>
+
+        <p>
+          Dart has <strong>sound null safety</strong> — the type system makes non-nullable types the default. A variable of type <code>String</code> can never hold <code>null</code>; you must opt in to nullability with <code>?</code>. This eliminates entire classes of bugs at compile time.
+        </p>
+
+        <div class="dl-concept">
+          <h4>Nullable vs Non-Nullable</h4>
+          <ul>
+            <li><strong>Non-nullable:</strong> <code>String name</code> — guaranteed to hold a <code>String</code>. Safe to use directly.</li>
+            <li><strong>Nullable:</strong> <code>String? name</code> — may hold <code>null</code>. Must be handled before use.</li>
+          </ul>
+        </div>
+
+        <div class="dl-code-block">
+          <div class="dl-code-header">
+            <span class="dl-code-lang">Dart</span>
+            <button type="button" class="dl-code-copy" aria-label="Copy code" data-code='void main() {
+  // Non-nullable: cannot hold null
+  String nonNullable = "Hello";
+  // nonNullable = null;  // Compile error!
+
+  // Nullable type
+  String? nullable = "World";
+  nullable = null;  // OK
+
+  // 1. Safe call operator (?.)
+  final length = nullable?.length;  // null if nullable is null
+
+  // 2. Null-aware operator (??)
+  final result = nullable ?? "Default value";
+
+  // 3. Null-aware assignment (??=)
+  String? label;
+  label ??= "assigned";  // only assigns if label is null
+
+  // 4. Bang operator (!) -- assert non-null
+  // final forced = nullable!.length;  // Throws if null!
+
+  // 5. late: lazily initialized non-nullable
+  late String greeting;
+  // ... assigned before first use
+  greeting = "Hi there";
+  print(greeting);
+
+  // Practical example
+  String? fetchUserName(int id) => id == 1 ? "Alice" : null;
+  final name = fetchUserName(5) ?? "Unknown";
+  print(name);  // Unknown
+}'>Copy</button>
+          </div>
+          <pre><code><span class="kw">void</span> <span class="fn">main</span>() {
+  <span class="cmt">// Non-nullable: cannot hold null</span>
+  <span class="type">String</span> nonNullable = <span class="str">"Hello"</span>;
+  <span class="cmt">// nonNullable = null;  // Compile error!</span>
+
+  <span class="cmt">// Nullable type</span>
+  <span class="type">String</span>? nullable = <span class="str">"World"</span>;
+  nullable = <span class="kw">null</span>;  <span class="cmt">// OK</span>
+
+  <span class="cmt">// 1. Safe call operator (?.)</span>
+  <span class="kw">final</span> length = nullable?.length;  <span class="cmt">// null if nullable is null</span>
+
+  <span class="cmt">// 2. Null-aware operator (??)</span>
+  <span class="kw">final</span> result = nullable ?? <span class="str">"Default value"</span>;
+
+  <span class="cmt">// 3. Null-aware assignment (??=)</span>
+  <span class="type">String</span>? label;
+  label ??= <span class="str">"assigned"</span>;  <span class="cmt">// only assigns if label is null</span>
+
+  <span class="cmt">// 4. Bang operator (!) -- assert non-null</span>
+  <span class="cmt">// final forced = nullable!.length;  // Throws if null!</span>
+
+  <span class="cmt">// 5. late: lazily initialized non-nullable</span>
+  <span class="kw">late</span> <span class="type">String</span> greeting;
+  greeting = <span class="str">"Hi there"</span>;
+  <span class="fn">print</span>(greeting);
+
+  <span class="cmt">// Practical example</span>
+  <span class="type">String</span>? <span class="fn">fetchUserName</span>(<span class="kw">int</span> id) => id == <span class="num">1</span> ? <span class="str">"Alice"</span> : <span class="kw">null</span>;
+  <span class="kw">final</span> name = <span class="fn">fetchUserName</span>(<span class="num">5</span>) ?? <span class="str">"Unknown"</span>;
+  <span class="fn">print</span>(name);  <span class="cmt">// Unknown</span>
+}</code></pre>
+        </div>
+
+        <div class="dl-callout">
+          <p><strong>Avoid the <code>!</code> operator</strong> in production code — it re-introduces the risk of a null error. Prefer <code>?.</code>, <code>??</code>, and pattern matching to handle nulls idiomatically and safely.</p>
+        </div>
+
+        <!-- Exercise -->
+        <div class="dl-exercise" id="exercise-null">
+          <div class="dl-exercise-title">
+            Practice: Null Safety
+          </div>
+          <p>What does the null-aware operator <code>??</code> do in Dart?</p>
+          <ol>
+            <li>Throws an exception if the left side is null</li>
+            <li>Returns the left side if non-null, otherwise evaluates the right side</li>
+            <li>Converts a nullable type to a non-nullable type</li>
+            <li>Declares a late variable</li>
+          </ol>
+          <button type="button" class="dl-exercise-toggle" aria-expanded="false" aria-controls="solution-null">Show Solution</button>
+          <div class="dl-exercise-solution" id="solution-null">
+            <p><strong>Correct Answer: B</strong></p>
+            <p>The <code>??</code> operator returns the left-hand value when it is non-null; otherwise it evaluates and returns the right-hand expression. It is the idiomatic Dart way to supply defaults for nullable values.</p>
+          </div>
+        </div>
+      </article>
+
+      <!-- ════════════════════════════════════════
+           LESSON 5: FUNCTIONS
+           ════════════════════════════════════════ -->
+      <article class="dl-lesson" id="topic-functions" data-topic="4">
+        <div class="dl-lesson-header">
+          <span class="dl-lesson-number">05</span>
+          <h3>Functions</h3>
+        </div>
+
+        <p>
+          Functions in Dart are first-class citizens — you can assign them to variables, pass them as arguments, and return them from other functions. Dart supports required parameters, optional positional parameters, named parameters, and concise arrow syntax.
+        </p>
+
+        <div class="dl-code-block">
+          <div class="dl-code-header">
+            <span class="dl-code-lang">Dart</span>
+            <button type="button" class="dl-code-copy" aria-label="Copy code" data-code='// Standard function
+String greet(String name) {
+  return "Hello, $name!";
+}
+
+// Arrow function (single expression)
+int doubleIt(int x) => x * 2;
+
+// Optional positional parameter [brackets]
+String describe(String name, [int? age]) =>
+    age == null ? name : "$name is $age years old";
+
+// Named parameters {braces} with defaults
+void createUser(String name, {int age = 18, String role = "user"}) {
+  print("$name ($age) - $role");
+}
+
+// Higher-order function: accepts a function
+int operate(int a, int b, int Function(int, int) op) => op(a, b);
+
+// Anonymous function (lambda)
+final sum = (int a, int b) => a + b;
+
+void main() {
+  print(greet("Alice"));
+  print(doubleIt(21));
+
+  print(describe("Bob"));
+  print(describe("Bob", 30));
+
+  createUser("Charlie", age: 25, role: "admin");
+
+  final nums = [1, 2, 3, 4, 5];
+  final evens = nums.where((n) => n.isEven).toList();
+  print(evens);  // [2, 4]
+
+  print(operate(10, 5, (a, b) => a - b));  // 5
+}'>Copy</button>
+          </div>
+          <pre><code><span class="cmt">// Standard function</span>
+<span class="type">String</span> <span class="fn">greet</span>(<span class="type">String</span> name) {
+  <span class="kw">return</span> <span class="str">"Hello, $name!"</span>;
+}
+
+<span class="cmt">// Arrow function (single expression)</span>
+<span class="kw">int</span> <span class="fn">doubleIt</span>(<span class="kw">int</span> x) => x * <span class="num">2</span>;
+
+<span class="cmt">// Optional positional parameter [brackets]</span>
+<span class="type">String</span> <span class="fn">describe</span>(<span class="type">String</span> name, [<span class="kw">int</span>? age]) =>
+    age == <span class="kw">null</span> ? name : <span class="str">"$name is $age years old"</span>;
+
+<span class="cmt">// Named parameters {braces} with defaults</span>
+<span class="kw">void</span> <span class="fn">createUser</span>(<span class="type">String</span> name, {<span class="kw">int</span> age = <span class="num">18</span>, <span class="type">String</span> role = <span class="str">"user"</span>}) {
+  <span class="fn">print</span>(<span class="str">"$name ($age) - $role"</span>);
+}
+
+<span class="cmt">// Higher-order function</span>
+<span class="kw">int</span> <span class="fn">operate</span>(<span class="kw">int</span> a, <span class="kw">int</span> b, <span class="kw">int</span> <span class="type">Function</span>(<span class="kw">int</span>, <span class="kw">int</span>) op) => op(a, b);
+
+<span class="cmt">// Anonymous function (lambda)</span>
+<span class="kw">final</span> sum = (<span class="kw">int</span> a, <span class="kw">int</span> b) => a + b;
+
+<span class="kw">void</span> <span class="fn">main</span>() {
+  <span class="fn">print</span>(<span class="fn">greet</span>(<span class="str">"Alice"</span>));
+  <span class="fn">print</span>(<span class="fn">doubleIt</span>(<span class="num">21</span>));
+
+  <span class="fn">print</span>(<span class="fn">describe</span>(<span class="str">"Bob"</span>));
+  <span class="fn">print</span>(<span class="fn">describe</span>(<span class="str">"Bob"</span>, <span class="num">30</span>));
+
+  <span class="fn">createUser</span>(<span class="str">"Charlie"</span>, age: <span class="num">25</span>, role: <span class="str">"admin"</span>);
+
+  <span class="kw">final</span> nums = [<span class="num">1</span>, <span class="num">2</span>, <span class="num">3</span>, <span class="num">4</span>, <span class="num">5</span>];
+  <span class="kw">final</span> evens = nums.<span class="fn">where</span>((n) => n.isEven).<span class="fn">toList</span>();
+  <span class="fn">print</span>(evens);  <span class="cmt">// [2, 4]</span>
+
+  <span class="fn">print</span>(<span class="fn">operate</span>(<span class="num">10</span>, <span class="num">5</span>, (a, b) => a - b));  <span class="cmt">// 5</span>
+}</code></pre>
+        </div>
+
+        <div class="dl-output">
+          <div class="dl-output-label">Output</div>
+          <pre>Hello, Alice!
+42
+Bob
+Bob is 30 years old
+Charlie (25) - admin
+[2, 4]
+5</pre>
+        </div>
+
+        <div class="dl-callout">
+          <p><strong>Named parameters</strong> make call sites self-documenting — <code>createUser(age: 25, name: "Bob")</code> reads like a sentence. They also let you omit arguments without breaking callers.</p>
+        </div>
+
+        <!-- Exercise -->
+        <div class="dl-exercise" id="exercise-functions">
+          <div class="dl-exercise-title">
+            Practice: Functions
+          </div>
+          <p>What is the result of <code>final f = (int n) => n * n; f(6)</code>?</p>
+          <ol>
+            <li><code>6</code></li>
+            <li><code>36</code></li>
+            <li><code>12</code></li>
+            <li><code>66</code></li>
+          </ol>
+          <button type="button" class="dl-exercise-toggle" aria-expanded="false" aria-controls="solution-functions">Show Solution</button>
+          <div class="dl-exercise-solution" id="solution-functions">
+            <p><strong>Correct Answer: B</strong></p>
+            <p><code>f</code> is an anonymous arrow function that squares its argument. <code>f(6)</code> returns <code>36</code>. Functions can be stored in variables and used like any other value in Dart.</p>
+          </div>
+        </div>
+      </article>
+
+      <!-- ════════════════════════════════════════
+           LESSON 6: CLASSES & MIXINS
+           ════════════════════════════════════════ -->
+      <div class="dl-divider">
+        <span class="dl-divider-inner">Next Topic</span>
+      </div>
+
+      <article class="dl-lesson" id="topic-classes" data-topic="5">
+        <div class="dl-lesson-header">
+          <span class="dl-lesson-number">06</span>
+          <h3>Classes &amp; Mixins</h3>
+        </div>
+
+        <p>
+          Dart is fully object-oriented. Classes support constructors (including named constructors), getters/setters, inheritance via <code>extends</code>, abstract classes, and — uniquely — <strong>mixins</strong> with the <code>with</code> keyword to reuse code across unrelated classes.
+        </p>
+
+        <div class="dl-code-block">
+          <div class="dl-code-header">
+            <span class="dl-code-lang">Dart</span>
+            <button type="button" class="dl-code-copy" aria-label="Copy code" data-code='// Class with a generative constructor
+class User {
+  final int id;
+  final String name;
+
+  User(this.id, this.name);  // shorthand constructor
+
+  String describe() => "User #$id: $name";
+}
+
+// Named constructor
+class Point {
+  final double x;
+  final double y;
+
+  Point(this.x, this.y);
+
+  Point.origin() : x = 0, y = 0;
+
+  double get magnitude => x * x + y * y;
+}
+
+// Inheritance with abstract class
+abstract class Animal {
+  final String name;
+  Animal(this.name);
+  void speak();  // must be implemented
+}
+
+class Dog extends Animal {
+  Dog(super.name);
+  @override
+  void speak() => print("$name barks!");
+}
+
+// Mixin: reusable behavior without inheritance
+mixin Swimmer {
+  void swim() => print("Swimming!");
+}
+
+class Duck extends Animal with Swimmer {
+  Duck(super.name);
+  @override
+  void speak() => print("$name quacks!");
+}
+
+void main() {
+  final user = User(1, "Alice");
+  print(user.describe());
+
+  final p = Point.origin();
+  print(p.magnitude);  // 0.0
+
+  final duck = Duck("Daffy");
+  duck.speak();   // Daffy quacks!
+  duck.swim();    // Swimming!  (from mixin)
+}'>Copy</button>
+          </div>
+          <pre><code><span class="cmt">// Class with a generative constructor</span>
+<span class="kw">class</span> <span class="fn">User</span> {
+  <span class="kw">final int</span> id;
+  <span class="kw">final String</span> name;
+
+  <span class="fn">User</span>(<span class="kw">this</span>.id, <span class="kw">this</span>.name);  <span class="cmt">// shorthand constructor</span>
+
+  <span class="type">String</span> <span class="fn">describe</span>() => <span class="str">"User #$id: $name"</span>;
+}
+
+<span class="cmt">// Named constructor</span>
+<span class="kw">class</span> <span class="fn">Point</span> {
+  <span class="kw">final double</span> x;
+  <span class="kw">final double</span> y;
+
+  <span class="fn">Point</span>(<span class="kw">this</span>.x, <span class="kw">this</span>.y);
+
+  <span class="fn">Point.origin</span>() : x = <span class="num">0</span>, y = <span class="num">0</span>;
+
+  <span class="kw">double</span> <span class="kw">get</span> magnitude => x * x + y * y;
+}
+
+<span class="cmt">// Inheritance with abstract class</span>
+<span class="kw">abstract class</span> <span class="fn">Animal</span> {
+  <span class="kw">final String</span> name;
+  <span class="fn">Animal</span>(<span class="kw">this</span>.name);
+  <span class="kw">void</span> <span class="fn">speak</span>();
+}
+
+<span class="kw">class</span> <span class="fn">Dog</span> <span class="kw">extends</span> <span class="fn">Animal</span> {
+  <span class="fn">Dog</span>(super.name);
+  <span class="kw">@override</span>
+  <span class="kw">void</span> <span class="fn">speak</span>() => <span class="fn">print</span>(<span class="str">"$name barks!"</span>);
+}
+
+<span class="cmt">// Mixin: reusable behavior without inheritance</span>
+<span class="kw">mixin</span> <span class="fn">Swimmer</span> {
+  <span class="kw">void</span> <span class="fn">swim</span>() => <span class="fn">print</span>(<span class="str">"Swimming!"</span>);
+}
+
+<span class="kw">class</span> <span class="fn">Duck</span> <span class="kw">extends</span> <span class="fn">Animal</span> <span class="kw">with</span> <span class="fn">Swimmer</span> {
+  <span class="fn">Duck</span>(super.name);
+  <span class="kw">@override</span>
+  <span class="kw">void</span> <span class="fn">speak</span>() => <span class="fn">print</span>(<span class="str">"$name quacks!"</span>);
+}
+
+<span class="kw">void</span> <span class="fn">main</span>() {
+  <span class="kw">final</span> user = <span class="fn">User</span>(<span class="num">1</span>, <span class="str">"Alice"</span>);
+  <span class="fn">print</span>(user.<span class="fn">describe</span>());
+
+  <span class="kw">final</span> p = <span class="fn">Point.origin</span>();
+  <span class="fn">print</span>(p.magnitude);  <span class="cmt">// 0.0</span>
+
+  <span class="kw">final</span> duck = <span class="fn">Duck</span>(<span class="str">"Daffy"</span>);
+  duck.<span class="fn">speak</span>();   <span class="cmt">// Daffy quacks!</span>
+  duck.<span class="fn">swim</span>();    <span class="cmt">// Swimming!  (from mixin)</span>
+}</code></pre>
+        </div>
+
+        <div class="dl-output">
+          <div class="dl-output-label">Output</div>
+          <pre>User #1: Alice
+0.0
+Daffy quacks!
+Swimming!</pre>
+        </div>
+
+        <div class="dl-concept">
+          <h4>Mixins vs Inheritance</h4>
+          <ul>
+            <li><strong>extends</strong> — a single inheritance chain. Use for "is-a" relationships.</li>
+            <li><strong>with (mixin)</strong> — reuse behavior across unrelated classes. Use for "has-a" capabilities like <code>Swimmer</code>, <code>Comparable</code>, or logging.</li>
+            <li><strong>implements</strong> — treat a class as an interface and provide your own implementation.</li>
+          </ul>
+        </div>
+
+        <!-- Exercise -->
+        <div class="dl-exercise" id="exercise-classes">
+          <div class="dl-exercise-title">
+            Practice: Classes &amp; Mixins
+          </div>
+          <p>What keyword adds a mixin's behavior to a class?</p>
+          <ol>
+            <li><code>extends</code></li>
+            <li><code>with</code></li>
+            <li><code>implements</code></li>
+            <li><code>@mixin</code></li>
+          </ol>
+          <button type="button" class="dl-exercise-toggle" aria-expanded="false" aria-controls="solution-classes">Show Solution</button>
+          <div class="dl-exercise-solution" id="solution-classes">
+            <p><strong>Correct Answer: B</strong></p>
+            <p>Mixins are applied with the <code>with</code> keyword: <code>class Duck extends Animal with Swimmer</code>. A class can apply multiple mixins: <code>with Swimmer, Flyer</code>. Unlike inheritance, mixins don't create a parent-child relationship.</p>
+          </div>
+        </div>
+      </article>
+
+      <!-- ════════════════════════════════════════
+           LESSON 7: COLLECTIONS
+           ════════════════════════════════════════ -->
+      <article class="dl-lesson" id="topic-collections" data-topic="6">
+        <div class="dl-lesson-header">
+          <span class="dl-lesson-number">07</span>
+          <h3>Collections</h3>
+        </div>
+
+        <p>
+          Dart ships with rich collections — <code>List</code>, <code>Set</code>, and <code>Map</code> — plus collection <code>if</code>, spread operators, and a powerful set of functional methods for transforming data.
+        </p>
+
+        <div class="dl-code-block">
+          <div class="dl-code-header">
+            <span class="dl-code-lang">Dart</span>
+            <button type="button" class="dl-code-copy" aria-label="Copy code" data-code='void main() {
+  // List (ordered, indexable)
+  final fruits = ["Apple", "Banana", "Cherry"];
+  print(fruits[1]);  // Banana
+  fruits.add("Date");
+
+  // Set (unique elements)
+  final unique = {1, 2, 2, 3};
+  print(unique);  // {1, 2, 3}
+
+  // Map (key-value pairs)
+  final userMap = {
+    "name": "Alice",
+    "age": 30,
+  };
+  print(userMap["name"]);
+
+  // Collection-if: conditional elements
+  final isAdmin = true;
+  final roles = ["user", if (isAdmin) "admin"];
+  print(roles);  // [user, admin]
+
+  // Spread operator
+  final more = [0, ...fruits];
+  print(more.length);  // 5
+
+  // Functional operations
+  final numbers = [1, 2, 3, 4, 5, 6];
+  final evenSquares = numbers
+      .where((n) => n.isEven)
+      .map((n) => n * n)
+      .toList();
+  print(evenSquares);  // [4, 16, 36]
+
+  final total = numbers.reduce((a, b) => a + b);
+  print(total);  // 21
+}'>Copy</button>
+          </div>
+          <pre><code><span class="kw">void</span> <span class="fn">main</span>() {
+  <span class="cmt">// List (ordered, indexable)</span>
+  <span class="kw">final</span> fruits = [<span class="str">"Apple"</span>, <span class="str">"Banana"</span>, <span class="str">"Cherry"</span>];
+  <span class="fn">print</span>(fruits[<span class="num">1</span>]);  <span class="cmt">// Banana</span>
+  fruits.<span class="fn">add</span>(<span class="str">"Date"</span>);
+
+  <span class="cmt">// Set (unique elements)</span>
+  <span class="kw">final</span> unique = {<span class="num">1</span>, <span class="num">2</span>, <span class="num">2</span>, <span class="num">3</span>};
+  <span class="fn">print</span>(unique);  <span class="cmt">// {1, 2, 3}</span>
+
+  <span class="cmt">// Map (key-value pairs)</span>
+  <span class="kw">final</span> userMap = {
+    <span class="str">"name"</span>: <span class="str">"Alice"</span>,
+    <span class="str">"age"</span>: <span class="num">30</span>,
+  };
+  <span class="fn">print</span>(userMap[<span class="str">"name"</span>]);
+
+  <span class="cmt">// Collection-if</span>
+  <span class="kw">final</span> isAdmin = <span class="kw">true</span>;
+  <span class="kw">final</span> roles = [<span class="str">"user"</span>, <span class="kw">if</span> (isAdmin) <span class="str">"admin"</span>];
+  <span class="fn">print</span>(roles);  <span class="cmt">// [user, admin]</span>
+
+  <span class="cmt">// Spread operator</span>
+  <span class="kw">final</span> more = [<span class="num">0</span>, ...fruits];
+  <span class="fn">print</span>(more.length);  <span class="cmt">// 5</span>
+
+  <span class="cmt">// Functional operations</span>
+  <span class="kw">final</span> numbers = [<span class="num">1</span>, <span class="num">2</span>, <span class="num">3</span>, <span class="num">4</span>, <span class="num">5</span>, <span class="num">6</span>];
+  <span class="kw">final</span> evenSquares = numbers
+      .<span class="fn">where</span>((n) => n.isEven)
+      .<span class="fn">map</span>((n) => n * n)
+      .<span class="fn">toList</span>();
+  <span class="fn">print</span>(evenSquares);  <span class="cmt">// [4, 16, 36]</span>
+
+  <span class="kw">final</span> total = numbers.<span class="fn">reduce</span>((a, b) => a + b);
+  <span class="fn">print</span>(total);  <span class="cmt">// 21</span>
+}</code></pre>
+        </div>
+
+        <div class="dl-output">
+          <div class="dl-output-label">Output</div>
+          <pre>Banana
+{1, 2, 3}
+Alice
+[user, admin]
+5
+[4, 16, 36]
+21</pre>
+        </div>
+
+        <div class="dl-concept">
+          <h4>Common Collection Methods</h4>
+          <ul>
+            <li><strong>map</strong> — transform each element into a new value</li>
+            <li><strong>where</strong> — filter elements by a predicate</li>
+            <li><strong>reduce</strong> / <strong>fold</strong> — combine elements into a single value</li>
+            <li><strong>any</strong> / <strong>every</strong> — check predicates across the collection</li>
+            <li><strong>firstWhere</strong> — find the first element matching a predicate</li>
+          </ul>
+        </div>
+
+        <!-- Exercise -->
+        <div class="dl-exercise" id="exercise-collections">
+          <div class="dl-exercise-title">
+            Practice: Collections
+          </div>
+          <p>What does <code>{1, 2, 2, 3}</code> evaluate to in Dart?</p>
+          <ol>
+            <li><code>[1, 2, 2, 3]</code></li>
+            <li><code>{1, 2, 3}</code></li>
+            <li><code>{1: 2, 2: 3}</code></li>
+            <li>A compile error</li>
+          </ol>
+          <button type="button" class="dl-exercise-toggle" aria-expanded="false" aria-controls="solution-collections">Show Solution</button>
+          <div class="dl-exercise-solution" id="solution-collections">
+            <p><strong>Correct Answer: B</strong></p>
+            <p>Curly braces create a <code>Set</code>, which stores only unique elements. The duplicate <code>2</code> is dropped, leaving <code>{1, 2, 3}</code>.</p>
+          </div>
+        </div>
+      </article>
+
+      <!-- ════════════════════════════════════════
+           LESSON 8: ASYNC/AWAIT & STREAMS
+           ════════════════════════════════════════ -->
+      <div class="dl-divider">
+        <span class="dl-divider-inner">Next Topic</span>
+      </div>
+
+      <article class="dl-lesson" id="topic-async" data-topic="7">
+        <div class="dl-lesson-header">
+          <span class="dl-lesson-number">08</span>
+          <h3>Async/Await &amp; Streams</h3>
+        </div>
+
+        <p>
+          Dart handles asynchronous work with <code>Future</code> (a single value later) and <code>Stream</code> (a sequence of values over time). The <code>async</code>/<code>await</code> syntax keeps async code readable and linear, while <code>async*</code> generators make streams effortless.
+        </p>
+
+        <div class="dl-code-block">
+          <div class="dl-code-header">
+            <span class="dl-code-lang">Dart</span>
+            <button type="button" class="dl-code-copy" aria-label="Copy code" data-code='import "dart:async";
+
+// A Future: one value later
+Future<String> fetchUserData(int id) async {
+  await Future.delayed(const Duration(milliseconds: 300));
+  return "User data for #$id";
+}
+
+// A Stream: many values over time
+Stream<int> countDown(int from) async* {
+  for (var i = from; i > 0; i--) {
+    await Future.delayed(const Duration(milliseconds: 200));
+    yield i;
+  }
+}
+
+void main() async {
+  // await: pause until the Future completes
+  final data = await fetchUserData(1);
+  print(data);
+
+  // await for: listen to each stream event
+  await for (final n in countDown(3)) {
+    print("Tick: $n");
+  }
+
+  // listen: subscribe with callbacks
+  final controller = StreamController<String>();
+  controller.stream.listen((msg) => print("Got: $msg"));
+  controller.add("Hello");
+  controller.add("World");
+  await controller.close();
+
+  // Handling errors on a Future
+  try {
+    await Future.error("boom");
+  } catch (e) {
+    print("Caught: $e");
+  }
+}'>Copy</button>
+          </div>
+          <pre><code><span class="kw">import</span> <span class="str">"dart:async"</span>;
+
+<span class="cmt">// A Future: one value later</span>
+<span class="type">Future</span>&lt;<span class="type">String</span>&gt; <span class="fn">fetchUserData</span>(<span class="kw">int</span> id) <span class="kw">async</span> {
+  <span class="kw">await</span> <span class="type">Future</span>.<span class="fn">delayed</span>(<span class="kw">const</span> <span class="type">Duration</span>(milliseconds: <span class="num">300</span>));
+  <span class="kw">return</span> <span class="str">"User data for #$id"</span>;
+}
+
+<span class="cmt">// A Stream: many values over time</span>
+<span class="type">Stream</span>&lt;<span class="kw">int</span>&gt; <span class="fn">countDown</span>(<span class="kw">int</span> from) <span class="kw">async*</span> {
+  <span class="kw">for</span> (<span class="kw">var</span> i = from; i > <span class="num">0</span>; i--) {
+    <span class="kw">await</span> <span class="type">Future</span>.<span class="fn">delayed</span>(<span class="kw">const</span> <span class="type">Duration</span>(milliseconds: <span class="num">200</span>));
+    <span class="kw">yield</span> i;
+  }
+}
+
+<span class="kw">void</span> <span class="fn">main</span>() <span class="kw">async</span> {
+  <span class="cmt">// await: pause until the Future completes</span>
+  <span class="kw">final</span> data = <span class="kw">await</span> <span class="fn">fetchUserData</span>(<span class="num">1</span>);
+  <span class="fn">print</span>(data);
+
+  <span class="cmt">// await for: listen to each stream event</span>
+  <span class="kw">await for</span> (<span class="kw">final</span> n <span class="kw">in</span> <span class="fn">countDown</span>(<span class="num">3</span>)) {
+    <span class="fn">print</span>(<span class="str">"Tick: $n"</span>);
+  }
+
+  <span class="cmt">// listen: subscribe with callbacks</span>
+  <span class="kw">final</span> controller = <span class="type">StreamController</span>&lt;<span class="type">String</span>&gt;();
+  controller.stream.<span class="fn">listen</span>((msg) => <span class="fn">print</span>(<span class="str">"Got: $msg"</span>));
+  controller.<span class="fn">add</span>(<span class="str">"Hello"</span>);
+  controller.<span class="fn">add</span>(<span class="str">"World"</span>);
+  <span class="kw">await</span> controller.<span class="fn">close</span>();
+
+  <span class="cmt">// Handling errors on a Future</span>
+  <span class="kw">try</span> {
+    <span class="kw">await</span> <span class="type">Future</span>.<span class="fn">error</span>(<span class="str">"boom"</span>);
+  } <span class="kw">catch</span> (e) {
+    <span class="fn">print</span>(<span class="str">"Caught: $e"</span>);
+  }
+}</code></pre>
+        </div>
+
+        <div class="dl-output">
+          <div class="dl-output-label">Output</div>
+          <pre>User data for #1
+Tick: 3
+Tick: 2
+Tick: 1
+Got: Hello
+Got: World
+Caught: boom</pre>
+        </div>
+
+        <div class="dl-concept">
+          <h4>Future vs Stream</h4>
+          <ul>
+            <li><strong>Future&lt;T&gt;</strong> — completes once with a value (or error). Use <code>await</code> or <code>.then()</code>.</li>
+            <li><strong>Stream&lt;T&gt;</strong> — emits zero or more values over time. Use <code>await for</code>, <code>.listen()</code>, or stream transformers like <code>.map()</code> and <code>.where()</code>.</li>
+            <li><strong>async*</strong> — marks a function as a stream generator that emits values with <code>yield</code>.</li>
+          </ul>
+        </div>
+
+        <!-- Exercise -->
+        <div class="dl-exercise" id="exercise-async">
+          <div class="dl-exercise-title">
+            Practice: Async/Await &amp; Streams
+          </div>
+          <p>Which keyword generates a <code>Stream</code> from a function that yields multiple values?</p>
+          <ol>
+            <li><code>async</code></li>
+            <li><code>async*</code></li>
+            <li><code>await</code></li>
+            <li><code>yield*</code></li>
+          </ol>
+          <button type="button" class="dl-exercise-toggle" aria-expanded="false" aria-controls="solution-async">Show Solution</button>
+          <div class="dl-exercise-solution" id="solution-async">
+            <p><strong>Correct Answer: B</strong></p>
+            <p>An <code>async*</code> function returns a <code>Stream</code> and emits values using <code>yield</code>. A plain <code>async</code> function returns a <code>Future</code> — a single value. <code>yield*</code> delegates to another stream.</p>
+          </div>
+        </div>
+      </article>
+
+      <!-- ════════════════════════════════════════
+           LESSON 9: DART & FLUTTER
+           ════════════════════════════════════════ -->
+      <article class="dl-lesson" id="topic-flutter" data-topic="8">
+        <div class="dl-lesson-header">
+          <span class="dl-lesson-number">09</span>
+          <h3>Dart &amp; Flutter</h3>
+        </div>
+
+        <p>
+          Flutter is written in, powered by, and extended through Dart. Everything you have learned — null safety, classes, mixins, collections, and async/await — is the foundation of every Flutter app. Dart's AOT compilation gives Flutter its native performance, while JIT + hot reload powers its fast development loop.
+        </p>
+
+        <div class="dl-concept">
+          <h4>How Dart Powers Flutter</h4>
+          <ul>
+            <li><strong>Single codebase:</strong> One Dart codebase compiles to native code for iOS, Android, web, and desktop.</li>
+            <li><strong>Widgets as functions:</strong> UI is built by composing widget classes — Flutter's tree is just Dart objects.</li>
+            <li><strong>Reactive state:</strong> <code>setState</code>, <code>FutureBuilder</code>, and <code>StreamBuilder</code> react to data changes automatically.</li>
+            <li><strong>Sound null safety:</strong> Eliminates crashes from missing widget/state values before shipping.</li>
+            <li><strong>No bridge overhead:</strong> Dart compiles to native machine code — no JavaScript bridge slowing things down.</li>
+          </ul>
+        </div>
+
+        <div class="dl-code-block">
+          <div class="dl-code-header">
+            <span class="dl-code-lang">Dart — Flutter Widget</span>
+            <button type="button" class="dl-code-copy" aria-label="Copy code" data-code='import "package:flutter/material.dart";
+
+void main() {
+  runApp(const MyApp());
+}
+
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      home: Scaffold(
+        appBar: AppBar(title: const Text("Dart & Flutter")),
+        body: const Center(child: CounterView()),
+      ),
+    );
+  }
+}
+
+// Stateful widget with setState
+class CounterView extends StatefulWidget {
+  const CounterView({super.key});
+
+  @override
+  State<CounterView> createState() => _CounterViewState();
+}
+
+class _CounterViewState extends State<CounterView> {
+  int _count = 0;
+
+  void _increment() {
+    setState(() => _count++);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text("Count: $_count"),
+        FilledButton(
+          onPressed: _increment,
+          child: const Text("Increment"),
+        ),
+      ],
+    );
+  }
+}'>Copy</button>
+          </div>
+          <pre><code><span class="kw">import</span> <span class="str">"package:flutter/material.dart"</span>;
+
+<span class="kw">void</span> <span class="fn">main</span>() {
+  <span class="fn">runApp</span>(<span class="kw">const</span> <span class="fn">MyApp</span>());
+}
+
+<span class="kw">class</span> <span class="fn">MyApp</span> <span class="kw">extends</span> <span class="fn">StatelessWidget</span> {
+  <span class="kw">const</span> <span class="fn">MyApp</span>({super.key});
+
+  <span class="kw">@override</span>
+  <span class="type">Widget</span> <span class="fn">build</span>(<span class="type">BuildContext</span> context) {
+    <span class="kw">return</span> <span class="fn">MaterialApp</span>(
+      home: <span class="fn">Scaffold</span>(
+        appBar: <span class="fn">AppBar</span>(title: <span class="kw">const</span> <span class="fn">Text</span>(<span class="str">"Dart & Flutter"</span>)),
+        body: <span class="kw">const</span> <span class="fn">Center</span>(child: <span class="fn">CounterView</span>()),
+      ),
+    );
+  }
+}
+
+<span class="cmt">// Stateful widget with setState</span>
+<span class="kw">class</span> <span class="fn">CounterView</span> <span class="kw">extends</span> <span class="fn">StatefulWidget</span> {
+  <span class="kw">const</span> <span class="fn">CounterView</span>({super.key});
+
+  <span class="kw">@override</span>
+  <span class="type">State</span>&lt;<span class="fn">CounterView</span>&gt; <span class="fn">createState</span>() => <span class="fn">_CounterViewState</span>();
+}
+
+<span class="kw">class</span> <span class="fn">_CounterViewState</span> <span class="kw">extends</span> <span class="fn">State</span>&lt;<span class="fn">CounterView</span>&gt; {
+  <span class="kw">int</span> _count = <span class="num">0</span>;
+
+  <span class="kw">void</span> <span class="fn">_increment</span>() {
+    <span class="fn">setState</span>(() => _count++);
+  }
+
+  <span class="kw">@override</span>
+  <span class="type">Widget</span> <span class="fn">build</span>(<span class="type">BuildContext</span> context) {
+    <span class="kw">return</span> <span class="fn">Column</span>(
+      mainAxisSize: <span class="type">MainAxisSize</span>.min,
+      children: [
+        <span class="fn">Text</span>(<span class="str">"Count: $_count"</span>),
+        <span class="fn">FilledButton</span>(
+          onPressed: _increment,
+          child: <span class="kw">const</span> <span class="fn">Text</span>(<span class="str">"Increment"</span>),
+        ),
+      ],
+    );
+  }
+}</code></pre>
+        </div>
+
+        <div class="dl-callout">
+          <p><strong>Stateless vs Stateful:</strong> Use <code>StatelessWidget</code> when the UI never changes on its own. Use <code>StatefulWidget</code> when the widget holds mutable state — <code>setState</code> marks the widget dirty and triggers a rebuild. For async data, prefer <code>FutureBuilder</code> and <code>StreamBuilder</code>, which tie directly into the Dart futures and streams from Lesson 8.</p>
+        </div>
+
+        <!-- Exercise -->
+        <div class="dl-exercise" id="exercise-flutter">
+          <div class="dl-exercise-title">
+            Practice: Dart &amp; Flutter
+          </div>
+          <p>Why does Flutter use Dart's AOT compilation?</p>
+          <ol>
+            <li>To run inside a JavaScript engine in the browser</li>
+            <li>To compile directly to native machine code for fast startup and performance</li>
+            <li>To avoid using a garbage collector</li>
+            <li>To allow Flutter to use Java libraries directly</li>
+          </ol>
+          <button type="button" class="dl-exercise-toggle" aria-expanded="false" aria-controls="solution-flutter">Show Solution</button>
+          <div class="dl-exercise-solution" id="solution-flutter">
+            <p><strong>Correct Answer: B</strong></p>
+            <p>Ahead-of-time compilation translates Dart into native machine code before the app runs, giving Flutter fast startup and smooth 60/120fps rendering without a bridge to interpret code at runtime.</p>
+          </div>
+        </div>
+      </article>
+
+    </section>
+
+    <!-- ════════════════════════════════════════
+         FOOTER
+         ════════════════════════════════════════ -->
+    <footer class="dl-footer">
+      <p>Build real apps with the <a href="/pages/learning/flutter-learning/flutter-learning.html">Flutter Learning Path →</a></p>
+      <p>Back to <a href="/pages/learning/languages.html">Programming Languages</a></p>
+    </footer>
+  </main>
+
+  <script src="/auth.js"></script>
+  <script src="/theme.js"></script>
+  <script src="/script.js"></script>
+  <script src="dart-learning.js"></script>
+</body>
+</html>

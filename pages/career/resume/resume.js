@@ -549,29 +549,38 @@ async function initAuditHistory() {
     const labels = trendsData.map((t) => new Date(t.timestamp).toLocaleDateString());
     const data = trendsData.map((t) => t.overallScore);
 
-    trendsChartInstance = new window.Chart(ctx, {
-      type: 'line',
-      data: {
-        labels,
-        datasets: [
-          {
-            label: 'ATS Score',
-            data,
-            borderColor: '#60a5fa',
-            backgroundColor: 'rgba(96, 165, 250, 0.1)',
-            fill: true,
-            tension: 0.4,
-          },
-        ],
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        scales: {
-          y: { beginAtZero: true, max: 100 },
+    function createChart() {
+      if (typeof window.Chart === 'undefined') return;
+      trendsChartInstance = new window.Chart(ctx, {
+        type: 'line',
+        data: {
+          labels,
+          datasets: [
+            {
+              label: 'ATS Score',
+              data,
+              borderColor: '#60a5fa',
+              backgroundColor: 'rgba(96, 165, 250, 0.1)',
+              fill: true,
+              tension: 0.4,
+            },
+          ],
         },
-      },
-    });
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            y: { beginAtZero: true, max: 100 },
+          },
+        },
+      });
+    }
+
+    if (typeof lazyVisualizer !== 'undefined') {
+      lazyVisualizer.lazyLoadChartJS(ctx, createChart);
+    } else {
+      createChart();
+    }
   } catch (err) {
     console.error('Failed to load audit history:', err);
   }

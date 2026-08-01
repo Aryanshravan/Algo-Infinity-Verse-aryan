@@ -1,0 +1,262 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Quantum Entanglement Communicator | Algo Infinity Verse</title>
+    <link rel="stylesheet" href="/styles.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <!-- Monaco Editor -->
+    <script src="https://unpkg.com/monaco-editor@0.36.1/min/vs/loader.js"></script>
+    <style>
+      body { margin: 0; overflow: hidden; background: #000; font-family: 'Poppins', sans-serif; color: #fff; }
+      .app-container { display: flex; height: 100vh; }
+      
+      .sidebar { width: 450px; background: rgba(15, 23, 42, 0.95); border-right: 1px solid #14b8a6; display: flex; flex-direction: column; z-index: 10; }
+      .header { padding: 20px; border-bottom: 1px solid #334155; }
+      .header h2 { margin: 0; color: #14b8a6; font-family: 'Orbitron', sans-serif; font-size: 1.2rem; }
+      .header p { margin: 5px 0 0 0; font-size: 0.8rem; color: #94a3b8; }
+      
+      #editor-container { flex: 1; min-height: 300px; }
+      
+      .controls { padding: 20px; border-top: 1px solid #334155; background: rgba(0,0,0,0.5); }
+      .btn { background: linear-gradient(90deg, #0d9488, #0f766e); color: #fff; border: none; padding: 10px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; transition: 0.3s; }
+      .btn:hover { background: #14b8a6; transform: translateY(-2px); box-shadow: 0 0 15px rgba(20, 184, 166, 0.5); }
+      
+      .sim-container { flex: 1; position: relative; background: #020617; overflow: hidden; }
+      canvas { width: 100%; height: 100%; display: block; filter: contrast(1.2); }
+      
+      .hud { position: absolute; top: 20px; left: 20px; background: rgba(0,0,0,0.8); padding: 15px; border-radius: 8px; border: 1px solid #14b8a6; width: 280px; z-index: 10; pointer-events: none; }
+      .hud h3 { margin: 0 0 10px 0; color: #14b8a6; font-size: 1rem; font-family: 'Orbitron', sans-serif; }
+      .metric { display: flex; justify-content: space-between; font-size: 0.8rem; color: #cbd5e1; margin-bottom: 5px; }
+      .val { font-weight: bold; font-family: monospace; }
+      .val-integrity { color: #38bdf8; }
+      .val-noise { color: #facc15; }
+    </style>
+  </head>
+  <body>
+    
+    <div class="app-container">
+      <div class="sidebar">
+        <div class="header">
+          <h2><i class="fas fa-network-wired"></i> Quantum Entanglement</h2>
+          <p>Instantaneous FTL Communication</p>
+        </div>
+        
+        <div id="editor-container"></div>
+        
+        <div class="controls">
+          <button class="btn" onclick="initiateLink()"><i class="fas fa-satellite-dish"></i> Establish Quantum Link</button>
+        </div>
+      </div>
+      
+      <div class="sim-container">
+        <!-- Noise Background -->
+        <div id="noiseOverlay" style="position: absolute; inset:0; background: url('data:image/svg+xml,%3Csvg width=\"100%\" height=\"100%\" xmlns=\"http://www.w3.org/2000/svg\"%3E%3Cfilter id=\"n\"%3E%3CfeTurbulence type=\"fractalNoise\" baseFrequency=\"0.5\" numOctaves=\"2\" stitchTiles=\"stitch\"/%3E%3C/filter%3E%3Crect width=\"100%\" height=\"100%\" filter=\"url(%23n)\" opacity=\"0.05\"/%3E%3C/svg%3E'); pointer-events: none; z-index: 0; opacity: 0.5;"></div>
+        
+        <canvas id="quantumCanvas" style="position: relative; z-index: 1;"></canvas>
+        
+        <div class="hud">
+          <h3>Link Telemetry</h3>
+          <div class="metric"><span>Decoherence Noise:</span> <span class="val val-noise" id="noiseVal">0%</span></div>
+          <div class="metric"><span>Link Integrity:</span> <span class="val val-integrity" id="integrityVal">100%</span></div>
+          <div class="metric"><span>Bandwidth:</span> <span class="val" id="bwVal" style="color:#5eead4">0 Qubits/s</span></div>
+          <div class="metric" style="margin-top: 10px; border-top: 1px solid #334155; padding-top: 5px;">
+            <span>Connection State:</span> <span class="val" id="statusVal" style="color:#94a3b8">OFFLINE</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      let editor;
+      require.config({ paths: { 'vs': 'https://unpkg.com/monaco-editor@0.36.1/min/vs' }});
+      require(['vs/editor/editor.main'], function() {
+        editor = monaco.editor.create(document.getElementById('editor-container'), {
+          value: `// Quantum Error Correction Algorithm
+// Cosmic background radiation and gravitational waves cause quantum decoherence (noise).
+// Write an algorithm to filter out the noise and stabilize the entangled qubit stream.
+// Filter carefully: Too little filtering breaks the link. Too much reduces bandwidth to zero.
+
+function filterQubits(stream, noiseLevel) {
+    // 'stream' is an array of noisy floats [-1.0 to 1.0]. Signal should be around 0.5 or -0.5.
+    // 'noiseLevel' is the current environmental noise [0.0 to 1.0].
+    // Return an array of corrected floats.
+    
+    // Naive logic: Average it out to 0
+    // Result: No bandwidth, link fails to transmit data.
+    
+    return stream.map(q => 0);
+}`,
+          language: 'javascript',
+          theme: 'vs-dark',
+          minimap: { enabled: false },
+          automaticLayout: true
+        });
+      });
+
+      const canvas = document.getElementById('quantumCanvas');
+      const ctx = canvas.getContext('2d');
+      
+      let isSimulating = false;
+      let time = 0;
+      
+      let integrity = 100;
+      let bandwidth = 0;
+      let environmentalNoise = 0;
+      let waveData = [];
+      let correctedData = [];
+      
+      function resize() { 
+          canvas.width = canvas.clientWidth; 
+          canvas.height = canvas.clientHeight;
+      }
+      
+      setTimeout(resize, 100);
+      window.addEventListener('resize', resize);
+
+      function animate() {
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+          let cx = canvas.width / 2;
+          let cy = canvas.height / 2;
+
+          if (isSimulating) {
+              time += 0.05;
+              
+              // Simulate environmental noise (gravity waves, cosmic background)
+              environmentalNoise = 0.3 + (Math.sin(time * 0.5) * 0.2) + (Math.random() * 0.4);
+              if (environmentalNoise > 1.0) environmentalNoise = 1.0;
+              if (environmentalNoise < 0.0) environmentalNoise = 0.0;
+              
+              // Update visual noise overlay
+              document.getElementById('noiseOverlay').style.opacity = environmentalNoise * 0.8;
+              
+              // Generate noisy qubit stream
+              waveData = [];
+              for(let i=0; i<100; i++) {
+                  let idealSignal = Math.sin((time * 2) + (i * 0.1)) > 0 ? 0.5 : -0.5; // Digital-ish quantum states
+                  let noise = (Math.random() - 0.5) * environmentalNoise * 2.0;
+                  waveData.push(idealSignal + noise);
+              }
+              
+              // Run user algorithm
+              correctedData = [];
+              try {
+                  eval(editor.getValue());
+                  let res = filterQubits([...waveData], environmentalNoise);
+                  if(Array.isArray(res)) correctedData = res;
+              } catch(e) {}
+              
+              // Evaluate correctness
+              let currentError = 0;
+              let currentBw = 0;
+              
+              for(let i=0; i<100; i++) {
+                  let idealSignal = Math.sin((time * 2) + (i * 0.1)) > 0 ? 0.5 : -0.5;
+                  let corrected = correctedData[i] || 0;
+                  
+                  let diff = Math.abs(idealSignal - corrected);
+                  currentError += diff;
+                  
+                  // If it's a flatline (e.g. naive 0), bandwidth is 0. If it perfectly tracks, bandwidth is max.
+                  if (Math.abs(corrected) > 0.1) currentBw++; 
+              }
+              
+              // Physics
+              if (currentError > 40) {
+                  integrity -= 0.5; // Decoherence!
+              } else {
+                  integrity += 0.2;
+              }
+              
+              if(integrity > 100) integrity = 100;
+              
+              bandwidth = (currentBw / 100) * 1024; // Qubits/s
+              if (currentError > 60) bandwidth = 0; // Completely scrambled
+              
+              // End states
+              if (integrity <= 0) {
+                  integrity = 0;
+                  isSimulating = false;
+                  document.getElementById('statusVal').innerText = "WAVEFUNCTION COLLAPSED";
+                  document.getElementById('statusVal').style.color = "#ef4444";
+              } else if (time > 20 && integrity > 90 && bandwidth > 500) {
+                  document.getElementById('statusVal').innerText = "STABLE ENTANGLEMENT";
+                  document.getElementById('statusVal').style.color = "#10b981";
+              } else {
+                  if (integrity < 50) {
+                      document.getElementById('statusVal').innerText = "DECOHERENCE IMMINENT";
+                      document.getElementById('statusVal').style.color = "#facc15";
+                  } else {
+                      document.getElementById('statusVal').innerText = "TRANSMITTING DATA...";
+                      document.getElementById('statusVal').style.color = "#38bdf8";
+                  }
+              }
+              
+              // HUD
+              document.getElementById('noiseVal').innerText = (environmentalNoise * 100).toFixed(1) + "%";
+              let intEl = document.getElementById('integrityVal');
+              intEl.innerText = integrity.toFixed(1) + "%";
+              if(integrity < 50) intEl.style.color = "#ef4444"; else intEl.style.color = "#38bdf8";
+              document.getElementById('bwVal').innerText = bandwidth.toFixed(0) + " kQ/s";
+          }
+          
+          // Draw Visualization
+          // Two entanglement nodes
+          let nodeDist = Math.min(canvas.width * 0.4, 400);
+          
+          ctx.fillStyle = '#14b8a6';
+          ctx.shadowBlur = 20;
+          ctx.shadowColor = '#14b8a6';
+          ctx.beginPath(); ctx.arc(cx - nodeDist, cy, 30, 0, Math.PI*2); ctx.fill();
+          ctx.beginPath(); ctx.arc(cx + nodeDist, cy, 30, 0, Math.PI*2); ctx.fill();
+          ctx.shadowBlur = 0;
+          
+          // Draw raw noisy stream (Red)
+          if (waveData.length > 0) {
+              ctx.strokeStyle = 'rgba(239, 68, 68, 0.4)';
+              ctx.lineWidth = 2;
+              ctx.beginPath();
+              for(let i=0; i<100; i++) {
+                  let px = (cx - nodeDist) + (i/100) * (nodeDist*2);
+                  let py = cy + waveData[i] * 100;
+                  if (i===0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+              }
+              ctx.stroke();
+          }
+          
+          // Draw corrected stream (Cyan)
+          if (correctedData.length > 0) {
+              ctx.strokeStyle = 'rgba(56, 189, 248, 1.0)';
+              ctx.lineWidth = 4;
+              ctx.shadowBlur = 10;
+              ctx.shadowColor = '#38bdf8';
+              ctx.beginPath();
+              for(let i=0; i<100; i++) {
+                  let val = correctedData[i] || 0;
+                  let px = (cx - nodeDist) + (i/100) * (nodeDist*2);
+                  let py = cy + val * 100;
+                  if (i===0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+              }
+              ctx.stroke();
+              ctx.shadowBlur = 0;
+          }
+
+          requestAnimationFrame(animate);
+      }
+      
+      animate();
+
+      function initiateLink() {
+          if(isSimulating) return;
+          isSimulating = true;
+          time = 0;
+          integrity = 100;
+          bandwidth = 0;
+          document.getElementById('statusVal').innerText = "ESTABLISHING LINK...";
+          document.getElementById('statusVal').style.color = "#14b8a6";
+      }
+    </script>
+  </body>
+</html>

@@ -1,504 +1,1043 @@
-/* ─────────────────────────────────────────────
-   C++ Learning Page – Scoped Component Styles
-   ───────────────────────────────────────────── */
+/* ================================================
+   C++ LEARNING PAGE — Redesign
+   ================================================
+   Design direction:
+   - Pastel blue (#7CB9E8) as primary accent
+   - C++ blue (#00599C) kept solid, no gradients
+   - Pastel yellow (#FDE68A) for highlights
+   - Pastel mint (#A7F3D0) for success
+   - JetBrains Mono (display/code) + Inter (body)
+   - No purple, no cyan, no lime
+   - Signature: angle-bracket motif <> in hero
+   ================================================ */
 
-:root {
+/* ─── CSS Variables (scoped) ─── */
+[data-page='cplusplus-learning'] {
+  --cpp-bg: #0c0c12;
+  --cpp-surface: #13131c;
+  --cpp-elevated: #1c1c2a;
   --cpp-primary: #00599C;
-  --cpp-secondary: #659AD2;
-  --cpp-gradient: linear-gradient(135deg, #00599C 0%, #659AD2 100%);
-  --cpp-bg: rgba(0, 89, 156, 0.06);
-  --cpp-bg-hover: rgba(0, 89, 156, 0.12);
+  --cpp-primary-rgb: 0, 89, 156;
+  --cpp-primary-soft: #7CB9E8;
+  --cpp-primary-soft-rgb: 124, 185, 232;
+  --cpp-primary-light: #A8D0E6;
+  --cpp-accent: #FDE68A;
+  --cpp-accent-rgb: 253, 230, 138;
+  --cpp-success: #A7F3D0;
+  --cpp-success-rgb: 167, 243, 208;
+  --cpp-text: #f1f5f9;
+  --cpp-text-muted: #94a3b8;
+  --cpp-text-faint: #5c6084;
+  --cpp-border: rgba(148, 163, 184, 0.10);
+  --cpp-border-hover: rgba(124, 185, 232, 0.20);
+  --cpp-radius: 12px;
+  --cpp-radius-sm: 8px;
+  --cpp-radius-pill: 100px;
+  --cpp-code-bg: #0f0f18;
+  --cpp-mono: 'JetBrains Mono', 'Fira Code', monospace;
+  --cpp-body: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
 }
 
-/* Hero typing text */
-.typing-text_cpp {
-  color: var(--cpp-primary);
-  font-weight: 600;
+/* ─── Override global cyan focus ring — use pastel blue ─── */
+[data-page='cplusplus-learning'] :focus-visible {
+  outline: 2px solid var(--cpp-primary-soft) !important;
+  outline-offset: 2px !important;
+  box-shadow: 0 0 0 4px rgba(var(--cpp-primary-soft-rgb), 0.18) !important;
 }
 
-/* ── Topic Navigation Sidebar ── */
-.cpp-layout {
-  display: flex;
-  gap: 2rem;
-  align-items: flex-start;
+/* ─── Hide the global Report Issue button on this page ─── */
+[data-page='cplusplus-learning'] #reportIssueBtn,
+[data-page='cplusplus-learning'] .report-issue-btn {
+  display: none !important;
 }
 
-.cpp-sidebar {
-  position: sticky;
-  top: 100px;
-  width: 240px;
-  flex-shrink: 0;
-  background: var(--glass-bg);
-  border: 1px solid var(--glass-border);
-  border-radius: 16px;
-  padding: 1.25rem 0;
-  backdrop-filter: blur(10px);
-}
-
-.cpp-sidebar-title {
-  font-size: 0.75rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  color: var(--text-secondary);
-  padding: 0 1.25rem 0.75rem;
-  border-bottom: 1px solid var(--glass-border);
-  margin-bottom: 0.5rem;
-}
-
-.cpp-sidebar-nav {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
-.cpp-sidebar-nav li a {
+/* ─── Hero Section ─── */
+[data-page='cplusplus-learning'] .cpp-hero {
+  position: relative;
+  padding: 6rem 1rem 2rem;
+  text-align: center;
+  overflow: hidden;
+  background: var(--cpp-bg);
+  min-height: 30vh;
   display: flex;
   align-items: center;
-  gap: 0.6rem;
-  padding: 0.55rem 1.25rem;
-  font-size: 0.85rem;
-  color: var(--text-secondary);
-  text-decoration: none;
-  transition: all 0.2s ease;
-  border-left: 3px solid transparent;
+  justify-content: center;
 }
 
-.cpp-sidebar-nav li a:hover,
-.cpp-sidebar-nav li a.active {
-  color: var(--cpp-primary);
-  background: var(--cpp-bg);
-  border-left-color: var(--cpp-primary);
+.cpp-hero-bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
 }
 
-.cpp-sidebar-nav li a .nav-icon {
-  width: 20px;
+.cpp-hero-glow {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 45% 30% at 30% 50%, rgba(var(--cpp-primary-rgb), 0.035) 0%, transparent 50%),
+    radial-gradient(ellipse 35% 25% at 70% 40%, rgba(var(--cpp-primary-soft-rgb), 0.02) 0%, transparent 50%);
+  pointer-events: none;
+}
+
+/* ─── Angle-Bracket Signature ─── */
+.cpp-brackets {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  margin-bottom: 1.25rem;
+  opacity: 0.35;
+  font-family: var(--cpp-mono);
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: var(--cpp-primary-soft);
+  letter-spacing: -2px;
+}
+
+.cpp-bracket {
+  display: inline-block;
+  transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), color 0.3s ease;
+  animation: cppBracketPulse 3.5s ease-in-out infinite;
+}
+
+.cpp-bracket:nth-child(1) { animation-delay: 0s; color: var(--cpp-primary-soft); }
+.cpp-bracket:nth-child(2) { animation-delay: 0.6s; color: var(--cpp-primary-light); }
+.cpp-bracket:nth-child(3) { animation-delay: 1.2s; color: var(--cpp-primary-soft); }
+
+.cpp-bracket-slash {
+  display: inline-block;
+  color: var(--cpp-accent);
+  opacity: 0.5;
+  font-size: 1.2rem;
+  margin: 0 4px;
+  animation: cppBracketPulse 3.5s ease-in-out 0.3s infinite;
+}
+
+@keyframes cppBracketPulse {
+  0%, 100% {
+    transform: scaleY(1);
+    opacity: 0.35;
+  }
+  50% {
+    transform: scaleY(1.3);
+    opacity: 0.6;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cpp-bracket,
+  .cpp-bracket-slash {
+    animation: none !important;
+  }
+}
+
+.cpp-hero-content {
+  position: relative;
+  z-index: 1;
+  max-width: 900px;
+  width: 100%;
+}
+
+/* ─── Static Title (pastel blue, monospace) ─── */
+.cpp-hero-title {
+  font-family: var(--cpp-mono);
+  font-size: clamp(2rem, 5.5vw, 4rem);
+  font-weight: 700;
+  line-height: 1.2;
+  margin-bottom: 1rem;
+  letter-spacing: -0.5px;
+  cursor: default;
+  color: var(--cpp-primary-soft);
+}
+
+.cpp-title-line {
+  display: block;
+  color: var(--cpp-primary-soft);
+}
+
+.cpp-title-line:last-child {
+  color: var(--cpp-primary-soft);
+}
+
+.cpp-hero-subtitle {
+  font-family: var(--cpp-body);
+  font-size: 1.05rem;
+  color: var(--cpp-text-muted);
+  line-height: 1.6;
+  max-width: 540px;
+  margin: 0 auto 2rem;
+}
+
+.cpp-hero-subtitle strong {
+  color: var(--cpp-primary-soft);
+  font-weight: 600;
+}
+
+/* ─── Hero Stats ─── */
+.cpp-hero-stats {
+  display: flex;
+  justify-content: center;
+  gap: 2rem;
+  margin-top: 1.5rem;
+}
+
+.cpp-stat {
   text-align: center;
+}
+
+.cpp-stat-value {
+  display: block;
+  font-family: var(--cpp-mono);
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: var(--cpp-text);
+  line-height: 1.2;
+}
+
+.cpp-stat-label {
+  font-family: var(--cpp-body);
+  font-size: 0.75rem;
+  color: var(--cpp-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* ─── Hero Actions ─── */
+.cpp-hero-actions {
+  display: flex;
+  justify-content: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  margin-top: 1.5rem;
+}
+
+.cpp-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.7rem 1.5rem;
+  border-radius: var(--cpp-radius-pill);
+  font-family: var(--cpp-body);
   font-size: 0.9rem;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: 1px solid transparent;
 }
 
-.cpp-main-content {
-  flex: 1;
-  min-width: 0;
+.cpp-btn-primary {
+  background: var(--cpp-primary-soft);
+  color: #0c0c12;
+  border-color: var(--cpp-primary-soft);
 }
 
-/* ── Lesson Section Card ── */
-.cpp-lesson {
-  background: var(--glass-bg);
-  border: 1px solid var(--glass-border);
-  border-radius: 16px;
-  padding: 2.5rem;
-  margin-bottom: 2rem;
-  backdrop-filter: blur(10px);
-  transition: border-color 0.3s ease;
+.cpp-btn-primary:hover {
+  background: var(--cpp-primary-light);
+  border-color: var(--cpp-primary-light);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(var(--cpp-primary-soft-rgb), 0.2);
 }
 
-.cpp-lesson:target {
+.cpp-btn-secondary {
+  background: transparent;
+  color: var(--cpp-text);
+  border-color: var(--cpp-border);
+}
+
+.cpp-btn-secondary:hover {
+  border-color: var(--cpp-primary-soft);
+  color: var(--cpp-primary-soft);
+  background: rgba(var(--cpp-primary-soft-rgb), 0.06);
+  transform: translateY(-1px);
+}
+
+/* ─── Back Button ─── */
+.cpp-back-btn {
+  position: absolute;
+  top: 1.5rem;
+  left: 1.5rem;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.4rem 1rem;
+  font-family: var(--cpp-body);
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: var(--cpp-text-muted);
+  text-decoration: none;
+  border: 1px solid var(--cpp-border);
+  border-radius: var(--cpp-radius-pill);
+  transition: all 0.2s ease;
+}
+
+.cpp-back-btn:hover {
+  color: var(--cpp-primary-soft);
+  border-color: var(--cpp-primary-soft);
+  background: rgba(var(--cpp-primary-soft-rgb), 0.06);
+}
+
+.cpp-back-btn i {
+  font-size: 0.78rem;
+}
+
+/* ─── Section ─── */
+[data-page='cplusplus-learning'] .cpp-section {
+  padding: 1rem 0 4rem;
+  background: var(--cpp-bg);
+}
+
+.cpp-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+/* ─── Topic Pills ─── */
+.cpp-topic-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 2.5rem;
+  justify-content: center;
+}
+
+.cpp-topic-pill {
+  font-family: var(--cpp-mono);
+  font-size: 0.72rem;
+  font-weight: 500;
+  padding: 0.4rem 1rem;
+  border-radius: var(--cpp-radius-pill);
+  background: transparent;
+  border: 1px solid var(--cpp-border);
+  color: var(--cpp-text-muted);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  text-decoration: none;
+  display: inline-block;
+}
+
+.cpp-topic-pill:hover {
+  border-color: var(--cpp-primary-soft);
+  color: var(--cpp-primary-soft);
+  background: rgba(var(--cpp-primary-soft-rgb), 0.06);
+}
+
+.cpp-topic-pill.active {
+  background: rgba(var(--cpp-primary-rgb), 0.10);
   border-color: var(--cpp-primary);
+  color: var(--cpp-primary-soft);
+}
+
+/* ─── Progress Dots ─── */
+.cpp-progress {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 2.5rem;
+}
+
+.cpp-progress-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.08);
+  transition: background 0.3s ease, transform 0.3s ease;
+  flex-shrink: 0;
+}
+
+.cpp-progress-dot.active {
+  background: var(--cpp-primary-soft);
+  transform: scale(1.3);
+  box-shadow: 0 0 8px rgba(var(--cpp-primary-soft-rgb), 0.3);
+}
+
+.cpp-progress-line {
+  width: 32px;
+  height: 2px;
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 2px;
+  transition: background 0.3s ease;
+  flex-shrink: 0;
+}
+
+.cpp-progress-line.active {
+  background: rgba(var(--cpp-primary-soft-rgb), 0.25);
+}
+
+/* ─── Lesson Card ─── */
+.cpp-lesson {
+  background: var(--cpp-surface);
+  border: 1px solid var(--cpp-border);
+  border-radius: var(--cpp-radius);
+  padding: 1.75rem;
+  margin-bottom: 1.5rem;
+  transition: border-color 0.25s ease, box-shadow 0.25s ease;
+  scroll-margin-top: 5rem;
+}
+
+.cpp-lesson:hover {
+  border-color: var(--cpp-border-hover);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
 }
 
 .cpp-lesson-header {
   display: flex;
-  align-items: center;
-  gap: 1rem;
-  margin-bottom: 1.5rem;
+  align-items: baseline;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
 }
 
 .cpp-lesson-number {
-  font-family: "Orbitron", sans-serif;
-  font-size: 1.5rem;
-  font-weight: 700;
-  background: var(--cpp-gradient);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+  font-family: var(--cpp-mono);
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--cpp-primary);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
   flex-shrink: 0;
 }
 
 .cpp-lesson-header h3 {
-  font-size: 1.4rem;
-  font-weight: 700;
-  color: var(--text-primary);
+  font-family: var(--cpp-mono);
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--cpp-text);
   margin: 0;
+  line-height: 1.3;
 }
 
-.cpp-lesson p,
-.cpp-lesson li {
-  color: var(--text-secondary);
-  font-size: 0.95rem;
-  line-height: 1.75;
-  margin-bottom: 0.75rem;
+.cpp-lesson p {
+  font-family: var(--cpp-body);
+  font-size: 0.92rem;
+  color: var(--cpp-text-muted);
+  line-height: 1.65;
+  margin: 0 0 1rem;
+}
+
+.cpp-lesson p:last-child {
+  margin-bottom: 0;
+}
+
+.cpp-lesson p strong,
+.cpp-lesson p code {
+  color: var(--cpp-text);
+}
+
+.cpp-lesson p code {
+  font-family: var(--cpp-mono);
+  font-size: 0.85em;
+  background: rgba(255, 255, 255, 0.04);
+  padding: 0.1em 0.4em;
+  border-radius: 4px;
 }
 
 .cpp-lesson ul,
 .cpp-lesson ol {
-  padding-left: 1.5rem;
+  margin: 0.5rem 0 1rem;
+  padding-left: 1.25rem;
+}
+
+.cpp-lesson ul li,
+.cpp-lesson ol li {
+  font-family: var(--cpp-body);
+  font-size: 0.9rem;
+  color: var(--cpp-text-muted);
+  line-height: 1.65;
+  margin-bottom: 0.3rem;
+}
+
+.cpp-lesson li strong {
+  color: var(--cpp-text);
+}
+
+.cpp-lesson li code {
+  font-family: var(--cpp-mono);
+  font-size: 0.85em;
+  background: rgba(255, 255, 255, 0.04);
+  padding: 0.1em 0.35em;
+  border-radius: 3px;
+  color: var(--cpp-text);
+}
+
+/* ─── Concept Card ─── */
+.cpp-concept {
+  background: rgba(var(--cpp-primary-rgb), 0.035);
+  border: 1px solid rgba(var(--cpp-primary-rgb), 0.08);
+  border-radius: var(--cpp-radius-sm);
+  padding: 1rem 1.25rem;
   margin-bottom: 1rem;
 }
 
-.cpp-lesson li {
-  margin-bottom: 0.4rem;
-}
-
-.cpp-lesson strong {
-  color: var(--text-primary);
-}
-
-/* ── Concept Card ── */
-.cpp-concept-card {
-  background: var(--dark-surface);
-  border: 1px solid var(--glass-border);
-  border-radius: 12px;
-  padding: 1.25rem 1.5rem;
-  margin: 1rem 0;
-}
-
-.cpp-concept-card h4 {
-  font-size: 1rem;
+.cpp-concept h4 {
+  font-family: var(--cpp-mono);
+  font-size: 0.82rem;
   font-weight: 600;
+  color: var(--cpp-primary-soft);
+  margin: 0 0 0.4rem;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.cpp-concept h4 i {
+  font-size: 0.85rem;
   color: var(--cpp-primary);
-  margin: 0 0 0.5rem;
 }
 
-.cpp-concept-card p {
-  margin-bottom: 0;
+.cpp-concept p {
+  font-size: 0.88rem !important;
+  margin: 0 !important;
 }
 
-/* ── Code Block ── */
+.cpp-concept ul {
+  margin: 0.35rem 0 0;
+  padding-left: 1.25rem;
+}
+
+.cpp-concept ul li {
+  font-family: var(--cpp-body);
+  font-size: 0.88rem;
+  color: var(--cpp-text-muted);
+  line-height: 1.6;
+  margin-bottom: 0.15rem;
+}
+
+.cpp-concept ul li strong {
+  color: var(--cpp-text);
+}
+
+.cpp-concept ul li code {
+  font-family: var(--cpp-mono);
+  font-size: 0.85em;
+  background: rgba(255, 255, 255, 0.04);
+  padding: 0.1em 0.35em;
+  border-radius: 3px;
+  color: var(--cpp-text);
+}
+
+/* ─── Code Block ─── */
 .cpp-code-block {
-  position: relative;
-  margin: 1rem 0 1.5rem;
-  border-radius: 12px;
+  background: var(--cpp-code-bg);
+  border: 1px solid var(--cpp-border);
+  border-radius: var(--cpp-radius-sm);
+  margin-bottom: 1rem;
   overflow: hidden;
-  border: 1px solid var(--glass-border);
 }
 
 .cpp-code-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background: rgba(0, 0, 0, 0.3);
+  background: rgba(0, 0, 0, 0.2);
   padding: 0.5rem 1rem;
-  border-bottom: 1px solid var(--glass-border);
+  border-bottom: 1px solid var(--cpp-border);
 }
 
 .cpp-code-lang {
-  font-family: "Fira Code", monospace;
-  font-size: 0.75rem;
+  font-family: var(--cpp-mono);
+  font-size: 0.72rem;
   font-weight: 500;
-  color: var(--cpp-secondary);
+  color: var(--cpp-primary-soft);
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.06em;
 }
 
 .cpp-code-copy {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
   background: none;
-  border: 1px solid var(--glass-border);
-  color: var(--text-secondary);
-  font-size: 0.75rem;
-  padding: 0.25rem 0.6rem;
+  border: 1px solid var(--cpp-border);
+  color: var(--cpp-text-muted);
+  font-family: var(--cpp-body);
+  font-size: 0.72rem;
+  padding: 0.25rem 0.7rem;
   border-radius: 6px;
   cursor: pointer;
-  font-family: "Poppins", sans-serif;
   transition: all 0.2s ease;
 }
 
+.cpp-code-copy i {
+  font-size: 0.7rem;
+}
+
 .cpp-code-copy:hover {
-  color: var(--text-primary);
-  border-color: var(--cpp-secondary);
+  color: var(--cpp-primary-soft);
+  border-color: var(--cpp-primary-soft);
+  background: rgba(var(--cpp-primary-soft-rgb), 0.06);
 }
 
 .cpp-code-copy.copied {
-  color: #22c55e;
-  border-color: #22c55e;
+  color: var(--cpp-success);
+  border-color: var(--cpp-success);
 }
 
 .cpp-code-block pre {
   margin: 0;
-  padding: 1.25rem 1.5rem;
-  background: #0d1117;
+  padding: 1rem 1.25rem;
+  background: var(--cpp-code-bg);
   overflow-x: auto;
 }
 
 .cpp-code-block code {
-  font-family: "Fira Code", Consolas, Monaco, monospace;
-  font-size: 0.85rem;
+  font-family: var(--cpp-mono);
+  font-size: 0.82rem;
   line-height: 1.7;
   color: #e6edf3;
 }
 
-/* Token colors */
-.cpp-code-block .tok-kw { color: #c792ea; }
-.cpp-code-block .tok-fn { color: #82aaff; }
-.cpp-code-block .tok-str { color: #c3e88d; }
-.cpp-code-block .tok-num { color: #f78c6c; }
-.cpp-code-block .tok-cmt { color: #546e7a; font-style: italic; }
-.cpp-code-block .tok-op { color: #89ddff; }
-.cpp-code-block .tok-bi { color: #ffcb6b; }
-.cpp-code-block .tok-var { color: #f07178; }
-.cpp-code-block .tok-bool { color: #ff5370; }
-.cpp-code-block .tok-param { color: #e6edf3; }
-.cpp-code-block .tok-pch { color: #ffcb6b; }
+/* Syntax token colors — NO purple, NO cyan, NO lime */
+.cpp-code-block .tok-kw { color: var(--cpp-primary-soft); }        /* keywords → pastel blue */
+.cpp-code-block .tok-fn { color: #82aaff; }                        /* functions → blue */
+.cpp-code-block .tok-str { color: var(--cpp-success); }             /* strings → pastel mint */
+.cpp-code-block .tok-num { color: #fcd34d; }                       /* numbers → pastel yellow */
+.cpp-code-block .tok-cmt { color: #64748b; font-style: italic; }   /* comments → gray */
+.cpp-code-block .tok-op { color: var(--cpp-primary-light); }       /* operators → light pastel blue */
+.cpp-code-block .tok-bi { color: #fde68a; }                        /* built-in → pastel yellow */
+.cpp-code-block .tok-var { color: #fca5a5; }                       /* variables → pastel red */
+.cpp-code-block .tok-bool { color: #fca5a5; }                      /* boolean → pastel red */
+.cpp-code-block .tok-param { color: #e6edf3; }                     /* param → light */
+.cpp-code-block .tok-pch { color: #fde68a; }                       /* preprocessor → pastel yellow */
 
-/* ── Exercise Box ── */
-.cpp-exercise {
-  background: rgba(34, 197, 94, 0.06);
-  border: 1px solid rgba(34, 197, 94, 0.25);
-  border-radius: 12px;
-  padding: 1.5rem;
-  margin: 1.5rem 0;
-}
-
-.cpp-exercise-title {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-size: 1rem;
-  font-weight: 600;
-  color: #22c55e;
-  margin-bottom: 0.75rem;
-}
-
-.cpp-exercise-title i {
-  font-size: 1.1rem;
-}
-
-.cpp-exercise ol,
-.cpp-exercise ul {
-  margin-bottom: 0.75rem;
-}
-
-.cpp-exercise-toggle {
-  background: rgba(34, 197, 94, 0.15);
-  border: 1px solid rgba(34, 197, 94, 0.3);
-  color: #22c55e;
-  font-family: "Poppins", sans-serif;
-  font-size: 0.85rem;
-  font-weight: 500;
-  padding: 0.4rem 1rem;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.cpp-exercise-toggle:hover {
-  background: rgba(34, 197, 94, 0.25);
-}
-
-.cpp-exercise-solution {
-  display: none;
-  margin-top: 1rem;
-  padding-top: 1rem;
-  border-top: 1px solid rgba(34, 197, 94, 0.2);
-}
-
-.cpp-exercise-solution.visible {
-  display: block;
-}
-
-.cpp-exercise-solution p {
-  font-size: 0.85rem;
-  color: var(--text-secondary);
-  margin-bottom: 0.5rem;
-}
-
-/* ── Output Block ── */
+/* ─── Output Block ─── */
 .cpp-output {
-  background: rgba(6, 182, 212, 0.06);
-  border: 1px solid rgba(6, 182, 212, 0.25);
-  border-radius: 10px;
-  padding: 1rem 1.25rem;
-  margin: 0.75rem 0 1.25rem;
+  background: rgba(var(--cpp-primary-rgb), 0.035);
+  border: 1px solid rgba(var(--cpp-primary-rgb), 0.08);
+  border-radius: var(--cpp-radius-sm);
+  padding: 0.9rem 1.1rem;
+  margin-bottom: 1rem;
 }
 
 .cpp-output-label {
-  font-size: 0.75rem;
+  font-family: var(--cpp-mono);
+  font-size: 0.65rem;
   font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: var(--accent);
-  margin-bottom: 0.4rem;
+  letter-spacing: 0.08em;
+  color: var(--cpp-primary-soft);
+  margin-bottom: 0.3rem;
 }
 
 .cpp-output pre {
   margin: 0;
-  font-family: "Fira Code", monospace;
-  font-size: 0.82rem;
+  font-family: var(--cpp-mono);
+  font-size: 0.8rem;
   line-height: 1.6;
-  color: var(--text-secondary);
+  color: var(--cpp-text-muted);
 }
 
-/* ── Progress Tracker ── */
-.cpp-progress-bar {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  margin: 2rem 0;
-  padding: 1.25rem 1.5rem;
-  background: var(--glass-bg);
-  border: 1px solid var(--glass-border);
-  border-radius: 12px;
-  backdrop-filter: blur(10px);
-}
-
-.cpp-progress-track {
-  flex: 1;
-  height: 8px;
-  background: var(--dark-surface);
-  border-radius: 99px;
-  overflow: hidden;
-}
-
-.cpp-progress-fill {
-  height: 100%;
-  width: 0%;
-  background: var(--cpp-gradient);
-  border-radius: 99px;
-  transition: width 0.5s ease;
-}
-
-.cpp-progress-text {
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: var(--text-primary);
-  white-space: nowrap;
-}
-
-/* ── Key Takeaway / Tip Callout ── */
+/* ─── Callout ─── */
 .cpp-callout {
   display: flex;
   gap: 0.75rem;
   align-items: flex-start;
-  background: var(--cpp-bg);
-  border: 1px solid rgba(0, 89, 156, 0.25);
-  border-radius: 12px;
-  padding: 1.25rem 1.5rem;
-  margin: 1.25rem 0;
+  background: rgba(var(--cpp-accent-rgb), 0.04);
+  border: 1px solid rgba(var(--cpp-accent-rgb), 0.10);
+  border-radius: var(--cpp-radius-sm);
+  padding: 1rem 1.25rem;
+  margin-bottom: 1rem;
 }
 
 .cpp-callout-icon {
-  font-size: 1.3rem;
+  font-size: 1.2rem;
   flex-shrink: 0;
   line-height: 1.4;
 }
 
 .cpp-callout p {
   margin: 0;
-  font-size: 0.9rem;
+  font-size: 0.88rem !important;
   line-height: 1.6;
+  color: var(--cpp-text-muted) !important;
 }
 
-/* ── Table ── */
+.cpp-callout p strong {
+  color: var(--cpp-text);
+}
+
+.cpp-callout p code {
+  font-family: var(--cpp-mono);
+  font-size: 0.85em;
+  background: rgba(255, 255, 255, 0.04);
+  padding: 0.1em 0.35em;
+  border-radius: 3px;
+  color: var(--cpp-accent);
+}
+
+/* ─── Table ─── */
 .cpp-table-wrap {
   overflow-x: auto;
-  margin: 1rem 0 1.5rem;
-  border-radius: 12px;
-  border: 1px solid var(--glass-border);
+  margin: 0 0 1rem;
+  border-radius: var(--cpp-radius-sm);
+  border: 1px solid var(--cpp-border);
 }
 
 .cpp-table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 0.88rem;
+  font-size: 0.84rem;
 }
 
 .cpp-table th {
-  background: rgba(0, 89, 156, 0.12);
-  color: var(--cpp-primary);
+  background: rgba(var(--cpp-primary-rgb), 0.08);
+  color: var(--cpp-primary-soft);
+  font-family: var(--cpp-mono);
   font-weight: 600;
   text-align: left;
-  padding: 0.75rem 1rem;
+  padding: 0.65rem 1rem;
   white-space: nowrap;
+  font-size: 0.76rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
 }
 
 .cpp-table td {
-  padding: 0.65rem 1rem;
-  border-top: 1px solid var(--glass-border);
-  color: var(--text-secondary);
+  padding: 0.6rem 1rem;
+  border-top: 1px solid var(--cpp-border);
+  color: var(--cpp-text-muted);
+  font-family: var(--cpp-body);
+  font-size: 0.84rem;
+}
+
+.cpp-table td code {
+  font-family: var(--cpp-mono);
+  font-size: 0.85em;
+  background: rgba(255, 255, 255, 0.04);
+  padding: 0.1em 0.35em;
+  border-radius: 3px;
+  color: var(--cpp-text);
 }
 
 .cpp-table tr:hover td {
-  background: rgba(255, 255, 255, 0.02);
+  background: rgba(255, 255, 255, 0.015);
 }
 
-/* ── Responsive ── */
-@media (max-width: 1024px) {
-  .cpp-sidebar {
+/* ─── Exercise ─── */
+.cpp-exercise {
+  background: rgba(var(--cpp-primary-rgb), 0.03);
+  border: 1px solid rgba(var(--cpp-primary-rgb), 0.08);
+  border-radius: var(--cpp-radius-sm);
+  padding: 1.25rem 1.5rem;
+  margin: 1.25rem 0;
+}
+
+.cpp-exercise-title {
+  font-family: var(--cpp-mono);
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--cpp-primary-soft);
+  margin-bottom: 0.75rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.cpp-exercise-title i {
+  font-size: 0.9rem;
+  color: var(--cpp-primary);
+}
+
+.cpp-exercise p {
+  font-size: 0.88rem !important;
+  margin-bottom: 0.75rem !important;
+}
+
+.cpp-exercise ol {
+  margin-bottom: 0.75rem;
+  padding-left: 1.25rem;
+}
+
+.cpp-exercise ol li {
+  font-family: var(--cpp-body);
+  font-size: 0.85rem;
+  color: var(--cpp-text-muted);
+  line-height: 1.65;
+  margin-bottom: 0.25rem;
+}
+
+.cpp-exercise-toggle {
+  background: rgba(var(--cpp-primary-soft-rgb), 0.08);
+  border: 1px solid rgba(var(--cpp-primary-soft-rgb), 0.15);
+  color: var(--cpp-primary-soft);
+  font-family: var(--cpp-body);
+  font-size: 0.82rem;
+  font-weight: 500;
+  padding: 0.35rem 1rem;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.cpp-exercise-toggle:hover {
+  background: rgba(var(--cpp-primary-soft-rgb), 0.15);
+  border-color: rgba(var(--cpp-primary-soft-rgb), 0.3);
+}
+
+.cpp-exercise-toggle:focus-visible {
+  outline: 2px solid var(--cpp-primary-soft);
+  outline-offset: 2px;
+}
+
+.cpp-exercise-solution {
+  display: none;
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(var(--cpp-primary-soft-rgb), 0.08);
+}
+
+.cpp-exercise-solution.visible {
+  display: block;
+}
+
+.cpp-exercise-solution .cpp-code-block {
+  margin-bottom: 0;
+}
+
+/* ─── Divider ─── */
+.cpp-divider {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin: 1.5rem 0;
+}
+
+.cpp-divider::before,
+.cpp-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--cpp-border));
+}
+
+.cpp-divider::after {
+  background: linear-gradient(90deg, var(--cpp-border), transparent);
+}
+
+.cpp-divider-inner {
+  font-family: var(--cpp-mono);
+  font-size: 0.65rem;
+  color: var(--cpp-text-faint);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  white-space: nowrap;
+}
+
+/* ─── Footer ─── */
+.cpp-footer {
+  text-align: center;
+  padding: 2rem 1rem 3rem;
+  border-top: 1px solid var(--cpp-border);
+  font-family: var(--cpp-body);
+  font-size: 0.85rem;
+  color: var(--cpp-text-muted);
+}
+
+.cpp-footer p {
+  margin: 0.25rem 0;
+}
+
+.cpp-footer a {
+  color: var(--cpp-primary-soft);
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.2s ease;
+}
+
+.cpp-footer a:hover {
+  color: var(--cpp-primary-light);
+  text-decoration: underline;
+}
+
+/* ─── Responsive ─── */
+@media (max-width: 768px) {
+  .cpp-hero {
+    padding: 5rem 1rem 1.5rem;
+    min-height: auto;
+  }
+
+  .cpp-back-btn {
+    top: 0.8rem;
+    left: 0.8rem;
+    font-size: 0.75rem;
+    padding: 0.3rem 0.7rem;
+  }
+
+  .cpp-back-btn span {
     display: none;
   }
-}
 
-@media (max-width: 768px) {
-  .cpp-lesson {
-    padding: 1.5rem;
+  .cpp-hero-title {
+    font-size: clamp(1.5rem, 7vw, 2.2rem);
   }
 
-  .cpp-lesson-header h3 {
-    font-size: 1.15rem;
+  .cpp-hero-subtitle {
+    font-size: 0.88rem;
+    max-width: 100%;
+    padding: 0 0.5rem;
   }
 
-  .cpp-code-block pre {
-    padding: 1rem;
+  .cpp-hero-stats {
+    gap: 1rem;
   }
 
-  .cpp-code-block code {
-    font-size: 0.78rem;
+  .cpp-stat-value {
+    font-size: 1.2rem;
   }
 
-  .cpp-progress-bar {
+  .cpp-stat-label {
+    font-size: 0.65rem;
+  }
+
+  .cpp-hero-actions {
     flex-direction: column;
-    align-items: stretch;
-    gap: 0.5rem;
+    align-items: center;
   }
 
-  .cpp-progress-text {
-    text-align: center;
+  .cpp-btn {
+    width: auto;
+    min-width: 180px;
+    justify-content: center;
   }
 
-  .cpp-callout {
-    flex-direction: column;
-    gap: 0.5rem;
+  .cpp-topic-nav {
+    gap: 0.35rem;
+    margin-bottom: 1.5rem;
   }
-}
 
-@media (max-width: 480px) {
+  .cpp-topic-pill {
+    font-size: 0.65rem;
+    padding: 0.3rem 0.7rem;
+  }
+
+  .cpp-progress {
+    margin-bottom: 1.5rem;
+  }
+
+  .cpp-progress-line {
+    width: 16px;
+  }
+
   .cpp-lesson {
     padding: 1.25rem;
-    border-radius: 12px;
+    border-radius: var(--cpp-radius-sm);
   }
 
   .cpp-lesson-header {
     flex-direction: column;
     align-items: flex-start;
-    gap: 0.5rem;
+    gap: 0.3rem;
+  }
+
+  .cpp-lesson-header h3 {
+    font-size: 0.95rem;
+  }
+
+  .cpp-code-block pre {
+    padding: 0.75rem 1rem;
+  }
+
+  .cpp-code-block code {
+    font-size: 0.75rem;
   }
 
   .cpp-exercise {
     padding: 1rem;
   }
+
+  .cpp-section {
+    padding: 0.5rem 0 3rem;
+  }
 }
 
-/* ── Accessibility: focus-visible ── */
-.cpp-sidebar-nav li a:focus-visible,
-.cpp-code-copy:focus-visible,
-.cpp-exercise-toggle:focus-visible {
-  outline: 2px solid var(--cpp-primary);
-  outline-offset: 2px;
+@media (max-width: 480px) {
+  .cpp-hero {
+    padding: 4rem 0.75rem 1rem;
+  }
+
+  .cpp-brackets {
+    font-size: 1.2rem;
+  }
+
+  .cpp-hero-stats {
+    gap: 1.5rem;
+  }
+
+  .cpp-topic-nav {
+    gap: 0.25rem;
+  }
+
+  .cpp-topic-pill {
+    font-size: 0.6rem;
+    padding: 0.25rem 0.6rem;
+  }
+
+  .cpp-lesson {
+    padding: 1rem;
+  }
+
+  .cpp-code-header {
+    padding: 0.4rem 0.75rem;
+  }
+
+  .cpp-table {
+    font-size: 0.75rem;
+  }
+
+  .cpp-table th,
+  .cpp-table td {
+    padding: 0.4rem 0.6rem;
+  }
 }
 
-/* ── Print styles ── */
+/* ─── Reduced Motion ─── */
+@media (prefers-reduced-motion: reduce) {
+  .cpp-bracket,
+  .cpp-bracket-slash {
+    animation: none !important;
+  }
+
+  .cpp-lesson {
+    transition: none !important;
+  }
+
+  .cpp-lesson:hover {
+    transform: none !important;
+  }
+
+  .cpp-topic-pill,
+  .cpp-btn,
+  .cpp-code-copy,
+  .cpp-exercise-toggle {
+    transition: none !important;
+  }
+
+  .cpp-progress-dot {
+    transition: none !important;
+  }
+}
+
+/* ─── Print ─── */
 @media print {
-  .cpp-sidebar,
-  .cpp-progress-bar,
+  .cpp-back-btn,
+  .cpp-topic-nav,
+  .cpp-progress,
   .cpp-exercise-toggle,
   .cpp-code-copy,
   .navbar,
-  .footer {
+  .footer,
+  #scrollTopBtn,
+  .shortcuts-toggle-btn {
     display: none !important;
   }
 
   .cpp-lesson {
     break-inside: avoid;
     border: 1px solid #ccc;
+    box-shadow: none;
   }
 
   .cpp-code-block pre {

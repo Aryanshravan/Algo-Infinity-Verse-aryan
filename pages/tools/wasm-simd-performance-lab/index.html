@@ -1,0 +1,227 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>WASM SIMD Performance Lab | Algo Infinity Verse</title>
+  <meta name="description" content="Benchmark pure JS matrix multiply against a Float32Array blocked SIMD-style path, measure FLOPS, cache heuristics, and export CSV results." />
+  <link rel="stylesheet" href="/styles.css" />
+  <link rel="stylesheet" href="style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Poppins:wght@300;400;500;600;700&family=Fira+Code:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <script>
+    (function () {
+      try {
+        var storedTheme = localStorage.getItem('theme');
+        var prefersLight = window.matchMedia('(prefers-color-scheme: light)').matches;
+        var theme = storedTheme || (prefersLight ? 'light' : 'dark');
+        if (theme === 'light') {
+          document.documentElement.classList.add('light-mode');
+        } else {
+          document.documentElement.classList.remove('light-mode');
+        }
+      } catch (e) {}
+    })();
+  </script>
+</head>
+<body data-page="wasm-simd-performance-lab">
+  <a href="#wasm-main" class="wasm-skip-link">Skip to main content</a>
+  <button type="button" id="scrollTopBtn" class="scroll-top-btn" aria-label="Scroll to top">
+    <i class="fas fa-arrow-up" aria-hidden="true"></i>
+  </button>
+
+  <div id="navbar-placeholder"></div>
+
+  <header class="wasm-hero">
+    <div class="wasm-hero-badge">
+      <i class="fas fa-microchip" aria-hidden="true"></i>
+      Performance Lab
+    </div>
+    <h1>
+      WASM SIMD
+      <span class="wasm-hero-accent">Performance Lab</span>
+    </h1>
+    <p>
+      Dual-path matrix multiply: pure JS vs Float32Array blocked matmul labeled as
+      WASM SIMD path (emulated), with FLOPS, cache heuristics, and CSV export.
+    </p>
+    <div class="wasm-hero-stats" aria-live="polite">
+      <div class="wasm-stat">
+        <span class="wasm-stat-val" id="statJsMs">—</span>
+        <span class="wasm-stat-label">JS ms</span>
+      </div>
+      <div class="wasm-stat">
+        <span class="wasm-stat-val" id="statSimdMs">—</span>
+        <span class="wasm-stat-label">SIMD ms</span>
+      </div>
+      <div class="wasm-stat">
+        <span class="wasm-stat-val" id="statSpeedup">—</span>
+        <span class="wasm-stat-label">Speedup</span>
+      </div>
+      <div class="wasm-stat">
+        <span class="wasm-stat-val" id="statGflops">—</span>
+        <span class="wasm-stat-label">GFLOPS</span>
+      </div>
+    </div>
+  </header>
+
+  <main id="wasm-main" class="wasm-main">
+    <div class="container">
+      <div class="wasm-workspace">
+        <section class="wasm-panel" aria-labelledby="wasm-config-title">
+          <div class="wasm-panel-header">
+            <div class="wasm-panel-title">
+              <i class="fas fa-sliders wasm-panel-icon" aria-hidden="true"></i>
+              <h2 id="wasm-config-title">Benchmark config</h2>
+            </div>
+          </div>
+
+          <label class="wasm-label" for="matrixSize">Matrix size (n × n)</label>
+          <select id="matrixSize" class="wasm-select" aria-describedby="sizeHint">
+            <option value="128">128</option>
+            <option value="256" selected>256</option>
+            <option value="512">512</option>
+            <option value="1024">1024</option>
+            <option value="2048">2048 (may be slow)</option>
+          </select>
+          <p id="sizeHint" class="wasm-hint">
+            Default 256. 2048 allocates large typed arrays and may stall the tab — use with care.
+          </p>
+
+          <label class="wasm-label" for="blockSize">Block size (SIMD path)</label>
+          <select id="blockSize" class="wasm-select">
+            <option value="8">8</option>
+            <option value="16" selected>16</option>
+            <option value="32">32</option>
+            <option value="64">64</option>
+          </select>
+
+          <div class="wasm-feature-row" id="wasmFeatures" role="status" aria-live="polite">
+            <span class="wasm-feature" id="featWasm">WebAssembly: —</span>
+            <span class="wasm-feature" id="featSimd">SIMD validate: —</span>
+          </div>
+
+          <div class="wasm-controls">
+            <button type="button" id="runBenchBtn" class="btn btn-primary">
+              <i class="fas fa-play" aria-hidden="true"></i> Run benchmark
+            </button>
+            <button type="button" id="exportCsvBtn" class="btn btn-outline" disabled>
+              <i class="fas fa-file-csv" aria-hidden="true"></i> Export CSV
+            </button>
+          </div>
+          <div id="wasmStatus" class="wasm-status" role="status" aria-live="polite"></div>
+        </section>
+
+        <section class="wasm-panel" aria-labelledby="wasm-metrics-title">
+          <div class="wasm-panel-header">
+            <div class="wasm-panel-title">
+              <i class="fas fa-chart-line wasm-panel-icon" aria-hidden="true"></i>
+              <h2 id="wasm-metrics-title">Metrics</h2>
+            </div>
+          </div>
+
+          <div id="wasmEmpty" class="wasm-empty">
+            <i class="fas fa-microchip" aria-hidden="true"></i>
+            <p>Run a benchmark to compare pure JS matmul vs WASM SIMD path (emulated).</p>
+          </div>
+
+          <div id="wasmMetrics" class="wasm-metrics" hidden>
+            <dl class="wasm-metric-list">
+              <div class="wasm-metric">
+                <dt>Ops (2·n³)</dt>
+                <dd id="metricOps">—</dd>
+              </div>
+              <div class="wasm-metric">
+                <dt>JS FLOPS</dt>
+                <dd id="metricJsFlops">—</dd>
+              </div>
+              <div class="wasm-metric">
+                <dt>SIMD path FLOPS</dt>
+                <dd id="metricSimdFlops">—</dd>
+              </div>
+              <div class="wasm-metric">
+                <dt>Cache / alignment heuristic</dt>
+                <dd id="metricCache">—</dd>
+              </div>
+              <div class="wasm-metric">
+                <dt>Path label</dt>
+                <dd id="metricPath">WASM SIMD path (emulated)</dd>
+              </div>
+            </dl>
+          </div>
+        </section>
+      </div>
+
+      <section class="wasm-panel" aria-labelledby="wasm-chart-title">
+        <div class="wasm-panel-header">
+          <div class="wasm-panel-title">
+            <i class="fas fa-chart-bar wasm-panel-icon" aria-hidden="true"></i>
+            <h2 id="wasm-chart-title">Performance ratio</h2>
+          </div>
+        </div>
+        <div class="wasm-bars" id="wasmBars" aria-hidden="true">
+          <div class="wasm-bar-row">
+            <span class="wasm-bar-label">Pure JS</span>
+            <div class="wasm-bar-track">
+              <div class="wasm-bar wasm-bar-js" id="barJs" style="width: 0%"></div>
+            </div>
+            <span class="wasm-bar-val" id="barJsLabel">—</span>
+          </div>
+          <div class="wasm-bar-row">
+            <span class="wasm-bar-label">SIMD path</span>
+            <div class="wasm-bar-track">
+              <div class="wasm-bar wasm-bar-simd" id="barSimd" style="width: 0%"></div>
+            </div>
+            <span class="wasm-bar-val" id="barSimdLabel">—</span>
+          </div>
+        </div>
+        <p class="wasm-hint" id="barHint">Bars scale to the slower of the two runs (longer = slower).</p>
+      </section>
+
+      <section class="wasm-panel" aria-labelledby="wasm-history-title">
+        <div class="wasm-panel-header">
+          <div class="wasm-panel-title">
+            <i class="fas fa-clock-rotate-left wasm-panel-icon" aria-hidden="true"></i>
+            <h2 id="wasm-history-title">Run history</h2>
+          </div>
+        </div>
+        <div class="wasm-table-wrap">
+          <table class="wasm-table" id="historyTable">
+            <thead>
+              <tr>
+                <th scope="col">n</th>
+                <th scope="col">Block</th>
+                <th scope="col">JS ms</th>
+                <th scope="col">SIMD ms</th>
+                <th scope="col">Speedup</th>
+                <th scope="col">GFLOPS</th>
+                <th scope="col">Cache score</th>
+              </tr>
+            </thead>
+            <tbody id="historyBody">
+              <tr class="wasm-empty-row">
+                <td colspan="7">No runs yet.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <div id="footer-placeholder"></div>
+
+  <script src="/auth.js"></script>
+  <script src="/bootstrap-legacy.js"></script>
+  <script src="/script.js"></script>
+  <script type="module" src="/dist/legacy-bundle.mjs"></script>
+  <script src="/theme.js"></script>
+  <script src="script.js"></script>
+  <script>
+    if (typeof loadPartial === 'function') {
+      loadPartial('navbar-placeholder', '/partials/navbar.html');
+      loadPartial('footer-placeholder', '/partials/footer.html');
+    }
+  </script>
+</body>
+</html>

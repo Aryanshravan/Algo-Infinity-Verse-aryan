@@ -18,13 +18,14 @@
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
     />
 
-    <!-- D3.js and Chart.js -->
+    <!-- D3.js and Chart.js (lazy-loaded) -->
     <script src="https://d3js.org/d3.v7.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="/modules/lazyVisualizer.js"></script>
 
     <!-- External Stylesheets -->
     <link rel="stylesheet" href="llm-inference.css" />
   <script src="/theme.js"></script>
+    <link rel="stylesheet" href="/modules/quick-notes/quick-notes.css" />
 </head>
 <body class="llm-body">
     <nav class="navbar llm-nav">
@@ -143,6 +144,7 @@
     </main>
 
     <script src="llm-inference.js"></script>
+    <script src="/modules/quick-notes/quick-notes.js"></script>
   </body>
 </html>
 

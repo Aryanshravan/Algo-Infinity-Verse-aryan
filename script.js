@@ -1,5 +1,92 @@
 /* global handleActiveNav, initPracticeSection, initProfile, initAiInterviewer, initNewsletterValidation, initFooterCurrentDate, closeTopicModal, saveProblemNotes, closeNotesModal, closeQuizEditor, closeQuizModal, openTopicModal, openQuizModal, renderQuizQuestion, handleProblemClick, escapeHtml, apiAbort, apiCache, getEditorDraft, getEditorDraftSignature, getProblemSignature, clearEditorDraft, updateEditorDisplayMode, toggleOutputPanel, updateLineNumbers, syncScroll, switchQuizTab, genCppHarness, genJavaHarness, genCHarness, genSwiftHarness, parseTestResults, setOutput, getXPForDifficulty, initializeQuizEditor, closeShortcutModal, renderProblems, updatePaginationControls, initDarkMode */
 
+// ============================================
+// MOBILE VIEWPORT GUARD
+// Keyboard shortcuts depend on a physical keyboard, so they are disabled on
+// mobile-sized viewports (< 768px). This mirrors modules/shortcut-guard.js,
+// which ES modules import directly; classic scripts reuse these globals so
+// the media-query check stays in one place. The `||` guard keeps whichever
+// definition loads first (module or classic script) so they can't clash.
+// ============================================
+window.isMobileViewport = window.isMobileViewport || function () {
+  return (
+    typeof window.matchMedia === 'function' &&
+    window.matchMedia('(max-width: 767px)').matches
+  );
+};
+window.areKeyboardShortcutsEnabled = window.areKeyboardShortcutsEnabled || function () {
+  return !window.isMobileViewport();
+};
+
+// ============================================
+// GLOBAL DOM EVENT GARBAGE COLLECTOR
+// Resolves innerHTML event listener memory leaks
+// ============================================
+(function() {
+  const originalAddEventListener = EventTarget.prototype.addEventListener;
+  const originalRemoveEventListener = EventTarget.prototype.removeEventListener;
+  const originalInnerHTML = Object.getOwnPropertyDescriptor(Element.prototype, 'innerHTML');
+
+  // Use a WeakMap so we don't prevent native garbage collection of the DOM elements themselves
+  const listenerRegistry = new WeakMap();
+
+  EventTarget.prototype.addEventListener = function(type, listener, options) {
+    let listeners = listenerRegistry.get(this);
+    if (!listeners) {
+      listeners = [];
+      listenerRegistry.set(this, listeners);
+    }
+    listeners.push({ type, listener, options });
+    return originalAddEventListener.call(this, type, listener, options);
+  };
+
+  EventTarget.prototype.removeEventListener = function(type, listener, options) {
+    const listeners = listenerRegistry.get(this);
+    if (listeners) {
+      const index = listeners.findIndex(l => l.type === type && l.listener === listener);
+      if (index !== -1) {
+        listeners.splice(index, 1);
+      }
+    }
+    return originalRemoveEventListener.call(this, type, listener, options);
+  };
+
+  function cleanupNode(node) {
+    if (node instanceof EventTarget) {
+      const listeners = listenerRegistry.get(node);
+      if (listeners) {
+        listeners.forEach(l => {
+          originalRemoveEventListener.call(node, l.type, l.listener, l.options);
+        });
+        listenerRegistry.delete(node);
+      }
+    }
+    // Recursively cleanup children
+    if (node.childNodes && node.childNodes.length > 0) {
+      for (let i = 0; i < node.childNodes.length; i++) {
+        cleanupNode(node.childNodes[i]);
+      }
+    }
+  }
+
+  if (originalInnerHTML) {
+    Object.defineProperty(Element.prototype, 'innerHTML', {
+      get: function() {
+        return originalInnerHTML.get.call(this);
+      },
+      set: function(val) {
+        // Automatically garbage collect all listeners inside this element before wiping it
+        for (let i = 0; i < this.childNodes.length; i++) {
+          cleanupNode(this.childNodes[i]);
+        }
+        originalInnerHTML.set.call(this, val);
+      },
+      enumerable: originalInnerHTML.enumerable,
+      configurable: originalInnerHTML.configurable
+    });
+  }
+})();
+
 // Nuke all caches on every page load — ensures fresh content always
 (async function nukeCaches() {
   try {
@@ -51,6 +138,9 @@ async function loadPartial(id, url) {
 
     document.getElementById(id).innerHTML = html;
     if (typeof handleActiveNav === 'function') handleActiveNav();
+    if (id === 'navbar-placeholder' && typeof _initNavbar === 'function') {
+      _initNavbar();
+    }
   } catch (e) {
     if (e.name !== 'AbortError') {
       void 0;
@@ -67,7 +157,43 @@ window.addEventListener('load', () => {
       }
     }
   });
+  setupAriaAnnouncer();
 });
+
+// ============================================
+// ACCESSIBILITY: ARIA LIVE ANNOUNCER
+// ============================================
+function setupAriaAnnouncer() {
+  let announcer = document.getElementById('global-a11y-announcer');
+  if (!announcer) {
+    announcer = document.createElement('div');
+    announcer.id = 'global-a11y-announcer';
+    announcer.setAttribute('aria-live', 'polite');
+    announcer.setAttribute('aria-atomic', 'true');
+    announcer.className = 'sr-only'; // Ensure this class exists in global css or hide it inline
+    announcer.style.position = 'absolute';
+    announcer.style.width = '1px';
+    announcer.style.height = '1px';
+    announcer.style.padding = '0';
+    announcer.style.margin = '-1px';
+    announcer.style.overflow = 'hidden';
+    announcer.style.clip = 'rect(0, 0, 0, 0)';
+    announcer.style.whiteSpace = 'nowrap';
+    announcer.style.border = '0';
+    document.body.appendChild(announcer);
+  }
+}
+
+window.announceStep = function(message) {
+  const announcer = document.getElementById('global-a11y-announcer');
+  if (announcer) {
+    // Clear first to force screen reader to read repeated text if identical consecutive steps
+    announcer.textContent = '';
+    setTimeout(() => {
+      announcer.textContent = message;
+    }, 50);
+  }
+};
 
 // ============================================
 // QUIZ DATA
@@ -620,6 +746,42 @@ const quizQuestions = {
       correct: 1,
       explanation: 'Edit distance computes minimum insertions, deletions, substitutions.',
     },
+  ],
+  stack: [
+    { id: 'stack-1', question: 'Which principle does a stack follow?', options: ['FIFO (First In, First Out)', 'LIFO (Last In, First Out)', 'Random access', 'Priority-based ordering'], correct: 1, explanation: 'Stacks follow LIFO: the last element pushed is the first one popped.' },
+    { id: 'stack-2', question: 'What is the time complexity of push and pop operations on a stack implemented with a dynamic array?', options: ['O(n) for both', 'O(1) amortized for both', 'O(log n) for push, O(1) for pop', 'O(1) for push, O(n) for pop'], correct: 1, explanation: 'Dynamic array push is O(1) amortized and pop is O(1) since elements are removed from the end.' },
+    { id: 'stack-3', question: 'What is the primary use case of a stack in recursive function calls?', options: ['Storing return values only', 'Managing the call stack with activation records', 'Parallelizing recursive calls', 'Replacing recursion with iteration'], correct: 1, explanation: 'Each recursive call pushes an activation record onto the call stack, storing local variables and return addresses.' },
+    { id: 'stack-4', question: 'Which classic problem is best solved using a stack to match opening and closing delimiters?', options: ['Longest Common Subsequence', 'Balanced Parentheses', 'Shortest Path', 'Merge Sort'], correct: 1, explanation: 'A stack tracks unmatched opening brackets; each closing bracket pops the matching opener.' },
+    { id: 'stack-5', question: 'What does a monotonic stack help efficiently find for each element in an array?', options: ['The smallest element in the array', 'The next greater or smaller element', 'The median of the array', 'The longest increasing subsequence'], correct: 1, explanation: 'Monotonic stacks maintain a sorted order to find next greater/smaller element in O(n) total time.' },
+    { id: 'stack-6', question: 'Which expression notation does a stack naturally evaluate?', options: ['Infix notation', 'Prefix notation only', 'Reverse Polish Notation (postfix)', 'Infix with parentheses'], correct: 2, explanation: 'Postfix expressions are evaluated left to right using a stack: push operands, pop and compute on operators.' },
+    { id: 'stack-7', question: 'What happens when you pop from an empty stack?', options: ['Returns null', 'Returns 0', 'Throws an underflow error', 'Adds a default element'], correct: 2, explanation: 'Popping from an empty stack causes a stack underflow, which is typically an error condition.' },
+    { id: 'stack-8', question: 'Which data structure combination is used to implement a stack that supports getMin() in O(1)?', options: ['A stack and a queue', 'Two stacks', 'A stack and a hash map', 'A stack and a linked list'], correct: 1, explanation: 'A second auxiliary stack tracks the minimum: push/pop mirrors the main stack, keeping the current min on top.' },
+    { id: 'stack-9', question: 'What is the time complexity of reversing the first k elements of a queue using a stack?', options: ['O(1)', 'O(k)', 'O(n)', 'O(n log n)'], correct: 1, explanation: 'Push k elements onto a stack (O(k)), then pop them back to the queue front, re-enqueue remaining n-k elements.' },
+    { id: 'stack-10', question: 'How is DFS (Depth-First Search) on a graph typically implemented iteratively?', options: ['Using a queue', 'Using a stack', 'Using a priority queue', 'Using recursion only'], correct: 1, explanation: 'Iterative DFS uses an explicit stack to simulate the recursive call stack.' },
+  ],
+  queue: [
+    { id: 'queue-1', question: 'Which principle does a queue follow?', options: ['LIFO (Last In, First Out)', 'FIFO (First In, First Out)', 'Random access', 'Priority-based ordering'], correct: 1, explanation: 'Queues follow FIFO: the first element enqueued is the first one dequeued.' },
+    { id: 'queue-2', question: 'What is the time complexity of enqueue and dequeue operations on a linked-list-based queue?', options: ['O(n) for both', 'O(1) for both', 'O(1) enqueue, O(n) dequeue', 'O(n) enqueue, O(1) dequeue'], correct: 1, explanation: 'Both operations modify only the head or tail pointer, making them O(1).' },
+    { id: 'queue-3', question: 'Which graph traversal algorithm uses a queue as its core data structure?', options: ['Depth-First Search (DFS)', 'Breadth-First Search (BFS)', "Dijkstra's Algorithm", 'Topological Sort (DFS-based)'], correct: 1, explanation: 'BFS explores nodes level by level, using a queue to visit nodes in FIFO order.' },
+    { id: 'queue-4', question: 'What problem does a circular buffer solve for array-based queues?', options: ['It allows O(1) search', 'It reuses space after dequeue operations to prevent wasted slots', 'It enables random access', 'It supports priority ordering'], correct: 1, explanation: 'A circular buffer wraps indices around, reclaiming dequeued space without shifting elements.' },
+    { id: 'queue-5', question: 'What is a deque (double-ended queue)?', options: ['A queue with priority ordering', 'A queue allowing insertions and deletions at both ends', 'A queue that only supports dequeue', 'A queue with a fixed capacity'], correct: 1, explanation: 'A deque supports O(1) insertion and deletion at both the front and rear ends.' },
+    { id: 'queue-6', question: 'Which real-world scheduling model does a simple FIFO queue best represent?', options: ['Round-robin scheduling', 'First-come, first-served scheduling', 'Priority-based scheduling', 'Shortest job first'], correct: 1, explanation: 'FCFS scheduling processes tasks in the order they arrive, exactly like a FIFO queue.' },
+    { id: 'queue-7', question: 'What is the time complexity of reversing a queue using recursion?', options: ['O(1)', 'O(log n)', 'O(n)', 'O(n^2)'], correct: 2, explanation: 'Reversing a queue recursively dequeues all n elements, then inserts each at the front, taking O(n) total.' },
+    { id: 'queue-8', question: 'How does a priority queue differ from a simple FIFO queue?', options: ['It has O(1) operations', 'It dequeues elements based on priority, not arrival order', 'It only supports enqueue', 'It uses a linked list exclusively'], correct: 1, explanation: 'A priority queue dequeues the highest-priority element first, regardless of insertion order.' },
+    { id: 'queue-9', question: 'Which operation is NOT typically supported by a standard queue ADT?', options: ['enqueue', 'dequeue', 'peek (front element)', 'insert at arbitrary index'], correct: 3, explanation: 'A standard queue only allows access at the front and rear; inserting in the middle violates FIFO.' },
+    { id: 'queue-10', question: 'Which data structure is used to implement a thread pool task scheduler?', options: ['A stack', 'A queue', 'A binary search tree', 'A hash set'], correct: 1, explanation: 'Task schedulers use a queue to ensure tasks are processed in the order they were submitted.' },
+  ],
+  recursion: [
+    { id: 'recursion-1', question: "What is a 'base case' in a recursive function?", options: ['The first line of the function', 'The condition that stops the recursion', 'The largest input the function handles', 'The initial call that starts recursion'], correct: 1, explanation: 'A base case defines the condition under which the function returns a value without making another recursive call, preventing infinite recursion.' },
+    { id: 'recursion-2', question: 'What happens when a recursive function has no base case?', options: ['The function returns null', 'It causes a stack overflow error', 'The compiler adds one automatically', 'The function runs faster'], correct: 1, explanation: 'Without a base case, the function calls itself indefinitely, consuming all available call stack memory until a stack overflow occurs.' },
+    { id: 'recursion-3', question: 'Which data structure does the system use to manage function calls during recursion?', options: ['Queue', 'Heap', 'Stack', 'Hash Map'], correct: 2, explanation: 'The call stack is a LIFO (stack) data structure that stores activation records for each function call, including local variables and return addresses.' },
+    { id: 'recursion-4', question: 'What is tail recursion?', options: ['Recursion that processes the tail of a list', 'When the recursive call is the last operation in the function', 'Recursion with only one base case', 'A recursive function with no return value'], correct: 1, explanation: 'In tail recursion, the recursive call is the final operation before returning, allowing compilers to optimize by reusing the current stack frame.' },
+    { id: 'recursion-5', question: 'What is the time complexity of naive recursive Fibonacci without memoization?', options: ['O(n)', 'O(n log n)', 'O(2^n)', 'O(n^2)'], correct: 2, explanation: 'Naive Fibonacci makes two recursive calls per invocation, creating an exponential call tree with roughly 2^n total calls.' },
+    { id: 'recursion-6', question: 'What is a recursion tree used for?', options: ['Storing recursive results in a tree data structure', 'Visualizing the hierarchy of recursive calls and their costs', 'Converting recursion to iteration', 'Measuring stack memory usage'], correct: 1, explanation: 'A recursion tree diagrams each recursive call as a node, helping analyze time complexity and identify overlapping subproblems.' },
+    { id: 'recursion-7', question: 'Which technique caches results of expensive recursive calls to avoid redundant computation?', options: ['Divide and conquer', 'Dynamic programming tabulation', 'Memoization', 'Greedy optimization'], correct: 2, explanation: 'Memoization stores previously computed results in a cache (like a hash map or array) so each unique subproblem is solved only once.' },
+    { id: 'recursion-8', question: 'What is the space complexity of a recursive function with maximum call depth n?', options: ['O(1)', 'O(log n)', 'O(n)', 'O(2^n)'], correct: 2, explanation: 'Each recursive call adds a frame to the call stack. With maximum depth n, the space used is O(n) for the stack frames.' },
+    { id: 'recursion-9', question: 'Which sorting algorithm is a classic example of the divide-and-conquer recursive paradigm?', options: ['Bubble Sort', 'Insertion Sort', 'Merge Sort', 'Selection Sort'], correct: 2, explanation: 'Merge Sort recursively divides the array in half, sorts each half, then merges the sorted halves — a textbook divide-and-conquer approach.' },
+    { id: 'recursion-10', question: "What does 'backtracking' in recursion involve?", options: ['Returning the final answer immediately', 'Exploring all possibilities and undoing choices that lead to dead ends', 'Converting recursive code to iterative loops', 'Storing all results in a hash map'], correct: 1, explanation: 'Backtracking explores each branch recursively, and when a dead end is reached, it undoes the last choice (backtracks) to try the next option.' },
   ],
 };
 
@@ -2163,12 +2325,17 @@ function initLoadingScreen() {
 }
 
 // ===== NAVBAR =====
+let navbarInitialized = false;
+
 function initNavbar() {
+  if (navbarInitialized) return;
   const menuToggle = document.getElementById('menuToggle');
   const navLinks = document.getElementById('navLinks');
 
+  if (!menuToggle || !navLinks) return;
+
   let overlay = document.querySelector('.nav-overlay');
-  if (!overlay && menuToggle && navLinks) {
+  if (!overlay) {
     overlay = document.createElement('div');
     overlay.className = 'nav-overlay';
     document.body.appendChild(overlay);
@@ -2192,18 +2359,16 @@ function initNavbar() {
     toggleMenu(false);
   };
 
-  if (menuToggle && navLinks) {
-    menuToggle.addEventListener('click', (e) => {
-      e.stopPropagation();
-      toggleMenu();
-    });
+  menuToggle.addEventListener('click', (e) => {
+    e.stopPropagation();
+    toggleMenu();
+  });
 
-    if (overlay) overlay.addEventListener('click', closeMenu);
+  if (overlay) overlay.addEventListener('click', closeMenu);
 
-    navLinks.querySelectorAll('a').forEach((link) => {
-      link.addEventListener('click', closeMenu);
-    });
-  }
+  navLinks.querySelectorAll('a').forEach((link) => {
+    link.addEventListener('click', closeMenu);
+  });
 
   const dropdownToggles = document.querySelectorAll('.dropdown-toggle');
   const isMobile = () => window.matchMedia('(max-width: 1024px)').matches;
@@ -2287,7 +2452,7 @@ function initNavbar() {
 
   window.addEventListener('resize', () => {
     if (!isMobile()) {
-      if (navLinks.classList.contains('active')) {
+      if (navLinks && navLinks.classList.contains('active')) {
         toggleMenu(false);
       }
     } else {
@@ -2299,7 +2464,11 @@ function initNavbar() {
       });
     }
   });
+
+  navbarInitialized = true;
 }
+
+const _initNavbar = initNavbar;
 
 // ===== HERO SECTION =====
 function initHeroSection() {
@@ -2429,21 +2598,37 @@ function initTopicOfTheDay() {
   const totdIcon = document.getElementById('totdIcon');
   if (!totdIcon) return;
 
-  totdIcon.textContent = topic.icon;
-  document.getElementById('totdTitle').textContent = topic.name;
-  document.getElementById('totdDesc').textContent = topic.description;
+  const topicIcons = {
+    'Arrays': 'fa-layer-group',
+    'Strings': 'fa-font',
+    'Linked List': 'fa-link',
+    'Trees': 'fa-tree',
+    'Graphs': 'fa-project-diagram',
+    'Dynamic Programming': 'fa-puzzle-piece',
+    'Heaps': 'fa-chart-bar',
+  };
+  totdIcon.textContent = '';
+  const icon = document.createElement('i');
+  icon.className = `fas ${topicIcons[topic.name] || 'fa-book'}`;
+  icon.style.fontSize = '2.5rem';
+  totdIcon.appendChild(icon);
+  const totdTitle = document.getElementById('totdTitle');
+  if (totdTitle) totdTitle.textContent = topic.name;
+  const totdDesc = document.getElementById('totdDesc');
+  if (totdDesc) totdDesc.textContent = topic.description;
 
   const diffEl = document.getElementById('totdDifficulty');
-  diffEl.textContent = topic.difficulty;
-  diffEl.className = `totd-difficulty difficulty-badge ${getDifficultyClass(topic.difficulty)}`;
+  if (diffEl) {
+    diffEl.textContent = topic.difficulty;
+    diffEl.className = `totd-difficulty difficulty-badge ${getDifficultyClass(topic.difficulty)}`;
+  }
 
   const progress = getTopicProgress(topic.name);
-  document.getElementById('totdProblems').textContent =
-    `${progress.completed}/${progress.total} solved`;
+  const totdProblems = document.getElementById('totdProblems');
+  if (totdProblems) totdProblems.textContent = `${progress.completed}/${progress.total} solved`;
 
-  document.getElementById('totdBtn').addEventListener('click', () => {
-    openTopicModal(topic);
-  });
+  const totdBtn = document.getElementById('totdBtn');
+  if (totdBtn) totdBtn.addEventListener('click', () => openTopicModal(topic));
 }
 
 function initTopicsSection() {
@@ -2531,6 +2716,12 @@ function getQuizTopicKey(topic) {
       graphs: 'graphs',
       'dynamic programming': 'dp',
       dp: 'dp',
+      heaps: 'heaps',
+      stacks: 'stack',
+      stack: 'stack',
+      queues: 'queue',
+      queue: 'queue',
+      recursion: 'recursion',
     };
     return map[normalize(key)] || null;
   };
@@ -2549,6 +2740,8 @@ function getQuizTopicKey(topic) {
     trees: 'trees',
     graphs: 'graphs',
     'dynamic programming': 'dp',
+    stacks: 'stack',
+    queues: 'queue',
   };
 
   return keyMap[name] || toKnownKey(name) || null;
@@ -3770,15 +3963,36 @@ function updateGamification() {
 }
 
 function showNotification(message, type = 'info') {
+  // Use ToastService if available (provides icon, close button, glassmorphism)
+  if (window.Toast && typeof window.Toast.show === 'function') {
+    window.Toast.show(message, type);
+    return;
+  }
+  // Fallback: dismiss any existing toasts first, then create a new one
+  document.querySelectorAll('.toast-notification').forEach(function(el) {
+    el.classList.remove('toast-visible');
+    if (el.parentNode) el.parentNode.removeChild(el);
+  });
+
   const notification = document.createElement('div');
-  notification.style.cssText = `position:fixed; top:100px; right:20px; padding:1rem 1.5rem; background:${type === 'success' ? 'var(--gradient-4)' : type === 'error' ? '#ef4444' : 'var(--primary)'}; color:${type === 'success' ? 'var(--dark-bg)' : 'white'}; border-radius:10px; box-shadow:var(--glass-shadow); z-index:10000; animation:slideIn 0.3s ease; font-weight:600; max-width:350px;`;
-  notification.textContent = message;
+  notification.className = `toast-notification toast-${type}`;
+
+  const iconEl = document.createElement('div');
+  iconEl.className = 'toast-icon';
+  const iconMap = { success: 'fa-check-circle', error: 'fa-exclamation-circle', warning: 'fa-exclamation-triangle' };
+  iconEl.innerHTML = `<i class="fas ${iconMap[type] || 'fa-info-circle'}"></i>`;
+  notification.appendChild(iconEl);
+
+  const msgEl = document.createElement('div');
+  msgEl.className = 'toast-message';
+  msgEl.textContent = message;
+  notification.appendChild(msgEl);
+
   document.body.appendChild(notification);
+  requestAnimationFrame(() => notification.classList.add('toast-visible'));
   setTimeout(() => {
-    notification.style.opacity = '0';
-    notification.style.transform = 'translateX(100%)';
-    notification.style.transition = 'all 0.3s ease';
-    setTimeout(() => notification.remove(), 300);
+    notification.classList.remove('toast-visible');
+    setTimeout(() => { if (notification.parentNode) notification.remove(); }, 300);
   }, 3000);
 }
 
@@ -4347,7 +4561,7 @@ function renderActivityHeatmap() {
   const WEEKS_TO_SHOW = 52;
   const dayOfWeek = today.getDay();
   const startDate = new Date(today);
-  startDate.setDate(startDate.getDate() - (WEEKS_TO_SHOW * 7 - 1) - dayOfWeek);
+  startDate.setDate(startDate.getDate() - ((WEEKS_TO_SHOW * 7 - 1) - dayOfWeek));
   startDate.setHours(0, 0, 0, 0);
   const weeks = [];
   const monthLabels = [];
@@ -4622,16 +4836,24 @@ function mapType(jt, lang) {
   return m[jt]?.[lang] || 'auto';
 }
 
+function extractMethods(problem) {
+  const map = new Map();
+  for (const tc of (problem.testCases || [])) {
+    if (tc.methods && Array.isArray(tc.methods)) {
+      for (const m of tc.methods) {
+        const name = m[0];
+        const argc = Math.max(0, m.length - 1);
+        if (!map.has(name) || map.get(name) < argc) map.set(name, argc);
+      }
+    }
+  }
+  return map;
+}
+
 function getClassTemplate(lang, problem) {
   const fnName = problem.functionName || 'LRUCache';
   const params = problem.params || [];
-
-  let docComment = '';
-  if (problem.guide) {
-    const lines = problem.guide.split('\n');
-    const prefix = lang === 'python' ? '# ' : '// ';
-    docComment = lines.map((l) => prefix + l).join('\n') + '\n';
-  }
+  const docComment = '';
 
   const paramStr = params
     .map((p) => {
@@ -4643,19 +4865,45 @@ function getClassTemplate(lang, problem) {
     })
     .join(', ');
 
+  const methods = extractMethods(problem);
+  const pn = (n) => n === 0 ? '' : n === 1 ? 'val' : n === 2 ? 'key, value' : Array.from({length: n}, (_, i) => `val${i + 1}`).join(', ');
+  const getterSet = new Set(['get', 'getMin', 'getMax', 'top', 'peek', 'peekMin', 'peekMax']);
+  for (const tc of (problem.testCases || [])) {
+    if (tc.methods && tc.methods.length > 0 && tc.expected !== undefined && tc.expected !== null) {
+      getterSet.add(tc.methods[tc.methods.length - 1][0]);
+    }
+  }
+  const getter = (n) => getterSet.has(n);
+
+  const has = methods.size > 0;
+  const js = has ? [...methods].map(([n, a]) => `\n\n    ${n}(${pn(a)}) {\n        \n    }`).join('') : '\n\n    get(key) {\n        \n    }\n\n    put(key, value) {\n        \n    }';
+  const py = has ? [...methods].map(([n, a]) => {
+    const p = a === 0 ? 'self' : a === 1 ? 'self, val' : a === 2 ? 'self, key: int, value: int' : `self, ${Array.from({length: a}, (_, i) => `param${i + 1}: int`).join(', ')}`;
+    return `\n\n    def ${n}(${p})${getter(n) ? ' -> int' : ' -> None'}:\n        pass`;
+  }).join('') : '\n\n    def get(self, key: int) -> int:\n        pass\n\n    def put(self, key: int, value: int) -> None:\n        pass';
+  const java = has ? [...methods].map(([n, a]) => {
+    const rt = getter(n) ? 'int' : 'void';
+    const p = a === 0 ? '' : a === 1 ? 'int val' : a === 2 ? 'int key, int value' : Array.from({length: a}, (_, i) => `int val${i + 1}`).join(', ');
+    return `\n\n    public ${rt} ${n}(${p})${rt === 'void' ? ' {\n        \n    }' : ' {\n        return 0;\n    }'}`;
+  }).join('') : '\n\n    public int get(int key) {\n        return 0;\n    }\n\n    public void put(int key, int value) {\n        \n    }';
+  const cpp = has ? [...methods].map(([n, a]) => {
+    const rt = getter(n) ? 'int' : 'void';
+    const p = a === 0 ? '' : a === 1 ? 'int val' : a === 2 ? 'int key, int value' : Array.from({length: a}, (_, i) => `int val${i + 1}`).join(', ');
+    return `\n\n    ${rt} ${n}(${p})${rt === 'void' ? ' {\n        \n    }' : ' {\n        return 0;\n    }'}`;
+  }).join('') : '\n\n    int get(int key) {\n        return 0;\n    }\n\n    void put(int key, int value) {\n        \n    }';
+  const swift = has ? [...methods].map(([n, a]) => {
+    const p = a === 0 ? '' : a === 1 ? '_ val: Int' : a === 2 ? '_ key: Int, _ value: Int' : Array.from({length: a}, (_, i) => `_ val${i + 1}: Int`).join(', ');
+    const rt = getter(n) ? ' -> Int' : '';
+    return `\n\n    func ${n}(${p})${rt}${rt ? ' {\n        return 0\n    }' : ' {\n        \n    }'}`;
+  }).join('') : '\n\n    func get(_ key: Int) -> Int {\n        return 0\n    }\n\n    func put(_ key: Int, _ value: Int) {\n        \n    }';
+
   const templates = {
-    javascript:
-      docComment +
-      `class ${fnName} {\n    constructor(${paramStr}) {\n        \n    }\n\n    get(key) {\n        \n    }\n\n    put(key, value) {\n        \n    }\n}`,
-    python:
-      docComment +
-      `class ${fnName}:\n    def __init__(self, ${params.join(', ')}):\n        pass\n\n    def get(self, key: int) -> int:\n        pass\n\n    def put(self, key: int, value: int) -> None:\n        pass\n`,
-    java: `class ${fnName} {\n${docComment.replace(/^(.)/gm, '    $1')}    public ${fnName}(${paramStr}) {\n        \n    }\n\n    public int get(int key) {\n        return 0;\n    }\n\n    public void put(int key, int value) {\n        \n    }\n}`,
-    cpp: `#include <unordered_map>\nusing namespace std;\n\n${docComment}class ${fnName} {\npublic:\n    ${fnName}(${paramStr}) {\n        \n    }\n\n    int get(int key) {\n        return 0;\n    }\n\n    void put(int key, int value) {\n        \n    }\n};`,
-    c: `${docComment}// Use a struct with function pointers:\ntypedef struct {\n    int capacity;\n} LRUCache;\n\nLRUCache* createLRUCache(int capacity) {\n    return NULL;\n}\n\nint get(LRUCache* cache, int key) {\n    return 0;\n}\n\nvoid put(LRUCache* cache, int key, int value) {\n    \n}`,
-    swift:
-      docComment +
-      `class ${fnName} {\n    init(${paramStr}) {\n        \n    }\n\n    func get(_ key: Int) -> Int {\n        return 0\n    }\n\n    func put(_ key: Int, _ value: Int) {\n        \n    }\n}`,
+    javascript: `class ${fnName} {\n    constructor(${paramStr}) {\n        \n    }` + js + '\n}',
+    python: `class ${fnName}:\n    def __init__(self, ${params.join(', ')}):\n        pass` + py + '\n',
+    java: `class ${fnName} {\n    public ${fnName}(${paramStr}) {\n        \n    }` + java + '\n}',
+    cpp: `#include <unordered_map>\nusing namespace std;\n\nclass ${fnName} {\npublic:\n    ${fnName}(${paramStr}) {\n        \n    }` + cpp + '\n};',
+    c: `// Use a struct with function pointers:\ntypedef struct {\n    int capacity;\n} LRUCache;\n\nLRUCache* createLRUCache(int capacity) {\n    return NULL;\n}\n\nint get(LRUCache* cache, int key) {\n    return 0;\n}\n\nvoid put(LRUCache* cache, int key, int value) {\n    \n}`,
+    swift: `class ${fnName} {\n    init(${paramStr}) {` + swift + '\n}',
   };
   return templates[lang] || templates.javascript;
 }
@@ -4693,20 +4941,14 @@ function getDefaultCode(lang, problem) {
         .join(', ')
     : 'params';
 
-  let docComment = '';
-  if (problem.guide) {
-    const lines = problem.guide.split('\n');
-    const prefix = lang === 'python' ? '# ' : '// ';
-    docComment = lines.map((l) => prefix + l).join('\n') + '\n';
-  }
+  const docComment = '';
 
   const templates = {
     javascript:
-      docComment + 'function ' + fnName + '(' + (params.join(', ') || 'params') + ') {\n    \n}',
-    python: docComment + 'def ' + fnName + '(' + (params.join(', ') || 'params') + '):\n    pass\n',
+      'function ' + fnName + '(' + (params.join(', ') || 'params') + ') {\n    \n}',
+    python: 'def ' + fnName + '(' + (params.join(', ') || 'params') + '):\n    pass\n',
     java:
       'class Solution {\n' +
-      docComment.replace(/^(.)/gm, '    $1') +
       '    public ' +
       retType +
       ' ' +
@@ -4716,7 +4958,6 @@ function getDefaultCode(lang, problem) {
       ') {\n        \n    }\n}',
     cpp:
       '#include <string>\n#include <stack>\nusing namespace std;\n\n' +
-      docComment +
       retType +
       ' ' +
       fnName +
@@ -4725,14 +4966,13 @@ function getDefaultCode(lang, problem) {
       ') {\n    \n}',
     c:
       '#include <stdio.h>\n#include <stdlib.h>\n#include <string.h>\n#include <stdbool.h>\n\n' +
-      docComment +
       retType +
       ' ' +
       fnName +
       '(' +
       paramStr +
       ') {\n    \n}',
-    swift: docComment + 'func ' + fnName + '(' + paramStr + ') -> ' + retType + ' {\n    \n}',
+    swift: 'func ' + fnName + '(' + paramStr + ') -> ' + retType + ' {\n    \n}'
   };
   return templates[lang] || templates.javascript;
 }
@@ -5092,7 +5332,6 @@ async function submitQuizCode() {
       const difficulty = problem.difficulty;
       addXP(getXPForDifficulty(difficulty));
       updateStreak();
-      recordDailyActivity(1);
       saveUserData();
       updateDashboard();
       updateGamification();
@@ -5131,6 +5370,7 @@ async function submitQuizCode() {
       );
       showNotification(failures.length + ' test(s) failed. Keep trying!', 'error');
     }
+    recordDailyActivity(1);
   } catch (e) {
     renderTestCases(testCases);
     setOutput(e.message || 'Execution failed', 'error');
@@ -5289,21 +5529,17 @@ async function runPerl() {
 }
 
 // Inject Report Issue Feature on educational pages
-document.addEventListener('DOMContentLoaded', () => {
-  const path = window.location.pathname;
-  if (
-    path.includes('/pages/learning/') ||
-    path.includes('/pages/visualizers/') ||
-    path.includes('/pages/resources/')
-  ) {
-    import('/scripts/report-issue.js').catch((err) =>
-      console.error('Failed to dynamically import report issue script:', err)
-    );
-  }
-});
+if (!window.location.pathname.includes('/pages/learning/tech-stacks') && (window.location.pathname.includes('/pages/learning/') || window.location.pathname.includes('/pages/visualizers/') || window.location.pathname.includes('/pages/resources/'))) {
+  import('/scripts/report-issue.js').catch((err) =>
+    console.error('Failed to dynamically import report issue script:', err)
+  );
+}
 
 // ===== KEYBOARD SHORTCUTS =====
 document.addEventListener('keydown', function (e) {
+  // Shortcuts are desktop-only: skip them on mobile-sized viewports (< 768px).
+  if (!window.areKeyboardShortcutsEnabled()) return;
+
   // Ctrl+K: Focus search
   if (e.ctrlKey && e.key === 'k') {
     e.preventDefault();
@@ -5339,6 +5575,42 @@ document.addEventListener('keydown', function (e) {
   if (e.altKey && e.key === 'd') {
     e.preventDefault();
     window.location.href = '#dashboard';
+  }
+
+  // Alt+S: Settings dropdown
+  if (e.altKey && e.key === 's') {
+    e.preventDefault();
+    const settingsParent = document.querySelector('.nav-settings-dropdown');
+    if (settingsParent) {
+      document.querySelectorAll('.has-dropdown.open').forEach(function (el) {
+        if (el !== settingsParent) {
+          el.classList.remove('open');
+          const btn = el.querySelector('.dropdown-toggle');
+          if (btn) btn.setAttribute('aria-expanded', 'false');
+        }
+      });
+      var isOpen = settingsParent.classList.toggle('open');
+      var toggle = settingsParent.querySelector('.dropdown-toggle');
+      if (toggle) toggle.setAttribute('aria-expanded', isOpen);
+    }
+  }
+
+  // Alt+L: Learn dropdown
+  if (e.altKey && e.key === 'l') {
+    e.preventDefault();
+    const learnParent = document.querySelector('.nav-learn-dropdown');
+    if (learnParent) {
+      document.querySelectorAll('.has-dropdown.open').forEach(function (el) {
+        if (el !== learnParent) {
+          el.classList.remove('open');
+          const btn = el.querySelector('.dropdown-toggle');
+          if (btn) btn.setAttribute('aria-expanded', 'false');
+        }
+      });
+      var isOpen = learnParent.classList.toggle('open');
+      var toggle = learnParent.querySelector('.dropdown-toggle');
+      if (toggle) toggle.setAttribute('aria-expanded', isOpen);
+    }
   }
 
   // Escape: Close modal
@@ -5534,39 +5806,176 @@ document.addEventListener('keydown', function (e) {
     initModalManager();
   }
 })();
+//===========================================
+//bookamrks
+//===========================================
+(function () {
+  // Skip bookmark rendering on auth pages (login, signup) — users can't save favorites without being logged in
+  const page = document.body?.dataset?.page;
+  if (page === 'login' || page === 'signup') return;
 
-// ============================================
-// PROFILE EDITING & LANGUAGES MANAGER
-// ============================================
-// Handled by modules/profile-edit.js (initial-based avatars, language saving)
-// Legacy emoji-based IIFE removed.
-
-// Offline/Online status handler
-window.addEventListener('load', () => {
-  function updateOnlineStatus() {
-    const banner = document.getElementById('offline-banner');
-    if (banner) {
-      if (navigator.onLine) {
-        banner.classList.add('hidden');
-      } else {
-        banner.classList.remove('hidden');
-      }
+  // Helper: Safely retrieve saved favorites array
+  function getSavedFavorites() {
+    try {
+      const stored = localStorage.getItem('algoInfinityVerse_favorites');
+      if (!stored) return [];
+      const parsed = JSON.parse(stored);
+      return Array.isArray(parsed) ? parsed : [];
+    } catch (e) {
+      return [];
     }
   }
-  window.addEventListener('online', updateOnlineStatus);
-  window.addEventListener('offline', updateOnlineStatus);
-  updateOnlineStatus();
 
-  // Sync notes on load
-  if (window.syncProblemNotesDown) {
-    window.syncProblemNotesDown();
+  // Helper: Persist favorites to localStorage and global state
+  function saveFavorites(favs) {
+    try {
+      localStorage.setItem('algoInfinityVerse_favorites', JSON.stringify(favs));
+    } catch (e) {
+      console.warn('Unable to write to localStorage:', e);
+    }
+    if (typeof userProgress !== 'undefined' && userProgress) {
+      userProgress.favoriteProblems = favs;
+    }
+    if (typeof saveUserData === 'function') {
+      saveUserData();
+    }
   }
 
-  // Sync spaced repetition on load
-  if (window.syncSpacedRepetitionDown) {
-    window.syncSpacedRepetitionDown();
+  // 1. Inject Bookmarks into Standalone Lesson Headers
+  function injectHeaderBookmarks() {
+    const selectors = [
+      '.title-wrapper',
+      '.topic-header',
+      '.problem-header',
+      '.arr-lesson-header',
+      '.os-lesson-header',   
+      '.oop-lesson-header',  
+      '.lt-hero-content',    
+      '.modal-header',
+      '.totd-title',
+      '.hero-title',
+      '.section-title'
+    ];
+
+    let titleWrapper = document.querySelector(selectors.join(', '));
+
+    // Fallback if no explicit wrapper class exists
+    if (!titleWrapper) {
+      const heading = document.querySelector('.oop-main-content h3, .os-main-content h3, main h1, main h2, main h3, article h3');
+      if (heading) titleWrapper = heading;
+    }
+
+    if (!titleWrapper || titleWrapper.querySelector('.favorite-btn')) return;
+
+    const pageId = window.location.pathname + window.location.hash;
+    const favs = getSavedFavorites();
+    const isSaved = favs.includes(pageId);
+
+    const heartBtn = document.createElement('button');
+    heartBtn.className = `favorite-btn ${isSaved ? 'active' : ''}`;
+    heartBtn.title = isSaved ? 'Remove from bookmarks' : 'Bookmark this topic';
+    heartBtn.type = 'button';
+    heartBtn.setAttribute('aria-label', 'Toggle Bookmark');
+    heartBtn.innerHTML = '<i class="fa-solid fa-heart"></i>';
+
+    heartBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      let currentFavs = getSavedFavorites();
+
+      if (currentFavs.includes(pageId)) {
+        currentFavs = currentFavs.filter(id => id !== pageId);
+        heartBtn.classList.remove('active', 'pulse');
+        heartBtn.title = 'Bookmark this topic';
+        if (typeof showNotification === 'function') showNotification('Removed from bookmarks', 'info');
+      } else {
+        currentFavs.push(pageId);
+        heartBtn.classList.add('active', 'pulse');
+        heartBtn.title = 'Remove from bookmarks';
+        if (typeof showNotification === 'function') showNotification('Saved to bookmarks!', 'success');
+      }
+
+      saveFavorites(currentFavs);
+    });
+
+    titleWrapper.appendChild(heartBtn);
   }
-});
+
+  //  Inject Bookmarks into Landing/Grid Cards 
+  function injectCardBookmarks() {
+    const cards = document.querySelectorAll('.lt-card, .topic-card, .quiz-card, .problem-card');
+    if (!cards.length) return;
+
+    const favs = getSavedFavorites();
+
+    cards.forEach((card) => {
+      if (card.querySelector('.favorite-btn')) return;
+
+      const targetPath = card.getAttribute('href') || card.dataset.path || card.querySelector('a')?.getAttribute('href');
+      if (!targetPath) return;
+
+      const isSaved = favs.includes(targetPath);
+
+      const heartBtn = document.createElement('button');
+      heartBtn.className = `favorite-btn card-fav-btn ${isSaved ? 'active' : ''}`;
+      heartBtn.title = isSaved ? 'Remove from bookmarks' : 'Bookmark this topic';
+      heartBtn.type = 'button';
+      heartBtn.setAttribute('aria-label', 'Bookmark topic');
+      heartBtn.innerHTML = '<i class="fa-solid fa-heart"></i>';
+
+      heartBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+
+        let currentFavs = getSavedFavorites();
+
+        if (currentFavs.includes(targetPath)) {
+          currentFavs = currentFavs.filter(id => id !== targetPath);
+          heartBtn.classList.remove('active', 'pulse');
+          heartBtn.title = 'Bookmark this topic';
+          if (typeof showNotification === 'function') showNotification('Removed from bookmarks', 'info');
+        } else {
+          currentFavs.push(targetPath);
+          heartBtn.classList.add('active', 'pulse');
+          heartBtn.title = 'Remove from bookmarks';
+          if (typeof showNotification === 'function') showNotification('Saved to bookmarks!', 'success');
+        }
+
+        saveFavorites(currentFavs);
+      });
+
+      const iconWrap = card.querySelector('.lt-card-icon, .topic-icon, .lt-card-header') || card;
+      iconWrap.style.position = 'relative';
+      iconWrap.appendChild(heartBtn);
+    });
+  }
+
+  // Master execution function
+  function runBookmarks() {
+    try {
+      // Skip bookmark injection on learning pages with custom bookmark systems
+      var pageData = document.body && document.body.getAttribute('data-page');
+      if (pageData === 'quizzes' || pageData === 'csharp-learning' || pageData === 'php-learning' || pageData === 'solidity-learning' || pageData === 'typescript-learning' || pageData === 'swift-learning' || pageData === 'kotlin-learning' || pageData === 'flutter-learning' || pageData === 'java-learning' || pageData === 'cplusplus-learning' || pageData === 'javascript-learning' || pageData === 'c-learning' || pageData === 'ruby-learning') return;
+      injectHeaderBookmarks();
+      injectCardBookmarks();
+    } catch (err) {
+      console.error('Bookmark Injection Error:', err);
+    }
+  }
+
+  // Lifecycle & Listener Triggers
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', runBookmarks);
+  } else {
+    runBookmarks();
+  }
+
+  window.addEventListener('hashchange', () => setTimeout(runBookmarks, 100));
+
+  const observer = new MutationObserver(() => runBookmarks());
+  if (document.body) {
+    observer.observe(document.body, { childList: true, subtree: true });
+  }
+})();
 
 // ============================================
 // ACTIVITY FEED
@@ -6125,7 +6534,7 @@ function updateProblemCount(filteredProblems) {
 // NavigationManager can attach to it — even on pages that don't load
 // the navbar partial (where the element normally lives).
 (function () {
-  if (!document.getElementById('dynamic-breadcrumbs')) {
+  if (!window.location.pathname.includes('/pages/learning/tech-stacks/') && !document.getElementById('dynamic-breadcrumbs')) {
     const div = document.createElement('div');
     div.id = 'dynamic-breadcrumbs';
     div.className = 'breadcrumb-bar';
@@ -6140,3 +6549,62 @@ function updateProblemCount(filteredProblems) {
     document.head.appendChild(s);
   }
 })();
+
+// ============================================
+// ASYNC UI STATE MANAGER
+// ============================================
+window.AsyncUIState = {
+  _injectOverlay: function (container, contentHtml) {
+    if (!container) return;
+    this.clear(container);
+    container.classList.add('async-ui-container');
+    const overlay = document.createElement('div');
+    overlay.className = 'async-ui-overlay';
+    overlay.innerHTML = contentHtml;
+    container.appendChild(overlay);
+  },
+  
+  showLoading: function (container, message = 'Loading...') {
+    this._injectOverlay(container, `
+      <i class="fas fa-spinner async-ui-spinner"></i>
+      <div class="async-ui-message">${escapeHtml(message)}</div>
+    `);
+  },
+  
+  showError: function (container, message = 'An error occurred', retryCallback = null) {
+    const retryHtml = typeof retryCallback === 'function' 
+      ? `<button class="async-ui-retry-btn" onclick="this.closest('.async-ui-overlay').dispatchEvent(new CustomEvent('retryAction', {bubbles: true}))"><i class="fas fa-redo"></i> Retry</button>` 
+      : '';
+      
+    this._injectOverlay(container, `
+      <i class="fas fa-exclamation-triangle async-ui-error-icon"></i>
+      <div class="async-ui-message">${escapeHtml(message)}</div>
+      ${retryHtml}
+    `);
+    
+    if (typeof retryCallback === 'function') {
+      const overlay = container.querySelector('.async-ui-overlay');
+      if (overlay) {
+        overlay.addEventListener('retryAction', function(e) {
+          e.stopPropagation();
+          retryCallback();
+        });
+      }
+    }
+  },
+  
+  showEmpty: function (container, message = 'No data available') {
+    this._injectOverlay(container, `
+      <i class="fas fa-folder-open async-ui-empty-icon"></i>
+      <div class="async-ui-message">${escapeHtml(message)}</div>
+    `);
+  },
+  
+  clear: function (container) {
+    if (!container) return;
+    const overlay = container.querySelector('.async-ui-overlay');
+    if (overlay) {
+      container.removeChild(overlay);
+    }
+  }
+};

@@ -1,0 +1,447 @@
+/* ===== AI SQLi & ORM Leak Auditor ===== */
+:root {
+  --sqli-glass: rgba(255, 255, 255, 0.04);
+  --sqli-border: rgba(255, 255, 255, 0.1);
+  --sqli-muted: rgba(255, 255, 255, 0.62);
+  --sqli-accent: #f472b6;
+  --sqli-accent-2: #fb923c;
+  --sqli-accent-dim: rgba(244, 114, 182, 0.14);
+  --sqli-error: #f87171;
+  --sqli-warn: #fbbf24;
+  --sqli-info: #60a5fa;
+  --sqli-ok: #4ade80;
+  --sqli-safe: #2dd4bf;
+}
+
+html.light-mode {
+  --sqli-glass: rgba(15, 23, 42, 0.04);
+  --sqli-border: rgba(15, 23, 42, 0.12);
+  --sqli-muted: rgba(15, 23, 42, 0.65);
+  --sqli-accent-dim: rgba(219, 39, 119, 0.1);
+}
+
+.sqli-skip-link {
+  position: absolute;
+  left: 1rem;
+  top: -100px;
+  z-index: 10000;
+  padding: 0.6rem 1rem;
+  background: var(--sqli-accent);
+  color: #0a0a14;
+  font-weight: 700;
+  border-radius: 8px;
+  text-decoration: none;
+}
+
+.sqli-skip-link:focus {
+  top: 1rem;
+  outline: 3px solid #fff;
+  outline-offset: 2px;
+}
+
+.sqli-hero {
+  position: relative;
+  overflow: hidden;
+  padding: 7.5rem 1.5rem 4rem;
+  text-align: center;
+  border-bottom: 1px solid var(--sqli-border);
+  background:
+    radial-gradient(ellipse at top right, rgba(244, 114, 182, 0.16), transparent 55%),
+    radial-gradient(ellipse at bottom left, rgba(251, 146, 60, 0.12), transparent 50%);
+}
+
+.sqli-hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1.1rem;
+  padding: 0.35rem 0.9rem;
+  border-radius: 999px;
+  border: 1px solid rgba(244, 114, 182, 0.4);
+  background: var(--sqli-accent-dim);
+  color: var(--sqli-accent);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.sqli-hero h1 {
+  margin: 0 0 1rem;
+  font-family: 'Orbitron', sans-serif;
+  font-size: clamp(1.9rem, 5vw, 3rem);
+  font-weight: 900;
+  line-height: 1.15;
+}
+
+.sqli-hero-accent {
+  display: inline-block;
+  background: linear-gradient(135deg, #f472b6, #fb923c);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.sqli-hero p {
+  max-width: 740px;
+  margin: 0 auto 2rem;
+  color: var(--sqli-muted);
+  font-size: 1.05rem;
+  line-height: 1.65;
+  font-family: 'Poppins', sans-serif;
+}
+
+.sqli-hero-stats {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1rem;
+}
+
+.sqli-stat {
+  min-width: 120px;
+  padding: 0.85rem 1.1rem;
+  border: 1px solid var(--sqli-border);
+  border-radius: 14px;
+  background: var(--sqli-glass);
+}
+
+.sqli-stat-val {
+  display: block;
+  font-family: 'Orbitron', sans-serif;
+  font-size: 1.45rem;
+  font-weight: 700;
+}
+
+.sqli-stat-label {
+  font-size: 0.75rem;
+  color: var(--sqli-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+#statFindings { color: var(--sqli-warn); }
+#statSeverity { color: var(--sqli-error); }
+#statRawLeaks { color: var(--sqli-accent); }
+#statRewrites { color: var(--sqli-safe); }
+
+.sqli-main {
+  padding: 2rem 0 4rem;
+  font-family: 'Poppins', sans-serif;
+}
+
+.sqli-workspace {
+  display: grid;
+  grid-template-columns: minmax(300px, 1fr) minmax(320px, 1.05fr);
+  gap: 1.5rem;
+  align-items: start;
+  margin-bottom: 1.5rem;
+}
+
+@media (max-width: 980px) {
+  .sqli-workspace {
+    grid-template-columns: 1fr;
+  }
+}
+
+.sqli-panel {
+  padding: 1.4rem;
+  border: 1px solid var(--sqli-border);
+  border-radius: 18px;
+  background: var(--sqli-glass);
+  backdrop-filter: blur(12px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
+}
+
+.sqli-panel-header {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1.2rem;
+  padding-bottom: 0.9rem;
+  border-bottom: 1px solid var(--sqli-border);
+}
+
+.sqli-panel-title {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.sqli-panel-title h2 {
+  margin: 0;
+  font-size: 1.15rem;
+  font-weight: 700;
+}
+
+.sqli-panel-icon {
+  color: var(--sqli-accent);
+}
+
+.sqli-label {
+  display: block;
+  margin-bottom: 0.4rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.sqli-textarea {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0.85rem 1rem;
+  border: 1px solid var(--sqli-border);
+  border-radius: 12px;
+  background: rgba(0, 0, 0, 0.25);
+  color: inherit;
+  font-family: 'Fira Code', monospace;
+  font-size: 0.78rem;
+  line-height: 1.5;
+  resize: vertical;
+  min-height: 220px;
+}
+
+html.light-mode .sqli-textarea {
+  background: rgba(255, 255, 255, 0.85);
+}
+
+.sqli-textarea:focus {
+  outline: 2px solid var(--sqli-accent);
+  outline-offset: 2px;
+  border-color: var(--sqli-accent);
+}
+
+.sqli-hint {
+  margin: 0.5rem 0 0;
+  font-size: 0.8rem;
+  color: var(--sqli-muted);
+  line-height: 1.5;
+}
+
+.sqli-hint code {
+  font-family: 'Fira Code', monospace;
+  font-size: 0.75rem;
+}
+
+.sqli-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  align-items: center;
+  margin-top: 1.1rem;
+}
+
+.sqli-status {
+  margin-top: 0.85rem;
+  min-height: 1.25rem;
+  font-size: 0.85rem;
+  color: var(--sqli-muted);
+}
+
+.sqli-status.is-error { color: var(--sqli-error); }
+.sqli-status.is-ok { color: var(--sqli-ok); }
+
+.sqli-empty {
+  text-align: center;
+  padding: 2.5rem 1rem;
+  color: var(--sqli-muted);
+}
+
+.sqli-empty i {
+  font-size: 2rem;
+  margin-bottom: 0.75rem;
+  color: var(--sqli-accent);
+  opacity: 0.85;
+}
+
+.sqli-section {
+  margin-bottom: 1.5rem;
+}
+
+.sqli-section h3 {
+  margin: 0 0 0.85rem;
+  font-size: 0.95rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--sqli-accent);
+}
+
+.sqli-muted {
+  margin: 0.25rem 0 0;
+  font-size: 0.82rem;
+  color: var(--sqli-muted);
+  line-height: 1.5;
+}
+
+.sqli-score-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.4rem;
+  padding: 1rem 1.1rem;
+  border: 1px solid var(--sqli-border);
+  border-radius: 14px;
+  background: rgba(0, 0, 0, 0.15);
+}
+
+html.light-mode .sqli-score-card {
+  background: rgba(255, 255, 255, 0.55);
+}
+
+.sqli-score-card h3 {
+  margin: 0;
+  font-size: 0.95rem;
+}
+
+.sqli-score-ring {
+  flex-shrink: 0;
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  border: 3px solid var(--sqli-warn);
+  background: var(--sqli-accent-dim);
+  font-family: 'Orbitron', sans-serif;
+  font-size: 1.35rem;
+  font-weight: 700;
+}
+
+.sqli-score-ring.is-low { border-color: var(--sqli-ok); color: var(--sqli-ok); }
+.sqli-score-ring.is-mid { border-color: var(--sqli-warn); color: var(--sqli-warn); }
+.sqli-score-ring.is-high { border-color: var(--sqli-error); color: var(--sqli-error); }
+
+.sqli-findings {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.sqli-finding {
+  padding: 0.85rem 1rem;
+  border: 1px solid var(--sqli-border);
+  border-left: 4px solid var(--sqli-warn);
+  border-radius: 12px;
+  background: rgba(0, 0, 0, 0.15);
+}
+
+html.light-mode .sqli-finding {
+  background: rgba(255, 255, 255, 0.55);
+}
+
+.sqli-finding.is-critical { border-left-color: var(--sqli-error); }
+.sqli-finding.is-high { border-left-color: var(--sqli-accent); }
+.sqli-finding.is-medium { border-left-color: var(--sqli-warn); }
+.sqli-finding.is-ok { border-left-color: var(--sqli-ok); }
+
+.sqli-finding-title {
+  margin: 0 0 0.3rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.sqli-finding-body {
+  margin: 0;
+  font-size: 0.82rem;
+  color: var(--sqli-muted);
+  line-height: 1.5;
+}
+
+.sqli-badge {
+  display: inline-block;
+  margin-bottom: 0.35rem;
+  padding: 0.12rem 0.45rem;
+  border-radius: 6px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  background: rgba(244, 114, 182, 0.18);
+  color: var(--sqli-accent);
+}
+
+.sqli-badge.is-critical {
+  background: rgba(248, 113, 113, 0.18);
+  color: var(--sqli-error);
+}
+
+.sqli-badge.is-ok {
+  background: rgba(74, 222, 128, 0.18);
+  color: var(--sqli-ok);
+}
+
+.sqli-orm-out {
+  padding: 0.9rem 1rem;
+  border: 1px solid var(--sqli-border);
+  border-radius: 12px;
+  background: rgba(0, 0, 0, 0.12);
+  font-size: 0.84rem;
+  line-height: 1.55;
+}
+
+html.light-mode .sqli-orm-out {
+  background: rgba(255, 255, 255, 0.5);
+}
+
+.sqli-orm-out ul {
+  margin: 0.5rem 0 0;
+  padding-left: 1.2rem;
+}
+
+.sqli-diff-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+}
+
+@media (max-width: 900px) {
+  .sqli-diff-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.sqli-code-panel {
+  margin: 0;
+  padding: 1rem;
+  max-height: 420px;
+  overflow: auto;
+  border-radius: 12px;
+  border: 1px solid var(--sqli-border);
+  background: rgba(0, 0, 0, 0.3);
+  font-family: 'Fira Code', monospace;
+  font-size: 0.74rem;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+html.light-mode .sqli-code-panel {
+  background: rgba(255, 255, 255, 0.85);
+}
+
+.sqli-code-after {
+  border-color: rgba(45, 212, 191, 0.35);
+}
+
+.sqli-empty[hidden],
+#sqliResults[hidden],
+#sqliRewritePanel[hidden] {
+  display: none !important;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .sqli-finding {
+    animation: sqli-fade 0.35s ease both;
+  }
+
+  @keyframes sqli-fade {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: none; }
+  }
+}

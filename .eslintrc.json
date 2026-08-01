@@ -29,6 +29,7 @@
   },
   "rules": {
     "no-unused-vars": ["error", { "argsIgnorePattern": "^_", "varsIgnorePattern": "^_" }],
-    "no-undef": "error"
+    "no-undef": "error",
+    "eqeqeq": ["error", "always"]
   }
 }

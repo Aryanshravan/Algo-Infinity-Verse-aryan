@@ -1,0 +1,286 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Neutron Star Magnetosphere Harvester | Algo Infinity Verse</title>
+    <link rel="stylesheet" href="/styles.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <!-- Monaco Editor -->
+    <script src="https://unpkg.com/monaco-editor@0.36.1/min/vs/loader.js"></script>
+    <style>
+      body { margin: 0; overflow: hidden; background: #000; font-family: 'Poppins', sans-serif; color: #fff; }
+      .app-container { display: flex; height: 100vh; }
+      
+      .sidebar { width: 450px; background: rgba(15, 23, 42, 0.95); border-right: 1px solid #a855f7; display: flex; flex-direction: column; z-index: 10; }
+      .header { padding: 20px; border-bottom: 1px solid #334155; }
+      .header h2 { margin: 0; color: #a855f7; font-family: 'Orbitron', sans-serif; font-size: 1.2rem; }
+      .header p { margin: 5px 0 0 0; font-size: 0.8rem; color: #94a3b8; }
+      
+      #editor-container { flex: 1; min-height: 300px; }
+      
+      .controls { padding: 20px; border-top: 1px solid #334155; background: rgba(0,0,0,0.5); }
+      .btn { background: linear-gradient(90deg, #9333ea, #7e22ce); color: #fff; border: none; padding: 10px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; transition: 0.3s; }
+      .btn:hover { background: #a855f7; transform: translateY(-2px); box-shadow: 0 0 15px rgba(168, 85, 247, 0.5); }
+      
+      .sim-container { flex: 1; position: relative; background: radial-gradient(circle at center, #1e1b4b 0%, #000 100%); overflow: hidden; }
+      canvas { width: 100%; height: 100%; display: block; filter: brightness(1.2); }
+      
+      .hud { position: absolute; top: 20px; left: 20px; background: rgba(0,0,0,0.8); padding: 15px; border-radius: 8px; border: 1px solid #a855f7; width: 300px; z-index: 10; pointer-events: none; }
+      .hud h3 { margin: 0 0 10px 0; color: #a855f7; font-size: 1rem; font-family: 'Orbitron', sans-serif; }
+      .metric { display: flex; justify-content: space-between; font-size: 0.8rem; color: #cbd5e1; margin-bottom: 5px; }
+      .val { font-weight: bold; font-family: monospace; }
+      .val-yield { color: #facc15; }
+      .val-stress { color: #ef4444; }
+    </style>
+  </head>
+  <body>
+    
+    <div class="app-container">
+      <div class="sidebar">
+        <div class="header">
+          <h2><i class="fas fa-meteor"></i> Neutron Star Harvester</h2>
+          <p>Extract exotic matter from a pulsar</p>
+        </div>
+        
+        <div id="editor-container"></div>
+        
+        <div class="controls">
+          <button class="btn" onclick="deployHarvester()"><i class="fas fa-satellite"></i> Deploy Harvesting Array</button>
+        </div>
+      </div>
+      
+      <div class="sim-container">
+        <!-- Intense Starfield -->
+        <div style="position: absolute; inset:0; background: url('data:image/svg+xml,%3Csvg width=\"100%\" height=\"100%\" xmlns=\"http://www.w3.org/2000/svg\"%3E%3Cfilter id=\"n\"%3E%3CfeTurbulence type=\"fractalNoise\" baseFrequency=\"0.2\" numOctaves=\"3\" stitchTiles=\"stitch\"/%3E%3C/filter%3E%3Crect width=\"100%\" height=\"100%\" filter=\"url(%23n)\" opacity=\"0.1\"/%3E%3C/svg%3E'); pointer-events: none; z-index: 0; mix-blend-mode: screen;"></div>
+        
+        <canvas id="pulsarCanvas" style="position: relative; z-index: 1;"></canvas>
+        
+        <div class="hud">
+          <h3>Array Telemetry</h3>
+          <div class="metric"><span>Distance to Core:</span> <span class="val" id="distVal" style="color:#38bdf8">0 km</span></div>
+          <div class="metric"><span>Magnetic Flux:</span> <span class="val" id="fluxVal" style="color:#d946ef">0 T</span></div>
+          <div class="metric"><span>Exotic Matter Yield:</span> <span class="val val-yield" id="yieldVal">0 kg</span></div>
+          <div class="metric"><span>Hull Stress:</span> <span class="val val-stress" id="stressVal">0%</span></div>
+          <div class="metric" style="margin-top: 10px; border-top: 1px solid #334155; padding-top: 5px;">
+            <span>Array Status:</span> <span class="val" id="statusVal" style="color:#94a3b8">ORBITING</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      let editor;
+      require.config({ paths: { 'vs': 'https://unpkg.com/monaco-editor@0.36.1/min/vs' }});
+      require(['vs/editor/editor.main'], function() {
+        editor = monaco.editor.create(document.getElementById('editor-container'), {
+          value: `// Magnetosphere Harvester AI
+// The pulsar has intense magnetic flux bands and gravitational tides.
+// Write logic to adjust your orbital altitude and shield polarity.
+// Get close to harvest, but don't get ripped apart!
+
+function adjustHarvester(altitude, magneticFlux, currentStress) {
+    // Return { thrust: float (-1 to 1), polarity: float (-1 to 1) }
+    // thrust > 0 moves away from the star, thrust < 0 dives deeper.
+    // polarity must oppose the current magnetic flux to prevent hull stress.
+    
+    // Naive logic: Dive straight in to maximize harvest!
+    // Result: Instantly crushed by gravitational tides and flux.
+    return {
+        thrust: -1.0,
+        polarity: 0.0
+    };
+}`,
+          language: 'javascript',
+          theme: 'vs-dark',
+          minimap: { enabled: false },
+          automaticLayout: true
+        });
+      });
+
+      const canvas = document.getElementById('pulsarCanvas');
+      const ctx = canvas.getContext('2d');
+      
+      let isSimulating = false;
+      let time = 0;
+      
+      let harvesterAlt = 800; // Starting altitude (px)
+      let harvesterVel = 0;
+      let harvesterPol = 0;
+      
+      let currentFlux = 0;
+      let totalYield = 0;
+      let hullStress = 0;
+      
+      function resize() { canvas.width = canvas.clientWidth; canvas.height = canvas.clientHeight; }
+      window.addEventListener('resize', resize);
+      resize();
+
+      function animate() {
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+          let cx = canvas.width / 2;
+          let cy = canvas.height / 2;
+          let starRadius = 50;
+
+          if (isSimulating) {
+              time += 0.05;
+              
+              // Pulsar Physics
+              // Flux oscillates wildly based on pulsar rotation
+              currentFlux = Math.sin(time * 3) * (1000 / Math.max(50, harvesterAlt));
+              
+              // Run user algorithm
+              let thrust = 0;
+              let targetPol = 0;
+              try {
+                  eval(editor.getValue());
+                  let res = adjustHarvester(harvesterAlt, currentFlux, hullStress);
+                  if (res) {
+                      thrust = Math.max(-1, Math.min(1, res.thrust || 0));
+                      targetPol = Math.max(-1, Math.min(1, res.polarity || 0));
+                  }
+              } catch(e) {}
+              
+              // Apply physics
+              // Gravity pulls in
+              let gravity = 5000 / (harvesterAlt * harvesterAlt);
+              harvesterVel -= gravity;
+              
+              // Thruster pushes
+              harvesterVel += thrust * 0.5;
+              
+              // Friction (magnetic drag)
+              harvesterVel *= 0.95;
+              
+              harvesterAlt += harvesterVel;
+              
+              // Polarity takes time to shift
+              harvesterPol += (targetPol - harvesterPol) * 0.1;
+              
+              // Stress calculation
+              let polarityMismatch = Math.abs(currentFlux) * Math.abs(harvesterPol + (currentFlux > 0 ? 1 : -1)); // Polarity must be opposite of flux to shield
+              let tidalStress = 10000 / (harvesterAlt * harvesterAlt); // Tides increase exponentially
+              
+              if (polarityMismatch > 0.5) {
+                  hullStress += (polarityMismatch * 0.1);
+              }
+              hullStress += (tidalStress * 0.05);
+              hullStress -= 0.5; // Natural repair/cooling
+              
+              if (hullStress < 0) hullStress = 0;
+              
+              // Harvesting
+              if (harvesterAlt < 300) {
+                  totalYield += (300 - harvesterAlt) * 0.01;
+              }
+              
+              // End conditions
+              if (harvesterAlt <= starRadius) {
+                  isSimulating = false;
+                  hullStress = 100;
+                  document.getElementById('statusVal').innerText = "VAPORIZED IN CORE";
+                  document.getElementById('statusVal').style.color = "#ef4444";
+              } else if (hullStress >= 100) {
+                  isSimulating = false;
+                  hullStress = 100;
+                  document.getElementById('statusVal').innerText = "HULL CRUSHED BY TIDES";
+                  document.getElementById('statusVal').style.color = "#ef4444";
+              } else if (totalYield > 1000) {
+                  document.getElementById('statusVal').innerText = "HARVEST COMPLETE";
+                  document.getElementById('statusVal').style.color = "#10b981";
+              } else {
+                  if (hullStress > 80) {
+                      document.getElementById('statusVal').innerText = "CRITICAL STRESS";
+                      document.getElementById('statusVal').style.color = "#ef4444";
+                  } else {
+                      document.getElementById('statusVal').innerText = "HARVESTING...";
+                      document.getElementById('statusVal').style.color = "#a855f7";
+                  }
+              }
+              
+              // HUD Updates
+              document.getElementById('distVal').innerText = Math.floor(harvesterAlt * 10) + " km";
+              document.getElementById('fluxVal').innerText = currentFlux.toFixed(2) + " T";
+              document.getElementById('yieldVal').innerText = Math.floor(totalYield) + " kg";
+              
+              let strEl = document.getElementById('stressVal');
+              strEl.innerText = Math.floor(hullStress) + "%";
+              if (hullStress > 80) strEl.style.color = "#ef4444";
+              else if (hullStress > 50) strEl.style.color = "#facc15";
+              else strEl.style.color = "#10b981";
+          }
+          
+          // Draw Pulsar
+          ctx.shadowBlur = 50;
+          ctx.shadowColor = '#a855f7';
+          ctx.fillStyle = '#fff';
+          ctx.beginPath(); ctx.arc(cx, cy, starRadius, 0, Math.PI*2); ctx.fill();
+          ctx.shadowBlur = 0;
+          
+          // Draw Magnetic Field Lines
+          ctx.strokeStyle = 'rgba(168, 85, 247, 0.2)';
+          ctx.lineWidth = 1;
+          for(let i=0; i<8; i++) {
+              let r = 100 + (i * 50) + (Math.sin(time*5)*10);
+              ctx.beginPath();
+              ctx.ellipse(cx, cy, r*1.5, r, 0, 0, Math.PI*2);
+              ctx.stroke();
+          }
+          
+          // Draw Pulsar Beams
+          ctx.fillStyle = 'rgba(168, 85, 247, 0.4)';
+          ctx.beginPath();
+          ctx.moveTo(cx, cy);
+          ctx.lineTo(cx - 500, cy - 200 + Math.sin(time*10)*50);
+          ctx.lineTo(cx - 500, cy + 200 - Math.sin(time*10)*50);
+          ctx.fill();
+          
+          ctx.beginPath();
+          ctx.moveTo(cx, cy);
+          ctx.lineTo(cx + 500, cy - 200 + Math.sin(time*10)*50);
+          ctx.lineTo(cx + 500, cy + 200 - Math.sin(time*10)*50);
+          ctx.fill();
+
+          // Draw Harvester
+          if (hullStress < 100 && harvesterAlt > starRadius) {
+              // Orbiting position
+              let hx = cx + Math.cos(time*0.5) * harvesterAlt;
+              let hy = cy + Math.sin(time*0.5) * harvesterAlt;
+              
+              // Shield
+              ctx.strokeStyle = harvesterPol > 0 ? 'rgba(56, 189, 248, 0.8)' : 'rgba(239, 68, 68, 0.8)'; // Blue or Red polarity
+              ctx.lineWidth = 2;
+              ctx.beginPath(); ctx.arc(hx, hy, 15, 0, Math.PI*2); ctx.stroke();
+              
+              // Ship
+              ctx.fillStyle = '#cbd5e1';
+              ctx.beginPath(); ctx.arc(hx, hy, 8, 0, Math.PI*2); ctx.fill();
+              
+              // Harvesting laser
+              if (harvesterAlt < 300) {
+                  ctx.strokeStyle = '#facc15';
+                  ctx.lineWidth = 2;
+                  ctx.beginPath(); ctx.moveTo(hx, hy); ctx.lineTo(cx, cy); ctx.stroke();
+              }
+          }
+
+          requestAnimationFrame(animate);
+      }
+      
+      animate();
+
+      function deployHarvester() {
+          if(isSimulating) return;
+          isSimulating = true;
+          time = 0;
+          harvesterAlt = 600;
+          harvesterVel = 0;
+          totalYield = 0;
+          hullStress = 0;
+          document.getElementById('statusVal').innerText = "DESCENDING...";
+          document.getElementById('statusVal').style.color = "#a855f7";
+      }
+    </script>
+  </body>
+</html>

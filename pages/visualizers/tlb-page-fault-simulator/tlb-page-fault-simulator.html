@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>TLB & Page Fault Simulator | Algo Infinity Verse</title>
+    <meta
+      name="description"
+      content="Visualize Translation Lookaside Buffer (TLB) thrashing, virtual memory mapping, and page faults."
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Poppins:wght@300;400;500;600;700&family=Fira+Code:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <link rel="stylesheet" href="/styles.css" />
+    <link rel="stylesheet" href="tlb-page-fault-simulator.css" />
+    <script src="/theme.js"></script>
+  </head>
+  <body class="tlb-body">
+    <nav class="navbar">
+      <div class="nav-logo">
+        <span class="logo-text">∞</span>
+        <span class="logo-title">Algo Infinity Verse</span>
+      </div>
+      <ul class="nav-links">
+        <li>
+          <a href="/index.html"><i class="fas fa-home"></i> Home</a>
+        </li>
+        <li>
+          <a href="/pages/visualizers/visualizers.html" class="active"
+            ><i class="fas fa-eye"></i> Visualizers</a
+          >
+        </li>
+      </ul>
+      <div class="theme-toggle">
+        <i class="fas fa-moon"></i>
+      </div>
+    </nav>
+
+    <div class="tlb-container">
+      <header class="tlb-header">
+        <h1>TLB Thrashing & Page Fault Simulator</h1>
+        <p>
+          Simulate virtual memory access. Watch how contiguous access leads to high TLB hit rates,
+          while stride access (jumping arrays) causes TLB thrashing and costly disk page faults!
+        </p>
+      </header>
+
+      <div class="tlb-controls-panel">
+        <div class="controls-row">
+          <button id="btn-contiguous" class="control-btn primary">
+            <i class="fas fa-arrow-right"></i> Contiguous Access
+          </button>
+          <button id="btn-stride" class="control-btn warning">
+            <i class="fas fa-frog"></i> Stride Access (Thrashing)
+          </button>
+          <button id="btn-pause" class="control-btn secondary" disabled>
+            <i class="fas fa-pause"></i> Pause
+          </button>
+          <button id="btn-reset" class="control-btn danger">
+            <i class="fas fa-redo"></i> Reset
+          </button>
+        </div>
+
+        <div class="stats-row">
+          <div class="stat-box">
+            <span class="stat-label">Memory Accesses</span>
+            <span class="stat-value" id="stat-accesses">0</span>
+          </div>
+          <div class="stat-box">
+            <span class="stat-label">TLB Hits</span>
+            <span class="stat-value success" id="stat-hits">0</span>
+          </div>
+          <div class="stat-box">
+            <span class="stat-label">TLB Misses</span>
+            <span class="stat-value warning" id="stat-misses">0</span>
+          </div>
+          <div class="stat-box">
+            <span class="stat-label">Page Faults (Disk IO)</span>
+            <span class="stat-value danger" id="stat-faults">0</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="tlb-main-view">
+        <div class="architecture-panel">
+          <div class="component-box cpu-box">
+            <h3>CPU / Process</h3>
+            <div class="current-instruction">
+              Fetching Virtual Address: <span id="current-va">0x----</span>
+            </div>
+          </div>
+          <div class="arrow-down"><i class="fas fa-arrow-down"></i></div>
+
+          <div class="component-box tlb-box">
+            <h3>TLB Cache (LRU)</h3>
+            <div class="tlb-slots" id="tlb-slots">
+              <!-- TLB entries dynamically injected -->
+            </div>
+            <div class="status-indicator" id="tlb-status">Idle</div>
+          </div>
+          <div class="arrow-down"><i class="fas fa-arrow-down"></i></div>
+
+          <div class="component-box pt-box">
+            <h3>Page Table</h3>
+            <div class="pt-entries" id="pt-entries">
+              <!-- PT entries dynamically injected -->
+            </div>
+            <div class="status-indicator" id="pt-status">Idle</div>
+          </div>
+        </div>
+
+        <div class="hardware-panel">
+          <div class="component-box ram-box">
+            <h3>Physical RAM</h3>
+            <div class="ram-frames" id="ram-frames">
+              <!-- Physical frames dynamically injected -->
+            </div>
+          </div>
+
+          <div class="component-box disk-box">
+            <h3>Disk / SSD (Swap Space)</h3>
+            <div class="disk-pages" id="disk-pages">
+              <!-- Disk pages dynamically injected -->
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="log-panel">
+        <h3>System Log</h3>
+        <div class="log-content" id="system-log">
+          <div>Simulation initialized. Ready.</div>
+        </div>
+      </div>
+    </div>
+
+    <script src="tlb-page-fault-simulator.js"></script>
+  </body>
+</html>

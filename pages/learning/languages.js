@@ -14,6 +14,15 @@ const languages = [
     desc: 'Beginner-friendly, versatile, and powerful. Ideal for data science, web development, automation, and AI.',
   },
   {
+    name: 'Ruby',
+    path: '/pages/learning/ruby-learning/ruby-learning.html',
+    category: 'General Purpose',
+    icon: 'fa-gem',
+    isBrandIcon: false,
+    langKey: 'ruby',
+    desc: "A language designed for developer happiness — elegant syntax, pure OOP, expressive blocks, and the power of Ruby on Rails.",
+  },
+  {
     name: 'JavaScript',
     path: '/pages/learning/javascript-learning/javascript-learning.html',
     category: 'Web',
@@ -24,6 +33,15 @@ const languages = [
   },
 
   // ── Enterprise ──
+  {
+    name: 'C#',
+    path: '/pages/learning/csharp-learning/csharp-learning.html',
+    category: 'Enterprise',
+    icon: 'fa-hashtag',
+    isBrandIcon: false,
+    langKey: 'csharp',
+    desc: 'Modern, type-safe, and object-oriented. The heart of the .NET ecosystem — from web APIs to cloud services.',
+  },
   {
     name: 'Java',
     path: '/pages/learning/java-learning/java-learning.html',
@@ -53,22 +71,18 @@ const languages = [
     langKey: 'c',
     desc: 'The foundation of modern computing. Efficient, portable, and the language that built operating systems.',
   },
-  {
-    name: 'Rust',
-    path: '/pages/rust-academy/rust-academy.html',
-    category: 'Systems',
-    icon: 'fa-cubes',
-    isBrandIcon: false,
-    langKey: 'rust',
-    desc: 'Fearless concurrency, memory safety without a garbage collector, and blazingly fast performance.',
-    svgIcon: `<svg viewBox="0 0 106 106" fill="currentColor" xmlns="http://www.w3.org/2000/svg" width="1em" height="1em">
-  <path d="M94 53c0-3.6-.3-7.1-.9-10.5l-10.2-.8c-1-3.4-2.4-6.6-4.1-9.5l5.5-8.5c-3.7-4.2-8-7.8-12.8-10.6l-7.9 6.4c-2.7-1.8-5.7-3.3-8.9-4.4L53 5.1c-4.5-.7-9.1-.7-13.6 0l-1.7 10.2c-3.2 1-6.1 2.5-8.8 4.2l-8-6.3c-4.8 2.8-9.2 6.4-12.9 10.6l5.7 8.6c-1.7 2.9-3 6-4 9.4L5.1 44c-.7 4.5-.7 9.1 0 13.6l9.9 1.6c.9 3.4 2.3 6.6 4 9.5l-5.6 8.6c3.7 4.2 8 7.8 12.8 10.6l8-6.4c2.7 1.8 5.7 3.3 8.9 4.4l1.7 10.1c4.5.7 9.1.7 13.6 0l1.7-10.1c3.2-1.1 6.1-2.6 8.8-4.4l8 6.4c4.8-2.8 9.1-6.4 12.8-10.6l-5.6-8.6c1.7-2.9 3.1-6.1 4-9.5l10-1.6c.6-4.5.9-9 .9-13.6z"/>
-  <path d="M53 83.6c-16.9 0-30.6-13.7-30.6-30.6S36.1 22.4 53 22.4 83.6 36.1 83.6 53 69.9 83.6 53 83.6z" fill="none" stroke="currentColor" stroke-width="4"/>
-  <path d="M39.8 68.5v-31h12.7c4.5 0 8 1 10.3 3.1 2.3 2.1 3.5 4.9 3.5 8.6 0 2.5-.7 4.7-2 6.5-1.3 1.8-3.2 3.1-5.6 3.9l9.3 8.9H62.5l-8.4-8.7h-5.9v8.7h-8.4zm8.4-16h3.5c2 0 3.6-.5 4.6-1.6s1.5-2.5 1.5-4.3-.5-3.2-1.5-4.2c-1-1-2.5-1.5-4.7-1.5h-3.4v11.6z"/>
-</svg>`
-  },
 
   // ── Web ──
+  {
+    name: 'TypeScript',
+    path: '/pages/learning/typescript-learning/typescript-learning.html',
+    category: 'Web',
+    icon: 'fa-typescript',
+    isBrandIcon: true,
+    langKey: 'typescript',
+    desc: 'A typed superset of JavaScript that compiles to plain JS — scale your code with confidence.',
+    svgIcon: `<img src="https://cdn.simpleicons.org/typescript/3178C6" alt="TypeScript" style="width:1em;height:1em;display:block;">`
+  },
   {
     name: 'PHP',
     path: '/pages/learning/php-learning/php-learning.html',
@@ -78,6 +92,65 @@ const languages = [
     langKey: 'php',
     desc: 'Server-side scripting that powers over 75% of the web — from WordPress to Laravel.',
   },
+
+  // ── Blockchain ──
+  {
+    name: 'Solidity',
+    path: '/pages/learning/solidity-learning/solidity-learning.html',
+    category: 'Systems',
+    icon: 'fa-link',
+    isBrandIcon: false,
+    langKey: 'solidity',
+    desc: 'The language of Ethereum smart contracts. Statically typed, contract-oriented, and designed for the EVM.',
+    svgIcon: `<img src="https://cdn.simpleicons.org/solidity/fbc4ab" alt="Solidity" style="width:1em;height:1em;display:block;">`
+  },
+
+  // ── Mobile / JVM ──
+  {
+    name: 'Kotlin',
+    path: '/pages/learning/kotlin-learning/kotlin-learning.html',
+    category: 'General Purpose',
+    icon: 'fa-code',
+    isBrandIcon: false,
+    langKey: 'kotlin',
+    desc: 'Modern, concise, and safe JVM language. Preferred for Android development with seamless Java interop and coroutines.',
+    svgIcon: `<img src="https://cdn.simpleicons.org/kotlin/a8c8f0" alt="Kotlin" style="width:1em;height:1em;display:block;">`
+  },
+
+  // ── Apple / Swift ──
+  {
+    name: 'Swift',
+    path: '/pages/learning/swift-learning/swift-learning.html',
+    category: 'General Purpose',
+    icon: 'fa-swift',
+    isBrandIcon: true,
+    langKey: 'swift',
+    desc: "Apple's modern, type-safe language for iOS, macOS, and beyond. Optionals, protocols, and closures make safe, expressive code the default.",
+    svgIcon: `<img src="https://cdn.simpleicons.org/swift/f2a88a" alt="Swift" style="width:1em;height:1em;display:block;">`
+  },
+
+  // ── Mobile / Cross-platform ──
+  {
+    name: 'Flutter',
+    path: '/pages/learning/flutter-learning/flutter-learning.html',
+    category: 'General Purpose',
+    icon: 'fa-mobile-screen',
+    isBrandIcon: false,
+    langKey: 'flutter',
+    desc: 'Google\'s UI toolkit for building beautiful, natively compiled apps for mobile, web, and desktop from a single Dart codebase.',
+    svgIcon: `<img src="https://cdn.simpleicons.org/flutter/a8c8dc" alt="Flutter" style="width:1em;height:1em;display:block;">`
+  },
+  {
+    name: 'Dart',
+    path: '/pages/learning/dart-learning/dart-learning.html',
+    category: 'General Purpose',
+    icon: 'fa-code',
+    isBrandIcon: false,
+    langKey: 'dart',
+    langColor: '#0175C2',
+    desc: 'Fast, client-optimized language that powers Flutter. Sound null safety, rich collections, and async streams for apps on any platform.',
+    svgIcon: `<img src="https://cdn.simpleicons.org/dart/0175C2" alt="Dart" style="width:1em;height:1em;display:block;">`
+  },
 ];
 
 /* ─── Categories ─── */
@@ -86,12 +159,19 @@ const categories = ['All', 'General Purpose', 'Systems', 'Web', 'Enterprise'];
 /* ─── Language brand colors for icons ─── */
 const langColors = {
   python: '#3572A5',
+  ruby: '#CC342D',
   javascript: '#f7df1e',
+  typescript: '#3178C6',
   java: '#b07219',
   cplusplus: '#f34b7d',
   c: '#888888',
   php: '#777BB4',
-  rust: '#dea584',
+  solidity: '#fbc4ab',
+  kotlin: '#a8c8f0',
+  csharp: '#e8b0b0',
+  swift: '#f2a88a',
+  flutter: '#a8c8dc',
+  dart: '#0175C2',
 };
 
 /* ─── DOM refs ─── */
@@ -164,7 +244,7 @@ function render() {
 
   emptyState.style.display = 'none';
   grid.innerHTML = filtered.map((v, i) => {
-    const iconColor = langColors[v.langKey] || 'var(--lang-primary)';
+    const iconColor = v.langColor || langColors[v.langKey] || 'var(--lang-primary)';
     let iconHtml;
     if (v.svgIcon) {
       iconHtml = v.svgIcon;
@@ -216,6 +296,8 @@ grid.addEventListener('click', (e) => {
 
 /* ─── Keyboard shortcut: ⌘K / Ctrl+K ─── */
 document.addEventListener('keydown', (e) => {
+  // Keyboard shortcuts are desktop-only — no-op on mobile viewports (< 768px).
+  if (!window.areKeyboardShortcutsEnabled()) return;
   if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
     e.preventDefault();
     searchInput.focus();

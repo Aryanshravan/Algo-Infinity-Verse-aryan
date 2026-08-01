@@ -4,14 +4,23 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Skip List Visualizer | Algo Infinity Verse</title>
-    <meta name="description" content="Interactive Skip List visualizer — insert, search, delete with animated multi-level traversal and probabilistic level generation." />
-    <link rel="stylesheet" href="/styles.css" />
+    <meta
+      name="description"
+      content="Interactive Skip List visualizer — insert, search, delete with animated multi-level traversal and probabilistic level generation."
+    />
+    <link rel="stylesheet" href="../../../styles.css" />
     <link rel="stylesheet" href="skip-list-visualizer.css" />
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Poppins:wght@300;400;500;600;700&family=Fira+Code:wght@400;500;600&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Poppins:wght@300;400;500;600;700&family=Fira+Code:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <link rel="stylesheet" href="../../../modules/quick-notes/quick-notes.css" />
   </head>
   <body data-page="skip-list-visualizer">
-
     <div id="loading-screen" class="hidden">
       <div class="loader">
         <div class="infinity-loader">∞</div>
@@ -29,7 +38,9 @@
     <!-- Hero -->
     <section class="hero sl-hero">
       <div class="hero-background">
-        <div class="stars"></div><div class="stars2"></div><div class="stars3"></div>
+        <div class="stars"></div>
+        <div class="stars2"></div>
+        <div class="stars3"></div>
       </div>
       <div class="hero-content">
         <h1 class="hero-title">
@@ -37,10 +48,18 @@
           <span class="main-title sl-gradient">Skip List Visualizer</span>
           <span class="subtitle">Multi-level linked lists with probabilistic magic.</span>
         </h1>
-        <p class="section-subtitle">Skip Lists achieve O(log n) search, insertion, and deletion using multiple levels of linked lists and coin-flip probability — no rotations needed. Watch it happen step by step.</p>
+        <p class="section-subtitle">
+          Skip Lists achieve O(log n) search, insertion, and deletion using multiple levels of
+          linked lists and coin-flip probability — no rotations needed. Watch it happen step by
+          step.
+        </p>
         <div class="hero-buttons">
-          <a href="#visualizer" class="btn btn-primary sl-btn-primary"><i class="fas fa-play"></i> Open Visualizer</a>
-          <a href="#learn" class="btn btn-secondary"><i class="fas fa-graduation-cap"></i> How It Works</a>
+          <a href="#visualizer" class="btn btn-primary sl-btn-primary"
+            ><i class="fas fa-play"></i> Open Visualizer</a
+          >
+          <a href="#learn" class="btn btn-secondary"
+            ><i class="fas fa-graduation-cap"></i> How It Works</a
+          >
         </div>
       </div>
     </section>
@@ -48,7 +67,6 @@
     <!-- Visualizer -->
     <section id="visualizer" class="section">
       <div class="container">
-
         <!-- Controls -->
         <div class="sl-control-card">
           <div class="sl-control-row">
@@ -56,31 +74,72 @@
             <div class="sl-op-group">
               <div class="sl-op-title"><i class="fas fa-plus-circle"></i> Insert</div>
               <div class="sl-op-inputs">
-                <input type="number" id="slInsertVal" class="sl-input-sm" value="5" min="-999" max="999" aria-label="Insert value" placeholder="val" />
-                <button type="button" class="btn sl-op-btn sl-op-insert" id="slInsertBtn">Insert</button>
+                <input
+                  type="number"
+                  id="slInsertVal"
+                  class="sl-input-sm"
+                  value="5"
+                  min="-999"
+                  max="999"
+                  aria-label="Insert value"
+                  placeholder="val"
+                />
+                <button type="button" class="btn sl-op-btn sl-op-insert" id="slInsertBtn">
+                  Insert
+                </button>
               </div>
             </div>
             <!-- Search -->
             <div class="sl-op-group">
               <div class="sl-op-title"><i class="fas fa-search"></i> Search</div>
               <div class="sl-op-inputs">
-                <input type="number" id="slSearchVal" class="sl-input-sm" value="5" min="-999" max="999" aria-label="Search value" placeholder="val" />
-                <button type="button" class="btn sl-op-btn sl-op-search" id="slSearchBtn">Search</button>
+                <input
+                  type="number"
+                  id="slSearchVal"
+                  class="sl-input-sm"
+                  value="5"
+                  min="-999"
+                  max="999"
+                  aria-label="Search value"
+                  placeholder="val"
+                />
+                <button type="button" class="btn sl-op-btn sl-op-search" id="slSearchBtn">
+                  Search
+                </button>
               </div>
             </div>
             <!-- Delete -->
             <div class="sl-op-group">
               <div class="sl-op-title"><i class="fas fa-trash"></i> Delete</div>
               <div class="sl-op-inputs">
-                <input type="number" id="slDeleteVal" class="sl-input-sm" value="5" min="-999" max="999" aria-label="Delete value" placeholder="val" />
-                <button type="button" class="btn sl-op-btn sl-op-delete" id="slDeleteBtn">Delete</button>
+                <input
+                  type="number"
+                  id="slDeleteVal"
+                  class="sl-input-sm"
+                  value="5"
+                  min="-999"
+                  max="999"
+                  aria-label="Delete value"
+                  placeholder="val"
+                />
+                <button type="button" class="btn sl-op-btn sl-op-delete" id="slDeleteBtn">
+                  Delete
+                </button>
               </div>
             </div>
             <!-- Probability -->
             <div class="sl-op-group">
               <div class="sl-op-title"><i class="fas fa-dice"></i> Level Probability</div>
               <div class="sl-op-inputs">
-                <input type="range" id="slProb" class="sl-range" min="1" max="9" value="5" aria-label="Level probability" />
+                <input
+                  type="range"
+                  id="slProb"
+                  class="sl-range"
+                  min="1"
+                  max="9"
+                  value="5"
+                  aria-label="Level probability"
+                />
                 <span class="sl-prob-val" id="slProbVal">p = 0.5</span>
               </div>
             </div>
@@ -88,30 +147,61 @@
 
           <!-- Playback -->
           <div class="sl-playback-row">
-            <button type="button" class="btn btn-secondary sl-pb-btn" id="slStepBtn" disabled><i class="fas fa-step-forward"></i> Step</button>
-            <button type="button" class="btn btn-secondary sl-pb-btn" id="slPlayBtn" disabled><i class="fas fa-play"></i> Play All</button>
-            <button type="button" class="btn btn-secondary sl-pb-btn" id="slResetBtn"><i class="fas fa-undo"></i> Reset</button>
+            <button type="button" class="btn btn-secondary sl-pb-btn" id="slStepBtn" disabled>
+              <i class="fas fa-step-forward"></i> Step
+            </button>
+            <button type="button" class="btn btn-secondary sl-pb-btn" id="slPlayBtn" disabled>
+              <i class="fas fa-play"></i> Play All
+            </button>
+            <button type="button" class="btn btn-secondary sl-pb-btn" id="slResetBtn">
+              <i class="fas fa-undo"></i> Reset
+            </button>
             <div class="sl-speed-wrap">
               <label class="sl-speed-label">Speed:</label>
-              <input type="range" id="slSpeed" class="sl-range" min="1" max="5" value="3" aria-label="Speed" />
+              <input
+                type="range"
+                id="slSpeed"
+                class="sl-range"
+                min="1"
+                max="5"
+                value="3"
+                aria-label="Speed"
+              />
               <span class="sl-speed-val" id="slSpeedVal">Normal</span>
             </div>
-            <div class="sl-step-ctr">Step <span id="slStepNum">0</span>/<span id="slStepTotal">0</span></div>
+            <div class="sl-step-ctr">
+              Step <span id="slStepNum">0</span>/<span id="slStepTotal">0</span>
+            </div>
           </div>
 
-          <!-- Preset -->
+          <!-- Preset & Degradation -->
           <div class="sl-preset-row">
-            <span class="sl-preset-label">Preload:</span>
-            <button type="button" class="btn sl-preset-btn" id="slPresetBtn">Insert [3, 6, 7, 9, 12, 19, 21, 25]</button>
+            <span class="sl-preset-label">Features:</span>
+            <button type="button" class="btn sl-preset-btn" id="slPresetBtn">
+              Preload 8 Nodes
+            </button>
+            <button type="button" class="btn sl-preset-btn deg-btn" id="slDegradeBtn">
+              <i class="fas fa-meteor"></i> Degradation Test (50 Nodes)
+            </button>
             <button type="button" class="btn sl-preset-btn" id="slClearBtn">Clear All</button>
           </div>
         </div>
 
         <!-- Status -->
-        <div class="sl-status" id="slStatus">Insert values to build the skip list. Use the preset to get started quickly.</div>
+        <div class="sl-status" id="slStatus">
+          Insert values to build the skip list. Use the preset to get started quickly.
+        </div>
 
         <!-- Canvas -->
-        <div class="sl-canvas-wrap">
+        <div class="sl-canvas-wrap" id="slCanvasWrap">
+          <!-- Coin Flip Animation Container -->
+          <div id="slCoinContainer" class="sl-coin-container hidden">
+            <div class="sl-coin">
+              <div class="sl-coin-face front">H</div>
+              <div class="sl-coin-face back">T</div>
+            </div>
+            <div class="sl-coin-result" id="slCoinResult"></div>
+          </div>
           <canvas id="slCanvas" class="sl-canvas" aria-label="Skip List visualization"></canvas>
           <div class="sl-canvas-empty" id="slCanvasEmpty">
             <i class="fas fa-layer-group"></i>
@@ -122,10 +212,16 @@
         <!-- Legend -->
         <div class="sl-legend">
           <span class="sl-legend-item"><span class="sl-ldot sl-ldot-default"></span>Default</span>
-          <span class="sl-legend-item"><span class="sl-ldot sl-ldot-active"></span>Currently Visiting</span>
-          <span class="sl-legend-item"><span class="sl-ldot sl-ldot-found"></span>Found / Inserted</span>
+          <span class="sl-legend-item"
+            ><span class="sl-ldot sl-ldot-active"></span>Currently Visiting</span
+          >
+          <span class="sl-legend-item"
+            ><span class="sl-ldot sl-ldot-found"></span>Found / Inserted</span
+          >
           <span class="sl-legend-item"><span class="sl-ldot sl-ldot-path"></span>Search Path</span>
-          <span class="sl-legend-item"><span class="sl-ldot sl-ldot-deleted"></span>To be Deleted</span>
+          <span class="sl-legend-item"
+            ><span class="sl-ldot sl-ldot-deleted"></span>To be Deleted</span
+          >
         </div>
 
         <!-- Node table -->
@@ -133,8 +229,23 @@
           <div class="sl-table-title">Node State</div>
           <div class="sl-table-scroll">
             <table class="sl-table" id="slTable">
-              <thead><tr><th>Value</th><th>Levels</th><th>Status</th></tr></thead>
-              <tbody id="slTableBody"><tr><td colspan="3" style="text-align:center;color:var(--text-secondary);font-style:italic">No nodes yet.</td></tr></tbody>
+              <thead>
+                <tr>
+                  <th>Value</th>
+                  <th>Levels</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody id="slTableBody">
+                <tr>
+                  <td
+                    colspan="3"
+                    style="text-align: center; color: var(--text-secondary); font-style: italic"
+                  >
+                    No nodes yet.
+                  </td>
+                </tr>
+              </tbody>
             </table>
           </div>
         </div>
@@ -144,7 +255,6 @@
           <div class="sl-log-title"><i class="fas fa-list"></i> Operation Log</div>
           <div class="sl-log" id="slLog"><div class="sl-log-empty">No operations yet.</div></div>
         </div>
-
       </div>
     </section>
 
@@ -156,26 +266,51 @@
           <div class="sl-learn-card">
             <div class="sl-learn-num">01</div>
             <h3>The Idea</h3>
-            <p>A skip list is multiple linked lists stacked on top of each other. The bottom level has all nodes. Higher levels are "express lanes" containing only some nodes — allowing search to skip large sections.</p>
-            <div class="sl-chips"><span class="sl-chip">O(log n) average</span><span class="sl-chip">Probabilistic</span></div>
+            <p>
+              A skip list is multiple linked lists stacked on top of each other. The bottom level
+              has all nodes. Higher levels are "express lanes" containing only some nodes — allowing
+              search to skip large sections.
+            </p>
+            <div class="sl-chips">
+              <span class="sl-chip">O(log n) average</span
+              ><span class="sl-chip">Probabilistic</span>
+            </div>
           </div>
           <div class="sl-learn-card">
             <div class="sl-learn-num">02</div>
             <h3>Level Assignment</h3>
-            <p>When inserting, each new node flips a coin. Heads → the node also appears in the next level up. This continues until tails. Result: each level has ~half the nodes of the level below.</p>
-            <div class="sl-chips"><span class="sl-chip">P(level k) = p^k</span><span class="sl-chip">Expected O(log n) levels</span></div>
+            <p>
+              When inserting, each new node flips a coin. Heads → the node also appears in the next
+              level up. This continues until tails. Result: each level has ~half the nodes of the
+              level below.
+            </p>
+            <div class="sl-chips">
+              <span class="sl-chip">P(level k) = p^k</span
+              ><span class="sl-chip">Expected O(log n) levels</span>
+            </div>
           </div>
           <div class="sl-learn-card">
             <div class="sl-learn-num">03</div>
             <h3>Search — O(log n)</h3>
-            <p>Start at the topmost level, leftmost node. Move right until the next value exceeds target. Drop down one level. Repeat. The express lanes skip most nodes — like a binary search on a linked list.</p>
-            <div class="sl-chips"><span class="sl-chip">Top-down</span><span class="sl-chip">Right then down</span></div>
+            <p>
+              Start at the topmost level, leftmost node. Move right until the next value exceeds
+              target. Drop down one level. Repeat. The express lanes skip most nodes — like a binary
+              search on a linked list.
+            </p>
+            <div class="sl-chips">
+              <span class="sl-chip">Top-down</span><span class="sl-chip">Right then down</span>
+            </div>
           </div>
           <div class="sl-learn-card">
             <div class="sl-learn-num">04</div>
             <h3>Used In Production</h3>
-            <p>Redis uses skip lists for its sorted sets (ZADD/ZRANGEBYSCORE). LevelDB and RocksDB use skip lists for in-memory memtables. Apache Lucene uses them for index structures.</p>
-            <div class="sl-chips"><span class="sl-chip">Redis ZADD</span><span class="sl-chip">LevelDB memtable</span></div>
+            <p>
+              Redis uses skip lists for its sorted sets (ZADD/ZRANGEBYSCORE). LevelDB and RocksDB
+              use skip lists for in-memory memtables. Apache Lucene uses them for index structures.
+            </p>
+            <div class="sl-chips">
+              <span class="sl-chip">Redis ZADD</span><span class="sl-chip">LevelDB memtable</span>
+            </div>
           </div>
         </div>
       </div>
@@ -183,21 +318,22 @@
 
     <div id="footer-placeholder"></div>
 
-    <script src="/auth.js"></script>
-    <script src="/bootstrap-legacy.js"></script>
+    <script src="../../../auth.js"></script>
+    <script src="../../../bootstrap-legacy.js"></script>
 
-    <script src="/script.js"></script>
-    <script type="module" src="/dist/legacy-bundle.mjs"></script>
-    <script src="/theme.js"></script>
-    <script src="/auth-gate.js"></script>
+    <script src="../../../script.js"></script>
+    <script type="module" src="../../../dist/legacy-bundle.mjs"></script>
+    <script src="../../../theme.js"></script>
+    <script src="../../../auth-gate.js"></script>
     <script src="skip-list-visualizer.js"></script>
     <script>
       if (typeof loadPartial === 'function') {
-        loadPartial('navbar-placeholder', '/partials/navbar.html').then(function() {
+        loadPartial('navbar-placeholder', '../../../partials/navbar.html').then(function () {
           if (typeof initNavbar === 'function') initNavbar();
         });
-        loadPartial('footer-placeholder', '/partials/footer.html');
+        loadPartial('footer-placeholder', '../../../partials/footer.html');
       }
     </script>
+    <script src="../../../modules/quick-notes/quick-notes.js"></script>
   </body>
 </html>

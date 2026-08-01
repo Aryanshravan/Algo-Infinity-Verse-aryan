@@ -16,6 +16,8 @@ class AESVisualizer {
     if (this.els.plaintext) {
       this.bindEvents();
       this.initSequence();
+      this.initBackgroundCanvas();
+      this.initSBoxGrid();
       this.reset();
     }
   }
@@ -29,6 +31,8 @@ class AESVisualizer {
       btnPrev: document.getElementById('btnPrev'),
       btnStep: document.getElementById('btnStep'),
       btnPlayPause: document.getElementById('btnPlayPause'),
+      speedSlider: document.getElementById('speedSlider'),
+      speedVal: document.getElementById('speedVal'),
 
       // Containers
       roundKeysContainer: document.getElementById('roundKeysContainer'),
@@ -56,10 +60,19 @@ class AESVisualizer {
     this.els.btnPrev.addEventListener('click', () => this.stepBackward());
     this.els.btnStep.addEventListener('click', () => this.stepForward());
     this.els.btnPlayPause.addEventListener('click', () => this.togglePlayPause());
+    this.els.speedSlider.addEventListener('input', (e) => {
+      this.animSpeed = parseFloat(e.target.value);
+      this.els.speedVal.textContent = `${this.animSpeed.toFixed(1)}x`;
+      document.documentElement.style.setProperty('--anim-speed', `${0.5 / this.animSpeed}s`);
+    });
 
     // Auto-recalculate on change
     this.els.plaintext.addEventListener('input', () => this.reset());
     this.els.key.addEventListener('input', () => this.reset());
+
+    // Default speed
+    this.animSpeed = 1.0;
+    document.documentElement.style.setProperty('--anim-speed', '0.5s');
   }
 
   initSequence() {
@@ -85,6 +98,109 @@ class AESVisualizer {
     this.stepsSequence.push({ round: 10, step: 'done', name: 'Ciphertext Ready' });
   }
 
+  initBackgroundCanvas() {
+    const canvas = document.getElementById('bgCanvas');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    let width = (canvas.width = window.innerWidth);
+    let height = (canvas.height = window.innerHeight);
+
+    window.addEventListener('resize', () => {
+      width = canvas.width = window.innerWidth;
+      height = canvas.height = window.innerHeight;
+    });
+
+    const particles = [];
+    const hexChars = '0123456789ABCDEF';
+    for (let i = 0; i < 60; i++) {
+      particles.push({
+        x: Math.random() * width,
+        y: Math.random() * height,
+        speed: 0.5 + Math.random() * 1.5,
+        char: hexChars[Math.floor(Math.random() * 16)] + hexChars[Math.floor(Math.random() * 16)],
+        size: 10 + Math.random() * 14,
+        alpha: 0.1 + Math.random() * 0.4,
+      });
+    }
+
+    const draw = () => {
+      ctx.clearRect(0, 0, width, height);
+      ctx.font = 'bold 16px "Fira Code"';
+
+      // Draw Mesh Connections
+      for (let i = 0; i < particles.length; i++) {
+        for (let j = i + 1; j < particles.length; j++) {
+          const p1 = particles[i];
+          const p2 = particles[j];
+          const dist = Math.hypot(p1.x - p2.x, p1.y - p2.y);
+          if (dist < 150) {
+            ctx.beginPath();
+            ctx.moveTo(p1.x + 8, p1.y - 8);
+            ctx.lineTo(p2.x + 8, p2.y - 8);
+            ctx.strokeStyle = `rgba(56, 189, 248, ${((150 - dist) / 150) * 0.2})`;
+            ctx.lineWidth = 1;
+            ctx.stroke();
+          }
+        }
+      }
+
+      // Draw Particles
+      particles.forEach((p) => {
+        ctx.fillStyle = `rgba(56, 189, 248, ${p.alpha})`;
+        ctx.fillText(p.char, p.x, p.y);
+        p.y -= p.speed;
+
+        // Slight horizontal drift
+        p.x += (Math.random() - 0.5) * 0.5;
+
+        if (p.y < -20) {
+          p.y = height + 20;
+          p.x = Math.random() * width;
+          p.char =
+            hexChars[Math.floor(Math.random() * 16)] + hexChars[Math.floor(Math.random() * 16)];
+        }
+      });
+      requestAnimationFrame(draw);
+    };
+    draw();
+  }
+
+  initSBoxGrid() {
+    const sboxGrid = document.getElementById('sboxGrid');
+    if (!sboxGrid) return;
+    sboxGrid.innerHTML = '';
+
+    // Top-left corner empty
+    const corner = document.createElement('div');
+    corner.className = 'sbox-cell header';
+    sboxGrid.appendChild(corner);
+
+    // Column Headers
+    for (let i = 0; i < 16; i++) {
+      const colHeader = document.createElement('div');
+      colHeader.className = 'sbox-cell header';
+      colHeader.textContent = i.toString(16).toUpperCase();
+      sboxGrid.appendChild(colHeader);
+    }
+
+    // Data Rows
+    for (let r = 0; r < 16; r++) {
+      // Row Header
+      const rowHeader = document.createElement('div');
+      rowHeader.className = 'sbox-cell header';
+      rowHeader.textContent = r.toString(16).toUpperCase();
+      sboxGrid.appendChild(rowHeader);
+
+      for (let c = 0; c < 16; c++) {
+        const val = this.sBox[r * 16 + c];
+        const cell = document.createElement('div');
+        cell.className = `sbox-cell sbox-val-${r}-${c}`;
+        cell.textContent = val.toString(16).padStart(2, '0').toUpperCase();
+        sboxGrid.appendChild(cell);
+      }
+    }
+  }
+
   reset() {
     this.clearAutoplay();
 
@@ -97,15 +213,37 @@ class AESVisualizer {
       roundKeys: [],
       currentState: [],
       currentStepIndex: 0,
-      stateHistory: [], // array of cloned states for back stepping
+      stateHistory: [],
+      allStates: [], // Precomputed O(N) state trajectory
     };
 
     // Generate keys
     this.state.roundKeys = this.expandKeys(this.state.keyBytes);
     this.state.currentState = [...this.state.plaintextBytes];
 
+    // Precompute all states sequentially to avoid O(N^2) timeline scrubbing
+    this.precomputeAllStates();
+
+    // Initialize DOM structure once
+    this.initDOMMatrix();
+
     this.renderRoundKeys();
     this.updateUI();
+  }
+
+  precomputeAllStates() {
+    this.state.allStates.push([...this.state.currentState]);
+    let temp = [...this.state.currentState];
+    for (let i = 1; i < this.stepsSequence.length; i++) {
+      const stepInfo = this.stepsSequence[i];
+      if (stepInfo.step === 'sub') temp = this.applySubBytes(temp);
+      else if (stepInfo.step === 'shift') temp = this.applyShiftRows(temp);
+      else if (stepInfo.step === 'mix') temp = this.applyMixColumns(temp);
+      else if (stepInfo.step === 'xor')
+        temp = this.applyAddRoundKey(temp, this.state.roundKeys[stepInfo.round]);
+
+      this.state.allStates.push([...temp]);
+    }
   }
 
   randomizeInputs() {
@@ -130,11 +268,14 @@ class AESVisualizer {
         bytes.push(parseInt(clean.substr(i, 2), 16));
       }
     } else {
+      // Use TextEncoder for proper UTF-8 handling
+      const encoder = new TextEncoder();
+      const utf8 = encoder.encode(val);
       for (let i = 0; i < 16; i++) {
-        if (i < val.length) {
-          bytes.push(val.charCodeAt(i) & 0xff);
+        if (i < utf8.length) {
+          bytes.push(utf8[i]);
         } else {
-          bytes.push(0);
+          bytes.push(0); // Pad with zeroes
         }
       }
     }
@@ -179,12 +320,13 @@ class AESVisualizer {
 
   galoisMultiply(a, b) {
     let p = 0;
+    a &= 0xff; // Ensure a is strictly 8-bit
     for (let i = 0; i < 8; i++) {
       if (b & 1) {
         p ^= a;
       }
       let hiBitSet = a & 0x80;
-      a <<= 1;
+      a = (a << 1) & 0xff; // Mask to prevent bit bleed
       if (hiBitSet) {
         a ^= 0x1b;
       }
@@ -246,40 +388,16 @@ class AESVisualizer {
 
   stepForward() {
     if (this.state.currentStepIndex >= this.stepsSequence.length - 1) return;
-
-    const nextStep = this.stepsSequence[this.state.currentStepIndex + 1];
-
-    // Save history
-    this.state.stateHistory.push({
-      state: [...this.state.currentState],
-      stepIndex: this.state.currentStepIndex,
-    });
-
-    // Compute transition
-    if (nextStep.step === 'sub') {
-      this.state.currentState = this.applySubBytes(this.state.currentState);
-    } else if (nextStep.step === 'shift') {
-      this.state.currentState = this.applyShiftRows(this.state.currentState);
-    } else if (nextStep.step === 'mix') {
-      this.state.currentState = this.applyMixColumns(this.state.currentState);
-    } else if (nextStep.step === 'xor') {
-      this.state.currentState = this.applyAddRoundKey(
-        this.state.currentState,
-        this.state.roundKeys[nextStep.round]
-      );
-    }
-
+    this.state.stateHistory.push(this.state.currentStepIndex);
     this.state.currentStepIndex++;
+    this.state.currentState = [...this.state.allStates[this.state.currentStepIndex]];
     this.updateUI();
   }
 
   stepBackward() {
     if (this.state.stateHistory.length === 0) return;
-
-    const previous = this.state.stateHistory.pop();
-    this.state.currentState = previous.state;
-    this.state.currentStepIndex = previous.stepIndex;
-
+    this.state.currentStepIndex = this.state.stateHistory.pop();
+    this.state.currentState = [...this.state.allStates[this.state.currentStepIndex]];
     this.updateUI();
   }
 
@@ -320,11 +438,33 @@ class AESVisualizer {
     this.els.currentRoundNum.textContent = currentStep.round;
     this.els.opTitle.textContent = currentStep.name;
 
+    // Update Status Badge dynamically
+    if (currentStep.step === 'sub') {
+      this.els.stateStatus.textContent = 'Substituting Bytes';
+      this.els.stateStatus.className = 'status-badge active badge-sub';
+    } else if (currentStep.step === 'shift') {
+      this.els.stateStatus.textContent = 'Shifting Rows';
+      this.els.stateStatus.className = 'status-badge active badge-shift';
+    } else if (currentStep.step === 'mix') {
+      this.els.stateStatus.textContent = 'Mixing Columns';
+      this.els.stateStatus.className = 'status-badge active badge-mix';
+    } else if (currentStep.step === 'xor') {
+      this.els.stateStatus.textContent = 'Adding Round Key';
+      this.els.stateStatus.className = 'status-badge active badge-xor';
+    } else if (currentStep.step === 'done') {
+      this.els.stateStatus.textContent = 'Ciphertext Ready';
+      this.els.stateStatus.className = 'status-badge active badge-done';
+    } else {
+      this.els.stateStatus.textContent = 'Initialized';
+      this.els.stateStatus.className = 'status-badge active';
+    }
+
     // Highlight key expansion active card
     const keyCards = this.els.roundKeysContainer.querySelectorAll('.round-key-card');
     keyCards.forEach((card, idx) => {
       if (idx === currentStep.round) {
         card.classList.add('active');
+        // Prevent scroll bumping if card is already in view (simple check)
         card.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
       } else {
         card.classList.remove('active');
@@ -332,7 +472,9 @@ class AESVisualizer {
     });
 
     // Update Status Steps Timeline indicator
-    const steps = ['init', 'sub', 'shift', 'mix', 'xor'];
+    const steps = this.timelineSteps || ['init', 'sub', 'shift', 'mix', 'xor'];
+    this.timelineSteps = steps; // cache to avoid leak
+
     steps.forEach((st) => {
       const el = document.getElementById(`prog-${st}`);
       if (!el) return;
@@ -349,6 +491,20 @@ class AESVisualizer {
       }
     });
 
+    // Handle S-Box Panel display
+    const sboxPanel = document.getElementById('sboxPanel');
+    if (sboxPanel) {
+      if (currentStep.step === 'sub') {
+        sboxPanel.style.display = 'block';
+      } else {
+        sboxPanel.style.display = 'none';
+        // Clear previous highlights
+        document.querySelectorAll('.sbox-cell').forEach((c) => {
+          c.classList.remove('highlight-row', 'highlight-col', 'highlight-active');
+        });
+      }
+    }
+
     // Render 4x4 matrix
     this.renderStateMatrix(currentStep.step);
 
@@ -356,31 +512,134 @@ class AESVisualizer {
     this.renderOperationDetails(currentStep);
   }
 
-  renderStateMatrix(stepType) {
+  initDOMMatrix() {
     this.els.stateMatrixGrid.innerHTML = '';
-    // Display in column-major order
-    // Elements of matrix: index in list is c*4 + r (column major)
+    this.domCells = [];
     for (let r = 0; r < 4; r++) {
       for (let c = 0; c < 4; c++) {
-        const idx = c * 4 + r;
-        const val = this.state.currentState[idx];
+        const cell = document.createElement('div');
+        cell.className = 'matrix-cell';
+        cell.innerHTML = `
+          <div class="cube-face face-front"></div>
+          <div class="cube-face face-right"></div>
+          <div class="cube-face face-top">
+            <span class="cell-hex">00</span>
+            <span class="cell-info">'.'</span>
+          </div>
+        `;
+        this.els.stateMatrixGrid.appendChild(cell);
+        this.domCells.push(cell); // r=0..3, c=0..3
+      }
+    }
+  }
+
+  renderStateMatrix(stepType) {
+    const currentState = this.state.allStates[this.state.currentStepIndex];
+
+    for (let r = 0; r < 4; r++) {
+      for (let c = 0; c < 4; c++) {
+        const domIdx = r * 4 + c;
+        const cell = this.domCells[domIdx];
+
+        const stateIdx = c * 4 + r; // Column-major access
+        const val = currentState[stateIdx];
         const hex = val.toString(16).padStart(2, '0').toUpperCase();
         const char = val >= 32 && val <= 126 ? String.fromCharCode(val) : '.';
 
-        const cell = document.createElement('div');
+        const hexEl = cell.querySelector('.cell-hex');
+        const infoEl = cell.querySelector('.cell-info');
+
+        // Reset state
         cell.className = 'matrix-cell';
+        cell.style.transform = '';
+        cell.style.transition = '';
 
-        // Highlights based on operation step
-        if (stepType === 'sub') cell.classList.add('highlight-sub');
-        else if (stepType === 'shift' && r > 0) cell.classList.add('highlight-shift');
-        else if (stepType === 'mix') cell.classList.add('highlight-mix');
-        else if (stepType === 'xor') cell.classList.add('highlight-xor');
+        // Handle physical animations based on step type
+        if (stepType === 'sub') {
+          cell.classList.add('highlight-sub');
 
-        cell.innerHTML = `
-          <span class="cell-hex">${hex}</span>
-          <span class="cell-info">'${char}' [${idx}]</span>
-        `;
-        this.els.stateMatrixGrid.appendChild(cell);
+          const oldState = this.state.allStates[this.state.currentStepIndex - 1] || currentState;
+          const oldVal = oldState[stateIdx];
+          hexEl.textContent = oldVal.toString(16).padStart(2, '0').toUpperCase();
+          infoEl.textContent = `[${stateIdx}]`;
+
+          cell.style.transition = `transform ${0.2 / this.animSpeed}s ease-out`;
+          cell.classList.add('animating-sub'); // pops up Z
+
+          setTimeout(
+            () => {
+              hexEl.textContent = hex; // swap text at peak
+              infoEl.textContent = `'${char}'`;
+              cell.style.transition = `transform ${0.2 / this.animSpeed}s ease-in`;
+              cell.classList.remove('animating-sub'); // fall back down
+            },
+            (0.2 / this.animSpeed) * 1000
+          );
+
+          // S-Box Hover Logic
+          cell.onmouseenter = () => {
+            const row = oldVal >> 4;
+            const col = oldVal & 0x0f;
+            const target = document.querySelector(`.sbox-val-${row}-${col}`);
+            if (target) {
+              document
+                .querySelectorAll('.sbox-cell')
+                .forEach((el) =>
+                  el.classList.remove('highlight-active', 'highlight-row', 'highlight-col')
+                );
+              target.classList.add('highlight-active');
+              const sboxGrid = document.getElementById('sboxGrid');
+              if (sboxGrid && sboxGrid.children.length > 0) {
+                sboxGrid.children[col + 1].classList.add('highlight-col');
+                sboxGrid.children[(row + 1) * 17].classList.add('highlight-row');
+              }
+            }
+          };
+          cell.onmouseleave = () => {
+            document
+              .querySelectorAll('.sbox-cell')
+              .forEach((el) =>
+                el.classList.remove('highlight-active', 'highlight-row', 'highlight-col')
+              );
+          };
+        } else if (stepType === 'shift' && r > 0) {
+          cell.classList.add('highlight-shift');
+
+          const oldState = this.state.allStates[this.state.currentStepIndex - 1] || currentState;
+          const oldVal = oldState[stateIdx];
+          hexEl.textContent = oldVal.toString(16).padStart(2, '0').toUpperCase();
+          infoEl.textContent = `[${stateIdx}]`;
+
+          // Physical slide distance
+          const startOffset = (((c + r) % 4) - c) * 70;
+
+          cell.style.transition = 'none'; // snap to start
+          cell.style.transform = `translateX(${startOffset}px)`;
+
+          // Animate to 0
+          requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
+              cell.style.transition = `transform ${0.4 / this.animSpeed}s cubic-bezier(0.4, 0, 0.2, 1)`;
+              cell.style.transform = 'translateX(0px)';
+
+              setTimeout(
+                () => {
+                  hexEl.textContent = hex;
+                  infoEl.textContent = `'${char}'`;
+                },
+                (0.4 / this.animSpeed) * 1000
+              );
+            });
+          });
+        } else {
+          cell.onmouseenter = null;
+          cell.onmouseleave = null;
+          // Default update
+          hexEl.textContent = hex;
+          infoEl.textContent = `'${char}'`;
+          if (stepType === 'mix') cell.classList.add('highlight-mix');
+          if (stepType === 'xor') cell.classList.add('highlight-xor');
+        }
       }
     }
   }
@@ -403,37 +662,19 @@ class AESVisualizer {
       }
       card.appendChild(grid);
       card.addEventListener('click', () => {
-        // Find first step of this round and jump
         const targetStepIdx = this.stepsSequence.findIndex((s) => s.round === roundIdx);
         if (targetStepIdx !== -1) {
-          this.state.stateHistory = Array.from({ length: targetStepIdx }, (_, stepIndex) => ({
-            state: this.recomputeStateTo(stepIndex),
-            stepIndex,
-          }));
+          this.state.stateHistory = [];
+          for (let i = 0; i < targetStepIdx; i++) {
+            this.state.stateHistory.push(i);
+          }
           this.state.currentStepIndex = targetStepIdx;
-          this.state.currentState = this.recomputeStateTo(targetStepIdx);
+          this.state.currentState = [...this.state.allStates[targetStepIdx]];
           this.updateUI();
         }
       });
       this.els.roundKeysContainer.appendChild(card);
     });
-  }
-
-  recomputeStateTo(stepIndex) {
-    let tempState = [...this.state.plaintextBytes];
-    for (let i = 1; i <= stepIndex; i++) {
-      const stepInfo = this.stepsSequence[i];
-      if (stepInfo.step === 'sub') {
-        tempState = this.applySubBytes(tempState);
-      } else if (stepInfo.step === 'shift') {
-        tempState = this.applyShiftRows(tempState);
-      } else if (stepInfo.step === 'mix') {
-        tempState = this.applyMixColumns(tempState);
-      } else if (stepInfo.step === 'xor') {
-        tempState = this.applyAddRoundKey(tempState, this.state.roundKeys[stepInfo.round]);
-      }
-    }
-    return tempState;
   }
 
   renderOperationDetails(currentStep) {
@@ -461,8 +702,7 @@ class AESVisualizer {
     } else if (currentStep.step === 'sub') {
       // Pick a sample cell for detail illustration
       const sampleIdx = 0;
-      const originalVal =
-        this.state.stateHistory[this.state.stateHistory.length - 1].state[sampleIdx];
+      const originalVal = this.state.allStates[this.state.currentStepIndex - 1][sampleIdx];
       const replacedVal = this.state.currentState[sampleIdx];
 
       area.innerHTML = `
@@ -558,7 +798,7 @@ class AESVisualizer {
       const keyBytes = this.state.roundKeys[currentStep.round];
       const sampleStateVal = this.state.currentState[0];
       const sampleKeyVal = keyBytes[0];
-      const originalStateVal = this.state.stateHistory[this.state.stateHistory.length - 1].state[0];
+      const originalStateVal = this.state.allStates[this.state.currentStepIndex - 1][0];
 
       area.innerHTML = `
         <div class="sub-bytes-detail">

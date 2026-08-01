@@ -1,0 +1,202 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>JWT Refresh Rotation Lab | Algo Infinity Verse</title>
+  <meta name="description" content="Configure refresh-token rotation policy, simulate concurrent refresh races, detect reuse, walk family invalidation, and export a hardening report." />
+  <link rel="stylesheet" href="/styles.css" />
+  <link rel="stylesheet" href="style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Poppins:wght@300;400;500;600;700&family=Fira+Code:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <script>
+    (function () {
+      try {
+        var storedTheme = localStorage.getItem('theme');
+        var prefersLight = window.matchMedia('(prefers-color-scheme: light)').matches;
+        var theme = storedTheme || (prefersLight ? 'light' : 'dark');
+        if (theme === 'light') {
+          document.documentElement.classList.add('light-mode');
+        } else {
+          document.documentElement.classList.remove('light-mode');
+        }
+      } catch (e) {}
+    })();
+  </script>
+</head>
+<body data-page="jwt-refresh-rotation-lab">
+  <a href="#jwtrot-main" class="jwtrot-skip-link">Skip to main content</a>
+  <button type="button" id="scrollTopBtn" class="scroll-top-btn" aria-label="Scroll to top">
+    <i class="fas fa-arrow-up" aria-hidden="true"></i>
+  </button>
+
+  <div id="navbar-placeholder"></div>
+
+  <header class="jwtrot-hero">
+    <div class="jwtrot-hero-badge">
+      <i class="fas fa-rotate" aria-hidden="true"></i>
+      Auth Security Lab
+    </div>
+    <h1>
+      JWT Refresh
+      <span class="jwtrot-hero-accent">Rotation Lab</span>
+    </h1>
+    <p>
+      Tune rotation policy, race N concurrent refresh attempts, observe reuse detection and
+      token-family invalidation, then export a hardening checklist report.
+    </p>
+    <div class="jwtrot-hero-stats" aria-live="polite">
+      <div class="jwtrot-stat">
+        <span class="jwtrot-stat-val" id="statRisk">—</span>
+        <span class="jwtrot-stat-label">Risk score</span>
+      </div>
+      <div class="jwtrot-stat">
+        <span class="jwtrot-stat-val" id="statRaces">—</span>
+        <span class="jwtrot-stat-label">Races run</span>
+      </div>
+      <div class="jwtrot-stat">
+        <span class="jwtrot-stat-val" id="statReuse">—</span>
+        <span class="jwtrot-stat-label">Reuse detections</span>
+      </div>
+    </div>
+  </header>
+
+  <main id="jwtrot-main" class="jwtrot-main">
+    <div class="container">
+      <div class="jwtrot-workspace">
+        <section class="jwtrot-panel" aria-labelledby="jwtrot-policy-title">
+          <div class="jwtrot-panel-header">
+            <div class="jwtrot-panel-title">
+              <i class="fas fa-sliders jwtrot-panel-icon" aria-hidden="true"></i>
+              <h2 id="jwtrot-policy-title">Rotation policy</h2>
+            </div>
+          </div>
+
+          <fieldset class="jwtrot-fieldset">
+            <legend class="jwtrot-label">Policy toggles</legend>
+            <div class="jwtrot-toggle-grid" role="group" aria-label="Refresh rotation policy">
+              <label class="jwtrot-toggle">
+                <input type="checkbox" id="toggleRotation" checked />
+                Rotation on refresh
+              </label>
+              <label class="jwtrot-toggle">
+                <input type="checkbox" id="toggleReuseDetect" checked />
+                Reuse detection
+              </label>
+              <label class="jwtrot-toggle">
+                <input type="checkbox" id="toggleFamily" checked />
+                Token family tracking
+              </label>
+            </div>
+          </fieldset>
+
+          <div class="jwtrot-field-grid">
+            <div class="jwtrot-field">
+              <label class="jwtrot-label" for="accessTtl">Access TTL (seconds)</label>
+              <input type="number" id="accessTtl" class="jwtrot-input" min="30" max="86400" value="900" />
+            </div>
+            <div class="jwtrot-field">
+              <label class="jwtrot-label" for="refreshTtl">Refresh TTL (seconds)</label>
+              <input type="number" id="refreshTtl" class="jwtrot-input" min="60" max="2592000" value="604800" />
+            </div>
+            <div class="jwtrot-field">
+              <label class="jwtrot-label" for="parallelN">Parallel refresh attempts (N)</label>
+              <input type="number" id="parallelN" class="jwtrot-input" min="1" max="20" value="5" />
+            </div>
+            <div class="jwtrot-field">
+              <label class="jwtrot-label" for="familyId">Token family ID</label>
+              <input type="text" id="familyId" class="jwtrot-input jwtrot-mono" value="fam_demo_01" autocomplete="off" />
+            </div>
+          </div>
+
+          <div class="jwtrot-controls">
+            <button type="button" id="resetFamilyBtn" class="btn btn-secondary">
+              <i class="fas fa-seedling" aria-hidden="true"></i> Seed fresh family
+            </button>
+            <button type="button" id="runRaceBtn" class="btn btn-primary">
+              <i class="fas fa-bolt" aria-hidden="true"></i> Run race simulator
+            </button>
+            <button type="button" id="exportBtn" class="btn btn-outline" disabled>
+              <i class="fas fa-download" aria-hidden="true"></i> Export report
+            </button>
+          </div>
+        </section>
+
+        <section class="jwtrot-panel" aria-labelledby="jwtrot-outcomes-title">
+          <div class="jwtrot-panel-header">
+            <div class="jwtrot-panel-title">
+              <i class="fas fa-flag-checkered jwtrot-panel-icon" aria-hidden="true"></i>
+              <h2 id="jwtrot-outcomes-title">Race outcomes</h2>
+            </div>
+            <span class="jwtrot-status-live" id="raceStatus" role="status" aria-live="polite">Idle</span>
+          </div>
+          <div id="outcomesList" class="jwtrot-outcomes" aria-live="polite">
+            <p class="jwtrot-empty">Configure policy and run the concurrent refresh race.</p>
+          </div>
+        </section>
+      </div>
+
+      <section class="jwtrot-panel" aria-labelledby="jwtrot-walk-title">
+        <div class="jwtrot-panel-header">
+          <div class="jwtrot-panel-title">
+            <i class="fas fa-route jwtrot-panel-icon" aria-hidden="true"></i>
+            <h2 id="jwtrot-walk-title">Family invalidation walkthrough</h2>
+          </div>
+        </div>
+        <ol class="jwtrot-steps" id="walkSteps" aria-live="polite">
+          <li class="jwtrot-step">Seed a refresh token in a family.</li>
+          <li class="jwtrot-step">First successful refresh rotates to a new refresh token.</li>
+          <li class="jwtrot-step">A reused (stolen) refresh triggers family-wide revoke when detection is on.</li>
+          <li class="jwtrot-step">Subsequent races with the old token are rejected.</li>
+        </ol>
+        <pre class="jwtrot-mono-block" id="walkLog" aria-live="polite">Awaiting simulation…</pre>
+      </section>
+
+      <div class="jwtrot-workspace">
+        <section class="jwtrot-panel" aria-labelledby="jwtrot-crypto-title">
+          <div class="jwtrot-panel-header">
+            <div class="jwtrot-panel-title">
+              <i class="fas fa-key jwtrot-panel-icon" aria-hidden="true"></i>
+              <h2 id="jwtrot-crypto-title">Optional Web Crypto demo</h2>
+            </div>
+          </div>
+          <p class="jwtrot-hint">Signs a fake JWT-like payload with HMAC-SHA256 (demo only — not a production auth server).</p>
+          <div class="jwtrot-controls">
+            <button type="button" id="signDemoBtn" class="btn btn-secondary">
+              <i class="fas fa-signature" aria-hidden="true"></i> Sign fake access token
+            </button>
+          </div>
+          <pre class="jwtrot-mono-block" id="cryptoOut" aria-live="polite">—</pre>
+        </section>
+
+        <section class="jwtrot-panel" aria-labelledby="jwtrot-check-title">
+          <div class="jwtrot-panel-header">
+            <div class="jwtrot-panel-title">
+              <i class="fas fa-clipboard-check jwtrot-panel-icon" aria-hidden="true"></i>
+              <h2 id="jwtrot-check-title">Hardening checklist</h2>
+            </div>
+          </div>
+          <ul id="checklist" class="jwtrot-checklist" aria-live="polite">
+            <li class="jwtrot-empty-li">Checklist updates after each race based on policy.</li>
+          </ul>
+        </section>
+      </div>
+    </div>
+  </main>
+
+  <div id="footer-placeholder"></div>
+
+  <script src="/auth.js"></script>
+  <script src="/bootstrap-legacy.js"></script>
+  <script src="/script.js"></script>
+  <script type="module" src="/dist/legacy-bundle.mjs"></script>
+  <script src="/theme.js"></script>
+  <script src="script.js"></script>
+  <script>
+    if (typeof loadPartial === 'function') {
+      loadPartial('navbar-placeholder', '/partials/navbar.html');
+      loadPartial('footer-placeholder', '/partials/footer.html');
+    }
+  </script>
+</body>
+</html>

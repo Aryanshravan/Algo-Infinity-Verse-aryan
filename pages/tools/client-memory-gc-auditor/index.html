@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Client Memory GC Auditor | Algo Infinity Verse</title>
+  <meta name="description" content="Static-analysis memory leak auditor for client JS: detect uncleared timers, orphaned listeners, detached DOM refs, and large closures — then simulate mount/unmount heap deltas." />
+  <link rel="stylesheet" href="/styles.css" />
+  <link rel="stylesheet" href="style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Poppins:wght@300;400;500;600;700&family=Fira+Code:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <script>
+    (function () {
+      try {
+        var storedTheme = localStorage.getItem('theme');
+        var prefersLight = window.matchMedia('(prefers-color-scheme: light)').matches;
+        var theme = storedTheme || (prefersLight ? 'light' : 'dark');
+        if (theme === 'light') {
+          document.documentElement.classList.add('light-mode');
+        } else {
+          document.documentElement.classList.remove('light-mode');
+        }
+      } catch (e) {}
+    })();
+  </script>
+</head>
+<body data-page="client-memory-gc-auditor">
+  <a href="#memgc-main" class="memgc-skip-link">Skip to main content</a>
+  <button type="button" id="scrollTopBtn" class="scroll-top-btn" aria-label="Scroll to top">
+    <i class="fas fa-arrow-up" aria-hidden="true"></i>
+  </button>
+
+  <div id="navbar-placeholder"></div>
+
+  <header class="memgc-hero">
+    <div class="memgc-hero-badge">
+      <i class="fas fa-memory" aria-hidden="true"></i>
+      Client Memory Lab
+    </div>
+    <h1>
+      Client Memory
+      <span class="memgc-hero-accent">GC Auditor</span>
+    </h1>
+    <p>
+      Paste component-like JavaScript, detect common leak patterns with static heuristics,
+      simulate mount vs unmount retained heap, and export a memory leak audit summary.
+    </p>
+    <div class="memgc-hero-stats" aria-live="polite">
+      <div class="memgc-stat">
+        <span class="memgc-stat-val" id="statLeaks">—</span>
+        <span class="memgc-stat-label">Leaks found</span>
+      </div>
+      <div class="memgc-stat">
+        <span class="memgc-stat-val" id="statTimers">—</span>
+        <span class="memgc-stat-label">Timers</span>
+      </div>
+      <div class="memgc-stat">
+        <span class="memgc-stat-val" id="statListeners">—</span>
+        <span class="memgc-stat-label">Listeners</span>
+      </div>
+      <div class="memgc-stat">
+        <span class="memgc-stat-val" id="statHeap">—</span>
+        <span class="memgc-stat-label">Heap delta</span>
+      </div>
+    </div>
+  </header>
+
+  <main id="memgc-main" class="memgc-main">
+    <div class="container">
+      <div class="memgc-workspace">
+        <section class="memgc-panel" aria-labelledby="memgc-source-title">
+          <div class="memgc-panel-header">
+            <div class="memgc-panel-title">
+              <i class="fas fa-code memgc-panel-icon" aria-hidden="true"></i>
+              <h2 id="memgc-source-title">Component source</h2>
+            </div>
+          </div>
+
+          <label class="memgc-label" for="codeInput">Paste JavaScript (component-like)</label>
+          <textarea
+            id="codeInput"
+            class="memgc-textarea"
+            rows="16"
+            spellcheck="false"
+            aria-describedby="codeHint"
+            placeholder="// Paste a class, hook, or module that mounts listeners/timers…"
+          ></textarea>
+          <p class="memgc-hint" id="codeHint">
+            Client-side static analysis only — no real Chrome heap API. Findings drive a simulated retained-heap delta.
+          </p>
+
+          <div class="memgc-controls">
+            <button type="button" id="loadDemoBtn" class="btn btn-secondary">
+              <i class="fas fa-flask" aria-hidden="true"></i> Load demo leaky component
+            </button>
+            <button type="button" id="analyzeBtn" class="btn btn-primary">
+              <i class="fas fa-magnifying-glass" aria-hidden="true"></i> Analyze
+            </button>
+            <button type="button" id="clearBtn" class="btn btn-outline">
+              <i class="fas fa-eraser" aria-hidden="true"></i> Clear
+            </button>
+          </div>
+        </section>
+
+        <section class="memgc-panel" aria-labelledby="memgc-lifecycle-title">
+          <div class="memgc-panel-header">
+            <div class="memgc-panel-title">
+              <i class="fas fa-recycle memgc-panel-icon" aria-hidden="true"></i>
+              <h2 id="memgc-lifecycle-title">Lifecycle simulation</h2>
+            </div>
+            <span class="memgc-status-live" id="lifecycleStatus" role="status" aria-live="polite">Idle</span>
+          </div>
+
+          <div class="memgc-lifecycle-viz" aria-hidden="true">
+            <div class="memgc-lifecycle-phase" id="phaseMount">
+              <span class="memgc-phase-label">Mount</span>
+              <span class="memgc-phase-heap" id="mountHeap">0 KB</span>
+            </div>
+            <div class="memgc-lifecycle-arrow" aria-hidden="true">
+              <i class="fas fa-arrow-right"></i>
+            </div>
+            <div class="memgc-lifecycle-phase" id="phaseUnmount">
+              <span class="memgc-phase-label">Unmount</span>
+              <span class="memgc-phase-heap" id="unmountHeap">0 KB</span>
+            </div>
+          </div>
+
+          <div class="memgc-heap-bar" role="img" aria-label="Retained heap visualization">
+            <div class="memgc-heap-fill" id="heapFill" style="width: 0%"></div>
+          </div>
+          <p class="memgc-hint" id="heapHint">Run analyze to simulate mount → unmount retained heap.</p>
+
+          <div class="memgc-controls">
+            <button type="button" id="simulateBtn" class="btn btn-primary" disabled>
+              <i class="fas fa-play" aria-hidden="true"></i> Simulate Mount → Unmount
+            </button>
+            <button type="button" id="exportMdBtn" class="btn btn-secondary" disabled>
+              <i class="fas fa-file-lines" aria-hidden="true"></i> Export .md
+            </button>
+            <button type="button" id="exportTxtBtn" class="btn btn-outline" disabled>
+              <i class="fas fa-download" aria-hidden="true"></i> Export .txt
+            </button>
+          </div>
+        </section>
+      </div>
+
+      <div class="memgc-results-grid">
+        <section class="memgc-panel" aria-labelledby="memgc-findings-title">
+          <div class="memgc-panel-header">
+            <div class="memgc-panel-title">
+              <i class="fas fa-bug memgc-panel-icon" aria-hidden="true"></i>
+              <h2 id="memgc-findings-title">Leak findings</h2>
+            </div>
+          </div>
+          <div id="findingsList" class="memgc-findings" aria-live="polite">
+            <p class="memgc-empty">Paste code and click Analyze to detect leak patterns.</p>
+          </div>
+        </section>
+
+        <section class="memgc-panel" aria-labelledby="memgc-recs-title">
+          <div class="memgc-panel-header">
+            <div class="memgc-panel-title">
+              <i class="fas fa-wrench memgc-panel-icon" aria-hidden="true"></i>
+              <h2 id="memgc-recs-title">Patch recommendations</h2>
+            </div>
+          </div>
+          <ul id="recsList" class="memgc-recs" aria-live="polite">
+            <li class="memgc-empty-li">Recommendations appear after analysis.</li>
+          </ul>
+        </section>
+      </div>
+    </div>
+  </main>
+
+  <div id="footer-placeholder"></div>
+
+  <script src="/auth.js"></script>
+  <script src="/bootstrap-legacy.js"></script>
+  <script src="/script.js"></script>
+  <script type="module" src="/dist/legacy-bundle.mjs"></script>
+  <script src="/theme.js"></script>
+  <script src="script.js"></script>
+  <script>
+    if (typeof loadPartial === 'function') {
+      loadPartial('navbar-placeholder', '/partials/navbar.html');
+      loadPartial('footer-placeholder', '/partials/footer.html');
+    }
+  </script>
+</body>
+</html>

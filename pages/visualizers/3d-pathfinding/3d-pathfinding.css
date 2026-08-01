@@ -1,90 +1,455 @@
-/* 3D Pathfinding Visualizer Specific Styles */
 :root {
-    --glass-bg: rgba(15, 23, 42, 0.85);
-    --glass-border: rgba(255, 255, 255, 0.1);
-    --text-primary: #f8fafc;
-    --text-secondary: #94a3b8;
-    --dark-surface: #020617;
-    
-    /* Theme Colors */
-    --path-primary: #14b8a6; /* Teal */
-    --path-primary-hover: #0d9488;
-    --path-accent: #f59e0b; /* Amber */
-    --path-success: #10b981; /* Emerald */
-    
-    /* Map Colors */
-    --node-start: #10b981; /* Emerald */
-    --node-end: #ef4444;   /* Red */
-    --node-open: #f59e0b;  /* Amber */
-    --node-closed: #8b5cf6; /* Violet */
-    --node-path: #ec4899;  /* Pink */
+  --vx-bg: #050505;
+  --vx-panel: #0a0a0a;
+  --vx-border: #1f1f1f;
+  --vx-text: #e0e0e0;
+  --vx-gray: #6b7280;
+
+  --vx-cyan: #00f0ff;
+  --vx-magenta: #ff003c;
+  --vx-lime: #39ff14;
+  --vx-orange: #ff5e00;
+  --vx-purple: #bd00ff;
+  --vx-blue: #003cff;
 }
 
-body.path-body {
-    margin: 0;
-    padding: 0;
-    background-color: var(--dark-surface);
-    color: var(--text-primary);
-    font-family: 'Poppins', sans-serif;
-    height: 100vh;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
+body.voxel-body {
+  background-color: var(--vx-bg);
+  color: var(--vx-text);
+  font-family: 'Fira Code', monospace;
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+  background-image:
+    linear-gradient(rgba(0, 240, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 240, 255, 0.03) 1px, transparent 1px);
+  background-size: 20px 20px;
 }
 
-/* Navbar */
-.navbar { height: 60px; padding: 0 1.5rem; background: rgba(2, 6, 23, 0.95); border-bottom: 1px solid var(--glass-border); display: flex; justify-content: space-between; align-items: center; z-index: 1000; }
-.nav-logo { font-family: 'Orbitron', sans-serif; font-weight: 700; font-size: 1.2rem; color: var(--path-primary); }
-.engine-badge { font-family: 'Fira Code', monospace; font-size: 0.85rem; color: var(--path-primary); background: rgba(20, 184, 166, 0.1); border: 1px solid rgba(20, 184, 166, 0.3); padding: 0.4rem 1rem; border-radius: 99px; display: flex; align-items: center; gap: 0.5rem; }
+/* Utilities */
+.text-xs {
+  font-size: 0.75rem;
+}
+.text-sm {
+  font-size: 0.85rem;
+}
+.text-gray {
+  color: var(--vx-gray);
+}
+.text-cyan {
+  color: var(--vx-cyan);
+  text-shadow: 0 0 5px rgba(0, 240, 255, 0.5);
+}
+.text-magenta {
+  color: var(--vx-magenta);
+  text-shadow: 0 0 5px rgba(255, 0, 60, 0.5);
+}
+.text-lime {
+  color: var(--vx-lime);
+  text-shadow: 0 0 5px rgba(57, 255, 20, 0.5);
+}
+.text-red {
+  color: #ff3333;
+}
+.text-center {
+  text-align: center;
+}
+.font-orbitron {
+  font-family: 'Orbitron', sans-serif;
+}
+.font-fira {
+  font-family: 'Fira Code', monospace;
+}
+.w-100 {
+  width: 100%;
+}
+.h-100 {
+  height: 100%;
+}
+.flex-col {
+  display: flex;
+  flex-direction: column;
+}
+.mb-2 {
+  margin-bottom: 0.5rem;
+}
+.mb-3 {
+  margin-bottom: 1rem;
+}
+.mb-4 {
+  margin-bottom: 1.5rem;
+}
+.mt-3 {
+  margin-top: 1rem;
+}
+.mt-4 {
+  margin-top: 1.5rem;
+}
 
-/* Buttons */
-.btn { padding: 0.8rem 1.2rem; border-radius: 6px; font-family: 'Poppins', sans-serif; font-weight: 600; cursor: pointer; border: none; transition: all 0.2s; display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; font-size: 0.9rem; }
-.btn-primary { background: var(--path-primary); color: #020617; }
-.btn-primary:hover:not(:disabled) { background: var(--path-primary-hover); transform: translateY(-1px); box-shadow: 0 4px 15px rgba(20, 184, 166, 0.3); }
-.btn-success { background: var(--path-success); color: #020617; }
-.btn-success:hover:not(:disabled) { background: #059669; transform: translateY(-1px); box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3); }
-.btn:disabled { opacity: 0.5; cursor: not-allowed; }
-.w-100 { width: 100%; }
+/* Hero */
+.voxel-hero {
+  padding: 4rem 2rem 2rem;
+  text-align: center;
+  border-bottom: 1px solid var(--vx-border);
+  background: radial-gradient(ellipse at bottom, rgba(0, 240, 255, 0.1) 0%, var(--vx-bg) 70%);
+}
+.voxel-hero-inner {
+  max-width: 800px;
+  margin: 0 auto;
+}
+.voxel-eyebrow {
+  color: var(--vx-cyan);
+  text-transform: uppercase;
+  letter-spacing: 3px;
+  font-size: 0.8rem;
+  margin-bottom: 1rem;
+}
+.voxel-title {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 2.5rem;
+  margin: 0 0 1rem;
+  color: #fff;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+.voxel-desc {
+  color: var(--vx-gray);
+  line-height: 1.6;
+}
 
-/* Workspace */
-.path-workspace { flex: 1; display: flex; position: relative; overflow: hidden; background: #000; }
+/* Layout */
+.voxel-dashboard {
+  padding: 2rem 1.5rem 4rem;
+  max-width: 1600px;
+  margin: 0 auto;
+}
+.voxel-layout {
+  display: grid;
+  grid-template-columns: 300px 1fr 300px;
+  gap: 2rem;
+  align-items: start;
+}
 
-/* Canvas Area */
-.canvas-wrapper { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; }
-#threejs-container { width: 100%; height: 100%; outline: none; }
+/* Cyber Panels */
+.cyber-panel {
+  background: var(--vx-panel);
+  border: 1px solid var(--vx-border);
+  padding: 1.5rem;
+  position: relative;
+}
+.cyber-panel::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 10px;
+  height: 10px;
+  border-top: 2px solid var(--vx-cyan);
+  border-left: 2px solid var(--vx-cyan);
+}
+.cyber-panel::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 10px;
+  height: 10px;
+  border-bottom: 2px solid var(--vx-cyan);
+  border-right: 2px solid var(--vx-cyan);
+}
+.panel-header {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-bottom: 1.5rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  border-bottom: 1px solid var(--vx-border);
+  padding-bottom: 0.75rem;
+}
 
-.camera-hint { position: absolute; bottom: 2rem; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.6); backdrop-filter: blur(5px); border: 1px solid var(--glass-border); padding: 0.5rem 1rem; border-radius: 8px; font-size: 0.85rem; color: var(--text-secondary); z-index: 10; pointer-events: none; }
+/* Controls */
+.control-group label {
+  display: block;
+  font-size: 0.85rem;
+  margin-bottom: 0.5rem;
+  color: var(--vx-gray);
+  text-transform: uppercase;
+}
+.cyber-select,
+.cyber-range {
+  background: #000;
+  border: 1px solid var(--vx-border);
+  color: var(--vx-text);
+  padding: 0.5rem;
+  font-family: 'Fira Code', monospace;
+  outline: none;
+}
+.cyber-select:focus {
+  border-color: var(--vx-cyan);
+}
+.cyber-range {
+  width: 100%;
+  accent-color: var(--vx-cyan);
+}
 
-/* Controls Overlay */
-.controls-overlay { position: absolute; top: 2rem; left: 2rem; width: 340px; background: var(--glass-bg); backdrop-filter: blur(10px); border: 1px solid var(--glass-border); border-radius: 12px; z-index: 10; box-shadow: 0 20px 40px rgba(0,0,0,0.6); display: flex; flex-direction: column; overflow: hidden; }
-.panel-header { padding: 1.2rem 1.5rem; background: rgba(0,0,0,0.4); border-bottom: 1px solid var(--glass-border); }
-.panel-header h3 { margin: 0; font-family: 'Orbitron', sans-serif; font-size: 1.1rem; color: #fff; display: flex; align-items: center; gap: 0.5rem; }
+.cyber-btn {
+  background: #000;
+  border: 1px solid var(--vx-border);
+  color: var(--vx-text);
+  padding: 0.75rem 1rem;
+  font-family: 'Fira Code', monospace;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  text-transform: uppercase;
+}
+.cyber-btn:hover {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: var(--vx-cyan);
+  color: var(--vx-cyan);
+}
+.border-red:hover {
+  border-color: #ff3333;
+  color: #ff3333;
+}
+.btn-glow {
+  background: rgba(0, 240, 255, 0.1);
+  border-color: var(--vx-cyan);
+  color: var(--vx-cyan);
+  box-shadow: 0 0 10px rgba(0, 240, 255, 0.2);
+}
+.btn-glow:hover {
+  background: rgba(0, 240, 255, 0.2);
+  box-shadow: 0 0 20px rgba(0, 240, 255, 0.4);
+}
 
-.controls-content { padding: 1.5rem; }
-.desc-text { font-size: 0.85rem; color: var(--text-secondary); line-height: 1.6; margin: 0 0 1.5rem; }
-.desc-text strong { color: #fff; }
+/* Legend */
+.terrain-legend {
+  font-size: 0.85rem;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.5rem;
+}
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.color-box {
+  width: 12px;
+  height: 12px;
+  display: inline-block;
+  border: 1px solid #fff;
+}
+.bg-grass {
+  background: rgba(57, 255, 20, 0.3);
+  border-color: var(--vx-lime);
+}
+.bg-mud {
+  background: rgba(255, 94, 0, 0.3);
+  border-color: var(--vx-orange);
+}
+.bg-mountain {
+  background: rgba(189, 0, 255, 0.3);
+  border-color: var(--vx-purple);
+}
+.bg-water {
+  background: rgba(0, 60, 255, 0.3);
+  border-color: var(--vx-blue);
+}
 
-.action-grid { display: flex; flex-direction: column; gap: 0.8rem; margin-bottom: 1.5rem; }
+/* Main Stage */
+.voxel-main {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.camera-controls {
+  margin-bottom: 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
 
-.settings-group { margin-bottom: 1.5rem; display: flex; flex-direction: column; gap: 0.5rem; }
-.settings-group label { font-size: 0.8rem; color: var(--text-secondary); text-transform: uppercase; font-family: 'Fira Code', monospace; letter-spacing: 0.05em; }
-input[type=range] { width: 100%; accent-color: var(--path-primary); cursor: pointer; background: #334155; height: 4px; border-radius: 2px; outline: none; }
+/* 3D Engine CSS */
+.voxel-stage {
+  perspective: 1200px;
+  width: 600px;
+  height: 600px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transform-style: preserve-3d;
+}
+.voxel-grid {
+  width: 450px; /* 15 cells * 30px */
+  height: 450px;
+  display: grid;
+  grid-template-columns: repeat(15, 30px);
+  grid-template-rows: repeat(15, 30px);
+  transform-style: preserve-3d;
+  /* Default isometric rotation */
+  transform: rotateX(60deg) rotateZ(45deg);
+  transition: transform 0.1s linear;
+}
 
-.legend-box { background: rgba(0,0,0,0.3); border: 1px solid var(--glass-border); border-radius: 8px; padding: 1rem; margin-bottom: 1.5rem; }
-.legend-box h4 { margin: 0 0 0.8rem; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-secondary); font-family: 'Fira Code', monospace; }
-.legend-item { display: flex; align-items: center; gap: 0.8rem; font-size: 0.85rem; margin-bottom: 0.5rem; color: #e2e8f0; }
-.color-box { width: 14px; height: 14px; border-radius: 3px; border: 1px solid rgba(255,255,255,0.2); }
-.color-box.start { background-color: var(--node-start); box-shadow: 0 0 8px var(--node-start); }
-.color-box.end { background-color: var(--node-end); box-shadow: 0 0 8px var(--node-end); }
-.color-box.open { background-color: var(--node-open); }
-.color-box.closed { background-color: var(--node-closed); }
-.color-box.path { background-color: var(--node-path); box-shadow: 0 0 10px var(--node-path); }
+/* Individual Voxel */
+.voxel {
+  width: 30px;
+  height: 30px;
+  position: relative;
+  transform-style: preserve-3d;
+  transition:
+    transform 0.3s ease,
+    background 0.3s;
+  cursor: pointer;
+}
 
-.stats-panel { border-top: 1px dashed var(--glass-border); padding-top: 1.2rem; }
-.stat-row { display: flex; justify-content: space-between; font-size: 0.85rem; margin-bottom: 0.5rem; color: var(--text-secondary); font-family: 'Fira Code', monospace; }
-.text-accent { color: var(--path-accent); font-weight: bold; }
+/* Voxel Top Face */
+.v-top {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 8px;
+  color: #fff;
+}
 
-@media (max-width: 768px) {
-    .controls-overlay { top: auto; bottom: 0; left: 0; width: 100%; border-radius: 12px 12px 0 0; max-height: 50vh; overflow-y: auto; border-left: none; border-right: none; border-bottom: none; }
-    .camera-hint { top: 1rem; bottom: auto; }
+/* Terrain Styles & Z-Translation */
+/* Grass Z=0 */
+.t-grass {
+  transform: translateZ(0px);
+}
+.t-grass .v-top {
+  background: rgba(57, 255, 20, 0.1);
+  border-color: rgba(57, 255, 20, 0.4);
+}
+/* Mud Z=-10 */
+.t-mud {
+  transform: translateZ(-10px);
+}
+.t-mud .v-top {
+  background: rgba(255, 94, 0, 0.2);
+  border-color: var(--vx-orange);
+}
+/* Mountain Z=30 */
+.t-mountain {
+  transform: translateZ(30px);
+}
+.t-mountain .v-top {
+  background: rgba(189, 0, 255, 0.4);
+  border-color: var(--vx-purple);
+}
+/* Water Z=-5 */
+.t-water {
+  transform: translateZ(-5px);
+}
+.t-water .v-top {
+  background: rgba(0, 60, 255, 0.4);
+  border-color: var(--vx-cyan);
+}
+
+/* Voxel States */
+.v-start .v-top {
+  background: var(--vx-cyan) !important;
+  box-shadow: 0 0 20px var(--vx-cyan);
+  border-color: #fff;
+}
+.v-end .v-top {
+  background: var(--vx-magenta) !important;
+  box-shadow: 0 0 20px var(--vx-magenta);
+  border-color: #fff;
+}
+.v-open .v-top {
+  background: rgba(0, 240, 255, 0.5);
+}
+.v-closed .v-top {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: #555;
+}
+.v-path .v-top {
+  background: var(--vx-lime) !important;
+  box-shadow: 0 0 15px var(--vx-lime);
+}
+
+/* Math Floating Label (Un-rotates to face camera) */
+/* The parent voxel is rotated X=60 Z=45. The label must counter-rotate to face screen */
+.math-label {
+  position: absolute;
+  top: -20px;
+  left: 50%;
+  transform: translate(-50%, -50%) rotateZ(-45deg) rotateX(-60deg) translateZ(40px);
+  background: rgba(0, 0, 0, 0.8);
+  border: 1px solid var(--vx-cyan);
+  color: #fff;
+  padding: 4px 6px;
+  font-size: 10px;
+  border-radius: 2px;
+  pointer-events: none;
+  white-space: nowrap;
+  z-index: 100;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+.math-label.show {
+  opacity: 1;
+}
+
+.math-overlay {
+  margin-top: 1rem;
+}
+
+/* Terminal */
+.terminal-stream {
+  flex: 1;
+  background: #000;
+  border: 1px solid var(--vx-border);
+  padding: 1rem;
+  font-size: 0.8rem;
+  overflow-y: auto;
+  max-height: 400px;
+}
+.term-line {
+  margin-bottom: 0.25rem;
+  color: var(--vx-gray);
+  word-wrap: break-word;
+}
+.term-line.info {
+  color: #fff;
+}
+.term-line.success {
+  color: var(--vx-lime);
+}
+.term-line.warning {
+  color: var(--vx-magenta);
+}
+
+.stat-row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
+  font-size: 0.9rem;
+}
+
+@media (max-width: 1300px) {
+  .voxel-layout {
+    grid-template-columns: 1fr;
+  }
+  .voxel-stage {
+    width: 100%;
+    height: 500px;
+  }
 }

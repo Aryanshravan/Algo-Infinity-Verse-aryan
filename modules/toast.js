@@ -18,6 +18,13 @@ class ToastService {
     show(message, type = 'info', duration = 3000) {
         if (!this.container) this.initContainer();
 
+        // Dismiss any existing toasts before showing a new one
+        while (this.container.firstChild) {
+            const existing = this.container.firstChild;
+            existing.classList.remove('toast-visible');
+            this.container.removeChild(existing);
+        }
+
         const toast = document.createElement('div');
         toast.className = `toast-notification toast-${type}`;
         

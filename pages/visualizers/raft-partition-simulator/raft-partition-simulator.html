@@ -1,0 +1,243 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Raft Consensus Split-Brain Simulator | Algo Infinity Verse</title>
+    <meta
+      name="description"
+      content="Animate Raft consensus node elections, AppendEntries replication, network partition split-brain conflicts, and step-by-step log recovery healing."
+    />
+    <link rel="stylesheet" href="/styles.css" />
+    <link rel="stylesheet" href="raft-partition-simulator.css" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Poppins:wght@300;400;500;600;700&family=Fira+Code:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+
+    <!-- Theme Initialization Script -->
+    <script>
+      (function () {
+        try {
+          const storedTheme = localStorage.getItem('theme');
+          const prefersLight = window.matchMedia('(prefers-color-scheme: light)').matches;
+          const theme = storedTheme || (prefersLight ? 'light' : 'dark');
+          if (theme === 'light') {
+            document.documentElement.classList.add('light-mode');
+          } else {
+            document.documentElement.classList.remove('light-mode');
+          }
+        } catch (e) {}
+      })();
+    </script>
+  </head>
+  <body data-page="raft-partition-simulator" data-no-loading>
+    <div id="loading-screen" class="hidden">
+      <div class="loader">
+        <div class="infinity-loader">∞</div>
+        <h2>Algo Infinity Verse</h2>
+        <div class="loading-bar"><div class="loading-progress"></div></div>
+      </div>
+    </div>
+
+    <button type="button" id="scrollTopBtn" class="scroll-top-btn" aria-label="Scroll to top">
+      <i class="fas fa-arrow-up"></i>
+    </button>
+
+    <div id="navbar-placeholder"></div>
+
+    <section class="hero raft-hero">
+      <div class="hero-background">
+        <div class="stars"></div>
+        <div class="stars2"></div>
+        <div class="stars3"></div>
+      </div>
+      <div class="hero-content">
+        <h1 class="hero-title">
+          <span class="title-line">Raft Consensus.</span>
+          <span
+            class="main-title"
+            style="
+              background: linear-gradient(135deg, #a855f7 0%, #d8b4fe 100%);
+              -webkit-background-clip: text;
+              -webkit-text-fill-color: transparent;
+            "
+            >Split-Brain Sandbox.</span
+          >
+          <span class="subtitle">Interactive Consensus Partitioning & Log Reconciler</span>
+        </h1>
+      </div>
+    </section>
+
+    <main class="raft-container">
+      <!-- Control Panel -->
+      <div class="raft-panel control-panel">
+        <div class="panel-header">
+          <i class="fas fa-sliders-h" style="color: #a855f7"></i>
+          <span>Execution Controls & Network Modifiers</span>
+        </div>
+        <div class="panel-body">
+          <div class="control-row">
+            <div class="button-group">
+              <button type="button" id="btnPause" class="raft-btn primary-btn">
+                <i class="fas fa-pause"></i> Pause Sim
+              </button>
+              <button type="button" id="btnStep" class="raft-btn secondary-btn" disabled>
+                <i class="fas fa-step-forward"></i> Single Step
+              </button>
+              <button type="button" id="btnHeal" class="raft-btn success-btn">
+                <i class="fas fa-house-medical"></i> Heal Partition
+              </button>
+            </div>
+
+            <div class="button-group">
+              <button type="button" id="btnPartition" class="raft-btn danger-btn">
+                <i class="fas fa-scissors"></i> Force Partition (1,2 | 3,4,5)
+              </button>
+              <button type="button" id="btnWrite" class="raft-btn primary-btn">
+                <i class="fas fa-pen-nib"></i> Write Key 'SET x=VAL'
+              </button>
+              <button type="button" id="btnReset" class="raft-btn secondary-btn">
+                <i class="fas fa-undo"></i> Reset Cluster
+              </button>
+            </div>
+          </div>
+
+          <hr class="raft-divider" />
+
+          <div class="control-row secondary-controls">
+            <div class="param-box">
+              <label for="writeNodeSel">Target Node:</label>
+              <select
+                id="writeNodeSel"
+                class="raft-select"
+                aria-label="Select target node for write"
+              >
+                <option value="1" selected>Node 1</option>
+                <option value="2">Node 2</option>
+                <option value="3">Node 3</option>
+                <option value="4">Node 4</option>
+                <option value="5">Node 5</option>
+              </select>
+            </div>
+            <div class="param-box">
+              <label for="simSpeed">Simulation Speed:</label>
+              <select id="simSpeed" class="raft-select" aria-label="Select simulation speed">
+                <option value="0.5">0.5x (Slow)</option>
+                <option value="1.0" selected>1.0x (Normal)</option>
+                <option value="2.0">2.0x (Fast)</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Main Layout Grid -->
+      <div class="workspace-grid">
+        <!-- Interactive 2D Network Grid -->
+        <div class="canvas-card">
+          <div class="card-header">
+            <i class="fas fa-network-wired" style="color: #a855f7"></i>
+            <span>Network RPC Canvas View</span>
+            <span class="canvas-instructions" id="simStatusText">Status: Running</span>
+          </div>
+          <div class="card-body">
+            <div
+              id="keyboardGuide"
+              style="
+                position: absolute;
+                width: 1px;
+                height: 1px;
+                padding: 0;
+                margin: -1px;
+                overflow: hidden;
+                clip: rect(0, 0, 0, 0);
+                border: 0;
+              "
+            >
+              Interactive Raft consensus canvas. Use Tab key to navigate between elements. Use Enter
+              or Space to toggle active nodes, crash nodes, or partition channels.
+            </div>
+            <canvas
+              id="raftCanvas"
+              class="raft-canvas"
+              role="application"
+              tabindex="0"
+              aria-label="Interactive consensus ring canvas detailing election states, heartbeat pulses, and flying RPC packets."
+              aria-describedby="keyboardGuide"
+            ></canvas>
+          </div>
+        </div>
+
+        <!-- Telemetry Details -->
+        <div class="side-panels">
+          <div class="panel telemetry-panel">
+            <div class="panel-header">
+              <i class="fas fa-chart-bar" style="color: #a855f7"></i>
+              <span>Consensus Telemetry</span>
+            </div>
+            <div id="raftStatusBody" class="panel-body" aria-live="polite">
+              <div class="telemetry-row">
+                <span class="label">Majority Partition Leader:</span>
+                <span id="telLeader" class="value text-success">-</span>
+              </div>
+              <div class="telemetry-row">
+                <span class="label">Term:</span>
+                <span id="telTerm" class="value">0</span>
+              </div>
+              <div class="telemetry-row">
+                <span class="label">Active Connectivity:</span>
+                <span id="telPartitionState" class="value">Fully Connected</span>
+              </div>
+              <div class="telemetry-row">
+                <span class="label">In-Flight RPCs:</span>
+                <span id="telInFlightCount" class="value">0</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Trace Logger -->
+          <div class="panel log-panel">
+            <div class="panel-header">
+              <i class="fas fa-terminal" style="color: #a855f7"></i>
+              <span>Cluster State Logs</span>
+            </div>
+            <div id="raftLogBody" class="panel-body" aria-live="polite">
+              <span class="raft-log-placeholder">Simulation logs will stream here...</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Comparative Logs Panel -->
+      <div class="raft-panel logs-panel-card">
+        <div class="panel-header">
+          <i class="fas fa-list-ol" style="color: #a855f7"></i>
+          <span>Vertical Node Log Entry Inspector</span>
+        </div>
+        <div class="panel-body">
+          <div class="logs-grid" id="nodeLogsGrid">
+            <!-- Driven via Javascript -->
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <div id="footer-placeholder"></div>
+
+    <script src="raft-partition-simulator.js"></script>
+    <script src="/auth.js"></script>
+    <script src="/bootstrap-legacy.js"></script>
+    <script src="/script.js"></script>
+    <script type="module" src="/dist/legacy-bundle.mjs"></script>
+    <script src="/theme.js"></script>
+    <script>
+      loadPartial('navbar-placeholder', '/partials/navbar.html');
+      loadPartial('footer-placeholder', '/partials/footer.html');
+    </script>
+  </body>
+</html>

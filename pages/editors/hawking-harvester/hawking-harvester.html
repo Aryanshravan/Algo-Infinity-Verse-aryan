@@ -1,0 +1,319 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Hawking Radiation Harvester | Algo Infinity Verse</title>
+    <link rel="stylesheet" href="/styles.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <!-- Monaco Editor -->
+    <script src="https://unpkg.com/monaco-editor@0.36.1/min/vs/loader.js"></script>
+    <style>
+      body { margin: 0; overflow: hidden; background: #000; font-family: 'Poppins', sans-serif; color: #fff; }
+      .app-container { display: flex; height: 100vh; }
+      
+      .sidebar { width: 450px; background: rgba(15, 23, 42, 0.95); border-right: 1px solid #8b5cf6; display: flex; flex-direction: column; z-index: 10; }
+      .header { padding: 20px; border-bottom: 1px solid #334155; }
+      .header h2 { margin: 0; color: #8b5cf6; font-family: 'Orbitron', sans-serif; font-size: 1.2rem; }
+      .header p { margin: 5px 0 0 0; font-size: 0.8rem; color: #94a3b8; }
+      
+      #editor-container { flex: 1; min-height: 300px; }
+      
+      .controls { padding: 20px; border-top: 1px solid #334155; background: rgba(0,0,0,0.5); }
+      .btn { background: linear-gradient(90deg, #7c3aed, #6d28d9); color: #fff; border: none; padding: 10px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; transition: 0.3s; }
+      .btn:hover { background: #8b5cf6; transform: translateY(-2px); box-shadow: 0 0 15px rgba(139, 92, 246, 0.5); }
+      
+      .sim-container { flex: 1; position: relative; background: #020617; overflow: hidden; }
+      canvas { width: 100%; height: 100%; display: block; mix-blend-mode: screen; }
+      
+      .hud { position: absolute; top: 20px; left: 20px; background: rgba(0,0,0,0.8); padding: 15px; border-radius: 8px; border: 1px solid #8b5cf6; width: 300px; z-index: 10; pointer-events: none; }
+      .hud h3 { margin: 0 0 10px 0; color: #8b5cf6; font-size: 1rem; font-family: 'Orbitron', sans-serif; }
+      .metric { display: flex; justify-content: space-between; font-size: 0.8rem; color: #cbd5e1; margin-bottom: 5px; }
+      .val { font-weight: bold; font-family: monospace; }
+      .val-mass { color: #f43f5e; }
+      .val-power { color: #38bdf8; }
+    </style>
+  </head>
+  <body>
+    
+    <div class="app-container">
+      <div class="sidebar">
+        <div class="header">
+          <h2><i class="fas fa-dot-circle"></i> Project Event Horizon</h2>
+          <p>Micro-Singularity Containment</p>
+        </div>
+        
+        <div id="editor-container"></div>
+        
+        <div class="controls">
+          <button class="btn" onclick="initiateContainment()"><i class="fas fa-radiation"></i> Ignite Micro-Singularity</button>
+        </div>
+      </div>
+      
+      <div class="sim-container">
+        
+        <canvas id="quantumCanvas" style="position: relative; z-index: 1;"></canvas>
+        
+        <div class="hud">
+          <h3>Containment Telemetry</h3>
+          <div class="metric"><span>Singularity Mass:</span> <span class="val val-mass" id="massVal">0 kg</span></div>
+          <div class="metric"><span>Energy Yield:</span> <span class="val val-power" id="powerVal">0 TW</span></div>
+          <div class="metric"><span>Temperature:</span> <span class="val" id="tempVal" style="color:#facc15">0 K</span></div>
+          <div class="metric" style="margin-top: 10px; border-top: 1px solid #334155; padding-top: 5px;">
+            <span>Facility State:</span> <span class="val" id="statusVal" style="color:#94a3b8">OFFLINE</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      let editor;
+      require.config({ paths: { 'vs': 'https://unpkg.com/monaco-editor@0.36.1/min/vs' }});
+      require(['vs/editor/editor.main'], function() {
+        editor = monaco.editor.create(document.getElementById('editor-container'), {
+          value: `// Micro-Black Hole Containment Algorithm
+// A micro-black hole evaporates via Hawking Radiation.
+// Smaller mass = hotter = evaporates faster.
+// You must feed it matter to keep it stable, and extract the radiation for power.
+// Warning: If mass hits 0, it explodes with the force of a trillion nukes.
+// If you feed it too much, it grows uncontrollably and eats the facility.
+
+function balanceSingularity(currentMass, currentTemp) {
+    // Return { feedRate: float (0.0 to 10.0), extractionRate: float (0.0 to 1.0) }
+    // feedRate injects matter (kg/s) to grow the mass.
+    // extractionRate (0-1) determines how much of the radiation you capture for power.
+    
+    // Naive logic: Extract max power, feed it nothing!
+    // Result: The black hole evaporates instantly and vaporizes the planet.
+    
+    return {
+        feedRate: 0.0,
+        extractionRate: 1.0
+    };
+}`,
+          language: 'javascript',
+          theme: 'vs-dark',
+          minimap: { enabled: false },
+          automaticLayout: true
+        });
+      });
+
+      const canvas = document.getElementById('quantumCanvas');
+      const ctx = canvas.getContext('2d');
+      
+      let isSimulating = false;
+      let time = 0;
+      
+      let bhMass = 0;
+      let bhTemp = 0;
+      let powerGenerated = 0;
+      
+      let particles = [];
+      let matterStream = 0;
+      
+      function resize() { canvas.width = canvas.clientWidth; canvas.height = canvas.clientHeight; }
+      window.addEventListener('resize', resize);
+      resize();
+
+      function animate() {
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+          let cx = canvas.width / 2;
+          let cy = canvas.height / 2;
+
+          if (isSimulating) {
+              time += 1;
+              
+              let feedRate = 0;
+              let extractRate = 0;
+              
+              try {
+                  eval(editor.getValue());
+                  let res = balanceSingularity(bhMass, bhTemp);
+                  if (res) {
+                      feedRate = Math.max(0, Math.min(10.0, res.feedRate || 0));
+                      extractRate = Math.max(0, Math.min(1.0, res.extractionRate || 0));
+                  }
+              } catch(e) {}
+              
+              matterStream = feedRate;
+              
+              // Physics Evaluation
+              // Hawking Radiation: evaporation rate is inversely proportional to mass squared (simplified)
+              let evaporationRate = 100 / (bhMass * bhMass);
+              if (bhMass < 1) evaporationRate = 100; // Cap to prevent Infinity math issues
+              
+              // Mass changes based on feed vs evaporation
+              bhMass += feedRate * 0.1;
+              bhMass -= evaporationRate * 0.1;
+              
+              // Temperature is inversely proportional to mass
+              bhTemp = 1000000 / Math.max(0.1, bhMass);
+              
+              // Power generation
+              let capturedPower = (evaporationRate * extractRate) * 10;
+              powerGenerated += capturedPower;
+              
+              // Heat load on facility
+              let escapedHeat = (evaporationRate * (1.0 - extractRate));
+              
+              // Particles for visual
+              for(let i=0; i<evaporationRate*2; i++) {
+                  let angle = Math.random() * Math.PI*2;
+                  particles.push({
+                      x: cx, y: cy,
+                      vx: Math.cos(angle)*(5 + Math.random()*10),
+                      vy: Math.sin(angle)*(5 + Math.random()*10),
+                      life: 1.0,
+                      captured: Math.random() < extractRate
+                  });
+              }
+              
+              // End States
+              if (bhMass <= 0) {
+                  isSimulating = false;
+                  bhMass = 0;
+                  document.getElementById('statusVal').innerText = "EVAPORATION DETONATION (FACILITY LOST)";
+                  document.getElementById('statusVal').style.color = "#ef4444";
+                  
+                  // Big explosion visual
+                  for(let i=0; i<500; i++) {
+                      let angle = Math.random() * Math.PI*2;
+                      particles.push({
+                          x: cx, y: cy,
+                          vx: Math.cos(angle)*30*Math.random(),
+                          vy: Math.sin(angle)*30*Math.random(),
+                          life: 2.0, captured: false
+                      });
+                  }
+              } else if (bhMass > 50) {
+                  isSimulating = false;
+                  document.getElementById('statusVal').innerText = "CONTAINMENT BREACH (MACRO-SINGULARITY)";
+                  document.getElementById('statusVal').style.color = "#ef4444";
+              } else if (time > 1000 && powerGenerated > 10000 && bhMass > 5 && bhMass < 20) {
+                  isSimulating = false;
+                  document.getElementById('statusVal').innerText = "GRID FULLY POWERED (STABLE)";
+                  document.getElementById('statusVal').style.color = "#10b981";
+              } else {
+                  if (bhMass < 2) {
+                      document.getElementById('statusVal').innerText = "WARNING: CRITICAL EVAPORATION";
+                      document.getElementById('statusVal').style.color = "#ef4444";
+                  } else if (bhMass > 30) {
+                      document.getElementById('statusVal').innerText = "WARNING: MASS EXPANDING";
+                      document.getElementById('statusVal').style.color = "#f97316";
+                  } else {
+                      document.getElementById('statusVal').innerText = "HARVESTING RADIATION...";
+                      document.getElementById('statusVal').style.color = "#8b5cf6";
+                  }
+              }
+              
+              // HUD
+              let mEl = document.getElementById('massVal');
+              mEl.innerText = bhMass.toFixed(2) + " kg";
+              if (bhMass < 2 || bhMass > 30) mEl.style.color = "#ef4444";
+              else mEl.style.color = "#10b981";
+              
+              document.getElementById('powerVal').innerText = Math.floor(powerGenerated) + " TW";
+              document.getElementById('tempVal').innerText = Math.floor(bhTemp) + " K";
+          }
+          
+          // Draw Containment Field
+          ctx.beginPath();
+          ctx.arc(cx, cy, 150, 0, Math.PI*2);
+          ctx.strokeStyle = 'rgba(139, 92, 246, 0.2)';
+          ctx.lineWidth = 2;
+          ctx.stroke();
+          
+          ctx.beginPath();
+          ctx.arc(cx, cy, 150 + Math.sin(time*0.1)*5, 0, Math.PI*2);
+          ctx.strokeStyle = 'rgba(139, 92, 246, 0.5)';
+          ctx.setLineDash([10, 20]);
+          ctx.stroke();
+          ctx.setLineDash([]);
+          
+          // Draw Matter Injector Stream
+          if (matterStream > 0 && bhMass > 0) {
+              ctx.beginPath();
+              ctx.moveTo(cx, 0);
+              ctx.lineTo(cx, cy);
+              ctx.strokeStyle = \`rgba(250, 204, 21, \${matterStream/10})\`;
+              ctx.lineWidth = matterStream;
+              ctx.shadowBlur = 15;
+              ctx.shadowColor = '#facc15';
+              ctx.stroke();
+              ctx.shadowBlur = 0;
+          }
+          
+          // Draw Particles (Hawking Radiation)
+          for(let i=particles.length-1; i>=0; i--) {
+              let p = particles[i];
+              p.x += p.vx;
+              p.y += p.vy;
+              p.life -= 0.02;
+              
+              if(p.life <= 0) {
+                  particles.splice(i, 1);
+                  continue;
+              }
+              
+              ctx.beginPath();
+              ctx.arc(p.x, p.y, 2, 0, Math.PI*2);
+              if (p.captured) {
+                  // Captured by containment field
+                  ctx.fillStyle = \`rgba(56, 189, 248, \${p.life})\`;
+                  if (Math.sqrt(Math.pow(p.x-cx,2) + Math.pow(p.y-cy,2)) > 150) {
+                      p.life = 0; // Hit the wall, absorbed
+                  }
+              } else {
+                  // Escaped heat
+                  ctx.fillStyle = \`rgba(239, 68, 68, \${p.life})\`;
+              }
+              ctx.fill();
+          }
+          
+          // Draw Black Hole
+          if (bhMass > 0) {
+              let radius = Math.max(2, bhMass); // Schwarzschild radius visualization
+              
+              // Accretion glow (blue shifted due to extreme temp)
+              ctx.beginPath();
+              ctx.arc(cx, cy, radius * 3, 0, Math.PI*2);
+              let grad = ctx.createRadialGradient(cx, cy, radius, cx, cy, radius*3);
+              grad.addColorStop(0, '#fff');
+              grad.addColorStop(0.2, '#38bdf8');
+              grad.addColorStop(1, 'transparent');
+              ctx.fillStyle = grad;
+              ctx.fill();
+              
+              // The Singularity Event Horizon
+              ctx.beginPath();
+              ctx.arc(cx, cy, radius, 0, Math.PI*2);
+              ctx.fillStyle = '#000';
+              ctx.fill();
+              
+              // White rim
+              ctx.strokeStyle = '#fff';
+              ctx.lineWidth = 1;
+              ctx.stroke();
+          }
+
+          requestAnimationFrame(animate);
+      }
+      
+      animate();
+
+      function initiateContainment() {
+          if(isSimulating) return;
+          isSimulating = true;
+          time = 0;
+          bhMass = 10.0; // Start with stable mass
+          bhTemp = 100000;
+          powerGenerated = 0;
+          particles = [];
+          
+          document.getElementById('statusVal').innerText = "SINGULARITY IGNITED...";
+          document.getElementById('statusVal').style.color = "#8b5cf6";
+      }
+    </script>
+  </body>
+</html>

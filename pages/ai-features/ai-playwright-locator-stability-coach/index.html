@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Playwright Locator Stability Coach | Algo Infinity Verse</title>
+  <meta name="description" content="Paste Playwright/CSS locators, detect brittle patterns, rewrite to getByRole/getByLabel/getByTestId, score stability, and download a locator audit report." />
+  <link rel="stylesheet" href="/styles.css" />
+  <link rel="stylesheet" href="style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Poppins:wght@300;400;500;600;700&family=Fira+Code:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <script>
+    (function () {
+      try {
+        var storedTheme = localStorage.getItem('theme');
+        var prefersLight = window.matchMedia('(prefers-color-scheme: light)').matches;
+        var theme = storedTheme || (prefersLight ? 'light' : 'dark');
+        if (theme === 'light') {
+          document.documentElement.classList.add('light-mode');
+        } else {
+          document.documentElement.classList.remove('light-mode');
+        }
+      } catch (e) {}
+    })();
+  </script>
+</head>
+<body data-page="ai-playwright-locator-stability-coach">
+  <a href="#loc-main" class="loc-skip-link">Skip to main content</a>
+  <button type="button" id="scrollTopBtn" class="scroll-top-btn" aria-label="Scroll to top">
+    <i class="fas fa-arrow-up" aria-hidden="true"></i>
+  </button>
+
+  <div id="navbar-placeholder"></div>
+
+  <header class="loc-hero">
+    <div class="loc-hero-badge">
+      <i class="fas fa-crosshairs" aria-hidden="true"></i>
+      Test Stability Coach
+    </div>
+    <h1>
+      AI Playwright Locator
+      <span class="loc-hero-accent">Stability Coach</span>
+    </h1>
+    <p>
+      Paste Playwright or CSS locators, detect brittle patterns, rewrite toward accessible
+      <code>getByRole</code> / <code>getByLabel</code> / <code>getByTestId</code> APIs, and export an audit — client-side only.
+    </p>
+    <div class="loc-hero-stats" aria-live="polite">
+      <div class="loc-stat">
+        <span class="loc-stat-val" id="statScore">—</span>
+        <span class="loc-stat-label">Stability</span>
+      </div>
+      <div class="loc-stat">
+        <span class="loc-stat-val" id="statBrittle">0</span>
+        <span class="loc-stat-label">Brittle hits</span>
+      </div>
+      <div class="loc-stat">
+        <span class="loc-stat-val" id="statRewrites">0</span>
+        <span class="loc-stat-label">Rewrites</span>
+      </div>
+      <div class="loc-stat">
+        <span class="loc-stat-val" id="statGrade">—</span>
+        <span class="loc-stat-label">Grade</span>
+      </div>
+    </div>
+  </header>
+
+  <main id="loc-main" class="loc-main">
+    <div class="container">
+      <div class="loc-workspace">
+        <section class="loc-panel" aria-labelledby="loc-input-title">
+          <div class="loc-panel-header">
+            <div class="loc-panel-title">
+              <i class="fas fa-code loc-panel-icon" aria-hidden="true"></i>
+              <h2 id="loc-input-title">Playwright / CSS locators</h2>
+            </div>
+          </div>
+
+          <label class="loc-label" for="locatorInput">Paste locators or test snippets</label>
+          <textarea
+            id="locatorInput"
+            class="loc-textarea"
+            rows="16"
+            spellcheck="false"
+            placeholder="// e.g. page.locator('.btn-primary:nth-child(3)')…"
+            aria-describedby="locatorHint"
+          ></textarea>
+          <p id="locatorHint" class="loc-hint">
+            Supports <code>page.locator</code>, CSS, XPath, and mixed Playwright snippets. Load a flake-prone demo to try the coach.
+          </p>
+
+          <div class="loc-controls">
+            <button type="button" id="loadDemoBtn" class="btn btn-secondary">
+              <i class="fas fa-flask" aria-hidden="true"></i> Load flake demos
+            </button>
+            <button type="button" id="analyzeBtn" class="btn btn-primary">
+              <i class="fas fa-magnifying-glass" aria-hidden="true"></i> Audit locators
+            </button>
+            <button type="button" id="clearBtn" class="btn btn-outline">
+              <i class="fas fa-eraser" aria-hidden="true"></i> Clear
+            </button>
+            <button type="button" id="exportBtn" class="btn btn-outline" disabled>
+              <i class="fas fa-download" aria-hidden="true"></i> Download audit report
+            </button>
+          </div>
+          <div id="locStatus" class="loc-status" role="status" aria-live="polite"></div>
+        </section>
+
+        <section class="loc-panel loc-report-panel" aria-labelledby="loc-report-title">
+          <div class="loc-panel-header">
+            <div class="loc-panel-title">
+              <i class="fas fa-clipboard-check loc-panel-icon" aria-hidden="true"></i>
+              <h2 id="loc-report-title">Brittle patterns &amp; score</h2>
+            </div>
+          </div>
+
+          <div id="locEmpty" class="loc-empty">
+            <i class="fas fa-crosshairs" aria-hidden="true"></i>
+            <p>No audit yet. Load flake demos or paste locators, then run the coach.</p>
+          </div>
+
+          <div id="locResults" hidden>
+            <div class="loc-score-card">
+              <div>
+                <h3 id="scoreHeading">Stability score</h3>
+                <p id="scoreBlurb" class="loc-muted"></p>
+              </div>
+              <div class="loc-score-ring" id="scoreRing" aria-hidden="true">
+                <span id="scoreVal">0</span>
+              </div>
+            </div>
+
+            <section class="loc-section" aria-labelledby="findingsHeading">
+              <h3 id="findingsHeading"><i class="fas fa-bug" aria-hidden="true"></i> Brittle locator findings</h3>
+              <ul id="findingList" class="loc-findings"></ul>
+            </section>
+
+            <section class="loc-section" aria-labelledby="rationaleHeading">
+              <h3 id="rationaleHeading"><i class="fas fa-lightbulb" aria-hidden="true"></i> Score rationale</h3>
+              <div id="rationaleOut" class="loc-rationale"></div>
+            </section>
+          </div>
+        </section>
+      </div>
+
+      <div class="loc-diff-grid" id="rewritePanel" hidden>
+        <section class="loc-panel" aria-labelledby="loc-before-title">
+          <div class="loc-panel-header">
+            <div class="loc-panel-title">
+              <i class="fas fa-file-code loc-panel-icon" aria-hidden="true"></i>
+              <h2 id="loc-before-title">Before (as pasted)</h2>
+            </div>
+          </div>
+          <pre id="beforeOut" class="loc-code-panel" tabindex="0"><code>Run an audit to capture the original snippet.</code></pre>
+        </section>
+        <section class="loc-panel" aria-labelledby="loc-after-title">
+          <div class="loc-panel-header">
+            <div class="loc-panel-title">
+              <i class="fas fa-wand-magic-sparkles loc-panel-icon" aria-hidden="true"></i>
+              <h2 id="loc-after-title">After (a11y-oriented rewrites)</h2>
+            </div>
+          </div>
+          <pre id="afterOut" class="loc-code-panel loc-code-after" tabindex="0"><code>Stable getByRole / getByLabel / getByTestId rewrites appear here.</code></pre>
+        </section>
+      </div>
+    </div>
+  </main>
+
+  <div id="footer-placeholder"></div>
+
+  <script src="/auth.js"></script>
+  <script src="/bootstrap-legacy.js"></script>
+  <script src="/script.js"></script>
+  <script type="module" src="/dist/legacy-bundle.mjs"></script>
+  <script src="/theme.js"></script>
+  <script src="script.js"></script>
+  <script>
+    if (typeof loadPartial === 'function') {
+      loadPartial('navbar-placeholder', '/partials/navbar.html');
+      loadPartial('footer-placeholder', '/partials/footer.html');
+    }
+  </script>
+</body>
+</html>

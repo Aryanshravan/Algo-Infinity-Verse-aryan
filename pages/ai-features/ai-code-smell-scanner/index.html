@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Code Smell Scanner | Algo Infinity Verse</title>
+  <meta name="description" content="Scan JavaScript/TypeScript for code smells, complexity scores, and AI-style refactor patches — client-side with Acorn AST or heuristic fallback." />
+  <link rel="stylesheet" href="/styles.css" />
+  <link rel="stylesheet" href="style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Poppins:wght@300;400;500;600;700&family=Fira+Code:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <script src="https://cdn.jsdelivr.net/npm/acorn@8.14.0/dist/acorn.min.js"></script>
+  <script>
+    (function () {
+      try {
+        var storedTheme = localStorage.getItem('theme');
+        var prefersLight = window.matchMedia('(prefers-color-scheme: light)').matches;
+        var theme = storedTheme || (prefersLight ? 'light' : 'dark');
+        if (theme === 'light') {
+          document.documentElement.classList.add('light-mode');
+        } else {
+          document.documentElement.classList.remove('light-mode');
+        }
+      } catch (e) {}
+    })();
+  </script>
+</head>
+<body data-page="ai-code-smell-scanner">
+  <a href="#smell-main" class="smell-skip-link">Skip to main content</a>
+  <button type="button" id="scrollTopBtn" class="scroll-top-btn" aria-label="Scroll to top">
+    <i class="fas fa-arrow-up" aria-hidden="true"></i>
+  </button>
+
+  <div id="navbar-placeholder"></div>
+
+  <header class="smell-hero">
+    <div class="smell-hero-badge">
+      <i class="fas fa-stethoscope" aria-hidden="true"></i>
+      Static Analysis Lab
+    </div>
+    <h1>
+      AI Code Smell
+      <span class="smell-hero-accent">Scanner</span>
+    </h1>
+    <p>
+      Paste JS/TS, detect classic smells and complexity, then get AI-style
+      Extract Method / Parameter Object refactor suggestions — fully client-side.
+    </p>
+    <div class="smell-hero-stats" aria-live="polite">
+      <div class="smell-stat">
+        <span class="smell-stat-val" id="statSmells">0</span>
+        <span class="smell-stat-label">Smells</span>
+      </div>
+      <div class="smell-stat">
+        <span class="smell-stat-val" id="statComplexity">—</span>
+        <span class="smell-stat-label">Complexity</span>
+      </div>
+      <div class="smell-stat">
+        <span class="smell-stat-val" id="statSeverity">—</span>
+        <span class="smell-stat-label">Severity</span>
+      </div>
+    </div>
+  </header>
+
+  <main id="smell-main" class="smell-main">
+    <div class="container">
+      <div class="smell-workspace">
+        <section class="smell-panel" aria-labelledby="smell-input-title">
+          <div class="smell-panel-header">
+            <div class="smell-panel-title">
+              <i class="fas fa-code smell-panel-icon" aria-hidden="true"></i>
+              <h2 id="smell-input-title">Source input</h2>
+            </div>
+            <span class="smell-engine-badge" id="smellEngineBadge" role="status">Engine: —</span>
+          </div>
+
+          <label class="smell-label" for="smellCode">JavaScript / TypeScript</label>
+          <textarea
+            id="smellCode"
+            class="smell-textarea"
+            rows="16"
+            spellcheck="false"
+            placeholder="// Paste JS/TS here…"
+            aria-describedby="smellCodeHint"
+          ></textarea>
+          <p id="smellCodeHint" class="smell-hint">
+            Prefer Acorn AST when the CDN loads; otherwise a regex / heuristic AST-lite path is used.
+          </p>
+
+          <div class="smell-controls">
+            <button type="button" id="loadDemoBtn" class="btn btn-secondary">
+              <i class="fas fa-flask" aria-hidden="true"></i> Load demo smell-heavy code
+            </button>
+            <button type="button" id="scanBtn" class="btn btn-primary">
+              <i class="fas fa-magnifying-glass" aria-hidden="true"></i> Scan smells
+            </button>
+            <button type="button" id="clearBtn" class="btn btn-outline">
+              <i class="fas fa-eraser" aria-hidden="true"></i> Clear
+            </button>
+            <button type="button" id="exportChecklistBtn" class="btn btn-outline" disabled>
+              <i class="fas fa-download" aria-hidden="true"></i> Export checklist
+            </button>
+          </div>
+          <div id="smellStatus" class="smell-status" role="status" aria-live="polite"></div>
+        </section>
+
+        <section class="smell-panel smell-report-panel" aria-labelledby="smell-report-title">
+          <div class="smell-panel-header">
+            <div class="smell-panel-title">
+              <i class="fas fa-bug smell-panel-icon" aria-hidden="true"></i>
+              <h2 id="smell-report-title">Smell report</h2>
+            </div>
+          </div>
+
+          <div id="smellEmpty" class="smell-empty">
+            <i class="fas fa-stethoscope" aria-hidden="true"></i>
+            <p>No scan yet. Load demo code or paste JS/TS, then scan for smells.</p>
+          </div>
+
+          <div id="smellComplexityCard" class="smell-complexity-card" hidden>
+            <div class="smell-complexity-item">
+              <span class="smell-complexity-label">Cyclomatic</span>
+              <span class="smell-complexity-val" id="cycloVal">—</span>
+            </div>
+            <div class="smell-complexity-item">
+              <span class="smell-complexity-label">Cognitive</span>
+              <span class="smell-complexity-val" id="cogVal">—</span>
+            </div>
+            <div class="smell-complexity-item">
+              <span class="smell-complexity-label">Parser</span>
+              <span class="smell-complexity-val" id="parserVal">—</span>
+            </div>
+          </div>
+
+          <ul id="smellList" class="smell-findings" hidden></ul>
+        </section>
+      </div>
+
+      <div class="smell-diff-grid">
+        <section class="smell-panel" aria-labelledby="smell-before-title">
+          <div class="smell-panel-header">
+            <div class="smell-panel-title">
+              <i class="fas fa-file-code smell-panel-icon" aria-hidden="true"></i>
+              <h2 id="smell-before-title">Before</h2>
+            </div>
+          </div>
+          <pre id="smellBefore" class="smell-code-panel" tabindex="0"><code>Run a scan to see the original snippet.</code></pre>
+        </section>
+        <section class="smell-panel" aria-labelledby="smell-after-title">
+          <div class="smell-panel-header">
+            <div class="smell-panel-title">
+              <i class="fas fa-wand-magic-sparkles smell-panel-icon" aria-hidden="true"></i>
+              <h2 id="smell-after-title">After (suggested)</h2>
+            </div>
+          </div>
+          <pre id="smellAfter" class="smell-code-panel smell-code-after" tabindex="0"><code>Refactor suggestions appear here.</code></pre>
+        </section>
+      </div>
+
+      <section class="smell-panel" aria-labelledby="smell-patches-title">
+        <div class="smell-panel-header">
+          <div class="smell-panel-title">
+            <i class="fas fa-robot smell-panel-icon" aria-hidden="true"></i>
+            <h2 id="smell-patches-title">AI-style refactor patches</h2>
+          </div>
+        </div>
+        <ul id="smellPatches" class="smell-patches" aria-live="polite">
+          <li class="smell-empty-li">Patches appear after a successful scan.</li>
+        </ul>
+      </section>
+    </div>
+  </main>
+
+  <div id="footer-placeholder"></div>
+
+  <script src="/auth.js"></script>
+  <script src="/bootstrap-legacy.js"></script>
+  <script src="/script.js"></script>
+  <script type="module" src="/dist/legacy-bundle.mjs"></script>
+  <script src="/theme.js"></script>
+  <script src="script.js"></script>
+  <script>
+    if (typeof loadPartial === 'function') {
+      loadPartial('navbar-placeholder', '/partials/navbar.html');
+      loadPartial('footer-placeholder', '/partials/footer.html');
+    }
+  </script>
+</body>
+</html>

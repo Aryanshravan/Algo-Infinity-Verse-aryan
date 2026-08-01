@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>WebAssembly Bytecode & Stack VM Debugger — Algo Infinity Verse</title>
+  <meta name="description" content="Debug WebAssembly Text Format (.wat) instructions, step through stack VM evaluation, inspect call stack frames, and view linear memory hex dumps." />
+  <link rel="stylesheet" href="/styles.css" />
+  <link rel="stylesheet" href="style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Poppins:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <script>
+    (function () {
+      try {
+        var storedTheme = localStorage.getItem('theme');
+        var prefersLight = window.matchMedia('(prefers-color-scheme: light)').matches;
+        var theme = storedTheme || (prefersLight ? 'light' : 'dark');
+        if (theme === 'light') {
+          document.documentElement.classList.add('light-mode');
+        } else {
+          document.documentElement.classList.remove('light-mode');
+        }
+      } catch (e) {}
+    })();
+  </script>
+</head>
+<body data-page="wasm-debugger">
+  <div id="navbar-placeholder"></div>
+
+  <header class="tool-hero">
+    <div class="tool-hero-badge">
+      <i class="fas fa-cubes" aria-hidden="true"></i> WebAssembly & Virtual Machines
+    </div>
+    <h1>WebAssembly Bytecode <span class="accent-text">& Stack VM Debugger</span></h1>
+    <p>
+      Write WASM Text Format (.wat) bytecode, step through operand stack push/pop dynamics, inspect function call frames, and view 64KB linear memory in real-time Hex/ASCII.
+    </p>
+  </header>
+
+  <main class="tool-container">
+    <!-- Toolbar Controls -->
+    <section class="toolbar-card">
+      <div class="toolbar-group">
+        <label for="wasmPresetSelect"><i class="fas fa-file-code"></i> WASM Preset:</label>
+        <select id="wasmPresetSelect" class="tool-select">
+          <option value="factorial">Factorial (Recursive i32.mul)</option>
+          <option value="fibonacci">Fibonacci (Iterative Stack Ops)</option>
+          <option value="memory_copy">Linear Memory Buffer Write</option>
+        </select>
+      </div>
+
+      <div class="toolbar-actions">
+        <button id="btnWasmStepForward" class="tool-btn primary-btn"><i class="fas fa-step-forward"></i> Step Forward</button>
+        <button id="btnWasmStepBack" class="tool-btn secondary-btn"><i class="fas fa-step-backward"></i> Step Back</button>
+        <button id="btnWasmReset" class="tool-btn danger-btn"><i class="fas fa-rotate-left"></i> Reset VM</button>
+      </div>
+    </section>
+
+    <!-- Main Grid Workspace -->
+    <div class="workspace-grid">
+      <!-- WAT Code Editor -->
+      <section class="panel-card editor-panel">
+        <div class="panel-header">
+          <h3><i class="fas fa-code"></i> WebAssembly Text Format (.wat)</h3>
+        </div>
+        <textarea id="watCodeEditor" spellcheck="false" placeholder="Write WASM bytecode..."></textarea>
+      </section>
+
+      <!-- Visual Evaluation Operand Stack -->
+      <section class="panel-card stack-panel">
+        <div class="panel-header">
+          <h3><i class="fas fa-layer-group"></i> Operand Evaluation Stack</h3>
+          <span class="badge" id="stackDepthBadge">Depth: 0</span>
+        </div>
+        <div class="operand-stack-container" id="operandStackContainer">
+          <!-- Stack items rendered vertically -->
+        </div>
+      </section>
+    </div>
+
+    <!-- Bottom Section: Call Stack & Linear Memory -->
+    <div class="secondary-grid">
+      <!-- Call Frame & Local Variables -->
+      <section class="panel-card frame-panel">
+        <div class="panel-header">
+          <h3><i class="fas fa-folder-tree"></i> Call Stack Frame & Local Registers</h3>
+        </div>
+        <div class="locals-grid" id="localsGrid">
+          <div class="local-card"><span>local $n (i32)</span> <strong>5</strong></div>
+          <div class="local-card"><span>local $res (i32)</span> <strong>120</strong></div>
+        </div>
+      </section>
+
+      <!-- 64KB Linear Memory Inspector -->
+      <section class="panel-card memory-panel">
+        <div class="panel-header">
+          <h3><i class="fas fa-memory"></i> Linear Memory Inspector (Hex / ASCII)</h3>
+        </div>
+        <div class="hex-memory-grid" id="hexMemoryGrid">
+          <!-- Hex dump memory view -->
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <script src="/modules/navbar.js" type="module"></script>
+  <script src="script.js"></script>
+</body>
+</html>

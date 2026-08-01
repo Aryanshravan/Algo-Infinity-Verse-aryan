@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI DSA Hallucination Detector | Algo Infinity Verse</title>
+  <meta name="description" content="Paste AI-generated DSA explanations, extract claims, fact-check complexities and invariants, score hallucination risk, and export a verification report." />
+  <link rel="stylesheet" href="/styles.css" />
+  <link rel="stylesheet" href="style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Poppins:wght@300;400;500;600;700&family=Fira+Code:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <script>
+    (function () {
+      try {
+        var storedTheme = localStorage.getItem('theme');
+        var prefersLight = window.matchMedia('(prefers-color-scheme: light)').matches;
+        var theme = storedTheme || (prefersLight ? 'light' : 'dark');
+        if (theme === 'light') {
+          document.documentElement.classList.add('light-mode');
+        } else {
+          document.documentElement.classList.remove('light-mode');
+        }
+      } catch (e) {}
+    })();
+  </script>
+</head>
+<body data-page="ai-dsa-hallucination-detector">
+  <a href="#hall-main" class="hall-skip-link">Skip to main content</a>
+  <button type="button" id="scrollTopBtn" class="scroll-top-btn" aria-label="Scroll to top">
+    <i class="fas fa-arrow-up" aria-hidden="true"></i>
+  </button>
+
+  <div id="navbar-placeholder"></div>
+
+  <header class="hall-hero">
+    <div class="hall-hero-badge">
+      <i class="fas fa-brain" aria-hidden="true"></i>
+      AI Verification Lab
+    </div>
+    <h1>
+      AI DSA
+      <span class="hall-hero-accent">Hallucination Detector</span>
+    </h1>
+    <p>
+      Paste an AI explanation of algorithms or data structures, extract claims,
+      fact-check common complexities and invariants, then export a verification report.
+    </p>
+    <div class="hall-hero-stats" aria-live="polite">
+      <div class="hall-stat">
+        <span class="hall-stat-val" id="statClaims">0</span>
+        <span class="hall-stat-label">Claims</span>
+      </div>
+      <div class="hall-stat">
+        <span class="hall-stat-val" id="statFlags">0</span>
+        <span class="hall-stat-label">Flags</span>
+      </div>
+      <div class="hall-stat">
+        <span class="hall-stat-val" id="statRisk">—</span>
+        <span class="hall-stat-label">Risk score</span>
+      </div>
+      <div class="hall-stat">
+        <span class="hall-stat-val" id="statTopic">—</span>
+        <span class="hall-stat-label">Topic</span>
+      </div>
+    </div>
+  </header>
+
+  <main id="hall-main" class="hall-main">
+    <div class="container">
+      <div class="hall-workspace">
+        <section class="hall-panel" aria-labelledby="hall-input-title">
+          <div class="hall-panel-header">
+            <div class="hall-panel-title">
+              <i class="fas fa-paste hall-panel-icon" aria-hidden="true"></i>
+              <h2 id="hall-input-title">AI explanation input</h2>
+            </div>
+          </div>
+
+          <label class="hall-label" for="topicSelect">Topic preset</label>
+          <select id="topicSelect" class="hall-select" aria-describedby="topicHint">
+            <option value="sorting">Sorting</option>
+            <option value="graphs">Graphs</option>
+            <option value="dp">Dynamic programming</option>
+            <option value="trees">Trees</option>
+            <option value="general">General / auto-detect</option>
+          </select>
+          <p id="topicHint" class="hall-hint">Load a demo with planted mistakes, or paste your own AI text.</p>
+
+          <label class="hall-label" for="hallText">Explanation text</label>
+          <textarea
+            id="hallText"
+            class="hall-textarea"
+            rows="14"
+            spellcheck="true"
+            placeholder="Paste an AI-generated DSA explanation here…"
+            aria-describedby="hallTextHint"
+          ></textarea>
+          <p id="hallTextHint" class="hall-hint">
+            Client-side ruleset checks complexities, invariants, and common misconceptions — not a substitute for textbooks.
+          </p>
+
+          <div class="hall-controls">
+            <button type="button" id="loadDemoBtn" class="btn btn-secondary">
+              <i class="fas fa-flask" aria-hidden="true"></i> Load demo (wrong)
+            </button>
+            <button type="button" id="analyzeBtn" class="btn btn-primary">
+              <i class="fas fa-magnifying-glass" aria-hidden="true"></i> Analyze claims
+            </button>
+            <button type="button" id="clearBtn" class="btn btn-outline">
+              <i class="fas fa-eraser" aria-hidden="true"></i> Clear
+            </button>
+            <button type="button" id="exportBtn" class="btn btn-outline" disabled>
+              <i class="fas fa-download" aria-hidden="true"></i> Export report
+            </button>
+          </div>
+          <div id="hallStatus" class="hall-status" role="status" aria-live="polite"></div>
+        </section>
+
+        <section class="hall-panel hall-score-panel" aria-labelledby="hall-score-title">
+          <div class="hall-panel-header">
+            <div class="hall-panel-title">
+              <i class="fas fa-gauge-high hall-panel-icon" aria-hidden="true"></i>
+              <h2 id="hall-score-title">Hallucination risk</h2>
+            </div>
+          </div>
+
+          <div class="hall-risk-meter" aria-hidden="true">
+            <div class="hall-risk-fill" id="riskFill"></div>
+          </div>
+          <p class="hall-risk-label" id="riskLabel">Run analysis to score risk.</p>
+
+          <div id="hallEmpty" class="hall-empty">
+            <i class="fas fa-shield-halved" aria-hidden="true"></i>
+            <p>No analysis yet. Load a demo or paste text, then analyze.</p>
+          </div>
+
+          <ul id="claimList" class="hall-claims" hidden aria-live="polite"></ul>
+        </section>
+      </div>
+
+      <div class="hall-split">
+        <section class="hall-panel" aria-labelledby="hall-evidence-title">
+          <div class="hall-panel-header">
+            <div class="hall-panel-title">
+              <i class="fas fa-highlighter hall-panel-icon" aria-hidden="true"></i>
+              <h2 id="hall-evidence-title">Evidence highlights</h2>
+            </div>
+          </div>
+          <div id="evidenceView" class="hall-evidence" tabindex="0">
+            <p class="hall-muted">Flagged spans appear here after analysis.</p>
+          </div>
+        </section>
+
+        <section class="hall-panel" aria-labelledby="hall-rewrite-title">
+          <div class="hall-panel-header">
+            <div class="hall-panel-title">
+              <i class="fas fa-wand-magic-sparkles hall-panel-icon" aria-hidden="true"></i>
+              <h2 id="hall-rewrite-title">Corrected rewrite suggestions</h2>
+            </div>
+          </div>
+          <div id="rewriteView" class="hall-rewrite" tabindex="0">
+            <p class="hall-muted">Suggested corrections appear after flags are found.</p>
+          </div>
+        </section>
+      </div>
+    </div>
+  </main>
+
+  <div id="footer-placeholder"></div>
+
+  <script src="/auth.js"></script>
+  <script src="/bootstrap-legacy.js"></script>
+  <script src="/script.js"></script>
+  <script type="module" src="/dist/legacy-bundle.mjs"></script>
+  <script src="/theme.js"></script>
+  <script src="script.js"></script>
+  <script>
+    if (typeof loadPartial === 'function') {
+      loadPartial('navbar-placeholder', '/partials/navbar.html');
+      loadPartial('footer-placeholder', '/partials/footer.html');
+    }
+  </script>
+</body>
+</html>

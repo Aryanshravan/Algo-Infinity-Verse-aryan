@@ -1,0 +1,297 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>BCI Motor Cortex Decoder | Algo Infinity Verse</title>
+    <link rel="stylesheet" href="/styles.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <!-- Monaco Editor -->
+    <script src="https://unpkg.com/monaco-editor@0.36.1/min/vs/loader.js"></script>
+    <style>
+      body { margin: 0; overflow: hidden; background: #0f172a; font-family: 'Poppins', sans-serif; color: #fff; }
+      .app-container { display: flex; height: 100vh; }
+      
+      .sidebar { width: 500px; background: rgba(2, 6, 23, 0.95); border-right: 1px solid #c026d3; display: flex; flex-direction: column; z-index: 10; }
+      .header { padding: 20px; border-bottom: 1px solid #1e293b; }
+      .header h2 { margin: 0; color: #c026d3; font-family: 'Orbitron', sans-serif; font-size: 1.2rem; }
+      .header p { margin: 5px 0 0 0; font-size: 0.8rem; color: #94a3b8; }
+      
+      #editor-container { flex: 1; min-height: 300px; }
+      
+      .controls { padding: 20px; border-top: 1px solid #1e293b; background: rgba(0,0,0,0.5); }
+      .btn { background: linear-gradient(90deg, #a21caf, #86198f); color: #fff; border: none; padding: 10px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; transition: 0.3s; }
+      .btn:hover { background: #c026d3; transform: translateY(-2px); box-shadow: 0 0 15px rgba(192, 38, 211, 0.5); }
+      
+      .sim-container { flex: 1; position: relative; background: #0f172a; overflow: hidden; display: flex; flex-direction: column; }
+      
+      .panels { display: flex; flex: 1; padding: 20px; gap: 20px; flex-direction: column; }
+      
+      .eeg-panel { height: 150px; background: #000; border: 1px solid #334155; border-radius: 12px; position: relative; overflow: hidden; }
+      .eeg-panel h3 { position: absolute; top: 10px; left: 15px; margin: 0; color: #c026d3; font-family: 'Orbitron', sans-serif; font-size: 0.9rem; z-index: 2; }
+      
+      .arm-panel { flex: 1; background: rgba(2, 6, 23, 0.8); border: 1px solid #c026d3; border-radius: 12px; position: relative; overflow: hidden; display: flex; justify-content: center; align-items: center; }
+      .arm-panel h3 { position: absolute; top: 10px; left: 15px; margin: 0; color: #eab308; font-family: 'Orbitron', sans-serif; font-size: 0.9rem; z-index: 2; }
+      
+      canvas { width: 100%; height: 100%; display: block; }
+      
+      .hud { background: rgba(0,0,0,0.8); padding: 15px; border-top: 1px solid #c026d3; }
+      .metric { display: flex; justify-content: space-between; font-size: 0.8rem; color: #cbd5e1; margin-bottom: 5px; }
+      .val { font-weight: bold; font-family: monospace; }
+      .val-accuracy { color: #10b981; }
+    </style>
+  </head>
+  <body>
+    
+    <div class="app-container">
+      <div class="sidebar">
+        <div class="header">
+          <h2><i class="fas fa-brain"></i> BCI Motor Decoder</h2>
+          <p>Translate EEG noise into robotic intent</p>
+        </div>
+        
+        <div id="editor-container"></div>
+        
+        <div class="controls">
+          <button class="btn" onclick="startBCI()"><i class="fas fa-satellite-dish"></i> Stream EEG Telemetry</button>
+        </div>
+      </div>
+      
+      <div class="sim-container">
+        
+        <div class="panels">
+            <div class="eeg-panel">
+                <h3>Motor Cortex EEG Stream (Channels 1-4)</h3>
+                <canvas id="eegCanvas"></canvas>
+            </div>
+            
+            <div class="arm-panel">
+                <h3>Robotic Prosthetic Visualizer</h3>
+                <!-- Subtle grid background -->
+                <div style="position: absolute; inset:0; background-image: linear-gradient(rgba(192,38,211,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(192,38,211,0.1) 1px, transparent 1px); background-size: 40px 40px; pointer-events: none;"></div>
+                <canvas id="armCanvas" style="position: relative; z-index: 1;"></canvas>
+            </div>
+        </div>
+
+        <div class="hud">
+          <div class="metric"><span>Processing Status:</span> <span class="val" id="statusVal" style="color:#94a3b8">OFFLINE</span></div>
+          <div class="metric"><span>Target Angle vs Actual:</span> <span class="val val-accuracy" id="accVal">0° / 0°</span></div>
+        </div>
+        
+      </div>
+    </div>
+
+    <script>
+      let editor;
+      require.config({ paths: { 'vs': 'https://unpkg.com/monaco-editor@0.36.1/min/vs' }});
+      require(['vs/editor/editor.main'], function() {
+        editor = monaco.editor.create(document.getElementById('editor-container'), {
+          value: `// Deep Learning Tensor Algorithm
+// The user is attempting to move their arm to a specific target angle.
+// Decode the 4-channel EEG signal to extract the intended joint angle (0 to 180).
+
+function decodeMotorIntent(eegChannels) {
+    // eegChannels is an array of 4 floats: [ch1, ch2, ch3, ch4]
+    // These contain a hidden signal buried in Gaussian noise.
+    // Return a float representing the intended joint angle.
+    
+    // Naive decoding (Averages everything, fails to filter noise):
+    let sum = 0;
+    for(let i=0; i<4; i++) {
+        sum += eegChannels[i];
+    }
+    let average = sum / 4;
+    
+    // Convert arbitrary amplitude to an angle (0 to 180)
+    return Math.abs(average * 50) % 180;
+}`,
+          language: 'javascript',
+          theme: 'vs-dark',
+          minimap: { enabled: false },
+          automaticLayout: true
+        });
+      });
+
+      const eegCanvas = document.getElementById('eegCanvas');
+      const eegCtx = eegCanvas.getContext('2d');
+      const armCanvas = document.getElementById('armCanvas');
+      const armCtx = armCanvas.getContext('2d');
+      
+      let isSimulating = false;
+      let time = 0;
+      let eegHistory = [[], [], [], []];
+      let targetIntent = 90; // User wants to move arm to 90 degrees initially
+      let currentArmAngle = 0;
+      let decodedIntent = 0;
+      let intentChangeTimer = 0;
+
+      function resize() { 
+          eegCanvas.width = eegCanvas.clientWidth; 
+          eegCanvas.height = eegCanvas.clientHeight;
+          armCanvas.width = armCanvas.clientWidth; 
+          armCanvas.height = armCanvas.clientHeight;
+      }
+      
+      setTimeout(resize, 100);
+      window.addEventListener('resize', resize);
+
+      function generateEEG() {
+          // Generate 4 channels of noisy data
+          // The true intent is hidden primarily in Channel 2 (Mu rhythm) mixed with a carrier frequency
+          // The other channels are pure noise or eye-blink artifacts
+          
+          let trueSignal = Math.sin(time * 0.1) * (targetIntent / 180); // Carrier wave modulated by target intent
+          
+          let ch1 = (Math.random() - 0.5) * 2; // pure noise
+          let ch2 = trueSignal + (Math.random() - 0.5) * 0.5; // signal + noise
+          let ch3 = (Math.random() - 0.5) * 1.5; // pure noise
+          let ch4 = Math.sin(time) > 0.9 ? 3 : (Math.random() - 0.5) * 0.5; // blink artifact
+          
+          return [ch1, ch2, ch3, ch4];
+      }
+
+      function drawEEG() {
+          eegCtx.fillStyle = 'rgba(0, 0, 0, 0.2)'; // fade effect
+          eegCtx.fillRect(0, 0, eegCanvas.width, eegCanvas.height);
+          
+          let colors = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444'];
+          
+          for(let ch=0; ch<4; ch++) {
+              eegCtx.beginPath();
+              eegCtx.strokeStyle = colors[ch];
+              eegCtx.lineWidth = 1.5;
+              
+              let yOffset = (ch + 1) * (eegCanvas.height / 5);
+              
+              for(let i=0; i<eegHistory[ch].length; i++) {
+                  let x = (i / 100) * eegCanvas.width;
+                  let y = yOffset - (eegHistory[ch][i] * 15);
+                  
+                  if(i === 0) eegCtx.moveTo(x, y);
+                  else eegCtx.lineTo(x, y);
+              }
+              eegCtx.stroke();
+          }
+      }
+
+      function drawArm() {
+          armCtx.clearRect(0, 0, armCanvas.width, armCanvas.height);
+          
+          let cx = armCanvas.width / 2;
+          let cy = armCanvas.height / 2;
+          
+          // Draw target ghost arm
+          armCtx.save();
+          armCtx.translate(cx, cy);
+          armCtx.rotate((targetIntent - 90) * Math.PI / 180);
+          armCtx.fillStyle = 'rgba(255, 255, 255, 0.1)';
+          armCtx.fillRect(-10, 0, 20, 150);
+          armCtx.beginPath();
+          armCtx.arc(0, 150, 15, 0, Math.PI*2);
+          armCtx.fill();
+          armCtx.restore();
+          
+          // Draw actual robotic arm
+          armCtx.save();
+          armCtx.translate(cx, cy);
+          
+          // Base joint
+          armCtx.beginPath();
+          armCtx.arc(0, 0, 25, 0, Math.PI*2);
+          armCtx.fillStyle = '#334155';
+          armCtx.fill();
+          armCtx.strokeStyle = '#c026d3';
+          armCtx.lineWidth = 3;
+          armCtx.stroke();
+          
+          // Arm segment
+          armCtx.rotate((currentArmAngle - 90) * Math.PI / 180);
+          
+          armCtx.fillStyle = '#cbd5e1';
+          armCtx.fillRect(-10, 0, 20, 150);
+          
+          // Cybernetic details
+          armCtx.strokeStyle = '#334155';
+          armCtx.beginPath();
+          armCtx.moveTo(-5, 20); armCtx.lineTo(-5, 130);
+          armCtx.moveTo(5, 20); armCtx.lineTo(5, 130);
+          armCtx.stroke();
+          
+          // End effector (Hand)
+          armCtx.beginPath();
+          armCtx.arc(0, 150, 15, 0, Math.PI*2);
+          armCtx.fillStyle = '#f472b6';
+          armCtx.fill();
+          armCtx.shadowBlur = 15;
+          armCtx.shadowColor = '#f472b6';
+          armCtx.stroke();
+          armCtx.shadowBlur = 0;
+          
+          armCtx.restore();
+      }
+
+      function animate() {
+          if (isSimulating) {
+              time += 0.1;
+              intentChangeTimer++;
+              
+              // Randomly change user intent every ~3 seconds
+              if(intentChangeTimer > 180) {
+                  targetIntent = Math.floor(Math.random() * 180);
+                  intentChangeTimer = 0;
+              }
+
+              let currentEEG = generateEEG();
+              
+              for(let i=0; i<4; i++) {
+                  eegHistory[i].push(currentEEG[i]);
+                  if(eegHistory[i].length > 100) eegHistory[i].shift();
+              }
+              
+              try {
+                  eval(editor.getValue());
+                  decodedIntent = decodeMotorIntent(currentEEG);
+                  
+                  // Smooth servo movement
+                  if(!isNaN(decodedIntent)) {
+                      // Bound it
+                      decodedIntent = Math.max(0, Math.min(180, decodedIntent));
+                      currentArmAngle += (decodedIntent - currentArmAngle) * 0.1;
+                  }
+              } catch(e) {}
+              
+              drawEEG();
+              drawArm();
+              
+              // Status updates
+              document.getElementById('accVal').innerText = \`Target: \${targetIntent}° / Actual: \${currentArmAngle.toFixed(1)}°\`;
+              
+              let error = Math.abs(targetIntent - currentArmAngle);
+              if (error < 5) {
+                  document.getElementById('statusVal').innerText = "NEURAL LINK SYNCED";
+                  document.getElementById('statusVal').style.color = "#10b981";
+              } else if (error > 45) {
+                  document.getElementById('statusVal').innerText = "SEVERE MOTOR SPASMS";
+                  document.getElementById('statusVal').style.color = "#ef4444";
+              } else {
+                  document.getElementById('statusVal').innerText = "PROCESSING CORTICAL FEED...";
+                  document.getElementById('statusVal').style.color = "#eab308";
+              }
+          }
+
+          requestAnimationFrame(animate);
+      }
+      animate();
+
+      function startBCI() {
+          if(isSimulating) return;
+          isSimulating = true;
+          time = 0;
+          eegHistory = [[], [], [], []];
+          targetIntent = 90;
+          currentArmAngle = 0;
+      }
+    </script>
+  </body>
+</html>

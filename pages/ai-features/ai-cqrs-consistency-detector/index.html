@@ -1,0 +1,207 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI CQRS Consistency Detector | Algo Infinity Verse</title>
+  <meta name="description" content="Paste event logs and projection rules to detect skipped events, out-of-order delivery, duplicates, dual-write anti-patterns, and divergence risk — client-side." />
+  <link rel="stylesheet" href="/styles.css" />
+  <link rel="stylesheet" href="style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Poppins:wght@300;400;500;600;700&family=Fira+Code:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <script>
+    (function () {
+      try {
+        var storedTheme = localStorage.getItem('theme');
+        var prefersLight = window.matchMedia('(prefers-color-scheme: light)').matches;
+        var theme = storedTheme || (prefersLight ? 'light' : 'dark');
+        if (theme === 'light') {
+          document.documentElement.classList.add('light-mode');
+        } else {
+          document.documentElement.classList.remove('light-mode');
+        }
+      } catch (e) {}
+    })();
+  </script>
+</head>
+<body data-page="ai-cqrs-consistency-detector">
+  <a href="#cqrs-main" class="cqrs-skip-link">Skip to main content</a>
+  <button type="button" id="scrollTopBtn" class="scroll-top-btn" aria-label="Scroll to top">
+    <i class="fas fa-arrow-up" aria-hidden="true"></i>
+  </button>
+
+  <div id="navbar-placeholder"></div>
+
+  
+  <header class="cqrs-hero">
+    <div class="cqrs-hero-badge">
+      <i class="fas fa-shuffle" aria-hidden="true"></i>
+      Event Consistency Lab
+    </div>
+    <h1>
+      AI CQRS
+      <span class="cqrs-hero-accent">Consistency Detector</span>
+    </h1>
+    <p>
+      Paste an event log and projection handlers to find gaps, out-of-order delivery,
+      duplicates, dual-write smells, and get rebuild vs catch-up coaching — fully client-side.
+    </p>
+    <div class="cqrs-hero-stats" aria-live="polite">
+      <div class="cqrs-stat">
+        <span class="cqrs-stat-val" id="statEvents">0</span>
+        <span class="cqrs-stat-label">Events</span>
+      </div>
+      <div class="cqrs-stat">
+        <span class="cqrs-stat-val" id="statIssues">0</span>
+        <span class="cqrs-stat-label">Issues</span>
+      </div>
+      <div class="cqrs-stat">
+        <span class="cqrs-stat-val" id="statRisk">—</span>
+        <span class="cqrs-stat-label">Divergence risk</span>
+      </div>
+    </div>
+  </header>
+
+  <main id="cqrs-main" class="cqrs-main">
+    <div class="container">
+      <div class="cqrs-workspace">
+        <section class="cqrs-panel" aria-labelledby="cqrs-input-title">
+          <div class="cqrs-panel-header">
+            <div class="cqrs-panel-title">
+              <i class="fas fa-stream cqrs-panel-icon" aria-hidden="true"></i>
+              <h2 id="cqrs-input-title">Event log &amp; projections</h2>
+            </div>
+          </div>
+
+          <div class="cqrs-editors">
+            <div class="cqrs-editor-block">
+              <label class="cqrs-label" for="cqrsEventLog">Event log (JSON array)</label>
+              <textarea
+                id="cqrsEventLog"
+                class="cqrs-textarea"
+                rows="14"
+                spellcheck="false"
+                placeholder='[{"eventId":"e1","aggregateId":"ord-1","type":"OrderPlaced","sequence":1,"timestamp":"2026-01-01T10:00:00Z"}]'
+                aria-describedby="cqrsEventHint"
+              ></textarea>
+              <p id="cqrsEventHint" class="cqrs-hint">
+                Fields: <code>eventId</code>, <code>aggregateId</code>, <code>type</code>,
+                <code>sequence</code> (or <code>version</code>), optional <code>timestamp</code>,
+                <code>payload</code>, and <code>writes</code> for dual-write detection.
+              </p>
+            </div>
+            <div class="cqrs-editor-block">
+              <label class="cqrs-label" for="cqrsProjectionCode">Projection rules / handler code</label>
+              <textarea
+                id="cqrsProjectionCode"
+                class="cqrs-textarea"
+                rows="14"
+                spellcheck="false"
+                placeholder="// when('OrderPlaced', …)&#10;// on(OrderShipped)…"
+                aria-describedby="cqrsProjHint"
+              ></textarea>
+              <p id="cqrsProjHint" class="cqrs-hint">
+                Handlers detected via <code>when('Type')</code>, <code>on(Type)</code>,
+                <code>handles(Type)</code>, <code>case 'Type'</code>, or a JSON list of event types.
+              </p>
+            </div>
+          </div>
+
+          <fieldset class="cqrs-presets">
+            <legend class="cqrs-label">Demo inconsistent presets</legend>
+            <div class="cqrs-preset-grid" role="group" aria-label="Load demo scenarios">
+              <button type="button" class="btn btn-outline cqrs-preset-btn" data-preset="skipped">
+                <i class="fas fa-forward-step" aria-hidden="true"></i> Skipped events
+              </button>
+              <button type="button" class="btn btn-outline cqrs-preset-btn" data-preset="ooo">
+                <i class="fas fa-arrow-down-up-across-line" aria-hidden="true"></i> Out-of-order
+              </button>
+              <button type="button" class="btn btn-outline cqrs-preset-btn" data-preset="duplicates">
+                <i class="fas fa-clone" aria-hidden="true"></i> Duplicates
+              </button>
+              <button type="button" class="btn btn-outline cqrs-preset-btn" data-preset="dualwrite">
+                <i class="fas fa-code-branch" aria-hidden="true"></i> Dual-write
+              </button>
+            </div>
+          </fieldset>
+
+          <div class="cqrs-controls">
+            <button type="button" id="cqrsAnalyzeBtn" class="btn btn-primary">
+              <i class="fas fa-magnifying-glass-chart" aria-hidden="true"></i> Analyze consistency
+            </button>
+            <button type="button" id="cqrsClearBtn" class="btn btn-outline">
+              <i class="fas fa-eraser" aria-hidden="true"></i> Clear
+            </button>
+            <button type="button" id="cqrsExportBtn" class="btn btn-outline" disabled>
+              <i class="fas fa-download" aria-hidden="true"></i> Download report
+            </button>
+          </div>
+          <div id="cqrsStatus" class="cqrs-status" role="status" aria-live="polite"></div>
+        </section>
+
+        <section class="cqrs-panel cqrs-report-panel" aria-labelledby="cqrs-report-title">
+          <div class="cqrs-panel-header">
+            <div class="cqrs-panel-title">
+              <i class="fas fa-shield-halved cqrs-panel-icon" aria-hidden="true"></i>
+              <h2 id="cqrs-report-title">Consistency analysis</h2>
+            </div>
+          </div>
+
+          <div id="cqrsEmpty" class="cqrs-empty">
+            <i class="fas fa-shuffle" aria-hidden="true"></i>
+            <p>No analysis yet. Load a demo preset or paste an event log and projection code, then analyze.</p>
+          </div>
+
+          <div id="cqrsResults" hidden>
+            <div class="cqrs-score-card" aria-labelledby="cqrsRiskHeading">
+              <div>
+                <h3 id="cqrsRiskHeading">Divergence risk score</h3>
+                <p id="cqrsRiskBlurb" class="cqrs-muted"></p>
+              </div>
+              <div class="cqrs-score-ring" id="cqrsScoreRing" aria-hidden="true">
+                <span id="cqrsScoreVal">0</span>
+              </div>
+            </div>
+
+            <section class="cqrs-section" aria-labelledby="cqrsStreamHeading">
+              <h3 id="cqrsStreamHeading"><i class="fas fa-timeline" aria-hidden="true"></i> Event stream ordering &amp; gaps</h3>
+              <div id="cqrsStreamViz" class="cqrs-stream-viz" role="img" aria-label="Per-aggregate sequence visualization"></div>
+              <ul id="cqrsGapList" class="cqrs-findings"></ul>
+            </section>
+
+            <section class="cqrs-section" aria-labelledby="cqrsHandlerHeading">
+              <h3 id="cqrsHandlerHeading"><i class="fas fa-puzzle-piece" aria-hidden="true"></i> Missing projection handlers</h3>
+              <ul id="cqrsHandlerList" class="cqrs-findings"></ul>
+            </section>
+
+            <section class="cqrs-section" aria-labelledby="cqrsDualHeading">
+              <h3 id="cqrsDualHeading"><i class="fas fa-code-branch" aria-hidden="true"></i> Dual-write anti-pattern warnings</h3>
+              <ul id="cqrsDualList" class="cqrs-findings"></ul>
+            </section>
+
+            <section class="cqrs-section" aria-labelledby="cqrsCoachHeading">
+              <h3 id="cqrsCoachHeading"><i class="fas fa-robot" aria-hidden="true"></i> Rebuild vs catch-up strategy coach</h3>
+              <div id="cqrsCoach" class="cqrs-coach"></div>
+            </section>
+          </div>
+        </section>
+      </div>
+    </div>
+  </main>
+
+  <div id="footer-placeholder"></div>
+
+  <script src="/auth.js"></script>
+  <script src="/bootstrap-legacy.js"></script>
+  <script src="/script.js"></script>
+  <script type="module" src="/dist/legacy-bundle.mjs"></script>
+  <script src="/theme.js"></script>
+  <script src="script.js"></script>
+  <script>
+    if (typeof loadPartial === 'function') {
+      loadPartial('navbar-placeholder', '/partials/navbar.html');
+      loadPartial('footer-placeholder', '/partials/footer.html');
+    }
+  </script>
+</body>
+</html>

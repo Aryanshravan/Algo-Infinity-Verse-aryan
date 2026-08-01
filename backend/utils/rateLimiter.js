@@ -171,12 +171,6 @@ export const resumeAnalysisLimiter = new RateLimiter({
   cooldownMs: 15 * 60 * 1000,
 });
 
-export const repoAnalysisLimiter = new RateLimiter({
-  windowMs: 15 * 60 * 1000,
-  maxAttempts: 20,
-  cooldownMs: 15 * 60 * 1000,
-});
-
 export const sdlcAdvisorLimiter = new RateLimiter({
   windowMs: 15 * 60 * 1000,
   maxAttempts: 15,
@@ -216,6 +210,15 @@ export const logErrorLimiter = new RateLimiter({
 export const aiHintLimiter = new RateLimiter({
   windowMs: 15 * 60 * 1000,
   maxAttempts: 15,
+  cooldownMs: 15 * 60 * 1000,
+});
+
+// Sharing a DSA insight creates a short URL that is public until it expires.
+// Cap the rate so an anonymous client cannot spam the store with links. The
+// generous window still allows normal "share then re-share after edits" usage.
+export const sharedSnippetLimiter = new RateLimiter({
+  windowMs: 15 * 60 * 1000,
+  maxAttempts: 20,
   cooldownMs: 15 * 60 * 1000,
 });
 

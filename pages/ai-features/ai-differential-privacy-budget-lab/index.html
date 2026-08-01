@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Differential Privacy Budget Lab | Algo Infinity Verse</title>
+  <meta name="description" content="Set ε/δ and query counts, visualize noise vs utility on quiz analytics aggregates, warn on budget exhaustion, and export a DP budget report." />
+  <link rel="stylesheet" href="/styles.css" />
+  <link rel="stylesheet" href="style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Poppins:wght@300;400;500;600;700&family=Fira+Code:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <script>
+    (function () {
+      try {
+        var storedTheme = localStorage.getItem('theme');
+        var prefersLight = window.matchMedia('(prefers-color-scheme: light)').matches;
+        var theme = storedTheme || (prefersLight ? 'light' : 'dark');
+        if (theme === 'light') {
+          document.documentElement.classList.add('light-mode');
+        } else {
+          document.documentElement.classList.remove('light-mode');
+        }
+      } catch (e) {}
+    })();
+  </script>
+</head>
+<body data-page="ai-differential-privacy-budget-lab">
+  <a href="#dpbud-main" class="dpbud-skip-link">Skip to main content</a>
+  <button type="button" id="scrollTopBtn" class="scroll-top-btn" aria-label="Scroll to top">
+    <i class="fas fa-arrow-up" aria-hidden="true"></i>
+  </button>
+
+  <div id="navbar-placeholder"></div>
+
+  <header class="dpbud-hero">
+    <div class="dpbud-hero-badge">
+      <i class="fas fa-shield-halved" aria-hidden="true"></i>
+      Privacy Budget Lab
+    </div>
+    <h1>
+      AI Differential Privacy
+      <span class="dpbud-hero-accent">Budget Lab</span>
+    </h1>
+    <p>
+      Set ε / δ and query counts, explore noise vs utility on quiz-analytics aggregates,
+      get composition warnings and safe-release recommendations — client-side only.
+    </p>
+    <div class="dpbud-hero-stats" aria-live="polite">
+      <div class="dpbud-stat">
+        <span class="dpbud-stat-val" id="statEpsilon">—</span>
+        <span class="dpbud-stat-label">ε used</span>
+      </div>
+      <div class="dpbud-stat">
+        <span class="dpbud-stat-val" id="statRemain">—</span>
+        <span class="dpbud-stat-label">ε remaining</span>
+      </div>
+      <div class="dpbud-stat">
+        <span class="dpbud-stat-val" id="statUtility">—</span>
+        <span class="dpbud-stat-label">Utility %</span>
+      </div>
+      <div class="dpbud-stat">
+        <span class="dpbud-stat-val" id="statRelease">—</span>
+        <span class="dpbud-stat-label">Release advice</span>
+      </div>
+    </div>
+  </header>
+
+  <main id="dpbud-main" class="dpbud-main">
+    <div class="container">
+      <div class="dpbud-workspace">
+        <section class="dpbud-panel" aria-labelledby="dpbud-input-title">
+          <div class="dpbud-panel-header">
+            <div class="dpbud-panel-title">
+              <i class="fas fa-sliders dpbud-panel-icon" aria-hidden="true"></i>
+              <h2 id="dpbud-input-title">Budget &amp; queries</h2>
+            </div>
+          </div>
+
+          <div class="dpbud-form-grid">
+            <div>
+              <label class="dpbud-label" for="dpbudEpsilonTotal">Total ε budget</label>
+              <input id="dpbudEpsilonTotal" class="dpbud-input" type="number" min="0.1" max="20" step="0.1" value="2.0" />
+            </div>
+            <div>
+              <label class="dpbud-label" for="dpbudDelta">δ (approx)</label>
+              <input id="dpbudDelta" class="dpbud-input" type="number" min="1e-12" max="0.01" step="1e-8" value="0.000001" />
+            </div>
+            <div>
+              <label class="dpbud-label" for="dpbudQueries">Query count (composition)</label>
+              <input id="dpbudQueries" class="dpbud-input" type="number" min="1" max="500" step="1" value="8" />
+            </div>
+            <div>
+              <label class="dpbud-label" for="dpbudPerQuery">ε per query (basic composition)</label>
+              <input id="dpbudPerQuery" class="dpbud-input" type="number" min="0.01" max="5" step="0.01" value="0.25" />
+            </div>
+            <div>
+              <label class="dpbud-label" for="dpbudSensitivity">Count sensitivity (Δ)</label>
+              <input id="dpbudSensitivity" class="dpbud-input" type="number" min="1" max="10" step="1" value="1" />
+            </div>
+            <div>
+              <label class="dpbud-label" for="dpbudTrueCount">True aggregate (quiz attempts)</label>
+              <input id="dpbudTrueCount" class="dpbud-input" type="number" min="1" max="1000000" step="1" value="1240" />
+            </div>
+          </div>
+
+          <p class="dpbud-hint">
+            Demo models Laplace noise on a quiz-analytics count query with basic (linear) composition: ε_used ≈ k · ε_query.
+          </p>
+
+          <div class="dpbud-controls">
+            <button type="button" id="dpbudPresetStrictBtn" class="btn btn-secondary">
+              <i class="fas fa-lock" aria-hidden="true"></i> Strict preset
+            </button>
+            <button type="button" id="dpbudPresetLooseBtn" class="btn btn-secondary">
+              <i class="fas fa-unlock" aria-hidden="true"></i> Loose preset
+            </button>
+            <button type="button" id="dpbudRunBtn" class="btn btn-primary">
+              <i class="fas fa-flask" aria-hidden="true"></i> Run budget lab
+            </button>
+            <button type="button" id="dpbudClearBtn" class="btn btn-outline">
+              <i class="fas fa-eraser" aria-hidden="true"></i> Reset
+            </button>
+            <button type="button" id="dpbudExportBtn" class="btn btn-outline" disabled>
+              <i class="fas fa-download" aria-hidden="true"></i> Export DP report
+            </button>
+          </div>
+          <div id="dpbudStatus" class="dpbud-status" role="status" aria-live="polite"></div>
+        </section>
+
+        <section class="dpbud-panel dpbud-report-panel" aria-labelledby="dpbud-report-title">
+          <div class="dpbud-panel-header">
+            <div class="dpbud-panel-title">
+              <i class="fas fa-chart-line dpbud-panel-icon" aria-hidden="true"></i>
+              <h2 id="dpbud-report-title">Noise vs utility</h2>
+            </div>
+          </div>
+
+          <div id="dpbudEmpty" class="dpbud-empty">
+            <i class="fas fa-shield-halved" aria-hidden="true"></i>
+            <p>No run yet. Tune ε/δ and queries, try a preset, then run the budget lab.</p>
+          </div>
+
+          <div id="dpbudResults" hidden>
+            <div class="dpbud-score-card">
+              <div>
+                <h3 id="dpbudRiskHeading">Budget health</h3>
+                <p id="dpbudRiskBlurb" class="dpbud-muted"></p>
+              </div>
+              <div class="dpbud-score-ring" id="dpbudScoreRing" aria-hidden="true">
+                <span id="dpbudScoreVal">0</span>
+              </div>
+            </div>
+
+            <section class="dpbud-section" aria-labelledby="dpbudNoiseHeading">
+              <h3 id="dpbudNoiseHeading"><i class="fas fa-wave-square" aria-hidden="true"></i> Noisy quiz aggregate</h3>
+              <div id="dpbudNoiseOut" class="dpbud-noise-out"></div>
+              <div class="dpbud-bars" aria-hidden="true">
+                <div class="dpbud-bar-row">
+                  <span>True</span>
+                  <div class="dpbud-bar-track"><div id="dpbudBarTrue" class="dpbud-bar dpbud-bar-true"></div></div>
+                </div>
+                <div class="dpbud-bar-row">
+                  <span>Noisy</span>
+                  <div class="dpbud-bar-track"><div id="dpbudBarNoisy" class="dpbud-bar dpbud-bar-noisy"></div></div>
+                </div>
+              </div>
+            </section>
+
+            <section class="dpbud-section" aria-labelledby="dpbudWarnHeading">
+              <h3 id="dpbudWarnHeading"><i class="fas fa-triangle-exclamation" aria-hidden="true"></i> Composition warnings</h3>
+              <ul id="dpbudWarningList" class="dpbud-findings"></ul>
+            </section>
+
+            <section class="dpbud-section" aria-labelledby="dpbudRecHeading">
+              <h3 id="dpbudRecHeading"><i class="fas fa-lightbulb" aria-hidden="true"></i> Safe release recommendations</h3>
+              <div id="dpbudRecOut" class="dpbud-noise-out"></div>
+            </section>
+          </div>
+        </section>
+      </div>
+    </div>
+  </main>
+
+  <div id="footer-placeholder"></div>
+
+  <script src="/auth.js"></script>
+  <script src="/bootstrap-legacy.js"></script>
+  <script src="/script.js"></script>
+  <script type="module" src="/dist/legacy-bundle.mjs"></script>
+  <script src="/theme.js"></script>
+  <script src="script.js"></script>
+  <script>
+    if (typeof loadPartial === 'function') {
+      loadPartial('navbar-placeholder', '/partials/navbar.html');
+      loadPartial('footer-placeholder', '/partials/footer.html');
+    }
+  </script>
+</body>
+</html>

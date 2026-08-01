@@ -1,0 +1,300 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Quantum Key Distribution (BB84) | Algo Infinity Verse</title>
+    <link rel="stylesheet" href="/styles.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <!-- Monaco Editor -->
+    <script src="https://unpkg.com/monaco-editor@0.36.1/min/vs/loader.js"></script>
+    <style>
+      body { margin: 0; overflow: hidden; background: #000; font-family: 'Poppins', sans-serif; color: #fff; }
+      .app-container { display: flex; height: 100vh; }
+      
+      .sidebar { width: 450px; background: rgba(15, 23, 42, 0.95); border-right: 1px solid #14b8a6; display: flex; flex-direction: column; z-index: 10; }
+      .header { padding: 20px; border-bottom: 1px solid #334155; }
+      .header h2 { margin: 0; color: #14b8a6; font-family: 'Orbitron', sans-serif; font-size: 1.2rem; }
+      .header p { margin: 5px 0 0 0; font-size: 0.8rem; color: #94a3b8; }
+      
+      #editor-container { flex: 1; min-height: 300px; }
+      
+      .controls { padding: 20px; border-top: 1px solid #334155; background: rgba(0,0,0,0.5); }
+      .btn { background: linear-gradient(90deg, #0d9488, #0f766e); color: #fff; border: none; padding: 10px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; transition: 0.3s; }
+      .btn:hover { background: #14b8a6; transform: translateY(-2px); box-shadow: 0 0 15px rgba(20, 184, 166, 0.5); }
+      
+      .sim-container { flex: 1; position: relative; background: #0f172a; overflow: hidden; display: flex; flex-direction: column; }
+      
+      .network-view { flex: 1; position: relative; display: flex; justify-content: space-between; align-items: center; padding: 50px; }
+      
+      .node { background: rgba(2, 6, 23, 0.9); border: 2px solid #14b8a6; border-radius: 12px; padding: 20px; width: 200px; text-align: center; box-shadow: 0 0 20px rgba(20, 184, 166, 0.2); z-index: 2; }
+      .node h3 { margin: 0 0 10px 0; color: #14b8a6; font-family: 'Orbitron', sans-serif; }
+      .node-eve { border-color: #ef4444; margin-top: -150px; box-shadow: 0 0 20px rgba(239, 68, 68, 0.2); }
+      .node-eve h3 { color: #ef4444; }
+      
+      .fiber-optic { position: absolute; top: 50%; left: 250px; right: 250px; height: 4px; background: rgba(51, 65, 85, 0.5); transform: translateY(-50%); z-index: 1; }
+      .fiber-eve { position: absolute; top: 50%; left: 50%; width: 2px; height: 100px; background: rgba(239, 68, 68, 0.5); transform: translate(-50%, -100%); z-index: 1; border-left: 2px dashed #ef4444;}
+      
+      .photon { position: absolute; top: 50%; width: 10px; height: 10px; background: #fff; border-radius: 50%; transform: translate(-50%, -50%); box-shadow: 0 0 10px #fff; z-index: 3; transition: left 1s linear; }
+      
+      .hud { background: rgba(0,0,0,0.8); padding: 15px; border-top: 1px solid #14b8a6; }
+      .metric { display: flex; justify-content: space-between; font-size: 0.8rem; color: #cbd5e1; margin-bottom: 5px; }
+      .val { font-weight: bold; font-family: monospace; }
+      
+      .key-display { font-family: monospace; letter-spacing: 2px; background: #000; padding: 10px; border-radius: 4px; border: 1px solid #334155; margin-top: 5px; color: #10b981; word-break: break-all; }
+      
+      .eavesdrop-toggle { position: absolute; top: 20px; right: 20px; background: rgba(239, 68, 68, 0.1); border: 1px solid #ef4444; color: #ef4444; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-family: 'Orbitron'; }
+      .eavesdrop-toggle:hover { background: rgba(239, 68, 68, 0.3); }
+      .eve-active { background: #ef4444; color: #fff; }
+    </style>
+  </head>
+  <body>
+    
+    <div class="app-container">
+      <div class="sidebar">
+        <div class="header">
+          <h2><i class="fas fa-key"></i> BB84 QKD Protocol</h2>
+          <p>Detect wave-function collapse to secure keys</p>
+        </div>
+        
+        <div id="editor-container"></div>
+        
+        <div class="controls">
+          <button class="btn" onclick="startExchange()"><i class="fas fa-exchange-alt"></i> Initiate Key Exchange</button>
+        </div>
+      </div>
+      
+      <div class="sim-container">
+        <button class="eavesdrop-toggle" id="eveBtn" onclick="toggleEve()">Eve: INACTIVE</button>
+        
+        <div class="network-view">
+            <div class="node" id="nodeAlice">
+                <h3>ALICE (Sender)</h3>
+                <div style="font-size: 0.7rem; color: #94a3b8;">Base: <span id="aliceBase" class="val" style="color:#fff;">-</span></div>
+                <div style="font-size: 0.7rem; color: #94a3b8;">Bit: <span id="aliceBit" class="val" style="color:#fff;">-</span></div>
+            </div>
+            
+            <div class="fiber-optic"></div>
+            
+            <div class="node node-eve" id="nodeEve" style="opacity: 0.2;">
+                <h3>EVE (Wiretap)</h3>
+                <div style="font-size: 0.7rem; color: #94a3b8;">Intercept Base: <span id="eveBase" class="val" style="color:#fff;">-</span></div>
+            </div>
+            <div class="fiber-eve" id="fiberEve" style="opacity: 0.2;"></div>
+            
+            <div class="photon" id="photonObj" style="left: 0; display: none;"></div>
+            
+            <div class="node" id="nodeBob">
+                <h3>BOB (Receiver)</h3>
+                <div style="font-size: 0.7rem; color: #94a3b8;">Base: <span id="bobBase" class="val" style="color:#fff;">-</span></div>
+                <div style="font-size: 0.7rem; color: #94a3b8;">Bit: <span id="bobBit" class="val" style="color:#fff;">-</span></div>
+            </div>
+        </div>
+
+        <div class="hud">
+          <div class="metric"><span>Shared Quantum Key:</span></div>
+          <div class="key-display" id="sharedKey">WAITING...</div>
+          <div class="metric" style="margin-top: 10px; border-top: 1px solid #334155; padding-top: 5px;">
+            <span>Channel Security:</span> <span class="val" id="statusVal" style="color:#94a3b8">OFFLINE</span>
+          </div>
+        </div>
+        
+      </div>
+    </div>
+
+    <script>
+      let editor;
+      require.config({ paths: { 'vs': 'https://unpkg.com/monaco-editor@0.36.1/min/vs' }});
+      require(['vs/editor/editor.main'], function() {
+        editor = monaco.editor.create(document.getElementById('editor-container'), {
+          value: `// BB84 Sifting & Error Checking Phase
+// Alice and Bob compare a subset of their keys to detect Eve.
+// If Eve intercepts, she forces the photon to collapse to her random basis,
+// introducing a ~25% error rate into Alice and Bob's shared key.
+
+function verifyQuantumChannel(aliceBases, bobBases, aliceBits, bobBits) {
+    // Return an object: { isSecure: boolean, siftedKey: string }
+    
+    let siftedKey = "";
+    let testSubsetErrors = 0;
+    let testSubsetSize = 0;
+    
+    for(let i=0; i<aliceBases.length; i++) {
+        // 1. Sifting phase: keep only bits where bases matched
+        if (aliceBases[i] === bobBases[i]) {
+            // 2. We should compare a subset to check for Eve's interference
+            // For this sandbox, let's just check the first 10 matching bits
+            if (testSubsetSize < 10) {
+                if(aliceBits[i] !== bobBits[i]) {
+                    testSubsetErrors++;
+                }
+                testSubsetSize++;
+            } else {
+                // If it passes the test, append to final key
+                siftedKey += bobBits[i];
+            }
+        }
+    }
+    
+    // If Eve is listening, error rate will be > 0.
+    let isSecure = (testSubsetErrors === 0);
+    
+    return { isSecure, siftedKey };
+}`,
+          language: 'javascript',
+          theme: 'vs-dark',
+          minimap: { enabled: false },
+          automaticLayout: true
+        });
+      });
+
+      let eveActive = false;
+      let isSimulating = false;
+      
+      function toggleEve() {
+          eveActive = !eveActive;
+          let btn = document.getElementById('eveBtn');
+          let nodeEve = document.getElementById('nodeEve');
+          let fiberEve = document.getElementById('fiberEve');
+          
+          if(eveActive) {
+              btn.innerText = "Eve: ACTIVE";
+              btn.className = "eavesdrop-toggle eve-active";
+              nodeEve.style.opacity = "1";
+              fiberEve.style.opacity = "1";
+          } else {
+              btn.innerText = "Eve: INACTIVE";
+              btn.className = "eavesdrop-toggle";
+              nodeEve.style.opacity = "0.2";
+              fiberEve.style.opacity = "0.2";
+          }
+      }
+
+      function startExchange() {
+          if(isSimulating) return;
+          isSimulating = true;
+          
+          let aBases = [];
+          let aBits = [];
+          let bBases = [];
+          let bBits = [];
+          
+          let currentBitIdx = 0;
+          let totalBits = 50; // Exchange 50 photons
+          
+          document.getElementById('sharedKey').innerText = "TRANSMITTING...";
+          document.getElementById('sharedKey').style.color = "#94a3b8";
+          document.getElementById('statusVal').innerText = "GENERATING QUBITS";
+          document.getElementById('statusVal').style.color = "#facc15";
+          
+          let photon = document.getElementById('photonObj');
+          
+          function sendNextPhoton() {
+              if (currentBitIdx >= totalBits) {
+                  // Transmission complete, run user's algorithm
+                  isSimulating = false;
+                  photon.style.display = 'none';
+                  
+                  document.getElementById('statusVal').innerText = "SIFTING AND VERIFYING...";
+                  
+                  setTimeout(() => {
+                      try {
+                          eval(editor.getValue());
+                          let result = verifyQuantumChannel(aBases, bBases, aBits, bBits);
+                          
+                          if (result && typeof result.isSecure === 'boolean') {
+                              if (!result.isSecure) {
+                                  document.getElementById('statusVal').innerText = "WAVE-FUNCTION COLLAPSE DETECTED. KEY COMPROMISED.";
+                                  document.getElementById('statusVal').style.color = "#ef4444";
+                                  document.getElementById('sharedKey').innerText = "ABORTED";
+                                  document.getElementById('sharedKey').style.color = "#ef4444";
+                              } else {
+                                  document.getElementById('statusVal').innerText = "CHANNEL SECURE. KEY ESTABLISHED.";
+                                  document.getElementById('statusVal').style.color = "#10b981";
+                                  document.getElementById('sharedKey').innerText = result.siftedKey || "[EMPTY KEY]";
+                                  document.getElementById('sharedKey').style.color = "#10b981";
+                              }
+                          }
+                      } catch(e) {
+                          document.getElementById('statusVal').innerText = "PROTOCOL ALGORITHM ERROR";
+                          document.getElementById('statusVal').style.color = "#ef4444";
+                      }
+                  }, 1000);
+                  
+                  return;
+              }
+              
+              // Alice generates random bit and basis
+              let aBit = Math.random() < 0.5 ? 0 : 1;
+              let aBase = Math.random() < 0.5 ? '+' : 'x'; // Rectilinear or Diagonal
+              
+              aBits.push(aBit);
+              aBases.push(aBase);
+              
+              document.getElementById('aliceBase').innerText = aBase;
+              document.getElementById('aliceBit').innerText = aBit;
+              
+              // Animate photon
+              photon.style.transition = 'none';
+              photon.style.left = '250px';
+              photon.style.display = 'block';
+              
+              // Change color based on basis
+              photon.style.background = aBase === '+' ? '#38bdf8' : '#f472b6';
+              photon.style.boxShadow = \`0 0 10px \${aBase === '+' ? '#38bdf8' : '#f472b6'}\`;
+              
+              // Force reflow
+              void photon.offsetWidth; 
+              
+              photon.style.transition = 'left 0.1s linear';
+              photon.style.left = 'calc(100% - 250px)';
+              
+              // Eve intercepts
+              let photonBit = aBit;
+              let photonBase = aBase;
+              
+              if(eveActive) {
+                  // Eve guesses a random basis
+                  let eBase = Math.random() < 0.5 ? '+' : 'x';
+                  document.getElementById('eveBase').innerText = eBase;
+                  
+                  // If Eve guesses wrong, she collapses the state and reads a random bit
+                  if (eBase !== aBase) {
+                      photonBit = Math.random() < 0.5 ? 0 : 1;
+                  }
+                  
+                  // Eve forwards it using HER basis
+                  photonBase = eBase;
+              } else {
+                  document.getElementById('eveBase').innerText = '-';
+              }
+              
+              // Bob receives
+              setTimeout(() => {
+                  let bBase = Math.random() < 0.5 ? '+' : 'x';
+                  let bBit = photonBit;
+                  
+                  // If Bob's basis doesn't match the incoming photon's basis, he reads random garbage
+                  if (bBase !== photonBase) {
+                      bBit = Math.random() < 0.5 ? 0 : 1;
+                  }
+                  
+                  bBases.push(bBase);
+                  bBits.push(bBit);
+                  
+                  document.getElementById('bobBase').innerText = bBase;
+                  document.getElementById('bobBit').innerText = bBit;
+                  
+                  photon.style.display = 'none';
+                  
+                  currentBitIdx++;
+                  setTimeout(sendNextPhoton, 50);
+              }, 100);
+          }
+          
+          sendNextPhoton();
+      }
+    </script>
+  </body>
+</html>

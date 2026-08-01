@@ -20,9 +20,10 @@
 
     <!-- External Stylesheets -->
     <link rel="stylesheet" href="2pc-visualizer.css" />
-  <script src="/theme.js"></script>
-</head>
-<body class="tpc-body">
+    <script src="/theme.js"></script>
+    <link rel="stylesheet" href="/modules/quick-notes/quick-notes.css" />
+  </head>
+  <body class="tpc-body">
     <nav class="navbar tpc-nav">
       <div class="nav-logo">
         <span class="logo-text">∞</span>
@@ -85,6 +86,17 @@
               <div class="toggle-info">
                 <strong>Crash Node C</strong>
                 <span>Simulates a total node failure. Causes Coordinator Timeout.</span>
+              </div>
+            </label>
+
+            <label class="chaos-toggle">
+              <input type="checkbox" id="crashCoord" />
+              <span class="toggle-box"></span>
+              <div class="toggle-info">
+                <strong>Crash Coordinator</strong>
+                <span
+                  >Simulates Coordinator failure before sending COMMIT. Participants block.</span
+                >
               </div>
             </label>
           </div>
@@ -150,6 +162,6 @@
     </main>
 
     <script src="2pc-visualizer.js"></script>
+    <script src="/modules/quick-notes/quick-notes.js"></script>
   </body>
 </html>
-

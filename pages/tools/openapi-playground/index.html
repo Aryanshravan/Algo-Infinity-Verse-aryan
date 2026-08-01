@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>OpenAPI Playground | Algo Infinity Verse</title>
+  <meta name="description" content="Write OpenAPI specs in YAML/JSON and see them rendered as interactive Swagger-style documentation in real-time." />
+  <link rel="stylesheet" href="/styles.css" />
+  <link rel="stylesheet" href="openapi-playground.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght,SOFT@9..144,400,50;9..144,600,50;9..144,700,50&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/js-yaml/4.1.0/js-yaml.min.js"></script>
+  <script>
+    (function () {
+      try {
+        var storedTheme = localStorage.getItem('theme');
+        var prefersLight = window.matchMedia('(prefers-color-scheme: light)').matches;
+        var theme = storedTheme || (prefersLight ? 'light' : 'dark');
+        if (theme === 'light') {
+          document.documentElement.classList.add('light-mode');
+        } else {
+          document.documentElement.classList.remove('light-mode');
+        }
+      } catch (e) {}
+    })();
+  </script>
+</head>
+<body data-page="openapi-playground">
+  <a href="#oas-main" class="oas-skip-link">Skip to main content</a>
+  <button type="button" id="scrollTopBtn" class="scroll-top-btn" aria-label="Scroll to top">
+    <i class="fas fa-arrow-up" aria-hidden="true"></i>
+  </button>
+
+  <div id="navbar-placeholder"></div>
+
+  <!-- Hero -->
+  <header class="oas-hero">
+    <div class="oas-hero-badge">
+      <i class="fas fa-file-code" aria-hidden="true"></i>
+      Interactive API Lab
+    </div>
+    <h1 class="oas-hero-title">
+      <span class="oas-hero-word">OpenAPI</span>
+      <span class="oas-hero-accent">Playground</span>
+    </h1>
+    <p class="oas-hero-sub">
+      Write your spec in YAML or JSON &mdash; see it render as living documentation.<br />
+      Pick a template, tweak, validate, export &mdash; no setup required.
+    </p>
+  </header>
+
+  <!-- Main playground -->
+  <main id="oas-main" class="oas-main">
+    <!-- Toolbar: template selector + actions -->
+    <div class="oas-toolbar">
+      <div class="oas-toolbar-left">
+        <label for="oasTemplateSelect" class="oas-toolbar-label">
+          <i class="fas fa-file-export" aria-hidden="true"></i> Template
+        </label>
+        <select id="oasTemplateSelect" class="oas-select" aria-label="Choose a template API specification">
+          <option value="petstore">Pet Store API</option>
+          <option value="blog">Blog API</option>
+          <option value="algoinfinity">Algo Infinity Verse API</option>
+        </select>
+        <span class="oas-toolbar-divider" aria-hidden="true"></span>
+        <label for="oasFormatToggle" class="oas-toggle-label">
+          <span id="oasFormatLabel">YAML</span>
+        </label>
+        <button type="button" id="oasFormatToggle" class="oas-format-toggle" role="switch" aria-checked="true" aria-label="Toggle between YAML and JSON format">
+          <span class="oas-toggle-track">
+            <span class="oas-toggle-thumb"></span>
+          </span>
+          <span class="oas-toggle-text oas-toggle-text-on">YAML</span>
+          <span class="oas-toggle-text oas-toggle-text-off">JSON</span>
+        </button>
+      </div>
+      <div class="oas-toolbar-right">
+        <button type="button" id="oasImportBtn" class="oas-btn oas-btn-secondary" title="Import a spec file">
+          <i class="fas fa-file-arrow-up" aria-hidden="true"></i>
+          <span class="oas-btn-label">Import</span>
+        </button>
+        <input type="file" id="oasFileInput" accept=".yaml,.yml,.json" class="oas-hidden-input" />
+        <div class="oas-export-group">
+          <button type="button" id="oasExportYamlBtn" class="oas-btn oas-btn-secondary" title="Download as YAML">
+            <i class="fas fa-download" aria-hidden="true"></i>
+            <span class="oas-btn-label">Export</span>
+          </button>
+          <button type="button" id="oasExportJsonBtn" class="oas-btn oas-btn-secondary oas-export-json" title="Download as JSON">
+            <span class="oas-btn-label">JSON</span>
+          </button>
+        </div>
+        <button type="button" id="oasCopyBtn" class="oas-btn oas-btn-secondary" title="Copy spec to clipboard">
+          <i class="fas fa-copy" aria-hidden="true"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- Split pane -->
+    <div class="oas-split" id="oasSplit">
+      <!-- Editor panel -->
+      <section class="oas-panel oas-editor-panel" aria-label="Spec editor">
+        <div class="oas-editor-header">
+          <div class="oas-editor-tabs">
+            <button type="button" class="oas-editor-tab active" data-tab="editor" aria-selected="true">Editor</button>
+            <button type="button" class="oas-editor-tab" data-tab="errors" aria-selected="false">
+              Errors
+              <span class="oas-error-count" id="oasErrorCount" hidden>0</span>
+            </button>
+          </div>
+          <div class="oas-editor-status">
+            <span class="oas-status-dot" id="oasStatusDot"></span>
+            <span id="oasStatusText">Ready</span>
+          </div>
+        </div>
+        <div class="oas-editor-body">
+          <div class="oas-editor-wrapper">
+            <div class="oas-line-numbers" id="oasLineNumbers" aria-hidden="true">1</div>
+            <div class="oas-editor-container">
+              <textarea id="oasEditor"
+                class="oas-editor-textarea"
+                spellcheck="false"
+                autocomplete="off"
+                autocorrect="off"
+                autocapitalize="off"
+                wrap="off"
+                placeholder="Write your OpenAPI spec here&hellip;"
+                aria-label="OpenAPI specification editor"
+              ></textarea>
+              <pre id="oasHighlightLayer" class="oas-highlight-layer" aria-hidden="true"><code></code></pre>
+            </div>
+          </div>
+          <div class="oas-errors-panel" id="oasErrorsPanel" hidden>
+            <div class="oas-errors-header">
+              <i class="fas fa-circle-exclamation" aria-hidden="true"></i>
+              <span>Validation Errors</span>
+            </div>
+            <ul class="oas-errors-list" id="oasErrorsList"></ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- Divider -->
+      <div class="oas-divider" id="oasDivider" role="separator" tabindex="0" aria-label="Resize editor and preview panels" aria-orientation="horizontal"></div>
+
+      <!-- Preview panel -->
+      <section class="oas-panel oas-preview-panel" aria-label="API documentation preview">
+        <div class="oas-preview-header">
+          <div class="oas-preview-title">
+            <i class="fas fa-book" aria-hidden="true"></i>
+            <span>API Documentation</span>
+          </div>
+          <span class="oas-preview-subtitle">Live preview</span>
+        </div>
+        <div class="oas-preview-body" id="oasPreviewBody">
+          <div class="oas-preview-empty" id="oasPreviewEmpty">
+            <i class="fas fa-pen-fancy" aria-hidden="true"></i>
+            <p>Start typing a valid OpenAPI spec,<br />or pick a template to begin.</p>
+          </div>
+          <div class="oas-preview-content" id="oasPreviewContent" hidden></div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <script src="/auth.js"></script>
+  <script src="/bootstrap-legacy.js"></script>
+  <script src="/script.js"></script>
+  <script type="module" src="/dist/legacy-bundle.mjs"></script>
+  <script src="/theme.js"></script>
+  <script src="openapi-playground.js"></script>
+  <script>
+    if (typeof loadPartial === 'function') {
+      loadPartial('navbar-placeholder', '/partials/navbar.html');
+    }
+  </script>
+</body>
+</html>

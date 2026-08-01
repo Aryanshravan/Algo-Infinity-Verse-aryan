@@ -2,29 +2,42 @@ import { VCSProvider } from '../VCSProvider.js';
 import * as yaml from 'js-yaml';
 
 export class BitbucketProvider extends VCSProvider {
-  async getCIConfigFiles() {
+  constructor(repoUrl) {
+    super(repoUrl);
     const match = this.repoUrl.match(/bitbucket\.org\/([^/]+)\/([^/]+)/);
-    if (!match) throw new Error("Invalid Bitbucket URL");
+    if (!match) throw new Error('Invalid Bitbucket URL');
+    this.workspace = match[1];
+    this.repo = match[2].replace(/\.git$/, '');
+    this.branches = ['master', 'main'];
+  }
 
-    const workspace = match[1];
-    const repo = match[2].replace(/\.git$/, '');
-
-    const apiUrl = `https://api.bitbucket.org/2.0/repositories/${workspace}/${repo}/src/master/bitbucket-pipelines.yml`;
-    const res = await fetch(apiUrl);
-
+  async _fetchText(url) {
+    const res = await fetch(url);
     if (!res.ok) {
-      if (res.status === 404) {
-        // Try main branch if master fails
-        const fallbackRes = await fetch(`https://api.bitbucket.org/2.0/repositories/${workspace}/${repo}/src/main/bitbucket-pipelines.yml`);
-        if (!fallbackRes.ok) return [];
-        const content = await fallbackRes.text();
+      if (res.status === 404) return null;
+      throw new Error(`Bitbucket API returned ${res.status} for ${url}`);
+    }
+    return res.text();
+  }
+
+  async _fetchJson(url) {
+    const res = await fetch(url);
+    if (!res.ok) {
+      if (res.status === 404) return null;
+      throw new Error(`Bitbucket API returned ${res.status} for ${url}`);
+    }
+    return res.json();
+  }
+
+  async getCIConfigFiles() {
+    for (const branch of this.branches) {
+      const apiUrl = `https://api.bitbucket.org/2.0/repositories/${this.workspace}/${this.repo}/src/${branch}/bitbucket-pipelines.yml`;
+      const content = await this._fetchText(apiUrl);
+      if (content !== null) {
         return [{ name: 'bitbucket-pipelines.yml', content }];
       }
-      throw new Error(`Bitbucket API returned ${res.status}`);
     }
-
-    const content = await res.text();
-    return [{ name: 'bitbucket-pipelines.yml', content }];
+    return [];
   }
 
   normalizeCIConfig(rawContent) {
@@ -34,20 +47,17 @@ export class BitbucketProvider extends VCSProvider {
     const commands = [];
     let hasJobs = false;
 
-    // Bitbucket Pipelines structure: pipelines -> default, branches, tags, custom
     if (doc.pipelines) {
       const p = doc.pipelines;
-      
+
       const extractSteps = (pipelineBlock) => {
         if (!pipelineBlock || !Array.isArray(pipelineBlock)) return;
         for (let item of pipelineBlock) {
-          // Resolve js-yaml alias merge key '<<'
           if (item['<<']) {
             item = { ...item['<<'], ...item };
             delete item['<<'];
           }
 
-          // Handle standard step
           if (item.step) {
             hasJobs = true;
             if (item.step.script && Array.isArray(item.step.script)) {
@@ -61,7 +71,6 @@ export class BitbucketProvider extends VCSProvider {
               }
             }
           }
-          // Handle parallel block containing steps
           if (item.parallel && Array.isArray(item.parallel)) {
             extractSteps(item.parallel);
           }
@@ -69,7 +78,7 @@ export class BitbucketProvider extends VCSProvider {
       };
 
       if (p.default) extractSteps(p.default);
-      
+
       if (p.branches) {
         for (const branch of Object.values(p.branches)) {
           extractSteps(branch);
@@ -86,11 +95,57 @@ export class BitbucketProvider extends VCSProvider {
         }
       }
     }
-    
+
     if (commands.length === 0 && hasJobs) {
-      commands.push("HAS_JOBS");
+      commands.push('HAS_JOBS');
     }
 
     return commands;
+  }
+
+  /**
+   * Fetch the repository file tree from Bitbucket's API.
+   * Bitbucket 2.0 API provides a src endpoint with recursive directory listing.
+   */
+  async getRepoFilePaths(_options = {}) {
+    for (const branch of this.branches) {
+      const paths = [];
+      await this._walkBitbucketTree(branch, '', paths);
+      if (paths.length > 0) return paths;
+    }
+    return [];
+  }
+
+  /**
+   * Recursively walk the Bitbucket src tree to collect all file paths.
+   * @param {string} branch
+   * @param {string} dirPath - Current directory path relative to root
+   * @param {string[]} paths - Accumulator array of file paths
+   */
+  async _walkBitbucketTree(branch, dirPath, paths) {
+    const url = `https://api.bitbucket.org/2.0/repositories/${this.workspace}/${this.repo}/src/${branch}/${dirPath}`;
+    const data = await this._fetchJson(url);
+    if (!data || !Array.isArray(data.values)) return;
+
+    for (const entry of data.values) {
+      if (entry.type === 'commit_file' && entry.path) {
+        paths.push(entry.path);
+      } else if (entry.type === 'commit_directory' && entry.path) {
+        // Recurse into subdirectories, but limit depth to avoid excessive API calls
+        const depth = entry.path.split('/').length;
+        if (depth <= 6) {
+          await this._walkBitbucketTree(branch, entry.path, paths);
+        }
+      }
+    }
+  }
+
+  async getFileContent(filePath) {
+    for (const branch of this.branches) {
+      const apiUrl = `https://api.bitbucket.org/2.0/repositories/${this.workspace}/${this.repo}/src/${branch}/${filePath}`;
+      const content = await this._fetchText(apiUrl);
+      if (content !== null) return content;
+    }
+    return null;
   }
 }

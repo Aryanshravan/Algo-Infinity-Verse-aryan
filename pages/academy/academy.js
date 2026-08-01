@@ -3,6 +3,44 @@
    ============================================ */
 
 const academies = [
+  // ── Featured (new) ──
+  {
+    id: 'quorum-latency-budget',
+    name: 'Quorum Latency Budget Lab',
+    path: '/pages/academy/quorum-latency-budget-lab/index.html',
+    category: 'System Design',
+    icon: 'fa-solid fa-network-wired',
+    difficulty: 'Advanced',
+    desc: 'Hands-on quorum math (R+W>N), leader timeout storms, latency budgets, and CAP tradeoffs with quizzes.',
+  },
+  {
+    id: 'db-isolation-anomaly',
+    name: 'DB Isolation Anomaly Lab',
+    path: '/pages/academy/db-isolation-anomaly-lab/index.html',
+    category: 'Databases',
+    icon: 'fa-solid fa-database',
+    difficulty: 'Advanced',
+    desc: 'Hands-on isolation lab: dirty/non-repeatable/phantom/lost-update anomalies, schedule simulator, and quizzes.',
+  },
+  {
+    id: 'pqc-migration',
+    name: 'PQC Migration Masterclass',
+    path: '/pages/academy/pqc-migration-masterclass/index.html',
+    category: 'Cloud & DevOps',
+    icon: 'fa-solid fa-lock',
+    difficulty: 'Advanced',
+    desc: 'Post-quantum crypto masterclass: NIST ML-KEM/Dilithium, cipher audits, hybrid X25519+Kyber handshake, and migration quizzes.',
+  },
+  {
+    id: 'ebpf-zero-trust',
+    name: 'eBPF Zero-Trust Security',
+    path: '/pages/academy/ebpf-zero-trust-security/index.html',
+    category: 'Cloud & DevOps',
+    icon: 'fa-solid fa-shield-halved',
+    difficulty: 'Advanced',
+    desc: 'Interactive masterclass on eBPF probes, XDP, Falco syscall rules, ring buffers, and zero-trust runtime policy with quizzes.',
+  },
+
   // ── Frontend ──
   {
     id: 'nextjs',
@@ -76,6 +114,15 @@ const academies = [
     difficulty: 'Intermediate',
     desc: 'Create polished React apps with Material Design components, theming, and customization.',
   },
+  {
+    id: 'webassembly',
+    name: 'WebAssembly Academy',
+    path: '/pages/webassembly-academy/webassembly-academy.html',
+    category: 'Frontend',
+    icon: 'fa-solid fa-microchip',
+    difficulty: 'Intermediate',
+    desc: 'Master WebAssembly end-to-end — binary format & LEB128, module lifecycle, linear memory, JS interop, WAT & toolchains, SIMD, and security with a live WAT simulator.',
+  },
 
   // ── Backend ──
   {
@@ -124,6 +171,15 @@ const academies = [
     desc: 'Enterprise-grade Node.js backend development with NestJS modular architecture.',
   },
   {
+    id: 'graphql',
+    name: 'GraphQL Academy',
+    path: '/pages/graphql-academy/graphql-academy.html',
+    category: 'Backend',
+    icon: 'fa-brands fa-graphql',
+    difficulty: 'Intermediate',
+    desc: 'Master GraphQL end-to-end — SDL & types, queries & mutations, resolvers & DataLoader, subscriptions, Apollo Client, and federation & security with a live query playground.',
+  },
+  {
     id: 'firebase',
     name: 'Firebase Academy',
     path: '/pages/firebase-academy/firebase-academy.html',
@@ -168,6 +224,44 @@ const academies = [
     difficulty: 'Beginner',
     desc: 'Learn server-side JavaScript with Node.js, event-driven architecture, and npm ecosystem.',
   },
+  {
+    id: 'websocket-academy',
+    name: 'WebSocket & SSE Academy',
+    path: '/pages/websocket-academy/websocket-academy.html',
+    category: 'Backend',
+    icon: 'fa-solid fa-wifi',
+    difficulty: 'Intermediate',
+    desc: 'Learn WebSocket and Server-Sent Events for real-time communication -- from protocol fundamentals to Socket.IO, reconnection strategies, and SSE patterns.',
+  },
+  {
+    id: 'grpc-academy',
+    name: 'gRPC & Protobuf Academy',
+    path: '/pages/grpc-academy/grpc-academy.html',
+    category: 'Backend',
+    icon: 'fa-solid fa-network-wired',
+    difficulty: 'Intermediate',
+    desc: 'Master high-performance RPC with gRPC and Protocol Buffers — message definitions, service definitions, HTTP/2 communication, streaming, and error handling.',
+  },
+  {
+    id: 'rails',
+    name: 'Ruby on Rails Academy',
+    path: '/pages/rails-academy/rails-academy.html',
+    category: 'Backend',
+    icon: 'fa-solid fa-gem',
+    difficulty: 'Intermediate',
+    desc: 'Master the Ruby on Rails framework — MVC architecture, routing, controllers, ActiveRecord & migrations, ERB views, authentication, and deployment.',
+  },
+
+  // ── System Design ──
+  {
+    id: 'system-design',
+    name: 'System Design Academy',
+    path: '/pages/system-design-academy/system-design-academy.html',
+    category: 'System Design',
+    icon: 'fa-solid fa-sitemap',
+    difficulty: 'Advanced',
+    desc: 'Master system design with 10 modules covering distributed systems, microservices, real-time systems, observability, and case studies from Uber to Netflix.',
+  },
 
   // ── Cloud & DevOps ──
   {
@@ -187,6 +281,26 @@ const academies = [
     icon: 'fa-brands fa-docker',
     difficulty: 'Intermediate',
     desc: 'Containerize apps with Docker and orchestrate at scale with Kubernetes.',
+  },
+  {
+    id: 'terraform',
+    name: 'Terraform & IaC Academy',
+    path: '/pages/terraform-academy/terraform-academy.html',
+    category: 'Cloud & DevOps',
+    icon: 'terraform',
+    difficulty: 'Intermediate',
+    desc: 'Master Infrastructure as Code with Terraform — HCL syntax, providers & resources, state & backends, modules, workspaces, and Terraform Cloud CI/CD.',
+  },
+
+  // ── Version Control ──
+  {
+    id: 'git-academy',
+    name: 'Git & GitHub Academy',
+    path: '/pages/git-academy/git-academy.html',
+    category: 'DevOps & CI/CD',
+    icon: 'fa-brands fa-git-alt',
+    difficulty: 'Beginner',
+    desc: 'Master Git and GitHub — from version control basics to branching, collaboration, and GitHub Actions CI/CD.',
   },
 
   // ── Databases ──
@@ -269,10 +383,12 @@ const academies = [
 /* ─── Categories with counts ─── */
 const categoryDefs = [
   { label: 'All', key: 'all', count: academies.length },
-  { label: 'Frontend', key: 'frontend', count: 8 },
-  { label: 'Backend', key: 'backend', count: 10 },
-  { label: 'Cloud & DevOps', key: 'cloud-devops', count: 2 },
+  { label: 'Frontend', key: 'frontend', count: 9 },
+  { label: 'Backend', key: 'backend', count: 14 },
+  { label: 'System Design', key: 'system-design', count: 1 },
+  { label: 'Cloud & DevOps', key: 'cloud-devops', count: 3 },
   { label: 'Databases', key: 'databases', count: 7 },
+  { label: 'DevOps & CI/CD', key: 'devops-ci-cd', count: 1 },
   { label: 'AI / Misc', key: 'ai-misc', count: 1 },
 ];
 
@@ -280,8 +396,10 @@ const categoryDefs = [
 const categoryColors = {
   frontend: '#bae6fd',
   backend: '#99f6e4',
+  'system-design': '#e9d5ff',
   'cloud-devops': '#bfdbfe',
   databases: '#fed7aa',
+  'devops-ci-cd': '#fed7aa',
   'ai-misc': '#fecaca',
 };
 
@@ -424,6 +542,8 @@ const svgIcons = {
     '<circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="2"/><text x="12" y="16" text-anchor="middle" font-size="14" font-weight="bold" fill="currentColor" font-family="system-ui, sans-serif">R</text>',
   go:
     '<circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="2"/><text x="12" y="16" text-anchor="middle" font-size="14" font-weight="bold" fill="currentColor" font-family="system-ui, sans-serif">Go</text>',
+  terraform:
+    'M1.44 0v7.575l6.561 3.79V3.787zm21.12 4.227l-6.561 3.791v7.574l6.56-3.787zM8.72 4.23v7.575l6.561 3.787V8.018zm0 8.405v7.575L15.28 24v-7.578z',
 };
 
 const iconViewBox = {
@@ -505,6 +625,7 @@ function initFlipAnimation() {
     { name: 'Svelte', cat: 'frontend' },
     { name: 'Vue.js', cat: 'frontend' },
     { name: 'Tailwind', cat: 'frontend' },
+    { name: 'WebAssembly', cat: 'frontend' },
     { name: 'FastAPI', cat: 'backend' },
     { name: 'Node.js', cat: 'backend' },
     { name: 'TypeScript', cat: 'backend' },
@@ -515,8 +636,10 @@ function initFlipAnimation() {
     { name: 'Kafka', cat: 'backend' },
     { name: 'Rust', cat: 'backend' },
     { name: 'Go', cat: 'backend' },
+    { name: 'System Design', cat: 'system-design' },
     { name: 'AWS', cat: 'cloud-devops' },
     { name: 'Docker & K8s', cat: 'cloud-devops' },
+    { name: 'Terraform', cat: 'cloud-devops' },
     { name: 'PostgreSQL', cat: 'databases' },
     { name: 'MongoDB', cat: 'databases' },
     { name: 'Elasticsearch', cat: 'databases' },
@@ -524,7 +647,12 @@ function initFlipAnimation() {
     { name: 'SQLite', cat: 'databases' },
     { name: 'Redis', cat: 'databases' },
     { name: 'Cassandra', cat: 'databases' },
+    { name: 'Git & GitHub', cat: 'devops-ci-cd' },
     { name: 'Fail', cat: 'ai-misc' },
+    { name: 'WebSocket & SSE', cat: 'backend' },
+    { name: 'gRPC & Protobuf', cat: 'backend' },
+    { name: 'Rails', cat: 'backend' },
+    { name: 'GraphQL', cat: 'backend' },
   ];
 
   const inner = document.getElementById('acFlipInner');

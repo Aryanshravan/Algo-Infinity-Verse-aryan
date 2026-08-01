@@ -4,8 +4,11 @@ import { setupWebRTCSignaling } from './backend/services/webrtc.service.js';
 import crypto from 'crypto';
 import fs from 'fs/promises';
 import http from 'http';
+import zlib from 'zlib';
+import util from 'util';
 import express from 'express';
 import apiRouter from './backend/routes/api.js';
+import { errorHandler } from './backend/middleware/errorHandler.js';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { spawn } from 'child_process';
@@ -20,7 +23,7 @@ import {
   mapSkillsToRoadmapTopics,
 } from './backend/resume-analyzer/skills.js';
 import { getSuggestions } from './backend/resume-analyzer/suggestions.js';
-import { analyzeWorkflow } from './backend/repository-analyzer/cicdValidator.js';
+import { analyzeRepository } from './backend/repository-analyzer/repoAnalyzer.js';
 import { VCSFactory } from './backend/vcs/VCSFactory.js';
 import {
   enqueueBulkAudit,
@@ -62,17 +65,24 @@ import {
   deleteAccountLimiter,
   resendVerificationLimiter,
   resumeAnalysisLimiter,
-  repoAnalysisLimiter,
   sdlcAdvisorLimiter,
   predictionLimiter,
   bulkAuditLimiter,
   logErrorLimiter,
   aiHintLimiter,
+  sharedSnippetLimiter,
 } from './backend/utils/rateLimiter.js';
+import { applyRedisRateLimit, repoAnalysisRedisLimiter } from './backend/utils/redisRateLimiter.js';
 import { generateAIHint } from './backend/services/aiHint.service.js';
 import { applySM2 } from './backend/services/memory.service.js';
 import { sendVerificationEmail } from './backend/services/email.service.js';
 import { TEST_CASES, runDetailedTestCases } from './pages/Dsa-Battle/Battleservice.js';
+import battlesHandler from './battles.js';
+import {
+  createSharedSnippet,
+  getSharedSnippet,
+  sharedSnippetUrl,
+} from './backend/controllers/sharedSnippets.js';
 
 // import { instrumentJS } from './modules/code-tracer.js';
 
@@ -138,13 +148,7 @@ const REFRESH_COOKIE = 'aiv_refresh';
 const DELETION_LOG_FILE = path.join(DATA_DIR, 'account-deletions.json');
 // ────────────────────────────────────────────────────────────────────────────
 
-const protectedPaths = new Set([
-  '/community',
-  '/community.html',
-  '/support-page',
-  '/support-page/',
-  '/support-page/index.html',
-]);
+const protectedPaths = new Set(['/community', '/community.html']);
 
 const mimeTypes = {
   '.css': 'text/css; charset=utf-8',
@@ -570,7 +574,7 @@ function redirect(res, location, headers = {}) {
 // verified as pure HMAC-signed JWTs (see backend/services/auth.service.js).
 // No third-party auth provider is involved.
 
-function getSession(req) {
+async function getSession(req) {
   const cookies = parseCookies(req.headers.cookie || '');
   return verifyAccessToken(cookies[SESSION_COOKIE]);
 }
@@ -600,12 +604,12 @@ function isProtectedRoute(pathname) {
   return protectedPaths.has(pathname);
 }
 
-function authorizeRequest(req, pathname) {
+async function authorizeRequest(req, pathname) {
   if (!isProtectedRoute(pathname)) {
     return { authorized: true };
   }
 
-  const session = getSession(req);
+  const session = await getSession(req);
 
   if (!session) {
     return {
@@ -673,7 +677,7 @@ async function handleApi(req, res, pathname) {
 
   if (pathname === '/api/team-profile' && req.method === 'GET') {
     try {
-      const session = getSession(req);
+      const session = await getSession(req);
       if (!session) {
         return sendJson(res, 401, { error: 'Login required.' });
       }
@@ -712,7 +716,7 @@ async function handleApi(req, res, pathname) {
 
   if (pathname === '/api/team-profile' && req.method === 'POST') {
     try {
-      const session = getSession(req);
+      const session = await getSession(req);
       if (!session) {
         return sendJson(res, 401, { error: 'Login required.' });
       }
@@ -883,14 +887,13 @@ async function handleApi(req, res, pathname) {
   }
 
   if (pathname === '/api/analyze-repository' && req.method === 'POST') {
-    if (
-      !applyRateLimit(
-        req,
-        res,
-        repoAnalysisLimiter,
-        'Too many repository analysis requests. Please try again later.'
-      )
-    ) {
+    const allowed = await applyRedisRateLimit(
+      req,
+      res,
+      repoAnalysisRedisLimiter,
+      'Too many repository analysis requests. Please try again later.'
+    );
+    if (!allowed) {
       return;
     }
     try {
@@ -923,55 +926,17 @@ async function handleApi(req, res, pathname) {
       }
 
       const provider = VCSFactory.getProvider(repoUrl);
-      const workflows = await provider.getNormalizedWorkflows();
 
-      if (workflows.length === 0) {
-        let recommendation =
-          'No GitHub Actions workflows found in .github/workflows. Add a CI/CD pipeline to automate testing.';
-        if (repoUrl.includes('gitlab.com')) {
-          recommendation =
-            'No GitLab CI/CD configuration found (.gitlab-ci.yml). Add a CI/CD pipeline to automate testing.';
-        } else if (repoUrl.includes('bitbucket.org')) {
-          recommendation =
-            'No Bitbucket Pipelines configuration found (bitbucket-pipelines.yml). Add a CI/CD pipeline to automate testing.';
-        }
-        return sendJson(res, 200, {
-          score: 0,
-          workflowsAnalyzed: 0,
-          details: { hasDependencies: false, hasTests: false },
-          recommendations: [recommendation],
-        });
-      }
-
-      let bestScore = -1;
-      let overallDeps = false;
-      let overallTests = false;
-
-      for (const wf of workflows) {
-        const result = analyzeWorkflow(wf.commands);
-        if (result.score > bestScore) bestScore = result.score;
-        if (result.hasDependencies) overallDeps = true;
-        if (result.hasTests) overallTests = true;
-      }
-
-      const recommendations = [];
-      if (bestScore === 20)
-        recommendations.push('Workflows found, but they contain no functional jobs or steps.');
-      if (bestScore === 50)
-        recommendations.push("Add explicit testing commands (like 'npm test') to your workflow.");
-      if (bestScore === 75)
-        recommendations.push('Ensure dependencies are installed securely before running tests.');
-      if (bestScore === 100)
-        recommendations.push('Excellent! Fully functional CI/CD pipeline detected.');
+      const result = await analyzeRepository(provider);
 
       return sendJson(res, 200, {
-        score: bestScore,
-        workflowsAnalyzed: workflows.length,
-        details: {
-          hasDependencies: overallDeps,
-          hasTests: overallTests,
-        },
-        recommendations,
+        overallScore: result.overallScore,
+        ciCd: result.ciCd,
+        codeQuality: result.codeQuality,
+        security: result.security,
+        documentation: result.documentation,
+        recommendations: result.recommendations,
+        warnings: result.warnings,
       });
     } catch (err) {
       console.error('Repository analysis error:', err.message);
@@ -1104,7 +1069,7 @@ async function handleApi(req, res, pathname) {
     if (!user)
       return sendJson(res, 401, { error: 'User not found' }, { 'Set-Cookie': clearAuthCookies() });
 
-    const accessToken = createAccessToken(user);
+    const accessToken = await createAccessToken(user);
     const refreshToken = await createRefreshToken(user, decoded.familyId);
 
     return sendJson(
@@ -1126,7 +1091,7 @@ async function handleApi(req, res, pathname) {
         rating: 1200,
         ratingHistory: [],
       };
-      const token = createAccessToken(guestUser);
+      const token = await createAccessToken(guestUser);
       const refreshToken = await createRefreshToken(guestUser);
       return sendJson(
         res,
@@ -1141,7 +1106,7 @@ async function handleApi(req, res, pathname) {
   }
 
   if (pathname === '/api/session' && req.method === 'GET') {
-    const session = getSession(req);
+    const session = await getSession(req);
 
     if (!session) {
       return sendJson(res, 200, { authenticated: false, user: null });
@@ -1210,7 +1175,7 @@ async function handleApi(req, res, pathname) {
         );
       }
 
-      const token = createAccessToken(user);
+      const token = await createAccessToken(user);
       const refreshToken = await createRefreshToken(user);
       loginLimiter.reset(getClientIdentifier(req));
       return sendJson(
@@ -1262,7 +1227,7 @@ async function handleApi(req, res, pathname) {
         }
       }
 
-      const token = createAccessToken(user);
+      const token = await createAccessToken(user);
       const refreshToken = await createRefreshToken(user);
       loginLimiter.reset(getClientIdentifier(req));
       return sendJson(
@@ -1288,7 +1253,7 @@ async function handleApi(req, res, pathname) {
     ) {
       return;
     }
-    const session = getSession(req);
+    const session = await getSession(req);
 
     if (!session) {
       return sendJson(res, 401, {
@@ -1358,7 +1323,7 @@ async function handleApi(req, res, pathname) {
   }
 
   if (pathname === '/api/deactivate-account' && req.method === 'POST') {
-    const session = getSession(req);
+    const session = await getSession(req);
 
     if (!session) {
       return sendJson(res, 401, {
@@ -1402,7 +1367,7 @@ async function handleApi(req, res, pathname) {
     ) {
       return;
     }
-    const session = getSession(req);
+    const session = await getSession(req);
 
     if (!session) {
       return sendJson(res, 401, {
@@ -1503,7 +1468,7 @@ async function handleApi(req, res, pathname) {
     return sendJson(res, 200, { message: 'Reset email sent if account exists.' });
   }
   if (pathname === '/api/feedback' && req.method === 'POST') {
-    const session = getSession(req);
+    const session = await getSession(req);
     let payload;
     try {
       payload = await readJsonBody(req);
@@ -1568,7 +1533,7 @@ async function handleApi(req, res, pathname) {
   }
 
   if (pathname === '/api/user/profile' && req.method === 'GET') {
-    const session = getSession(req);
+    const session = await getSession(req);
 
     // Read the authenticated user's persisted record so the profile reflects
     // real progress saved via /api/progress, /api/study-rooms results, etc.
@@ -1632,7 +1597,7 @@ async function handleApi(req, res, pathname) {
   }
 
   if (pathname === '/api/interview-experiences' && req.method === 'POST') {
-    const session = getSession(req);
+    const session = await getSession(req);
     let payload;
     try {
       payload = await readJsonBody(req);
@@ -1681,7 +1646,7 @@ async function handleApi(req, res, pathname) {
   }
 
   if (pathname === '/api/audit/history' && req.method === 'POST') {
-    const session = getSession(req);
+    const session = await getSession(req);
     if (!session) return sendJson(res, 401, { error: 'Login required.' });
 
     try {
@@ -1707,7 +1672,7 @@ async function handleApi(req, res, pathname) {
   }
 
   if (pathname === '/api/audit/history' && req.method === 'GET') {
-    const session = getSession(req);
+    const session = await getSession(req);
     if (!session) return sendJson(res, 401, { error: 'Login required.' });
 
     const url = new URL(req.url, `http://${req.headers.host}`);
@@ -1731,7 +1696,7 @@ async function handleApi(req, res, pathname) {
   }
 
   if (pathname === '/api/audit/trends' && req.method === 'GET') {
-    const session = getSession(req);
+    const session = await getSession(req);
     if (!session) return sendJson(res, 401, { error: 'Login required.' });
 
     const url = new URL(req.url, `http://${req.headers.host}`);
@@ -1757,7 +1722,7 @@ async function handleApi(req, res, pathname) {
   }
 
   if (pathname === '/api/memory/log' && req.method === 'POST') {
-    const session = getSession(req);
+    const session = await getSession(req);
     if (!session) return sendJson(res, 401, { error: 'Login required.' });
 
     let payload;
@@ -1796,7 +1761,7 @@ async function handleApi(req, res, pathname) {
   }
 
   if (pathname === '/api/memory/due' && req.method === 'GET') {
-    const session = getSession(req);
+    const session = await getSession(req);
     if (!session) return sendJson(res, 401, { error: 'Login required.' });
 
     const store = await readMemoryStore();
@@ -1808,7 +1773,7 @@ async function handleApi(req, res, pathname) {
   }
 
   if (pathname === '/api/memory/all' && req.method === 'GET') {
-    const session = getSession(req);
+    const session = await getSession(req);
     if (!session) return sendJson(res, 401, { error: 'Login required.' });
 
     const store = await readMemoryStore();
@@ -1822,7 +1787,7 @@ async function handleApi(req, res, pathname) {
 
   // ── Quiz Results ──────────────────────────────────────────────────────────
   if (pathname === '/api/quiz-results' && req.method === 'POST') {
-    const session = getSession(req);
+    const session = await getSession(req);
     if (!session) return sendJson(res, 401, { error: 'Authentication required.' });
 
     let payload;
@@ -1888,7 +1853,7 @@ async function handleApi(req, res, pathname) {
   }
 
   if (pathname === '/api/quiz-results' && req.method === 'GET') {
-    const session = getSession(req);
+    const session = await getSession(req);
     if (!session) return sendJson(res, 401, { error: 'Authentication required.' });
 
     try {
@@ -1926,13 +1891,13 @@ async function handleApi(req, res, pathname) {
   }
 
   if (pathname === '/api/reports/export/pdf' || pathname === '/api/reports/export/image') {
-    const session = getSession(req);
+    const session = await getSession(req);
     if (!session) return sendJson(res, 401, { error: 'Authentication required.' });
     return await handleReportRequest(req, res, pathname, session);
   }
 
   if (pathname === '/api/reports/status' && req.method === 'GET') {
-    const session = getSession(req);
+    const session = await getSession(req);
     if (!session) return sendJson(res, 401, { error: 'Authentication required.' });
 
     const urlParams = new URL(req.url, `http://${req.headers.host}`).searchParams;
@@ -1967,7 +1932,7 @@ async function handleApi(req, res, pathname) {
   }
 
   if (pathname === '/api/user/benchmark' && req.method === 'GET') {
-    const session = getSession(req);
+    const session = await getSession(req);
     if (!session) return sendJson(res, 401, { error: 'Authentication required.' });
 
     try {
@@ -1981,7 +1946,7 @@ async function handleApi(req, res, pathname) {
 
   // ── Problem Notes & Mnemonics endpoints ──────────────────────────────────
   if (pathname === '/api/problem-notes' && req.method === 'GET') {
-    const session = getSession(req);
+    const session = await getSession(req);
     if (!session) return sendJson(res, 401, { error: 'Login required.' });
 
     try {
@@ -1996,7 +1961,7 @@ async function handleApi(req, res, pathname) {
 
   const notesMatch = pathname.match(/^\/api\/problem-notes\/([^/]+)$/);
   if (notesMatch && req.method === 'PUT') {
-    const session = getSession(req);
+    const session = await getSession(req);
     if (!session) return sendJson(res, 401, { error: 'Login required.' });
 
     const problemId = notesMatch[1];
@@ -2035,7 +2000,7 @@ async function handleApi(req, res, pathname) {
 
   // ── Spaced Repetition Practice Problems endpoints ─────────────────────────
   if (pathname === '/api/spaced-repetition' && req.method === 'GET') {
-    const session = getSession(req);
+    const session = await getSession(req);
     if (!session) return sendJson(res, 401, { error: 'Login required.' });
 
     try {
@@ -2050,7 +2015,7 @@ async function handleApi(req, res, pathname) {
 
   const repMatch = pathname.match(/^\/api\/spaced-repetition\/([^/]+)$/);
   if (repMatch && req.method === 'PUT') {
-    const session = getSession(req);
+    const session = await getSession(req);
     if (!session) return sendJson(res, 401, { error: 'Login required.' });
 
     const problemId = repMatch[1];
@@ -2087,7 +2052,7 @@ async function handleApi(req, res, pathname) {
 
   // ── Smart Revision endpoints ──────────────────────────────────────────────
   if (pathname === '/api/revision' && req.method === 'GET') {
-    const session = getSession(req);
+    const session = await getSession(req);
     if (!session) return sendJson(res, 401, { error: 'Login required.' });
 
     try {
@@ -2113,7 +2078,7 @@ async function handleApi(req, res, pathname) {
   }
 
   if (pathname === '/api/revision' && (req.method === 'PUT' || req.method === 'POST')) {
-    const session = getSession(req);
+    const session = await getSession(req);
     if (!session) return sendJson(res, 401, { error: 'Login required.' });
 
     let payload;
@@ -2162,7 +2127,7 @@ async function handleApi(req, res, pathname) {
   }
 
   if (pathname === '/api/study-rooms' && req.method === 'POST') {
-    const session = getSession(req);
+    const session = await getSession(req);
     if (!session) return sendJson(res, 401, { error: 'Login required.' });
 
     let body;
@@ -2213,7 +2178,7 @@ async function handleApi(req, res, pathname) {
     pathname.endsWith('/results') &&
     req.method === 'POST'
   ) {
-    const session = getSession(req);
+    const session = await getSession(req);
     if (!session) return sendJson(res, 401, { error: 'Login required.' });
 
     const match = pathname.match(/^\/api\/study-rooms\/([^/]+)\/results$/);
@@ -2258,23 +2223,91 @@ async function handleApi(req, res, pathname) {
     }
   }
 
+  // ── Shared DSA Insight routes ──────────────────────────────────────────────
+  // The Code Playground "Share a DSA Insight" flow creates a short public link
+  // (/shared/:id) that resolves back to a read-only copy of { language, title,
+  // code }. The store lives in backend/controllers/sharedSnippets.js and
+  // expires snippets after 7 days.
+
+  if (pathname === '/api/shared' && req.method === 'POST') {
+    if (
+      !applyRateLimit(
+        req,
+        res,
+        sharedSnippetLimiter,
+        'Too many shared links created. Please try again later.'
+      )
+    ) {
+      return;
+    }
+    let body = {};
+    try {
+      body = await readJsonBody(req);
+    } catch {
+      body = {};
+    }
+    const language = typeof body.language === 'string' ? body.language : 'javascript';
+    const title = typeof body.title === 'string' ? body.title : '';
+    const code = typeof body.code === 'string' ? body.code : '';
+
+    if (!code.trim()) {
+      return sendJson(res, 400, { error: 'Nothing to share — the editor is empty.' });
+    }
+    if (code.length > 100000) {
+      return sendJson(res, 413, { error: 'Code is too large to share (max 100KB).' });
+    }
+
+    try {
+      const snippet = await createSharedSnippet({ language, title, code });
+      return sendJson(res, 201, {
+        id: snippet.id,
+        url: sharedSnippetUrl(snippet.id),
+        language: snippet.language,
+        title: snippet.title,
+        createdAt: snippet.createdAt,
+        expiresAt: snippet.expiresAt,
+      });
+    } catch (err) {
+      console.error('[shared] Failed to create snippet:', err);
+      return sendJson(res, 500, { error: err.message || 'Failed to create shared link.' });
+    }
+  }
+
+  // GET /api/shared/:id — public lookup used by the /shared/:id page.
+  const sharedGetMatch = pathname.match(/^\/api\/shared\/([^/]+)\/?$/);
+  if (sharedGetMatch && req.method === 'GET') {
+    const snippet = await getSharedSnippet(sharedGetMatch[1]);
+    if (!snippet) {
+      return sendJson(res, 404, { error: 'Shared insight not found or has expired.' });
+    }
+    return sendJson(res, 200, snippet);
+  }
+
   // ── Battle routes ──────────────────────────────────────────────────────────
-  // Battle mode relies on a document store (previously Firestore). It is
-  // disabled in this pure-JWT build, so every battle route returns 503.
-  // All routes still require an active session — unauthenticated requests get 401.
+  // Battle mode relies on a Firestore document store (see ./battles.js). The
+  // handler is mounted here so the email-invite flow — createBattle,
+  // joinBattle, submitSolution — works under both the persistent Node server
+  // and Vercel's serverless catch-all (api/[...path].js). All routes require
+  // an active session; unauthenticated requests get 401.
 
   if (pathname === '/api/battles' && req.method === 'POST') {
-    const session = getSession(req);
-    if (!session) return sendJson(res, 401, { error: 'Login required.' });
-    return sendJson(res, 503, { error: 'Battle mode is currently unavailable.' });
+    return battlesHandler(req, res);
   }
 
   // GET /api/battles/history  — must be declared BEFORE the :id pattern below
   // or "history" gets captured as a battle ID.
   if (pathname === '/api/battles/history' && req.method === 'GET') {
-    const session = getSession(req);
-    if (!session) return sendJson(res, 401, { error: 'Login required.' });
-    return sendJson(res, 503, { error: 'Battle mode is currently unavailable.' });
+    return battlesHandler(req, res);
+  }
+
+  const battleGetMatch = pathname.match(/^\/api\/battles\/([^/]+)\/?$/);
+  if (battleGetMatch && battleGetMatch[1] !== 'history' && req.method === 'GET') {
+    return battlesHandler(req, res);
+  }
+
+  const battleActionMatch = pathname.match(/^\/api\/battles\/([^/]+)\/(join|submit)\/?$/);
+  if (battleActionMatch && req.method === 'POST') {
+    return battlesHandler(req, res);
   }
 
   // ── End battle routes ─────
@@ -2293,7 +2326,7 @@ async function handleApi(req, res, pathname) {
     users[idx].verifyTokenExpiry = null;
     await writeUsers(users);
 
-    const sessionToken = createAccessToken(users[idx]);
+    const sessionToken = await createAccessToken(users[idx]);
     const refreshToken = await createRefreshToken(users[idx]);
     res.setHeader('Set-Cookie', authCookies(sessionToken, refreshToken, req));
     return sendJson(res, 200, { ok: true });
@@ -2378,8 +2411,61 @@ async function handleApi(req, res, pathname) {
 
   // ── Execution History Endpoints ─────────────────────────────────────────
 
+  if (pathname === '/api/executions' && req.method === 'POST') {
+    const session = await getSession(req);
+    if (!session) return sendJson(res, 401, { error: 'Login required.' });
+
+    try {
+      const payload = await readJsonBody(req);
+      const {
+        sourceCode,
+        originalCode,
+        language,
+        stdin,
+        stdout,
+        stderr,
+        exitCode,
+        cpuTime,
+        memory,
+        error,
+        problemId,
+      } = payload;
+
+      if (!sourceCode || !language) {
+        return sendJson(res, 400, { error: 'sourceCode and language are required.' });
+      }
+
+      const execution = {
+        id: crypto.randomUUID(),
+        userId: session.sub,
+        sourceCode,
+        originalCode: originalCode || '',
+        language: language.toLowerCase(),
+        stdin: stdin || '',
+        stdout: stdout || '',
+        stderr: stderr || '',
+        exitCode: typeof exitCode === 'number' ? exitCode : 0,
+        cpuTime: cpuTime !== undefined ? String(cpuTime) : '',
+        memory: memory !== undefined ? Number(memory) : 0,
+        error: error || null,
+        problemId: problemId !== undefined && problemId !== null ? String(problemId) : null,
+        createdAt: new Date().toISOString(),
+        variableSnapshots: [],
+      };
+
+      await updateExecutionStore((store) => {
+        store.push(execution);
+      });
+
+      return sendJson(res, 201, { success: true, execution });
+    } catch (err) {
+      console.error('Error saving execution:', err);
+      return sendJson(res, 500, { error: 'Failed to save execution.' });
+    }
+  }
+
   if (pathname === '/api/executions' && req.method === 'GET') {
-    const session = getSession(req);
+    const session = await getSession(req);
     if (!session) return sendJson(res, 401, { error: 'Login required.' });
 
     try {
@@ -2430,7 +2516,7 @@ async function handleApi(req, res, pathname) {
   }
 
   if (pathname.startsWith('/api/executions/') && req.method === 'GET') {
-    const session = getSession(req);
+    const session = await getSession(req);
     if (!session) return sendJson(res, 401, { error: 'Login required.' });
 
     const execId = pathname.slice('/api/executions/'.length);
@@ -2453,7 +2539,7 @@ async function handleApi(req, res, pathname) {
     req.method === 'POST' &&
     pathname.endsWith('/snapshots')
   ) {
-    const session = getSession(req);
+    const session = await getSession(req);
     if (!session) return sendJson(res, 401, { error: 'Login required.' });
 
     const execId = pathname.split('/')[3];
@@ -2853,7 +2939,7 @@ CRITICAL RULES:
       const totalPages = Math.ceil(totalUsers / limit);
       const paginatedUsers = allLeaders.slice(offset, offset + limit);
 
-      const session = getSession(req);
+      const session = await getSession(req);
       return sendJson(res, 200, {
         leaders: paginatedUsers,
         currentUserId: session?.sub || null,
@@ -2879,7 +2965,7 @@ CRITICAL RULES:
 
   // ── User Progress Sync ───────────────────────────────────────────────────
   if (pathname === '/api/progress' && req.method === 'PUT') {
-    const session = getSession(req);
+    const session = await getSession(req);
     if (!session) return sendJson(res, 401, { error: 'Authentication required.' });
     try {
       const body = await readJsonBody(req);
@@ -2918,6 +3004,14 @@ CRITICAL RULES:
     }
   }
 
+  // ── Code Execution (local dev) ──────────────────────────────────────
+  if (pathname === '/api/execute/problem' && req.method === 'POST') {
+    return sendJson(res, 200, {
+      success: false,
+      message: 'Server-side execution not available in local dev',
+    });
+  }
+
   return sendJson(res, 404, { error: 'Not found.' });
 }
 
@@ -2937,6 +3031,16 @@ function resolveStaticPath(pathname) {
     '/rust-learning.html': 'pages/rust-academy/rust-academy.html',
     '/rust-academy': 'pages/rust-academy/rust-academy.html',
     '/rust-academy.html': 'pages/rust-academy/rust-academy.html',
+    '/terraform-academy': 'pages/terraform-academy/terraform-academy.html',
+    '/terraform-academy.html': 'pages/terraform-academy/terraform-academy.html',
+    '/graphql-academy': 'pages/graphql-academy/graphql-academy.html',
+    '/graphql-academy.html': 'pages/graphql-academy/graphql-academy.html',
+    '/graphql-academy.css': 'pages/graphql-academy/graphql-academy.css',
+    '/graphql-academy.js': 'pages/graphql-academy/graphql-academy.js',
+    '/webassembly-academy': 'pages/webassembly-academy/webassembly-academy.html',
+    '/webassembly-academy.html': 'pages/webassembly-academy/webassembly-academy.html',
+    '/webassembly-academy.css': 'pages/webassembly-academy/webassembly-academy.css',
+    '/webassembly-academy.js': 'pages/webassembly-academy/webassembly-academy.js',
     '/python-learning': 'pages/learning/python-learning/python-learning.html',
     '/javascript-learning': 'pages/learning/javascript-learning/javascript-learning.html',
     '/dbms-learning': 'pages/learning/dbms-learning/dbms-learning.html',
@@ -2953,6 +3057,8 @@ function resolveStaticPath(pathname) {
     '/algorithm-timeline': 'pages/visualizers/algorithm-timeline/algorithm-timeline.html',
     '/practice': 'pages/practice/problems.html',
     '/practice.html': 'pages/practice/problems.html',
+    '/practice/editor': 'pages/practice/editor.html',
+    '/practice/editor.html': 'pages/practice/editor.html',
     '/support-page': 'support-page/index.html',
     '/support-page/': 'support-page/index.html',
     '/leaderboard': 'pages/leaderboard/leaderboard.html',
@@ -3004,11 +3110,14 @@ function resolveStaticPath(pathname) {
   return filePath;
 }
 
-function getCacheControlHeader(ext) {
+function getCacheControlHeader(ext, filename = '') {
   if (ext === '.html') {
     return 'no-store, no-cache, must-revalidate, private';
   }
   if (ext === '.css' || ext === '.js' || ext === '.json') {
+    if (/[-.][a-fA-F0-9]{8,}\.(js|css)$/.test(filename)) {
+      return 'public, max-age=31536000, immutable';
+    }
     return 'no-cache, public';
   }
   if (['.png', '.jpg', '.jpeg', '.gif', '.svg', '.ico', '.webp'].includes(ext)) {
@@ -3047,7 +3156,7 @@ async function serveStatic(req, res, pathname) {
         /<meta\b(?=[^>]*\sname\s*=\s*["']auth-required["'])(?=[^>]*\scontent\s*=\s*["']true["'])[^>]*>/i.test(
           htmlContent
         );
-      if (requiresAuth && !getSession(req)) {
+      if (requiresAuth && !(await getSession(req))) {
         return redirect(res, `/login?next=${encodeURIComponent(pathname)}`);
       }
     }
@@ -3055,8 +3164,21 @@ async function serveStatic(req, res, pathname) {
     // ETag generation based on file size and mtime
     const mtimeMs = fileStat.mtime.getTime();
     const size = fileStat.size;
-    const etag = `W/"${size}-${mtimeMs}"`;
-    const cacheControl = getCacheControlHeader(ext);
+    const baseEtag = `W/"${size}-${mtimeMs}"`;
+
+    const filename = path.basename(target);
+    const cacheControl = getCacheControlHeader(ext, filename);
+
+    const acceptEncoding = req.headers['accept-encoding'] || '';
+    const isCompressible = ['.html', '.css', '.js', '.json', '.svg', '.txt'].includes(ext);
+
+    let encoding = '';
+    if (isCompressible) {
+      if (acceptEncoding.includes('br')) encoding = 'br';
+      else if (acceptEncoding.includes('gzip')) encoding = 'gzip';
+    }
+
+    const etag = encoding ? `${baseEtag}-${encoding}` : baseEtag;
 
     const headers = {
       'X-Content-Type-Options': 'nosniff',
@@ -3065,6 +3187,7 @@ async function serveStatic(req, res, pathname) {
       'Referrer-Policy': 'strict-origin-when-cross-origin',
       'Permissions-Policy': 'geolocation=(), camera=(), microphone=()',
       'Cache-Control': cacheControl,
+      Vary: 'Accept-Encoding',
       ETag: etag,
     };
 
@@ -3083,8 +3206,9 @@ async function serveStatic(req, res, pathname) {
       headers['Content-Security-Policy'] =
         `default-src 'self'; ` +
         `script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.gstatic.com https://apis.google.com https://cdn.tailwindcss.com https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://esm.sh https://cdn.socket.io; ` +
-        `style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com https://cdn.tailwindcss.com; ` +
-        `font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com; ` +
+        `worker-src 'self' blob:; ` +
+        `style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com https://cdn.tailwindcss.com https://cdn.jsdelivr.net; ` +
+        `font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; ` +
         `img-src 'self' data: https: blob:; ` +
         `connect-src 'self' https: wss:; ` +
         `frame-src 'self' blob: https://*.firebaseapp.com; ` +
@@ -3092,6 +3216,14 @@ async function serveStatic(req, res, pathname) {
         `base-uri 'self';`;
     } else {
       content = await fs.readFile(target);
+    }
+
+    if (encoding === 'br') {
+      headers['Content-Encoding'] = 'br';
+      content = await util.promisify(zlib.brotliCompress)(content);
+    } else if (encoding === 'gzip') {
+      headers['Content-Encoding'] = 'gzip';
+      content = await util.promisify(zlib.gzip)(content);
     }
 
     headers['Content-Type'] = mimeTypes[ext] || 'application/octet-stream';
@@ -3113,7 +3245,7 @@ async function serve404Page(req, res) {
   }
 }
 
-async function requestHandler(req, res) {
+async function requestHandler(req, res, next) {
   try {
     const url = new URL(req.url, `http://${req.headers.host || 'localhost'}`);
     const pathname = normalizePathname(decodeURIComponent(url.pathname));
@@ -3134,7 +3266,15 @@ async function requestHandler(req, res) {
       return redirect(res, '/login', { 'Set-Cookie': clearAuthCookies() });
     }
 
-    const authorization = authorizeRequest(req, pathname);
+    // Short shared-insight links — /shared/:id loads the Code Playground in a
+    // read-only "shared insight" mode. The page reads the id off the path and
+    // fetches the payload from /api/shared/:id. Public by design so anyone with
+    // the link can view and fork it.
+    if (/^\/shared\/[A-Za-z0-9_-]{4,32}$/.test(pathname)) {
+      return await serveStatic(req, res, '/code-playground.html');
+    }
+
+    const authorization = await authorizeRequest(req, pathname);
 
     if (!authorization.authorized) {
       return redirect(res, authorization.redirectTo);
@@ -3143,6 +3283,7 @@ async function requestHandler(req, res) {
     return await serveStatic(req, res, pathname);
   } catch (error) {
     console.error(error);
+    if (next) return next(error);
     sendJson(res, 500, { error: 'Something went wrong.' });
   }
 }
@@ -3151,11 +3292,12 @@ const app = express();
 app.use('/api', apiRouter);
 app.use(async (req, res, next) => {
   try {
-    await requestHandler(req, res);
+    await requestHandler(req, res, next);
   } catch (err) {
     next(err);
   }
 });
+app.use(errorHandler);
 const server = http.createServer(app);
 
 // ===== CODE ANALYSIS ENGINE =====
@@ -3933,7 +4075,7 @@ io.on('connection', (socket) => {
 
   // ── COLLABORATIVE STUDY ROOM EVENTS ──
   socket.on('join-study-room', async ({ roomId, userId, userName }) => {
-    const session = getSession(socket.request);
+    const session = await getSession(socket.request);
     const authUserId = session ? session.sub : userId;
     const authUserName = session ? session.name : userName;
 
@@ -4233,7 +4375,9 @@ if (process.env.VERCEL !== '1' && process.env.NODE_ENV !== 'test') {
       const host = process.env.HOST || '127.0.0.1';
 
       server.listen(port, host, () => {
-        // listening started
+        console.log(
+          `\n\x1b[38;5;183mServer running at\x1b[0m \x1b[38;5;228mhttp://${host}:${port}\x1b[0m\n`
+        );
       });
 
       server.on('error', (err) => {

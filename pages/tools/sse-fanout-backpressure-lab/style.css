@@ -1,0 +1,366 @@
+/* ===== SSE Fan-out Backpressure Lab ===== */
+:root {
+  --sse-glass: rgba(255, 255, 255, 0.04);
+  --sse-border: rgba(255, 255, 255, 0.1);
+  --sse-muted: rgba(255, 255, 255, 0.62);
+  --sse-accent: #38bdf8;
+  --sse-accent-dim: rgba(56, 189, 248, 0.15);
+  --sse-warn: #fbbf24;
+  --sse-danger: #f87171;
+  --sse-ok: #4ade80;
+  --sse-info: #a78bfa;
+  --sse-code-bg: rgba(0, 0, 0, 0.35);
+}
+
+html.light-mode {
+  --sse-glass: rgba(15, 23, 42, 0.04);
+  --sse-border: rgba(15, 23, 42, 0.12);
+  --sse-muted: rgba(15, 23, 42, 0.65);
+  --sse-accent-dim: rgba(14, 165, 233, 0.12);
+  --sse-code-bg: rgba(15, 23, 42, 0.06);
+}
+
+.sse-skip-link {
+  position: absolute;
+  left: 1rem;
+  top: -100px;
+  z-index: 10000;
+  padding: 0.6rem 1rem;
+  background: var(--sse-accent);
+  color: #0a0a14;
+  font-weight: 700;
+  border-radius: 8px;
+  text-decoration: none;
+}
+
+.sse-skip-link:focus {
+  top: 1rem;
+  outline: 3px solid #fff;
+  outline-offset: 2px;
+}
+
+.sse-hero {
+  position: relative;
+  overflow: hidden;
+  padding: 7.5rem 1.5rem 4rem;
+  text-align: center;
+  border-bottom: 1px solid var(--sse-border);
+  background:
+    radial-gradient(ellipse at top right, rgba(56, 189, 248, 0.18), transparent 55%),
+    radial-gradient(ellipse at bottom left, rgba(167, 139, 250, 0.1), transparent 50%);
+}
+
+.sse-hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1.1rem;
+  padding: 0.35rem 0.9rem;
+  border-radius: 999px;
+  border: 1px solid rgba(56, 189, 248, 0.45);
+  background: var(--sse-accent-dim);
+  color: var(--sse-accent);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.sse-hero h1 {
+  margin: 0 0 1rem;
+  font-family: 'Orbitron', sans-serif;
+  font-size: clamp(1.9rem, 5vw, 3rem);
+  font-weight: 900;
+  line-height: 1.15;
+}
+
+.sse-hero-accent {
+  display: inline-block;
+  background: linear-gradient(135deg, #38bdf8, #a78bfa);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.sse-hero p {
+  max-width: 720px;
+  margin: 0 auto 2rem;
+  color: var(--sse-muted);
+  font-size: 1.05rem;
+  line-height: 1.65;
+  font-family: 'Poppins', sans-serif;
+}
+
+.sse-hero-stats {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1rem;
+}
+
+.sse-stat {
+  min-width: 110px;
+  padding: 0.85rem 1.1rem;
+  border: 1px solid var(--sse-border);
+  border-radius: 14px;
+  background: var(--sse-glass);
+}
+
+.sse-stat-val {
+  display: block;
+  font-family: 'Orbitron', sans-serif;
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--sse-accent);
+}
+
+.sse-stat-label {
+  font-size: 0.75rem;
+  color: var(--sse-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.sse-main {
+  padding: 2rem 0 4rem;
+  font-family: 'Poppins', sans-serif;
+}
+
+.sse-workspace {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+@media (max-width: 900px) {
+  .sse-workspace {
+    grid-template-columns: 1fr;
+  }
+}
+
+.sse-panel {
+  padding: 1.4rem;
+  border: 1px solid var(--sse-border);
+  border-radius: 18px;
+  background: var(--sse-glass);
+  backdrop-filter: blur(12px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
+}
+
+.sse-panel-header {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1.2rem;
+  padding-bottom: 0.9rem;
+  border-bottom: 1px solid var(--sse-border);
+}
+
+.sse-panel-title {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.sse-panel-title h2 {
+  margin: 0;
+  font-size: 1.15rem;
+  font-weight: 700;
+}
+
+.sse-panel-icon {
+  color: var(--sse-accent);
+}
+
+.sse-live {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--sse-accent);
+}
+
+.sse-label {
+  display: block;
+  margin-bottom: 0.4rem;
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+.sse-field-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.85rem;
+  margin-bottom: 1rem;
+}
+
+@media (max-width: 600px) {
+  .sse-field-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.sse-input,
+.sse-select {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0.65rem 0.8rem;
+  border: 1px solid var(--sse-border);
+  border-radius: 10px;
+  background: var(--sse-code-bg);
+  color: inherit;
+  font-family: 'Fira Code', ui-monospace, monospace;
+  font-size: 0.82rem;
+}
+
+.sse-preset-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+@media (max-width: 700px) {
+  .sse-preset-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.sse-preset-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.25rem;
+  padding: 0.85rem 1rem;
+  border: 1px solid var(--sse-border);
+  border-radius: 12px;
+  background: transparent;
+  color: inherit;
+  font-family: 'Poppins', sans-serif;
+  cursor: pointer;
+  text-align: left;
+  transition: border-color 0.2s, background 0.2s;
+}
+
+.sse-preset-btn span {
+  font-weight: 700;
+}
+
+.sse-preset-btn small {
+  color: var(--sse-muted);
+  font-size: 0.75rem;
+}
+
+.sse-preset-btn i {
+  color: var(--sse-accent);
+}
+
+.sse-preset-btn[aria-pressed='true'],
+.sse-preset-btn:hover {
+  border-color: rgba(56, 189, 248, 0.55);
+  background: var(--sse-accent-dim);
+}
+
+.sse-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  margin-bottom: 0.75rem;
+}
+
+.sse-status {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--sse-muted);
+}
+
+.sse-empty,
+.sse-empty-li {
+  color: var(--sse-muted);
+  font-size: 0.9rem;
+}
+
+.sse-gauge-wrap {
+  margin-bottom: 1rem;
+}
+
+.sse-gauge {
+  height: 16px;
+  border-radius: 999px;
+  border: 1px solid var(--sse-border);
+  background: var(--sse-code-bg);
+  overflow: hidden;
+}
+
+.sse-gauge-fill {
+  height: 100%;
+  width: 0%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #4ade80, #fbbf24, #f87171);
+  transition: width 0.35s ease;
+}
+
+.sse-gauge-meta {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 0.4rem;
+  font-size: 0.72rem;
+  color: var(--sse-muted);
+}
+
+.sse-policy-out,
+.sse-replay {
+  line-height: 1.55;
+  margin-bottom: 0.85rem;
+}
+
+.sse-log {
+  margin: 0;
+  max-height: 220px;
+  overflow: auto;
+  padding: 0.85rem 1rem;
+  border-radius: 12px;
+  background: var(--sse-code-bg);
+  border: 1px solid var(--sse-border);
+  font-family: 'Fira Code', ui-monospace, monospace;
+  font-size: 0.75rem;
+  line-height: 1.5;
+  white-space: pre-wrap;
+}
+
+.sse-recs {
+  margin: 0;
+  padding-left: 1.15rem;
+  line-height: 1.6;
+}
+
+.sse-recs li {
+  margin-bottom: 0.45rem;
+}
+
+.sse-badge {
+  display: inline-block;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 0.15rem 0.45rem;
+  border-radius: 6px;
+  margin-bottom: 0.4rem;
+}
+
+.sse-badge.ok {
+  background: rgba(74, 222, 128, 0.2);
+  color: var(--sse-ok);
+}
+
+.sse-badge.warn {
+  background: rgba(251, 191, 36, 0.2);
+  color: var(--sse-warn);
+}
+
+.sse-badge.danger {
+  background: rgba(248, 113, 113, 0.2);
+  color: var(--sse-danger);
+}

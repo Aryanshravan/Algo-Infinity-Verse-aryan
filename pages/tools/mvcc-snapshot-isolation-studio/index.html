@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MVCC & Snapshot Isolation Studio — Algo Infinity Verse</title>
+  <meta name="description" content="Simulate database engine MVCC tuple versioning (xmin, xmax), rollback undo logs, and concurrency anomalies across parallel transactions." />
+  <link rel="stylesheet" href="/styles.css" />
+  <link rel="stylesheet" href="style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Poppins:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <script>
+    (function () {
+      try {
+        var storedTheme = localStorage.getItem('theme');
+        var prefersLight = window.matchMedia('(prefers-color-scheme: light)').matches;
+        var theme = storedTheme || (prefersLight ? 'light' : 'dark');
+        if (theme === 'light') {
+          document.documentElement.classList.add('light-mode');
+        } else {
+          document.documentElement.classList.remove('light-mode');
+        }
+      } catch (e) {}
+    })();
+  </script>
+</head>
+<body data-page="mvcc-studio">
+  <div id="navbar-placeholder"></div>
+
+  <header class="tool-hero">
+    <div class="tool-hero-badge">
+      <i class="fas fa-database" aria-hidden="true"></i> Database Internals & MVCC
+    </div>
+    <h1>Interactive MVCC <span class="accent-text">& Snapshot Isolation Studio</span></h1>
+    <p>
+      Execute concurrent SQL transactions, inspect row tuple headers (xmin, xmax), track snapshot read views, and visualize isolation anomalies like Write Skew and Non-Repeatable Reads.
+    </p>
+  </header>
+
+  <main class="tool-container">
+    <!-- Toolbar -->
+    <section class="toolbar-card">
+      <div class="toolbar-group">
+        <label for="isolationLevelSelect"><i class="fas fa-lock"></i> Isolation Level:</label>
+        <select id="isolationLevelSelect" class="tool-select">
+          <option value="READ_COMMITTED">Read Committed (PostgreSQL Default)</option>
+          <option value="REPEATABLE_READ" selected>Repeatable Read / Snapshot Isolation</option>
+          <option value="SERIALIZABLE">Serializable (SSI / Lock Verification)</option>
+        </select>
+      </div>
+
+      <div class="toolbar-group">
+        <label for="anomalyPresetSelect"><i class="fas fa-bug"></i> Anomaly Scenario:</label>
+        <select id="anomalyPresetSelect" class="tool-select">
+          <option value="write_skew">Doctor Shift Swap (Write Skew Anomaly)</option>
+          <option value="non_repeatable_read">Non-Repeatable Read</option>
+          <option value="dirty_read">Dirty Read (Prevented in Read Committed)</option>
+        </select>
+      </div>
+
+      <div class="toolbar-actions">
+        <button id="btnResetMvcc" class="tool-btn secondary-btn"><i class="fas fa-rotate-left"></i> Reset Engine</button>
+      </div>
+    </section>
+
+    <!-- Multi-Transaction Session Lanes -->
+    <section class="panel-card lanes-panel">
+      <div class="panel-header">
+        <h3><i class="fas fa-diagram-next"></i> Parallel Transaction Lanes (T1 & T2)</h3>
+      </div>
+      
+      <div class="lanes-grid">
+        <!-- Transaction T1 Lane -->
+        <div class="txn-lane" id="laneT1">
+          <div class="lane-header">
+            <h4>Transaction T1 <span class="badge tx-id">tx_id: 101</span></h4>
+            <span class="tx-status" id="t1Status">ACTIVE</span>
+          </div>
+          <div class="lane-actions">
+            <button class="tool-btn compact-btn" onclick="execTxn('T1', 'BEGIN')">BEGIN</button>
+            <button class="tool-btn compact-btn" onclick="execTxn('T1', 'SELECT')">SELECT * FROM Doctors</button>
+            <button class="tool-btn compact-btn" onclick="execTxn('T1', 'UPDATE')">UPDATE Doctors SET on_call=false WHERE name='Alice'</button>
+            <button class="tool-btn compact-btn primary-btn" onclick="execTxn('T1', 'COMMIT')">COMMIT</button>
+          </div>
+          <div class="lane-log" id="t1Log"></div>
+        </div>
+
+        <!-- Transaction T2 Lane -->
+        <div class="txn-lane" id="laneT2">
+          <div class="lane-header">
+            <h4>Transaction T2 <span class="badge tx-id">tx_id: 102</span></h4>
+            <span class="tx-status" id="t2Status">ACTIVE</span>
+          </div>
+          <div class="lane-actions">
+            <button class="tool-btn compact-btn" onclick="execTxn('T2', 'BEGIN')">BEGIN</button>
+            <button class="tool-btn compact-btn" onclick="execTxn('T2', 'SELECT')">SELECT * FROM Doctors</button>
+            <button class="tool-btn compact-btn" onclick="execTxn('T2', 'UPDATE')">UPDATE Doctors SET on_call=false WHERE name='Bob'</button>
+            <button class="tool-btn compact-btn primary-btn" onclick="execTxn('T2', 'COMMIT')">COMMIT</button>
+          </div>
+          <div class="lane-log" id="t2Log"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Tuple Version Chain & Snapshot Inspector -->
+    <div class="workspace-grid">
+      <!-- Tuple Version Chain -->
+      <section class="panel-card tuples-panel">
+        <div class="panel-header">
+          <h3><i class="fas fa-list-ol"></i> Tuple Version Chains & Visibility Headers</h3>
+        </div>
+        <div class="version-chain-list" id="tupleVersionContainer">
+          <!-- Dynamic tuple rows with xmin, xmax -->
+        </div>
+      </section>
+
+      <!-- Snapshot Read Views & Anomaly Output -->
+      <section class="panel-card snapshot-panel">
+        <div class="panel-header">
+          <h3><i class="fas fa-eye"></i> Snapshot Read Views & Anomaly Alert</h3>
+        </div>
+        <div class="anomaly-alert-box" id="anomalyAlertBox">
+          <span class="anomaly-badge idle">NO CONCURRENCY ANOMALY DETECTED</span>
+        </div>
+        <div class="snapshot-details" id="snapshotDetailsBox">
+          <div><strong>Active Snapshot Read Views:</strong></div>
+          <div id="activeSnapshotsList" class="snapshot-list-code">active_txns = [101, 102]</div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <script src="/modules/navbar.js" type="module"></script>
+  <script src="script.js"></script>
+</body>
+</html>

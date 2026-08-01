@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Code Reviewer & Security Linter — Algo Infinity Verse</title>
+  <meta name="description" content="Autonomous AI Code Reviewer scanning JavaScript, Python, and C++ for OWASP Top 10 vulnerabilities, memory leaks, and AST security bugs." />
+  
+  
+  <link rel="stylesheet" href="../../../styles.css" />
+  <link rel="stylesheet" href="style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+
+  <script>
+    (function() {
+      try {
+        var t = localStorage.getItem('theme');
+        var p = window.matchMedia('(prefers-color-scheme: light)').matches;
+        var theme = t || (p ? 'light' : 'dark');
+        if (theme === 'light') document.documentElement.classList.add('light-mode');
+      } catch (e) {}
+    })();
+  </script>
+</head>
+<body data-page="ai-reviewer">
+
+  <header class="air-header">
+    <div class="air-header-container">
+      <a href="../ai-features.html" class="air-back-btn">
+        <i class="fas fa-arrow-left"></i>
+        <span>AI Tools</span>
+      </a>
+      <div class="air-title-area">
+        <h1><i class="fas fa-robot"></i> Autonomous AI Code Reviewer &amp; Security Linter</h1>
+        <p>OWASP Top 10 Vulnerability Scanning, AST Analysis, and Automated Code Patch Generation</p>
+      </div>
+      <div class="air-header-actions">
+        <button id="themeToggleBtn" class="air-icon-btn" title="Toggle Theme">
+          <i class="fas fa-moon"></i>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="air-main">
+    <!-- TOOLBAR -->
+    <div class="air-toolbar">
+      <div class="air-preset-group">
+        <label><i class="fas fa-code"></i> Samples:</label>
+        <button class="air-btn air-btn-preset active" data-preset="xss">Reflected XSS Vulnerability</button>
+        <button class="air-btn air-btn-preset" data-preset="sqli">SQL Injection Vulnerability</button>
+        <button class="air-btn air-btn-preset" data-preset="memory">Buffer Overflow / Memory Leak</button>
+      </div>
+      <div class="air-action-group">
+        <button id="btnScanCode" class="air-btn air-btn-primary"><i class="fas fa-shield-cat"></i> Scan &amp; Review Code</button>
+        <button id="btnApplyFix" class="air-btn air-btn-success"><i class="fas fa-wand-magic-sparkles"></i> Apply AI Auto-Fix</button>
+      </div>
+    </div>
+
+    <!-- MAIN GRID -->
+    <div class="air-grid">
+      <!-- CODE EDITOR WINDOW -->
+      <div class="air-card air-code-card">
+        <div class="air-card-header">
+          <h2><i class="fas fa-file-code"></i> Input Source Code Editor</h2>
+          <select id="langSelect" class="air-select">
+            <option value="js">JavaScript (Node.js)</option>
+            <option value="py">Python</option>
+            <option value="cpp">C++</option>
+          </select>
+        </div>
+        <div class="air-editor-wrapper">
+          <textarea id="airCodeInput" class="air-textarea" placeholder="Paste source code for AI review..."></textarea>
+        </div>
+      </div>
+
+      <!-- AI REVIEW FINDINGS & SCORE -->
+      <div class="air-side-panel">
+        
+        <!-- SECURITY HEALTH INDEX SCORE -->
+        <div class="air-card">
+          <div class="air-card-header">
+            <h3><i class="fas fa-gauge-high"></i> Code Security &amp; Quality Index</h3>
+          </div>
+          <div class="air-card-body">
+            <div class="air-score-box">
+              <span class="air-score-val" id="securityScoreVal">42 / 100</span>
+              <span class="air-score-label" id="securityGradeLabel">CRITICAL RISKS DETECTED</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- FINDINGS LIST -->
+        <div class="air-card air-flex-card">
+          <div class="air-card-header">
+            <h3><i class="fas fa-bug"></i> Security Findings &amp; Inline Annotations</h3>
+          </div>
+          <div class="air-card-body air-scrollable" id="findingsContainer">
+            <!-- Rendered by JS -->
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </main>
+
+  <script src="../../../auth.js"></script>
+  <script src="../../../theme.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>

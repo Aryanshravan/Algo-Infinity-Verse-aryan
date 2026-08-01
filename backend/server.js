@@ -197,9 +197,6 @@ function clearLoginFailures(identifier) {
 const protectedPaths = new Set([
   '/community',
   '/community.html',
-  '/support-page',
-  '/support-page/',
-  '/support-page/index.html',
 ]);
 
 const mimeTypes = {
@@ -636,7 +633,9 @@ if (process.env.VERCEL !== '1') {
       const port = Number(process.env.PORT || 3000);
       const host = process.env.HOST || '127.0.0.1';
 
-      server.listen(port, host, () => {});
+      server.listen(port, host, () => {
+        console.log(`\n\x1b[38;5;183mServer running at\x1b[0m \x1b[38;5;228mhttp://${host}:${port}\x1b[0m\n`);
+      });
     })
     .catch((error) => {
       console.error('Failed to load environment configuration:', error);

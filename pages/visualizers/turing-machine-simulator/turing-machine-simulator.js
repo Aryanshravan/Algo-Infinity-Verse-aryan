@@ -1,4 +1,5 @@
 /* turing-machine-simulator.js */
+/* global d3 */
 
 const EXAMPLES = {
     binary_increment: {
@@ -353,11 +354,15 @@ function updateUI() {
     }
 
     // 3. Highlight D3 Node
-    d3.selectAll('.node').classed('active', false);
-    d3.select('#node-' + tm.currentState.replace(/[^a-zA-Z0-9]/g, '_')).classed('active', true);
+    if (window.d3) {
+        d3.selectAll('.node').classed('active', false);
+        d3.select('#node-' + tm.currentState.replace(/[^a-zA-Z0-9]/g, '_')).classed('active', true);
+    }
 }
 
 function renderGraph() {
+    if (!window.d3) return;
+    
     const container = document.getElementById('graphContainer');
     const width = container.clientWidth || 500;
     const height = container.clientHeight || 400;

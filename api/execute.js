@@ -1,5 +1,5 @@
 import { runUserCode } from '../backend/jsSandboxRunner.js';
-import { SESSION_COOKIE, verifySessionToken, parseCookies } from "../backend/utils/sessionToken.js";
+import { SESSION_COOKIE, verifySessionToken, parseCookies } from '../backend/utils/sessionToken.js';
 
 // ============================================
 // CONFIGURABLE SETTINGS
@@ -12,26 +12,26 @@ const EXECUTION_CONFIG = {
 };
 
 // ─── Auth helpers ──────────────────────────────────────────────────────────
-function getUser(req) {
-  const cookies = parseCookies(req.headers.cookie || "");
-  return verifySessionToken(cookies[SESSION_COOKIE]);
+async function getUser(req) {
+  const cookies = parseCookies(req.headers.cookie || '');
+  return await verifySessionToken(cookies[SESSION_COOKIE]);
 }
 
 const LANGUAGE_IDS = {
-  python:      71,
-  javascript:  63,
-  java:        62,
-  'c++':       54,
-  cpp:         54,
-  c:           50,
-  typescript:  74,
-  go:          60,
-  rust:        73,
-  ruby:        72,
-  swift:       83,
-  dart:        98,
-  haskell:     89,
-  kotlin:      78,
+  python: 71,
+  javascript: 63,
+  java: 62,
+  'c++': 54,
+  cpp: 54,
+  c: 50,
+  typescript: 74,
+  go: 60,
+  rust: 73,
+  ruby: 72,
+  swift: 83,
+  dart: 98,
+  haskell: 89,
+  kotlin: 78,
 };
 
 export default async function handler(req, res) {
@@ -39,7 +39,7 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const user = getUser(req);
+  const user = await getUser(req);
   if (!user) {
     return res.status(401).json({ error: 'Unauthorized — please log in' });
   }
@@ -47,8 +47,8 @@ export default async function handler(req, res) {
   // Validate request body size via Content-Length header
   const contentLength = parseInt(req.headers['content-length'] || '0', 10);
   if (contentLength > EXECUTION_CONFIG.MAX_PAYLOAD_SIZE) {
-    return res.status(413).json({ 
-      error: `Payload too large. Request body must be under ${EXECUTION_CONFIG.MAX_PAYLOAD_SIZE / 1000}KB.` 
+    return res.status(413).json({
+      error: `Payload too large. Request body must be under ${EXECUTION_CONFIG.MAX_PAYLOAD_SIZE / 1000}KB.`,
     });
   }
 
@@ -65,8 +65,8 @@ export default async function handler(req, res) {
   }
 
   if (source_code.length > EXECUTION_CONFIG.MAX_CODE_LENGTH) {
-    return res.status(400).json({ 
-      error: `source_code exceeds maximum length of ${EXECUTION_CONFIG.MAX_CODE_LENGTH} characters.` 
+    return res.status(400).json({
+      error: `source_code exceeds maximum length of ${EXECUTION_CONFIG.MAX_CODE_LENGTH} characters.`,
     });
   }
 
@@ -76,14 +76,14 @@ export default async function handler(req, res) {
   }
 
   try {
-    const tests = [{ input: stdin, expectedOutput: "" }];
-    
+    const tests = [{ input: stdin, expectedOutput: '' }];
+
     const result = await runUserCode({
       language: language,
       sourceCode: source_code,
       tests: tests,
       timeoutMs: EXECUTION_CONFIG.TIMEOUT_MS,
-      showMySteps: true
+      showMySteps: true,
     });
 
     if (!result.ok) {
@@ -96,9 +96,12 @@ export default async function handler(req, res) {
       stdout: execResult.transcript?.stdout || execResult.actualOutput || '',
       stderr: execResult.runtimeError?.message || execResult.transcript?.stderr || '',
       code: execResult.runtimeError ? 1 : 0,
-      status: execResult.timedOut ? 'Time Limit Exceeded' : (execResult.runtimeError ? 'Runtime Error' : 'Accepted'),
+      status: execResult.timedOut
+        ? 'Time Limit Exceeded'
+        : execResult.runtimeError
+          ? 'Runtime Error'
+          : 'Accepted',
     });
-
   } catch (err) {
     return res.status(500).json({ error: err.message });
   }

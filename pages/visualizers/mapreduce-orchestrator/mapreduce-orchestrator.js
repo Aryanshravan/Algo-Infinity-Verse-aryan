@@ -4,8 +4,8 @@
  * Master node chunks data and spawns dynamic Web Workers for Map and Reduce phases.
  */
 
-document.addEventListener("DOMContentLoaded", () => {
-    initMapReduce();
+document.addEventListener('DOMContentLoaded', () => {
+  initMapReduce();
 });
 
 // ==========================================
@@ -18,96 +18,97 @@ let startTime = 0;
 let workerUrl = null;
 
 const els = {
-    dataInput: document.getElementById('dataInput'),
-    btnGenData: document.getElementById('btnGenData'),
-    workerCountSlider: document.getElementById('workerCountSlider'),
-    workerCountVal: document.getElementById('workerCountVal'),
-    btnStartJob: document.getElementById('btnStartJob'),
-    
-    statWords: document.getElementById('statWords'),
-    statTime: document.getElementById('statTime'),
-    progressPhase: document.getElementById('progressPhase'),
-    progressPct: document.getElementById('progressPct'),
-    progressBar: document.getElementById('progressBar'),
-    logContainer: document.getElementById('logContainer'),
-    engineBadge: document.getElementById('engineBadge'),
-    
-    // Cluster UI
-    mapperTier: document.getElementById('mapperTier'),
-    reducerTier: document.getElementById('reducerTier'),
-    nodeMaster: document.getElementById('nodeMaster'),
-    nodeShuffle: document.getElementById('nodeShuffle'),
-    
-    resultsList: document.getElementById('resultsList')
+  dataInput: document.getElementById('dataInput'),
+  btnGenData: document.getElementById('btnGenData'),
+  workerCountSlider: document.getElementById('workerCountSlider'),
+  workerCountVal: document.getElementById('workerCountVal'),
+  btnStartJob: document.getElementById('btnStartJob'),
+  stragglerToggle: document.getElementById('stragglerToggle'),
+
+  statWords: document.getElementById('statWords'),
+  statTime: document.getElementById('statTime'),
+  progressPhase: document.getElementById('progressPhase'),
+  progressPct: document.getElementById('progressPct'),
+  progressBar: document.getElementById('progressBar'),
+  logContainer: document.getElementById('logContainer'),
+  engineBadge: document.getElementById('engineBadge'),
+
+  // Cluster UI
+  mapperTier: document.getElementById('mapperTier'),
+  reducerTier: document.getElementById('reducerTier'),
+  nodeMaster: document.getElementById('nodeMaster'),
+  nodeShuffle: document.getElementById('nodeShuffle'),
+
+  resultsList: document.getElementById('resultsList'),
 };
 
 // ==========================================
 // 2. INITIALIZATION
 // ==========================================
 function initMapReduce() {
-    bindEvents();
-    renderTopology(); // Initial layout based on default slider
-    createWorkerBlob();
+  bindEvents();
+  renderTopology(); // Initial layout based on default slider
+  createWorkerBlob();
 }
 
 function bindEvents() {
-    els.btnGenData.addEventListener('click', generateMassiveDataset);
-    
-    els.workerCountSlider.addEventListener('input', (e) => {
-        els.workerCountVal.textContent = e.target.value;
-        renderTopology();
-    });
+  els.btnGenData.addEventListener('click', generateMassiveDataset);
 
-    els.btnStartJob.addEventListener('click', startMapReduceJob);
+  els.workerCountSlider.addEventListener('input', (e) => {
+    els.workerCountVal.textContent = e.target.value;
+    renderTopology();
+  });
+
+  els.btnStartJob.addEventListener('click', startMapReduceJob);
 }
 
 function logSys(msg, type = 'sys') {
-    const div = document.createElement('div');
-    div.className = `log-entry ${type}`;
-    div.textContent = `> ${msg}`;
-    els.logContainer.appendChild(div);
-    els.logContainer.scrollTop = els.logContainer.scrollHeight;
+  const div = document.createElement('div');
+  div.className = `log-entry ${type}`;
+  div.textContent = `> ${msg}`;
+  els.logContainer.appendChild(div);
+  els.logContainer.scrollTop = els.logContainer.scrollHeight;
 }
 
 function updateProgress(pct, phase, color) {
-    els.progressPct.textContent = `${pct}%`;
-    els.progressPhase.textContent = phase;
-    els.progressBar.style.width = `${pct}%`;
-    els.progressBar.style.backgroundColor = `var(--mr-${color})`;
+  els.progressPct.textContent = `${pct}%`;
+  els.progressPhase.textContent = phase;
+  els.progressBar.style.width = `${pct}%`;
+  els.progressBar.style.backgroundColor = `var(--mr-${color})`;
 }
 
 function renderTopology() {
-    const numWorkers = parseInt(els.workerCountSlider.value);
-    
-    const createNodes = (container, prefix, icon) => {
-        container.innerHTML = '';
-        for (let i = 0; i < numWorkers; i++) {
-            const node = document.createElement('div');
-            node.className = 'mr-node worker';
-            node.id = `${prefix}-${i}`;
-            node.innerHTML = `
+  const numWorkers = parseInt(els.workerCountSlider.value);
+
+  const createNodes = (container, prefix, icon) => {
+    container.innerHTML = '';
+    for (let i = 0; i < numWorkers; i++) {
+      const node = document.createElement('div');
+      node.className = 'mr-node worker';
+      node.id = `${prefix}-${i}`;
+      node.innerHTML = `
                 <div class="worker-id">Node-${i}</div>
                 <i class="fas ${icon}"></i>
                 <span>Idle</span>
             `;
-            container.appendChild(node);
-        }
-    };
+      container.appendChild(node);
+    }
+  };
 
-    createNodes(els.mapperTier, 'mapper', 'fa-map');
-    createNodes(els.reducerTier, 'reducer', 'fa-compress-alt');
+  createNodes(els.mapperTier, 'mapper', 'fa-map');
+  createNodes(els.reducerTier, 'reducer', 'fa-compress-alt');
 }
 
 function setNodeStatus(prefix, id, status, isActive) {
-    const node = document.getElementById(`${prefix}-${id}`);
-    if (!node) return;
-    
-    node.querySelector('span').textContent = status;
-    if (isActive) {
-        node.classList.add(prefix === 'mapper' ? 'active-map' : 'active-reduce');
-    } else {
-        node.classList.remove('active-map', 'active-reduce');
-    }
+  const node = document.getElementById(`${prefix}-${id}`);
+  if (!node) return;
+
+  node.querySelector('span').textContent = status;
+  if (isActive) {
+    node.classList.add(prefix === 'mapper' ? 'active-map' : 'active-reduce');
+  } else {
+    node.classList.remove('active-map', 'active-reduce');
+  }
 }
 
 // ==========================================
@@ -115,9 +116,9 @@ function setNodeStatus(prefix, id, status, isActive) {
 // ==========================================
 // We create the worker code as a string and convert to Blob to avoid CORS issues.
 function createWorkerBlob() {
-    const workerCode = `
+  const workerCode = `
         self.onmessage = function(e) {
-            const { type, payload, id } = e.data;
+            const { type, payload, id, isStraggler } = e.data;
             
             if (type === 'map') {
                 // Map Phase: Tokenize and emit (Key, 1) pairs
@@ -129,7 +130,9 @@ function createWorkerBlob() {
                 }
                 
                 // Simulate I/O or heavy computation processing delay based on chunk size
-                const delay = Math.min(1500, words.length * 0.1); 
+                let delay = Math.min(1500, words.length * 0.1); 
+                if (isStraggler) delay += 4000; // Inject 4s lag
+                
                 let start = Date.now(); while(Date.now() - start < delay) {}
                 
                 self.postMessage({ type: 'map_done', id, result: localCounts });
@@ -142,7 +145,9 @@ function createWorkerBlob() {
                 }
                 
                 // Simulate reduction delay
-                const delay = Math.min(1000, Object.keys(payload).length * 10);
+                let delay = Math.min(1000, Object.keys(payload).length * 10);
+                if (isStraggler) delay += 4000; // Inject 4s lag
+                
                 let start = Date.now(); while(Date.now() - start < delay) {}
                 
                 self.postMessage({ type: 'reduce_done', id, result: finalCounts });
@@ -150,8 +155,8 @@ function createWorkerBlob() {
         };
     `;
 
-    const blob = new Blob([workerCode], { type: 'application/javascript' });
-    workerUrl = URL.createObjectURL(blob);
+  const blob = new Blob([workerCode], { type: 'application/javascript' });
+  workerUrl = URL.createObjectURL(blob);
 }
 
 // ==========================================
@@ -159,218 +164,425 @@ function createWorkerBlob() {
 // ==========================================
 
 async function startMapReduceJob() {
-    const rawText = els.dataInput.value.trim();
-    if (!rawText) return void 0;
+  const rawText = els.dataInput.value.trim();
+  if (!rawText) return void 0;
 
-    // Lock UI
-    els.btnStartJob.disabled = true;
-    els.btnGenData.disabled = true;
-    els.workerCountSlider.disabled = true;
-    els.resultsList.innerHTML = '';
-    
-    els.engineBadge.classList.add('active');
-    els.engineBadge.innerHTML = '<i class="fas fa-cog fa-spin"></i> Job Running...';
-    
-    startTime = performance.now();
-    logSys("Job submitted. Master Node taking control.", "info");
-    els.nodeMaster.classList.add('processing');
+  // Lock UI
+  els.btnStartJob.disabled = true;
+  els.btnGenData.disabled = true;
+  els.workerCountSlider.disabled = true;
+  els.resultsList.innerHTML = '';
 
-    const numWorkers = parseInt(els.workerCountSlider.value);
-    
-    // ----------------------------------------------------
-    // PHASE 0: CHUNKING
-    // ----------------------------------------------------
-    updateProgress(10, 'Chunking Data...', 'primary');
-    
-    // Split into roughly equal chunks by characters (ensuring we don't split words)
-    // For simplicity in this demo, we'll just split roughly
-    const chunks = [];
-    const chunkSize = Math.ceil(rawText.length / numWorkers);
-    
-    for (let i = 0; i < numWorkers; i++) {
-        chunks.push(rawText.substring(i * chunkSize, (i + 1) * chunkSize));
+  els.engineBadge.classList.add('active');
+  els.engineBadge.innerHTML = '<i class="fas fa-cog fa-spin"></i> Job Running...';
+
+  startTime = performance.now();
+  logSys('Job submitted. Master Node taking control.', 'info');
+  els.nodeMaster.classList.add('processing');
+
+  const numWorkers = parseInt(els.workerCountSlider.value);
+
+  // ----------------------------------------------------
+  // PHASE 0: CHUNKING
+  // ----------------------------------------------------
+  updateProgress(10, 'Chunking Data...', 'primary');
+
+  // Split into roughly equal chunks by characters (ensuring we don't split words)
+  // For simplicity in this demo, we'll just split roughly
+  const chunks = [];
+  const chunkSize = Math.ceil(rawText.length / numWorkers);
+
+  for (let i = 0; i < numWorkers; i++) {
+    chunks.push(rawText.substring(i * chunkSize, (i + 1) * chunkSize));
+  }
+
+  els.statWords.textContent = (rawText.match(/\w+/g) || []).length.toLocaleString();
+
+  // ----------------------------------------------------
+  // PHASE 1: MAP
+  // ----------------------------------------------------
+  updateProgress(30, 'Map Phase Running...', 'map');
+  logSys(`Dispatching ${numWorkers} chunks to Map nodes...`, 'map');
+
+  const mapResults = await runMapPhase(chunks, numWorkers);
+
+  // ----------------------------------------------------
+  // PHASE 2: SHUFFLE & SORT
+  // ----------------------------------------------------
+  updateProgress(60, 'Shuffling & Routing Keys...', 'shuffle');
+  logSys('Mappers finished. Shuffling keys across network...', 'shuffle');
+  els.nodeShuffle.classList.add('processing');
+
+  // Artificial delay to visualize the shuffle phase
+  await new Promise((r) => setTimeout(r, 1000));
+
+  // Group all intermediate key-value pairs
+  // { "apple": [1, 1, 1], "banana": [1, 2] }
+  const shuffledData = {};
+  mapResults.forEach((workerResult) => {
+    for (let [word, count] of Object.entries(workerResult)) {
+      if (!shuffledData[word]) shuffledData[word] = [];
+      shuffledData[word].push(count);
     }
-    
-    els.statWords.textContent = (rawText.match(/\w+/g) || []).length.toLocaleString();
+  });
 
-    // ----------------------------------------------------
-    // PHASE 1: MAP
-    // ----------------------------------------------------
-    updateProgress(30, 'Map Phase Running...', 'map');
-    logSys(`Dispatching ${numWorkers} chunks to Map nodes...`, "map");
+  els.nodeShuffle.classList.remove('processing');
 
-    const mapResults = await runMapPhase(chunks, numWorkers);
-    
-    // ----------------------------------------------------
-    // PHASE 2: SHUFFLE & SORT
-    // ----------------------------------------------------
-    updateProgress(60, 'Shuffling & Routing Keys...', 'shuffle');
-    logSys("Mappers finished. Shuffling keys across network...", "shuffle");
-    els.nodeShuffle.classList.add('processing');
-    
-    // Artificial delay to visualize the shuffle phase
-    await new Promise(r => setTimeout(r, 1000));
-    
-    // Group all intermediate key-value pairs
-    // { "apple": [1, 1, 1], "banana": [1, 2] }
-    const shuffledData = {};
-    mapResults.forEach(workerResult => {
-        for (let [word, count] of Object.entries(workerResult)) {
-            if (!shuffledData[word]) shuffledData[word] = [];
-            shuffledData[word].push(count);
-        }
-    });
-    
-    els.nodeShuffle.classList.remove('processing');
+  // ----------------------------------------------------
+  // PHASE 3: REDUCE
+  // ----------------------------------------------------
+  updateProgress(80, 'Reduce Phase Running...', 'reduce');
+  logSys('Shuffle complete. Dispatching grouped keys to Reducers...', 'reduce');
 
-    // ----------------------------------------------------
-    // PHASE 3: REDUCE
-    // ----------------------------------------------------
-    updateProgress(80, 'Reduce Phase Running...', 'reduce');
-    logSys("Shuffle complete. Dispatching grouped keys to Reducers...", "reduce");
+  // Partition shuffled keys among Reducers
+  const reducerInputs = Array.from({ length: numWorkers }, () => ({}));
+  const keys = Object.keys(shuffledData);
 
-    // Partition shuffled keys among Reducers
-    const reducerInputs = Array.from({length: numWorkers}, () => ({}));
-    const keys = Object.keys(shuffledData);
-    
-    // Simple hash partitioning
-    keys.forEach(key => {
-        // Hash key to a reducer
-        let hash = 0;
-        for (let i = 0; i < key.length; i++) hash += key.charCodeAt(i);
-        const reducerId = hash % numWorkers;
-        reducerInputs[reducerId][key] = shuffledData[key];
-    });
+  // Simple hash partitioning
+  keys.forEach((key) => {
+    // Hash key to a reducer
+    let hash = 0;
+    for (let i = 0; i < key.length; i++) hash += key.charCodeAt(i);
+    const reducerId = hash % numWorkers;
+    reducerInputs[reducerId][key] = shuffledData[key];
+  });
 
-    const reduceResults = await runReducePhase(reducerInputs, numWorkers);
+  const reduceResults = await runReducePhase(reducerInputs, numWorkers);
 
-    // ----------------------------------------------------
-    // PHASE 4: AGGREGATE FINAL OUTPUT
-    // ----------------------------------------------------
-    updateProgress(100, 'Job Complete', 'primary');
-    
-    // Combine all reducer outputs
-    let finalOutput = {};
-    reduceResults.forEach(res => {
-        Object.assign(finalOutput, res);
-    });
-    
-    // Sort final results descending by count
-    const sortedFinal = Object.entries(finalOutput).sort((a, b) => b[1] - a[1]);
+  // ----------------------------------------------------
+  // PHASE 4: AGGREGATE FINAL OUTPUT
+  // ----------------------------------------------------
+  updateProgress(100, 'Job Complete', 'primary');
 
-    const duration = (performance.now() - startTime).toFixed(0);
-    els.statTime.textContent = `${duration} ms`;
-    
-    logSys(`Job finished successfully in ${duration}ms.`, "success");
-    els.nodeMaster.classList.remove('processing');
-    
-    renderResults(sortedFinal);
+  // Combine all reducer outputs
+  let finalOutput = {};
+  reduceResults.forEach((res) => {
+    Object.assign(finalOutput, res);
+  });
 
-    // Unlock UI
-    els.btnStartJob.disabled = false;
-    els.btnGenData.disabled = false;
-    els.workerCountSlider.disabled = false;
-    els.engineBadge.classList.remove('active');
-    els.engineBadge.innerHTML = '<i class="fas fa-check-circle" style="color:var(--mr-map);"></i> Cluster: Idle';
+  // Sort final results descending by count
+  const sortedFinal = Object.entries(finalOutput).sort((a, b) => b[1] - a[1]);
+
+  const duration = (performance.now() - startTime).toFixed(0);
+  els.statTime.textContent = `${duration} ms`;
+
+  logSys(`Job finished successfully in ${duration}ms.`, 'success');
+  els.nodeMaster.classList.remove('processing');
+
+  renderResults(sortedFinal);
+
+  // Unlock UI
+  els.btnStartJob.disabled = false;
+  els.btnGenData.disabled = false;
+  els.workerCountSlider.disabled = false;
+  els.engineBadge.classList.remove('active');
+  els.engineBadge.innerHTML =
+    '<i class="fas fa-check-circle" style="color:var(--mr-map);"></i> Cluster: Idle';
 }
 
 // --- Worker Handlers ---
 function runMapPhase(chunks, numWorkers) {
-    return new Promise((resolve) => {
-        let completed = 0;
-        let results = [];
-        
-        for (let i = 0; i < numWorkers; i++) {
-            setNodeStatus('mapper', i, 'Mapping...', true);
-            
-            const worker = new Worker(workerUrl);
-            worker.onmessage = (e) => {
-                if (e.data.type === 'map_done') {
-                    results[i] = e.data.result;
-                    setNodeStatus('mapper', i, 'Done', false);
-                    worker.terminate(); // Clean up
-                    
-                    completed++;
-                    if (completed === numWorkers) resolve(results);
-                }
-            };
-            
-            worker.postMessage({ type: 'map', id: i, payload: chunks[i] });
+  return new Promise((resolve) => {
+    let completed = 0;
+    let results = [];
+    let workersMap = {};
+
+    for (let i = 0; i < numWorkers; i++) {
+      setNodeStatus('mapper', i, 'Mapping...', true);
+
+      const worker = new Worker(workerUrl);
+      workersMap[i] = worker;
+
+      worker.onmessage = (e) => {
+        if (e.data.type === 'map_done') {
+          if (results[i] !== undefined) return; // Speculative race handled
+
+          results[i] = e.data.result;
+          setNodeStatus('mapper', i, 'Done', false);
+
+          const originalNode = document.getElementById(`mapper-${i}`);
+          if (originalNode) originalNode.classList.remove('straggler-lag');
+
+          worker.terminate();
+
+          if (workersMap[`${i}_spec`]) {
+            workersMap[`${i}_spec`].terminate();
+            const specNode = document.getElementById(`mapper-${i}-spec`);
+            if (specNode) {
+              specNode.classList.remove('active-map');
+              specNode.classList.add('terminated-node');
+              specNode.querySelector('span').textContent = 'Killed';
+              specNode.querySelector('i').className = 'fas fa-skull';
+            }
+            logSys(
+              `Original mapper-${i} recovered and won the race. Spec clone terminated.`,
+              'sys'
+            );
+          }
+
+          completed++;
+          if (completed === numWorkers) resolve(results);
         }
-    });
+      };
+
+      // Explicit toggle check for straggler
+      const forceStraggler = els.stragglerToggle.checked;
+      const isStraggler = forceStraggler && i === 1;
+      if (isStraggler) {
+        setNodeStatus('mapper', i, 'Lagging...', true);
+        const nodeEl = document.getElementById(`mapper-${i}`);
+        if (nodeEl) nodeEl.classList.add('straggler-lag');
+        logSys(
+          `Node mapper-${i} is experiencing severe hardware degradation (Straggler).`,
+          'error'
+        );
+      }
+
+      worker.postMessage({ type: 'map', id: i, payload: chunks[i], isStraggler });
+
+      // Speculative Execution Check
+      setTimeout(() => {
+        if (results[i] === undefined && completed > numWorkers * 0.3) {
+          logSys(`Node mapper-${i} is lagging. Launching Speculative Execution clone...`, 'sys');
+
+          // Visually spawn spec clone
+          const originalNode = document.getElementById(`mapper-${i}`);
+          if (originalNode) {
+            const specClone = document.createElement('div');
+            specClone.className = 'mr-node worker spec-node active-map';
+            specClone.id = `mapper-${i}-spec`;
+            specClone.innerHTML = `
+                            <div class="worker-id">Node-${i} (Spec)</div>
+                            <i class="fas fa-bolt"></i>
+                            <span>Speculating...</span>
+                        `;
+            originalNode.parentNode.insertBefore(specClone, originalNode.nextSibling);
+          }
+
+          const specWorker = new Worker(workerUrl);
+          workersMap[`${i}_spec`] = specWorker;
+
+          specWorker.onmessage = (e) => {
+            if (e.data.type === 'map_done' && results[i] === undefined) {
+              results[i] = e.data.result;
+
+              // Visual update for Spec Win
+              const specNode = document.getElementById(`mapper-${i}-spec`);
+              if (specNode) {
+                specNode.querySelector('span').textContent = 'Done';
+                specNode.classList.remove('active-map');
+              }
+              // Kill original straggler
+              if (originalNode) {
+                originalNode.classList.remove('active-map', 'straggler-lag');
+                originalNode.classList.add('terminated-node');
+                originalNode.querySelector('span').textContent = 'Killed';
+                originalNode.querySelector('i').className = 'fas fa-skull';
+              }
+
+              specWorker.terminate();
+              workersMap[i].terminate(); // Kill straggler
+
+              logSys(
+                `Speculative clone for mapper-${i} WON the race! Original straggler terminated.`,
+                'success'
+              );
+
+              completed++;
+              if (completed === numWorkers) resolve(results);
+            }
+          };
+
+          specWorker.postMessage({ type: 'map', id: i, payload: chunks[i], isStraggler: false });
+        }
+      }, 2500); // Check after 2.5s
+    }
+  });
 }
 
 function runReducePhase(partitions, numWorkers) {
-    return new Promise((resolve) => {
-        let completed = 0;
-        let results = [];
-        
-        for (let i = 0; i < numWorkers; i++) {
-            setNodeStatus('reducer', i, 'Reducing...', true);
-            
-            const worker = new Worker(workerUrl);
-            worker.onmessage = (e) => {
-                if (e.data.type === 'reduce_done') {
-                    results[i] = e.data.result;
-                    setNodeStatus('reducer', i, 'Done', false);
-                    worker.terminate();
-                    
-                    completed++;
-                    if (completed === numWorkers) resolve(results);
-                }
-            };
-            
-            worker.postMessage({ type: 'reduce', id: i, payload: partitions[i] });
+  return new Promise((resolve) => {
+    let completed = 0;
+    let results = [];
+    let workersMap = {};
+
+    for (let i = 0; i < numWorkers; i++) {
+      setNodeStatus('reducer', i, 'Reducing...', true);
+
+      const worker = new Worker(workerUrl);
+      workersMap[i] = worker;
+
+      worker.onmessage = (e) => {
+        if (e.data.type === 'reduce_done') {
+          if (results[i] !== undefined) return;
+
+          results[i] = e.data.result;
+          setNodeStatus('reducer', i, 'Done', false);
+
+          const originalNode = document.getElementById(`reducer-${i}`);
+          if (originalNode) originalNode.classList.remove('straggler-lag');
+
+          worker.terminate();
+
+          if (workersMap[`${i}_spec`]) {
+            workersMap[`${i}_spec`].terminate();
+            const specNode = document.getElementById(`reducer-${i}-spec`);
+            if (specNode) {
+              specNode.classList.remove('active-reduce');
+              specNode.classList.add('terminated-node');
+              specNode.querySelector('span').textContent = 'Killed';
+              specNode.querySelector('i').className = 'fas fa-skull';
+            }
+            logSys(
+              `Original reducer-${i} recovered and won the race. Spec clone terminated.`,
+              'sys'
+            );
+          }
+
+          completed++;
+          if (completed === numWorkers) resolve(results);
         }
-    });
+      };
+
+      const forceStraggler = els.stragglerToggle.checked;
+      const isStraggler = forceStraggler && i === 1;
+      if (isStraggler) {
+        setNodeStatus('reducer', i, 'Lagging...', true);
+        const nodeEl = document.getElementById(`reducer-${i}`);
+        if (nodeEl) nodeEl.classList.add('straggler-lag');
+        logSys(`Node reducer-${i} is experiencing hardware degradation (Straggler).`, 'error');
+      }
+
+      worker.postMessage({ type: 'reduce', id: i, payload: partitions[i], isStraggler });
+
+      // Speculative Execution Check
+      setTimeout(() => {
+        if (results[i] === undefined && completed > numWorkers * 0.3) {
+          logSys(`Node reducer-${i} is lagging. Launching Speculative Execution clone...`, 'sys');
+
+          const originalNode = document.getElementById(`reducer-${i}`);
+          if (originalNode) {
+            const specClone = document.createElement('div');
+            specClone.className = 'mr-node worker spec-node active-reduce';
+            specClone.id = `reducer-${i}-spec`;
+            specClone.innerHTML = `
+                            <div class="worker-id">Node-${i} (Spec)</div>
+                            <i class="fas fa-bolt"></i>
+                            <span>Speculating...</span>
+                        `;
+            originalNode.parentNode.insertBefore(specClone, originalNode.nextSibling);
+          }
+
+          const specWorker = new Worker(workerUrl);
+          workersMap[`${i}_spec`] = specWorker;
+
+          specWorker.onmessage = (e) => {
+            if (e.data.type === 'reduce_done' && results[i] === undefined) {
+              results[i] = e.data.result;
+
+              const specNode = document.getElementById(`reducer-${i}-spec`);
+              if (specNode) {
+                specNode.querySelector('span').textContent = 'Done';
+                specNode.classList.remove('active-reduce');
+              }
+
+              if (originalNode) {
+                originalNode.classList.remove('active-reduce', 'straggler-lag');
+                originalNode.classList.add('terminated-node');
+                originalNode.querySelector('span').textContent = 'Killed';
+                originalNode.querySelector('i').className = 'fas fa-skull';
+              }
+
+              specWorker.terminate();
+              workersMap[i].terminate(); // Kill straggler
+
+              logSys(
+                `Speculative clone for reducer-${i} WON the race! Original straggler terminated.`,
+                'success'
+              );
+
+              completed++;
+              if (completed === numWorkers) resolve(results);
+            }
+          };
+
+          specWorker.postMessage({
+            type: 'reduce',
+            id: i,
+            payload: partitions[i],
+            isStraggler: false,
+          });
+        }
+      }, 2500); // Check after 2.5s
+    }
+  });
 }
 
 // ==========================================
 // 5. UTILITIES & RENDERING
 // ==========================================
 function renderResults(sortedData) {
-    els.resultsList.innerHTML = '';
-    
-    // Render top 100 to avoid locking DOM
-    const limit = Math.min(sortedData.length, 100);
-    
-    for(let i = 0; i < limit; i++) {
-        const [word, count] = sortedData[i];
-        const row = document.createElement('div');
-        row.className = 'result-row';
-        row.innerHTML = `<span class="result-key">${word}</span> <span class="result-val">${count}</span>`;
-        els.resultsList.appendChild(row);
-    }
-    
-    if (sortedData.length > limit) {
-        const msg = document.createElement('div');
-        msg.style.textAlign = 'center';
-        msg.style.color = 'var(--text-secondary)';
-        msg.style.fontSize = '0.8rem';
-        msg.style.marginTop = '1rem';
-        msg.textContent = `... and ${sortedData.length - limit} more unique keys hidden for UI performance.`;
-        els.resultsList.appendChild(msg);
-    }
+  els.resultsList.innerHTML = '';
+
+  // Render top 100 to avoid locking DOM
+  const limit = Math.min(sortedData.length, 100);
+
+  for (let i = 0; i < limit; i++) {
+    const [word, count] = sortedData[i];
+    const row = document.createElement('div');
+    row.className = 'result-row';
+    row.innerHTML = `<span class="result-key">${word}</span> <span class="result-val">${count}</span>`;
+    els.resultsList.appendChild(row);
+  }
+
+  if (sortedData.length > limit) {
+    const msg = document.createElement('div');
+    msg.style.textAlign = 'center';
+    msg.style.color = 'var(--text-secondary)';
+    msg.style.fontSize = '0.8rem';
+    msg.style.marginTop = '1rem';
+    msg.textContent = `... and ${sortedData.length - limit} more unique keys hidden for UI performance.`;
+    els.resultsList.appendChild(msg);
+  }
 }
 
 function generateMassiveDataset() {
-    els.dataInput.value = "Generating data...";
-    
-    setTimeout(() => {
-        const words = [
-            "apple", "banana", "cloud", "data", "engineer", "algorithm", 
-            "server", "system", "design", "network", "node", "hash",
-            "cluster", "worker", "map", "reduce", "shuffle", "sort",
-            "big", "scale", "performance", "latency", "throughput"
-        ];
-        
-        // Generate roughly 100k words
-        let result = [];
-        for(let i=0; i<100000; i++) {
-            result.push(words[Math.floor(Math.random() * words.length)]);
-        }
-        
-        els.dataInput.value = result.join(' ');
-        logSys("Generated 100,000 word dataset.", "sys");
-    }, 100);
+  els.dataInput.value = 'Generating data...';
+
+  setTimeout(() => {
+    const words = [
+      'apple',
+      'banana',
+      'cloud',
+      'data',
+      'engineer',
+      'algorithm',
+      'server',
+      'system',
+      'design',
+      'network',
+      'node',
+      'hash',
+      'cluster',
+      'worker',
+      'map',
+      'reduce',
+      'shuffle',
+      'sort',
+      'big',
+      'scale',
+      'performance',
+      'latency',
+      'throughput',
+    ];
+
+    // Generate roughly 100k words
+    let result = [];
+    for (let i = 0; i < 100000; i++) {
+      result.push(words[Math.floor(Math.random() * words.length)]);
+    }
+
+    els.dataInput.value = result.join(' ');
+    logSys('Generated 100,000 word dataset.', 'sys');
+  }, 100);
 }

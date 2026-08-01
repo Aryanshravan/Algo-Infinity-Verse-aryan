@@ -1,0 +1,779 @@
+/* ===== eBPF Zero-Trust Security Academy ===== */
+:root {
+  --ebpf-glass: rgba(255, 255, 255, 0.04);
+  --ebpf-border: rgba(255, 255, 255, 0.1);
+  --ebpf-muted: rgba(255, 255, 255, 0.62);
+  --ebpf-text: rgba(255, 255, 255, 0.92);
+  --ebpf-accent: #34d399;
+  --ebpf-accent-2: #22d3ee;
+  --ebpf-accent-dim: rgba(52, 211, 153, 0.14);
+  --ebpf-warn: #fbbf24;
+  --ebpf-danger: #f87171;
+  --ebpf-pass: #4ade80;
+  --ebpf-panel-bg: rgba(12, 18, 32, 0.72);
+  --ebpf-code-bg: rgba(0, 0, 0, 0.35);
+  --ebpf-nav-active: rgba(52, 211, 153, 0.18);
+  --ebpf-focus: #22d3ee;
+  --ebpf-radius: 14px;
+  --ebpf-font: 'Poppins', system-ui, sans-serif;
+  --ebpf-display: 'Orbitron', sans-serif;
+  --ebpf-mono: 'Fira Code', ui-monospace, monospace;
+}
+
+html.light-mode {
+  --ebpf-glass: rgba(15, 23, 42, 0.04);
+  --ebpf-border: rgba(15, 23, 42, 0.12);
+  --ebpf-muted: rgba(15, 23, 42, 0.65);
+  --ebpf-text: rgba(15, 23, 42, 0.92);
+  --ebpf-accent-dim: rgba(5, 150, 105, 0.12);
+  --ebpf-panel-bg: rgba(255, 255, 255, 0.88);
+  --ebpf-code-bg: rgba(15, 23, 42, 0.05);
+  --ebpf-nav-active: rgba(5, 150, 105, 0.12);
+}
+
+.ebpf-skip-link {
+  position: absolute;
+  left: 1rem;
+  top: -100px;
+  z-index: 10000;
+  padding: 0.6rem 1rem;
+  background: var(--ebpf-accent);
+  color: #0a0a14;
+  font-weight: 700;
+  border-radius: 8px;
+  text-decoration: none;
+  font-family: var(--ebpf-font);
+}
+
+.ebpf-skip-link:focus {
+  top: 1rem;
+  outline: 3px solid #fff;
+  outline-offset: 2px;
+}
+
+/* Hero */
+.ebpf-hero {
+  position: relative;
+  overflow: hidden;
+  padding: 7.5rem 1.5rem 3.5rem;
+  text-align: center;
+  border-bottom: 1px solid var(--ebpf-border);
+  background:
+    radial-gradient(ellipse at top right, rgba(52, 211, 153, 0.16), transparent 55%),
+    radial-gradient(ellipse at bottom left, rgba(34, 211, 238, 0.1), transparent 50%);
+  font-family: var(--ebpf-font);
+}
+
+.ebpf-hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1.1rem;
+  padding: 0.35rem 0.9rem;
+  border-radius: 999px;
+  border: 1px solid rgba(52, 211, 153, 0.4);
+  background: var(--ebpf-accent-dim);
+  color: var(--ebpf-accent);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.ebpf-hero h1 {
+  margin: 0 0 1rem;
+  font-family: var(--ebpf-display);
+  font-size: clamp(1.9rem, 5vw, 3rem);
+  font-weight: 900;
+  line-height: 1.15;
+  color: var(--ebpf-text);
+}
+
+.ebpf-hero-accent {
+  display: inline-block;
+  background: linear-gradient(135deg, #34d399, #22d3ee);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.ebpf-hero p {
+  max-width: 680px;
+  margin: 0 auto 2rem;
+  color: var(--ebpf-muted);
+  font-size: 1.05rem;
+  line-height: 1.65;
+}
+
+.ebpf-hero-stats {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.ebpf-stat {
+  min-width: 110px;
+  padding: 0.85rem 1.1rem;
+  border: 1px solid var(--ebpf-border);
+  border-radius: var(--ebpf-radius);
+  background: var(--ebpf-glass);
+}
+
+.ebpf-stat-val {
+  display: block;
+  font-family: var(--ebpf-display);
+  font-size: 1.45rem;
+  font-weight: 700;
+  color: var(--ebpf-text);
+}
+
+.ebpf-stat-label {
+  font-size: 0.75rem;
+  color: var(--ebpf-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.ebpf-progress-track {
+  max-width: 420px;
+  height: 8px;
+  margin: 0 auto;
+  border-radius: 999px;
+  background: var(--ebpf-glass);
+  border: 1px solid var(--ebpf-border);
+  overflow: hidden;
+}
+
+.ebpf-progress-fill {
+  height: 100%;
+  width: 0%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--ebpf-accent), var(--ebpf-accent-2));
+  transition: width 0.45s ease;
+}
+
+/* Main layout */
+.ebpf-main {
+  font-family: var(--ebpf-font);
+  color: var(--ebpf-text);
+  padding: 2.5rem 0 4rem;
+}
+
+.ebpf-container {
+  width: min(1120px, calc(100% - 2rem));
+  margin: 0 auto;
+}
+
+.ebpf-section {
+  margin-bottom: 2.75rem;
+}
+
+.ebpf-section-head {
+  margin-bottom: 1.25rem;
+}
+
+.ebpf-section-head h2 {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  margin: 0 0 0.4rem;
+  font-family: var(--ebpf-display);
+  font-size: clamp(1.2rem, 2.5vw, 1.55rem);
+  font-weight: 700;
+}
+
+.ebpf-section-head h2 i {
+  color: var(--ebpf-accent);
+}
+
+.ebpf-section-head p {
+  margin: 0;
+  color: var(--ebpf-muted);
+  max-width: 720px;
+  line-height: 1.55;
+}
+
+.ebpf-muted {
+  color: var(--ebpf-muted);
+}
+
+/* Modules */
+.ebpf-modules-layout {
+  display: grid;
+  grid-template-columns: minmax(220px, 280px) 1fr;
+  gap: 1.25rem;
+  align-items: start;
+}
+
+.ebpf-module-nav,
+.ebpf-lesson-panel,
+.ebpf-panel {
+  border: 1px solid var(--ebpf-border);
+  border-radius: var(--ebpf-radius);
+  background: var(--ebpf-panel-bg);
+  backdrop-filter: blur(8px);
+}
+
+.ebpf-module-nav {
+  padding: 0.75rem;
+  position: sticky;
+  top: 5.5rem;
+  max-height: calc(100vh - 7rem);
+  overflow-y: auto;
+}
+
+.ebpf-module-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.ebpf-module-btn {
+  width: 100%;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.65rem;
+  text-align: left;
+  padding: 0.7rem 0.8rem;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--ebpf-text);
+  font: inherit;
+  cursor: pointer;
+  transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+.ebpf-module-btn:hover {
+  background: var(--ebpf-glass);
+  border-color: var(--ebpf-border);
+}
+
+.ebpf-module-btn:focus-visible {
+  outline: 2px solid var(--ebpf-focus);
+  outline-offset: 2px;
+}
+
+.ebpf-module-btn.is-active {
+  background: var(--ebpf-nav-active);
+  border-color: rgba(52, 211, 153, 0.35);
+}
+
+.ebpf-module-btn.is-complete .ebpf-module-check {
+  color: var(--ebpf-pass);
+}
+
+.ebpf-module-check {
+  flex-shrink: 0;
+  margin-top: 0.15rem;
+  color: var(--ebpf-muted);
+  width: 1rem;
+  text-align: center;
+}
+
+.ebpf-module-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  min-width: 0;
+}
+
+.ebpf-module-meta strong {
+  font-size: 0.88rem;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.ebpf-module-meta span {
+  font-size: 0.72rem;
+  color: var(--ebpf-muted);
+}
+
+.ebpf-lesson-panel {
+  padding: 1.35rem 1.5rem 1.5rem;
+  min-height: 320px;
+}
+
+.ebpf-lesson-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+  padding-bottom: 0.85rem;
+  border-bottom: 1px solid var(--ebpf-border);
+}
+
+.ebpf-lesson-header h3 {
+  margin: 0;
+  font-family: var(--ebpf-display);
+  font-size: 1.2rem;
+  flex: 1;
+}
+
+.ebpf-lesson-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.25rem 0.65rem;
+  border-radius: 999px;
+  background: rgba(74, 222, 128, 0.15);
+  color: var(--ebpf-pass);
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.ebpf-lesson-body {
+  line-height: 1.7;
+  font-size: 0.98rem;
+}
+
+.ebpf-lesson-body p {
+  margin: 0 0 1rem;
+}
+
+.ebpf-lesson-body ul {
+  margin: 0 0 1rem;
+  padding-left: 1.25rem;
+}
+
+.ebpf-lesson-body li {
+  margin-bottom: 0.4rem;
+}
+
+.ebpf-lesson-body code {
+  font-family: var(--ebpf-mono);
+  font-size: 0.86em;
+  padding: 0.1rem 0.35rem;
+  border-radius: 4px;
+  background: var(--ebpf-code-bg);
+}
+
+.ebpf-lesson-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--ebpf-border);
+}
+
+/* Panels & form controls */
+.ebpf-panel {
+  padding: 1.25rem 1.35rem;
+}
+
+.ebpf-lab-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.25rem;
+}
+
+.ebpf-label {
+  display: block;
+  margin-bottom: 0.45rem;
+  font-size: 0.82rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--ebpf-text);
+}
+
+.ebpf-fieldset {
+  border: none;
+  margin: 0 0 1rem;
+  padding: 0;
+}
+
+.ebpf-textarea,
+.ebpf-input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0.75rem 0.85rem;
+  border: 1px solid var(--ebpf-border);
+  border-radius: 10px;
+  background: var(--ebpf-code-bg);
+  color: var(--ebpf-text);
+  font-family: var(--ebpf-mono);
+  font-size: 0.82rem;
+  line-height: 1.5;
+  resize: vertical;
+}
+
+.ebpf-textarea:focus,
+.ebpf-input:focus {
+  outline: 2px solid var(--ebpf-focus);
+  outline-offset: 1px;
+  border-color: transparent;
+}
+
+.ebpf-textarea-sm {
+  min-height: 110px;
+}
+
+.ebpf-hint {
+  margin: 0.45rem 0 0.85rem;
+  font-size: 0.78rem;
+  color: var(--ebpf-muted);
+  line-height: 1.45;
+}
+
+.ebpf-btn-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin-top: 0.75rem;
+}
+
+.ebpf-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.55rem 1rem;
+  border-radius: 10px;
+  border: 1px solid transparent;
+  font: inherit;
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s ease, border-color 0.2s ease, opacity 0.2s ease;
+}
+
+.ebpf-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.ebpf-btn:focus-visible {
+  outline: 2px solid var(--ebpf-focus);
+  outline-offset: 2px;
+}
+
+.ebpf-btn-primary {
+  background: linear-gradient(135deg, #059669, #0e7490);
+  color: #fff;
+}
+
+.ebpf-btn-primary:hover:not(:disabled) {
+  filter: brightness(1.08);
+}
+
+.ebpf-btn-secondary {
+  background: var(--ebpf-accent-dim);
+  border-color: rgba(52, 211, 153, 0.35);
+  color: var(--ebpf-accent);
+}
+
+.ebpf-btn-secondary:hover:not(:disabled) {
+  background: rgba(52, 211, 153, 0.22);
+}
+
+.ebpf-btn-ghost {
+  background: transparent;
+  border-color: var(--ebpf-border);
+  color: var(--ebpf-text);
+}
+
+.ebpf-btn-ghost:hover:not(:disabled) {
+  background: var(--ebpf-glass);
+}
+
+html.light-mode .ebpf-btn-primary {
+  background: linear-gradient(135deg, #047857, #0e7490);
+}
+
+/* Event picks */
+.ebpf-event-picks {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  margin-bottom: 1rem;
+}
+
+.ebpf-event-pick {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.55rem;
+  padding: 0.55rem 0.7rem;
+  border: 1px solid var(--ebpf-border);
+  border-radius: 10px;
+  background: var(--ebpf-glass);
+  cursor: pointer;
+  font-size: 0.82rem;
+  line-height: 1.4;
+}
+
+.ebpf-event-pick:hover {
+  border-color: rgba(52, 211, 153, 0.4);
+}
+
+.ebpf-event-pick input {
+  margin-top: 0.2rem;
+  accent-color: var(--ebpf-accent);
+}
+
+.ebpf-event-pick code {
+  font-family: var(--ebpf-mono);
+  font-size: 0.78rem;
+  color: var(--ebpf-accent-2);
+}
+
+/* Results & tips */
+.ebpf-results {
+  margin-top: 1rem;
+  padding: 0.85rem;
+  border-radius: 10px;
+  border: 1px solid var(--ebpf-border);
+  background: var(--ebpf-glass);
+  font-size: 0.88rem;
+  line-height: 1.5;
+}
+
+.ebpf-result-item {
+  display: flex;
+  gap: 0.55rem;
+  align-items: flex-start;
+  padding: 0.45rem 0;
+  border-bottom: 1px solid var(--ebpf-border);
+}
+
+.ebpf-result-item:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.ebpf-result-item:first-child {
+  padding-top: 0;
+}
+
+.ebpf-tag {
+  flex-shrink: 0;
+  min-width: 3.5rem;
+  text-align: center;
+  padding: 0.15rem 0.4rem;
+  border-radius: 6px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.ebpf-tag-fire {
+  background: rgba(248, 113, 113, 0.18);
+  color: var(--ebpf-danger);
+}
+
+.ebpf-tag-pass {
+  background: rgba(74, 222, 128, 0.15);
+  color: var(--ebpf-pass);
+}
+
+.ebpf-tips {
+  margin-top: 0.85rem;
+  padding: 0.85rem 1rem;
+  border-radius: 10px;
+  border: 1px solid rgba(251, 191, 36, 0.35);
+  background: rgba(251, 191, 36, 0.1);
+  color: var(--ebpf-warn);
+  font-size: 0.86rem;
+  line-height: 1.55;
+}
+
+.ebpf-tips h4 {
+  margin: 0 0 0.4rem;
+  font-size: 0.88rem;
+  font-family: var(--ebpf-display);
+}
+
+.ebpf-tips ul {
+  margin: 0;
+  padding-left: 1.15rem;
+}
+
+.ebpf-tips li {
+  margin-bottom: 0.3rem;
+}
+
+/* Trace simulator */
+.ebpf-trace-panel {
+  padding: 1rem 1.15rem 1.15rem;
+}
+
+.ebpf-trace-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.55rem;
+  margin-bottom: 0.85rem;
+}
+
+.ebpf-trace-status {
+  margin-left: auto;
+  font-size: 0.8rem;
+  color: var(--ebpf-muted);
+  font-weight: 600;
+}
+
+.ebpf-trace-log {
+  height: 280px;
+  overflow-y: auto;
+  padding: 0.85rem 1rem;
+  border-radius: 10px;
+  border: 1px solid var(--ebpf-border);
+  background: #060a12;
+  color: #a7f3d0;
+  font-family: var(--ebpf-mono);
+  font-size: 0.78rem;
+  line-height: 1.55;
+}
+
+html.light-mode .ebpf-trace-log {
+  background: #0f172a;
+  color: #a7f3d0;
+}
+
+.ebpf-trace-line {
+  margin-bottom: 0.25rem;
+  word-break: break-word;
+}
+
+.ebpf-trace-line .ts {
+  color: #64748b;
+}
+
+.ebpf-trace-line .sys {
+  color: #22d3ee;
+  font-weight: 600;
+}
+
+.ebpf-trace-line .alert {
+  color: #f87171;
+}
+
+.ebpf-trace-empty {
+  color: #64748b;
+}
+
+/* Quiz */
+.ebpf-quiz-q {
+  margin-bottom: 1.35rem;
+  padding-bottom: 1.15rem;
+  border-bottom: 1px solid var(--ebpf-border);
+}
+
+.ebpf-quiz-q:last-of-type {
+  border-bottom: none;
+}
+
+.ebpf-quiz-q legend {
+  font-weight: 600;
+  margin-bottom: 0.65rem;
+  line-height: 1.45;
+  padding: 0;
+}
+
+.ebpf-quiz-options {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.ebpf-quiz-option {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.55rem;
+  padding: 0.55rem 0.7rem;
+  border: 1px solid var(--ebpf-border);
+  border-radius: 10px;
+  background: var(--ebpf-glass);
+  cursor: pointer;
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+.ebpf-quiz-option:hover {
+  border-color: rgba(52, 211, 153, 0.4);
+}
+
+.ebpf-quiz-option input {
+  margin-top: 0.2rem;
+  accent-color: var(--ebpf-accent);
+}
+
+.ebpf-quiz-option.is-correct {
+  border-color: rgba(74, 222, 128, 0.55);
+  background: rgba(74, 222, 128, 0.1);
+}
+
+.ebpf-quiz-option.is-wrong {
+  border-color: rgba(248, 113, 113, 0.55);
+  background: rgba(248, 113, 113, 0.1);
+}
+
+.ebpf-quiz-result {
+  margin-top: 1.15rem;
+  padding: 1rem 1.15rem;
+  border-radius: 10px;
+  border: 1px solid var(--ebpf-border);
+  background: var(--ebpf-accent-dim);
+  font-size: 0.95rem;
+  line-height: 1.55;
+}
+
+.ebpf-quiz-result strong {
+  font-family: var(--ebpf-display);
+  font-size: 1.1rem;
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+  .ebpf-modules-layout,
+  .ebpf-lab-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .ebpf-module-nav {
+    position: static;
+    max-height: none;
+  }
+
+  .ebpf-module-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 0.45rem;
+  }
+
+  .ebpf-trace-status {
+    margin-left: 0;
+    width: 100%;
+  }
+}
+
+@media (max-width: 560px) {
+  .ebpf-hero {
+    padding: 6.5rem 1rem 2.5rem;
+  }
+
+  .ebpf-lesson-panel,
+  .ebpf-panel {
+    padding: 1rem;
+  }
+
+  .ebpf-stat {
+    min-width: 96px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ebpf-progress-fill,
+  .ebpf-module-btn,
+  .ebpf-btn {
+    transition: none;
+  }
+}

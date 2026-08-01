@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Distributed Tracing Analyzer | Algo Infinity Verse</title>
+  <meta name="description" content="Analyze OpenTelemetry/Jaeger-like span JSON: critical path, waterfall timeline, cascading timeouts, and N+1 query patterns — client-side." />
+  <link rel="stylesheet" href="/styles.css" />
+  <link rel="stylesheet" href="style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Poppins:wght@300;400;500;600;700&family=Fira+Code:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <script>
+    (function () {
+      try {
+        var storedTheme = localStorage.getItem('theme');
+        var prefersLight = window.matchMedia('(prefers-color-scheme: light)').matches;
+        var theme = storedTheme || (prefersLight ? 'light' : 'dark');
+        if (theme === 'light') {
+          document.documentElement.classList.add('light-mode');
+        } else {
+          document.documentElement.classList.remove('light-mode');
+        }
+      } catch (e) {}
+    })();
+  </script>
+</head>
+<body data-page="ai-distributed-tracing-analyzer">
+  <a href="#trace-main" class="trace-skip-link">Skip to main content</a>
+  <button type="button" id="scrollTopBtn" class="scroll-top-btn" aria-label="Scroll to top">
+    <i class="fas fa-arrow-up" aria-hidden="true"></i>
+  </button>
+
+  <div id="navbar-placeholder"></div>
+
+  <header class="trace-hero">
+    <div class="trace-hero-badge">
+      <i class="fas fa-diagram-project" aria-hidden="true"></i>
+      Observability Lab
+    </div>
+    <h1>
+      AI Distributed
+      <span class="trace-hero-accent">Tracing Analyzer</span>
+    </h1>
+    <p>
+      Paste OpenTelemetry / Jaeger-like span JSON to compute the critical path,
+      render a waterfall, and spot cascading RPC timeouts plus N+1 database patterns.
+    </p>
+    <div class="trace-hero-stats" aria-live="polite">
+      <div class="trace-stat">
+        <span class="trace-stat-val" id="statSpans">0</span>
+        <span class="trace-stat-label">Total spans</span>
+      </div>
+      <div class="trace-stat">
+        <span class="trace-stat-val" id="statCriticalMs">—</span>
+        <span class="trace-stat-label">Critical path ms</span>
+      </div>
+      <div class="trace-stat">
+        <span class="trace-stat-val" id="statBottlenecks">0</span>
+        <span class="trace-stat-label">Bottlenecks</span>
+      </div>
+    </div>
+  </header>
+
+  <main id="trace-main" class="trace-main">
+    <div class="container">
+      <div class="trace-workspace">
+        <section class="trace-panel" aria-labelledby="trace-input-title">
+          <div class="trace-panel-header">
+            <div class="trace-panel-title">
+              <i class="fas fa-code trace-panel-icon" aria-hidden="true"></i>
+              <h2 id="trace-input-title">Trace input</h2>
+            </div>
+          </div>
+
+          <label class="trace-label" for="traceJson">OpenTelemetry / Jaeger-like spans (JSON array)</label>
+          <textarea id="traceJson" class="trace-textarea" rows="16" spellcheck="false" placeholder='[{"traceId":"...","spanId":"...","name":"HTTP GET /api","serviceName":"gateway","startTimeUnixNano":"0","endTimeUnixNano":"120000000"}]' aria-describedby="traceHint"></textarea>
+          <p id="traceHint" class="trace-hint">
+            Each span: <code>traceId</code>, <code>spanId</code>, <code>parentSpanId</code>, <code>name</code>,
+            <code>serviceName</code> (or <code>attributes["service.name"]</code>),
+            timing via <code>startTimeUnixNano</code>/<code>endTimeUnixNano</code> or <code>startTime</code>/<code>duration</code>,
+            and optional <code>status.code</code>.
+          </p>
+
+          <fieldset class="trace-filters">
+            <legend class="trace-label">Filters</legend>
+            <div class="trace-filter-grid">
+              <div>
+                <label class="trace-label" for="filterService">Service name</label>
+                <select id="filterService" class="trace-select">
+                  <option value="">All services</option>
+                </select>
+              </div>
+              <div>
+                <label class="trace-label" for="filterStatus">Status</label>
+                <select id="filterStatus" class="trace-select">
+                  <option value="">All statuses</option>
+                  <option value="ok">OK</option>
+                  <option value="error">Error</option>
+                </select>
+              </div>
+              <div>
+                <label class="trace-label" for="filterMinLatency">Min latency (ms)</label>
+                <input type="number" id="filterMinLatency" class="trace-input" min="0" step="1" value="0" inputmode="numeric" />
+              </div>
+            </div>
+          </fieldset>
+
+          <div class="trace-controls">
+            <button type="button" id="loadDemoTraceBtn" class="btn btn-secondary">
+              <i class="fas fa-flask" aria-hidden="true"></i> Load demo trace
+            </button>
+            <button type="button" id="analyzeTraceBtn" class="btn btn-primary">
+              <i class="fas fa-chart-line" aria-hidden="true"></i> Analyze trace
+            </button>
+            <button type="button" id="clearTraceBtn" class="btn btn-outline">
+              <i class="fas fa-eraser" aria-hidden="true"></i> Clear
+            </button>
+            <button type="button" id="exportTraceBtn" class="btn btn-outline" disabled>
+              <i class="fas fa-download" aria-hidden="true"></i> Export summary
+            </button>
+          </div>
+          <div id="traceStatus" class="trace-status" role="status" aria-live="polite"></div>
+        </section>
+
+        <section class="trace-panel trace-report-panel" aria-labelledby="trace-report-title">
+          <div class="trace-panel-header">
+            <div class="trace-panel-title">
+              <i class="fas fa-wave-square trace-panel-icon" aria-hidden="true"></i>
+              <h2 id="trace-report-title">Analysis</h2>
+            </div>
+          </div>
+
+          <div id="traceEmpty" class="trace-empty">
+            <i class="fas fa-diagram-project" aria-hidden="true"></i>
+            <p>No analysis yet. Load the demo trace or paste span JSON, then analyze.</p>
+          </div>
+
+          <div id="traceResults" hidden>
+            <section class="trace-section" aria-labelledby="criticalPathHeading">
+              <h3 id="criticalPathHeading"><i class="fas fa-route" aria-hidden="true"></i> Critical path</h3>
+              <ol id="criticalPathList" class="trace-path-list"></ol>
+            </section>
+
+            <section class="trace-section" aria-labelledby="waterfallHeading">
+              <h3 id="waterfallHeading"><i class="fas fa-bars-staggered" aria-hidden="true"></i> Waterfall timeline</h3>
+              <div id="waterfall" class="trace-waterfall" role="img" aria-label="Span waterfall timeline"></div>
+            </section>
+
+            <section class="trace-section" aria-labelledby="bottleneckHeading">
+              <h3 id="bottleneckHeading"><i class="fas fa-triangle-exclamation" aria-hidden="true"></i> Detected bottlenecks</h3>
+              <ul id="bottleneckList" class="trace-findings"></ul>
+            </section>
+
+            <section class="trace-section" aria-labelledby="remediationHeading">
+              <h3 id="remediationHeading"><i class="fas fa-robot" aria-hidden="true"></i> AI remediation suggestions</h3>
+              <ul id="remediationList" class="trace-findings"></ul>
+            </section>
+          </div>
+        </section>
+      </div>
+    </div>
+  </main>
+
+  <div id="footer-placeholder"></div>
+
+  <script src="/auth.js"></script>
+  <script src="/bootstrap-legacy.js"></script>
+  <script src="/script.js"></script>
+  <script type="module" src="/dist/legacy-bundle.mjs"></script>
+  <script src="/theme.js"></script>
+  <script src="script.js"></script>
+  <script>
+    if (typeof loadPartial === 'function') {
+      loadPartial('navbar-placeholder', '/partials/navbar.html');
+      loadPartial('footer-placeholder', '/partials/footer.html');
+    }
+  </script>
+</body>
+</html>

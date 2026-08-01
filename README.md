@@ -493,7 +493,7 @@ Dedicated editors with syntax highlighting, execution, and language-specific fea
    | `FIREBASE_CLIENT_EMAIL` | Admin SDK service account email |
    | `FIREBASE_PRIVATE_KEY` | Admin SDK service account private key |
 
-   > **Note:** Without Firebase credentials, user data is stored locally in `data/users.json`. With Firebase, it uses Firestore and the local file is not used.
+   > **Note:** Without Firebase credentials, user data is stored locally in `data/users.json`, which is generated locally at runtime and is intentionally excluded from version control. With Firebase, user data is stored in Firestore instead.
 
    Start the server:
    ```bash

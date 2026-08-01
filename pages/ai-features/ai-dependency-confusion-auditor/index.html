@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Dependency Confusion Auditor | Algo Infinity Verse</title>
+  <meta name="description" content="Paste package.json or lockfile excerpts, detect unscoped internal names and typosquats, get registry/scope policy recommendations, and export a dependency-confusion report." />
+  <link rel="stylesheet" href="/styles.css" />
+  <link rel="stylesheet" href="style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Poppins:wght@300;400;500;600;700&family=Fira+Code:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <script>
+    (function () {
+      try {
+        var storedTheme = localStorage.getItem('theme');
+        var prefersLight = window.matchMedia('(prefers-color-scheme: light)').matches;
+        var theme = storedTheme || (prefersLight ? 'light' : 'dark');
+        if (theme === 'light') {
+          document.documentElement.classList.add('light-mode');
+        } else {
+          document.documentElement.classList.remove('light-mode');
+        }
+      } catch (e) {}
+    })();
+  </script>
+</head>
+<body data-page="ai-dependency-confusion-auditor">
+  <a href="#depconf-main" class="depconf-skip-link">Skip to main content</a>
+  <button type="button" id="scrollTopBtn" class="scroll-top-btn" aria-label="Scroll to top">
+    <i class="fas fa-arrow-up" aria-hidden="true"></i>
+  </button>
+
+  <div id="navbar-placeholder"></div>
+
+  <header class="depconf-hero">
+    <div class="depconf-hero-badge">
+      <i class="fas fa-box-open" aria-hidden="true"></i>
+      Supply-Chain Guard Lab
+    </div>
+    <h1>
+      AI Dependency Confusion
+      <span class="depconf-hero-accent">Auditor</span>
+    </h1>
+    <p>
+      Paste package.json / lockfile excerpts, flag unscoped internal names and typosquat lookalikes,
+      get registry/scope policy recommendations, and download a confusion report — client-side only.
+    </p>
+    <div class="depconf-hero-stats" aria-live="polite">
+      <div class="depconf-stat">
+        <span class="depconf-stat-val" id="statPackages">0</span>
+        <span class="depconf-stat-label">Packages seen</span>
+      </div>
+      <div class="depconf-stat">
+        <span class="depconf-stat-val" id="statUnscoped">0</span>
+        <span class="depconf-stat-label">Unscoped internal</span>
+      </div>
+      <div class="depconf-stat">
+        <span class="depconf-stat-val" id="statTypos">0</span>
+        <span class="depconf-stat-label">Typosquat hits</span>
+      </div>
+      <div class="depconf-stat">
+        <span class="depconf-stat-val" id="statRisk">—</span>
+        <span class="depconf-stat-label">Risk level</span>
+      </div>
+    </div>
+  </header>
+
+  <main id="depconf-main" class="depconf-main">
+    <div class="container">
+      <div class="depconf-workspace">
+        <section class="depconf-panel" aria-labelledby="depconf-input-title">
+          <div class="depconf-panel-header">
+            <div class="depconf-panel-title">
+              <i class="fas fa-file-code depconf-panel-icon" aria-hidden="true"></i>
+              <h2 id="depconf-input-title">package.json / lock excerpt</h2>
+            </div>
+          </div>
+
+          <label class="depconf-label" for="depconfManifestInput">Paste dependencies block or lockfile lines</label>
+          <textarea
+            id="depconfManifestInput"
+            class="depconf-textarea"
+            rows="16"
+            spellcheck="false"
+            placeholder='{"dependencies":{"algo-infinity-core":"1.0.0","lodahs":"4.17.21"}}'
+            aria-describedby="depconfManifestHint"
+          ></textarea>
+          <p id="depconfManifestHint" class="depconf-hint">
+            Detects unscoped names that look internal, and near-miss spellings of popular public packages.
+          </p>
+
+          <div class="depconf-controls">
+            <button type="button" id="depconfLoadDemoBtn" class="btn btn-secondary">
+              <i class="fas fa-flask" aria-hidden="true"></i> Load vulnerable demos
+            </button>
+            <button type="button" id="depconfAuditBtn" class="btn btn-primary">
+              <i class="fas fa-magnifying-glass" aria-hidden="true"></i> Audit confusion risk
+            </button>
+            <button type="button" id="depconfClearBtn" class="btn btn-outline">
+              <i class="fas fa-eraser" aria-hidden="true"></i> Clear
+            </button>
+            <button type="button" id="depconfExportBtn" class="btn btn-outline" disabled>
+              <i class="fas fa-download" aria-hidden="true"></i> Export confusion report
+            </button>
+          </div>
+          <div id="depconfStatus" class="depconf-status" role="status" aria-live="polite"></div>
+        </section>
+
+        <section class="depconf-panel depconf-report-panel" aria-labelledby="depconf-report-title">
+          <div class="depconf-panel-header">
+            <div class="depconf-panel-title">
+              <i class="fas fa-clipboard-check depconf-panel-icon" aria-hidden="true"></i>
+              <h2 id="depconf-report-title">Audit results</h2>
+            </div>
+          </div>
+
+          <div id="depconfEmpty" class="depconf-empty">
+            <i class="fas fa-box-open" aria-hidden="true"></i>
+            <p>No audit yet. Load vulnerable demos or paste a manifest excerpt, then run the auditor.</p>
+          </div>
+
+          <div id="depconfResults" hidden>
+            <div class="depconf-score-card">
+              <div>
+                <h3 id="depconfRiskHeading">Confusion risk score</h3>
+                <p id="depconfRiskBlurb" class="depconf-muted"></p>
+              </div>
+              <div class="depconf-score-ring" id="depconfScoreRing" aria-hidden="true">
+                <span id="depconfScoreVal">0</span>
+              </div>
+            </div>
+
+            <section class="depconf-section" aria-labelledby="depconfFindingsHeading">
+              <h3 id="depconfFindingsHeading"><i class="fas fa-bug" aria-hidden="true"></i> Detector findings</h3>
+              <ul id="depconfFindingList" class="depconf-findings"></ul>
+            </section>
+
+            <section class="depconf-section" aria-labelledby="depconfPolicyHeading">
+              <h3 id="depconfPolicyHeading"><i class="fas fa-scale-balanced" aria-hidden="true"></i> Registry / scope policy</h3>
+              <div id="depconfPolicyOut" class="depconf-policy-out"></div>
+            </section>
+          </div>
+        </section>
+      </div>
+    </div>
+  </main>
+
+  <div id="footer-placeholder"></div>
+
+  <script src="/auth.js"></script>
+  <script src="/bootstrap-legacy.js"></script>
+  <script src="/script.js"></script>
+  <script type="module" src="/dist/legacy-bundle.mjs"></script>
+  <script src="/theme.js"></script>
+  <script src="script.js"></script>
+  <script>
+    if (typeof loadPartial === 'function') {
+      loadPartial('navbar-placeholder', '/partials/navbar.html');
+      loadPartial('footer-placeholder', '/partials/footer.html');
+    }
+  </script>
+</body>
+</html>

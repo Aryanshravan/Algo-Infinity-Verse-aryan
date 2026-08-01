@@ -15,6 +15,7 @@ jest.unstable_mockModule('../backend/jobs/queue.js', () => ({
   redisAvailable: false,
   redisClient: null,
   redisReady: Promise.resolve(),
+  createRedisClient: jest.fn(),
   default: {},
 }));
 

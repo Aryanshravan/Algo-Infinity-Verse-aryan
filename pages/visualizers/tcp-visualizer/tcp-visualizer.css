@@ -110,3 +110,41 @@ body.tcp-body {
     .panel-left, .panel-right { width: 100%; border: none; border-bottom: 1px solid var(--glass-border); flex-shrink: 0; }
     .panel-right { height: 800px; }
 }
+
+/* ── Algorithm Toggle ──────────────────────── */
+.algo-toggle {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.25rem;
+}
+
+.algo-btn {
+  flex: 1;
+  padding: 0.4rem 0.75rem;
+  border: 1px solid var(--border-color, #2d3748);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--text-secondary, #94a3b8);
+  font-size: 0.8rem;
+  font-family: 'Fira Code', monospace;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.algo-btn:hover {
+  border-color: #0ea5e9;
+  color: #0ea5e9;
+}
+
+.algo-btn.active {
+  background: rgba(14, 165, 233, 0.15);
+  border-color: #0ea5e9;
+  color: #0ea5e9;
+  font-weight: 600;
+}
+
+#btnAlgoCubic.active {
+  background: rgba(249, 115, 22, 0.15);
+  border-color: #f97316;
+  color: #f97316;
+}

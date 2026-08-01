@@ -1,4 +1,4 @@
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
   hlInit();
 });
 
@@ -56,22 +56,45 @@ function hlProcessItem(itemStr) {
   var isNewMax = run > hlState.registers[bucketIdx];
   if (isNewMax) hlState.registers[bucketIdx] = run;
 
-  return { bucketIdx: bucketIdx, run: run, isNewMax: isNewMax, hashHex: '0x' + h.toString(16).padStart(8, '0') };
+  var binaryStr = h.toString(2).padStart(32, '0');
+
+  return {
+    bucketIdx: bucketIdx,
+    run: run,
+    isNewMax: isNewMax,
+    hashHex: '0x' + h.toString(16).padStart(8, '0'),
+    binaryStr: binaryStr,
+  };
 }
 
 function hlEstimate() {
   var m = hlState.m;
   var sum = 0;
-  hlState.registers.forEach(function(r) { sum += Math.pow(2, -r); });
+  hlState.registers.forEach(function (r) {
+    sum += Math.pow(2, -r);
+  });
   var alpha = hlAlpha(m);
-  var raw = alpha * m * m / sum;
+  var raw = (alpha * m * m) / sum;
 
   if (raw <= 2.5 * m) {
-    var zeros = hlState.registers.filter(function(r) { return r === 0; }).length;
+    var zeros = hlState.registers.filter(function (r) {
+      return r === 0;
+    }).length;
     if (zeros > 0) raw = m * Math.log(m / zeros);
   }
 
   return Math.round(raw);
+}
+
+function hlEstimateArithmetic() {
+  var m = hlState.m;
+  var sum = 0;
+  hlState.registers.forEach(function (r) {
+    sum += Math.pow(2, r);
+  });
+  var avg = sum / m;
+  var alpha = hlAlpha(m);
+  return Math.round(alpha * m * avg);
 }
 
 function hlRenderRegisters(justUpdatedIdx) {
@@ -79,9 +102,12 @@ function hlRenderRegisters(justUpdatedIdx) {
   if (!grid) return;
   grid.textContent = '';
   var frag = document.createDocumentFragment();
-  hlState.registers.forEach(function(r, i) {
+  hlState.registers.forEach(function (r, i) {
     var cell = document.createElement('div');
-    cell.className = 'hl-register-cell' + (r > 0 ? ' nonzero' : '') + (i === justUpdatedIdx ? ' just-updated' : '');
+    cell.className =
+      'hl-register-cell' +
+      (r > 0 ? ' nonzero' : '') +
+      (i === justUpdatedIdx ? ' just-updated' : '');
     cell.textContent = r;
     frag.appendChild(cell);
   });
@@ -91,7 +117,7 @@ function hlRenderRegisters(justUpdatedIdx) {
 function hlRenderStats() {
   var estimate = hlEstimate();
   var trueCount = Object.keys(hlState.trueSet).length;
-  var error = trueCount > 0 ? Math.abs(estimate - trueCount) / trueCount * 100 : 0;
+  var error = trueCount > 0 ? (Math.abs(estimate - trueCount) / trueCount) * 100 : 0;
 
   var estBigEl = document.getElementById('hlEstimateBig');
   var streamedEl = document.getElementById('hlStreamed');
@@ -116,7 +142,13 @@ function hlRenderStats() {
     memSavingsEl.textContent = setBytes > hllBytes ? pct + '% smaller' : '—';
   }
 
-  hlState.chartHistory.push({ streamed: hlState.streamed, estimate: estimate, trueCount: trueCount });
+  var arithmeticEstimate = hlEstimateArithmetic();
+  hlState.chartHistory.push({
+    streamed: hlState.streamed,
+    estimate: estimate,
+    arithmeticEstimate: arithmeticEstimate,
+    trueCount: trueCount,
+  });
   hlDrawChart();
 }
 
@@ -131,36 +163,83 @@ function hlDrawChart() {
   var hist = hlState.chartHistory;
   if (hist.length < 2) return;
 
-  var W = canvas.width; var H = canvas.height;
+  var W = canvas.width;
+  var H = canvas.height;
   var pad = { top: 15, right: 15, bottom: 25, left: 50 };
   var plotW = W - pad.left - pad.right;
   var plotH = H - pad.top - pad.bottom;
 
-  var maxVal = Math.max.apply(null, hist.map(function(h) { return Math.max(h.estimate, h.trueCount); }).concat([10]));
+  var maxVal = Math.max.apply(
+    null,
+    hist
+      .map(function (h) {
+        return Math.max(h.estimate, h.trueCount, h.arithmeticEstimate);
+      })
+      .concat([10])
+  );
 
-  function xPos(i) { return pad.left + (i / (hist.length - 1)) * plotW; }
-  function yPos(v) { return pad.top + (1 - v / maxVal) * plotH; }
+  function xPos(i) {
+    return pad.left + (i / (hist.length - 1)) * plotW;
+  }
+  function yPos(v) {
+    return pad.top + (1 - v / maxVal) * plotH;
+  }
 
   ctx.strokeStyle = 'rgba(255,255,255,0.05)';
   for (var i = 0; i <= 4; i++) {
     var y = pad.top + (i / 4) * plotH;
-    ctx.beginPath(); ctx.moveTo(pad.left, y); ctx.lineTo(W - pad.right, y); ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(pad.left, y);
+    ctx.lineTo(W - pad.right, y);
+    ctx.stroke();
     var val = Math.round(maxVal * (1 - i / 4));
-    ctx.fillStyle = 'rgba(148,163,184,0.4)'; ctx.font = '8px Fira Code,monospace'; ctx.textAlign = 'right';
+    ctx.fillStyle = 'rgba(148,163,184,0.4)';
+    ctx.font = '8px Fira Code,monospace';
+    ctx.textAlign = 'right';
     ctx.fillText(val, pad.left - 4, y + 3);
   }
 
-  ctx.strokeStyle = '#22c55e'; ctx.lineWidth = 2;
+  // Arithmetic Mean (Volatile - Red)
+  ctx.strokeStyle = 'rgba(239, 68, 68, 0.5)';
+  ctx.lineWidth = 1.5;
+  ctx.setLineDash([2, 2]);
   ctx.beginPath();
-  hist.forEach(function(h, i) { var x = xPos(i); var y = yPos(h.trueCount); if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y); });
+  hist.forEach(function (h, i) {
+    var x = xPos(i);
+    var y = yPos(h.arithmeticEstimate);
+    if (i === 0) ctx.moveTo(x, y);
+    else ctx.lineTo(x, y);
+  });
+  ctx.stroke();
+  ctx.setLineDash([]);
+
+  // True Count (Green)
+  ctx.strokeStyle = '#22c55e';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  hist.forEach(function (h, i) {
+    var x = xPos(i);
+    var y = yPos(h.trueCount);
+    if (i === 0) ctx.moveTo(x, y);
+    else ctx.lineTo(x, y);
+  });
   ctx.stroke();
 
-  ctx.strokeStyle = '#06b6d4'; ctx.lineWidth = 2;
+  // Harmonic Mean (Cyan)
+  ctx.strokeStyle = '#06b6d4';
+  ctx.lineWidth = 2;
   ctx.beginPath();
-  hist.forEach(function(h, i) { var x = xPos(i); var y = yPos(h.estimate); if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y); });
+  hist.forEach(function (h, i) {
+    var x = xPos(i);
+    var y = yPos(h.estimate);
+    if (i === 0) ctx.moveTo(x, y);
+    else ctx.lineTo(x, y);
+  });
   ctx.stroke();
 
-  ctx.fillStyle = 'rgba(148,163,184,0.4)'; ctx.font = '8px Fira Code,monospace'; ctx.textAlign = 'center';
+  ctx.fillStyle = 'rgba(148,163,184,0.4)';
+  ctx.font = '8px Fira Code,monospace';
+  ctx.textAlign = 'center';
   ctx.fillText('items streamed', pad.left + plotW / 2, H - 4);
 }
 
@@ -171,13 +250,68 @@ function hlSetStatus(msg) {
 
 function hlUpdateHashTrace(itemStr, result) {
   var el = document.getElementById('hlHashTrace');
-  if (!el) return;
-  el.textContent = '';
-  el.appendChild(document.createTextNode('item "'));
-  var strong = document.createElement('strong');
-  strong.textContent = itemStr;
-  el.appendChild(strong);
-  el.appendChild(document.createTextNode('" → hash ' + result.hashHex + ' → bucket [' + result.bucketIdx + '], leading-zero-run = ' + result.run + (result.isNewMax ? ' → new max for this bucket!' : ' (not a new max — bucket already has a longer run)')));
+  if (el) {
+    el.textContent = '';
+    el.appendChild(document.createTextNode('item "'));
+    var strong = document.createElement('strong');
+    strong.textContent = itemStr;
+    el.appendChild(strong);
+    el.appendChild(
+      document.createTextNode(
+        '" → hash ' +
+          result.hashHex +
+          ' → bucket [' +
+          result.bucketIdx +
+          '], leading-zero-run = ' +
+          result.run +
+          (result.isNewMax
+            ? ' → new max for this bucket!'
+            : ' (not a new max — bucket already has a longer run)')
+      )
+    );
+  }
+
+  var splitterEl = document.getElementById('hlHashSplitter');
+  if (splitterEl && result.binaryStr) {
+    var b = hlState.b;
+    var bucketStr = result.binaryStr.substring(0, b);
+    var restStr = result.binaryStr.substring(b);
+
+    // Find the leading zeroes in the rest of the string
+    var zeroRun = 0;
+    for (var i = 0; i < restStr.length; i++) {
+      if (restStr[i] === '1') break;
+      zeroRun++;
+    }
+
+    var zeroStr = restStr.substring(0, zeroRun);
+    var valStr = restStr.substring(zeroRun);
+
+    splitterEl.innerHTML = '';
+
+    var bucketSpan = document.createElement('span');
+    bucketSpan.className = 'bucket-bits';
+    bucketSpan.textContent = bucketStr;
+    bucketSpan.title = 'Bucket Index: ' + result.bucketIdx;
+
+    var divSpan = document.createElement('span');
+    divSpan.className = 'split-divider';
+    divSpan.textContent = '|';
+
+    var zeroSpan = document.createElement('span');
+    zeroSpan.className = 'zero-bits';
+    zeroSpan.textContent = zeroStr;
+    zeroSpan.title = 'Leading Zeros: ' + zeroRun;
+
+    var valSpan = document.createElement('span');
+    valSpan.className = 'value-bits';
+    valSpan.textContent = valStr;
+
+    splitterEl.appendChild(bucketSpan);
+    splitterEl.appendChild(divSpan);
+    if (zeroRun > 0) splitterEl.appendChild(zeroSpan);
+    splitterEl.appendChild(valSpan);
+  }
 }
 
 function hlAddOneItem() {
@@ -200,14 +334,33 @@ function hlAddOneItem() {
 
   var trueCount = Object.keys(hlState.trueSet).length;
   var est = hlEstimate();
-  hlSetStatus('Streamed ' + hlState.streamed + ' items (' + trueCount + ' unique). Current estimate: ' + est.toLocaleString() + '.');
+  hlSetStatus(
+    'Streamed ' +
+      hlState.streamed +
+      ' items (' +
+      trueCount +
+      ' unique). Current estimate: ' +
+      est.toLocaleString() +
+      '.'
+  );
 }
 
 function hlStreamMany() {
   var count = 500;
   var done = 0;
   function loop() {
-    if (done >= count) { hlSetStatus('Streamed ' + count + ' items. Final estimate: ' + hlEstimate().toLocaleString() + ' vs true count: ' + Object.keys(hlState.trueSet).length + '.'); return; }
+    if (done >= count) {
+      hlSetStatus(
+        'Streamed ' +
+          count +
+          ' items. Final estimate: ' +
+          hlEstimate().toLocaleString() +
+          ' vs true count: ' +
+          Object.keys(hlState.trueSet).length +
+          '.'
+      );
+      return;
+    }
     var batchSize = 10;
     for (var i = 0; i < batchSize && done < count; i++, done++) hlAddOneItem();
     requestAnimationFrame(loop);
@@ -225,7 +378,8 @@ function hlUpdateMParams() {
   if (mValEl) mValEl.textContent = 'm = ' + hlState.m;
 
   var errorHintEl = document.getElementById('hlErrorHint');
-  if (errorHintEl) errorHintEl.textContent = 'Standard error ≈ ' + (104 / Math.sqrt(hlState.m)).toFixed(1) + '%';
+  if (errorHintEl)
+    errorHintEl.textContent = 'Standard error ≈ ' + (104 / Math.sqrt(hlState.m)).toFixed(1) + '%';
 }
 
 function hlReset() {
@@ -239,9 +393,18 @@ function hlReset() {
   hlRenderStats();
 
   var traceEl = document.getElementById('hlHashTrace');
-  if (traceEl) traceEl.textContent = 'Stream an item to see its hash split into bucket index + leading-zero-run.';
+  if (traceEl)
+    traceEl.textContent =
+      'Stream an item to see its hash split into bucket index + leading-zero-run.';
 
-  hlSetStatus('Reset with m = ' + hlState.m + ' registers. Stream items to watch the estimate converge.');
+  var splitterEl = document.getElementById('hlHashSplitter');
+  if (splitterEl)
+    splitterEl.innerHTML =
+      '<div class="splitter-placeholder">Awaiting items to split hash...</div>';
+
+  hlSetStatus(
+    'Reset with m = ' + hlState.m + ' registers. Stream items to watch the estimate converge.'
+  );
 }
 
 function hlInit() {
@@ -250,7 +413,7 @@ function hlInit() {
 
   var mSlider = document.getElementById('hlMSlider');
   if (mSlider) {
-    mSlider.addEventListener('input', function() {
+    mSlider.addEventListener('input', function () {
       hlUpdateMParams();
       hlReset();
     });
@@ -265,7 +428,7 @@ function hlInit() {
 
   var dupCheck = document.getElementById('hlDuplicates');
   if (dupCheck) {
-    dupCheck.addEventListener('change', function() {
+    dupCheck.addEventListener('change', function () {
       hlState.duplicates = dupCheck.checked;
     });
   }

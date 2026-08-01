@@ -1,0 +1,124 @@
+/* ============================================================
+   Distributed Systems & High-Availability DB Academy CSS
+   ============================================================ */
+
+:root {
+  --ds-bg-dark: #0b0f19;
+  --ds-card-bg-dark: rgba(21, 29, 46, 0.85);
+  --ds-border-dark: rgba(255, 255, 255, 0.1);
+  --ds-text-dark: #f1f5f9;
+  --ds-text-muted-dark: #94a3b8;
+
+  --ds-accent: #3b82f6;
+  --ds-success: #10b981;
+  --ds-warning: #f59e0b;
+  --ds-danger: #ef4444;
+  --ds-radius: 12px;
+}
+
+.light-mode {
+  --ds-bg-dark: #f8fafc;
+  --ds-card-bg-dark: #ffffff;
+  --ds-border-dark: #e2e8f0;
+  --ds-text-dark: #0f172a;
+  --ds-text-muted-dark: #64748b;
+}
+
+body[data-page="ds-academy"] {
+  margin: 0; padding: 0;
+  background-color: var(--ds-bg-dark);
+  color: var(--ds-text-dark);
+  font-family: 'Inter', sans-serif;
+  min-height: 100vh;
+}
+
+.ds-header {
+  background: var(--ds-card-bg-dark);
+  border-bottom: 1px solid var(--ds-border-dark);
+  padding: 16px 24px;
+}
+
+.ds-header-container {
+  max-width: 1600px; margin: 0 auto;
+  display: flex; align-items: center; justify-content: space-between;
+}
+
+.ds-back-btn {
+  display: flex; align-items: center; gap: 8px;
+  color: var(--ds-text-muted-dark); text-decoration: none;
+  font-weight: 500; font-size: 0.9rem; padding: 8px 14px;
+  border-radius: 8px; background: rgba(255, 255, 255, 0.05);
+}
+
+.ds-title-area h1 { margin: 0; font-size: 1.4rem; font-family: 'Space Grotesk', sans-serif; }
+.ds-title-area p { margin: 4px 0 0 0; font-size: 0.85rem; color: var(--ds-text-muted-dark); }
+
+.ds-icon-btn {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--ds-border-dark); color: var(--ds-text-dark);
+  width: 40px; height: 40px; border-radius: 50%; cursor: pointer;
+}
+
+.ds-main { max-width: 1600px; margin: 0 auto; padding: 20px 24px; display: flex; flex-direction: column; gap: 20px; }
+
+.ds-card {
+  background: var(--ds-card-bg-dark);
+  border: 1px solid var(--ds-border-dark);
+  border-radius: var(--ds-radius);
+}
+
+.ds-card-header {
+  padding: 16px 20px; border-bottom: 1px solid var(--ds-border-dark);
+  display: flex; justify-content: space-between; align-items: center;
+}
+
+.ds-card-header h2, .ds-card-header h3 { margin: 0; font-size: 1.1rem; font-family: 'Space Grotesk', sans-serif; }
+
+.ds-badge-success { background: rgba(16, 185, 129, 0.2); color: var(--ds-success); padding: 4px 8px; border-radius: 6px; font-size: 0.75rem; }
+
+.ds-modules-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; padding: 20px; }
+@media (max-width: 900px) { .ds-modules-grid { grid-template-columns: repeat(2, 1fr); } }
+
+.ds-module-card {
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid var(--ds-border-dark);
+  border-radius: 10px; padding: 16px; cursor: pointer; transition: all 0.2s;
+}
+
+.ds-module-card:hover { border-color: var(--ds-accent); transform: translateY(-2px); }
+.ds-module-card.active { border-color: var(--ds-accent); background: rgba(59, 130, 246, 0.1); }
+
+.ds-mod-num { font-size: 0.8rem; font-weight: 700; color: var(--ds-accent); margin-bottom: 6px; }
+.ds-mod-title { font-size: 0.95rem; font-weight: 700; margin-bottom: 6px; }
+.ds-module-card p { margin: 0; font-size: 0.8rem; color: var(--ds-text-muted-dark); }
+
+.ds-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+@media (max-width: 900px) { .ds-grid { grid-template-columns: 1fr; } }
+
+.ds-card-body { padding: 20px; display: flex; flex-direction: column; gap: 16px; }
+
+.ds-form-group { display: flex; flex-direction: column; gap: 6px; }
+.ds-form-group label { font-size: 0.85rem; font-weight: 600; color: var(--ds-text-muted-dark); }
+
+.ds-select {
+  padding: 10px 12px; border-radius: 8px;
+  border: 1px solid var(--ds-border-dark);
+  background: rgba(0, 0, 0, 0.2); color: var(--ds-text-dark);
+  font-family: inherit; font-size: 0.85rem;
+}
+
+.ds-eval-box {
+  background: rgba(0, 0, 0, 0.2); border: 1px solid var(--ds-border-dark);
+  border-radius: 8px; padding: 14px; font-size: 0.85rem; line-height: 1.5;
+}
+
+.ds-scenario-buttons { display: flex; gap: 12px; }
+
+.ds-btn {
+  padding: 10px 16px; border-radius: 8px; font-size: 0.85rem; font-weight: 600;
+  border: 1px solid var(--ds-border-dark); cursor: pointer;
+  display: inline-flex; align-items: center; gap: 8px;
+}
+
+.ds-btn-warning { background: var(--ds-warning); color: #fff; border-color: var(--ds-warning); }
+.ds-btn-danger { background: var(--ds-danger); color: #fff; border-color: var(--ds-danger); }

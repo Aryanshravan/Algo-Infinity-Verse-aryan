@@ -1,0 +1,193 @@
+/* WebRTC NAT Traversal Visualizer Stylesheet */
+
+:root {
+  --rtc-bg: #090e17;
+  --rtc-card-bg: rgba(20, 30, 48, 0.85);
+  --rtc-border: rgba(45, 62, 90, 0.7);
+  --rtc-accent: #06b6d4;
+  --rtc-accent-glow: rgba(6, 182, 212, 0.25);
+  --rtc-success: #10b981;
+  --rtc-warning: #f59e0b;
+  --rtc-danger: #ef4444;
+  --rtc-text: #f1f5f9;
+  --rtc-muted: #94a3b8;
+  --rtc-font-mono: 'JetBrains Mono', monospace;
+}
+
+body[data-page="webrtc-visualizer"] {
+  background-color: var(--rtc-bg);
+  color: var(--rtc-text);
+  font-family: 'Poppins', sans-serif;
+  margin: 0;
+  padding: 0;
+}
+
+.tool-hero {
+  text-align: center;
+  padding: 2.5rem 1.5rem 1.5rem;
+  background: radial-gradient(circle at top, rgba(6, 182, 212, 0.12), transparent 70%);
+  border-bottom: 1px solid var(--rtc-border);
+}
+
+.tool-hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.35rem 0.85rem;
+  border-radius: 999px;
+  background: rgba(6, 182, 212, 0.1);
+  color: var(--rtc-accent);
+  font-size: 0.85rem;
+  font-weight: 600;
+  margin-bottom: 0.75rem;
+}
+
+.tool-hero h1 {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 2.2rem;
+  margin: 0.5rem 0;
+}
+
+.accent-text { color: var(--rtc-accent); }
+
+.tool-container {
+  max-width: 1400px;
+  margin: 1.5rem auto;
+  padding: 0 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.toolbar-card, .panel-card {
+  background: var(--rtc-card-bg);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--rtc-border);
+  border-radius: 12px;
+  padding: 1.25rem;
+}
+
+.toolbar-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.tool-select {
+  background: #050a12;
+  color: var(--rtc-text);
+  border: 1px solid var(--rtc-border);
+  border-radius: 6px;
+  padding: 0.55rem 0.85rem;
+  font-family: var(--rtc-font-mono);
+}
+
+.tool-btn {
+  padding: 0.55rem 1.1rem;
+  border-radius: 6px;
+  border: none;
+  font-weight: 600;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.primary-btn { background: var(--rtc-accent); color: #000; }
+.secondary-btn { background: #1e293b; color: #fff; border: 1px solid var(--rtc-border); }
+
+.topology-grid {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem 1rem;
+  gap: 1rem;
+  overflow-x: auto;
+}
+
+.topo-node {
+  background: #070d18;
+  border: 1px solid var(--rtc-border);
+  border-radius: 10px;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
+  min-width: 130px;
+  text-align: center;
+}
+
+.topo-node i {
+  font-size: 1.6rem;
+  color: var(--rtc-accent);
+}
+
+.topo-node.relay i {
+  color: var(--rtc-warning);
+}
+
+.ip-label {
+  font-family: var(--rtc-font-mono);
+  font-size: 0.75rem;
+  color: var(--rtc-muted);
+}
+
+.workspace-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+}
+
+#sdpViewer {
+  width: 100%;
+  height: 180px;
+  background: #04070d;
+  color: #38bdf8;
+  border: 1px solid var(--rtc-border);
+  border-radius: 8px;
+  padding: 0.85rem;
+  font-family: var(--rtc-font-mono);
+  font-size: 0.8rem;
+  box-sizing: border-box;
+}
+
+.candidate-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: var(--rtc-font-mono);
+  font-size: 0.8rem;
+}
+
+.candidate-table th {
+  background: #0c1424;
+  padding: 0.5rem;
+  color: var(--rtc-muted);
+  border-bottom: 1px solid var(--rtc-border);
+}
+
+.candidate-table td {
+  padding: 0.45rem;
+  border-bottom: 1px solid rgba(45, 62, 90, 0.4);
+  text-align: center;
+}
+
+.status-badge {
+  padding: 0.2rem 0.5rem;
+  border-radius: 999px;
+  font-weight: bold;
+  font-size: 0.75rem;
+}
+.status-success { background: rgba(16, 185, 129, 0.2); color: var(--rtc-success); }
+.status-failed { background: rgba(239, 68, 68, 0.2); color: var(--rtc-danger); }
+.status-waiting { background: rgba(245, 158, 11, 0.2); color: var(--rtc-warning); }
+
+.packet-log-box {
+  height: 140px;
+  overflow-y: auto;
+  background: #04070d;
+  padding: 0.75rem;
+  border-radius: 8px;
+  font-family: var(--rtc-font-mono);
+  font-size: 0.8rem;
+}

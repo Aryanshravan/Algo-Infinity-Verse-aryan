@@ -1,0 +1,321 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>O'Neill Cylinder Ecosystem Stabilizer | Algo Infinity Verse</title>
+    <link rel="stylesheet" href="/styles.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <!-- Monaco Editor -->
+    <script src="https://unpkg.com/monaco-editor@0.36.1/min/vs/loader.js"></script>
+    <style>
+      body { margin: 0; overflow: hidden; background: #000; font-family: 'Poppins', sans-serif; color: #fff; }
+      .app-container { display: flex; height: 100vh; }
+      
+      .sidebar { width: 450px; background: rgba(15, 23, 42, 0.95); border-right: 1px solid #22c55e; display: flex; flex-direction: column; z-index: 10; }
+      .header { padding: 20px; border-bottom: 1px solid #334155; }
+      .header h2 { margin: 0; color: #22c55e; font-family: 'Orbitron', sans-serif; font-size: 1.2rem; }
+      .header p { margin: 5px 0 0 0; font-size: 0.8rem; color: #94a3b8; }
+      
+      #editor-container { flex: 1; min-height: 300px; }
+      
+      .controls { padding: 20px; border-top: 1px solid #334155; background: rgba(0,0,0,0.5); }
+      .btn { background: linear-gradient(90deg, #16a34a, #15803d); color: #fff; border: none; padding: 10px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; transition: 0.3s; }
+      .btn:hover { background: #22c55e; transform: translateY(-2px); box-shadow: 0 0 15px rgba(34, 197, 94, 0.5); }
+      
+      .sim-container { flex: 1; position: relative; background: radial-gradient(circle at center, #020617 0%, #000 100%); overflow: hidden; perspective: 1200px; }
+      canvas { width: 100%; height: 100%; display: block; }
+      
+      .hud { position: absolute; top: 20px; left: 20px; background: rgba(0,0,0,0.8); padding: 15px; border-radius: 8px; border: 1px solid #22c55e; width: 280px; z-index: 10; pointer-events: none; }
+      .hud h3 { margin: 0 0 10px 0; color: #22c55e; font-size: 1rem; font-family: 'Orbitron', sans-serif; }
+      .metric { display: flex; justify-content: space-between; font-size: 0.8rem; color: #cbd5e1; margin-bottom: 5px; }
+      .val { font-weight: bold; font-family: monospace; }
+      .val-temp { color: #facc15; }
+      .val-humidity { color: #38bdf8; }
+      .val-co2 { color: #ef4444; }
+    </style>
+  </head>
+  <body>
+    
+    <div class="app-container">
+      <div class="sidebar">
+        <div class="header">
+          <h2><i class="fas fa-globe-americas"></i> O'Neill Cylinder</h2>
+          <p>Ecosystem Thermodynamics Sandbox</p>
+        </div>
+        
+        <div id="editor-container"></div>
+        
+        <div class="controls">
+          <button class="btn" onclick="initiateHab()"><i class="fas fa-sun"></i> Open Solar Mirrors</button>
+        </div>
+      </div>
+      
+      <div class="sim-container">
+        <!-- Space Background -->
+        <div style="position: absolute; inset:0; background: url('data:image/svg+xml,%3Csvg width=\"100%\" height=\"100%\" xmlns=\"http://www.w3.org/2000/svg\"%3E%3Cfilter id=\"n\"%3E%3CfeTurbulence type=\"fractalNoise\" baseFrequency=\"0.8\" numOctaves=\"2\" stitchTiles=\"stitch\"/%3E%3C/filter%3E%3Crect width=\"100%\" height=\"100%\" filter=\"url(%23n)\" opacity=\"0.1\"/%3E%3C/svg%3E'); pointer-events: none; z-index: 0; mix-blend-mode: screen;"></div>
+        
+        <canvas id="oneillCanvas" style="position: relative; z-index: 1;"></canvas>
+        
+        <div class="hud">
+          <h3>Habitat Telemetry</h3>
+          <div class="metric"><span>Global Temp:</span> <span class="val val-temp" id="tempVal">0 °C</span></div>
+          <div class="metric"><span>Humidity:</span> <span class="val val-humidity" id="humVal">0%</span></div>
+          <div class="metric"><span>CO2 Levels:</span> <span class="val val-co2" id="co2Val">400 ppm</span></div>
+          <div class="metric"><span>Population:</span> <span class="val" id="popVal" style="color:#10b981">10.0 M</span></div>
+          <div class="metric" style="margin-top: 10px; border-top: 1px solid #334155; padding-top: 5px;">
+            <span>Biosphere Status:</span> <span class="val" id="statusVal" style="color:#94a3b8">SEALED</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      let editor;
+      require.config({ paths: { 'vs': 'https://unpkg.com/monaco-editor@0.36.1/min/vs' }});
+      require(['vs/editor/editor.main'], function() {
+        editor = monaco.editor.create(document.getElementById('editor-container'), {
+          value: `// O'Neill Cylinder Ecosystem Balancer
+// You control the giant solar mirrors and the artificial weather system.
+// Maintain temperature between 15C and 25C. Keep humidity balanced.
+// People breathe O2 and exhale CO2. Plants do the reverse.
+
+function controlEnvironment(currentTemp, humidity, co2Level) {
+    // Return { mirrorAngle: float (0.0 to 1.0), rainSprinklers: boolean }
+    // mirrorAngle 1.0 = Max Sunlight (heats up fast). 0.0 = Night (cools down).
+    // rainSprinklers = True drops humidity and cools slightly, but needs time to recharge.
+    
+    // Naive logic: Max sunlight for the plants!
+    // Result: Runaway greenhouse effect boils the oceans and kills everyone.
+    return {
+        mirrorAngle: 1.0,
+        rainSprinklers: false
+    };
+}`,
+          language: 'javascript',
+          theme: 'vs-dark',
+          minimap: { enabled: false },
+          automaticLayout: true
+        });
+      });
+
+      const canvas = document.getElementById('oneillCanvas');
+      const ctx = canvas.getContext('2d');
+      
+      let isSimulating = false;
+      let time = 0;
+      
+      let temperature = -50; // Starts cold in space
+      let humidity = 50;
+      let co2 = 400; // ppm
+      let population = 10.0; // Millions
+      let plantHealth = 100; // 0 to 100
+      let waterReservoir = 100; // 0 to 100
+      
+      let rainActive = false;
+      let mirrorAngle = 0;
+      
+      function resize() { canvas.width = canvas.clientWidth; canvas.height = canvas.clientHeight; }
+      window.addEventListener('resize', resize);
+      resize();
+
+      function animate() {
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+          let cx = canvas.width / 2;
+          let cy = canvas.height / 2;
+
+          if (isSimulating) {
+              time += 0.05;
+              
+              let targetMirror = 0.5;
+              let requestRain = false;
+              
+              try {
+                  eval(editor.getValue());
+                  let res = controlEnvironment(temperature, humidity, co2);
+                  if (res) {
+                      targetMirror = Math.max(0, Math.min(1.0, res.mirrorAngle || 0));
+                      requestRain = !!res.rainSprinklers;
+                  }
+              } catch(e) {}
+              
+              // Smooth mirror transition
+              mirrorAngle += (targetMirror - mirrorAngle) * 0.1;
+              
+              // Rain logic
+              if (requestRain && waterReservoir > 0 && humidity > 40) {
+                  rainActive = true;
+                  waterReservoir -= 1.0;
+                  humidity -= 0.5; // Rain removes moisture from air
+                  temperature -= 0.2; // Cooling effect
+              } else {
+                  rainActive = false;
+                  waterReservoir += 0.5; // Evaporates back to clouds
+                  if(waterReservoir > 100) waterReservoir = 100;
+              }
+              
+              // Thermodynamics
+              // Base cooling of space
+              temperature -= 0.5;
+              // Heating from mirrors
+              temperature += mirrorAngle * 1.5;
+              // Greenhouse heating
+              temperature += (co2 / 400) * 0.1;
+              
+              // Humidity logic
+              if (!rainActive) {
+                  humidity += (temperature / 20) * 0.2; // Evaporation
+              }
+              if (humidity > 100) humidity = 100;
+              if (humidity < 0) humidity = 0;
+              
+              // Biology logic
+              // Plants breathe CO2 and exhale O2 (reduce CO2) if temp and humidity are good
+              if (temperature > 10 && temperature < 35 && humidity > 30) {
+                  plantHealth += 0.5;
+                  co2 -= (plantHealth / 100) * 2.0;
+              } else {
+                  plantHealth -= 1.0; // Plants dying
+              }
+              if (plantHealth > 100) plantHealth = 100;
+              if (plantHealth < 0) plantHealth = 0;
+              
+              // Humans breathe O2 and exhale CO2
+              co2 += population * 0.2;
+              
+              if(co2 < 0) co2 = 0;
+              
+              // Human Survival
+              if (temperature > 50 || temperature < -10 || co2 > 2000) {
+                  population -= 0.1;
+              } else if (temperature > 20 && temperature < 25 && co2 < 600) {
+                  population += 0.01;
+              }
+              
+              if (population < 0) population = 0;
+              
+              // Win/Loss
+              if (population <= 0) {
+                  isSimulating = false;
+                  document.getElementById('statusVal').innerText = "EXTINCTION (BIOSPHERE COLLAPSE)";
+                  document.getElementById('statusVal').style.color = "#ef4444";
+              } else if (time > 30 && population > 9.5 && plantHealth > 80) {
+                  document.getElementById('statusVal').innerText = "ECOSYSTEM STABILIZED";
+                  document.getElementById('statusVal').style.color = "#10b981";
+              } else {
+                  if (temperature > 40) {
+                      document.getElementById('statusVal').innerText = "WARNING: RUNAWAY GREENHOUSE";
+                      document.getElementById('statusVal').style.color = "#ef4444";
+                  } else if (temperature < 0) {
+                      document.getElementById('statusVal').innerText = "WARNING: ATMOSPHERIC FREEZE";
+                      document.getElementById('statusVal').style.color = "#38bdf8";
+                  } else if (co2 > 1000) {
+                      document.getElementById('statusVal').innerText = "WARNING: TOXIC CO2 LEVELS";
+                      document.getElementById('statusVal').style.color = "#facc15";
+                  } else {
+                      document.getElementById('statusVal').innerText = "BALANCING CLIMATE...";
+                      document.getElementById('statusVal').style.color = "#22c55e";
+                  }
+              }
+              
+              // HUD Updates
+              document.getElementById('tempVal').innerText = temperature.toFixed(1) + " °C";
+              document.getElementById('humVal').innerText = humidity.toFixed(1) + "%";
+              document.getElementById('co2Val').innerText = Math.floor(co2) + " ppm";
+              document.getElementById('popVal').innerText = population.toFixed(2) + " M";
+              
+              // Colors
+              document.getElementById('tempVal').style.color = temperature > 35 ? "#ef4444" : (temperature < 10 ? "#38bdf8" : "#10b981");
+              document.getElementById('co2Val').style.color = co2 > 1000 ? "#ef4444" : "#10b981";
+          }
+          
+          // Render Cylinder Interior (Perspective illusion)
+          let cylWidth = Math.min(canvas.width * 0.8, 800);
+          let cylHeight = 300;
+          
+          ctx.save();
+          ctx.translate(cx, cy);
+          
+          // Draw the back half of the cylinder
+          ctx.fillStyle = '#0f172a';
+          ctx.beginPath(); ctx.ellipse(0, 0, cylWidth/2, cylHeight/2, 0, 0, Math.PI, true); ctx.fill();
+          
+          // Draw Landmasses inside
+          for(let i=0; i<3; i++) {
+              let angle = (time*0.5 + i * (Math.PI*2/3)) % (Math.PI*2);
+              if (angle > Math.PI) continue; // Only draw back half
+              
+              let x = Math.cos(angle) * (cylWidth/2);
+              let y = Math.sin(angle) * (cylHeight/2);
+              
+              ctx.fillStyle = \`rgba(34, 197, 94, \${plantHealth/100})\`; // Greener if healthy
+              if(temperature > 40) ctx.fillStyle = '#b45309'; // Burnt
+              if(temperature < 0) ctx.fillStyle = '#e0f2fe'; // Frozen
+              
+              ctx.beginPath(); ctx.ellipse(x, y, 60, 20, 0, 0, Math.PI*2); ctx.fill();
+          }
+          
+          // Draw the front half
+          ctx.fillStyle = 'rgba(15, 23, 42, 0.4)';
+          ctx.beginPath(); ctx.ellipse(0, 0, cylWidth/2, cylHeight/2, 0, 0, Math.PI, false); ctx.fill();
+          
+          // Draw Structure rings
+          ctx.strokeStyle = '#334155';
+          ctx.lineWidth = 4;
+          ctx.beginPath(); ctx.ellipse(0, 0, cylWidth/2, cylHeight/2, 0, 0, Math.PI*2); ctx.stroke();
+          ctx.beginPath(); ctx.ellipse(-cylWidth/4, 0, cylWidth/4, cylHeight/2, 0, 0, Math.PI*2); ctx.stroke();
+          ctx.beginPath(); ctx.ellipse(cylWidth/4, 0, cylWidth/4, cylHeight/2, 0, 0, Math.PI*2); ctx.stroke();
+          
+          // Draw Sunlight beam
+          if (mirrorAngle > 0.1) {
+              let grad = ctx.createLinearGradient(0, -cylHeight, 0, cylHeight/2);
+              grad.addColorStop(0, \`rgba(250, 204, 21, \${mirrorAngle * 0.8})\`);
+              grad.addColorStop(1, 'rgba(250, 204, 21, 0)');
+              ctx.fillStyle = grad;
+              ctx.beginPath();
+              ctx.moveTo(-100, -cylHeight*2);
+              ctx.lineTo(100, -cylHeight*2);
+              ctx.lineTo(cylWidth/2, cylHeight/2);
+              ctx.lineTo(-cylWidth/2, cylHeight/2);
+              ctx.fill();
+          }
+          
+          // Draw Rain
+          if (rainActive) {
+              ctx.strokeStyle = 'rgba(56, 189, 248, 0.5)';
+              ctx.lineWidth = 1;
+              ctx.beginPath();
+              for(let i=0; i<100; i++) {
+                  let rx = (Math.random() - 0.5) * cylWidth;
+                  let ry = (Math.random() - 0.5) * cylHeight;
+                  if (Math.pow(rx/(cylWidth/2), 2) + Math.pow(ry/(cylHeight/2), 2) <= 1) {
+                      ctx.moveTo(rx, ry);
+                      ctx.lineTo(rx - 5, ry + 15);
+                  }
+              }
+              ctx.stroke();
+          }
+
+          ctx.restore();
+          requestAnimationFrame(animate);
+      }
+      
+      animate();
+
+      function initiateHab() {
+          if(isSimulating) return;
+          isSimulating = true;
+          time = 0;
+          temperature = 20;
+          humidity = 50;
+          co2 = 400;
+          population = 10.0;
+          plantHealth = 100;
+          waterReservoir = 100;
+          document.getElementById('statusVal').innerText = "CLIMATE CONTROL ACTIVE";
+          document.getElementById('statusVal').style.color = "#22c55e";
+      }
+    </script>
+  </body>
+</html>

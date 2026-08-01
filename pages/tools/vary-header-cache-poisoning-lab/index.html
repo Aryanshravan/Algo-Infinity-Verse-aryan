@@ -1,0 +1,208 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Vary Header Cache Poisoning Lab | Algo Infinity Verse</title>
+  <meta name="description" content="Simulate content negotiation, detect missing or incorrect Vary headers, view cache poisoning outcomes, and export a safe cache-key audit report." />
+  <link rel="stylesheet" href="/styles.css" />
+  <link rel="stylesheet" href="style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Poppins:wght@300;400;500;600;700&family=Fira+Code:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <script>
+    (function () {
+      try {
+        var storedTheme = localStorage.getItem('theme');
+        var prefersLight = window.matchMedia('(prefers-color-scheme: light)').matches;
+        var theme = storedTheme || (prefersLight ? 'light' : 'dark');
+        if (theme === 'light') {
+          document.documentElement.classList.add('light-mode');
+        } else {
+          document.documentElement.classList.remove('light-mode');
+        }
+      } catch (e) {}
+    })();
+  </script>
+</head>
+<body data-page="vary-header-cache-poisoning-lab">
+  <a href="#vary-main" class="vary-skip-link">Skip to main content</a>
+  <button type="button" id="scrollTopBtn" class="scroll-top-btn" aria-label="Scroll to top">
+    <i class="fas fa-arrow-up" aria-hidden="true"></i>
+  </button>
+
+  <div id="navbar-placeholder"></div>
+
+  <header class="vary-hero">
+    <div class="vary-hero-badge">
+      <i class="fas fa-virus" aria-hidden="true"></i>
+      Cache Security Lab
+    </div>
+    <h1>
+      Vary Header
+      <span class="vary-hero-accent">Cache Poisoning Lab</span>
+    </h1>
+    <p>
+      Negotiate Accept / encoding / language / cookie variants, detect missing or incorrect
+      <code>Vary</code>, watch cache poisoning outcomes, and export a safe cache-key audit.
+    </p>
+    <div class="vary-hero-stats" aria-live="polite">
+      <div class="vary-stat">
+        <span class="vary-stat-val" id="vary-statRisk">—</span>
+        <span class="vary-stat-label">Poison risk</span>
+      </div>
+      <div class="vary-stat">
+        <span class="vary-stat-val" id="vary-statGaps">—</span>
+        <span class="vary-stat-label">Vary gaps</span>
+      </div>
+      <div class="vary-stat">
+        <span class="vary-stat-val" id="vary-statVariants">—</span>
+        <span class="vary-stat-label">Variants</span>
+      </div>
+      <div class="vary-stat">
+        <span class="vary-stat-val" id="vary-statVerdict">—</span>
+        <span class="vary-stat-label">Verdict</span>
+      </div>
+    </div>
+  </header>
+
+  <main id="vary-main" class="vary-main">
+    <div class="container">
+      <div class="vary-workspace">
+        <section class="vary-panel" aria-labelledby="vary-nego-title">
+          <div class="vary-panel-header">
+            <div class="vary-panel-title">
+              <i class="fas fa-handshake vary-panel-icon" aria-hidden="true"></i>
+              <h2 id="vary-nego-title">Content negotiation simulator</h2>
+            </div>
+          </div>
+
+          <div class="vary-field-grid">
+            <div class="vary-field">
+              <label class="vary-label" for="vary-accept">Accept</label>
+              <input type="text" id="vary-accept" class="vary-input" value="text/html,application/xhtml+xml" />
+            </div>
+            <div class="vary-field">
+              <label class="vary-label" for="vary-encoding">Accept-Encoding</label>
+              <input type="text" id="vary-encoding" class="vary-input" value="gzip, deflate, br" />
+            </div>
+            <div class="vary-field">
+              <label class="vary-label" for="vary-language">Accept-Language</label>
+              <input type="text" id="vary-language" class="vary-input" value="en-US,en;q=0.9" />
+            </div>
+            <div class="vary-field">
+              <label class="vary-label" for="vary-cookie">Cookie (optional)</label>
+              <input type="text" id="vary-cookie" class="vary-input" value="" placeholder="session=abc; theme=dark" />
+            </div>
+            <div class="vary-field">
+              <label class="vary-label" for="vary-responseVary">Response Vary header</label>
+              <input type="text" id="vary-responseVary" class="vary-input" value="Accept-Encoding" />
+            </div>
+            <div class="vary-field">
+              <label class="vary-label" for="vary-cacheKey">CDN cache-key mode</label>
+              <select id="vary-cacheKey" class="vary-select">
+                <option value="url-only">URL only (ignore Vary)</option>
+                <option value="url-vary" selected>URL + Vary headers</option>
+                <option value="url-all">URL + all request headers</option>
+              </select>
+            </div>
+          </div>
+
+          <fieldset class="vary-fieldset">
+            <legend>Negotiated response body depends on</legend>
+            <label class="vary-check"><input type="checkbox" id="vary-depEncoding" checked /> Encoding (gzip/br)</label>
+            <label class="vary-check"><input type="checkbox" id="vary-depLanguage" /> Language</label>
+            <label class="vary-check"><input type="checkbox" id="vary-depAccept" /> Accept / content-type</label>
+            <label class="vary-check"><input type="checkbox" id="vary-depCookie" /> Cookie / personalization</label>
+          </fieldset>
+
+          <div class="vary-preset-grid" role="group" aria-label="Negotiation presets">
+            <button type="button" class="vary-preset-btn" data-preset="encoding" aria-pressed="false">
+              <i class="fas fa-file-zipper" aria-hidden="true"></i>
+              <span>Encoding</span>
+              <small>gzip vs br mismatch</small>
+            </button>
+            <button type="button" class="vary-preset-btn" data-preset="language" aria-pressed="false">
+              <i class="fas fa-language" aria-hidden="true"></i>
+              <span>Language</span>
+              <small>en vs fr without Vary</small>
+            </button>
+            <button type="button" class="vary-preset-btn" data-preset="cookie" aria-pressed="false">
+              <i class="fas fa-cookie-bite" aria-hidden="true"></i>
+              <span>Cookie</span>
+              <small>Personalized cache hit</small>
+            </button>
+          </div>
+
+          <div class="vary-controls">
+            <button type="button" id="vary-runBtn" class="btn btn-primary">
+              <i class="fas fa-flask" aria-hidden="true"></i> Run negotiation
+            </button>
+            <button type="button" id="vary-auditBtn" class="btn btn-secondary">
+              <i class="fas fa-magnifying-glass" aria-hidden="true"></i> Detect Vary gaps
+            </button>
+            <button type="button" id="vary-exportBtn" class="btn btn-outline" disabled>
+              <i class="fas fa-download" aria-hidden="true"></i> Export audit report
+            </button>
+          </div>
+          <p class="vary-status" id="vary-status" role="status" aria-live="polite">Idle — configure negotiation and run.</p>
+        </section>
+
+        <section class="vary-panel" aria-labelledby="vary-poison-title">
+          <div class="vary-panel-header">
+            <div class="vary-panel-title">
+              <i class="fas fa-skull-crossbones vary-panel-icon" aria-hidden="true"></i>
+              <h2 id="vary-poison-title">Cache poisoning outcome viewer</h2>
+            </div>
+            <span class="vary-live" id="vary-poisonLive">Ready</span>
+          </div>
+          <div id="vary-poisonOut" class="vary-outcome" aria-live="polite">
+            <p class="vary-empty">Run negotiation to see victim vs attacker cache outcomes.</p>
+          </div>
+          <pre class="vary-log" id="vary-eventLog" aria-live="polite">Awaiting simulation…</pre>
+        </section>
+      </div>
+
+      <div class="vary-workspace">
+        <section class="vary-panel" aria-labelledby="vary-gaps-title">
+          <div class="vary-panel-header">
+            <div class="vary-panel-title">
+              <i class="fas fa-triangle-exclamation vary-panel-icon" aria-hidden="true"></i>
+              <h2 id="vary-gaps-title">Missing / incorrect Vary detector</h2>
+            </div>
+          </div>
+          <div id="vary-gaps" class="vary-findings" aria-live="polite">
+            <p class="vary-empty">Audit to list Vary gaps.</p>
+          </div>
+        </section>
+
+        <section class="vary-panel" aria-labelledby="vary-tips-title">
+          <div class="vary-panel-header">
+            <div class="vary-panel-title">
+              <i class="fas fa-key vary-panel-icon" aria-hidden="true"></i>
+              <h2 id="vary-tips-title">Safe cache-key tips</h2>
+            </div>
+          </div>
+          <ul id="vary-tips" class="vary-tips" aria-live="polite">
+            <li class="vary-empty-li">Tips appear after audit.</li>
+          </ul>
+        </section>
+      </div>
+    </div>
+  </main>
+
+  <div id="footer-placeholder"></div>
+
+  <script src="/auth.js"></script>
+  <script src="/bootstrap-legacy.js"></script>
+  <script src="/script.js"></script>
+  <script type="module" src="/dist/legacy-bundle.mjs"></script>
+  <script src="/theme.js"></script>
+  <script src="script.js"></script>
+  <script>
+    if (typeof loadPartial === 'function') {
+      loadPartial('navbar-placeholder', '/partials/navbar.html');
+      loadPartial('footer-placeholder', '/partials/footer.html');
+    }
+  </script>
+</body>
+</html>

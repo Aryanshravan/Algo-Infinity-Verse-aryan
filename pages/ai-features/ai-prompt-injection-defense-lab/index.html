@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Prompt Injection Defense Lab | Algo Infinity Verse</title>
+  <meta name="description" content="Test system prompts against adversarial user messages — detect role override, ignore-previous, exfiltration, and tool-call abuse, then export a defense audit." />
+  <link rel="stylesheet" href="/styles.css" />
+  <link rel="stylesheet" href="style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Poppins:wght@300;400;500;600;700&family=Fira+Code:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <script>
+    (function () {
+      try {
+        var storedTheme = localStorage.getItem('theme');
+        var prefersLight = window.matchMedia('(prefers-color-scheme: light)').matches;
+        var theme = storedTheme || (prefersLight ? 'light' : 'dark');
+        if (theme === 'light') {
+          document.documentElement.classList.add('light-mode');
+        } else {
+          document.documentElement.classList.remove('light-mode');
+        }
+      } catch (e) {}
+    })();
+  </script>
+</head>
+<body data-page="ai-prompt-injection-defense-lab">
+  <a href="#inj-main" class="inj-skip-link">Skip to main content</a>
+  <button type="button" id="scrollTopBtn" class="scroll-top-btn" aria-label="Scroll to top">
+    <i class="fas fa-arrow-up" aria-hidden="true"></i>
+  </button>
+
+  <div id="navbar-placeholder"></div>
+
+  <header class="inj-hero">
+    <div class="inj-hero-badge">
+      <i class="fas fa-user-shield" aria-hidden="true"></i>
+      Prompt Defense Lab
+    </div>
+    <h1>
+      AI Prompt Injection
+      <span class="inj-hero-accent">Defense Lab</span>
+    </h1>
+    <p>
+      Paste a system prompt and user message, detect role-override / ignore-previous / exfiltration /
+      tool-call abuse heuristics, then generate a hardened system-prompt patch.
+    </p>
+    <div class="inj-hero-stats" aria-live="polite">
+      <div class="inj-stat">
+        <span class="inj-stat-val" id="statJailbreak">—</span>
+        <span class="inj-stat-label">Jailbreak %</span>
+      </div>
+      <div class="inj-stat">
+        <span class="inj-stat-val" id="statSeverity">—</span>
+        <span class="inj-stat-label">Severity</span>
+      </div>
+      <div class="inj-stat">
+        <span class="inj-stat-val" id="statFindings">—</span>
+        <span class="inj-stat-label">Findings</span>
+      </div>
+    </div>
+  </header>
+
+  <main id="inj-main" class="inj-main">
+    <div class="container">
+      <div class="inj-workspace">
+        <section class="inj-panel" aria-labelledby="inj-sys-title">
+          <div class="inj-panel-header">
+            <div class="inj-panel-title">
+              <i class="fas fa-robot inj-panel-icon" aria-hidden="true"></i>
+              <h2 id="inj-sys-title">System prompt</h2>
+            </div>
+          </div>
+          <label class="inj-label" for="injSystem">System instructions</label>
+          <textarea
+            id="injSystem"
+            class="inj-textarea"
+            rows="12"
+            spellcheck="false"
+            placeholder="You are a helpful assistant…"
+            aria-describedby="injSysHint"
+          ></textarea>
+          <p id="injSysHint" class="inj-hint">Supports dark/light theme via site theme toggle. Analysis is client-side only.</p>
+        </section>
+
+        <section class="inj-panel" aria-labelledby="inj-user-title">
+          <div class="inj-panel-header">
+            <div class="inj-panel-title">
+              <i class="fas fa-message inj-panel-icon" aria-hidden="true"></i>
+              <h2 id="inj-user-title">User message</h2>
+            </div>
+          </div>
+          <label class="inj-label" for="injUser">User / untrusted input</label>
+          <textarea
+            id="injUser"
+            class="inj-textarea"
+            rows="12"
+            spellcheck="false"
+            placeholder="Ignore previous instructions…"
+            aria-describedby="injUserHint"
+          ></textarea>
+          <p id="injUserHint" class="inj-hint">Treat all user content as untrusted — including pasted docs and tool results.</p>
+        </section>
+      </div>
+
+      <div class="inj-controls">
+        <button type="button" id="injDemoBtn" class="btn btn-secondary">
+          <i class="fas fa-flask" aria-hidden="true"></i> Load adversarial demo
+        </button>
+        <button type="button" id="injAnalyzeBtn" class="btn btn-primary">
+          <i class="fas fa-shield-halved" aria-hidden="true"></i> Analyze threats
+        </button>
+        <button type="button" id="injClearBtn" class="btn btn-outline">
+          <i class="fas fa-eraser" aria-hidden="true"></i> Clear
+        </button>
+        <button type="button" id="injExportBtn" class="btn btn-outline" disabled>
+          <i class="fas fa-download" aria-hidden="true"></i> Export defense audit
+        </button>
+      </div>
+      <div id="injStatus" class="inj-status" role="status" aria-live="polite"></div>
+
+      <div class="inj-results-grid">
+        <section class="inj-panel" aria-labelledby="inj-find-title">
+          <div class="inj-panel-header">
+            <div class="inj-panel-title">
+              <i class="fas fa-triangle-exclamation inj-panel-icon" aria-hidden="true"></i>
+              <h2 id="inj-find-title">Threat findings</h2>
+            </div>
+          </div>
+          <div id="injFindings" class="inj-findings" aria-live="polite">
+            <p class="inj-empty">Role-override, ignore-previous, exfiltration, and tool-abuse hits appear here.</p>
+          </div>
+        </section>
+
+        <section class="inj-panel" aria-labelledby="inj-patch-title">
+          <div class="inj-panel-header">
+            <div class="inj-panel-title">
+              <i class="fas fa-file-shield inj-panel-icon" aria-hidden="true"></i>
+              <h2 id="inj-patch-title">Hardened system-prompt patch</h2>
+            </div>
+            <button type="button" id="injCopyPatchBtn" class="btn btn-outline" disabled>
+              <i class="fas fa-copy" aria-hidden="true"></i> Copy patch
+            </button>
+          </div>
+          <pre id="injPatch" class="inj-patch" tabindex="0" aria-live="polite">Run analysis to generate a hardened patch.</pre>
+        </section>
+      </div>
+    </div>
+  </main>
+
+  <div id="footer-placeholder"></div>
+
+  <script src="/auth.js"></script>
+  <script src="/bootstrap-legacy.js"></script>
+  <script src="/script.js"></script>
+  <script type="module" src="/dist/legacy-bundle.mjs"></script>
+  <script src="/theme.js"></script>
+  <script src="script.js"></script>
+  <script>
+    if (typeof loadPartial === 'function') {
+      loadPartial('navbar-placeholder', '/partials/navbar.html');
+      loadPartial('footer-placeholder', '/partials/footer.html');
+    }
+  </script>
+</body>
+</html>

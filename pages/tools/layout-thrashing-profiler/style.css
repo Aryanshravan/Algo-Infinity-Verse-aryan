@@ -1,0 +1,380 @@
+/* ===== Layout Thrashing Profiler ===== */
+:root {
+  --thrash-glass: rgba(255, 255, 255, 0.04);
+  --thrash-border: rgba(255, 255, 255, 0.1);
+  --thrash-muted: rgba(255, 255, 255, 0.62);
+  --thrash-accent: #fb923c;
+  --thrash-accent-dim: rgba(251, 146, 60, 0.15);
+  --thrash-warn: #fbbf24;
+  --thrash-danger: #f87171;
+  --thrash-ok: #4ade80;
+  --thrash-info: #60a5fa;
+  --thrash-code-bg: rgba(0, 0, 0, 0.35);
+}
+
+html.light-mode {
+  --thrash-glass: rgba(15, 23, 42, 0.04);
+  --thrash-border: rgba(15, 23, 42, 0.12);
+  --thrash-muted: rgba(15, 23, 42, 0.65);
+  --thrash-accent-dim: rgba(234, 88, 12, 0.12);
+  --thrash-code-bg: rgba(15, 23, 42, 0.06);
+}
+
+.thrash-skip-link {
+  position: absolute;
+  left: 1rem;
+  top: -100px;
+  z-index: 10000;
+  padding: 0.6rem 1rem;
+  background: var(--thrash-accent);
+  color: #0a0a14;
+  font-weight: 700;
+  border-radius: 8px;
+  text-decoration: none;
+}
+
+.thrash-skip-link:focus {
+  top: 1rem;
+  outline: 3px solid #fff;
+  outline-offset: 2px;
+}
+
+.thrash-hero {
+  position: relative;
+  overflow: hidden;
+  padding: 7.5rem 1.5rem 4rem;
+  text-align: center;
+  border-bottom: 1px solid var(--thrash-border);
+  background:
+    radial-gradient(ellipse at top right, rgba(251, 146, 60, 0.18), transparent 55%),
+    radial-gradient(ellipse at bottom left, rgba(248, 113, 113, 0.1), transparent 50%);
+}
+
+.thrash-hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1.1rem;
+  padding: 0.35rem 0.9rem;
+  border-radius: 999px;
+  border: 1px solid rgba(251, 146, 60, 0.4);
+  background: var(--thrash-accent-dim);
+  color: var(--thrash-accent);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.thrash-hero h1 {
+  margin: 0 0 1rem;
+  font-family: 'Orbitron', sans-serif;
+  font-size: clamp(1.9rem, 5vw, 3rem);
+  font-weight: 900;
+  line-height: 1.15;
+}
+
+.thrash-hero-accent {
+  display: inline-block;
+  background: linear-gradient(135deg, #fb923c, #f87171);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.thrash-hero p {
+  max-width: 700px;
+  margin: 0 auto 2rem;
+  color: var(--thrash-muted);
+  font-size: 1.05rem;
+  line-height: 1.65;
+  font-family: 'Poppins', sans-serif;
+}
+
+.thrash-hero-stats {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1rem;
+}
+
+.thrash-stat {
+  min-width: 110px;
+  padding: 0.85rem 1.1rem;
+  border: 1px solid var(--thrash-border);
+  border-radius: 14px;
+  background: var(--thrash-glass);
+}
+
+.thrash-stat-val {
+  display: block;
+  font-family: 'Orbitron', sans-serif;
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: var(--thrash-accent);
+}
+
+.thrash-stat-label {
+  font-size: 0.75rem;
+  color: var(--thrash-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.thrash-main {
+  padding: 2rem 0 4rem;
+  font-family: 'Poppins', sans-serif;
+}
+
+.thrash-workspace {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+@media (max-width: 900px) {
+  .thrash-workspace {
+    grid-template-columns: 1fr;
+  }
+}
+
+.thrash-panel {
+  padding: 1.4rem;
+  border: 1px solid var(--thrash-border);
+  border-radius: 18px;
+  background: var(--thrash-glass);
+  backdrop-filter: blur(12px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
+}
+
+.thrash-panel-header {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1.2rem;
+  padding-bottom: 0.9rem;
+  border-bottom: 1px solid var(--thrash-border);
+}
+
+.thrash-panel-title {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.thrash-panel-title h2 {
+  margin: 0;
+  font-size: 1.15rem;
+  font-weight: 700;
+}
+
+.thrash-panel-icon {
+  color: var(--thrash-accent);
+}
+
+.thrash-label {
+  display: block;
+  margin-bottom: 0.45rem;
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+.thrash-hint {
+  margin: 0.5rem 0 0;
+  font-size: 0.78rem;
+  color: var(--thrash-muted);
+  line-height: 1.45;
+}
+
+.thrash-textarea {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0.9rem 1rem;
+  border: 1px solid var(--thrash-border);
+  border-radius: 12px;
+  background: var(--thrash-code-bg);
+  color: inherit;
+  font-family: 'Fira Code', ui-monospace, monospace;
+  font-size: 0.82rem;
+  line-height: 1.5;
+  resize: vertical;
+  min-height: 220px;
+}
+
+.thrash-textarea:focus {
+  outline: 2px solid var(--thrash-accent);
+  outline-offset: 2px;
+}
+
+.thrash-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  margin-top: 1rem;
+}
+
+.thrash-status-live {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--thrash-accent);
+}
+
+.thrash-findings {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.thrash-empty,
+.thrash-empty-li {
+  color: var(--thrash-muted);
+  font-size: 0.9rem;
+}
+
+.thrash-finding {
+  padding: 0.9rem 1rem;
+  border-radius: 12px;
+  border: 1px solid var(--thrash-border);
+  border-left: 4px solid var(--thrash-warn);
+  background: rgba(0, 0, 0, 0.15);
+}
+
+.thrash-finding.sev-high {
+  border-left-color: var(--thrash-danger);
+}
+
+.thrash-finding.sev-medium {
+  border-left-color: var(--thrash-warn);
+}
+
+.thrash-finding.sev-low {
+  border-left-color: var(--thrash-info);
+}
+
+.thrash-finding-title {
+  margin: 0 0 0.35rem;
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+
+.thrash-finding-meta {
+  margin: 0 0 0.4rem;
+  font-size: 0.75rem;
+  color: var(--thrash-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.thrash-finding p {
+  margin: 0;
+  font-size: 0.85rem;
+  line-height: 1.5;
+  color: var(--thrash-muted);
+}
+
+.thrash-finding pre {
+  margin: 0.6rem 0 0;
+  padding: 0.6rem 0.75rem;
+  border-radius: 8px;
+  background: var(--thrash-code-bg);
+  font-family: 'Fira Code', ui-monospace, monospace;
+  font-size: 0.75rem;
+  overflow-x: auto;
+  white-space: pre-wrap;
+}
+
+.thrash-timeline {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  margin-bottom: 1rem;
+}
+
+.thrash-bar-row {
+  display: grid;
+  grid-template-columns: 72px 1fr 40px;
+  gap: 0.5rem;
+  align-items: center;
+  font-size: 0.78rem;
+}
+
+.thrash-bar-label {
+  font-family: 'Fira Code', ui-monospace, monospace;
+  color: var(--thrash-muted);
+}
+
+.thrash-bar-track {
+  height: 10px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  overflow: hidden;
+}
+
+html.light-mode .thrash-bar-track {
+  background: rgba(15, 23, 42, 0.1);
+}
+
+.thrash-bar-fill {
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #fb923c, #f87171);
+  transition: width 0.35s ease;
+}
+
+.thrash-bar-fill.is-read {
+  background: linear-gradient(90deg, #60a5fa, #38bdf8);
+}
+
+.thrash-bar-fill.is-write {
+  background: linear-gradient(90deg, #fb923c, #fbbf24);
+}
+
+.thrash-timeline-list {
+  margin: 0;
+  padding-left: 1.2rem;
+  font-size: 0.82rem;
+  color: var(--thrash-muted);
+  line-height: 1.55;
+}
+
+.thrash-subhead {
+  margin: 0 0 0.5rem;
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.thrash-refactor-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+@media (max-width: 700px) {
+  .thrash-refactor-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.thrash-mono-block {
+  margin: 0;
+  padding: 0.9rem 1rem;
+  border-radius: 12px;
+  border: 1px solid var(--thrash-border);
+  background: var(--thrash-code-bg);
+  font-family: 'Fira Code', ui-monospace, monospace;
+  font-size: 0.75rem;
+  line-height: 1.5;
+  overflow-x: auto;
+  white-space: pre-wrap;
+  word-break: break-word;
+  min-height: 120px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .thrash-bar-fill {
+    transition: none;
+  }
+}

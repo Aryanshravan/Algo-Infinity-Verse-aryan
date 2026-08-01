@@ -91,6 +91,10 @@ export function getJsStructuralSequence(code) {
     traverse(ast);
     return sequence;
   } catch (err) {
+    console.warn(
+      '[PLAGIARISM] AST Parsing failed, falling back to tokenizer:',
+      err?.message || err
+    );
     return getFallbackStructuralSequence(code);
   }
 }

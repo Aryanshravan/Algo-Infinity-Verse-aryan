@@ -1,0 +1,355 @@
+/* ===== Scroll-Driven Motion A11y Auditor ===== */
+:root {
+  --motion-glass: rgba(255, 255, 255, 0.04);
+  --motion-border: rgba(255, 255, 255, 0.1);
+  --motion-muted: rgba(255, 255, 255, 0.62);
+  --motion-accent: #f472b6;
+  --motion-accent-dim: rgba(244, 114, 182, 0.15);
+  --motion-warn: #fbbf24;
+  --motion-danger: #f87171;
+  --motion-ok: #4ade80;
+  --motion-info: #60a5fa;
+  --motion-code-bg: rgba(0, 0, 0, 0.35);
+}
+
+html.light-mode {
+  --motion-glass: rgba(15, 23, 42, 0.04);
+  --motion-border: rgba(15, 23, 42, 0.12);
+  --motion-muted: rgba(15, 23, 42, 0.65);
+  --motion-accent-dim: rgba(219, 39, 119, 0.1);
+  --motion-code-bg: rgba(15, 23, 42, 0.06);
+}
+
+.motion-skip-link {
+  position: absolute;
+  left: 1rem;
+  top: -100px;
+  z-index: 10000;
+  padding: 0.6rem 1rem;
+  background: var(--motion-accent);
+  color: #0a0a14;
+  font-weight: 700;
+  border-radius: 8px;
+  text-decoration: none;
+}
+
+.motion-skip-link:focus {
+  top: 1rem;
+  outline: 3px solid #fff;
+  outline-offset: 2px;
+}
+
+.motion-hero {
+  position: relative;
+  overflow: hidden;
+  padding: 7.5rem 1.5rem 4rem;
+  text-align: center;
+  border-bottom: 1px solid var(--motion-border);
+  background:
+    radial-gradient(ellipse at top right, rgba(244, 114, 182, 0.18), transparent 55%),
+    radial-gradient(ellipse at bottom left, rgba(96, 165, 250, 0.1), transparent 50%);
+}
+
+.motion-hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1.1rem;
+  padding: 0.35rem 0.9rem;
+  border-radius: 999px;
+  border: 1px solid rgba(244, 114, 182, 0.45);
+  background: var(--motion-accent-dim);
+  color: var(--motion-accent);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.motion-hero h1 {
+  margin: 0 0 1rem;
+  font-family: 'Orbitron', sans-serif;
+  font-size: clamp(1.9rem, 5vw, 3rem);
+  font-weight: 900;
+  line-height: 1.15;
+}
+
+.motion-hero-accent {
+  display: inline-block;
+  background: linear-gradient(135deg, #f472b6, #60a5fa);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.motion-hero p {
+  max-width: 720px;
+  margin: 0 auto 2rem;
+  color: var(--motion-muted);
+  font-size: 1.05rem;
+  line-height: 1.65;
+  font-family: 'Poppins', sans-serif;
+}
+
+.motion-hero-stats {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1rem;
+}
+
+.motion-stat {
+  min-width: 110px;
+  padding: 0.85rem 1.1rem;
+  border: 1px solid var(--motion-border);
+  border-radius: 14px;
+  background: var(--motion-glass);
+}
+
+.motion-stat-val {
+  display: block;
+  font-family: 'Orbitron', sans-serif;
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--motion-accent);
+}
+
+.motion-stat-label {
+  font-size: 0.75rem;
+  color: var(--motion-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.motion-main {
+  padding: 2rem 0 4rem;
+  font-family: 'Poppins', sans-serif;
+}
+
+.motion-workspace {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+@media (max-width: 900px) {
+  .motion-workspace {
+    grid-template-columns: 1fr;
+  }
+}
+
+.motion-panel {
+  padding: 1.4rem;
+  border: 1px solid var(--motion-border);
+  border-radius: 18px;
+  background: var(--motion-glass);
+  backdrop-filter: blur(12px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
+}
+
+.motion-panel-header {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1.2rem;
+  padding-bottom: 0.9rem;
+  border-bottom: 1px solid var(--motion-border);
+}
+
+.motion-panel-title {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.motion-panel-title h2 {
+  margin: 0;
+  font-size: 1.15rem;
+  font-weight: 700;
+}
+
+.motion-panel-icon {
+  color: var(--motion-accent);
+}
+
+.motion-label {
+  display: block;
+  margin-bottom: 0.45rem;
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+.motion-hint,
+.motion-status {
+  margin: 0.5rem 0 0;
+  font-size: 0.78rem;
+  color: var(--motion-muted);
+  line-height: 1.45;
+}
+
+.motion-textarea {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0.9rem 1rem;
+  border: 1px solid var(--motion-border);
+  border-radius: 12px;
+  background: var(--motion-code-bg);
+  color: inherit;
+  font-family: 'Fira Code', ui-monospace, monospace;
+  font-size: 0.78rem;
+  line-height: 1.5;
+  resize: vertical;
+}
+
+.motion-demo-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+  margin: 0.85rem 0;
+}
+
+.motion-demo-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.5rem 0.85rem;
+  border: 1px solid var(--motion-border);
+  border-radius: 10px;
+  background: transparent;
+  color: inherit;
+  font-family: 'Poppins', sans-serif;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.motion-demo-btn:hover,
+.motion-demo-btn:focus-visible {
+  border-color: rgba(244, 114, 182, 0.55);
+  background: var(--motion-accent-dim);
+  outline: none;
+}
+
+.motion-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+}
+
+.motion-empty,
+.motion-empty-li {
+  color: var(--motion-muted);
+  font-size: 0.9rem;
+}
+
+.motion-findings .motion-finding {
+  padding: 0.75rem 0.9rem;
+  margin-bottom: 0.65rem;
+  border-radius: 10px;
+  border: 1px solid var(--motion-border);
+  background: rgba(0, 0, 0, 0.15);
+}
+
+.motion-finding-sev {
+  display: inline-block;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 0.35rem;
+  padding: 0.15rem 0.45rem;
+  border-radius: 6px;
+}
+
+.motion-finding-sev.high {
+  background: rgba(248, 113, 113, 0.2);
+  color: var(--motion-danger);
+}
+
+.motion-finding-sev.med {
+  background: rgba(251, 191, 36, 0.2);
+  color: var(--motion-warn);
+}
+
+.motion-finding-sev.low {
+  background: rgba(96, 165, 250, 0.2);
+  color: var(--motion-info);
+}
+
+.motion-risk-meter {
+  margin-top: 1rem;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 0.5rem 0.75rem;
+  align-items: center;
+}
+
+.motion-risk-label {
+  grid-column: 1 / -1;
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+.motion-gauge {
+  height: 12px;
+  border-radius: 999px;
+  border: 1px solid var(--motion-border);
+  background: var(--motion-code-bg);
+  overflow: hidden;
+}
+
+.motion-gauge-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #4ade80, #fbbf24, #f87171);
+  border-radius: inherit;
+  transition: width 0.35s ease;
+}
+
+.motion-tips {
+  margin: 0;
+  padding-left: 1.15rem;
+  line-height: 1.6;
+}
+
+.motion-tips li {
+  margin-bottom: 0.45rem;
+}
+
+.motion-ba-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+@media (max-width: 700px) {
+  .motion-ba-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.motion-subhead {
+  margin: 0 0 0.5rem;
+  font-size: 0.88rem;
+  font-weight: 700;
+}
+
+.motion-mono {
+  margin: 0;
+  max-height: 280px;
+  overflow: auto;
+  padding: 0.85rem 1rem;
+  border-radius: 12px;
+  background: var(--motion-code-bg);
+  border: 1px solid var(--motion-border);
+  font-family: 'Fira Code', ui-monospace, monospace;
+  font-size: 0.72rem;
+  line-height: 1.45;
+  white-space: pre-wrap;
+}
+
+html.light-mode .motion-findings .motion-finding {
+  background: rgba(15, 23, 42, 0.04);
+}

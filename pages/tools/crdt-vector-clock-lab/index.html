@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CRDT & Vector Clock Resolution Lab — Algo Infinity Verse</title>
+  <meta name="description" content="Simulate real-time collaborative CRDT editing, Vector Clock causality tracking, offline node partitioning, and deterministic state convergence." />
+  
+  <link rel="stylesheet" href="../../../styles.css" />
+  <link rel="stylesheet" href="style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+
+  <script>
+    (function() {
+      try {
+        var t = localStorage.getItem('theme');
+        var p = window.matchMedia('(prefers-color-scheme: light)').matches;
+        var theme = t || (p ? 'light' : 'dark');
+        if (theme === 'light') document.documentElement.classList.add('light-mode');
+      } catch (e) {}
+    })();
+  </script>
+</head>
+<body data-page="crdt-lab">
+
+  <header class="crdt-header">
+    <div class="crdt-header-container">
+      <a href="../tools.html" class="crdt-back-btn">
+        <i class="fas fa-arrow-left"></i>
+        <span>Tools Hub</span>
+      </a>
+      <div class="crdt-title-area">
+        <h1><i class="fas fa-code-branch"></i> CRDT &amp; Vector Clock Resolution Lab</h1>
+        <p>Explore Distributed Causality, LWW-Register, PN-Counters, and Network Partition Convergence</p>
+      </div>
+      <div class="crdt-header-actions">
+        <button id="themeToggleBtn" class="crdt-icon-btn" title="Toggle Theme">
+          <i class="fas fa-moon"></i>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="crdt-main">
+    <!-- TOP TOOLBAR -->
+    <div class="crdt-toolbar">
+      <div class="crdt-mode-selector">
+        <label><i class="fas fa-cubes"></i> CRDT Model:</label>
+        <select id="crdtModelSelect" class="crdt-select">
+          <option value="text">Sequence CRDT (Collaborative Text Buffer)</option>
+          <option value="lww">LWW-Element-Set (Last-Write-Wins Register)</option>
+          <option value="pn-counter">PN-Counter (Distributed Counter)</option>
+        </select>
+      </div>
+      <div class="crdt-action-group">
+        <button id="btnPartitionNetwork" class="crdt-btn crdt-btn-warning"><i class="fas fa-plug-circle-xmark"></i> Partition Network (Go Offline)</button>
+        <button id="btnResyncNetwork" class="crdt-btn crdt-btn-primary"><i class="fas fa-sync"></i> Re-connect &amp; Sync Peers</button>
+        <button id="btnGarbageCollect" class="crdt-btn crdt-btn-secondary"><i class="fas fa-broom"></i> Run Tombstone GC</button>
+      </div>
+    </div>
+
+    <!-- MAIN GRID LAYOUT -->
+    <div class="crdt-grid">
+      
+      <!-- PEER PANELS CONTAINER -->
+      <div class="crdt-card crdt-peers-card">
+        <div class="crdt-card-header">
+          <h2><i class="fas fa-network-wired"></i> Multi-Peer Distributed State Editors</h2>
+          <span class="crdt-status-pill" id="networkStatusPill"><i class="fas fa-wifi"></i> Network: Connected</span>
+        </div>
+        <div class="crdt-peers-grid" id="peersGrid">
+          
+          <!-- NODE A -->
+          <div class="crdt-node-panel" id="panel-NodeA">
+            <div class="crdt-node-header">
+              <span class="crdt-node-title"><i class="fas fa-laptop-code"></i> Peer Node A</span>
+              <label class="crdt-switch">
+                <input type="checkbox" checked data-node="NodeA" class="crdt-node-online-toggle" />
+                <span class="crdt-slider"></span>
+              </label>
+            </div>
+            <div class="crdt-clock-box">
+              <span>Vector Clock V<sub>A</sub>:</span>
+              <code id="clock-NodeA">[A:0, B:0, C:0]</code>
+            </div>
+            <div class="crdt-editor-area">
+              <textarea id="editor-NodeA" class="crdt-textarea" placeholder="Type text on Node A..."></textarea>
+              <div class="crdt-counter-controls" style="display:none;">
+                <button class="crdt-btn crdt-btn-sm crdt-btn-success btn-inc" data-node="NodeA"><i class="fas fa-plus"></i> Increment</button>
+                <button class="crdt-btn crdt-btn-sm crdt-btn-danger btn-dec" data-node="NodeA"><i class="fas fa-minus"></i> Decrement</button>
+                <span class="crdt-val-display" id="val-NodeA">0</span>
+              </div>
+            </div>
+            <button class="crdt-btn crdt-btn-sm crdt-btn-primary btn-local-op" data-node="NodeA"><i class="fas fa-bolt"></i> Commit Local Op</button>
+          </div>
+
+          <!-- NODE B -->
+          <div class="crdt-node-panel" id="panel-NodeB">
+            <div class="crdt-node-header">
+              <span class="crdt-node-title"><i class="fas fa-laptop-code"></i> Peer Node B</span>
+              <label class="crdt-switch">
+                <input type="checkbox" checked data-node="NodeB" class="crdt-node-online-toggle" />
+                <span class="crdt-slider"></span>
+              </label>
+            </div>
+            <div class="crdt-clock-box">
+              <span>Vector Clock V<sub>B</sub>:</span>
+              <code id="clock-NodeB">[A:0, B:0, C:0]</code>
+            </div>
+            <div class="crdt-editor-area">
+              <textarea id="editor-NodeB" class="crdt-textarea" placeholder="Type text on Node B..."></textarea>
+              <div class="crdt-counter-controls" style="display:none;">
+                <button class="crdt-btn crdt-btn-sm crdt-btn-success btn-inc" data-node="NodeB"><i class="fas fa-plus"></i> Increment</button>
+                <button class="crdt-btn crdt-btn-sm crdt-btn-danger btn-dec" data-node="NodeB"><i class="fas fa-minus"></i> Decrement</button>
+                <span class="crdt-val-display" id="val-NodeB">0</span>
+              </div>
+            </div>
+            <button class="crdt-btn crdt-btn-sm crdt-btn-primary btn-local-op" data-node="NodeB"><i class="fas fa-bolt"></i> Commit Local Op</button>
+          </div>
+
+          <!-- NODE C -->
+          <div class="crdt-node-panel" id="panel-NodeC">
+            <div class="crdt-node-header">
+              <span class="crdt-node-title"><i class="fas fa-laptop-code"></i> Peer Node C</span>
+              <label class="crdt-switch">
+                <input type="checkbox" checked data-node="NodeC" class="crdt-node-online-toggle" />
+                <span class="crdt-slider"></span>
+              </label>
+            </div>
+            <div class="crdt-clock-box">
+              <span>Vector Clock V<sub>C</sub>:</span>
+              <code id="clock-NodeC">[A:0, B:0, C:0]</code>
+            </div>
+            <div class="crdt-editor-area">
+              <textarea id="editor-NodeC" class="crdt-textarea" placeholder="Type text on Node C..."></textarea>
+              <div class="crdt-counter-controls" style="display:none;">
+                <button class="crdt-btn crdt-btn-sm crdt-btn-success btn-inc" data-node="NodeC"><i class="fas fa-plus"></i> Increment</button>
+                <button class="crdt-btn crdt-btn-sm crdt-btn-danger btn-dec" data-node="NodeC"><i class="fas fa-minus"></i> Decrement</button>
+                <span class="crdt-val-display" id="val-NodeC">0</span>
+              </div>
+            </div>
+            <button class="crdt-btn crdt-btn-sm crdt-btn-primary btn-local-op" data-node="NodeC"><i class="fas fa-bolt"></i> Commit Local Op</button>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- RIGHT SIDE: VECTOR CLOCK & CONFLICT TREE INSPECTOR -->
+      <div class="crdt-side-panel">
+        
+        <!-- VECTOR CLOCK CAUSALITY MATRIX -->
+        <div class="crdt-card">
+          <div class="crdt-card-header">
+            <h3><i class="fas fa-table-cells"></i> Vector Clock Causality Matrix</h3>
+          </div>
+          <div class="crdt-card-body">
+            <table class="crdt-matrix-table">
+              <thead>
+                <tr>
+                  <th>Node</th>
+                  <th>V[A]</th>
+                  <th>V[B]</th>
+                  <th>V[C]</th>
+                  <th>Causality Status</th>
+                </tr>
+              </thead>
+              <tbody id="vcMatrixBody">
+                <!-- Rendered by JS -->
+              </tbody>
+            </table>
+            <div class="crdt-causality-legend">
+              <span><i class="fas fa-arrow-right"></i> V<sub>1</sub> &lt; V<sub>2</sub> (Happened-Before)</span>
+              <span><i class="fas fa-arrows-split-up-and-left"></i> Concurrent (V<sub>1</sub> || V<sub>2</sub> Edit Conflict)</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- CONFLICT TREE & TOMBSTONE VIEWER -->
+        <div class="crdt-card crdt-flex-card">
+          <div class="crdt-card-header">
+            <h3><i class="fas fa-sitemap"></i> CRDT Operation Log &amp; Tombstone Viewer</h3>
+          </div>
+          <div class="crdt-card-body crdt-scrollable" id="opTreeContainer">
+            <!-- Operations / Sequence Elements rendered here -->
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- CONSOLE LOG -->
+    <div class="crdt-card crdt-console-card">
+      <div class="crdt-card-header">
+        <h2><i class="fas fa-terminal"></i> Distributed Message &amp; State Sync Execution Log</h2>
+        <button id="btnClearConsole" class="crdt-btn crdt-btn-sm"><i class="fas fa-trash"></i> Clear Log</button>
+      </div>
+      <div class="crdt-console-body" id="crdtConsole">
+        <div class="crdt-log-entry info">[SYSTEM] CRDT Vector Clock Resolution Lab initialized.</div>
+      </div>
+    </div>
+  </main>
+
+  <script src="../../../auth.js"></script>
+  <script src="../../../theme.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>

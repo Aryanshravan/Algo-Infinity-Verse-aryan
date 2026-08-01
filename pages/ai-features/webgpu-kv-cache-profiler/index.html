@@ -1,0 +1,243 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>WebGPU KV-Cache Profiler | Algo Infinity Verse</title>
+  <meta name="description" content="Math-based LLM KV-cache VRAM profiler: model size, context length, quantization, PagedAttention vs contiguous, max batch under a VRAM budget. Optional WebGPU detection." />
+  <link rel="stylesheet" href="/styles.css" />
+  <link rel="stylesheet" href="style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Poppins:wght@300;400;500;600;700&family=Fira+Code:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <script>
+    (function () {
+      try {
+        var storedTheme = localStorage.getItem('theme');
+        var prefersLight = window.matchMedia('(prefers-color-scheme: light)').matches;
+        var theme = storedTheme || (prefersLight ? 'light' : 'dark');
+        if (theme === 'light') {
+          document.documentElement.classList.add('light-mode');
+        } else {
+          document.documentElement.classList.remove('light-mode');
+        }
+      } catch (e) {}
+    })();
+  </script>
+</head>
+<body data-page="webgpu-kv-cache-profiler">
+  <a href="#kv-main" class="kv-skip-link">Skip to main content</a>
+  <button type="button" id="scrollTopBtn" class="scroll-top-btn" aria-label="Scroll to top">
+    <i class="fas fa-arrow-up" aria-hidden="true"></i>
+  </button>
+
+  <div id="navbar-placeholder"></div>
+
+  <header class="kv-hero">
+    <div class="kv-hero-top">
+      <div class="kv-hero-badge">
+        <i class="fas fa-microchip" aria-hidden="true"></i>
+        LLM Memory Lab
+      </div>
+      <span id="webgpuBadge" class="kv-webgpu-badge" role="status" aria-live="polite">
+        <i class="fas fa-spinner fa-spin" aria-hidden="true"></i> Detecting WebGPU…
+      </span>
+    </div>
+    <h1>
+      WebGPU KV-Cache
+      <span class="kv-hero-accent">Profiler</span>
+    </h1>
+    <p>
+      Estimate key-value cache VRAM from layers, heads, context, quantization, and batch size.
+      Compare FP32→INT4, PagedAttention vs contiguous fragmentation, and max batch for a GPU budget.
+    </p>
+    <div class="kv-hero-stats" aria-live="polite">
+      <div class="kv-stat">
+        <span class="kv-stat-val" id="statKvMib">—</span>
+        <span class="kv-stat-label">KV MiB</span>
+      </div>
+      <div class="kv-stat">
+        <span class="kv-stat-val" id="statMaxBatch">—</span>
+        <span class="kv-stat-label">Max batch</span>
+      </div>
+      <div class="kv-stat">
+        <span class="kv-stat-val" id="statUtil">—</span>
+        <span class="kv-stat-label">Utilization</span>
+      </div>
+    </div>
+  </header>
+
+  <main id="kv-main" class="kv-main">
+    <div class="container">
+      <div class="kv-workspace">
+        <!-- Controls -->
+        <section class="kv-panel" aria-labelledby="kv-config-title">
+          <div class="kv-panel-header">
+            <div class="kv-panel-title">
+              <i class="fas fa-sliders kv-panel-icon" aria-hidden="true"></i>
+              <h2 id="kv-config-title">Model &amp; cache config</h2>
+            </div>
+          </div>
+
+          <div class="kv-field">
+            <label class="kv-label" for="modelSelect">Model size</label>
+            <select id="modelSelect" class="kv-select">
+              <option value="1.5B">1.5B</option>
+              <option value="7B" selected>7B</option>
+              <option value="13B">13B</option>
+              <option value="70B">70B</option>
+            </select>
+          </div>
+
+          <div class="kv-grid-3">
+            <div class="kv-field">
+              <label class="kv-label" for="layersInput">Layers</label>
+              <input type="number" id="layersInput" class="kv-input" min="1" max="128" step="1" />
+            </div>
+            <div class="kv-field">
+              <label class="kv-label" for="headsInput">KV heads</label>
+              <input type="number" id="headsInput" class="kv-input" min="1" max="128" step="1" />
+            </div>
+            <div class="kv-field">
+              <label class="kv-label" for="headDimInput">Head dim</label>
+              <input type="number" id="headDimInput" class="kv-input" min="8" max="512" step="1" />
+            </div>
+          </div>
+          <p class="kv-hint">Defaults update with model size (GQA-style KV heads for larger models).</p>
+
+          <div class="kv-field">
+            <label class="kv-label" for="ctxSlider">
+              Context length: <span id="ctxValue">8192</span> tokens
+            </label>
+            <input type="range" id="ctxSlider" class="kv-range" min="11" max="17" step="1" value="13"
+              aria-valuemin="2048" aria-valuemax="131072" aria-valuenow="8192"
+              aria-describedby="ctxHint" />
+            <div class="kv-range-labels" aria-hidden="true">
+              <span>2k</span><span>4k</span><span>8k</span><span>16k</span><span>32k</span><span>64k</span><span>128k</span>
+            </div>
+            <p id="ctxHint" class="kv-hint">Slider steps: 2k → 128k (powers of two).</p>
+          </div>
+
+          <fieldset class="kv-fieldset">
+            <legend class="kv-label">Quantization</legend>
+            <div class="kv-radio-row" role="radiogroup" aria-label="KV cache quantization">
+              <label class="kv-radio"><input type="radio" name="quant" value="fp32" /> FP32</label>
+              <label class="kv-radio"><input type="radio" name="quant" value="fp16" checked /> FP16</label>
+              <label class="kv-radio"><input type="radio" name="quant" value="int8" /> INT8</label>
+              <label class="kv-radio"><input type="radio" name="quant" value="int4" /> INT4</label>
+            </div>
+          </fieldset>
+
+          <fieldset class="kv-fieldset">
+            <legend class="kv-label">Attention layout</legend>
+            <div class="kv-toggle-row">
+              <label class="kv-switch">
+                <input type="checkbox" id="pagedToggle" checked />
+                <span class="kv-switch-ui" aria-hidden="true"></span>
+                <span>PagedAttention</span>
+              </label>
+              <span class="kv-hint-inline" id="layoutHint">vs Contiguous allocation</span>
+            </div>
+          </fieldset>
+
+          <div class="kv-grid-2">
+            <div class="kv-field">
+              <label class="kv-label" for="batchInput">Batch size</label>
+              <input type="number" id="batchInput" class="kv-input" min="1" max="1024" value="1" step="1" />
+            </div>
+            <div class="kv-field">
+              <label class="kv-label" for="vramBudget">VRAM budget (GB)</label>
+              <input type="number" id="vramBudget" class="kv-input" min="1" max="192" value="24" step="0.5" />
+            </div>
+          </div>
+
+          <div class="kv-controls">
+            <button type="button" id="calculateBtn" class="btn btn-primary">
+              <i class="fas fa-calculator" aria-hidden="true"></i> Calculate
+            </button>
+            <button type="button" id="exportReportBtn" class="btn btn-outline" disabled>
+              <i class="fas fa-download" aria-hidden="true"></i> Export report
+            </button>
+          </div>
+        </section>
+
+        <!-- Results summary -->
+        <section class="kv-panel" aria-labelledby="kv-results-title">
+          <div class="kv-panel-header">
+            <div class="kv-panel-title">
+              <i class="fas fa-chart-pie kv-panel-icon" aria-hidden="true"></i>
+              <h2 id="kv-results-title">Profile results</h2>
+            </div>
+          </div>
+
+          <div id="kvSummary" class="kv-summary" role="status" aria-live="polite">
+            <p class="kv-empty">Adjust parameters and calculate to see KV-cache footprint.</p>
+          </div>
+
+          <div class="kv-frag-block" aria-labelledby="kv-frag-title">
+            <h3 id="kv-frag-title" class="kv-subhead">Fragmentation estimate</h3>
+            <div class="kv-frag-bars">
+              <div class="kv-frag-row">
+                <span class="kv-frag-label">Contiguous waste</span>
+                <div class="kv-bar" role="presentation">
+                  <div class="kv-bar-fill kv-bar-waste" id="wasteBar" style="width: 0%"></div>
+                </div>
+                <span class="kv-frag-val" id="wastePct">—</span>
+              </div>
+              <div class="kv-frag-row">
+                <span class="kv-frag-label">Paged block util.</span>
+                <div class="kv-bar" role="presentation">
+                  <div class="kv-bar-fill kv-bar-util" id="pagedBar" style="width: 0%"></div>
+                </div>
+                <span class="kv-frag-val" id="pagedPct">—</span>
+              </div>
+            </div>
+            <p class="kv-hint" id="fragNote">PagedAttention uses fixed-size blocks; contiguous over-allocates to max seq.</p>
+          </div>
+        </section>
+      </div>
+
+      <!-- Comparison matrix -->
+      <section class="kv-panel kv-matrix-panel" aria-labelledby="kv-matrix-title">
+        <div class="kv-panel-header">
+          <div class="kv-panel-title">
+            <i class="fas fa-table kv-panel-icon" aria-hidden="true"></i>
+            <h2 id="kv-matrix-title">Quantization comparison</h2>
+          </div>
+        </div>
+        <div class="kv-table-wrap">
+          <table class="kv-table" id="quantTable">
+            <caption class="kv-sr-only">KV cache size and max batch across quantization formats</caption>
+            <thead>
+              <tr>
+                <th scope="col">Format</th>
+                <th scope="col">Bytes/elem</th>
+                <th scope="col">KV cache</th>
+                <th scope="col">Max batch @ budget</th>
+                <th scope="col">vs FP16</th>
+              </tr>
+            </thead>
+            <tbody id="quantTableBody">
+              <tr><td colspan="5" class="kv-empty-cell">Run calculate to fill the matrix.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <div id="footer-placeholder"></div>
+
+  <script src="/auth.js"></script>
+  <script src="/bootstrap-legacy.js"></script>
+  <script src="/script.js"></script>
+  <script type="module" src="/dist/legacy-bundle.mjs"></script>
+  <script src="/theme.js"></script>
+  <script src="script.js"></script>
+  <script>
+    if (typeof loadPartial === 'function') {
+      loadPartial('navbar-placeholder', '/partials/navbar.html');
+      loadPartial('footer-placeholder', '/partials/footer.html');
+    }
+  </script>
+</body>
+</html>

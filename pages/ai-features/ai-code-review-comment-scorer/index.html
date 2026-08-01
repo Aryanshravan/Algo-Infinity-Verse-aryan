@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Code Review Comment Scorer | Algo Infinity Verse</title>
+  <meta name="description" content="Score code review comments for clarity, specificity, actionability, and toxicity — get inclusive rewrites and export a coaching report." />
+  <link rel="stylesheet" href="/styles.css" />
+  <link rel="stylesheet" href="style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Poppins:wght@300;400;500;600;700&family=Fira+Code:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <script>
+    (function () {
+      try {
+        var storedTheme = localStorage.getItem('theme');
+        var prefersLight = window.matchMedia('(prefers-color-scheme: light)').matches;
+        var theme = storedTheme || (prefersLight ? 'light' : 'dark');
+        if (theme === 'light') {
+          document.documentElement.classList.add('light-mode');
+        } else {
+          document.documentElement.classList.remove('light-mode');
+        }
+      } catch (e) {}
+    })();
+  </script>
+</head>
+<body data-page="ai-code-review-comment-scorer">
+  <a href="#rev-main" class="rev-skip-link">Skip to main content</a>
+  <button type="button" id="scrollTopBtn" class="scroll-top-btn" aria-label="Scroll to top">
+    <i class="fas fa-arrow-up" aria-hidden="true"></i>
+  </button>
+
+  <div id="navbar-placeholder"></div>
+
+  <header class="rev-hero">
+    <div class="rev-hero-badge">
+      <i class="fas fa-comments" aria-hidden="true"></i>
+      Review Coaching Lab
+    </div>
+    <h1>
+      AI Code Review
+      <span class="rev-hero-accent">Comment Scorer</span>
+    </h1>
+    <p>
+      Paste review comments, score clarity / specificity / actionability / toxicity heuristics,
+      generate inclusive rewrites, and export a CoC-aligned coaching report.
+    </p>
+    <div class="rev-hero-stats" aria-live="polite">
+      <div class="rev-stat">
+        <span class="rev-stat-val" id="statComments">—</span>
+        <span class="rev-stat-label">Comments</span>
+      </div>
+      <div class="rev-stat">
+        <span class="rev-stat-val" id="statAvg">—</span>
+        <span class="rev-stat-label">Avg score</span>
+      </div>
+      <div class="rev-stat">
+        <span class="rev-stat-val" id="statToxicity">—</span>
+        <span class="rev-stat-label">Toxicity flags</span>
+      </div>
+    </div>
+  </header>
+
+  <main id="rev-main" class="rev-main">
+    <div class="container">
+      <div class="rev-workspace">
+        <section class="rev-panel" aria-labelledby="rev-input-title">
+          <div class="rev-panel-header">
+            <div class="rev-panel-title">
+              <i class="fas fa-pen-to-square rev-panel-icon" aria-hidden="true"></i>
+              <h2 id="rev-input-title">Review comments</h2>
+            </div>
+          </div>
+          <label class="rev-label" for="revComments">One comment per line (or blank-line separated)</label>
+          <textarea
+            id="revComments"
+            class="rev-textarea"
+            rows="14"
+            spellcheck="true"
+            placeholder="This is wrong.&#10;Why didn't you use X?&#10;Consider extracting this into a helper."
+            aria-describedby="revInputHint"
+          ></textarea>
+          <p id="revInputHint" class="rev-hint">Heuristic scoring only — not a replacement for human judgment or your Code of Conduct process.</p>
+
+          <div class="rev-controls">
+            <button type="button" id="revDemoBtn" class="btn btn-secondary">
+              <i class="fas fa-flask" aria-hidden="true"></i> Load harsh / vague demo
+            </button>
+            <button type="button" id="revScoreBtn" class="btn btn-primary">
+              <i class="fas fa-gauge-high" aria-hidden="true"></i> Score comments
+            </button>
+            <button type="button" id="revClearBtn" class="btn btn-outline">
+              <i class="fas fa-eraser" aria-hidden="true"></i> Clear
+            </button>
+            <button type="button" id="revExportBtn" class="btn btn-outline" disabled>
+              <i class="fas fa-download" aria-hidden="true"></i> Export coaching report
+            </button>
+          </div>
+          <div id="revStatus" class="rev-status" role="status" aria-live="polite"></div>
+        </section>
+
+        <section class="rev-panel" aria-labelledby="rev-rubric-title">
+          <div class="rev-panel-header">
+            <div class="rev-panel-title">
+              <i class="fas fa-scale-balanced rev-panel-icon" aria-hidden="true"></i>
+              <h2 id="rev-rubric-title">CoC-aligned rubric</h2>
+            </div>
+          </div>
+          <ul class="rev-rubric" id="revRubric">
+            <li><strong>Clarity:</strong> Reader can understand the concern without guessing.</li>
+            <li><strong>Specificity:</strong> Points to location, behavior, or example — not vague “this is bad”.</li>
+            <li><strong>Actionability:</strong> Suggests a next step or alternative the author can take.</li>
+            <li><strong>Respect:</strong> Avoids personal attacks, sarcasm, and absolute dismissals (toxicity heuristic).</li>
+            <li><strong>Inclusive tone:</strong> Prefer “we / this code” over “you always / you never”.</li>
+          </ul>
+        </section>
+      </div>
+
+      <section class="rev-panel" aria-labelledby="rev-scores-title">
+        <div class="rev-panel-header">
+          <div class="rev-panel-title">
+            <i class="fas fa-list-check rev-panel-icon" aria-hidden="true"></i>
+            <h2 id="rev-scores-title">Scored comments</h2>
+          </div>
+        </div>
+        <div id="revResults" class="rev-results" aria-live="polite">
+          <p class="rev-empty">Score comments to see per-dimension ratings and inclusive rewrites.</p>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <div id="footer-placeholder"></div>
+
+  <script src="/auth.js"></script>
+  <script src="/bootstrap-legacy.js"></script>
+  <script src="/script.js"></script>
+  <script type="module" src="/dist/legacy-bundle.mjs"></script>
+  <script src="/theme.js"></script>
+  <script src="script.js"></script>
+  <script>
+    if (typeof loadPartial === 'function') {
+      loadPartial('navbar-placeholder', '/partials/navbar.html');
+      loadPartial('footer-placeholder', '/partials/footer.html');
+    }
+  </script>
+</body>
+</html>

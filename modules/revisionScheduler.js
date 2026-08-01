@@ -59,7 +59,10 @@ export function getTopicProblemCount(topicKey) {
 
 export function buildReason(progress, topicKey) {
   const quizScore = progress.quizScores?.[topicKey]?.bestScore || 0;
-  const completedCount = progress.completedProblems?.length || 0;
+  const completedCount = (progress.completedProblems || []).filter((problem) => {
+    const category = typeof problem === 'object' ? problem?.category : null;
+    return category?.toLowerCase() === topicKey.toLowerCase();
+  }).length;
   const topicProblems = getTopicProblemCount(topicKey);
   if (quizScore < 60) return ' Low quiz accuracy suggests a quick review is helpful.';
   if (topicProblems > 0 && completedCount < topicProblems)

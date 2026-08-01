@@ -1,0 +1,338 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Fusion Tokamak Confinement | Algo Infinity Verse</title>
+    <link rel="stylesheet" href="/styles.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <!-- Monaco Editor -->
+    <script src="https://unpkg.com/monaco-editor@0.36.1/min/vs/loader.js"></script>
+    <style>
+      body { margin: 0; overflow: hidden; background: #000; font-family: 'Poppins', sans-serif; color: #fff; }
+      .app-container { display: flex; height: 100vh; }
+      
+      .sidebar { width: 450px; background: rgba(15, 23, 42, 0.95); border-right: 1px solid #ef4444; display: flex; flex-direction: column; z-index: 10; }
+      .header { padding: 20px; border-bottom: 1px solid #334155; }
+      .header h2 { margin: 0; color: #ef4444; font-family: 'Orbitron', sans-serif; font-size: 1.2rem; }
+      .header p { margin: 5px 0 0 0; font-size: 0.8rem; color: #94a3b8; }
+      
+      #editor-container { flex: 1; min-height: 300px; }
+      
+      .controls { padding: 20px; border-top: 1px solid #334155; background: rgba(0,0,0,0.5); }
+      .btn { background: linear-gradient(90deg, #dc2626, #991b1b); color: #fff; border: none; padding: 10px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; transition: 0.3s; }
+      .btn:hover { background: #ef4444; transform: translateY(-2px); box-shadow: 0 0 15px rgba(239, 68, 68, 0.5); }
+      
+      .sim-container { flex: 1; position: relative; background: #000; overflow: hidden; }
+      canvas { width: 100%; height: 100%; display: block; }
+      
+      .hud { position: absolute; top: 20px; left: 20px; background: rgba(0,0,0,0.8); padding: 15px; border-radius: 8px; border: 1px solid #ef4444; width: 280px; z-index: 10; pointer-events: none; }
+      .hud h3 { margin: 0 0 10px 0; color: #ef4444; font-size: 1rem; font-family: 'Orbitron', sans-serif; }
+      .metric { display: flex; justify-content: space-between; font-size: 0.8rem; color: #cbd5e1; margin-bottom: 5px; }
+      .val { font-weight: bold; font-family: monospace; }
+      .val-temp { color: #f97316; }
+      .val-output { color: #3b82f6; }
+      .val-danger { color: #ef4444; }
+    </style>
+  </head>
+  <body>
+    
+    <div class="app-container">
+      <div class="sidebar">
+        <div class="header">
+          <h2><i class="fas fa-fire"></i> Tokamak Confinement</h2>
+          <p>Control a star in a magnetic bottle</p>
+        </div>
+        
+        <div id="editor-container"></div>
+        
+        <div class="controls">
+          <button class="btn" onclick="ignitePlasma()"><i class="fas fa-bolt"></i> Ignite Plasma</button>
+        </div>
+      </div>
+      
+      <div class="sim-container">
+        <!-- Reactor wall background -->
+        <div style="position: absolute; inset:0; background: radial-gradient(circle, transparent 200px, rgba(30, 41, 59, 0.8) 250px, #0f172a 100%); pointer-events: none; z-index: 0;"></div>
+        
+        <canvas id="plasmaCanvas" style="position: relative; z-index: 1;"></canvas>
+        
+        <div class="hud">
+          <h3>Reactor Telemetry</h3>
+          <div class="metric"><span>Plasma Core Temp:</span> <span class="val val-temp" id="tempVal">0M °C</span></div>
+          <div class="metric"><span>Fusion Energy Output:</span> <span class="val val-output" id="outVal">0 MW</span></div>
+          <div class="metric"><span>Wall Proximity:</span> <span class="val" id="proxVal" style="color:#10b981">Safe</span></div>
+          <div class="metric" style="margin-top: 10px; border-top: 1px solid #334155; padding-top: 5px;">
+            <span>System Status:</span> <span class="val" id="statusVal" style="color:#94a3b8">STANDBY</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      let editor;
+      require.config({ paths: { 'vs': 'https://unpkg.com/monaco-editor@0.36.1/min/vs' }});
+      require(['vs/editor/editor.main'], function() {
+        editor = monaco.editor.create(document.getElementById('editor-container'), {
+          value: `// Magnetic Confinement Algorithm
+// Plasma is a highly unstable superheated fluid.
+// It will naturally buckle, twist, and expand towards the reactor walls.
+// You must dynamically adjust the 8 surrounding magnetic coils to keep it centered.
+
+function adjustMagneticCoils(plasmaRadius, plasmaDistortion) {
+    // Return an array of 8 floats [0.0 to 1.0] representing coil power.
+    // Higher power pushes the plasma inward, but costs energy to run.
+    
+    // Naive logic: Max power to all coils! 
+    // This wastes energy and doesn't account for uneven distortions.
+    
+    let coilPower = [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0];
+    
+    return coilPower;
+}`,
+          language: 'javascript',
+          theme: 'vs-dark',
+          minimap: { enabled: false },
+          automaticLayout: true
+        });
+      });
+
+      const canvas = document.getElementById('plasmaCanvas');
+      const ctx = canvas.getContext('2d');
+      
+      let isSimulating = false;
+      let time = 0;
+      let cx = 0, cy = 0;
+      
+      // Plasma state
+      let plasmaPoints = [];
+      let baseRadius = 150;
+      let temp = 0; // target 150M
+      let netEnergy = 0;
+      
+      function resize() { 
+          canvas.width = canvas.clientWidth; 
+          canvas.height = canvas.clientHeight;
+          cx = canvas.width / 2;
+          cy = canvas.height / 2;
+          
+          initPlasma();
+      }
+      
+      function initPlasma() {
+          plasmaPoints = [];
+          let numPoints = 64;
+          for(let i=0; i<numPoints; i++) {
+              plasmaPoints.push({
+                  angle: (i / numPoints) * Math.PI * 2,
+                  radius: baseRadius,
+                  velocity: 0
+              });
+          }
+      }
+      
+      setTimeout(resize, 100);
+      window.addEventListener('resize', resize);
+
+      function animate() {
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+          if (isSimulating) {
+              time += 0.05;
+              
+              // Ramp up temperature
+              if(temp < 150) temp += 0.5;
+              
+              // Natural plasma instabilities (Kink and Sausage instabilities)
+              for(let i=0; i<plasmaPoints.length; i++) {
+                  let p = plasmaPoints[i];
+                  // Instability force
+                  let instability = Math.sin(p.angle * 3 + time) * 0.5;
+                  instability += Math.sin(p.angle * 5 - time * 1.5) * 0.3;
+                  
+                  // Thermal expansion
+                  let expansion = (temp / 150) * 1.5;
+                  
+                  p.velocity += (instability + expansion) * 0.1;
+              }
+              
+              // Execute user control algorithm
+              let coilPower = [0,0,0,0,0,0,0,0];
+              try {
+                  // Calculate average radius and distortion for the user
+                  let avgR = 0;
+                  let maxDiff = 0;
+                  for(let p of plasmaPoints) avgR += p.radius;
+                  avgR /= plasmaPoints.length;
+                  for(let p of plasmaPoints) maxDiff = Math.max(maxDiff, Math.abs(p.radius - avgR));
+                  
+                  eval(editor.getValue());
+                  let result = adjustMagneticCoils(avgR, maxDiff);
+                  if(Array.isArray(result) && result.length === 8) {
+                      coilPower = result.map(v => Math.max(0, Math.min(1, v)));
+                  }
+              } catch(e) {}
+              
+              // Apply magnetic forces
+              let energyCost = 0;
+              for(let i=0; i<8; i++) {
+                  let power = coilPower[i];
+                  energyCost += power * 50; // Cost 50 MW per full coil
+                  let coilAngle = (i / 8) * Math.PI * 2;
+                  
+                  // Apply inward force to nearby plasma points
+                  for(let p of plasmaPoints) {
+                      // Angular distance
+                      let angDist = Math.abs(p.angle - coilAngle);
+                      if (angDist > Math.PI) angDist = Math.PI * 2 - angDist;
+                      
+                      if (angDist < Math.PI/2) {
+                          // Coil pushes inward
+                          let force = power * (1 - angDist/(Math.PI/2)) * 2.0;
+                          p.velocity -= force * 0.1;
+                      }
+                  }
+              }
+              
+              // Update plasma and check constraints
+              let maxRadius = 0;
+              for(let i=0; i<plasmaPoints.length; i++) {
+                  let p = plasmaPoints[i];
+                  // Spring force pulling back to base radius (internal tension)
+                  p.velocity += (baseRadius - p.radius) * 0.01;
+                  
+                  // Damping
+                  p.velocity *= 0.95;
+                  
+                  p.radius += p.velocity;
+                  maxRadius = Math.max(maxRadius, p.radius);
+                  
+                  // Prevent collapsing completely
+                  if(p.radius < 50) p.radius = 50;
+              }
+              
+              // Calculate Energy (Fusion requires temp > 100M and stable confinement)
+              let fusionOutput = 0;
+              if (temp > 100) {
+                  // Roughness penalizes fusion
+                  let roughness = 0;
+                  for(let p of plasmaPoints) roughness += Math.abs(p.radius - baseRadius);
+                  roughness /= plasmaPoints.length;
+                  
+                  let stabilityMulti = Math.max(0, 1 - (roughness / 100));
+                  fusionOutput = (temp / 150) * 1000 * stabilityMulti; // Max 1000 MW output
+              }
+              
+              netEnergy = fusionOutput - energyCost;
+              
+              // UI Updates
+              document.getElementById('tempVal').innerText = temp.toFixed(1) + "M °C";
+              let outEl = document.getElementById('outVal');
+              outEl.innerText = netEnergy.toFixed(1) + " MW";
+              if(netEnergy > 0) outEl.style.color = "#10b981"; else outEl.style.color = "#ef4444";
+              
+              let proxEl = document.getElementById('proxVal');
+              let gap = 250 - maxRadius;
+              if(gap < 20) {
+                  proxEl.innerText = "CRITICAL"; proxEl.style.color = "#ef4444";
+              } else if(gap < 50) {
+                  proxEl.innerText = "WARNING"; proxEl.style.color = "#facc15";
+              } else {
+                  proxEl.innerText = "Safe"; proxEl.style.color = "#10b981";
+              }
+              
+              if(maxRadius > 250) {
+                  // BREACH!
+                  isSimulating = false;
+                  document.getElementById('statusVal').innerText = "CONTAINMENT BREACH. MELTDOWN.";
+                  document.getElementById('statusVal').style.color = "#ef4444";
+                  // Draw explosion
+                  let grad = ctx.createRadialGradient(cx, cy, 10, cx, cy, 500);
+                  grad.addColorStop(0, '#ffffff');
+                  grad.addColorStop(0.2, '#f97316');
+                  grad.addColorStop(1, 'transparent');
+                  ctx.fillStyle = grad;
+                  ctx.fillRect(0, 0, canvas.width, canvas.height);
+              } else {
+                  document.getElementById('statusVal').innerText = temp >= 149 ? "IGNITED & CONFINED" : "IGNITING...";
+                  document.getElementById('statusVal').style.color = temp >= 149 ? "#10b981" : "#facc15";
+              }
+          }
+
+          if (isSimulating || document.getElementById('statusVal').innerText === "STANDBY") {
+              // Draw Reactor Walls
+              ctx.strokeStyle = '#334155';
+              ctx.lineWidth = 10;
+              ctx.beginPath();
+              ctx.arc(cx, cy, 255, 0, Math.PI*2);
+              ctx.stroke();
+              
+              // Draw 8 Magnetic Coils
+              ctx.fillStyle = '#cbd5e1';
+              for(let i=0; i<8; i++) {
+                  let angle = (i / 8) * Math.PI * 2;
+                  let px = cx + Math.cos(angle) * 255;
+                  let py = cy + Math.sin(angle) * 255;
+                  
+                  ctx.beginPath();
+                  ctx.arc(px, py, 15, 0, Math.PI*2);
+                  ctx.fill();
+              }
+              
+              if (isSimulating) {
+                  // Draw Plasma
+                  ctx.beginPath();
+                  for(let i=0; i<plasmaPoints.length; i++) {
+                      let p = plasmaPoints[i];
+                      let px = cx + Math.cos(p.angle) * p.radius;
+                      let py = cy + Math.sin(p.angle) * p.radius;
+                      if(i===0) ctx.moveTo(px, py);
+                      else ctx.lineTo(px, py);
+                  }
+                  ctx.closePath();
+                  
+                  // Heat gradient
+                  let plasmaGrad = ctx.createRadialGradient(cx, cy, 0, cx, cy, 250);
+                  if (temp < 50) {
+                      plasmaGrad.addColorStop(0, 'rgba(239, 68, 68, 0.8)'); // Red
+                      plasmaGrad.addColorStop(1, 'rgba(239, 68, 68, 0)');
+                  } else if (temp < 100) {
+                      plasmaGrad.addColorStop(0, 'rgba(249, 115, 22, 0.9)'); // Orange
+                      plasmaGrad.addColorStop(1, 'rgba(249, 115, 22, 0)');
+                  } else {
+                      plasmaGrad.addColorStop(0, '#ffffff'); // White hot
+                      plasmaGrad.addColorStop(0.3, 'rgba(168, 85, 247, 0.8)'); // Purple/blue
+                      plasmaGrad.addColorStop(1, 'rgba(59, 130, 246, 0)');
+                  }
+                  
+                  ctx.fillStyle = plasmaGrad;
+                  ctx.fill();
+                  
+                  // Core intense line
+                  ctx.strokeStyle = '#fff';
+                  ctx.lineWidth = 3;
+                  ctx.stroke();
+                  
+                  // Outer corona blur
+                  ctx.shadowBlur = 30;
+                  ctx.shadowColor = temp > 100 ? '#a855f7' : '#ef4444';
+                  ctx.stroke();
+                  ctx.shadowBlur = 0;
+              }
+          }
+
+          requestAnimationFrame(animate);
+      }
+      animate();
+
+      function ignitePlasma() {
+          if(isSimulating) return;
+          isSimulating = true;
+          time = 0;
+          temp = 0;
+          initPlasma();
+      }
+    </script>
+  </body>
+</html>

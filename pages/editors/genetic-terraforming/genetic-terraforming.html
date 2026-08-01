@@ -1,0 +1,259 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Genetic Terraforming Engine | Algo Infinity Verse</title>
+    <link rel="stylesheet" href="/styles.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <!-- Monaco Editor -->
+    <script src="https://unpkg.com/monaco-editor@0.36.1/min/vs/loader.js"></script>
+    <style>
+      body { margin: 0; overflow: hidden; background: #000; font-family: 'Poppins', sans-serif; color: #fff; }
+      .app-container { display: flex; height: 100vh; }
+      
+      .sidebar { width: 450px; background: rgba(15, 23, 42, 0.95); border-right: 1px solid #10b981; display: flex; flex-direction: column; z-index: 10; }
+      .header { padding: 20px; border-bottom: 1px solid #334155; }
+      .header h2 { margin: 0; color: #10b981; font-family: 'Orbitron', sans-serif; font-size: 1.2rem; }
+      .header p { margin: 5px 0 0 0; font-size: 0.8rem; color: #94a3b8; }
+      
+      #editor-container { flex: 1; min-height: 300px; }
+      
+      .controls { padding: 20px; border-top: 1px solid #334155; background: rgba(0,0,0,0.5); }
+      .btn { background: linear-gradient(90deg, #059669, #047857); color: #fff; border: none; padding: 10px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; transition: 0.3s; }
+      .btn:hover { background: #10b981; transform: translateY(-2px); box-shadow: 0 0 15px rgba(16, 185, 129, 0.5); }
+      
+      .sim-container { flex: 1; position: relative; background: #451a03; overflow: hidden; transition: background 2s ease; }
+      canvas { width: 100%; height: 100%; display: block; filter: contrast(1.1); }
+      
+      .hud { position: absolute; top: 20px; left: 20px; background: rgba(0,0,0,0.8); padding: 15px; border-radius: 8px; border: 1px solid #10b981; width: 280px; z-index: 10; pointer-events: none; }
+      .hud h3 { margin: 0 0 10px 0; color: #10b981; font-size: 1rem; font-family: 'Orbitron', sans-serif; }
+      .metric { display: flex; justify-content: space-between; font-size: 0.8rem; color: #cbd5e1; margin-bottom: 5px; }
+      .val { font-weight: bold; font-family: monospace; }
+      .val-o2 { color: #38bdf8; }
+      .val-tox { color: #facc15; }
+    </style>
+  </head>
+  <body>
+    
+    <div class="app-container">
+      <div class="sidebar">
+        <div class="header">
+          <h2><i class="fas fa-leaf"></i> Evolutionary Terraformer</h2>
+          <p>Breed extremophile algae to save a dead world</p>
+        </div>
+        
+        <div id="editor-container"></div>
+        
+        <div class="controls">
+          <button class="btn" onclick="seedPlanet()"><i class="fas fa-seedling"></i> Deploy Genesis Seed</button>
+        </div>
+      </div>
+      
+      <div class="sim-container" id="simBg">
+        <canvas id="terraCanvas" style="position: relative; z-index: 1;"></canvas>
+        
+        <div class="hud">
+          <h3>Planetary Biosphere</h3>
+          <div class="metric"><span>Generation:</span> <span class="val" id="genVal" style="color:#d946ef">0</span></div>
+          <div class="metric"><span>Algae Population:</span> <span class="val" id="popVal" style="color:#10b981">0</span></div>
+          <div class="metric"><span>Atmospheric Toxicity:</span> <span class="val val-tox" id="toxVal">100%</span></div>
+          <div class="metric"><span>O2 Saturation:</span> <span class="val val-o2" id="o2Val">0%</span></div>
+          <div class="metric" style="margin-top: 10px; border-top: 1px solid #334155; padding-top: 5px;">
+            <span>Ecosystem State:</span> <span class="val" id="statusVal" style="color:#94a3b8">DEAD WORLD</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      let editor;
+      require.config({ paths: { 'vs': 'https://unpkg.com/monaco-editor@0.36.1/min/vs' }});
+      require(['vs/editor/editor.main'], function() {
+        editor = monaco.editor.create(document.getElementById('editor-container'), {
+          value: `// Extremophile Genetic Algorithm
+// Toxicity naturally shifts due to volcanic outgassing.
+// If algae mutate too slowly, they die to toxicity.
+// If algae mutate too fast, they lose their O2 producing traits.
+
+function evolveAlgae(currentPopulation, toxicityLevel) {
+    // Return { mutationRate: float (0.0 to 1.0) }
+    
+    // Naive logic: Mutate aggressively to survive toxicity!
+    // Result: They survive, but devolve into useless slime that produces zero oxygen.
+    return {
+        mutationRate: 0.8
+    };
+}`,
+          language: 'javascript',
+          theme: 'vs-dark',
+          minimap: { enabled: false },
+          automaticLayout: true
+        });
+      });
+
+      const canvas = document.getElementById('terraCanvas');
+      const ctx = canvas.getContext('2d');
+      
+      let isSimulating = false;
+      let time = 0;
+      let generation = 0;
+      
+      let population = 0;
+      let toxicity = 100;
+      let oxygen = 0;
+      
+      // Genetic traits of the swarm average
+      let o2ProductionTrait = 1.0; 
+      let toxResistanceTrait = 0.0;
+      
+      // Rendering particles
+      let algaeBlobs = [];
+      
+      function resize() { canvas.width = canvas.clientWidth; canvas.height = canvas.clientHeight; }
+      window.addEventListener('resize', resize);
+      resize();
+
+      function animate() {
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+          let cx = canvas.width / 2;
+          let cy = canvas.height / 2;
+
+          if (isSimulating) {
+              time += 0.05;
+              
+              // Shift toxicity (volcanic events)
+              toxicity = 50 + Math.sin(time * 0.5) * 40 + (Math.random() * 20);
+              if (toxicity > 100) toxicity = 100;
+              if (toxicity < 0) toxicity = 0;
+              
+              // Evolve every "season"
+              if (Math.floor(time * 10) % 10 === 0) {
+                  generation++;
+                  
+                  let mutationRate = 0.1;
+                  try {
+                      eval(editor.getValue());
+                      let res = evolveAlgae(population, toxicity);
+                      if (res && res.mutationRate !== undefined) {
+                          mutationRate = Math.max(0, Math.min(1.0, res.mutationRate));
+                      }
+                  } catch(e) {}
+                  
+                  // Evolutionary Physics
+                  // High mutation helps catch up to toxicity, but degrades highly optimized traits (like O2 production)
+                  
+                  // Shift resistance towards toxicity
+                  let selectionPressure = toxicity / 100;
+                  let adaptation = (selectionPressure - toxResistanceTrait) * mutationRate;
+                  toxResistanceTrait += adaptation;
+                  
+                  // Mutation degrades O2 production (entropic decay of specialized traits if mutation is too high)
+                  o2ProductionTrait -= (mutationRate * 0.1); 
+                  if (o2ProductionTrait < 0) o2ProductionTrait = 0;
+                  
+                  // Population dynamics
+                  // If resistance is too far from toxicity, massive die-off
+                  let surviveGap = Math.abs((toxResistanceTrait*100) - toxicity);
+                  if (surviveGap > 30) {
+                      population *= 0.5; // Die off
+                  } else {
+                      population *= 1.2; // Thrive
+                  }
+                  
+                  if (population > 10000) population = 10000;
+                  
+                  // Produce O2
+                  oxygen += (population * o2ProductionTrait * 0.0001);
+              }
+              
+              if(oxygen > 100) oxygen = 100;
+              
+              // End States
+              if (population < 10) {
+                  population = 0;
+                  isSimulating = false;
+                  document.getElementById('statusVal').innerText = "EXTINCTION EVENT";
+                  document.getElementById('statusVal').style.color = "#ef4444";
+              } else if (oxygen >= 100) {
+                  isSimulating = false;
+                  document.getElementById('statusVal').innerText = "TERRAFORMING COMPLETE";
+                  document.getElementById('statusVal').style.color = "#10b981";
+              } else {
+                  if (toxicity > 80) {
+                      document.getElementById('statusVal').innerText = "TOXIC SPIKE";
+                      document.getElementById('statusVal').style.color = "#facc15";
+                  } else {
+                      document.getElementById('statusVal').innerText = "BIOSYNTHESIZING...";
+                      document.getElementById('statusVal').style.color = "#38bdf8";
+                  }
+              }
+              
+              // Update HUD
+              document.getElementById('genVal').innerText = generation;
+              document.getElementById('popVal').innerText = Math.floor(population).toLocaleString();
+              document.getElementById('toxVal').innerText = toxicity.toFixed(1) + "%";
+              document.getElementById('o2Val').innerText = oxygen.toFixed(2) + "%";
+              
+              // Update Bg color based on O2 (Brown -> Blue/Green)
+              let r = Math.floor(69 - (oxygen * 0.69));
+              let g = Math.floor(26 + (oxygen * 0.5));
+              let b = Math.floor(3 + (oxygen * 1.5));
+              document.getElementById('simBg').style.background = \`rgb(\${r}, \${g}, \${b})\`;
+          }
+          
+          // Draw Algae Blobs
+          let visualCount = Math.min(200, Math.floor(population / 50));
+          
+          while(algaeBlobs.length < visualCount) {
+              algaeBlobs.push({
+                  x: Math.random() * canvas.width,
+                  y: Math.random() * canvas.height,
+                  phase: Math.random() * Math.PI * 2
+              });
+          }
+          if (algaeBlobs.length > visualCount) algaeBlobs.length = visualCount;
+          
+          ctx.fillStyle = \`rgba(16, 185, 129, \${0.2 + (o2ProductionTrait*0.6)})\`; // Brighter green = higher O2 trait
+          for(let i=0; i<algaeBlobs.length; i++) {
+              let a = algaeBlobs[i];
+              a.x += Math.sin(time + a.phase) * 0.5;
+              a.y += Math.cos(time + a.phase) * 0.5;
+              
+              ctx.beginPath();
+              ctx.arc(a.x, a.y, 5 + Math.sin(time*3 + a.phase)*2, 0, Math.PI*2);
+              ctx.fill();
+          }
+          
+          // Draw Toxicity Clouds
+          if (toxicity > 20) {
+              ctx.fillStyle = \`rgba(250, 204, 21, \${(toxicity/100) * 0.3})\`;
+              for(let i=0; i<5; i++) {
+                  ctx.beginPath();
+                  ctx.arc(cx + Math.sin(time*0.2 + i)*300, cy + Math.cos(time*0.3 + i)*200, 200 + Math.sin(time+i)*50, 0, Math.PI*2);
+                  ctx.fill();
+              }
+          }
+
+          requestAnimationFrame(animate);
+      }
+      
+      animate();
+
+      function seedPlanet() {
+          if(isSimulating) return;
+          isSimulating = true;
+          time = 0;
+          generation = 0;
+          population = 1000;
+          oxygen = 0;
+          o2ProductionTrait = 1.0;
+          toxResistanceTrait = 0.5; // Starts adapted to 50% tox
+          algaeBlobs = [];
+          document.getElementById('statusVal').innerText = "SEED DEPLOYED...";
+          document.getElementById('statusVal').style.color = "#10b981";
+      }
+    </script>
+  </body>
+</html>

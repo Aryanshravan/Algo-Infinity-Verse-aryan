@@ -1,0 +1,208 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Focus Trap Modal UX Lab | Algo Infinity Verse</title>
+  <meta name="description" content="Paste modal HTML/JS, check focus trap completeness, validate Esc/initial/return focus, scroll-lock and inert guidance, simulate Tab sequences, and export a modal UX audit." />
+  <link rel="stylesheet" href="/styles.css" />
+  <link rel="stylesheet" href="style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Poppins:wght@300;400;500;600;700&family=Fira+Code:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <script>
+    (function () {
+      try {
+        var storedTheme = localStorage.getItem('theme');
+        var prefersLight = window.matchMedia('(prefers-color-scheme: light)').matches;
+        var theme = storedTheme || (prefersLight ? 'light' : 'dark');
+        if (theme === 'light') {
+          document.documentElement.classList.add('light-mode');
+        } else {
+          document.documentElement.classList.remove('light-mode');
+        }
+      } catch (e) {}
+    })();
+  </script>
+</head>
+<body data-page="focus-trap-modal-ux-lab">
+  <a href="#focus-main" class="focus-skip-link">Skip to main content</a>
+  <button type="button" id="scrollTopBtn" class="scroll-top-btn" aria-label="Scroll to top">
+    <i class="fas fa-arrow-up" aria-hidden="true"></i>
+  </button>
+
+  <div id="navbar-placeholder"></div>
+
+  <header class="focus-hero">
+    <div class="focus-hero-badge">
+      <i class="fas fa-keyboard" aria-hidden="true"></i>
+      Accessibility UX Lab
+    </div>
+    <h1>
+      Focus Trap Modal
+      <span class="focus-hero-accent">UX Lab</span>
+    </h1>
+    <p>
+      Audit modal markup and behavior for focus traps, Esc handling, return focus,
+      scroll lock, and <code>inert</code> — then simulate Tab sequences and export a checklist.
+    </p>
+    <div class="focus-hero-stats" aria-live="polite">
+      <div class="focus-stat">
+        <span class="focus-stat-val" id="statScore">—</span>
+        <span class="focus-stat-label">UX score</span>
+      </div>
+      <div class="focus-stat">
+        <span class="focus-stat-val" id="statTrap">—</span>
+        <span class="focus-stat-label">Trap gaps</span>
+      </div>
+      <div class="focus-stat">
+        <span class="focus-stat-val" id="statKeys">—</span>
+        <span class="focus-stat-label">Key checks</span>
+      </div>
+      <div class="focus-stat">
+        <span class="focus-stat-val" id="statPass">—</span>
+        <span class="focus-stat-label">Checklist</span>
+      </div>
+    </div>
+  </header>
+
+  <main id="focus-main" class="focus-main">
+    <div class="container">
+      <div class="focus-workspace">
+        <section class="focus-panel" aria-labelledby="focus-source-title">
+          <div class="focus-panel-header">
+            <div class="focus-panel-title">
+              <i class="fas fa-code focus-panel-icon" aria-hidden="true"></i>
+              <h2 id="focus-source-title">Modal HTML / JS</h2>
+            </div>
+          </div>
+
+          <label class="focus-label" for="modalInput">Paste modal markup and open/close behavior</label>
+          <textarea
+            id="modalInput"
+            class="focus-textarea"
+            rows="16"
+            spellcheck="false"
+            aria-describedby="modalHint"
+            placeholder="<!-- dialog markup + focus / keydown handlers… -->"
+          ></textarea>
+          <p class="focus-hint" id="modalHint">
+            Heuristic static audit for <code>role="dialog"</code>, focus trap loops, Esc,
+            initial/return focus, scroll lock, and background <code>inert</code> / <code>aria-hidden</code>.
+          </p>
+
+          <div class="focus-controls">
+            <button type="button" id="loadDemoBtn" class="btn btn-secondary">
+              <i class="fas fa-flask" aria-hidden="true"></i> Load broken demo
+            </button>
+            <button type="button" id="analyzeBtn" class="btn btn-primary">
+              <i class="fas fa-magnifying-glass" aria-hidden="true"></i> Audit modal
+            </button>
+            <button type="button" id="simulateBtn" class="btn btn-secondary">
+              <i class="fas fa-person-walking" aria-hidden="true"></i> Simulate keys
+            </button>
+            <button type="button" id="clearBtn" class="btn btn-outline">
+              <i class="fas fa-eraser" aria-hidden="true"></i> Clear
+            </button>
+            <button type="button" id="exportMdBtn" class="btn btn-outline" disabled>
+              <i class="fas fa-file-lines" aria-hidden="true"></i> Export .md
+            </button>
+            <button type="button" id="exportTxtBtn" class="btn btn-outline" disabled>
+              <i class="fas fa-file-alt" aria-hidden="true"></i> Export .txt
+            </button>
+          </div>
+        </section>
+
+        <section class="focus-panel" aria-labelledby="focus-findings-title">
+          <div class="focus-panel-header">
+            <div class="focus-panel-title">
+              <i class="fas fa-triangle-exclamation focus-panel-icon" aria-hidden="true"></i>
+              <h2 id="focus-findings-title">Focus &amp; trap findings</h2>
+            </div>
+            <span class="focus-status-live" id="analysisStatus" role="status" aria-live="polite">Ready</span>
+          </div>
+          <div id="findingsList" class="focus-findings" aria-live="polite">
+            <p class="focus-empty">Load the broken demo or paste modal code, then audit.</p>
+          </div>
+        </section>
+      </div>
+
+      <div class="focus-workspace">
+        <section class="focus-panel" aria-labelledby="focus-validators-title">
+          <div class="focus-panel-header">
+            <div class="focus-panel-title">
+              <i class="fas fa-clipboard-check focus-panel-icon" aria-hidden="true"></i>
+              <h2 id="focus-validators-title">Esc / focus / scroll validators</h2>
+            </div>
+          </div>
+          <ul id="validatorList" class="focus-validator-list" aria-live="polite">
+            <li class="focus-empty-li">Validators run after analysis.</li>
+          </ul>
+          <div id="inertGuidance" class="focus-inert-box" aria-live="polite">
+            <p class="focus-empty">Scroll-lock &amp; inert guidance appears here.</p>
+          </div>
+        </section>
+
+        <section class="focus-panel" aria-labelledby="focus-sim-title">
+          <div class="focus-panel-header">
+            <div class="focus-panel-title">
+              <i class="fas fa-route focus-panel-icon" aria-hidden="true"></i>
+              <h2 id="focus-sim-title">Tab / Shift+Tab / Esc simulation</h2>
+            </div>
+          </div>
+          <ol id="simResults" class="focus-sim-list" aria-live="polite">
+            <li class="focus-empty-li">Run “Simulate keys” after audit (or with demo loaded).</li>
+          </ol>
+        </section>
+      </div>
+
+      <div class="focus-workspace">
+        <section class="focus-panel" aria-labelledby="focus-checklist-title">
+          <div class="focus-panel-header">
+            <div class="focus-panel-title">
+              <i class="fas fa-list-check focus-panel-icon" aria-hidden="true"></i>
+              <h2 id="focus-checklist-title">Keyboard regression checklist</h2>
+            </div>
+          </div>
+          <ul id="checklist" class="focus-checklist" aria-live="polite">
+            <li class="focus-empty-li">Checklist fills after analysis.</li>
+          </ul>
+        </section>
+
+        <section class="focus-panel" aria-labelledby="focus-refactor-title">
+          <div class="focus-panel-header">
+            <div class="focus-panel-title">
+              <i class="fas fa-wand-magic-sparkles focus-panel-icon" aria-hidden="true"></i>
+              <h2 id="focus-refactor-title">Before / after accessible dialog</h2>
+            </div>
+          </div>
+          <div class="focus-refactor-grid">
+            <div>
+              <h3 class="focus-subhead">Before (broken patterns)</h3>
+              <pre class="focus-mono-block" id="beforeOut" aria-live="polite">—</pre>
+            </div>
+            <div>
+              <h3 class="focus-subhead">After (accessible pattern)</h3>
+              <pre class="focus-mono-block" id="afterOut" aria-live="polite">—</pre>
+            </div>
+          </div>
+        </section>
+      </div>
+    </div>
+  </main>
+
+  <div id="footer-placeholder"></div>
+
+  <script src="/auth.js"></script>
+  <script src="/bootstrap-legacy.js"></script>
+  <script src="/script.js"></script>
+  <script type="module" src="/dist/legacy-bundle.mjs"></script>
+  <script src="/theme.js"></script>
+  <script src="script.js"></script>
+  <script>
+    if (typeof loadPartial === 'function') {
+      loadPartial('navbar-placeholder', '/partials/navbar.html');
+      loadPartial('footer-placeholder', '/partials/footer.html');
+    }
+  </script>
+</body>
+</html>

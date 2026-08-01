@@ -5,12 +5,22 @@
  */
 
 document.addEventListener("DOMContentLoaded", () => {
-    // Ensure Three.js is loaded
-    if (typeof THREE === 'undefined') {
-        console.error("Three.js not loaded. Make sure the CDN links are accessible.");
-        return;
+    var container = document.getElementById('threejs-container');
+    if (typeof lazyVisualizer !== 'undefined') {
+        lazyVisualizer.lazyLoadThree(container, function () {
+            if (typeof THREE === 'undefined') {
+                console.error("Three.js failed to load.");
+                return;
+            }
+            initVisualizer();
+        });
+    } else {
+        if (typeof THREE === 'undefined') {
+            console.error("Three.js not loaded. Make sure the CDN links are accessible.");
+            return;
+        }
+        initVisualizer();
     }
-    initVisualizer();
 });
 
 // Settings & Globals

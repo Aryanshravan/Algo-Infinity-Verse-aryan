@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Euler Tour + Sparse Table LCA | Algo Infinity Verse</title>
+    <meta name="description" content="Answering Lowest Common Ancestor queries in O(1) time using Euler Tour and Sparse Table." />
+    <link rel="stylesheet" href="../../../styles.css" />
+    <link rel="stylesheet" href="euler-tour-lca.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Poppins:wght@300;400;500;600;700&family=Fira+Code:wght@400;500;600&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <link rel="stylesheet" href="/modules/quick-notes/quick-notes.css" />
+  </head>
+  <body data-page="euler-tour-lca">
+
+    <div id="navbar-placeholder"></div>
+
+    <button id="scrollTopBtn" aria-label="Scroll to top" class="scroll-top-btn">
+      <i class="fas fa-circle-chevron-up"></i>
+    </button>
+
+    <section class="elca-hero">
+      <div class="elca-hero-bg"><canvas id="elcaHeroCanvas" class="elca-hero-canvas"></canvas></div>
+      <div class="elca-hero-inner">
+        <div class="elca-hero-eyebrow">🌳 Tree Flattening · RMQ Reduction</div>
+        <h1 class="elca-hero-title">Euler Tour + Sparse Table LCA</h1>
+        <p class="elca-hero-sub">Flatten the tree. Build the table. Answer queries in O(1).</p>
+        <p class="elca-hero-desc">Finding the Lowest Common Ancestor naively means walking up from each node — O(depth). By flattening the tree into an Euler Tour and precomputing a Sparse Table on the depths, we reduce LCA to a Range Minimum Query (RMQ). After O(n log n) preprocessing, every query takes true O(1) time.</p>
+        <a href="#lab" class="btn btn-primary elca-btn-primary"><i class="fas fa-project-diagram"></i> Explore Visualizer</a>
+      </div>
+    </section>
+
+    <section id="lab" class="section elca-section">
+      <div class="container">
+
+        <div class="elca-control-card">
+          <div class="elca-row">
+            <span class="elca-row-label">Controls</span>
+            <button class="btn btn-secondary elca-btn" id="btnGenTree"><i class="fas fa-random"></i> Generate Tree</button>
+            <button class="btn elca-btn-primary elca-btn" id="btnEulerTour"><i class="fas fa-route"></i> Build Euler Tour</button>
+            <button class="btn btn-secondary elca-btn" id="btnSparseTable"><i class="fas fa-table"></i> Build Sparse Table</button>
+            <button class="btn btn-secondary elca-btn" id="btnQueryLCA"><i class="fas fa-search"></i> Query Random LCA</button>
+            <button class="btn btn-secondary elca-btn" id="btnReset"><i class="fas fa-undo"></i> Reset</button>
+          </div>
+          <div class="elca-row" style="margin-top: 0.5rem">
+             <span class="elca-row-label">Animation Speed</span>
+             <input type="range" id="speedRange" min="50" max="1500" value="500" style="flex:1; max-width: 200px;" />
+             <span class="elca-row-label" id="speedLabel" style="text-transform:none; font-family: Fira Code, monospace;">500ms</span>
+          </div>
+        </div>
+
+        <div class="elca-status" id="elcaStatus" role="status" aria-live="polite">Generate a tree and build the Euler tour to start!</div>
+
+        <!-- Tree Canvas -->
+        <div class="elca-array-section">
+          <div class="elca-panel-title"><i class="fas fa-tree"></i> Tree Structure</div>
+          <div class="elca-canvas-wrapper">
+             <canvas id="treeCanvas"></canvas>
+          </div>
+        </div>
+
+        <div class="elca-main-layout">
+          <div class="elca-left-panel">
+            <div class="elca-array-section" style="margin-bottom:0">
+              <div class="elca-panel-title"><i class="fas fa-list-ol"></i> Euler Tour Arrays</div>
+              
+              <div class="elca-qcol-title" style="margin-bottom:0.3rem">First Occurrence (first[])</div>
+              <div class="elca-array-track" id="firstArrayTrack"></div>
+              
+              <div class="elca-qcol-title" style="margin-top:1rem; margin-bottom:0.3rem">Euler Tour (tour[])</div>
+              <div class="elca-array-track" id="tourArrayTrack"></div>
+              
+              <div class="elca-qcol-title" style="margin-top:1rem; margin-bottom:0.3rem">Depths (depth[])</div>
+              <div class="elca-array-track" id="depthArrayTrack"></div>
+            </div>
+          </div>
+
+          <div class="elca-right-panel">
+            <div class="elca-panel-card">
+              <div class="elca-panel-title"><i class="fas fa-table"></i> Sparse Table (st[i][j])</div>
+              <div class="elca-sparse-container" id="sparseTableContainer">
+                  <table class="elca-sparse-table" id="sparseTable"></table>
+              </div>
+            </div>
+
+            <div class="elca-panel-card" style="flex: 1;">
+              <div class="elca-panel-title"><i class="fas fa-search"></i> LCA Query Log</div>
+              <div class="elca-answers-grid" id="queryLog">
+                  <div class="elca-answer-row"><span>Ready for queries.</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <section id="learn" class="section">
+      <div class="container">
+        <h2 class="section-title"><span class="title-icon">🌳</span> Why Euler Tour + Sparse Table?</h2>
+        <div class="elca-learn-grid">
+          <div class="elca-learn-card" style="--lc:#06b6d4">
+            <div class="elca-learn-icon">🛤️</div>
+            <h3>Euler Tour Flattening</h3>
+            <p>We traverse the tree using DFS and record every node we visit, including when we backtrack. This creates an array representation of the tree where any path between two nodes is captured.</p>
+          </div>
+          <div class="elca-learn-card" style="--lc:#a855f7">
+            <div class="elca-learn-icon">⬇️</div>
+            <h3>Lowest Depth</h3>
+            <p>Between the first occurrences of any two nodes u and v in the Euler Tour, the node with the minimum depth is exactly their Lowest Common Ancestor (LCA). The tree problem is now an array RMQ problem.</p>
+          </div>
+          <div class="elca-learn-card" style="--lc:#22c55e">
+            <div class="elca-learn-icon">🧮</div>
+            <h3>Sparse Table RMQ</h3>
+            <p>A Sparse Table precomputes the minimum depth for all range lengths that are powers of 2. It takes O(n log n) time to build, but allows answering any Range Minimum Query (RMQ) in true O(1) time.</p>
+          </div>
+          <div class="elca-learn-card" style="--lc:#f59e0b">
+            <div class="elca-learn-icon">⚡</div>
+            <h3>O(1) Queries</h3>
+            <p>To find the minimum in any range [L, R], we find the largest power of 2 (let's say 2^j) that fits in the range. We then compare the precomputed minimums of two overlapping blocks: [L, L+2^j-1] and [R-2^j+1, R].</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div id="footer-placeholder"></div>
+
+    <script src="../../../auth.js"></script>
+    <script src="../../../script.js"></script>
+    <script src="../../../theme.js"></script>
+    <script src="../../../auth-gate.js"></script>
+    <script src="euler-tour-lca.js"></script>
+    <script>
+      if (typeof loadPartial === 'function') {
+        loadPartial('navbar-placeholder', '/partials/navbar.html').then(function() {
+          if (typeof initNavbar === 'function') initNavbar();
+        });
+        loadPartial('footer-placeholder', '/partials/footer.html');
+      }
+    </script>
+    <script src="/modules/quick-notes/quick-notes.js"></script>
+  </body>
+</html>

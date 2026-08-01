@@ -1,0 +1,178 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI OpenAPI Contract Linter | Algo Infinity Verse</title>
+  <meta name="description" content="Diff OpenAPI specs for breaking changes, run OWASP API Top 10-style checks, and get AI-style remediation patches — all client-side." />
+  <link rel="stylesheet" href="/styles.css" />
+  <link rel="stylesheet" href="style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Poppins:wght@300;400;500;600;700&family=Fira+Code:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <script src="https://cdn.jsdelivr.net/npm/js-yaml@4.1.0/dist/js-yaml.min.js"></script>
+  <script>
+    (function () {
+      try {
+        var storedTheme = localStorage.getItem('theme');
+        var prefersLight = window.matchMedia('(prefers-color-scheme: light)').matches;
+        var theme = storedTheme || (prefersLight ? 'light' : 'dark');
+        if (theme === 'light') {
+          document.documentElement.classList.add('light-mode');
+        } else {
+          document.documentElement.classList.remove('light-mode');
+        }
+      } catch (e) {}
+    })();
+  </script>
+</head>
+<body data-page="ai-openapi-contract-linter">
+  <a href="#oapi-main" class="oapi-skip-link">Skip to main content</a>
+  <button type="button" id="scrollTopBtn" class="scroll-top-btn" aria-label="Scroll to top">
+    <i class="fas fa-arrow-up" aria-hidden="true"></i>
+  </button>
+
+  <div id="navbar-placeholder"></div>
+
+  <header class="oapi-hero">
+    <div class="oapi-hero-badge">
+      <i class="fas fa-file-contract" aria-hidden="true"></i>
+      Contract Intelligence
+    </div>
+    <h1>
+      AI OpenAPI
+      <span class="oapi-hero-accent">Contract Linter</span>
+    </h1>
+    <p>
+      Compare baseline vs candidate OpenAPI 3.x specs for breaking changes,
+      OWASP API Top 10-style security gaps, and AI-style remediation patches — fully client-side.
+    </p>
+    <div class="oapi-hero-stats" aria-live="polite">
+      <div class="oapi-stat">
+        <span class="oapi-stat-val" id="statBreaking">0</span>
+        <span class="oapi-stat-label">Breaking</span>
+      </div>
+      <div class="oapi-stat">
+        <span class="oapi-stat-val" id="statSecurity">0</span>
+        <span class="oapi-stat-label">Security issues</span>
+      </div>
+      <div class="oapi-stat">
+        <span class="oapi-stat-val" id="statScore">—</span>
+        <span class="oapi-stat-label">Compat score</span>
+      </div>
+    </div>
+  </header>
+
+  <main id="oapi-main" class="oapi-main">
+    <div class="container">
+      <div class="oapi-workspace">
+        <section class="oapi-panel" aria-labelledby="oapi-input-title">
+          <div class="oapi-panel-header">
+            <div class="oapi-panel-title">
+              <i class="fas fa-code-compare oapi-panel-icon" aria-hidden="true"></i>
+              <h2 id="oapi-input-title">Spec inputs</h2>
+            </div>
+          </div>
+
+          <p class="oapi-hint oapi-hint-block">
+            Paste JSON OpenAPI documents (preferred). YAML is supported via js-yaml when JSON parse fails.
+          </p>
+
+          <div class="oapi-editors">
+            <div class="oapi-editor-block">
+              <label class="oapi-label" for="baselineSpec">Baseline OpenAPI</label>
+              <textarea id="baselineSpec" class="oapi-textarea" rows="14" spellcheck="false" placeholder='{"openapi":"3.0.3","info":{"title":"API","version":"1.0.0"},"paths":{}}' aria-describedby="baselineHint"></textarea>
+              <p id="baselineHint" class="oapi-hint">Stable contract consumers already depend on.</p>
+            </div>
+            <div class="oapi-editor-block">
+              <label class="oapi-label" for="candidateSpec">Candidate OpenAPI</label>
+              <textarea id="candidateSpec" class="oapi-textarea" rows="14" spellcheck="false" placeholder='{"openapi":"3.0.3","info":{"title":"API","version":"2.0.0"},"paths":{}}' aria-describedby="candidateHint"></textarea>
+              <p id="candidateHint" class="oapi-hint">Proposed revision to lint against the baseline.</p>
+            </div>
+          </div>
+
+          <div class="oapi-controls">
+            <button type="button" id="loadDemoBtn" class="btn btn-secondary">
+              <i class="fas fa-flask" aria-hidden="true"></i> Load demo specs
+            </button>
+            <button type="button" id="runLintBtn" class="btn btn-primary">
+              <i class="fas fa-wand-magic-sparkles" aria-hidden="true"></i> Run contract lint
+            </button>
+            <button type="button" id="clearBtn" class="btn btn-outline">
+              <i class="fas fa-eraser" aria-hidden="true"></i> Clear
+            </button>
+            <div class="oapi-export-group" role="group" aria-label="Download audit report">
+              <button type="button" id="exportMdBtn" class="btn btn-outline" disabled>
+                <i class="fas fa-download" aria-hidden="true"></i> Report .md
+              </button>
+              <button type="button" id="exportTxtBtn" class="btn btn-outline" disabled>
+                <i class="fas fa-file-lines" aria-hidden="true"></i> Report .txt
+              </button>
+            </div>
+          </div>
+          <div id="oapiParseStatus" class="oapi-status" role="status" aria-live="polite"></div>
+        </section>
+
+        <section class="oapi-panel oapi-report-panel" aria-labelledby="oapi-report-title">
+          <div class="oapi-panel-header">
+            <div class="oapi-panel-title">
+              <i class="fas fa-clipboard-check oapi-panel-icon" aria-hidden="true"></i>
+              <h2 id="oapi-report-title">Lint report</h2>
+            </div>
+            <div class="oapi-filter-bar" role="group" aria-label="Filter findings">
+              <button type="button" class="oapi-filter active" data-filter="all">All</button>
+              <button type="button" class="oapi-filter" data-filter="breaking">Breaking</button>
+              <button type="button" class="oapi-filter" data-filter="security">Security</button>
+              <button type="button" class="oapi-filter" data-filter="patch">Patches</button>
+            </div>
+          </div>
+
+          <div id="oapiEmpty" class="oapi-empty">
+            <i class="fas fa-file-contract" aria-hidden="true"></i>
+            <p>No audit yet. Load demo specs or paste baseline &amp; candidate OpenAPI, then run the linter.</p>
+          </div>
+
+          <div id="oapiScoreCard" class="oapi-score-card" hidden>
+            <div class="oapi-score-ring" aria-hidden="true">
+              <span id="oapiScoreBig">—</span>
+            </div>
+            <div>
+              <h3 class="oapi-score-title">Compatibility score</h3>
+              <p id="oapiScoreSummary" class="oapi-hint">Run a lint to see results.</p>
+            </div>
+          </div>
+
+          <div id="oapiResults" class="oapi-results" hidden>
+            <section class="oapi-section" aria-labelledby="breakingHeading" data-section="breaking">
+              <h3 id="breakingHeading"><i class="fas fa-bolt" aria-hidden="true"></i> Breaking changes</h3>
+              <ul id="breakingList" class="oapi-findings"></ul>
+            </section>
+            <section class="oapi-section" aria-labelledby="securityHeading" data-section="security">
+              <h3 id="securityHeading"><i class="fas fa-shield-halved" aria-hidden="true"></i> OWASP-style security checks</h3>
+              <ul id="securityList" class="oapi-findings"></ul>
+            </section>
+            <section class="oapi-section" aria-labelledby="patchHeading" data-section="patch">
+              <h3 id="patchHeading"><i class="fas fa-robot" aria-hidden="true"></i> AI-style patch suggestions</h3>
+              <ul id="patchList" class="oapi-findings oapi-patches"></ul>
+            </section>
+          </div>
+        </section>
+      </div>
+    </div>
+  </main>
+
+  <div id="footer-placeholder"></div>
+
+  <script src="/auth.js"></script>
+  <script src="/bootstrap-legacy.js"></script>
+  <script src="/script.js"></script>
+  <script type="module" src="/dist/legacy-bundle.mjs"></script>
+  <script src="/theme.js"></script>
+  <script src="script.js"></script>
+  <script>
+    if (typeof loadPartial === 'function') {
+      loadPartial('navbar-placeholder', '/partials/navbar.html');
+      loadPartial('footer-placeholder', '/partials/footer.html');
+    }
+  </script>
+</body>
+</html>

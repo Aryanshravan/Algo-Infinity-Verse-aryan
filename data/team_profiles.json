@@ -289,5 +289,65 @@
     "name": "Legacy Team",
     "description": "secret",
     "version": 1
+  },
+  "team-owner-1785509241395": {
+    "id": "team-owner-1785509241395",
+    "ownerId": "userA-1785509241395",
+    "name": "A Team",
+    "description": "secret",
+    "members": [],
+    "version": 2,
+    "updatedAt": "2026-07-31T14:47:21.396Z"
+  },
+  "team-legacy-1785509241423": {
+    "id": "team-legacy-1785509241423",
+    "name": "Legacy Team",
+    "description": "secret",
+    "version": 1
+  },
+  "team-owner-1785509263957": {
+    "id": "team-owner-1785509263957",
+    "ownerId": "userA-1785509263957",
+    "name": "A Team",
+    "description": "secret",
+    "members": [],
+    "version": 2,
+    "updatedAt": "2026-07-31T14:47:43.958Z"
+  },
+  "team-legacy-1785509263983": {
+    "id": "team-legacy-1785509263983",
+    "name": "Legacy Team",
+    "description": "secret",
+    "version": 1
+  },
+  "team-owner-1785608591634": {
+    "id": "team-owner-1785608591634",
+    "ownerId": "userA-1785608591634",
+    "name": "A Team",
+    "description": "secret",
+    "members": [],
+    "version": 2,
+    "updatedAt": "2026-08-01T18:23:11.659Z"
+  },
+  "team-legacy-1785608591677": {
+    "id": "team-legacy-1785608591677",
+    "name": "Legacy Team",
+    "description": "secret",
+    "version": 1
+  },
+  "team-owner-1785608600772": {
+    "id": "team-owner-1785608600772",
+    "ownerId": "userA-1785608600772",
+    "name": "A Team",
+    "description": "secret",
+    "members": [],
+    "version": 2,
+    "updatedAt": "2026-08-01T18:23:20.777Z"
+  },
+  "team-legacy-1785608600794": {
+    "id": "team-legacy-1785608600794",
+    "name": "Legacy Team",
+    "description": "secret",
+    "version": 1
   }
 }

@@ -43,7 +43,7 @@ class YCodeMirrorBinding {
   constructor(ytext, editor) {
     this.ytext = ytext;
     this.editor = editor;
-    this.isApplying = false;
+    this._applyDepth = 0;
 
     // Initialize CodeMirror with Yjs content
     this.editor.setValue(this.ytext.toString());
@@ -56,10 +56,10 @@ class YCodeMirrorBinding {
   }
 
   onCodeMirrorChange(instance, changeObj) {
-    if (this.isApplying) return;
+    if (this._applyDepth > 0) return;
     if (changeObj.origin === '*remote' || changeObj.origin === 'setValue') return;
 
-    this.isApplying = true;
+    this._applyDepth++;
     this.ytext.doc.transact(() => {
       const fromIndex = this.editor.indexFromPos(changeObj.from);
       const removedLength = changeObj.removed.join('\n').length;
@@ -72,34 +72,40 @@ class YCodeMirrorBinding {
         this.ytext.insert(fromIndex, addedText);
       }
     }, 'local');
-    this.isApplying = false;
+    this._applyDepth--;
   }
 
   onYjsChange(event) {
-    if (this.isApplying) return;
-    this.isApplying = true;
+    if (this._applyDepth > 0) return;
+    this._applyDepth++;
 
     const doc = this.editor.getDoc();
-    this.ytext.doc.transact(() => {
-      let index = 0;
-      event.changes.delta.forEach((op) => {
-        if (op.retain) {
-          index += op.retain;
-        } else if (op.insert) {
-          const text = op.insert;
-          const pos = doc.posFromIndex(index);
-          doc.replaceRange(text, pos, pos, '*remote');
-          index += text.length;
-        } else if (op.delete) {
-          const len = op.delete;
-          const startPos = doc.posFromIndex(index);
-          const endPos = doc.posFromIndex(index + len);
-          doc.replaceRange('', startPos, endPos, '*remote');
-        }
-      });
-    }, 'remote');
+    const savedCursor = doc.getCursor();
 
-    this.isApplying = false;
+    this.editor.operation(() => {
+      this.ytext.doc.transact(() => {
+        let index = 0;
+        event.changes.delta.forEach((op) => {
+          if (op.retain) {
+            index += op.retain;
+          } else if (op.insert) {
+            const text = op.insert;
+            const pos = doc.posFromIndex(index);
+            doc.replaceRange(text, pos, pos, '*remote');
+            index += text.length;
+          } else if (op.delete) {
+            const len = op.delete;
+            const startPos = doc.posFromIndex(index);
+            const endPos = doc.posFromIndex(index + len);
+            doc.replaceRange('', startPos, endPos, '*remote');
+          }
+        });
+      }, 'remote');
+    });
+
+    doc.setCursor(savedCursor);
+
+    this._applyDepth--;
   }
 }
 

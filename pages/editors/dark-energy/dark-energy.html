@@ -1,0 +1,275 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dark Energy Counter-Field | Algo Infinity Verse</title>
+    <link rel="stylesheet" href="/styles.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <!-- Monaco Editor -->
+    <script src="https://unpkg.com/monaco-editor@0.36.1/min/vs/loader.js"></script>
+    <style>
+      body { margin: 0; overflow: hidden; background: #000; font-family: 'Poppins', sans-serif; color: #fff; }
+      .app-container { display: flex; height: 100vh; }
+      
+      .sidebar { width: 450px; background: rgba(15, 23, 42, 0.95); border-right: 1px solid #4f46e5; display: flex; flex-direction: column; z-index: 10; }
+      .header { padding: 20px; border-bottom: 1px solid #334155; }
+      .header h2 { margin: 0; color: #4f46e5; font-family: 'Orbitron', sans-serif; font-size: 1.2rem; }
+      .header p { margin: 5px 0 0 0; font-size: 0.8rem; color: #94a3b8; }
+      
+      #editor-container { flex: 1; min-height: 300px; }
+      
+      .controls { padding: 20px; border-top: 1px solid #334155; background: rgba(0,0,0,0.5); }
+      .btn { background: linear-gradient(90deg, #4338ca, #3730a3); color: #fff; border: none; padding: 10px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; transition: 0.3s; }
+      .btn:hover { background: #4f46e5; transform: translateY(-2px); box-shadow: 0 0 15px rgba(79, 70, 229, 0.5); }
+      
+      .sim-container { flex: 1; position: relative; background: #020617; overflow: hidden; }
+      
+      canvas { width: 100%; height: 100%; display: block; }
+      
+      .hud { position: absolute; top: 20px; left: 20px; background: rgba(0,0,0,0.8); padding: 15px; border-radius: 8px; border: 1px solid #4f46e5; width: 280px; z-index: 10; pointer-events: none; }
+      .hud h3 { margin: 0 0 10px 0; color: #4f46e5; font-size: 1rem; font-family: 'Orbitron', sans-serif; }
+      .metric { display: flex; justify-content: space-between; font-size: 0.8rem; color: #cbd5e1; margin-bottom: 5px; }
+      .val { font-weight: bold; font-family: monospace; }
+      .val-expansion { color: #facc15; }
+      .val-integrity { color: #38bdf8; }
+    </style>
+  </head>
+  <body>
+    
+    <div class="app-container">
+      <div class="sidebar">
+        <div class="header">
+          <h2><i class="fas fa-atom"></i> Dark Energy Counter-Field</h2>
+          <p>Prevent the Big Rip scenario</p>
+        </div>
+        
+        <div id="editor-container"></div>
+        
+        <div class="controls">
+          <button class="btn" onclick="initiateSimulation()"><i class="fas fa-play"></i> Initiate Time Acceleration</button>
+        </div>
+      </div>
+      
+      <div class="sim-container">
+        <!-- Cosmic Microwave Background -->
+        <div style="position: absolute; inset:0; background-image: url('data:image/svg+xml,%3Csvg width=\"100%\" height=\"100%\" xmlns=\"http://www.w3.org/2000/svg\"%3E%3Cfilter id=\"n\"%3E%3CfeTurbulence type=\"fractalNoise\" baseFrequency=\"0.05\" numOctaves=\"3\" stitchTiles=\"stitch\"/%3E%3C/filter%3E%3Crect width=\"100%\" height=\"100%\" filter=\"url(%23n)\" opacity=\"0.2\"/%3E%3C/svg%3E'); pointer-events: none; z-index: 0;"></div>
+        
+        <canvas id="cosmosCanvas" style="position: relative; z-index: 1;"></canvas>
+        
+        <div class="hud">
+          <h3>Cosmic Telemetry</h3>
+          <div class="metric"><span>Expansion Rate (H):</span> <span class="val val-expansion" id="expVal">70.0 km/s/Mpc</span></div>
+          <div class="metric"><span>Cluster Integrity:</span> <span class="val val-integrity" id="intVal">100%</span></div>
+          <div class="metric"><span>Vacuum Density Mod:</span> <span class="val" id="vacVal">0.0 Λ</span></div>
+          <div class="metric" style="margin-top: 10px; border-top: 1px solid #334155; padding-top: 5px;">
+            <span>Universe State:</span> <span class="val" id="statusVal" style="color:#94a3b8">STATIC</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      let editor;
+      require.config({ paths: { 'vs': 'https://unpkg.com/monaco-editor@0.36.1/min/vs' }});
+      require(['vs/editor/editor.main'], function() {
+        editor = monaco.editor.create(document.getElementById('editor-container'), {
+          value: `// Vacuum Energy Density Modulation (Counter-Dark Energy)
+// Dark energy expands space itself (Hubble parameter H accelerates).
+// You must dynamically tune a counter-field to increase local gravity (or decrease local dark energy).
+// If the counter-field is too weak, the cluster is torn apart (Big Rip).
+// If it is too strong, the cluster collapses into a super-massive black hole (Big Crunch).
+
+function calculateCounterField(expansionRateH) {
+    // Return a float representing the required vacuum energy modulation (-1.0 to 1.0).
+    // Negative values create an attractive force (countering expansion).
+    
+    // Naive logic: Max counter-field!
+    // Result: The entire galactic supercluster instantly collapses into a singularity.
+    
+    return -1.0;
+}`,
+          language: 'javascript',
+          theme: 'vs-dark',
+          minimap: { enabled: false },
+          automaticLayout: true
+        });
+      });
+
+      const canvas = document.getElementById('cosmosCanvas');
+      const ctx = canvas.getContext('2d');
+      
+      let isSimulating = false;
+      let time = 0;
+      
+      let galaxies = [];
+      let hubbleConstant = 70.0;
+      let vacuumMod = 0;
+      let integrity = 100;
+      
+      function resize() { 
+          canvas.width = canvas.clientWidth; 
+          canvas.height = canvas.clientHeight;
+          initSupercluster();
+      }
+      
+      function initSupercluster() {
+          galaxies = [];
+          let cx = canvas.width/2;
+          let cy = canvas.height/2;
+          
+          for(let i=0; i<150; i++) {
+              // Create a cluster in the center
+              let angle = Math.random() * Math.PI * 2;
+              let radius = Math.random() * 150;
+              if (Math.random() > 0.8) radius = 150 + Math.random() * 100; // Halo
+              
+              galaxies.push({
+                  x: cx + Math.cos(angle)*radius,
+                  y: cy + Math.sin(angle)*radius,
+                  basex: cx + Math.cos(angle)*radius,
+                  basey: cy + Math.sin(angle)*radius,
+                  dist: Math.hypot(Math.cos(angle)*radius, Math.sin(angle)*radius),
+                  color: (Math.random()>0.5)? '#38bdf8' : '#fbcfe8',
+                  size: 1 + Math.random()*3
+              });
+          }
+      }
+      
+      setTimeout(resize, 100);
+      window.addEventListener('resize', resize);
+
+      function animate() {
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+          let cx = canvas.width/2;
+          let cy = canvas.height/2;
+          
+          if (isSimulating) {
+              time += 0.05;
+              
+              // Dark Energy accelerates exponentially over time
+              hubbleConstant += 0.5; 
+              
+              vacuumMod = 0;
+              try {
+                  eval(editor.getValue());
+                  let result = calculateCounterField(hubbleConstant);
+                  if (typeof result === 'number') {
+                      vacuumMod = Math.max(-1.0, Math.min(1.0, result));
+                  }
+              } catch(e) {}
+              
+              // Net force: Expansion (pushing outward) + Gravity/Counter-Field (pulling inward)
+              // Expansion scales with distance (Hubble's Law: v = H * d)
+              // Counter-field is applied uniformly across the cluster
+              
+              let totalSpread = 0;
+              
+              for(let g of galaxies) {
+                  let dx = g.x - cx;
+                  let dy = g.y - cy;
+                  let d = Math.hypot(dx, dy);
+                  
+                  if (d < 1) continue;
+                  
+                  let expansionVelocity = (hubbleConstant * 0.01) * d; // Outward
+                  let gravityVelocity = 500 / (d + 10); // Standard gravity holding it together
+                  let counterVelocity = vacuumMod * 50; // User applied field
+                  
+                  let netV = expansionVelocity - gravityVelocity + counterVelocity;
+                  
+                  g.x += (dx/d) * netV * 0.1;
+                  g.y += (dy/d) * netV * 0.1;
+                  
+                  totalSpread += Math.hypot(g.x - cx, g.y - cy);
+              }
+              
+              let avgSpread = totalSpread / galaxies.length;
+              
+              // Evaluate Integrity
+              if (avgSpread > 400) {
+                  integrity -= 1; // Big Rip tearing it apart
+              } else if (avgSpread < 50) {
+                  integrity -= 2; // Crushing into a singularity
+              } else {
+                  integrity = Math.min(100, integrity + 0.5); // Healing/Stable
+              }
+              
+              // End conditions
+              if (integrity <= 0) {
+                  isSimulating = false;
+                  if (avgSpread > 400) {
+                      document.getElementById('statusVal').innerText = "BIG RIP. CLUSTER DESTROYED.";
+                      document.getElementById('statusVal').style.color = "#ef4444";
+                  } else {
+                      document.getElementById('statusVal').innerText = "BIG CRUNCH. SINGULARITY FORMED.";
+                      document.getElementById('statusVal').style.color = "#ef4444";
+                      
+                      // Draw Black Hole
+                      ctx.fillStyle = '#000';
+                      ctx.beginPath(); ctx.arc(cx, cy, 100, 0, Math.PI*2); ctx.fill();
+                      ctx.strokeStyle = '#fff'; ctx.lineWidth=2; ctx.stroke();
+                  }
+              } else if (hubbleConstant > 200) {
+                  document.getElementById('statusVal').innerText = "STABLE THROUGH MAXIMUM ENTROPY.";
+                  document.getElementById('statusVal').style.color = "#10b981";
+              } else {
+                  document.getElementById('statusVal').innerText = "ACCELERATING TIME...";
+                  document.getElementById('statusVal').style.color = "#38bdf8";
+              }
+              
+              // HUD
+              document.getElementById('expVal').innerText = hubbleConstant.toFixed(1) + " km/s/Mpc";
+              let intEl = document.getElementById('intVal');
+              intEl.innerText = integrity.toFixed(1) + "%";
+              if(integrity < 50) intEl.style.color = "#ef4444"; else intEl.style.color = "#38bdf8";
+              
+              let vacEl = document.getElementById('vacVal');
+              vacEl.innerText = vacuumMod.toFixed(2) + " Λ";
+              if(vacuumMod < 0) vacEl.style.color = "#c084fc"; else vacEl.style.color = "#facc15";
+          }
+          
+          // Draw Counter-Field Visual
+          if (isSimulating && vacuumMod !== 0) {
+              let grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, 500);
+              let color = vacuumMod < 0 ? 'rgba(192, 132, 252, ' : 'rgba(250, 204, 21, ';
+              grad.addColorStop(0, color + Math.abs(vacuumMod)*0.2 + ')');
+              grad.addColorStop(1, 'transparent');
+              ctx.fillStyle = grad;
+              ctx.fillRect(0,0, canvas.width, canvas.height);
+          }
+
+          // Draw Galaxies
+          for(let g of galaxies) {
+              ctx.fillStyle = g.color;
+              ctx.beginPath();
+              ctx.arc(g.x, g.y, g.size, 0, Math.PI*2);
+              ctx.fill();
+              
+              if(isSimulating && hubbleConstant > 100) {
+                  // Motion blur effect as expansion speeds up
+                  ctx.strokeStyle = \`rgba(255,255,255,0.1)\`;
+                  ctx.lineWidth = 1;
+                  ctx.beginPath(); ctx.moveTo(g.x, g.y); ctx.lineTo(cx, cy); ctx.stroke();
+              }
+          }
+
+          requestAnimationFrame(animate);
+      }
+      
+      animate();
+
+      function initiateSimulation() {
+          if(isSimulating) return;
+          initSupercluster();
+          isSimulating = true;
+          time = 0;
+          hubbleConstant = 70.0;
+          integrity = 100;
+          document.getElementById('statusVal').innerText = "ACCELERATING TIME...";
+          document.getElementById('statusVal').style.color = "#38bdf8";
+      }
+    </script>
+  </body>
+</html>

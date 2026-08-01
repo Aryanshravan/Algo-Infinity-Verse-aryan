@@ -1,0 +1,10 @@
+{
+  "type": "string",
+  "size": 20,
+  "count": 5,
+  "edgeCases": true,
+  "options": {
+    "charset": "lowercase",
+    "unique": false
+  }
+}

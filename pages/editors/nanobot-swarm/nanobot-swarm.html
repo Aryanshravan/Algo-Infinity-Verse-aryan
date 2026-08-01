@@ -1,0 +1,336 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Nanobot Immune Swarm | Algo Infinity Verse</title>
+    <link rel="stylesheet" href="/styles.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <!-- Monaco Editor -->
+    <script src="https://unpkg.com/monaco-editor@0.36.1/min/vs/loader.js"></script>
+    <style>
+      body { margin: 0; overflow: hidden; background: #000; font-family: 'Poppins', sans-serif; color: #fff; }
+      .app-container { display: flex; height: 100vh; }
+      
+      .sidebar { width: 450px; background: rgba(15, 23, 42, 0.95); border-right: 1px solid #10b981; display: flex; flex-direction: column; z-index: 10; }
+      .header { padding: 20px; border-bottom: 1px solid #334155; }
+      .header h2 { margin: 0; color: #10b981; font-family: 'Orbitron', sans-serif; font-size: 1.2rem; }
+      .header p { margin: 5px 0 0 0; font-size: 0.8rem; color: #94a3b8; }
+      
+      #editor-container { flex: 1; min-height: 300px; }
+      
+      .controls { padding: 20px; border-top: 1px solid #334155; background: rgba(0,0,0,0.5); }
+      .btn { background: linear-gradient(90deg, #059669, #047857); color: #fff; border: none; padding: 10px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; transition: 0.3s; }
+      .btn:hover { background: #10b981; transform: translateY(-2px); box-shadow: 0 0 15px rgba(16, 185, 129, 0.5); }
+      
+      .sim-container { flex: 1; position: relative; background: #2a0a0a; overflow: hidden; }
+      canvas { width: 100%; height: 100%; display: block; }
+      
+      .hud { position: absolute; top: 20px; right: 20px; background: rgba(0,0,0,0.8); padding: 15px; border-radius: 8px; border: 1px solid #10b981; width: 280px; z-index: 10; pointer-events: none; }
+      .hud h3 { margin: 0 0 10px 0; color: #10b981; font-size: 1rem; font-family: 'Orbitron', sans-serif; }
+      .metric { display: flex; justify-content: space-between; font-size: 0.8rem; color: #cbd5e1; margin-bottom: 5px; }
+      .val { font-weight: bold; font-family: monospace; }
+      .val-healthy { color: #f43f5e; }
+      .val-cancer { color: #8b5cf6; }
+      .val-nano { color: #10b981; }
+    </style>
+  </head>
+  <body>
+    
+    <div class="app-container">
+      <div class="sidebar">
+        <div class="header">
+          <h2><i class="fas fa-microscope"></i> Nanobot Swarm Controller</h2>
+          <p>Eradicate cancer without harming the host</p>
+        </div>
+        
+        <div id="editor-container"></div>
+        
+        <div class="controls">
+          <button class="btn" onclick="injectNanobots()"><i class="fas fa-syringe"></i> Inject Nanobot Swarm</button>
+        </div>
+      </div>
+      
+      <div class="sim-container">
+        <!-- Bloodstream background -->
+        <div style="position: absolute; inset:0; background: radial-gradient(circle, transparent 0%, #000 100%); pointer-events: none; z-index: 0;"></div>
+        
+        <canvas id="bloodCanvas" style="position: relative; z-index: 1;"></canvas>
+        
+        <div class="hud">
+          <h3>Bloodstream Telemetry</h3>
+          <div class="metric"><span>Healthy Cells:</span> <span class="val val-healthy" id="healthVal">100</span></div>
+          <div class="metric"><span>Cancer Cells:</span> <span class="val val-cancer" id="cancerVal">10</span></div>
+          <div class="metric"><span>Active Nanobots:</span> <span class="val val-nano" id="nanoVal">0</span></div>
+          <div class="metric" style="margin-top: 10px; border-top: 1px solid #334155; padding-top: 5px;">
+            <span>Host Status:</span> <span class="val" id="statusVal" style="color:#facc15">INFECTION DETECTED</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      let editor;
+      require.config({ paths: { 'vs': 'https://unpkg.com/monaco-editor@0.36.1/min/vs' }});
+      require(['vs/editor/editor.main'], function() {
+        editor = monaco.editor.create(document.getElementById('editor-container'), {
+          value: `// Nanobot Swarm Heuristic Targeting
+// The swarm scans nearby cells. Cancer cells often mutate their surface proteins (antigens).
+// Healthy cells have antigen values between 0.0 and 1.0.
+// Cancer cells have rapidly shifting antigen values, usually > 1.5.
+
+function identifyTarget(cellAntigen) {
+    // cellAntigen is a float representing the cell's surface protein signature.
+    // Return true to ATTACK and DESTROY the cell. Return false to ignore.
+    
+    // Naive logic: Attack everything!
+    // This will trigger a lethal autoimmune response.
+    return true; 
+}`,
+          language: 'javascript',
+          theme: 'vs-dark',
+          minimap: { enabled: false },
+          automaticLayout: true
+        });
+      });
+
+      const canvas = document.getElementById('bloodCanvas');
+      const ctx = canvas.getContext('2d');
+      
+      let isSimulating = false;
+      let time = 0;
+      
+      let cells = [];
+      let nanobots = [];
+      
+      function resize() { 
+          canvas.width = canvas.clientWidth; 
+          canvas.height = canvas.clientHeight;
+          initCells();
+      }
+      
+      function initCells() {
+          cells = [];
+          // 100 Healthy Cells (Red Blood Cells)
+          for(let i=0; i<100; i++) {
+              cells.push({
+                  x: Math.random() * canvas.width,
+                  y: Math.random() * canvas.height,
+                  vx: (Math.random()-0.5) * 1,
+                  vy: Math.random() * 2 + 0.5, // Flowing down
+                  type: 'healthy',
+                  radius: 12,
+                  antigen: Math.random() * 1.0 // 0.0 to 1.0
+              });
+          }
+          // 10 Cancer Cells
+          for(let i=0; i<10; i++) {
+              cells.push({
+                  x: Math.random() * canvas.width,
+                  y: Math.random() * canvas.height,
+                  vx: (Math.random()-0.5) * 0.5,
+                  vy: Math.random() * 1 + 0.2, // Slower flow
+                  type: 'cancer',
+                  radius: 15,
+                  antigen: 2.0 // Initial high value
+              });
+          }
+      }
+      
+      setTimeout(resize, 100);
+      window.addEventListener('resize', resize);
+
+      function animate() {
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+          time += 0.05;
+
+          // Background blood flow effect
+          ctx.fillStyle = 'rgba(255, 0, 0, 0.05)';
+          for(let i=0; i<20; i++) {
+              ctx.beginPath();
+              ctx.arc(Math.random()*canvas.width, (time*50 + i*100) % canvas.height, Math.random()*5, 0, Math.PI*2);
+              ctx.fill();
+          }
+
+          let hCount = 0;
+          let cCount = 0;
+
+          // Update Cells
+          for(let i=cells.length-1; i>=0; i--) {
+              let c = cells[i];
+              
+              if(c.type === 'healthy') hCount++;
+              if(c.type === 'cancer') {
+                  cCount++;
+                  // Cancer mutates its antigen over time (1.5 to 3.5)
+                  c.antigen = 2.5 + Math.sin(time + i) * 1.0;
+                  
+                  // Cancer replicates slowly if not destroyed
+                  if (Math.random() < 0.002 && cCount < 50) {
+                      cells.push({
+                          x: c.x + (Math.random()-0.5)*20,
+                          y: c.y + (Math.random()-0.5)*20,
+                          vx: c.vx, vy: c.vy,
+                          type: 'cancer', radius: 15, antigen: c.antigen
+                      });
+                  }
+              }
+              
+              c.x += c.vx;
+              c.y += c.vy;
+              
+              // Wrap around
+              if(c.y > canvas.height + 20) {
+                  c.y = -20; c.x = Math.random() * canvas.width;
+              }
+              if(c.x > canvas.width + 20) c.x = -20;
+              if(c.x < -20) c.x = canvas.width + 20;
+              
+              // Draw Cell
+              ctx.beginPath();
+              ctx.arc(c.x, c.y, c.radius, 0, Math.PI*2);
+              if(c.type === 'healthy') {
+                  ctx.fillStyle = '#f43f5e';
+                  // Inner dimple for RBC
+                  ctx.fill();
+                  ctx.beginPath();
+                  ctx.arc(c.x, c.y, c.radius*0.5, 0, Math.PI*2);
+                  ctx.fillStyle = '#be123c';
+              } else {
+                  // Cancer cell
+                  ctx.fillStyle = '#8b5cf6';
+                  ctx.fill();
+                  // Spiky/irregular
+                  ctx.strokeStyle = '#c084fc';
+                  ctx.lineWidth = 2;
+                  for(let a=0; a<Math.PI*2; a+=0.5) {
+                      ctx.moveTo(c.x, c.y);
+                      ctx.lineTo(c.x + Math.cos(a)*(c.radius+3), c.y + Math.sin(a)*(c.radius+3));
+                  }
+                  ctx.stroke();
+              }
+              ctx.fill();
+          }
+
+          if (isSimulating) {
+              // Update Nanobots
+              for(let i=nanobots.length-1; i>=0; i--) {
+                  let n = nanobots[i];
+                  
+                  n.x += n.vx;
+                  n.y += n.vy;
+                  
+                  // Wrap around
+                  if(n.y > canvas.height + 10) n.y = -10;
+                  if(n.x > canvas.width + 10) n.x = -10;
+                  if(n.x < -10) n.x = canvas.width + 10;
+                  
+                  // Swarm logic - find nearest cell
+                  let closestDist = Infinity;
+                  let closestCellIdx = -1;
+                  
+                  for(let j=0; j<cells.length; j++) {
+                      let dist = Math.hypot(n.x - cells[j].x, n.y - cells[j].y);
+                      if (dist < closestDist) {
+                          closestDist = dist;
+                          closestCellIdx = j;
+                      }
+                  }
+                  
+                  if (closestCellIdx !== -1 && closestDist < 100) {
+                      let targetCell = cells[closestCellIdx];
+                      
+                      // Steer towards it slightly to scan
+                      let dx = targetCell.x - n.x;
+                      let dy = targetCell.y - n.y;
+                      n.vx += (dx / closestDist) * 0.1;
+                      n.vy += (dy / closestDist) * 0.1;
+                      
+                      // Friction
+                      n.vx *= 0.95; n.vy *= 0.95;
+                      
+                      // Run user algorithm
+                      let shouldAttack = false;
+                      try {
+                          eval(editor.getValue());
+                          shouldAttack = !!identifyTarget(targetCell.antigen);
+                      } catch(e) {}
+                      
+                      if (shouldAttack) {
+                          // Zap line
+                          ctx.strokeStyle = '#10b981';
+                          ctx.lineWidth = 1;
+                          ctx.beginPath();
+                          ctx.moveTo(n.x, n.y);
+                          ctx.lineTo(targetCell.x, targetCell.y);
+                          ctx.stroke();
+                          
+                          // Steer hard towards it
+                          n.vx += (dx / closestDist) * 0.5;
+                          n.vy += (dy / closestDist) * 0.5;
+                          
+                          // If close enough, destroy
+                          if (closestDist < targetCell.radius + 5) {
+                              cells.splice(closestCellIdx, 1); // Kill cell
+                              
+                              // Visual explosion
+                              ctx.fillStyle = '#10b981';
+                              ctx.beginPath();
+                              ctx.arc(targetCell.x, targetCell.y, 20, 0, Math.PI*2);
+                              ctx.fill();
+                          }
+                      }
+                  }
+                  
+                  // Draw Nanobot
+                  ctx.fillStyle = '#10b981';
+                  ctx.fillRect(n.x-2, n.y-2, 4, 4);
+                  ctx.strokeStyle = '#059669';
+                  ctx.strokeRect(n.x-3, n.y-3, 6, 6);
+              }
+              
+              // End conditions
+              if (hCount < 50) {
+                  document.getElementById('statusVal').innerText = "LETHAL AUTOIMMUNE RESPONSE";
+                  document.getElementById('statusVal').style.color = "#ef4444";
+                  isSimulating = false;
+              } else if (cCount === 0) {
+                  document.getElementById('statusVal').innerText = "PATIENT CURED";
+                  document.getElementById('statusVal').style.color = "#10b981";
+                  isSimulating = false;
+              } else if (cCount >= 50) {
+                  document.getElementById('statusVal').innerText = "METASTASIS. PATIENT LOST.";
+                  document.getElementById('statusVal').style.color = "#ef4444";
+                  isSimulating = false;
+              }
+          }
+
+          document.getElementById('healthVal').innerText = hCount;
+          document.getElementById('cancerVal').innerText = cCount;
+          document.getElementById('nanoVal').innerText = nanobots.length;
+
+          requestAnimationFrame(animate);
+      }
+      animate();
+
+      function injectNanobots() {
+          if(isSimulating) return;
+          isSimulating = true;
+          
+          nanobots = [];
+          for(let i=0; i<150; i++) {
+              nanobots.push({
+                  x: Math.random() * canvas.width,
+                  y: -50 - Math.random() * 200, // Inject from top
+                  vx: 0,
+                  vy: 2 + Math.random()
+              });
+          }
+          
+          document.getElementById('statusVal').innerText = "SWARM DEPLOYED";
+          document.getElementById('statusVal').style.color = "#38bdf8";
+      }
+    </script>
+  </body>
+</html>

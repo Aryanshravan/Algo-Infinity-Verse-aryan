@@ -1,0 +1,306 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Algorithm Cheat Sheet Generator — Algo Infinity Verse</title>
+    <meta
+      name="description"
+      content="Generate printable, exportable PDF algorithm cheat sheets customized to your weak topics, learning history, code templates, Big-O charts, and mnemonics."
+    />
+
+    <!-- Core & Custom Styles -->
+    <link rel="stylesheet" href="/styles.css" />
+    <link rel="stylesheet" href="/pages/tools/tools.css" />
+    <link rel="stylesheet" href="cheat-sheet-generator.css" />
+
+    <!-- Typography & Icons -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&family=Orbitron:wght@500;700;900&family=Fira+Code:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+
+    <!-- Theme Pre-loader -->
+    <script>
+      (function () {
+        try {
+          var t = localStorage.getItem('theme');
+          var p = window.matchMedia('(prefers-color-scheme: light)').matches;
+          var theme = t || (p ? 'light' : 'dark');
+          if (theme === 'light') document.documentElement.classList.add('light-mode');
+          else document.documentElement.classList.remove('light-mode');
+        } catch (e) {}
+      })();
+    </script>
+  </head>
+  <body data-page="cheat-sheet-generator">
+    <!-- Navigation Bar Placeholder -->
+    <div id="navbar-placeholder" class="no-print"></div>
+
+    <main class="csg-main-wrapper">
+      <!-- HERO SECTION -->
+      <section class="csg-hero no-print">
+        <div class="csg-hero-bg" aria-hidden="true"></div>
+        <div class="csg-container">
+          <a href="/pages/tools/tools.html" class="csg-back-btn" aria-label="Back to tools">
+            <i class="fas fa-arrow-left"></i> <span>Back to Tools</span>
+          </a>
+
+          <div class="csg-hero-content">
+            <div class="csg-badge"><i class="fas fa-file-pdf"></i> PDF &amp; Print Generator</div>
+            <h1 class="csg-hero-title">Algorithm <span>Cheat Sheet</span> Generator</h1>
+            <p class="csg-hero-subtitle">
+              Consolidate 64+ topics, Big-O complexity charts, multi-language code templates,
+              mnemonics, common pitfalls, edge cases, and your personal study notes into a single
+              high-impact reference.
+            </p>
+
+            <div class="csg-quick-actions">
+              <button type="button" id="csgPrintBtn" class="csg-btn csg-btn-primary">
+                <i class="fas fa-print"></i> Print / Export PDF
+              </button>
+              <button type="button" id="csgDownloadHtmlBtn" class="csg-btn csg-btn-secondary">
+                <i class="fas fa-download"></i> Download HTML
+              </button>
+              <button type="button" id="csgDetectWeakBtn" class="csg-btn csg-btn-accent">
+                <i class="fas fa-wand-magic-sparkles"></i> AI Weak Area Auto-Detect
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- CONFIGURATION & PREVIEW CONTAINER -->
+      <div class="csg-container csg-layout-grid">
+        <!-- CONTROLS SIDEBAR -->
+        <aside class="csg-controls-sidebar no-print">
+          <!-- MODE TOGGLE CARD -->
+          <div class="csg-card csg-mode-card">
+            <h3><i class="fas fa-sliders"></i> Layout Mode</h3>
+            <div class="csg-mode-switch" role="radiogroup" aria-label="Cheat sheet layout mode">
+              <button
+                type="button"
+                id="modeStandardBtn"
+                class="csg-mode-btn active"
+                role="radio"
+                aria-checked="true"
+              >
+                <i class="fas fa-book-open"></i> Full Reference
+              </button>
+              <button
+                type="button"
+                id="modeOnePagerBtn"
+                class="csg-mode-btn"
+                role="radio"
+                aria-checked="false"
+              >
+                <i class="fas fa-bolt"></i> 1-Pager Quick Sheet
+              </button>
+            </div>
+          </div>
+
+          <!-- WEAK AREA AI DETECTION SUMMARY -->
+          <div class="csg-card csg-ai-card">
+            <div class="csg-ai-card-header">
+              <h3><i class="fas fa-brain"></i> Weak Topic Scanner</h3>
+              <span class="csg-pill-tag" id="weakCountBadge">0 Weak Areas</span>
+            </div>
+            <p class="csg-text-muted">
+              Analyzes your quiz history, revision schedules, and topic accuracy to customize your
+              cheat sheet.
+            </p>
+            <div id="weakTopicsList" class="csg-weak-list">
+              <span class="csg-text-muted"
+                ><i class="fas fa-info-circle"></i> Click "AI Weak Area Auto-Detect" above to
+                scan.</span
+              >
+            </div>
+          </div>
+
+          <!-- CUSTOMIZATION OPTIONS CARD -->
+          <div class="csg-card">
+            <h3><i class="fas fa-gear"></i> Content Settings</h3>
+
+            <div class="csg-form-group">
+              <label for="csgLangSelect"><i class="fas fa-code"></i> Code Language</label>
+              <select id="csgLangSelect" class="csg-select">
+                <option value="javascript" selected>JavaScript (ES6+)</option>
+                <option value="python">Python 3</option>
+                <option value="cpp">C++ 17</option>
+                <option value="java">Java 17</option>
+              </select>
+            </div>
+
+            <div class="csg-toggle-group">
+              <label class="csg-checkbox-label">
+                <input type="checkbox" id="chkComplexity" checked />
+                <span>Big-O Complexity Matrix</span>
+              </label>
+              <label class="csg-checkbox-label">
+                <input type="checkbox" id="chkTemplates" checked />
+                <span>Code Templates &amp; Boilerplate</span>
+              </label>
+              <label class="csg-checkbox-label">
+                <input type="checkbox" id="chkMnemonics" checked />
+                <span>Mnemonics &amp; Mental Models</span>
+              </label>
+              <label class="csg-checkbox-label">
+                <input type="checkbox" id="chkPitfalls" checked />
+                <span>Common Pitfalls &amp; Bugs</span>
+              </label>
+              <label class="csg-checkbox-label">
+                <input type="checkbox" id="chkEdgeCases" checked />
+                <span>Edge Cases Checklist</span>
+              </label>
+              <label class="csg-checkbox-label">
+                <input type="checkbox" id="chkUserNotes" checked />
+                <span>Personal Notes &amp; Mnemonics</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- TOPIC SELECTION PANEL -->
+          <div class="csg-card csg-topic-panel">
+            <div class="csg-topic-panel-header">
+              <h3>
+                <i class="fas fa-layer-group"></i> Select Topics (<span id="selectedCountDisplay"
+                  >0</span
+                >/64+)
+              </h3>
+              <div class="csg-panel-actions">
+                <button type="button" id="selectAllBtn" class="csg-link-btn">Select All</button> |
+                <button type="button" id="clearAllBtn" class="csg-link-btn">Clear</button>
+              </div>
+            </div>
+
+            <!-- TOPIC SEARCH BAR -->
+            <div class="csg-search-box">
+              <i class="fas fa-search"></i>
+              <input
+                type="text"
+                id="topicSearchInput"
+                placeholder="Filter topics (e.g. Trees, DP, Graphs)..."
+                autocomplete="off"
+              />
+            </div>
+
+            <!-- CATEGORY TABS -->
+            <div class="csg-category-tabs" id="categoryTabs" role="tablist">
+              <button type="button" class="csg-tab active" data-category="all">All</button>
+              <button type="button" class="csg-tab" data-category="Linear Data Structures">
+                Linear
+              </button>
+              <button type="button" class="csg-tab" data-category="Non-Linear Data Structures">
+                Non-Linear
+              </button>
+              <button type="button" class="csg-tab" data-category="Algorithmic Paradigms">
+                Paradigms
+              </button>
+              <button type="button" class="csg-tab" data-category="Data Structures">
+                Structures
+              </button>
+            </div>
+
+            <!-- TOPIC PILL GRID -->
+            <div
+              class="csg-topic-grid"
+              id="topicPillsGrid"
+              role="group"
+              aria-label="DSA topic checklist"
+            >
+              <!-- Dynamically populated via JS -->
+            </div>
+          </div>
+        </aside>
+
+        <!-- PREVIEW & PRINT SHEET AREA -->
+        <section class="csg-sheet-container">
+          <div class="csg-sheet-header-toolbar no-print">
+            <div class="csg-toolbar-status">
+              <i class="fas fa-eye"></i> Live Cheat Sheet Preview
+            </div>
+            <div class="csg-toolbar-btns">
+              <button type="button" id="csgCopyTextBtn" class="csg-btn-sm" title="Copy Raw Text">
+                <i class="fas fa-copy"></i> Copy Text
+              </button>
+              <button type="button" id="csgGenerateBtn" class="csg-btn-sm csg-btn-primary">
+                <i class="fas fa-rotate"></i> Refresh Sheet
+              </button>
+            </div>
+          </div>
+
+          <!-- THE PRINTABLE / EXPORTABLE CANVAS -->
+          <article id="cheatSheetPaper" class="csg-paper">
+            <header class="csg-paper-header">
+              <div class="csg-paper-brand">
+                <span class="csg-paper-logo">⚡ Algo Infinity Verse</span>
+                <span class="csg-paper-tagline"
+                  >Algorithm &amp; Data Structures Master Reference</span
+                >
+              </div>
+              <div class="csg-paper-meta">
+                <span id="metaDate">Date: 2026-07-27</span>
+                <span id="metaMode">Mode: Full Reference</span>
+                <span id="metaLang">Lang: JavaScript</span>
+              </div>
+            </header>
+
+            <!-- GLOBAL BIG-O MATRIX SECTION -->
+            <section id="sectionBigO" class="csg-sheet-section">
+              <h2 class="csg-section-title">
+                <i class="fas fa-gauge-high"></i> Big-O Time &amp; Space Complexity Chart
+              </h2>
+              <div class="csg-table-wrapper">
+                <table class="csg-table">
+                  <thead>
+                    <tr>
+                      <th>Data Structure / Operation</th>
+                      <th>Best Time</th>
+                      <th>Average Time</th>
+                      <th>Worst Time</th>
+                      <th>Space Complexity</th>
+                    </tr>
+                  </thead>
+                  <tbody id="bigOTableBody">
+                    <!-- Populated dynamically -->
+                  </tbody>
+                </table>
+              </div>
+            </section>
+
+            <!-- DYNAMIC TOPIC SECTIONS CONTAINER -->
+            <div id="csgSectionsContainer" class="csg-topics-container">
+              <!-- Topic sections rendered here -->
+            </div>
+
+            <!-- FOOTER FOR PRINT / PDF -->
+            <footer class="csg-paper-footer">
+              <p>
+                Generated by Algo Infinity Verse • Customized DSA Learning Platform •
+                www.algoinfinityverse.com
+              </p>
+            </footer>
+          </article>
+        </section>
+      </div>
+    </main>
+
+    <!-- Footer Placeholder -->
+    <div id="footer-placeholder" class="no-print"></div>
+
+    <!-- Scripts -->
+    <script src="/auth.js"></script>
+    <script src="/theme.js"></script>
+    <script src="/script.js"></script>
+    <script src="cheat-sheet-generator.js"></script>
+
+    <script>
+      loadPartial('navbar-placeholder', '/partials/navbar.html');
+      loadPartial('footer-placeholder', '/partials/footer.html');
+    </script>
+  </body>
+</html>

@@ -1,0 +1,186 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CRDT Collaborative Text Editor | Algo Infinity Verse</title>
+    <meta
+      name="description"
+      content="Interactive visualizer for Conflict-free Replicated Data Types (CRDTs). Demonstrates Eventual Consistency, Vector Clocks, and Replicated Growable Arrays (RGA)."
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Poppins:wght@300;400;500;600;700&family=Fira+Code:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <link rel="stylesheet" href="../../../styles.css" />
+    <link rel="stylesheet" href="crdt-visualizer.css" />
+    <script src="../../../modules/toast.js"></script>
+  </head>
+  <body class="crdt-body">
+    <div id="navbar-placeholder"></div>
+
+    <section class="crdt-hero">
+      <div class="crdt-hero-bg"></div>
+      <div class="crdt-hero-inner">
+        <div class="crdt-eyebrow">Local-First Architecture</div>
+        <h1 class="crdt-title">Eventual Consistency (CRDT)</h1>
+        <p class="crdt-desc">
+          Experience the mathematical magic of <strong>Replicated Growable Arrays (RGA)</strong>.
+          Watch decentralized systems seamlessly merge highly conflicting, out-of-order text edits
+          without a central server or lock.
+        </p>
+      </div>
+    </section>
+
+    <div class="crdt-dashboard container">
+      <!-- Network Controller Panel -->
+      <div class="crdt-panel glass-panel mb-4">
+        <div class="crdt-panel-header">
+          <i class="fas fa-network-wired"></i> Peer-to-Peer Network Controller
+        </div>
+
+        <div class="crdt-network-grid">
+          <div class="crdt-control-group">
+            <label class="text-danger"><i class="fas fa-cut"></i> Network Partition</label>
+            <div class="toggle-row">
+              <span class="text-sm">Disconnect all clients (Simulate offline typing)</span>
+              <label class="switch">
+                <input type="checkbox" id="networkToggle" />
+                <span class="slider round"></span>
+              </label>
+            </div>
+            <p class="crdt-hint mt-2">
+              When disconnected, packets queue locally. Healing the network flushes the queues and
+              forces a massive CRDT merge.
+            </p>
+          </div>
+
+          <div class="crdt-control-group">
+            <label class="text-warning"
+              ><i class="fas fa-stopwatch"></i> Artificial Network Latency</label
+            >
+            <div class="crdt-slider-wrap">
+              <span class="text-xs text-gray">0ms</span>
+              <input type="range" id="latencySlider" min="0" max="3000" step="100" value="500" />
+              <span class="text-xs text-gray">3000ms</span>
+            </div>
+            <p class="crdt-hint text-center mt-1">
+              Current Latency: <span id="latencyVal" class="text-primary font-fira">500ms</span>
+            </p>
+          </div>
+
+          <div class="crdt-control-group">
+            <label class="text-primary"><i class="fas fa-sync"></i> System Operations</label>
+            <button class="btn btn-secondary w-100 mb-2" id="btnSyncNow">
+              <i class="fas fa-bolt"></i> Force Sync (Heal)
+            </button>
+            <button class="btn btn-warning w-100" id="btnReset">
+              <i class="fas fa-trash"></i> Reset System
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Clients Layout -->
+      <div class="crdt-clients-grid">
+        <!-- Client A -->
+        <div class="crdt-client-panel glass-panel" id="client-a-panel">
+          <div class="client-header text-client-a">
+            <i class="fas fa-laptop"></i> Client A
+            <span class="client-status status-online" id="status-a">Online</span>
+          </div>
+          <div class="crdt-editor-wrap">
+            <div class="crdt-editor" id="editor-a" contenteditable="true" spellcheck="false"></div>
+            <div class="crdt-placeholder">Start typing...</div>
+          </div>
+          <div class="client-footer">
+            <div class="queue-status">Queue: <span id="queue-a" class="font-fira">0</span></div>
+            <div class="vector-clock font-fira" id="clock-a">[A:0, B:0, C:0]</div>
+          </div>
+        </div>
+
+        <!-- Client B -->
+        <div class="crdt-client-panel glass-panel" id="client-b-panel">
+          <div class="client-header text-client-b">
+            <i class="fas fa-mobile-alt"></i> Client B
+            <span class="client-status status-online" id="status-b">Online</span>
+          </div>
+          <div class="crdt-editor-wrap">
+            <div class="crdt-editor" id="editor-b" contenteditable="true" spellcheck="false"></div>
+            <div class="crdt-placeholder">Start typing...</div>
+          </div>
+          <div class="client-footer">
+            <div class="queue-status">Queue: <span id="queue-b" class="font-fira">0</span></div>
+            <div class="vector-clock font-fira" id="clock-b">[A:0, B:0, C:0]</div>
+          </div>
+        </div>
+
+        <!-- Client C -->
+        <div class="crdt-client-panel glass-panel" id="client-c-panel">
+          <div class="client-header text-client-c">
+            <i class="fas fa-tablet-alt"></i> Client C
+            <span class="client-status status-online" id="status-c">Online</span>
+          </div>
+          <div class="crdt-editor-wrap">
+            <div class="crdt-editor" id="editor-c" contenteditable="true" spellcheck="false"></div>
+            <div class="crdt-placeholder">Start typing...</div>
+          </div>
+          <div class="client-footer">
+            <div class="queue-status">Queue: <span id="queue-c" class="font-fira">0</span></div>
+            <div class="vector-clock font-fira" id="clock-c">[A:0, B:0, C:0]</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Network Packet Visualizer Space (Absolute overlay for animations) -->
+      <div id="packet-layer"></div>
+
+      <!-- Interactive RGA Tree Visualizer -->
+      <div class="crdt-panel glass-panel mt-4">
+        <div class="crdt-panel-header ch-flex-between">
+          <span><i class="fas fa-sitemap"></i> Shared RGA Tree Visualizer (Memory Structure)</span>
+          <span class="text-xs text-gray"
+            >Hover over characters in the editors above to inspect Vector Clocks!</span
+          >
+        </div>
+
+        <div class="crdt-legend">
+          <div class="crdt-leg-item"><span class="crdt-dot dot-a"></span> Client A Node</div>
+          <div class="crdt-leg-item"><span class="crdt-dot dot-b"></span> Client B Node</div>
+          <div class="crdt-leg-item"><span class="crdt-dot dot-c"></span> Client C Node</div>
+          <div class="crdt-leg-item">
+            <span class="crdt-dot dot-tombstone"></span> Tombstone (Deleted)
+          </div>
+        </div>
+
+        <div class="crdt-tree-wrapper" id="treeWrapper">
+          <!-- Rendered via HTML5 Canvas -->
+          <canvas id="crdtCanvas"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tooltip for Vector Clock Inspector -->
+    <div id="crdtTooltip" class="crdt-tooltip"></div>
+
+    <div id="footer-placeholder"></div>
+
+    <script src="../../../auth.js"></script>
+    <script src="../../../script.js"></script>
+    <script src="../../../theme.js"></script>
+    <script src="../../../auth-gate.js"></script>
+    <script src="crdt-visualizer.js"></script>
+    <script>
+      if (typeof loadPartial === 'function') {
+        loadPartial('navbar-placeholder', '/partials/navbar.html').then(function () {
+          if (typeof initNavbar === 'function') initNavbar();
+        });
+        loadPartial('footer-placeholder', '/partials/footer.html');
+      }
+    </script>
+  </body>
+</html>

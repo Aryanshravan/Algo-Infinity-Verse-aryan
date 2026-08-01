@@ -35,7 +35,8 @@ yarn-debug.log*
 yarn-error.log*
 
 # Local auth data
-data/*
+data/leave-requests.json
+data/memory.json
 
 # Testing
 playwright-report/
@@ -48,3 +49,6 @@ dist/
 scratch/
 screenshots/
 *.cjs
+
+# Local authentication data
+data/users.json

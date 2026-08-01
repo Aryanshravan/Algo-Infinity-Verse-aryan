@@ -27,6 +27,7 @@ jest.unstable_mockModule('../backend/jobs/queue.js', () => ({
   redisAvailable: false,
   redisClient: null,
   redisReady: Promise.resolve(),
+  createRedisClient: jest.fn(),
   default: {},
 }));
 
@@ -37,8 +38,8 @@ const { server } = await import('../server.js');
 const { createAccessToken } = await import('../backend/services/auth.service.js');
 const { MAX_BULK_AUDIT_URLS } = await import('../backend/jobs/queue.js');
 
-function cookieFor(user) {
-  return `aiv_session=${createAccessToken(user)}`;
+async function cookieFor(user) {
+  return `aiv_session=${await createAccessToken(user)}`;
 }
 
 describe('Access control: /api/team-profile IDOR (#1216)', () => {
@@ -77,7 +78,11 @@ describe('Access control: /api/team-profile IDOR (#1216)', () => {
     // User A creates the profile -> becomes owner.
     const createRes = await fetch(`${origin}/api/team-profile`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', Cookie: cookieFor(userA), Origin: origin },
+      headers: {
+        'Content-Type': 'application/json',
+        Cookie: await cookieFor(userA),
+        Origin: origin,
+      },
       body: JSON.stringify({ id: teamId, version: 1, name: 'A Team', description: 'secret' }),
     });
     expect(createRes.status).toBe(200);
@@ -86,21 +91,25 @@ describe('Access control: /api/team-profile IDOR (#1216)', () => {
 
     // User B must not be able to read it.
     const bGet = await fetch(`${origin}/api/team-profile?id=${teamId}`, {
-      headers: { Cookie: cookieFor(userB) },
+      headers: { Cookie: await cookieFor(userB) },
     });
     expect(bGet.status).toBe(403);
 
     // User B must not be able to overwrite it.
     const bPost = await fetch(`${origin}/api/team-profile`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', Cookie: cookieFor(userB), Origin: origin },
+      headers: {
+        'Content-Type': 'application/json',
+        Cookie: await cookieFor(userB),
+        Origin: origin,
+      },
       body: JSON.stringify({ id: teamId, version: created.version, name: 'hijacked' }),
     });
     expect(bPost.status).toBe(403);
 
     // User A still has full access.
     const aGet = await fetch(`${origin}/api/team-profile?id=${teamId}`, {
-      headers: { Cookie: cookieFor(userA) },
+      headers: { Cookie: await cookieFor(userA) },
     });
     expect(aGet.status).toBe(200);
     const aData = await aGet.json();
@@ -117,13 +126,17 @@ describe('Access control: /api/team-profile IDOR (#1216)', () => {
     await fs.writeFile(teamProfilesFile, `${JSON.stringify(store, null, 2)}\n`);
 
     const getRes = await fetch(`${origin}/api/team-profile?id=${teamId}`, {
-      headers: { Cookie: cookieFor(someUser) },
+      headers: { Cookie: await cookieFor(someUser) },
     });
     expect(getRes.status).toBe(403);
 
     const postRes = await fetch(`${origin}/api/team-profile`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', Cookie: cookieFor(someUser), Origin: origin },
+      headers: {
+        'Content-Type': 'application/json',
+        Cookie: await cookieFor(someUser),
+        Origin: origin,
+      },
       body: JSON.stringify({ id: teamId, version: 1, name: 'hijacked' }),
     });
     expect(postRes.status).toBe(403);

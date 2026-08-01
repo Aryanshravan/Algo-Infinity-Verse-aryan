@@ -1,0 +1,1080 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Learn TypeScript – Static Typing for Modern JS | Algo Infinity Verse</title>
+  <meta name="description" content="Free interactive TypeScript tutorial covering types, interfaces, generics, enums, utility types, and real-world patterns. Write safer JavaScript with confidence." />
+
+  <link rel="stylesheet" href="/styles.css" />
+  <link rel="stylesheet" href="typescript-learning.css" />
+
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+
+  <script>
+    (function() {
+      try {
+        var t = localStorage.getItem('theme');
+        var p = window.matchMedia('(prefers-color-scheme: light)').matches;
+        var theme = t || (p ? 'light' : 'dark');
+        if (theme === 'light') document.documentElement.classList.add('light-mode');
+      } catch (e) {}
+    })();
+  </script>
+</head>
+<body data-page="typescript-learning" data-no-loading>
+  <div id="loading-screen" class="hidden">
+    <div class="loader">
+      <div class="infinity-loader">&#x221E;</div>
+      <h2>Loading TypeScript Learning...</h2>
+    </div>
+  </div>
+
+  <main>
+    <!-- HERO SECTION -->
+    <section class="ts-hero">
+      <div class="ts-hero-bg">
+        <div class="ts-hero-glow"></div>
+      </div>
+
+      <a href="/pages/learning/languages.html" class="ts-back-btn" id="tsBackBtn" aria-label="Go back to languages">
+        <i class="fas fa-arrow-left"></i>
+        <span>Languages</span>
+      </a>
+
+      <div class="ts-hero-content">
+        <h1 class="ts-hero-title" id="tsHeroTitle">
+          <span class="ts-title-line">Learn TypeScript</span>
+          <span class="ts-title-line">Static Typing</span>
+        </h1>
+
+        <p class="ts-hero-subtitle">
+          Master TypeScript, the superset that brings static typing to JavaScript. From type annotations to generics -- <strong>6 interactive lessons</strong> to write safer, more scalable code.
+        </p>
+
+        <!-- Stats -->
+        <div class="ts-hero-stats">
+          <div class="ts-stat">
+            <span class="ts-stat-value" id="topicCount">6</span>
+            <span class="ts-stat-label">Topics</span>
+          </div>
+          <div class="ts-stat">
+            <span class="ts-stat-value">24+</span>
+            <span class="ts-stat-label">Examples</span>
+          </div>
+          <div class="ts-stat">
+            <span class="ts-stat-value">6</span>
+            <span class="ts-stat-label">Exercises</span>
+          </div>
+        </div>
+
+        <!-- CTA -->
+        <div class="ts-hero-actions">
+          <a href="#topic-types" class="ts-btn ts-btn-primary">
+            <i class="fas fa-play"></i> Start Learning
+          </a>
+          <a href="/pages/learning/languages.html" class="ts-btn ts-btn-secondary">
+            <i class="fas fa-th"></i> Browse Languages
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- TOPIC NAVIGATION PILLS -->
+    <section class="ts-section">
+        <nav class="ts-topic-nav" id="tsTopicNav" aria-label="Lesson topics">
+          <a href="#topic-types" class="ts-topic-pill active">Types &amp; Annotations</a>
+          <a href="#topic-interfaces" class="ts-topic-pill">Interfaces &amp; Aliases</a>
+          <a href="#topic-generics" class="ts-topic-pill">Generics</a>
+          <a href="#topic-enums" class="ts-topic-pill">Enums &amp; Unions</a>
+          <a href="#topic-utility" class="ts-topic-pill">Utility Types</a>
+          <a href="#topic-realworld" class="ts-topic-pill">Real-World TS</a>
+        </nav>
+
+        <!-- Progress dots -->
+        <div class="ts-progress" id="tsProgress" aria-hidden="true">
+          <span class="ts-progress-dot active" data-topic="0"></span>
+          <span class="ts-progress-line" data-topic="0"></span>
+          <span class="ts-progress-dot" data-topic="1"></span>
+          <span class="ts-progress-line" data-topic="1"></span>
+          <span class="ts-progress-dot" data-topic="2"></span>
+          <span class="ts-progress-line" data-topic="2"></span>
+          <span class="ts-progress-dot" data-topic="3"></span>
+          <span class="ts-progress-line" data-topic="3"></span>
+          <span class="ts-progress-dot" data-topic="4"></span>
+          <span class="ts-progress-line" data-topic="4"></span>
+          <span class="ts-progress-dot" data-topic="5"></span>
+        </div>
+
+        <!-- LESSON 1: TYPES & TYPE ANNOTATIONS -->
+        <article class="ts-lesson" id="topic-types" data-topic="0">
+          <div class="ts-lesson-header">
+            <span class="ts-lesson-number">01</span>
+            <h3>Types &amp; Type Annotations</h3>
+          </div>
+
+          <p>
+            TypeScript is a <strong>statically typed</strong> superset of JavaScript. Every variable, parameter, and return value can declare its type. The compiler catches mismatches before your code ever runs -- catching entire categories of bugs at compile time.
+          </p>
+
+          <div class="ts-concept">
+            <h4>Primitive Types</h4>
+            <ul>
+              <li><code>string</code> -- textual data (<code>"hello"</code>, <code>'world'</code>)</li>
+              <li><code>number</code> -- all numeric values (<code>42</code>, <code>3.14</code>, <code>0xFF</code>)</li>
+              <li><code>boolean</code> -- <code>true</code> or <code>false</code></li>
+              <li><code>null</code> / <code>undefined</code> -- the absence of a value</li>
+              <li><code>void</code> -- the return type of a function that returns nothing</li>
+              <li><code>never</code> -- a value that never occurs (e.g. a function that always throws)</li>
+              <li><code>any</code> -- opt-out of type checking (use sparingly)</li>
+              <li><code>unknown</code> -- type-safe counterpart of <code>any</code> (requires narrowing)</li>
+            </ul>
+          </div>
+
+          <div class="ts-code-block">
+            <div class="ts-code-header">
+              <span class="ts-code-lang">TypeScript</span>
+              <button type="button" class="ts-code-copy" aria-label="Copy code" data-code='// Type annotations
+let username: string = "alice";
+let age: number = 30;
+let isAdmin: boolean = false;
+let nothing: null = null;
+let notDefined: undefined = undefined;
+
+// Type inference -- TS deduces the type
+let message = "Hello, TypeScript!";
+// message = 42; // Error: Type 'number' is not assignable to type 'string'
+
+// Array types
+let scores: number[] = [95, 87, 92];
+let names: Array<string> = ["Alice", "Bob", "Charlie"];
+
+// Tuples -- fixed-length arrays with typed positions
+let pair: [string, number] = ["version", 5.3];
+
+// Union type
+let identifier: string | number = "user_001";
+identifier = 1001; // OK
+
+// Unknown requires narrowing
+let input: unknown = fetchData();
+if (typeof input === "string") {
+  console.log(input.toUpperCase());
+}'><i class="fas fa-copy"></i> Copy</button>
+            </div>
+            <pre><code><span class="cmt">// Type annotations</span>
+<span class="kw">let</span> username: <span class="type">string</span> = <span class="str">"alice"</span>;
+<span class="kw">let</span> age: <span class="type">number</span> = <span class="num">30</span>;
+<span class="kw">let</span> isAdmin: <span class="type">boolean</span> = <span class="kw">false</span>;
+<span class="kw">let</span> nothing: <span class="type">null</span> = <span class="kw">null</span>;
+<span class="kw">let</span> notDefined: <span class="type">undefined</span> = <span class="kw">undefined</span>;
+
+<span class="cmt">// Type inference -- TS deduces the type</span>
+<span class="kw">let</span> message = <span class="str">"Hello, TypeScript!"</span>;
+<span class="cmt">// message = 42; // Error</span>
+
+<span class="cmt">// Array types</span>
+<span class="kw">let</span> scores: <span class="type">number</span>[] = [<span class="num">95</span>, <span class="num">87</span>, <span class="num">92</span>];
+<span class="kw">let</span> names: <span class="type">Array</span>&lt;<span class="type">string</span>&gt; = [<span class="str">"Alice"</span>, <span class="str">"Bob"</span>, <span class="str">"Charlie"</span>];
+
+<span class="cmt">// Tuples -- fixed-length arrays with typed positions</span>
+<span class="kw">let</span> pair: [<span class="type">string</span>, <span class="type">number</span>] = [<span class="str">"version"</span>, <span class="num">5.3</span>];
+
+<span class="cmt">// Union type</span>
+<span class="kw">let</span> identifier: <span class="type">string</span> | <span class="type">number</span> = <span class="str">"user_001"</span>;
+identifier = <span class="num">1001</span>; <span class="cmt">// OK</span></code></pre>
+          </div>
+
+          <div class="ts-callout">
+            <p><strong>Prefer <code>unknown</code> over <code>any</code>.</strong> <code>unknown</code> forces you to narrow the type before using it (via <code>typeof</code>, <code>instanceof</code>, or type guards), making your code safer while still flexible.</p>
+          </div>
+
+          <div class="ts-table-wrap">
+            <table class="ts-table" aria-label="TypeScript primitive types">
+              <thead>
+                <tr>
+                  <th scope="col">Type</th>
+                  <th scope="col">Example</th>
+                  <th scope="col">Use Case</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><td><code>string</code></td><td><code>"hello"</code></td><td>Names, messages, serialized data</td></tr>
+                <tr><td><code>number</code></td><td><code>42</code></td><td>Counts, measurements, IDs</td></tr>
+                <tr><td><code>boolean</code></td><td><code>true</code></td><td>Flags, toggles, conditions</td></tr>
+                <tr><td><code>void</code></td><td><code>undefined</code></td><td>Function return with no value</td></tr>
+                <tr><td><code>never</code></td><td><em>never occurs</em></td><td>Exhaustive checks, throwing functions</td></tr>
+                <tr><td><code>unknown</code></td><td><em>any value</em></td><td>API responses, third-party data</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Exercise -->
+          <div class="ts-exercise" id="exercise-types">
+            <div class="ts-exercise-title">
+              Practice: Type Annotations
+            </div>
+            <p>Write TypeScript code that declares the following variables with appropriate types:</p>
+            <ol>
+              <li>A <code>string</code> variable called <code>projectName</code> initialized to <code>"Algo Infinity"</code></li>
+              <li>A <code>number</code> variable called <code>version</code> set to <code>2.0</code></li>
+              <li>A <code>boolean</code> variable called <code>isOpenSource</code> set to <code>true</code></li>
+              <li>An array of <code>string</code> called <code>tags</code> containing <code>"typescript"</code>, <code>"learning"</code></li>
+              <li>A tuple <code>[string, number]</code> called <code>entry</code> with <code>"build"</code> and <code>42</code></li>
+            </ol>
+            <button type="button" class="ts-exercise-toggle" aria-expanded="false" aria-controls="solution-types">Show Solution</button>
+            <div class="ts-exercise-solution" id="solution-types">
+              <div class="ts-code-block">
+                <div class="ts-code-header">
+                  <span class="ts-code-lang">TypeScript</span>
+                  <button type="button" class="ts-code-copy" aria-label="Copy code" data-code='let projectName: string = "Algo Infinity";
+let version: number = 2.0;
+let isOpenSource: boolean = true;
+let tags: string[] = ["typescript", "learning"];
+let entry: [string, number] = ["build", 42];'><i class="fas fa-copy"></i> Copy</button>
+                </div>
+                <pre><code><span class="kw">let</span> projectName: <span class="type">string</span> = <span class="str">"Algo Infinity"</span>;
+<span class="kw">let</span> version: <span class="type">number</span> = <span class="num">2.0</span>;
+<span class="kw">let</span> isOpenSource: <span class="type">boolean</span> = <span class="kw">true</span>;
+<span class="kw">let</span> tags: <span class="type">string</span>[] = [<span class="str">"typescript"</span>, <span class="str">"learning"</span>];
+<span class="kw">let</span> entry: [<span class="type">string</span>, <span class="type">number</span>] = [<span class="str">"build"</span>, <span class="num">42</span>];</code></pre>
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <!-- LESSON 2: INTERFACES & TYPE ALIASES -->
+        <article class="ts-lesson" id="topic-interfaces" data-topic="1">
+          <div class="ts-lesson-header">
+            <span class="ts-lesson-number">02</span>
+            <h3>Interfaces &amp; Type Aliases</h3>
+          </div>
+
+          <p>
+            Interfaces and type aliases are TypeScript's primary tools for <strong>shaping objects</strong>. They define contracts that values must satisfy, enabling the compiler to verify structural correctness across your codebase.
+          </p>
+
+          <div class="ts-concept">
+            <h4>Interfaces</h4>
+            <ul>
+              <li>Define the shape of an object with named properties and their types</li>
+              <li>Optional properties marked with <code>?</code> -- the property may be absent</li>
+              <li><code>readonly</code> properties cannot be reassigned after creation</li>
+              <li>Interfaces support <strong>extension</strong> via <code>extends</code></li>
+              <li>Can be <strong>declaration-merged</strong> -- multiple declarations with the same name are merged</li>
+            </ul>
+          </div>
+
+          <div class="ts-code-block">
+            <div class="ts-code-header">
+              <span class="ts-code-lang">TypeScript</span>
+              <button type="button" class="ts-code-copy" aria-label="Copy code" data-code='interface User {
+  id: number;
+  name: string;
+  email?: string;             // optional
+  readonly createdAt: Date;   // cannot be changed
+}
+
+// Extending an interface
+interface Admin extends User {
+  role: "admin" | "superadmin";
+  permissions: string[];
+}
+
+// Using the interface
+const admin: Admin = {
+  id: 1,
+  name: "Alice",
+  email: "alice@example.com",
+  createdAt: new Date(),
+  role: "admin",
+  permissions: ["read", "write", "delete"],
+};
+
+// Type alias -- similar but with some differences
+type Point = {
+  x: number;
+  y: number;
+};
+
+// Intersection types (type alias equivalent of extends)
+type Animal = { species: string };
+type Pet = Animal & { name: string; };"><i class="fas fa-copy"></i> Copy</button>
+            </div>
+            <pre><code><span class="kw">interface</span> <span class="fn">User</span> {
+  id: <span class="type">number</span>;
+  name: <span class="type">string</span>;
+  email?: <span class="type">string</span>;
+  <span class="kw">readonly</span> createdAt: <span class="type">Date</span>;
+}
+
+<span class="cmt">// Extending an interface</span>
+<span class="kw">interface</span> <span class="fn">Admin</span> <span class="kw">extends</span> <span class="fn">User</span> {
+  role: <span class="str">"admin"</span> | <span class="str">"superadmin"</span>;
+  permissions: <span class="type">string</span>[];
+}
+
+<span class="cmt">// Type alias</span>
+<span class="kw">type</span> <span class="fn">Point</span> = {
+  x: <span class="type">number</span>;
+  y: <span class="type">number</span>;
+};
+
+<span class="cmt">// Intersection types</span>
+<span class="kw">type</span> <span class="fn">Pet</span> = <span class="fn">Animal</span> & { name: <span class="type">string</span> };</code></pre>
+          </div>
+
+          <div class="ts-concept">
+            <h4>Interfaces vs Type Aliases</h4>
+            <ul>
+              <li><strong>Interfaces</strong> can be extended (<code>extends</code>) and merged -- prefer for object shapes that may grow</li>
+              <li><strong>Type aliases</strong> can represent unions, primitives, and tuples -- use when you need a union or computed property</li>
+              <li>Both support generics and <code>readonly</code> modifiers</li>
+            </ul>
+          </div>
+
+          <div class="ts-callout">
+            <p><strong>Rule of thumb:</strong> Use <code>interface</code> for public API shapes and object contracts. Use <code>type</code> for unions, intersections, and when you need computed or mapped types. The TypeScript team recommends <code>interface</code> over <code>type</code> for object types when possible.</p>
+          </div>
+
+          <!-- Exercise -->
+          <div class="ts-exercise" id="exercise-interfaces">
+            <div class="ts-exercise-title">
+              Practice: Interfaces
+            </div>
+            <p>Define the following types:</p>
+            <ol>
+              <li>An <code>interface Book</code> with <code>title: string</code>, <code>author: string</code>, optional <code>isbn?: string</code>, and <code>readonly publishedYear: number</code></li>
+              <li>An <code>interface EBook</code> that <code>extends Book</code> with <code>format: "pdf" | "epub" | "mobi"</code> and <code>fileSizeMb: number</code></li>
+              <li>A <code>type Library</code> that is a <code>Record&lt;string, Book&gt;</code></li>
+            </ol>
+            <button type="button" class="ts-exercise-toggle" aria-expanded="false" aria-controls="solution-interfaces">Show Solution</button>
+            <div class="ts-exercise-solution" id="solution-interfaces">
+              <div class="ts-code-block">
+                <div class="ts-code-header">
+                  <span class="ts-code-lang">TypeScript</span>
+                  <button type="button" class="ts-code-copy" aria-label="Copy code" data-code='interface Book {
+  title: string;
+  author: string;
+  isbn?: string;
+  readonly publishedYear: number;
+}
+
+interface EBook extends Book {
+  format: "pdf" | "epub" | "mobi";
+  fileSizeMb: number;
+}
+
+type Library = Record<string, Book>;'><i class="fas fa-copy"></i> Copy</button>
+                </div>
+                <pre><code><span class="kw">interface</span> <span class="fn">Book</span> {
+  title: <span class="type">string</span>;
+  author: <span class="type">string</span>;
+  isbn?: <span class="type">string</span>;
+  <span class="kw">readonly</span> publishedYear: <span class="type">number</span>;
+}
+
+<span class="kw">interface</span> <span class="fn">EBook</span> <span class="kw">extends</span> <span class="fn">Book</span> {
+  format: <span class="str">"pdf"</span> | <span class="str">"epub"</span> | <span class="str">"mobi"</span>;
+  fileSizeMb: <span class="type">number</span>;
+}
+
+<span class="kw">type</span> <span class="fn">Library</span> = <span class="type">Record</span>&lt;<span class="type">string</span>, <span class="fn">Book</span>&gt;;</code></pre>
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <!-- LESSON 3: GENERICS -->
+        <div class="ts-divider">
+          <span class="ts-divider-inner">Next Topic</span>
+        </div>
+
+        <article class="ts-lesson" id="topic-generics" data-topic="2">
+          <div class="ts-lesson-header">
+            <span class="ts-lesson-number">03</span>
+            <h3>Generics -- Reusable Type-Safe Code</h3>
+          </div>
+
+          <p>
+            Generics allow you to write functions, classes, and interfaces that work with <strong>any type</strong> while preserving type safety. Instead of using <code>any</code> and losing type information, you capture the type as a parameter -- just like a function captures a value.
+          </p>
+
+          <div class="ts-concept">
+            <h4>Generic Fundamentals</h4>
+            <ul>
+              <li>Type parameters use angle bracket syntax: <code>&lt;T&gt;</code> (commonly <code>T</code>, <code>K</code>, <code>V</code>)</li>
+              <li>Constraints restrict type parameters with <code>extends</code>: <code>&lt;T extends HasLength&gt;</code></li>
+              <li>Generic interfaces define reusable contracts: <code>interface Box&lt;T&gt; { value: T }</code></li>
+              <li>Multiple type parameters: <code>&lt;K, V&gt;</code> for key-value pairs</li>
+              <li>Default types: <code>&lt;T = string&gt;</code></li>
+            </ul>
+          </div>
+
+          <div class="ts-code-block">
+            <div class="ts-code-header">
+              <span class="ts-code-lang">TypeScript</span>
+              <button type="button" class="ts-code-copy" aria-label="Copy code" data-code='// Generic identity function
+function identity<T>(arg: T): T {
+  return arg;
+}
+
+const num = identity<number>(42);   // type: number
+const str = identity("hello");      // type: string (inferred)
+
+// Generic interface
+interface Repository<T> {
+  getById(id: string): T;
+  getAll(): T[];
+  create(item: T): void;
+}
+
+// Constrained generic
+interface HasLength {
+  length: number;
+}
+
+function logLength<T extends HasLength>(arg: T): T {
+  console.log(arg.length);
+  return arg;
+}
+
+logLength("hello");        // OK: string has .length
+logLength([1, 2, 3]);      // OK: array has .length
+// logLength(42);          // Error: number has no .length
+
+// Keyof constraint
+function getProperty<T, K extends keyof T>(obj: T, key: K): T[K] {
+  return obj[key];
+}
+
+const user = { name: "Alice", age: 30 };
+getProperty(user, "name");  // type: string
+getProperty(user, "age");   // type: number'><i class="fas fa-copy"></i> Copy</button>
+            </div>
+            <pre><code><span class="cmt">// Generic identity function</span>
+<span class="kw">function</span> <span class="fn">identity</span>&lt;<span class="type">T</span>&gt;(arg: <span class="type">T</span>): <span class="type">T</span> {
+  <span class="kw">return</span> arg;
+}
+
+<span class="cmt">// Generic interface</span>
+<span class="kw">interface</span> <span class="fn">Repository</span>&lt;<span class="type">T</span>&gt; {
+  getById(id: <span class="type">string</span>): <span class="type">T</span>;
+  getAll(): <span class="type">T</span>[];
+  create(item: <span class="type">T</span>): <span class="type">void</span>;
+}
+
+<span class="cmt">// Constrained generic</span>
+<span class="kw">function</span> <span class="fn">logLength</span>&lt;<span class="type">T</span> <span class="kw">extends</span> { length: <span class="type">number</span> }&gt;(arg: <span class="type">T</span>): <span class="type">T</span> {
+  <span class="kw">console</span>.log(arg.length);
+  <span class="kw">return</span> arg;
+}
+
+<span class="cmt">// Keyof constraint</span>
+<span class="kw">function</span> <span class="fn">getProperty</span>&lt;<span class="type">T</span>, <span class="type">K</span> <span class="kw">extends</span> <span class="kw">keyof</span> <span class="type">T</span>&gt;(obj: <span class="type">T</span>, key: <span class="type">K</span>): <span class="type">T</span>[<span class="type">K</span>] {
+  <span class="kw">return</span> obj[key];
+}</code></pre>
+          </div>
+
+          <div class="ts-callout">
+            <p><strong>Generics vs <code>any</code>:</strong> Using <code>any</code> opts out of type checking entirely -- you lose editor autocompletion, compile-time validation, and refactoring safety. Generics preserve all of that while keeping your code flexible. Always prefer generics over <code>any</code> for reusable logic.</p>
+          </div>
+
+          <!-- Exercise -->
+          <div class="ts-exercise" id="exercise-generics">
+            <div class="ts-exercise-title">
+              Practice: Generics
+            </div>
+            <p>Implement the following:</p>
+            <ol>
+              <li>A generic function <code>first&lt;T&gt;(items: T[]): T | undefined</code> that returns the first element or <code>undefined</code></li>
+              <li>A generic interface <code>Pair&lt;T, U&gt;</code> with <code>first: T</code> and <code>second: U</code></li>
+              <li>A constrained generic <code>longest&lt;T extends { length: number }&gt;(a: T, b: T): T</code> that returns the longer value</li>
+            </ol>
+            <button type="button" class="ts-exercise-toggle" aria-expanded="false" aria-controls="solution-generics">Show Solution</button>
+            <div class="ts-exercise-solution" id="solution-generics">
+              <div class="ts-code-block">
+                <div class="ts-code-header">
+                  <span class="ts-code-lang">TypeScript</span>
+                  <button type="button" class="ts-code-copy" aria-label="Copy code" data-code='function first<T>(items: T[]): T | undefined {
+  return items[0];
+}
+
+interface Pair<T, U> {
+  first: T;
+  second: U;
+}
+
+function longest<T extends { length: number }>(a: T, b: T): T {
+  return a.length >= b.length ? a : b;
+}'><i class="fas fa-copy"></i> Copy</button>
+                </div>
+                <pre><code><span class="kw">function</span> <span class="fn">first</span>&lt;<span class="type">T</span>&gt;(items: <span class="type">T</span>[]): <span class="type">T</span> | <span class="type">undefined</span> {
+  <span class="kw">return</span> items[<span class="num">0</span>];
+}
+
+<span class="kw">interface</span> <span class="fn">Pair</span>&lt;<span class="type">T</span>, <span class="type">U</span>&gt; {
+  first: <span class="type">T</span>;
+  second: <span class="type">U</span>;
+}
+
+<span class="kw">function</span> <span class="fn">longest</span>&lt;<span class="type">T</span> <span class="kw">extends</span> { length: <span class="type">number</span> }&gt;(a: <span class="type">T</span>, b: <span class="type">T</span>): <span class="type">T</span> {
+  <span class="kw">return</span> a.length >= b.length ? a : b;
+}</code></pre>
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <!-- LESSON 4: ENUMS & UNIONS -->
+        <article class="ts-lesson" id="topic-enums" data-topic="3">
+          <div class="ts-lesson-header">
+            <span class="ts-lesson-number">04</span>
+            <h3>Enums &amp; Union Types</h3>
+          </div>
+
+          <p>
+            Enums give meaningful names to sets of related constants. Union types let a value be one of several types. When combined with <strong>discriminated unions</strong>, they form one of the most powerful patterns in TypeScript -- enabling exhaustive type checking over complex state.
+          </p>
+
+          <div class="ts-concept">
+            <h4>Enums</h4>
+            <ul>
+              <li><strong>Numeric enums</strong> auto-increment from 0 (or a custom start value)</li>
+              <li><strong>String enums</strong> have no auto-incrementing -- each member must be initialized</li>
+              <li>Enums create both a type and a runtime value</li>
+              <li>Use <code>const enum</code> to avoid runtime overhead (values are inlined)</li>
+            </ul>
+          </div>
+
+          <div class="ts-code-block">
+            <div class="ts-code-header">
+              <span class="ts-code-lang">TypeScript</span>
+              <button type="button" class="ts-code-copy" aria-label="Copy code" data-code='// Numeric enum (auto-incrementing)
+enum Direction {
+  Up,      // 0
+  Down,    // 1
+  Left,    // 2
+  Right,   // 3
+}
+
+// Numeric enum with custom start
+enum HttpStatus {
+  Continue = 100,
+  OK = 200,
+  Created = 201,
+  BadRequest = 400,
+  Unauthorized = 401,
+  NotFound = 404,
+}
+
+// String enum
+enum Color {
+  Red = "RED",
+  Green = "GREEN",
+  Blue = "BLUE",
+}
+
+// Union type
+type Status = "idle" | "loading" | "success" | "error";
+
+// Discriminated union
+type Shape =
+  | { kind: "circle"; radius: number }
+  | { kind: "square"; sideLength: number }
+  | { kind: "rectangle"; width: number; height: number };
+
+function area(shape: Shape): number {
+  switch (shape.kind) {
+    case "circle":
+      return Math.PI * shape.radius ** 2;
+    case "square":
+      return shape.sideLength ** 2;
+    case "rectangle":
+      return shape.width * shape.height;
+  }
+}'><i class="fas fa-copy"></i> Copy</button>
+            </div>
+            <pre><code><span class="cmt">// Numeric enum</span>
+<span class="kw">enum</span> <span class="fn">Direction</span> {
+  Up,      <span class="cmt">// 0</span>
+  Down,    <span class="cmt">// 1</span>
+  Left,    <span class="cmt">// 2</span>
+  Right,   <span class="cmt">// 3</span>
+}
+
+<span class="cmt">// String enum</span>
+<span class="kw">enum</span> <span class="fn">Color</span> {
+  Red = <span class="str">"RED"</span>,
+  Green = <span class="str">"GREEN"</span>,
+  Blue = <span class="str">"BLUE"</span>,
+}
+
+<span class="cmt">// Union type</span>
+<span class="kw">type</span> <span class="fn">Status</span> = <span class="str">"idle"</span> | <span class="str">"loading"</span> | <span class="str">"success"</span> | <span class="str">"error"</span>;
+
+<span class="cmt">// Discriminated union</span>
+<span class="kw">type</span> <span class="fn">Shape</span> =
+  | { kind: <span class="str">"circle"</span>; radius: <span class="type">number</span> }
+  | { kind: <span class="str">"square"</span>; sideLength: <span class="type">number</span> }
+  | { kind: <span class="str">"rectangle"</span>; width: <span class="type">number</span>; height: <span class="type">number</span> };
+
+<span class="kw">function</span> <span class="fn">area</span>(shape: <span class="fn">Shape</span>): <span class="type">number</span> {
+  <span class="kw">switch</span> (shape.kind) {
+    <span class="kw">case</span> <span class="str">"circle"</span>:    <span class="kw">return</span> Math.PI * shape.radius ** <span class="num">2</span>;
+    <span class="kw">case</span> <span class="str">"square"</span>:    <span class="kw">return</span> shape.sideLength ** <span class="num">2</span>;
+    <span class="kw">case</span> <span class="str">"rectangle"</span>: <span class="kw">return</span> shape.width * shape.height;
+  }
+}</code></pre>
+          </div>
+
+          <div class="ts-concept">
+            <h4>Type Narrowing</h4>
+            <p>TypeScript narrows the type of a value based on runtime checks. Common narrowing techniques:</p>
+            <ul>
+              <li><code>typeof</code> guards: <code>typeof x === "string"</code></li>
+              <li><code>in</code> operator: <code>"radius" in shape</code></li>
+              <li><code>instanceof</code> checks: <code>error instanceof TypeError</code></li>
+              <li>Discriminated union: checking the <code>kind</code> property narrows the rest</li>
+            </ul>
+          </div>
+
+          <!-- Exercise -->
+          <div class="ts-exercise" id="exercise-enums">
+            <div class="ts-exercise-title">
+              Practice: Enums &amp; Discriminated Unions
+            </div>
+            <p>Build a payment processing system:</p>
+            <ol>
+              <li>Define a <code>string enum PaymentStatus</code> with members <code>Pending</code>, <code>Completed</code>, <code>Failed</code>, <code>Refunded</code></li>
+              <li>Define a discriminated union <code>PaymentEvent</code> with types: <code>PaymentInitiated</code> (amount), <code>PaymentSucceeded</code> (txId, timestamp), <code>PaymentFailed</code> (errorCode, reason)</li>
+              <li>Write a function <code>handleEvent(event: PaymentEvent): string</code> that returns a human-readable summary using a switch on the discriminant</li>
+            </ol>
+            <button type="button" class="ts-exercise-toggle" aria-expanded="false" aria-controls="solution-enums">Show Solution</button>
+            <div class="ts-exercise-solution" id="solution-enums">
+              <div class="ts-code-block">
+                <div class="ts-code-header">
+                  <span class="ts-code-lang">TypeScript</span>
+                  <button type="button" class="ts-code-copy" aria-label="Copy code" data-code='enum PaymentStatus {
+  Pending = "PENDING",
+  Completed = "COMPLETED",
+  Failed = "FAILED",
+  Refunded = "REFUNDED",
+}
+
+type PaymentEvent =
+  | { type: "initiated"; amount: number }
+  | { type: "succeeded"; txId: string; timestamp: Date }
+  | { type: "failed"; errorCode: number; reason: string };
+
+function handleEvent(event: PaymentEvent): string {
+  switch (event.type) {
+    case "initiated":
+      return `Payment of $${event.amount} initiated`;
+    case "succeeded":
+      return `Payment succeeded: tx ${event.txId}`;
+    case "failed":
+      return `Payment failed: ${event.reason} (code ${event.errorCode})`;
+  }
+}'><i class="fas fa-copy"></i> Copy</button>
+                </div>
+                <pre><code><span class="kw">enum</span> <span class="fn">PaymentStatus</span> {
+  Pending = <span class="str">"PENDING"</span>,
+  Completed = <span class="str">"COMPLETED"</span>,
+  Failed = <span class="str">"FAILED"</span>,
+  Refunded = <span class="str">"REFUNDED"</span>,
+}
+
+<span class="kw">type</span> <span class="fn">PaymentEvent</span> =
+  | { type: <span class="str">"initiated"</span>; amount: <span class="type">number</span> }
+  | { type: <span class="str">"succeeded"</span>; txId: <span class="type">string</span>; timestamp: <span class="type">Date</span> }
+  | { type: <span class="str">"failed"</span>; errorCode: <span class="type">number</span>; reason: <span class="type">string</span> };
+
+<span class="kw">function</span> <span class="fn">handleEvent</span>(event: <span class="fn">PaymentEvent</span>): <span class="type">string</span> {
+  <span class="kw">switch</span> (event.type) {
+    <span class="kw">case</span> <span class="str">"initiated"</span>:
+      <span class="kw">return</span> <span class="str">"Payment of $"</span> + event.amount + <span class="str">" initiated"</span>;
+    <span class="kw">case</span> <span class="str">"succeeded"</span>:
+      <span class="kw">return</span> <span class="str">"Payment succeeded: tx "</span> + event.txId;
+    <span class="kw">case</span> <span class="str">"failed"</span>:
+      <span class="kw">return</span> <span class="str">"Payment failed: "</span> + event.reason;
+  }
+}</code></pre>
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <!-- LESSON 5: UTILITY TYPES -->
+        <div class="ts-divider">
+          <span class="ts-divider-inner">Next Topic</span>
+        </div>
+
+        <article class="ts-lesson" id="topic-utility" data-topic="4">
+          <div class="ts-lesson-header">
+            <span class="ts-lesson-number">05</span>
+            <h3>Utility Types -- Transform Types on the Fly</h3>
+          </div>
+
+          <p>
+            TypeScript ships with a rich set of <strong>utility types</strong> that transform existing types into new ones. They reduce boilerplate and ensure consistency -- instead of redefining partial or derived types, you compose them from the source of truth.
+          </p>
+
+          <div class="ts-concept">
+            <h4>Common Utility Types</h4>
+            <ul>
+              <li><code>Partial&lt;T&gt;</code> -- all properties become optional</li>
+              <li><code>Required&lt;T&gt;</code> -- all properties become mandatory</li>
+              <li><code>Readonly&lt;T&gt;</code> -- all properties become readonly</li>
+              <li><code>Pick&lt;T, K&gt;</code> -- select a subset of properties</li>
+              <li><code>Omit&lt;T, K&gt;</code> -- exclude a subset of properties</li>
+              <li><code>Record&lt;K, V&gt;</code> -- construct an object type with keys <code>K</code> and values <code>V</code></li>
+              <li><code>Exclude&lt;T, U&gt;</code> -- exclude members from a union</li>
+              <li><code>NonNullable&lt;T&gt;</code> -- remove <code>null</code> and <code>undefined</code></li>
+              <li><code>ReturnType&lt;T&gt;</code> -- extract the return type of a function type</li>
+              <li><code>Parameters&lt;T&gt;</code> -- extract parameter types as a tuple</li>
+            </ul>
+          </div>
+
+          <div class="ts-code-block">
+            <div class="ts-code-header">
+              <span class="ts-code-lang">TypeScript</span>
+              <button type="button" class="ts-code-copy" aria-label="Copy code" data-code='interface User {
+  id: number;
+  name: string;
+  email: string;
+  password: string;
+  createdAt: Date;
+}
+
+// Partial -- useful for update operations
+function updateUser(id: number, changes: Partial<User>): void {
+  // Only the fields provided are updated
+}
+
+// Pick & Omit
+type UserPreview = Pick<User, "id" | "name">;
+type PublicUser = Omit<User, "password">;
+
+// Record -- construct a map
+type UserMap = Record<string, User>;
+const users: UserMap = {
+  "user_1": { id: 1, name: "Alice", email: "a@x.com", password: "***", createdAt: new Date() },
+};
+
+// Readonly -- prevent mutation
+type ImmutableUser = Readonly<User>;
+
+// ReturnType
+function fetchUser(id: string): Promise<User> { /* ... */ return Promise.resolve({} as User); }
+type FetchResult = ReturnType<typeof fetchUser>; // Promise<User>
+
+// NonNullable
+type MaybeString = string | null | undefined;
+type DefinitelyString = NonNullable<MaybeString>; // string'><i class="fas fa-copy"></i> Copy</button>
+            </div>
+            <pre><code><span class="kw">interface</span> <span class="fn">User</span> {
+  id: <span class="type">number</span>;
+  name: <span class="type">string</span>;
+  email: <span class="type">string</span>;
+  password: <span class="type">string</span>;
+  createdAt: <span class="type">Date</span>;
+}
+
+<span class="cmt">// Partial -- useful for updates</span>
+<span class="kw">function</span> <span class="fn">updateUser</span>(id: <span class="type">number</span>, changes: <span class="type">Partial</span>&lt;<span class="fn">User</span>&gt;): <span class="type">void</span> {}
+
+<span class="cmt">// Pick & Omit</span>
+<span class="kw">type</span> <span class="fn">UserPreview</span> = <span class="type">Pick</span>&lt;<span class="fn">User</span>, <span class="str">"id"</span> | <span class="str">"name"</span>&gt;;
+<span class="kw">type</span> <span class="fn">PublicUser</span> = <span class="type">Omit</span>&lt;<span class="fn">User</span>, <span class="str">"password"</span>&gt;;
+
+<span class="cmt">// Record</span>
+<span class="kw">type</span> <span class="fn">UserMap</span> = <span class="type">Record</span>&lt;<span class="type">string</span>, <span class="fn">User</span>&gt;;
+
+<span class="cmt">// ReturnType</span>
+<span class="kw">type</span> <span class="fn">FetchResult</span> = <span class="type">ReturnType</span>&lt;<span class="kw">typeof</span> fetchUser&gt;;
+
+<span class="cmt">// NonNullable</span>
+<span class="kw">type</span> <span class="fn">DefinitelyString</span> = <span class="type">NonNullable</span>&lt;<span class="type">string</span> | <span class="kw">null</span> | <span class="kw">undefined</span>&gt;;</code></pre>
+          </div>
+
+          <div class="ts-table-wrap">
+            <table class="ts-table" aria-label="Utility types reference">
+              <thead>
+                <tr>
+                  <th scope="col">Utility</th>
+                  <th scope="col">Input</th>
+                  <th scope="col">Output</th>
+                  <th scope="col">Use Case</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><td><code>Partial&lt;T&gt;</code></td><td>Interface</td><td>All optional</td><td>Update payloads</td></tr>
+                <tr><td><code>Required&lt;T&gt;</code></td><td>Interface</td><td>All required</td><td>Form validation</td></tr>
+                <tr><td><code>Pick&lt;T, K&gt;</code></td><td>Type + keys</td><td>Subset</td><td>API responses</td></tr>
+                <tr><td><code>Omit&lt;T, K&gt;</code></td><td>Type + keys</td><td>Exclusion</td><td>Stripping sensitive fields</td></tr>
+                <tr><td><code>Record&lt;K, V&gt;</code></td><td>Keys + values</td><td>Object map</td><td>Dictionaries, caches</td></tr>
+                <tr><td><code>ReturnType&lt;T&gt;</code></td><td>Function type</td><td>Return type</td><td>Type inference from functions</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="ts-callout">
+            <p>Utility types use <strong>mapped types</strong> and <strong>conditional types</strong> internally. You can build your own by combining these patterns -- e.g., <code>type Nullable&lt;T&gt; = { [K in keyof T]: T[K] | null }</code>.</p>
+          </div>
+
+          <!-- Exercise -->
+          <div class="ts-exercise" id="exercise-utility">
+            <div class="ts-exercise-title">
+              Practice: Utility Types
+            </div>
+            <p>Given the following interface:</p>
+            <div class="ts-code-block">
+              <div class="ts-code-header">
+                <span class="ts-code-lang">TypeScript</span>
+                <button type="button" class="ts-code-copy" aria-label="Copy code" data-code='interface Article {
+  id: number;
+  title: string;
+  body: string;
+  authorId: number;
+  publishedAt: Date;
+  tags: string[];
+}'><i class="fas fa-copy"></i> Copy</button>
+              </div>
+              <pre><code><span class="kw">interface</span> <span class="fn">Article</span> {
+  id: <span class="type">number</span>;
+  title: <span class="type">string</span>;
+  body: <span class="type">string</span>;
+  authorId: <span class="type">number</span>;
+  publishedAt: <span class="type">Date</span>;
+  tags: <span class="type">string</span>[];
+}</code></pre>
+            </div>
+            <p>Derive the following types using utilities:</p>
+            <ol>
+              <li><code>ArticlePreview</code> -- only <code>id</code>, <code>title</code>, and <code>publishedAt</code></li>
+              <li><code>ArticleDraft</code> -- all fields optional</li>
+              <li><code>ArticleMap</code> -- a Record keyed by <code>string</code> with <code>Article</code> values</li>
+              <li><code>ArticleStub</code> -- <code>Article</code> without <code>body</code> and <code>tags</code></li>
+            </ol>
+            <button type="button" class="ts-exercise-toggle" aria-expanded="false" aria-controls="solution-utility">Show Solution</button>
+            <div class="ts-exercise-solution" id="solution-utility">
+              <div class="ts-code-block">
+                <div class="ts-code-header">
+                  <span class="ts-code-lang">TypeScript</span>
+                  <button type="button" class="ts-code-copy" aria-label="Copy code" data-code='type ArticlePreview = Pick<Article, "id" | "title" | "publishedAt">;
+type ArticleDraft = Partial<Article>;
+type ArticleMap = Record<string, Article>;
+type ArticleStub = Omit<Article, "body" | "tags">;'><i class="fas fa-copy"></i> Copy</button>
+                </div>
+                <pre><code><span class="kw">type</span> <span class="fn">ArticlePreview</span> = <span class="type">Pick</span>&lt;<span class="fn">Article</span>, <span class="str">"id"</span> | <span class="str">"title"</span> | <span class="str">"publishedAt"</span>&gt;;
+<span class="kw">type</span> <span class="fn">ArticleDraft</span> = <span class="type">Partial</span>&lt;<span class="fn">Article</span>&gt;;
+<span class="kw">type</span> <span class="fn">ArticleMap</span> = <span class="type">Record</span>&lt;<span class="type">string</span>, <span class="fn">Article</span>&gt;;
+<span class="kw">type</span> <span class="fn">ArticleStub</span> = <span class="type">Omit</span>&lt;<span class="fn">Article</span>, <span class="str">"body"</span> | <span class="str">"tags"</span>&gt;;</code></pre>
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <!-- LESSON 6: REAL-WORLD TYPESCRIPT -->
+        <article class="ts-lesson" id="topic-realworld" data-topic="5">
+          <div class="ts-lesson-header">
+            <span class="ts-lesson-number">06</span>
+            <h3>Real-World TypeScript Patterns</h3>
+          </div>
+
+          <p>
+            Let's bring everything together with practical patterns you will use daily. These features -- optional chaining, nullish coalescing, type guards, and async typing -- make TypeScript a joy to work with in production applications.
+          </p>
+
+          <div class="ts-concept">
+            <h4>Modern JavaScript Features (TypeScript-Enhanced)</h4>
+            <ul>
+              <li><strong>Optional chaining</strong> (<code>?.</code>) -- safely access deeply nested properties without checking each level</li>
+              <li><strong>Nullish coalescing</strong> (<code>??</code>) -- fall back to a default only for <code>null</code> or <code>undefined</code> (unlike <code>||</code> which catches all falsy values)</li>
+              <li><strong>Type predicates</strong> -- custom type guards with <code>is</code> return type</li>
+              <li><strong>Async/await with strict typing</strong> -- fully typed async functions</li>
+            </ul>
+          </div>
+
+          <div class="ts-code-block">
+            <div class="ts-code-header">
+              <span class="ts-code-lang">TypeScript</span>
+              <button type="button" class="ts-code-copy" aria-label="Copy code" data-code='// Optional chaining
+interface Config {
+  api?: {
+    timeout?: number;
+    retries?: number;
+  };
+}
+
+function getTimeout(config: Config): number {
+  return config.api?.timeout ?? 3000; // defaults to 3000
+}
+
+// Type predicate -- custom type guard
+interface Cat { meow(): void; }
+interface Dog { bark(): void; }
+
+function isCat(pet: Cat | Dog): pet is Cat {
+  return (pet as Cat).meow !== undefined;
+}
+
+function handlePet(pet: Cat | Dog) {
+  if (isCat(pet)) {
+    pet.meow(); // narrowed to Cat
+  } else {
+    pet.bark(); // narrowed to Dog
+  }
+}
+
+// Typed API response
+interface ApiResponse<T> {
+  data: T;
+  error?: string;
+  status: number;
+}
+
+async function fetchJson<T>(url: string): Promise<ApiResponse<T>> {
+  try {
+    const res = await fetch(url);
+    const data = await res.json();
+    return { data, status: res.status };
+  } catch (err) {
+    return { data: null as T, error: String(err), status: 500 };
+  }
+}'><i class="fas fa-copy"></i> Copy</button>
+            </div>
+            <pre><code><span class="cmt">// Nullish coalescing</span>
+<span class="kw">function</span> <span class="fn">getTimeout</span>(config: <span class="fn">Config</span>): <span class="type">number</span> {
+  <span class="kw">return</span> config.api?.timeout ?? <span class="num">3000</span>;
+}
+
+<span class="cmt">// Type predicate</span>
+<span class="kw">function</span> <span class="fn">isCat</span>(pet: <span class="fn">Cat</span> | <span class="fn">Dog</span>): pet <span class="kw">is</span> <span class="fn">Cat</span> {
+  <span class="kw">return</span> (pet <span class="kw">as</span> <span class="fn">Cat</span>).meow !== <span class="kw">undefined</span>;
+}
+
+<span class="cmt">// Generic API response</span>
+<span class="kw">interface</span> <span class="fn">ApiResponse</span>&lt;<span class="type">T</span>&gt; {
+  data: <span class="type">T</span>;
+  error?: <span class="type">string</span>;
+  status: <span class="type">number</span>;
+}
+
+<span class="kw">async function</span> <span class="fn">fetchJson</span>&lt;<span class="type">T</span>&gt;(url: <span class="type">string</span>): <span class="type">Promise</span>&lt;<span class="fn">ApiResponse</span>&lt;<span class="type">T</span>&gt;&gt; {
+  <span class="kw">try</span> {
+    <span class="kw">const</span> res = <span class="kw">await</span> fetch(url);
+    <span class="kw">const</span> data = <span class="kw">await</span> res.json();
+    <span class="kw">return</span> { data, status: res.status };
+  } <span class="kw">catch</span> (err) {
+    <span class="kw">return</span> { data: <span class="kw">null</span> <span class="kw">as</span> <span class="type">T</span>, error: <span class="type">String</span>(err), status: <span class="num">500</span> };
+  }
+}</code></pre>
+          </div>
+
+          <div class="ts-concept">
+            <h4>Key Takeaways</h4>
+            <ul>
+              <li><strong>Optional chaining</strong> (<code>?.</code>) prevents the dreaded <code>Cannot read property of undefined</code> at runtime</li>
+              <li><strong>Nullish coalescing</strong> (<code>??</code>) is safer than <code>||</code> when <code>0</code>, <code>""</code>, and <code>false</code> are valid values</li>
+              <li><strong>Type predicates</strong> enable custom narrowing logic that the compiler trusts</li>
+              <li><strong>Generic async functions</strong> give you reusable, fully typed data fetching</li>
+            </ul>
+          </div>
+
+          <div class="ts-callout">
+            <p>Ready to put your skills into practice? Head to the <a href="https://www.typescriptlang.org/play" target="_blank" rel="noopener noreferrer" class="ts-inline-link">TypeScript Playground</a> to write and test your own types -- or build a fully typed API client using the patterns above.</p>
+          </div>
+
+          <!-- Exercise -->
+          <div class="ts-exercise" id="exercise-realworld">
+            <div class="ts-exercise-title">
+              Practice: Real-World Patterns
+            </div>
+            <p>Build a typed user search function:</p>
+            <ol>
+              <li>Define an <code>interface User</code> with <code>id: number</code>, <code>name: string</code>, <code>email: string</code></li>
+              <li>Define a type <code>SearchResult&lt;T&gt;</code> as <code>{ results: T[]; total: number; hasMore: boolean }</code></li>
+              <li>Write an async function <code>searchUsers(query: string): Promise&lt;SearchResult&lt;User&gt;&gt;</code> that uses <code>fetchJson</code> behind the scenes</li>
+              <li>Use optional chaining to safely access <code>results[0]?.name</code></li>
+            </ol>
+            <button type="button" class="ts-exercise-toggle" aria-expanded="false" aria-controls="solution-realworld">Show Solution</button>
+            <div class="ts-exercise-solution" id="solution-realworld">
+              <div class="ts-code-block">
+                <div class="ts-code-header">
+                  <span class="ts-code-lang">TypeScript</span>
+                  <button type="button" class="ts-code-copy" aria-label="Copy code" data-code='interface User {
+  id: number;
+  name: string;
+  email: string;
+}
+
+type SearchResult<T> = {
+  results: T[];
+  total: number;
+  hasMore: boolean;
+};
+
+async function searchUsers(query: string): Promise<SearchResult<User>> {
+  const response = await fetchJson<User[]>(`/api/users?q=${query}`);
+  if (response.error) {
+    return { results: [], total: 0, hasMore: false };
+  }
+  return {
+    results: response.data,
+    total: response.data.length,
+    hasMore: response.data.length > 0,
+  };
+}
+
+// Safe access
+const firstUserName = results?.[0]?.name;'><i class="fas fa-copy"></i> Copy</button>
+                </div>
+                <pre><code><span class="kw">interface</span> <span class="fn">User</span> {
+  id: <span class="type">number</span>;
+  name: <span class="type">string</span>;
+  email: <span class="type">string</span>;
+}
+
+<span class="kw">type</span> <span class="fn">SearchResult</span>&lt;<span class="type">T</span>&gt; = {
+  results: <span class="type">T</span>[];
+  total: <span class="type">number</span>;
+  hasMore: <span class="type">boolean</span>;
+};
+
+<span class="kw">async function</span> <span class="fn">searchUsers</span>(query: <span class="type">string</span>): <span class="type">Promise</span>&lt;<span class="fn">SearchResult</span>&lt;<span class="fn">User</span>&gt;&gt; {
+  <span class="kw">const</span> response = <span class="kw">await</span> <span class="fn">fetchJson</span>&lt;<span class="fn">User</span>[]&gt;(<span class="str">`/api/users?q=${query}`</span>);
+  <span class="kw">if</span> (response.error) {
+    <span class="kw">return</span> { results: [], total: <span class="num">0</span>, hasMore: <span class="kw">false</span> };
+  }
+  <span class="kw">return</span> {
+    results: response.data,
+    total: response.data.length,
+    hasMore: response.data.length > <span class="num">0</span>,
+  };
+}
+
+<span class="cmt">// Safe access with optional chaining</span>
+<span class="kw">const</span> firstUserName = results?.[<span class="num">0</span>]?.name;</code></pre>
+              </div>
+            </div>
+          </div>
+        </article>
+
+    </section>
+
+    <!-- FOOTER -->
+    <footer class="ts-footer">
+      <p>Practice your skills in the <a href="https://www.typescriptlang.org/play" target="_blank" rel="noopener noreferrer">TypeScript Playground &rarr;</a></p>
+      <p>Back to <a href="/pages/learning/languages.html">Programming Languages</a></p>
+    </footer>
+  </main>
+
+  <script src="/auth.js"></script>
+  <script src="/theme.js"></script>
+  <script src="/script.js"></script>
+  <script src="typescript-learning.js"></script>
+</body>
+</html>

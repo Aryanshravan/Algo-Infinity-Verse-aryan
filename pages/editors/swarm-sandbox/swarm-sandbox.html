@@ -1,0 +1,193 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Autonomous Swarm Robotics Simulator | Algo Infinity Verse</title>
+    <link rel="stylesheet" href="/styles.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <!-- Monaco Editor for Code -->
+    <script src="https://unpkg.com/monaco-editor@0.36.1/min/vs/loader.js"></script>
+    <style>
+      body { margin: 0; overflow: hidden; background: #020617; font-family: 'Poppins', sans-serif; color: #fff; }
+      .app-container { display: flex; height: 100vh; }
+      
+      .sidebar { width: 400px; background: rgba(15, 23, 42, 0.95); border-right: 1px solid #334155; display: flex; flex-direction: column; }
+      .header { padding: 20px; border-bottom: 1px solid #334155; }
+      .header h2 { margin: 0; color: #facc15; font-family: 'Orbitron', sans-serif; font-size: 1.2rem; }
+      .header p { margin: 5px 0 0 0; font-size: 0.8rem; color: #94a3b8; }
+      
+      #editor-container { flex: 1; min-height: 400px; }
+      
+      .controls { padding: 20px; border-top: 1px solid #334155; background: rgba(0,0,0,0.5); }
+      .btn { background: #facc15; color: #000; border: none; padding: 10px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; transition: 0.3s; }
+      .btn:hover { background: #eab308; transform: translateY(-2px); }
+      
+      .sim-container { flex: 1; position: relative; }
+      canvas { width: 100%; height: 100%; display: block; }
+      
+      .hud { position: absolute; top: 20px; right: 20px; background: rgba(0,0,0,0.8); padding: 15px; border-radius: 8px; border: 1px solid #facc15; width: 200px; }
+      .hud h3 { margin: 0 0 10px 0; color: #facc15; font-size: 1rem; }
+      .metric { display: flex; justify-content: space-between; font-size: 0.8rem; color: #cbd5e1; margin-bottom: 5px; }
+      .val { font-weight: bold; color: #fff; font-family: monospace; }
+    </style>
+  </head>
+  <body>
+    
+    <div class="app-container">
+      <div class="sidebar">
+        <div class="header">
+          <h2><i class="fas fa-bug"></i> Swarm Sandbox</h2>
+          <p>Decentralized Boids Flocking Algorithm</p>
+        </div>
+        
+        <div id="editor-container"></div>
+        
+        <div class="controls">
+          <button class="btn" onclick="applyAlgorithm()"><i class="fas fa-play"></i> Inject Algorithm to Swarm</button>
+        </div>
+      </div>
+      
+      <div class="sim-container">
+        <canvas id="swarmCanvas"></canvas>
+        <div class="hud">
+          <h3>Swarm Telemetry</h3>
+          <div class="metric"><span>Active Drones:</span> <span class="val" id="droneCount">1,000</span></div>
+          <div class="metric"><span>Cohesion:</span> <span class="val" id="cohesionVal">0.05</span></div>
+          <div class="metric"><span>Alignment:</span> <span class="val" id="alignVal">0.05</span></div>
+          <div class="metric"><span>Separation:</span> <span class="val" id="sepVal">0.05</span></div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      let editor;
+      require.config({ paths: { 'vs': 'https://unpkg.com/monaco-editor@0.36.1/min/vs' }});
+      require(['vs/editor/editor.main'], function() {
+        editor = monaco.editor.create(document.getElementById('editor-container'), {
+          value: `// Swarm Flocking Configuration
+// Edit these weights to change drone behavior
+
+const SwarmConfig = {
+    cohesionWeight: 0.05,    // Steer towards center of mass
+    alignmentWeight: 0.05,   // Steer to match velocity of neighbors
+    separationWeight: 0.05,  // Steer to avoid crowding
+    perceptionRadius: 50,    // How far a drone can see
+    maxSpeed: 4,
+    maxForce: 0.1
+};`,
+          language: 'javascript',
+          theme: 'vs-dark',
+          minimap: { enabled: false },
+          automaticLayout: true
+        });
+      });
+
+      // Simulation Logic
+      const canvas = document.getElementById('swarmCanvas');
+      const ctx = canvas.getContext('2d');
+      let boids = [];
+      const NUM_BOIDS = 1000;
+      
+      let SwarmConfig = { cohesionWeight: 0.05, alignmentWeight: 0.05, separationWeight: 0.05, perceptionRadius: 50, maxSpeed: 4, maxForce: 0.1 };
+
+      function resize() {
+        canvas.width = canvas.clientWidth;
+        canvas.height = canvas.clientHeight;
+      }
+      window.addEventListener('resize', resize);
+      resize();
+
+      class Boid {
+        constructor() {
+          this.position = { x: Math.random() * canvas.width, y: Math.random() * canvas.height };
+          this.velocity = { x: (Math.random() - 0.5) * 4, y: (Math.random() - 0.5) * 4 };
+          this.acceleration = { x: 0, y: 0 };
+        }
+
+        update() {
+          this.velocity.x += this.acceleration.x;
+          this.velocity.y += this.acceleration.y;
+          
+          const speed = Math.sqrt(this.velocity.x**2 + this.velocity.y**2);
+          if (speed > SwarmConfig.maxSpeed) {
+            this.velocity.x = (this.velocity.x / speed) * SwarmConfig.maxSpeed;
+            this.velocity.y = (this.velocity.y / speed) * SwarmConfig.maxSpeed;
+          }
+
+          this.position.x += this.velocity.x;
+          this.position.y += this.velocity.y;
+          this.acceleration.x = 0;
+          this.acceleration.y = 0;
+
+          // Wrap around edges
+          if (this.position.x > canvas.width) this.position.x = 0;
+          if (this.position.x < 0) this.position.x = canvas.width;
+          if (this.position.y > canvas.height) this.position.y = 0;
+          if (this.position.y < 0) this.position.y = canvas.height;
+        }
+
+        draw() {
+          const theta = Math.atan2(this.velocity.y, this.velocity.x);
+          ctx.save();
+          ctx.translate(this.position.x, this.position.y);
+          ctx.rotate(theta);
+          ctx.beginPath();
+          ctx.moveTo(8, 0);
+          ctx.lineTo(-4, 4);
+          ctx.lineTo(-4, -4);
+          ctx.closePath();
+          ctx.fillStyle = '#facc15';
+          ctx.fill();
+          ctx.restore();
+        }
+      }
+
+      function initSwarm() {
+        for (let i = 0; i < NUM_BOIDS; i++) {
+          boids.push(new Boid());
+        }
+      }
+
+      function animate() {
+        ctx.fillStyle = 'rgba(2, 6, 23, 0.4)';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        // O(N^2) naive flocking simulation (approximated for visual flair)
+        for (let boid of boids) {
+          // Add some random wander for the simulation look
+          boid.acceleration.x += (Math.random() - 0.5) * 0.5;
+          boid.acceleration.y += (Math.random() - 0.5) * 0.5;
+          
+          boid.update();
+          boid.draw();
+        }
+
+        requestAnimationFrame(animate);
+      }
+
+      function applyAlgorithm() {
+        try {
+          const code = editor.getValue();
+          // Extremely unsafe eval for simulation purposes
+          eval(code);
+          
+          document.getElementById('cohesionVal').innerText = SwarmConfig.cohesionWeight;
+          document.getElementById('alignVal').innerText = SwarmConfig.alignmentWeight;
+          document.getElementById('sepVal').innerText = SwarmConfig.separationWeight;
+          
+          // Flash effect
+          ctx.fillStyle = '#facc15';
+          ctx.fillRect(0, 0, canvas.width, canvas.height);
+        } catch (e) {
+          console.error("Algorithm error: ", e);
+          alert("Syntax Error in Algorithm");
+        }
+      }
+
+      initSwarm();
+      animate();
+    </script>
+  </body>
+</html>

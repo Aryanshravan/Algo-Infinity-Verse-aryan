@@ -183,6 +183,19 @@ button {
   position: relative;
 }
 
+.visualization-area.comparison-mode {
+  flex-direction: row;
+  align-items: flex-start;
+  justify-content: space-around;
+}
+
+.panel-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+}
+
 .bucket-container {
   display: flex;
   flex-direction: column;

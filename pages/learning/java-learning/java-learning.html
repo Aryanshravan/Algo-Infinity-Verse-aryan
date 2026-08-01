@@ -1,505 +1,532 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Learn Java – Beginner Guide | Algo Infinity Verse</title>
-    <meta name="description" content="Free beginner-friendly Java tutorial covering variables, data types, operators, I/O, conditionals, loops, methods, arrays, strings, classes, objects, and OOP concepts with interactive exercises." />
-    <link rel="stylesheet" href="/styles.css" />
-    <link rel="stylesheet" href="java-learning.css" />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Poppins:wght@300;400;500;600;700&family=Fira+Code:wght@400;500;600&display=swap"
-      rel="stylesheet"
-    />
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
-    />
-  
-    <!-- Theme Initialization Script -->
-    <script>
-      (function() {
-        try {
-          var storedTheme = localStorage.getItem('theme');
-          var prefersLight = window.matchMedia('(prefers-color-scheme: light)').matches;
-          var theme = storedTheme || (prefersLight ? 'light' : 'dark');
-          if (theme === 'light') {
-            document.documentElement.classList.add('light-mode');
-          } else {
-            document.documentElement.classList.remove('light-mode');
-          }
-        } catch (e) {}
-      })();
-    </script>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Learn Java – Object-Oriented Fundamentals | Algo Infinity Verse</title>
+  <meta name="description" content="Free interactive Java tutorial covering variables, types, operators, I/O, conditionals, loops, methods, arrays, strings, classes, objects, and OOP concepts with hands-on exercises." />
+
+  <link rel="stylesheet" href="/styles.css" />
+  <link rel="stylesheet" href="java-learning.css" />
+
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+
+  <script>
+    (function() {
+      try {
+        var t = localStorage.getItem('theme');
+        var p = window.matchMedia('(prefers-color-scheme: light)').matches;
+        var theme = t || (p ? 'light' : 'dark');
+        if (theme === 'light') document.documentElement.classList.add('light-mode');
+      } catch (e) {}
+    })();
+  </script>
 </head>
-  <body data-page="java-learning">
-    <!-- Loading Screen -->
-    <div id="loading-screen" class="hidden">
-      <div class="loader">
-        <div class="infinity-loader">∞</div>
-        <h2>Algo Infinity Verse</h2>
-        <div class="loading-bar">
-          <div class="loading-progress"></div>
-        </div>
-      </div>
+<body data-page="java-learning" data-no-loading>
+  <div id="loading-screen" class="hidden">
+    <div class="loader">
+      <div class="infinity-loader">&#x221E;</div>
+      <h2>Loading Java Learning...</h2>
     </div>
+  </div>
 
-    <!-- Scroll to Top Button -->
-    <button type="button" id="scrollTopBtn" class="scroll-top-btn" aria-label="Scroll to top">
-      <i class="fas fa-arrow-up"></i>
-    </button>
-
-    <!-- Navigation Bar -->
-    <div id="navbar-placeholder"></div>
-
-    <!-- Hero Section -->
-    <section id="home" class="hero">
-      <div class="hero-background">
-        <div class="stars"></div>
-        <div class="stars2"></div>
-        <div class="stars3"></div>
+  <main>
+    <!-- ════════════════════════════════════════
+         HERO SECTION
+         ════════════════════════════════════════ -->
+    <section class="jv-hero">
+      <div class="jv-hero-bg">
+        <div class="jv-hero-glow"></div>
       </div>
-      <div class="hero-content">
-        <h1 class="hero-title">
-          <span class="title-line">Start Your Journey With</span>
-          <span class="main-title gradient-text" style="background: linear-gradient(135deg, #e63946 0%, #f4a261 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Java Programming</span>
-          <span class="subtitle">Beginner-Friendly Concepts, Code &amp; Practice</span>
-        </h1>
-        <div class="typing-container">
-          <span class="typing-text_java" id="typingTextJava"></span>
-          <span class="typing-cursor">|</span>
+
+      <a href="/pages/learning/languages.html" class="jv-back-btn" id="jvBackBtn" aria-label="Go back to languages">
+        <i class="fas fa-arrow-left"></i>
+        <span>Languages</span>
+      </a>
+
+      <div class="jv-hero-content">
+        <!-- Coffee steam signature motif (Java ☕ inspiration) -->
+        <div class="jv-steam" aria-hidden="true">
+          <span class="jv-steam-line"></span>
+          <span class="jv-steam-line"></span>
+          <span class="jv-steam-line"></span>
         </div>
-        <div class="hero-buttons">
-          <a href="#introduction" class="btn btn-primary" style="background: linear-gradient(135deg, #e63946 0%, #f4a261 100%); border: none; color: #fff; font-weight: 600;">
+
+        <h1 class="jv-hero-title" id="jvHeroTitle">
+          <span class="jv-title-line">Learn Java</span>
+          <span class="jv-title-line">Object-Oriented</span>
+        </h1>
+
+        <p class="jv-hero-subtitle">
+          Master the language that powers billions of devices. From variables to OOP — <strong>11 interactive lessons</strong> to build real Java fluency.
+        </p>
+
+        <!-- Stats -->
+        <div class="jv-hero-stats">
+          <div class="jv-stat">
+            <span class="jv-stat-value" id="topicCount">11</span>
+            <span class="jv-stat-label">Topics</span>
+          </div>
+          <div class="jv-stat">
+            <span class="jv-stat-value">40+</span>
+            <span class="jv-stat-label">Examples</span>
+          </div>
+          <div class="jv-stat">
+            <span class="jv-stat-value">11</span>
+            <span class="jv-stat-label">Exercises</span>
+          </div>
+        </div>
+
+        <!-- CTA -->
+        <div class="jv-hero-actions">
+          <a href="#topic-introduction" class="jv-btn jv-btn-primary">
             <i class="fas fa-play"></i> Start Learning
           </a>
-          <a href="#exercise-variables" class="btn btn-secondary">
-            <i class="fas fa-pen"></i> Practice Exercises
+          <a href="/pages/learning/languages.html" class="jv-btn jv-btn-secondary">
+            <i class="fas fa-th"></i> Browse Languages
           </a>
         </div>
-        <div class="hero-stats">
-          <div class="stat-box">
-            <span class="stat-number" data-target="11">0</span>
-            <span class="stat-label">Topics</span>
-          </div>
-          <div class="stat-box">
-            <span class="stat-number" data-target="40">0</span>
-            <span class="stat-label">Examples</span>
-          </div>
-          <div class="stat-box">
-            <span class="stat-number" data-target="11">0</span>
-            <span class="stat-label">Exercises</span>
-          </div>
-        </div>
-      </div>
-      <div class="scroll-indicator">
-        <i class="fas fa-chevron-down"></i>
       </div>
     </section>
 
-    <!-- Java Learning Section -->
-    <section id="java-learning" class="section">
-      <div class="container">
-        <h2 class="section-title">
-          <span class="title-icon">☕</span>
-          Learn Java
-        </h2>
-        <p class="section-subtitle">
-          Master the fundamentals of Java with clear explanations and hands-on examples
-        </p>
+    <!-- ════════════════════════════════════════
+         TOPIC NAVIGATION PILLS
+         ════════════════════════════════════════ -->
+    <section class="jv-section">
+        <nav class="jv-topic-nav" id="jvTopicNav" aria-label="Lesson topics">
+          <a href="#topic-introduction" class="jv-topic-pill active">Introduction</a>
+          <a href="#topic-setup" class="jv-topic-pill">Installation</a>
+          <a href="#topic-variables" class="jv-topic-pill">Variables &amp; Types</a>
+          <a href="#topic-io" class="jv-topic-pill">Input &amp; Output</a>
+          <a href="#topic-operators" class="jv-topic-pill">Operators</a>
+          <a href="#topic-conditionals" class="jv-topic-pill">Conditionals</a>
+          <a href="#topic-loops" class="jv-topic-pill">Loops</a>
+          <a href="#topic-methods" class="jv-topic-pill">Methods</a>
+          <a href="#topic-arrays-strings" class="jv-topic-pill">Arrays &amp; Strings</a>
+          <a href="#topic-classes" class="jv-topic-pill">Classes &amp; Objects</a>
+          <a href="#topic-oop" class="jv-topic-pill">Basic OOP</a>
+        </nav>
 
-        <!-- Progress Bar -->
-        <div class="java-progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" aria-label="Learning progress">
-          <span class="java-progress-text"><span id="progressCount">0</span> / 11 topics completed</span>
-          <div class="java-progress-track">
-            <div class="java-progress-fill" id="progressFill"></div>
-          </div>
+        <!-- Progress dots -->
+        <div class="jv-progress" id="jvProgress" aria-hidden="true">
+          <span class="jv-progress-dot active" data-topic="0"></span>
+          <span class="jv-progress-line" data-topic="0"></span>
+          <span class="jv-progress-dot" data-topic="1"></span>
+          <span class="jv-progress-line" data-topic="1"></span>
+          <span class="jv-progress-dot" data-topic="2"></span>
+          <span class="jv-progress-line" data-topic="2"></span>
+          <span class="jv-progress-dot" data-topic="3"></span>
+          <span class="jv-progress-line" data-topic="3"></span>
+          <span class="jv-progress-dot" data-topic="4"></span>
+          <span class="jv-progress-line" data-topic="4"></span>
+          <span class="jv-progress-dot" data-topic="5"></span>
+          <span class="jv-progress-line" data-topic="5"></span>
+          <span class="jv-progress-dot" data-topic="6"></span>
+          <span class="jv-progress-line" data-topic="6"></span>
+          <span class="jv-progress-dot" data-topic="7"></span>
+          <span class="jv-progress-line" data-topic="7"></span>
+          <span class="jv-progress-dot" data-topic="8"></span>
+          <span class="jv-progress-line" data-topic="8"></span>
+          <span class="jv-progress-dot" data-topic="9"></span>
+          <span class="jv-progress-line" data-topic="9"></span>
+          <span class="jv-progress-dot" data-topic="10"></span>
         </div>
 
-        <div class="java-layout">
-          <!-- Sidebar Navigation -->
-          <aside class="java-sidebar" aria-label="Topic navigation">
-            <div class="java-sidebar-title">Topics</div>
-            <ul class="java-sidebar-nav" id="topicNav">
-              <li><a href="#introduction"><span class="nav-icon">📖</span> Introduction</a></li>
-              <li><a href="#setup"><span class="nav-icon">⚙️</span> Installation &amp; Setup</a></li>
-              <li><a href="#variables"><span class="nav-icon">📦</span> Variables &amp; Types</a></li>
-              <li><a href="#io"><span class="nav-icon">⌨️</span> Input &amp; Output</a></li>
-              <li><a href="#operators"><span class="nav-icon">➕</span> Operators</a></li>
-              <li><a href="#conditionals"><span class="nav-icon">🔀</span> Conditionals</a></li>
-              <li><a href="#loops"><span class="nav-icon">🔄</span> Loops</a></li>
-              <li><a href="#methods"><span class="nav-icon">⚡</span> Methods</a></li>
-              <li><a href="#arrays-strings"><span class="nav-icon">📋</span> Arrays &amp; Strings</a></li>
-              <li><a href="#classes-objects"><span class="nav-icon">🏛️</span> Classes &amp; Objects</a></li>
-              <li><a href="#oop"><span class="nav-icon">🔷</span> Basic OOP</a></li>
+        <!-- ════════════════════════════════════════
+             LESSON 1: INTRODUCTION TO JAVA
+             ════════════════════════════════════════ -->
+        <article class="jv-lesson" id="topic-introduction" data-topic="0">
+          <div class="jv-lesson-header">
+            <span class="jv-lesson-number">01</span>
+            <h3>Introduction to Java</h3>
+          </div>
+
+          <p>
+            Java is a high-level, object-oriented programming language developed by <strong>Sun Microsystems</strong> (now Oracle) and first released in 1995. It follows <strong>"Write Once, Run Anywhere"</strong> (WORA) — compiled Java runs on any platform with a JVM.
+          </p>
+
+          <div class="jv-concept">
+            <h4>Why Learn Java?</h4>
+            <ul>
+              <li><strong>Platform Independent</strong> — runs on any device with a JVM</li>
+              <li><strong>Object-Oriented</strong> — encourages reusable, modular code</li>
+              <li><strong>Massive Ecosystem</strong> — Spring, Android, Hibernate, and more</li>
+              <li><strong>Industry Standard</strong> — used by 90% of Fortune 500 companies</li>
+              <li><strong>Strong Typing</strong> — catches errors at compile time</li>
             </ul>
-          </aside>
+          </div>
 
-          <!-- Main Content -->
-          <main class="java-main-content" id="mainContent">
+          <p>Your first Java program is the classic "Hello, World!":</p>
 
-            <!-- 1. Introduction to Java -->
-            <article class="java-lesson" id="introduction" data-topic="1">
-              <div class="java-lesson-header">
-                <span class="java-lesson-number">01</span>
-                <h3>Introduction to Java</h3>
-              </div>
-              <p>
-                Java is a high-level, object-oriented programming language developed by <strong>Sun Microsystems</strong> (now Oracle) and first released in 1995.
-                It follows the principle of <strong>"Write Once, Run Anywhere"</strong> (WORA), meaning compiled Java code runs on any platform that supports the Java Virtual Machine (JVM).
-              </p>
-              <div class="java-concept-card">
-                <h4>Why Learn Java?</h4>
-                <ul>
-                  <li><strong>Platform Independent</strong> – Runs on any device with a JVM</li>
-                  <li><strong>Object-Oriented</strong> – Encourages reusable, modular code</li>
-                  <li><strong>Massive Ecosystem</strong> – Spring, Android, Hibernate, and more</li>
-                  <li><strong>Industry Standard</strong> – Used by 90% of Fortune 500 companies</li>
-                  <li><strong>Strong Typing</strong> – Catches errors at compile time</li>
-                </ul>
-              </div>
-              <p>Your first Java program is the classic "Hello, World!":</p>
-              <div class="java-code-block">
-                <div class="java-code-header">
-                  <span class="java-code-lang">Java</span>
-                  <button type="button" class="java-code-copy" aria-label="Copy code" data-code="public class HelloWorld {
+          <div class="jv-code-block">
+            <div class="jv-code-header">
+              <span class="jv-code-lang">Java</span>
+              <button type="button" class="jv-code-copy" aria-label="Copy code" data-code='public class HelloWorld {
     public static void main(String[] args) {
-        System.out.println(&quot;Hello, World!&quot;);
+        System.out.println("Hello, World!");
     }
-}">Copy</button>
-                </div>
-                <pre><code><span class="tok-kw">public class</span> <span class="tok-bi">HelloWorld</span> {
-    <span class="tok-kw">public static void</span> <span class="tok-fn">main</span>(<span class="tok-bi">String</span>[] args) {
-        <span class="tok-bi">System</span>.out.<span class="tok-fn">println</span>(<span class="tok-str">"Hello, World!"</span>);
+}'><i class="fas fa-copy"></i> Copy</button>
+            </div>
+            <pre><code><span class="kw">public class</span> <span class="bi">HelloWorld</span> {
+    <span class="kw">public static void</span> <span class="fn">main</span>(<span class="bi">String</span>[] args) {
+        <span class="bi">System</span>.out.<span class="fn">println</span>(<span class="str">"Hello, World!"</span>);
     }
 }</code></pre>
-              </div>
-              <div class="java-output">
-                <div class="java-output-label">Output</div>
-                <pre>Hello, World!</pre>
-              </div>
-              <div class="java-callout">
-                <span class="java-callout-icon">💡</span>
-                <p>Every Java application needs a <code>main</code> method — it's the entry point where the program starts executing. The class name must match the filename (<code>HelloWorld.java</code>).</p>
-              </div>
-            </article>
+          </div>
 
-            <!-- 2. Installation & Setup -->
-            <article class="java-lesson" id="setup" data-topic="2">
-              <div class="java-lesson-header">
-                <span class="java-lesson-number">02</span>
-                <h3>Installation &amp; Setup</h3>
-              </div>
-              <p>
-                To write and run Java code, you need the <strong>Java Development Kit (JDK)</strong> and a text editor or IDE. The JDK includes the compiler (<code>javac</code>), runtime (<code>java</code>), and libraries.
-              </p>
-              <div class="java-concept-card">
-                <h4><i class="fas fa-download"></i> Installing the JDK</h4>
-                <p>Download the latest JDK from <strong>oracle.com/java</strong> or use an open-source build like <strong>OpenJDK</strong>. Version 17 LTS or 21 LTS is recommended for beginners.</p>
-              </div>
-              <div class="java-code-block">
-                <div class="java-code-header">
-                  <span class="java-code-lang">Bash</span>
-                  <button type="button" class="java-code-copy" aria-label="Copy code" data-code="# Verify your Java installation
+          <div class="jv-output">
+            <div class="jv-output-label">Output</div>
+            <pre>Hello, World!</pre>
+          </div>
+
+          <div class="jv-callout">
+            <p>Every Java application needs a <code>main</code> method — it's the entry point where the program starts executing. The class name must match the filename (<code>HelloWorld.java</code>).</p>
+          </div>
+        </article>
+
+        <!-- ════════════════════════════════════════
+             LESSON 2: INSTALLATION & SETUP
+             ════════════════════════════════════════ -->
+        <article class="jv-lesson" id="topic-setup" data-topic="1">
+          <div class="jv-lesson-header">
+            <span class="jv-lesson-number">02</span>
+            <h3>Installation &amp; Setup</h3>
+          </div>
+
+          <p>
+            To write and run Java, you need the <strong>Java Development Kit (JDK)</strong>. The JDK includes the compiler (<code>javac</code>), runtime (<code>java</code>), and standard libraries.
+          </p>
+
+          <div class="jv-concept">
+            <h4><i class="fas fa-download"></i> Installing the JDK</h4>
+            <p>Download the latest JDK from <strong>oracle.com/java</strong> or use an open-source build like <strong>OpenJDK</strong>. Version 17 LTS or 21 LTS is recommended for beginners.</p>
+          </div>
+
+          <div class="jv-code-block">
+            <div class="jv-code-header">
+              <span class="jv-code-lang">Bash</span>
+              <button type="button" class="jv-code-copy" aria-label="Copy code" data-code='# Verify your Java installation
 java -version
-javac -version">Copy</button>
-                </div>
-                <pre><code><span class="tok-cmt"># Verify your Java installation</span>
+javac -version'><i class="fas fa-copy"></i> Copy</button>
+            </div>
+            <pre><code><span class="cmt"># Verify your Java installation</span>
 java -version
 javac -version</code></pre>
-              </div>
-              <div class="java-concept-card">
-                <h4><i class="fas fa-laptop-code"></i> Choosing an IDE</h4>
-                <ul>
-                  <li><strong>IntelliJ IDEA Community</strong> – Free, feature-rich, recommended for beginners</li>
-                  <li><strong>Eclipse</strong> – Free, widely used in industry</li>
-                  <li><strong>VS Code</strong> – Lightweight with Java extension pack</li>
-                </ul>
-              </div>
-              <div class="java-code-block">
-                <div class="java-code-header">
-                  <span class="java-code-lang">Bash</span>
-                  <button type="button" class="java-code-copy" aria-label="Copy code" data-code="# Compile and run a Java program
-javac HelloWorld.java    # compiles to HelloWorld.class
-java HelloWorld          # runs the compiled bytecode">Copy</button>
-                </div>
-                <pre><code><span class="tok-cmt"># Compile and run a Java program</span>
-javac HelloWorld.java    <span class="tok-cmt"># compiles to HelloWorld.class</span>
-java HelloWorld          <span class="tok-cmt"># runs the compiled bytecode</span></code></pre>
-              </div>
-              <div class="java-callout">
-                <span class="java-callout-icon">✅</span>
-                <p>Java is a <strong>compiled</strong> language: you write <code>.java</code> source files, compile them to <code>.class</code> bytecode with <code>javac</code>, and run the bytecode with <code>java</code> on the JVM.</p>
-              </div>
-            </article>
+          </div>
 
-            <!-- 3. Variables and Data Types -->
-            <article class="java-lesson" id="variables" data-topic="3">
-              <div class="java-lesson-header">
-                <span class="java-lesson-number">03</span>
-                <h3>Variables &amp; Data Types</h3>
-              </div>
-              <p>
-                In Java, every variable must have a declared <strong>type</strong>. Java is statically typed — once you declare a variable's type, it cannot hold a different type of value.
-              </p>
-              <div class="java-code-block">
-                <div class="java-code-header">
-                  <span class="java-code-lang">Java</span>
-                  <button type="button" class="java-code-copy" aria-label="Copy code" data-code="String name = &quot;Alice&quot;;    // Text
+          <div class="jv-concept">
+            <h4><i class="fas fa-laptop-code"></i> Choosing an IDE</h4>
+            <ul>
+              <li><strong>IntelliJ IDEA Community</strong> — free, feature-rich, recommended for beginners</li>
+              <li><strong>Eclipse</strong> — free, widely used in industry</li>
+              <li><strong>VS Code</strong> — lightweight with Java extension pack</li>
+            </ul>
+          </div>
+
+          <div class="jv-code-block">
+            <div class="jv-code-header">
+              <span class="jv-code-lang">Bash</span>
+              <button type="button" class="jv-code-copy" aria-label="Copy code" data-code='# Compile and run a Java program
+javac HelloWorld.java    # compiles to HelloWorld.class
+java HelloWorld          # runs the compiled bytecode'><i class="fas fa-copy"></i> Copy</button>
+            </div>
+            <pre><code><span class="cmt"># Compile and run a Java program</span>
+javac HelloWorld.java    <span class="cmt"># compiles to HelloWorld.class</span>
+java HelloWorld          <span class="cmt"># runs the compiled bytecode</span></code></pre>
+          </div>
+
+          <div class="jv-callout">
+            <p>Java is a <strong>compiled</strong> language: you write <code>.java</code> source files, compile them to <code>.class</code> bytecode with <code>javac</code>, and run the bytecode with <code>java</code> on the JVM.</p>
+          </div>
+        </article>
+
+        <!-- ════════════════════════════════════════
+             LESSON 3: VARIABLES & DATA TYPES
+             ════════════════════════════════════════ -->
+        <article class="jv-lesson" id="topic-variables" data-topic="2">
+          <div class="jv-lesson-header">
+            <span class="jv-lesson-number">03</span>
+            <h3>Variables &amp; Data Types</h3>
+          </div>
+
+          <p>
+            In Java, every variable has a declared <strong>type</strong>. Java is statically typed — once you declare a variable's type, it cannot hold a different kind of value.
+          </p>
+
+          <div class="jv-code-block">
+            <div class="jv-code-header">
+              <span class="jv-code-lang">Java</span>
+              <button type="button" class="jv-code-copy" aria-label="Copy code" data-code='String name = "Alice";    // Text
 int age = 25;                // Whole number
 double height = 5.7;         // Decimal number
 boolean isStudent = true;    // true / false
-char grade = 'A';            // Single character
+char grade = &#39;A&#39;;            // Single character
 
 System.out.println(name);
-System.out.println(age);">Copy</button>
-                </div>
-                <pre><code><span class="tok-bi">String</span> name = <span class="tok-str">"Alice"</span>;    <span class="tok-cmt">// Text</span>
-<span class="tok-kw">int</span> age = <span class="tok-num">25</span>;                <span class="tok-cmt">// Whole number</span>
-<span class="tok-kw">double</span> height = <span class="tok-num">5.7</span>;         <span class="tok-cmt">// Decimal number</span>
-<span class="tok-kw">boolean</span> isStudent = <span class="tok-bool">true</span>;    <span class="tok-cmt">// true / false</span>
-<span class="tok-kw">char</span> grade = <span class="tok-str">'A'</span>;            <span class="tok-cmt">// Single character</span>
+System.out.println(age);'><i class="fas fa-copy"></i> Copy</button>
+            </div>
+            <pre><code><span class="bi">String</span> name = <span class="str">"Alice"</span>;    <span class="cmt">// Text</span>
+<span class="kw">int</span> age = <span class="num">25</span>;                <span class="cmt">// Whole number</span>
+<span class="kw">double</span> height = <span class="num">5.7</span>;         <span class="cmt">// Decimal number</span>
+<span class="kw">boolean</span> isStudent = <span class="kw">true</span>;    <span class="cmt">// true / false</span>
+<span class="kw">char</span> grade = <span class="str">'"'"'A'"'"'</span>;            <span class="cmt">// Single character</span>
 
-<span class="tok-bi">System</span>.out.<span class="tok-fn">println</span>(name);
-<span class="tok-bi">System</span>.out.<span class="tok-fn">println</span>(age);</code></pre>
-              </div>
-              <div class="java-output">
-                <div class="java-output-label">Output</div>
-                <pre>Alice
+<span class="bi">System</span>.out.<span class="fn">println</span>(name);
+<span class="bi">System</span>.out.<span class="fn">println</span>(age);</code></pre>
+          </div>
+
+          <div class="jv-output">
+            <div class="jv-output-label">Output</div>
+            <pre>Alice
 25</pre>
-              </div>
-              <div class="java-table-wrap">
-                <table class="java-table" aria-label="Java primitive data types">
-                  <thead>
-                    <tr>
-                      <th scope="col">Type</th>
-                      <th scope="col">Size</th>
-                      <th scope="col">Example</th>
-                      <th scope="col">Description</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr><td><code>byte</code></td><td>8-bit</td><td><code>127</code></td><td>Small integer</td></tr>
-                    <tr><td><code>int</code></td><td>32-bit</td><td><code>42</code></td><td>Whole number</td></tr>
-                    <tr><td><code>long</code></td><td>64-bit</td><td><code>100L</code></td><td>Large integer</td></tr>
-                    <tr><td><code>float</code></td><td>32-bit</td><td><code>3.14f</code></td><td>Single precision decimal</td></tr>
-                    <tr><td><code>double</code></td><td>64-bit</td><td><code>3.14159</code></td><td>Double precision decimal</td></tr>
-                    <tr><td><code>char</code></td><td>16-bit</td><td><code>'A'</code></td><td>Single Unicode character</td></tr>
-                    <tr><td><code>boolean</code></td><td>1-bit</td><td><code>true/false</code></td><td>Logical value</td></tr>
-                  </tbody>
-                </table>
-              </div>
-              <div class="java-callout">
-                <span class="java-callout-icon">💡</span>
-                <p>Java also has <strong>reference types</strong> like <code>String</code>, arrays, and objects. Unlike primitives, reference types store a reference (memory address) to the actual data.</p>
-              </div>
+          </div>
 
-              <!-- Exercise -->
-              <div class="java-exercise" id="exercise-variables">
-                <div class="java-exercise-title">
-                  <i class="fas fa-dumbbell"></i> Practice: Variables &amp; Data Types
-                </div>
-                <p>Create variables of different primitive types and print them:</p>
-                <ol>
-                  <li>Create an <code>int</code> variable <code>score</code> with value <code>95</code></li>
-                  <li>Create a <code>double</code> variable <code>gpa</code> with value <code>3.85</code></li>
-                  <li>Create a <code>String</code> variable <code>city</code> with value <code>"New York"</code></li>
-                  <li>Create a <code>boolean</code> variable <code>passed</code> set to <code>true</code></li>
-                  <li>Print each variable using <code>System.out.println()</code></li>
-                </ol>
-                <button type="button" class="java-exercise-toggle" aria-expanded="false" aria-controls="solution-variables">Show Solution</button>
-                <div class="java-exercise-solution" id="solution-variables">
-                  <div class="java-code-block">
-                    <div class="java-code-header">
-                      <span class="java-code-lang">Java</span>
-                      <button type="button" class="java-code-copy" aria-label="Copy code" data-code="int score = 95;
+          <div class="jv-table-wrap">
+            <table class="jv-table" aria-label="Java primitive data types">
+              <thead>
+                <tr>
+                  <th scope="col">Type</th>
+                  <th scope="col">Size</th>
+                  <th scope="col">Example</th>
+                  <th scope="col">Description</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><td><code>byte</code></td><td>8-bit</td><td><code>127</code></td><td>Small integer</td></tr>
+                <tr><td><code>int</code></td><td>32-bit</td><td><code>42</code></td><td>Whole number</td></tr>
+                <tr><td><code>long</code></td><td>64-bit</td><td><code>100L</code></td><td>Large integer</td></tr>
+                <tr><td><code>float</code></td><td>32-bit</td><td><code>3.14f</code></td><td>Single precision decimal</td></tr>
+                <tr><td><code>double</code></td><td>64-bit</td><td><code>3.14159</code></td><td>Double precision decimal</td></tr>
+                <tr><td><code>char</code></td><td>16-bit</td><td><code>'A'</code></td><td>Single Unicode character</td></tr>
+                <tr><td><code>boolean</code></td><td>1-bit</td><td><code>true/false</code></td><td>Logical value</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="jv-callout">
+            <p>Java also has <strong>reference types</strong> like <code>String</code>, arrays, and objects. Unlike primitives, reference types store a memory address to the actual data.</p>
+          </div>
+
+          <!-- Exercise -->
+          <div class="jv-exercise" id="exercise-variables">
+            <div class="jv-exercise-title">
+              Practice: Variables &amp; Data Types
+            </div>
+            <p>Create variables of different primitive types and print them:</p>
+            <ol>
+              <li>Create an <code>int</code> variable <code>score</code> with value <code>95</code></li>
+              <li>Create a <code>double</code> variable <code>gpa</code> with value <code>3.85</code></li>
+              <li>Create a <code>String</code> variable <code>city</code> with value <code>"New York"</code></li>
+              <li>Create a <code>boolean</code> variable <code>passed</code> set to <code>true</code></li>
+              <li>Print each variable using <code>System.out.println()</code></li>
+            </ol>
+            <button type="button" class="jv-exercise-toggle" aria-expanded="false" aria-controls="solution-variables">Show Solution</button>
+            <div class="jv-exercise-solution" id="solution-variables">
+              <div class="jv-code-block">
+                <div class="jv-code-header">
+                  <span class="jv-code-lang">Java</span>
+                  <button type="button" class="jv-code-copy" aria-label="Copy code" data-code='int score = 95;
 double gpa = 3.85;
-String city = &quot;New York&quot;;
+String city = "New York";
 boolean passed = true;
 
-System.out.println(&quot;Score: &quot; + score);
-System.out.println(&quot;GPA: &quot; + gpa);
-System.out.println(&quot;City: &quot; + city);
-System.out.println(&quot;Passed: &quot; + passed);">Copy</button>
-                    </div>
-                    <pre><code><span class="tok-kw">int</span> score = <span class="tok-num">95</span>;
-<span class="tok-kw">double</span> gpa = <span class="tok-num">3.85</span>;
-<span class="tok-bi">String</span> city = <span class="tok-str">"New York"</span>;
-<span class="tok-kw">boolean</span> passed = <span class="tok-bool">true</span>;
-
-<span class="tok-bi">System</span>.out.<span class="tok-fn">println</span>(<span class="tok-str">"Score: "</span> + score);
-<span class="tok-bi">System</span>.out.<span class="tok-fn">println</span>(<span class="tok-str">"GPA: "</span> + gpa);
-<span class="tok-bi">System</span>.out.<span class="tok-fn">println</span>(<span class="tok-str">"City: "</span> + city);
-<span class="tok-bi">System</span>.out.<span class="tok-fn">println</span>(<span class="tok-str">"Passed: "</span> + passed);</code></pre>
-                  </div>
+System.out.println("Score: " + score);
+System.out.println("GPA: " + gpa);
+System.out.println("City: " + city);
+System.out.println("Passed: " + passed);'><i class="fas fa-copy"></i> Copy</button>
                 </div>
-              </div>
-            </article>
+                <pre><code><span class="kw">int</span> score = <span class="num">95</span>;
+<span class="kw">double</span> gpa = <span class="num">3.85</span>;
+<span class="bi">String</span> city = <span class="str">"New York"</span>;
+<span class="kw">boolean</span> passed = <span class="kw">true</span>;
 
-            <!-- 4. Input and Output -->
-            <article class="java-lesson" id="io" data-topic="4">
-              <div class="java-lesson-header">
-                <span class="java-lesson-number">04</span>
-                <h3>Input &amp; Output</h3>
+<span class="bi">System</span>.out.<span class="fn">println</span>(<span class="str">"Score: "</span> + score);
+<span class="bi">System</span>.out.<span class="fn">println</span>(<span class="str">"GPA: "</span> + gpa);
+<span class="bi">System</span>.out.<span class="fn">println</span>(<span class="str">"City: "</span> + city);
+<span class="bi">System</span>.out.<span class="fn">println</span>(<span class="str">"Passed: "</span> + passed);</code></pre>
               </div>
-              <p>
-                Java provides <code>System.out.println()</code> for output and the <code>Scanner</code> class for reading user input.
-              </p>
-              <div class="java-concept-card">
-                <h4>System.out — Displaying Output</h4>
-                <p><code>System.out.println()</code> prints text followed by a newline. Use <code>System.out.print()</code> to print without a newline.</p>
-              </div>
-              <div class="java-code-block">
-                <div class="java-code-header">
-                  <span class="java-code-lang">Java</span>
-                  <button type="button" class="java-code-copy" aria-label="Copy code" data-code="String name = &quot;Alice&quot;;
+            </div>
+          </div>
+        </article>
+
+        <!-- ════════════════════════════════════════
+             LESSON 4: INPUT & OUTPUT
+             ════════════════════════════════════════ -->
+        <article class="jv-lesson" id="topic-io" data-topic="3">
+          <div class="jv-lesson-header">
+            <span class="jv-lesson-number">04</span>
+            <h3>Input &amp; Output</h3>
+          </div>
+
+          <p>
+            Java provides <code>System.out.println()</code> for output and the <code>Scanner</code> class for reading user input.
+          </p>
+
+          <div class="jv-concept">
+            <h4>System.out — Displaying Output</h4>
+            <p><code>System.out.println()</code> prints text followed by a newline. Use <code>System.out.print()</code> to print without a newline.</p>
+          </div>
+
+          <div class="jv-code-block">
+            <div class="jv-code-header">
+              <span class="jv-code-lang">Java</span>
+              <button type="button" class="jv-code-copy" aria-label="Copy code" data-code='String name = "Alice";
 int age = 25;
 
-System.out.println(&quot;My name is &quot; + name + &quot; and I am &quot; + age + &quot; years old.&quot;);
-System.out.printf(&quot;Name: %s | Age: %d%n&quot;, name, age);">Copy</button>
-                </div>
-                <pre><code><span class="tok-bi">String</span> name = <span class="tok-str">"Alice"</span>;
-<span class="tok-kw">int</span> age = <span class="tok-num">25</span>;
+System.out.println("My name is " + name + " and I am " + age + " years old.");
+System.out.printf("Name: %s | Age: %d%n", name, age);'><i class="fas fa-copy"></i> Copy</button>
+            </div>
+            <pre><code><span class="bi">String</span> name = <span class="str">"Alice"</span>;
+<span class="kw">int</span> age = <span class="num">25</span>;
 
-<span class="tok-bi">System</span>.out.<span class="tok-fn">println</span>(<span class="tok-str">"My name is "</span> + name + <span class="tok-str">" and I am "</span> + age + <span class="tok-str">" years old."</span>);
-<span class="tok-bi">System</span>.out.<span class="tok-fn">printf</span>(<span class="tok-str">"Name: %s | Age: %d%n"</span>, name, age);</code></pre>
-              </div>
-              <div class="java-output">
-                <div class="java-output-label">Output</div>
-                <pre>My name is Alice and I am 25 years old.
+<span class="bi">System</span>.out.<span class="fn">println</span>(<span class="str">"My name is "</span> + name + <span class="str">" and I am "</span> + age + <span class="str">" years old."</span>);
+<span class="bi">System</span>.out.<span class="fn">printf</span>(<span class="str">"Name: %s | Age: %d%n"</span>, name, age);</code></pre>
+          </div>
+
+          <div class="jv-output">
+            <div class="jv-output-label">Output</div>
+            <pre>My name is Alice and I am 25 years old.
 Name: Alice | Age: 25</pre>
-              </div>
-              <div class="java-concept-card">
-                <h4>Scanner — Reading User Input</h4>
-                <p>The <code>Scanner</code> class reads input from the console. Import it from <code>java.util</code>.</p>
-              </div>
-              <div class="java-code-block">
-                <div class="java-code-header">
-                  <span class="java-code-lang">Java</span>
-                  <button type="button" class="java-code-copy" aria-label="Copy code" data-code="import java.util.Scanner;
+          </div>
+
+          <div class="jv-concept">
+            <h4>Scanner — Reading User Input</h4>
+            <p>The <code>Scanner</code> class reads input from the console. Import it from <code>java.util</code>.</p>
+          </div>
+
+          <div class="jv-code-block">
+            <div class="jv-code-header">
+              <span class="jv-code-lang">Java</span>
+              <button type="button" class="jv-code-copy" aria-label="Copy code" data-code='import java.util.Scanner;
 
 public class Greeting {
     public static void main(String[] args) {
         Scanner sc = new Scanner(System.in);
 
-        System.out.print(&quot;What is your name? &quot;);
+        System.out.print("What is your name? ");
         String name = sc.nextLine();
 
-        System.out.print(&quot;How old are you? &quot;);
+        System.out.print("How old are you? ");
         int age = sc.nextInt();
 
-        System.out.println(&quot;Hello, &quot; + name + &quot;! In 10 years you will be &quot; + (age + 10) + &quot;.&quot;);
+        System.out.println("Hello, " + name + "! In 10 years you will be " + (age + 10) + ".");
         sc.close();
     }
-}">Copy</button>
-                </div>
-                <pre><code><span class="tok-kw">import</span> <span class="tok-bi">java.util.Scanner</span>;
+}'><i class="fas fa-copy"></i> Copy</button>
+            </div>
+            <pre><code><span class="kw">import</span> <span class="bi">java.util.Scanner</span>;
 
-<span class="tok-kw">public class</span> <span class="tok-bi">Greeting</span> {
-    <span class="tok-kw">public static void</span> <span class="tok-fn">main</span>(<span class="tok-bi">String</span>[] args) {
-        <span class="tok-bi">Scanner</span> sc = <span class="tok-kw">new</span> <span class="tok-bi">Scanner</span>(<span class="tok-bi">System</span>.in);
+<span class="kw">public class</span> <span class="bi">Greeting</span> {
+    <span class="kw">public static void</span> <span class="fn">main</span>(<span class="bi">String</span>[] args) {
+        <span class="bi">Scanner</span> sc = <span class="kw">new</span> <span class="bi">Scanner</span>(<span class="bi">System</span>.in);
 
-        <span class="tok-bi">System</span>.out.<span class="tok-fn">print</span>(<span class="tok-str">"What is your name? "</span>);
-        <span class="tok-bi">String</span> name = sc.<span class="tok-fn">nextLine</span>();
+        <span class="bi">System</span>.out.<span class="fn">print</span>(<span class="str">"What is your name? "</span>);
+        <span class="bi">String</span> name = sc.<span class="fn">nextLine</span>();
 
-        <span class="tok-bi">System</span>.out.<span class="tok-fn">print</span>(<span class="tok-str">"How old are you? "</span>);
-        <span class="tok-kw">int</span> age = sc.<span class="tok-fn">nextInt</span>();
+        <span class="bi">System</span>.out.<span class="fn">print</span>(<span class="str">"How old are you? "</span>);
+        <span class="kw">int</span> age = sc.<span class="fn">nextInt</span>();
 
-        <span class="tok-bi">System</span>.out.<span class="tok-fn">println</span>(<span class="tok-str">"Hello, "</span> + name + <span class="tok-str">"! In 10 years you will be "</span> + (age + <span class="tok-num">10</span>) + <span class="tok-str">"."</span>);
-        sc.<span class="tok-fn">close</span>();
+        <span class="bi">System</span>.out.<span class="fn">println</span>(<span class="str">"Hello, "</span> + name + <span class="str">"! In 10 years you will be "</span> + (age + <span class="num">10</span>) + <span class="str">"."</span>);
+        sc.<span class="fn">close</span>();
     }
 }</code></pre>
-              </div>
-              <div class="java-callout">
-                <span class="java-callout-icon">⚠️</span>
-                <p>Always call <code>sc.close()</code> to release the scanner resource. <code>nextLine()</code> reads a whole line; <code>nextInt()</code> reads an integer. Be careful about mixing them — <code>nextInt()</code> leaves a newline that <code>nextLine()</code> will consume!</p>
-              </div>
+          </div>
 
-              <!-- Exercise -->
-              <div class="java-exercise" id="exercise-io">
-                <div class="java-exercise-title">
-                  <i class="fas fa-dumbbell"></i> Practice: Input &amp; Output
-                </div>
-                <p>Write a program that asks the user for their name and favorite color, then prints a greeting.</p>
-                <ol>
-                  <li>Import <code>java.util.Scanner</code></li>
-                  <li>Ask for name and favorite color using <code>nextLine()</code></li>
-                  <li>Print: <code>"Hello {name}, your favorite color is {color}!"</code></li>
-                </ol>
-                <button type="button" class="java-exercise-toggle" aria-expanded="false" aria-controls="solution-io">Show Solution</button>
-                <div class="java-exercise-solution" id="solution-io">
-                  <div class="java-code-block">
-                    <div class="java-code-header">
-                      <span class="java-code-lang">Java</span>
-                      <button type="button" class="java-code-copy" aria-label="Copy code" data-code="import java.util.Scanner;
+          <div class="jv-callout">
+            <p>Always call <code>sc.close()</code> to release the scanner resource. <code>nextLine()</code> reads a whole line; <code>nextInt()</code> reads an integer. Be careful mixing them — <code>nextInt()</code> leaves a newline that <code>nextLine()</code> will consume!</p>
+          </div>
+
+          <!-- Exercise -->
+          <div class="jv-exercise" id="exercise-io">
+            <div class="jv-exercise-title">
+              Practice: Input &amp; Output
+            </div>
+            <p>Write a program that asks the user for their name and favorite color, then prints a greeting.</p>
+            <ol>
+              <li>Import <code>java.util.Scanner</code></li>
+              <li>Ask for name and favorite color using <code>nextLine()</code></li>
+              <li>Print: <code>"Hello {name}, your favorite color is {color}!"</code></li>
+            </ol>
+            <button type="button" class="jv-exercise-toggle" aria-expanded="false" aria-controls="solution-io">Show Solution</button>
+            <div class="jv-exercise-solution" id="solution-io">
+              <div class="jv-code-block">
+                <div class="jv-code-header">
+                  <span class="jv-code-lang">Java</span>
+                  <button type="button" class="jv-code-copy" aria-label="Copy code" data-code='import java.util.Scanner;
 
 public class Greeting {
     public static void main(String[] args) {
         Scanner sc = new Scanner(System.in);
 
-        System.out.print(&quot;Enter your name: &quot;);
+        System.out.print("Enter your name: ");
         String name = sc.nextLine();
 
-        System.out.print(&quot;Enter your favorite color: &quot;);
+        System.out.print("Enter your favorite color: ");
         String color = sc.nextLine();
 
-        System.out.println(&quot;Hello &quot; + name + &quot;, your favorite color is &quot; + color + &quot;!&quot;);
+        System.out.println("Hello " + name + ", your favorite color is " + color + "!");
         sc.close();
     }
-}">Copy</button>
-                    </div>
-                    <pre><code><span class="tok-kw">import</span> <span class="tok-bi">java.util.Scanner</span>;
+}'><i class="fas fa-copy"></i> Copy</button>
+                </div>
+                <pre><code><span class="kw">import</span> <span class="bi">java.util.Scanner</span>;
 
-<span class="tok-kw">public class</span> <span class="tok-bi">Greeting</span> {
-    <span class="tok-kw">public static void</span> <span class="tok-fn">main</span>(<span class="tok-bi">String</span>[] args) {
-        <span class="tok-bi">Scanner</span> sc = <span class="tok-kw">new</span> <span class="tok-bi">Scanner</span>(<span class="tok-bi">System</span>.in);
+<span class="kw">public class</span> <span class="bi">Greeting</span> {
+    <span class="kw">public static void</span> <span class="fn">main</span>(<span class="bi">String</span>[] args) {
+        <span class="bi">Scanner</span> sc = <span class="kw">new</span> <span class="bi">Scanner</span>(<span class="bi">System</span>.in);
 
-        <span class="tok-bi">System</span>.out.<span class="tok-fn">print</span>(<span class="tok-str">"Enter your name: "</span>);
-        <span class="tok-bi">String</span> name = sc.<span class="tok-fn">nextLine</span>();
+        <span class="bi">System</span>.out.<span class="fn">print</span>(<span class="str">"Enter your name: "</span>);
+        <span class="bi">String</span> name = sc.<span class="fn">nextLine</span>();
 
-        <span class="tok-bi">System</span>.out.<span class="tok-fn">print</span>(<span class="tok-str">"Enter your favorite color: "</span>);
-        <span class="tok-bi">String</span> color = sc.<span class="tok-fn">nextLine</span>();
+        <span class="bi">System</span>.out.<span class="fn">print</span>(<span class="str">"Enter your favorite color: "</span>);
+        <span class="bi">String</span> color = sc.<span class="fn">nextLine</span>();
 
-        <span class="tok-bi">System</span>.out.<span class="tok-fn">println</span>(<span class="tok-str">"Hello "</span> + name + <span class="tok-str">", your favorite color is "</span> + color + <span class="tok-str">"!"</span>);
-        sc.<span class="tok-fn">close</span>();
+        <span class="bi">System</span>.out.<span class="fn">println</span>(<span class="str">"Hello "</span> + name + <span class="str">", your favorite color is "</span> + color + <span class="str">"!"</span>);
+        sc.<span class="fn">close</span>();
     }
 }</code></pre>
-                  </div>
-                </div>
               </div>
-            </article>
+            </div>
+          </div>
+        </article>
 
-            <!-- 5. Operators -->
-            <article class="java-lesson" id="operators" data-topic="5">
-              <div class="java-lesson-header">
-                <span class="java-lesson-number">05</span>
-                <h3>Operators</h3>
-              </div>
-              <p>
-                Operators perform operations on variables and values. Java supports arithmetic, assignment, comparison, logical, and more.
-              </p>
-              <div class="java-table-wrap">
-                <table class="java-table" aria-label="Java operators">
-                  <thead>
-                    <tr>
-                      <th scope="col">Category</th>
-                      <th scope="col">Operators</th>
-                      <th scope="col">Example</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr><td>Arithmetic</td><td><code>+ - * / %</code></td><td><code>10 + 5 → 15</code></td></tr>
-                    <tr><td>Assignment</td><td><code>= += -= *= /=</code></td><td><code>x += 5</code></td></tr>
-                    <tr><td>Comparison</td><td><code>== != &lt; &gt; &lt;= &gt;=</code></td><td><code>10 &gt; 5 → true</code></td></tr>
-                    <tr><td>Logical</td><td><code>&& || !</code></td><td><code>true && false → false</code></td></tr>
-                    <tr><td>Unary</td><td><code>++ -- !</code></td><td><code>i++</code></td></tr>
-                  </tbody>
-                </table>
-              </div>
-              <div class="java-code-block">
-                <div class="java-code-header">
-                  <span class="java-code-lang">Java</span>
-                  <button type="button" class="java-code-copy" aria-label="Copy code" data-code="int a = 10;
+        <!-- ════════════════════════════════════════
+             LESSON 5: OPERATORS
+             ════════════════════════════════════════ -->
+        <article class="jv-lesson" id="topic-operators" data-topic="4">
+          <div class="jv-lesson-header">
+            <span class="jv-lesson-number">05</span>
+            <h3>Operators</h3>
+          </div>
+
+          <p>
+            Operators perform operations on variables and values. Java supports arithmetic, assignment, comparison, logical, and more.
+          </p>
+
+          <div class="jv-table-wrap">
+            <table class="jv-table" aria-label="Java operators">
+              <thead>
+                <tr>
+                  <th scope="col">Category</th>
+                  <th scope="col">Operators</th>
+                  <th scope="col">Example</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><td>Arithmetic</td><td><code>+ - * / %</code></td><td><code>10 + 5 → 15</code></td></tr>
+                <tr><td>Assignment</td><td><code>= += -= *= /=</code></td><td><code>x += 5</code></td></tr>
+                <tr><td>Comparison</td><td><code>== != &lt; &gt; &lt;= &gt;=</code></td><td><code>10 &gt; 5 → true</code></td></tr>
+                <tr><td>Logical</td><td><code>&amp;&amp; || !</code></td><td><code>true &amp;&amp; false → false</code></td></tr>
+                <tr><td>Unary</td><td><code>++ -- !</code></td><td><code>i++</code></td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="jv-code-block">
+            <div class="jv-code-header">
+              <span class="jv-code-lang">Java</span>
+              <button type="button" class="jv-code-copy" aria-label="Copy code" data-code='int a = 10;
 int b = 5;
 
 // Arithmetic
@@ -511,261 +538,276 @@ int remainder = a % b;
 boolean isGreater = a > b;
 boolean bothPositive = (a > 0) && (b > 0);
 
-System.out.println(&quot;Sum: &quot; + sum);
-System.out.println(&quot;Product: &quot; + product);
-System.out.println(&quot;Remainder: &quot; + remainder);
-System.out.println(&quot;Is a &gt; b? &quot; + isGreater);
-System.out.println(&quot;Both positive? &quot; + bothPositive);">Copy</button>
-                </div>
-                <pre><code><span class="tok-kw">int</span> a = <span class="tok-num">10</span>;
-<span class="tok-kw">int</span> b = <span class="tok-num">5</span>;
+System.out.println("Sum: " + sum);
+System.out.println("Product: " + product);
+System.out.println("Remainder: " + remainder);
+System.out.println("Is a > b? " + isGreater);
+System.out.println("Both positive? " + bothPositive);'><i class="fas fa-copy"></i> Copy</button>
+            </div>
+            <pre><code><span class="kw">int</span> a = <span class="num">10</span>;
+<span class="kw">int</span> b = <span class="num">5</span>;
 
-<span class="tok-cmt">// Arithmetic</span>
-<span class="tok-kw">int</span> sum = a + b;
-<span class="tok-kw">int</span> product = a * b;
-<span class="tok-kw">int</span> remainder = a % b;
+<span class="cmt">// Arithmetic</span>
+<span class="kw">int</span> sum = a + b;
+<span class="kw">int</span> product = a * b;
+<span class="kw">int</span> remainder = a % b;
 
-<span class="tok-cmt">// Comparison &amp; Logical</span>
-<span class="tok-kw">boolean</span> isGreater = a > b;
-<span class="tok-kw">boolean</span> bothPositive = (a > <span class="tok-num">0</span>) && (b > <span class="tok-num">0</span>);
+<span class="cmt">// Comparison &amp; Logical</span>
+<span class="kw">boolean</span> isGreater = a > b;
+<span class="kw">boolean</span> bothPositive = (a > <span class="num">0</span>) && (b > <span class="num">0</span>);
 
-<span class="tok-bi">System</span>.out.<span class="tok-fn">println</span>(<span class="tok-str">"Sum: "</span> + sum);
-<span class="tok-bi">System</span>.out.<span class="tok-fn">println</span>(<span class="tok-str">"Product: "</span> + product);
-<span class="tok-bi">System</span>.out.<span class="tok-fn">println</span>(<span class="tok-str">"Remainder: "</span> + remainder);
-<span class="tok-bi">System</span>.out.<span class="tok-fn">println</span>(<span class="tok-str">"Is a > b? "</span> + isGreater);
-<span class="tok-bi">System</span>.out.<span class="tok-fn">println</span>(<span class="tok-str">"Both positive? "</span> + bothPositive);</code></pre>
-              </div>
-              <div class="java-output">
-                <div class="java-output-label">Output</div>
-                <pre>Sum: 15
+<span class="bi">System</span>.out.<span class="fn">println</span>(<span class="str">"Sum: "</span> + sum);
+<span class="bi">System</span>.out.<span class="fn">println</span>(<span class="str">"Product: "</span> + product);
+<span class="bi">System</span>.out.<span class="fn">println</span>(<span class="str">"Remainder: "</span> + remainder);
+<span class="bi">System</span>.out.<span class="fn">println</span>(<span class="str">"Is a > b? "</span> + isGreater);
+<span class="bi">System</span>.out.<span class="fn">println</span>(<span class="str">"Both positive? "</span> + bothPositive);</code></pre>
+          </div>
+
+          <div class="jv-output">
+            <div class="jv-output-label">Output</div>
+            <pre>Sum: 15
 Product: 50
 Remainder: 0
 Is a > b? true
 Both positive? true</pre>
-              </div>
+          </div>
 
-              <!-- Exercise -->
-              <div class="java-exercise" id="exercise-operators">
-                <div class="java-exercise-title">
-                  <i class="fas fa-dumbbell"></i> Practice: Operators
-                </div>
-                <p>Calculate the area and perimeter of a rectangle with width <code>8</code> and length <code>12</code>.</p>
-                <ol>
-                  <li>Create <code>int</code> variables <code>width</code> and <code>length</code></li>
-                  <li>Calculate <code>area = width * length</code></li>
-                  <li>Calculate <code>perimeter = 2 * (width + length)</code></li>
-                  <li>Print both results</li>
-                </ol>
-                <button type="button" class="java-exercise-toggle" aria-expanded="false" aria-controls="solution-operators">Show Solution</button>
-                <div class="java-exercise-solution" id="solution-operators">
-                  <div class="java-code-block">
-                    <div class="java-code-header">
-                      <span class="java-code-lang">Java</span>
-                      <button type="button" class="java-code-copy" aria-label="Copy code" data-code="int width = 8;
+          <!-- Exercise -->
+          <div class="jv-exercise" id="exercise-operators">
+            <div class="jv-exercise-title">
+              Practice: Operators
+            </div>
+            <p>Calculate the area and perimeter of a rectangle with width <code>8</code> and length <code>12</code>.</p>
+            <ol>
+              <li>Create <code>int</code> variables <code>width</code> and <code>length</code></li>
+              <li>Calculate <code>area = width * length</code></li>
+              <li>Calculate <code>perimeter = 2 * (width + length)</code></li>
+              <li>Print both results</li>
+            </ol>
+            <button type="button" class="jv-exercise-toggle" aria-expanded="false" aria-controls="solution-operators">Show Solution</button>
+            <div class="jv-exercise-solution" id="solution-operators">
+              <div class="jv-code-block">
+                <div class="jv-code-header">
+                  <span class="jv-code-lang">Java</span>
+                  <button type="button" class="jv-code-copy" aria-label="Copy code" data-code='int width = 8;
 int length = 12;
 int area = width * length;
 int perimeter = 2 * (width + length);
 
-System.out.println(&quot;Area: &quot; + area);
-System.out.println(&quot;Perimeter: &quot; + perimeter);">Copy</button>
-                    </div>
-                    <pre><code><span class="tok-kw">int</span> width = <span class="tok-num">8</span>;
-<span class="tok-kw">int</span> length = <span class="tok-num">12</span>;
-<span class="tok-kw">int</span> area = width * length;
-<span class="tok-kw">int</span> perimeter = <span class="tok-num">2</span> * (width + length);
-
-<span class="tok-bi">System</span>.out.<span class="tok-fn">println</span>(<span class="tok-str">"Area: "</span> + area);
-<span class="tok-bi">System</span>.out.<span class="tok-fn">println</span>(<span class="tok-str">"Perimeter: "</span> + perimeter);</code></pre>
-                  </div>
+System.out.println("Area: " + area);
+System.out.println("Perimeter: " + perimeter);'><i class="fas fa-copy"></i> Copy</button>
                 </div>
-              </div>
-            </article>
+                <pre><code><span class="kw">int</span> width = <span class="num">8</span>;
+<span class="kw">int</span> length = <span class="num">12</span>;
+<span class="kw">int</span> area = width * length;
+<span class="kw">int</span> perimeter = <span class="num">2</span> * (width + length);
 
-            <!-- 6. Conditional Statements -->
-            <article class="java-lesson" id="conditionals" data-topic="6">
-              <div class="java-lesson-header">
-                <span class="java-lesson-number">06</span>
-                <h3>Conditional Statements</h3>
+<span class="bi">System</span>.out.<span class="fn">println</span>(<span class="str">"Area: "</span> + area);
+<span class="bi">System</span>.out.<span class="fn">println</span>(<span class="str">"Perimeter: "</span> + perimeter);</code></pre>
               </div>
-              <p>
-                Conditionals let your program make decisions. Java supports <code>if</code>, <code>else if</code>, <code>else</code>, and <code>switch</code> statements.
-              </p>
-              <div class="java-code-block">
-                <div class="java-code-header">
-                  <span class="java-code-lang">Java</span>
-                  <button type="button" class="java-code-copy" aria-label="Copy code" data-code="int score = 85;
+            </div>
+          </div>
+        </article>
+
+        <!-- ════════════════════════════════════════
+             LESSON 6: CONDITIONAL STATEMENTS
+             ════════════════════════════════════════ -->
+        <article class="jv-lesson" id="topic-conditionals" data-topic="5">
+          <div class="jv-lesson-header">
+            <span class="jv-lesson-number">06</span>
+            <h3>Conditional Statements</h3>
+          </div>
+
+          <p>
+            Conditionals let your program make decisions. Java supports <code>if</code>, <code>else if</code>, <code>else</code>, and <code>switch</code> statements.
+          </p>
+
+          <div class="jv-code-block">
+            <div class="jv-code-header">
+              <span class="jv-code-lang">Java</span>
+              <button type="button" class="jv-code-copy" aria-label="Copy code" data-code='int score = 85;
 char grade;
 
 if (score >= 90) {
-    grade = 'A';
+    grade = &#39;A&#39;;
 } else if (score >= 80) {
-    grade = 'B';
+    grade = &#39;B&#39;;
 } else if (score >= 70) {
-    grade = 'C';
+    grade = &#39;C&#39;;
 } else {
-    grade = 'F';
+    grade = &#39;F&#39;;
 }
 
-System.out.println(&quot;Score: &quot; + score + &quot; → Grade: &quot; + grade);">Copy</button>
-                </div>
-                <pre><code><span class="tok-kw">int</span> score = <span class="tok-num">85</span>;
-<span class="tok-kw">char</span> grade;
+System.out.println("Score: " + score + " → Grade: " + grade);'><i class="fas fa-copy"></i> Copy</button>
+            </div>
+            <pre><code><span class="kw">int</span> score = <span class="num">85</span>;
+<span class="kw">char</span> grade;
 
-<span class="tok-kw">if</span> (score >= <span class="tok-num">90</span>) {
-    grade = <span class="tok-str">'A'</span>;
-} <span class="tok-kw">else if</span> (score >= <span class="tok-num">80</span>) {
-    grade = <span class="tok-str">'B'</span>;
-} <span class="tok-kw">else if</span> (score >= <span class="tok-num">70</span>) {
-    grade = <span class="tok-str">'C'</span>;
-} <span class="tok-kw">else</span> {
-    grade = <span class="tok-str">'F'</span>;
+<span class="kw">if</span> (score >= <span class="num">90</span>) {
+    grade = <span class="str">'"'"'A'"'"'</span>;
+} <span class="kw">else if</span> (score >= <span class="num">80</span>) {
+    grade = <span class="str">'"'"'B'"'"'</span>;
+} <span class="kw">else if</span> (score >= <span class="num">70</span>) {
+    grade = <span class="str">'"'"'C'"'"'</span>;
+} <span class="kw">else</span> {
+    grade = <span class="str">'"'"'F'"'"'</span>;
 }
 
-<span class="tok-bi">System</span>.out.<span class="tok-fn">println</span>(<span class="tok-str">"Score: "</span> + score + <span class="tok-str">" → Grade: "</span> + grade);</code></pre>
-              </div>
-              <div class="java-output">
-                <div class="java-output-label">Output</div>
-                <pre>Score: 85 → Grade: B</pre>
-              </div>
-              <div class="java-concept-card">
-                <h4>switch Statement</h4>
-                <p>The <code>switch</code> statement is useful when checking a variable against many specific values.</p>
-              </div>
-              <div class="java-code-block">
-                <div class="java-code-header">
-                  <span class="java-code-lang">Java</span>
-                  <button type="button" class="java-code-copy" aria-label="Copy code" data-code="int day = 3;
+<span class="bi">System</span>.out.<span class="fn">println</span>(<span class="str">"Score: "</span> + score + <span class="str">" → Grade: "</span> + grade);</code></pre>
+          </div>
+
+          <div class="jv-output">
+            <div class="jv-output-label">Output</div>
+            <pre>Score: 85 → Grade: B</pre>
+          </div>
+
+          <div class="jv-concept">
+            <h4>switch Statement</h4>
+            <p>The <code>switch</code> statement is useful when checking a variable against many specific values.</p>
+          </div>
+
+          <div class="jv-code-block">
+            <div class="jv-code-header">
+              <span class="jv-code-lang">Java</span>
+              <button type="button" class="jv-code-copy" aria-label="Copy code" data-code='int day = 3;
 String dayName;
 
 switch (day) {
-    case 1:  dayName = &quot;Monday&quot;;    break;
-    case 2:  dayName = &quot;Tuesday&quot;;   break;
-    case 3:  dayName = &quot;Wednesday&quot;; break;
-    case 4:  dayName = &quot;Thursday&quot;;  break;
-    case 5:  dayName = &quot;Friday&quot;;    break;
-    default: dayName = &quot;Weekend&quot;;
+    case 1:  dayName = "Monday";    break;
+    case 2:  dayName = "Tuesday";   break;
+    case 3:  dayName = "Wednesday"; break;
+    case 4:  dayName = "Thursday";  break;
+    case 5:  dayName = "Friday";    break;
+    default: dayName = "Weekend";
 }
 
-System.out.println(dayName);">Copy</button>
-                </div>
-                <pre><code><span class="tok-kw">int</span> day = <span class="tok-num">3</span>;
-<span class="tok-bi">String</span> dayName;
+System.out.println(dayName);'><i class="fas fa-copy"></i> Copy</button>
+            </div>
+            <pre><code><span class="kw">int</span> day = <span class="num">3</span>;
+<span class="bi">String</span> dayName;
 
-<span class="tok-kw">switch</span> (day) {
-    <span class="tok-kw">case</span> <span class="tok-num">1</span>:  dayName = <span class="tok-str">"Monday"</span>;    <span class="tok-kw">break</span>;
-    <span class="tok-kw">case</span> <span class="tok-num">2</span>:  dayName = <span class="tok-str">"Tuesday"</span>;   <span class="tok-kw">break</span>;
-    <span class="tok-kw">case</span> <span class="tok-num">3</span>:  dayName = <span class="tok-str">"Wednesday"</span>; <span class="tok-kw">break</span>;
-    <span class="tok-kw">case</span> <span class="tok-num">4</span>:  dayName = <span class="tok-str">"Thursday"</span>;  <span class="tok-kw">break</span>;
-    <span class="tok-kw">case</span> <span class="tok-num">5</span>:  dayName = <span class="tok-str">"Friday"</span>;    <span class="tok-kw">break</span>;
-    <span class="tok-kw">default</span>: dayName = <span class="tok-str">"Weekend"</span>;
+<span class="kw">switch</span> (day) {
+    <span class="kw">case</span> <span class="num">1</span>:  dayName = <span class="str">"Monday"</span>;    <span class="kw">break</span>;
+    <span class="kw">case</span> <span class="num">2</span>:  dayName = <span class="str">"Tuesday"</span>;   <span class="kw">break</span>;
+    <span class="kw">case</span> <span class="num">3</span>:  dayName = <span class="str">"Wednesday"</span>; <span class="kw">break</span>;
+    <span class="kw">case</span> <span class="num">4</span>:  dayName = <span class="str">"Thursday"</span>;  <span class="kw">break</span>;
+    <span class="kw">case</span> <span class="num">5</span>:  dayName = <span class="str">"Friday"</span>;    <span class="kw">break</span>;
+    <span class="kw">default</span>: dayName = <span class="str">"Weekend"</span>;
 }
 
-<span class="tok-bi">System</span>.out.<span class="tok-fn">println</span>(dayName);</code></pre>
-              </div>
-              <div class="java-output">
-                <div class="java-output-label">Output</div>
-                <pre>Wednesday</pre>
-              </div>
+<span class="bi">System</span>.out.<span class="fn">println</span>(dayName);</code></pre>
+          </div>
 
-              <!-- Exercise -->
-              <div class="java-exercise" id="exercise-conditionals">
-                <div class="java-exercise-title">
-                  <i class="fas fa-dumbbell"></i> Practice: Conditionals
-                </div>
-                <p>Write a program that reads a number and prints whether it is positive, negative, or zero.</p>
-                <ol>
-                  <li>Use <code>Scanner</code> to read an integer</li>
-                  <li>Use <code>if</code>/<code>else if</code>/<code>else</code> to check the number</li>
-                  <li>Print the result</li>
-                </ol>
-                <button type="button" class="java-exercise-toggle" aria-expanded="false" aria-controls="solution-conditionals">Show Solution</button>
-                <div class="java-exercise-solution" id="solution-conditionals">
-                  <div class="java-code-block">
-                    <div class="java-code-header">
-                      <span class="java-code-lang">Java</span>
-                      <button type="button" class="java-code-copy" aria-label="Copy code" data-code="import java.util.Scanner;
+          <div class="jv-output">
+            <div class="jv-output-label">Output</div>
+            <pre>Wednesday</pre>
+          </div>
+
+          <!-- Exercise -->
+          <div class="jv-exercise" id="exercise-conditionals">
+            <div class="jv-exercise-title">
+              Practice: Conditionals
+            </div>
+            <p>Write a program that reads a number and prints whether it is positive, negative, or zero.</p>
+            <ol>
+              <li>Use <code>Scanner</code> to read an integer</li>
+              <li>Use <code>if</code>/<code>else if</code>/<code>else</code> to check the number</li>
+              <li>Print the result</li>
+            </ol>
+            <button type="button" class="jv-exercise-toggle" aria-expanded="false" aria-controls="solution-conditionals">Show Solution</button>
+            <div class="jv-exercise-solution" id="solution-conditionals">
+              <div class="jv-code-block">
+                <div class="jv-code-header">
+                  <span class="jv-code-lang">Java</span>
+                  <button type="button" class="jv-code-copy" aria-label="Copy code" data-code='import java.util.Scanner;
 
 public class CheckNumber {
     public static void main(String[] args) {
         Scanner sc = new Scanner(System.in);
-        System.out.print(&quot;Enter a number: &quot;);
+        System.out.print("Enter a number: ");
         int num = sc.nextInt();
 
-        if (num &gt; 0) {
-            System.out.println(&quot;Positive&quot;);
-        } else if (num &lt; 0) {
-            System.out.println(&quot;Negative&quot;);
+        if (num > 0) {
+            System.out.println("Positive");
+        } else if (num < 0) {
+            System.out.println("Negative");
         } else {
-            System.out.println(&quot;Zero&quot;);
+            System.out.println("Zero");
         }
         sc.close();
     }
-}">Copy</button>
-                    </div>
-                    <pre><code><span class="tok-kw">import</span> <span class="tok-bi">java.util.Scanner</span>;
+}'><i class="fas fa-copy"></i> Copy</button>
+                </div>
+                <pre><code><span class="kw">import</span> <span class="bi">java.util.Scanner</span>;
 
-<span class="tok-kw">public class</span> <span class="tok-bi">CheckNumber</span> {
-    <span class="tok-kw">public static void</span> <span class="tok-fn">main</span>(<span class="tok-bi">String</span>[] args) {
-        <span class="tok-bi">Scanner</span> sc = <span class="tok-kw">new</span> <span class="tok-bi">Scanner</span>(<span class="tok-bi">System</span>.in);
-        <span class="tok-bi">System</span>.out.<span class="tok-fn">print</span>(<span class="tok-str">"Enter a number: "</span>);
-        <span class="tok-kw">int</span> num = sc.<span class="tok-fn">nextInt</span>();
+<span class="kw">public class</span> <span class="bi">CheckNumber</span> {
+    <span class="kw">public static void</span> <span class="fn">main</span>(<span class="bi">String</span>[] args) {
+        <span class="bi">Scanner</span> sc = <span class="kw">new</span> <span class="bi">Scanner</span>(<span class="bi">System</span>.in);
+        <span class="bi">System</span>.out.<span class="fn">print</span>(<span class="str">"Enter a number: "</span>);
+        <span class="kw">int</span> num = sc.<span class="fn">nextInt</span>();
 
-        <span class="tok-kw">if</span> (num > <span class="tok-num">0</span>) {
-            <span class="tok-bi">System</span>.out.<span class="tok-fn">println</span>(<span class="tok-str">"Positive"</span>);
-        } <span class="tok-kw">else if</span> (num < <span class="tok-num">0</span>) {
-            <span class="tok-bi">System</span>.out.<span class="tok-fn">println</span>(<span class="tok-str">"Negative"</span>);
-        } <span class="tok-kw">else</span> {
-            <span class="tok-bi">System</span>.out.<span class="tok-fn">println</span>(<span class="tok-str">"Zero"</span>);
+        <span class="kw">if</span> (num > <span class="num">0</span>) {
+            <span class="bi">System</span>.out.<span class="fn">println</span>(<span class="str">"Positive"</span>);
+        } <span class="kw">else if</span> (num < <span class="num">0</span>) {
+            <span class="bi">System</span>.out.<span class="fn">println</span>(<span class="str">"Negative"</span>);
+        } <span class="kw">else</span> {
+            <span class="bi">System</span>.out.<span class="fn">println</span>(<span class="str">"Zero"</span>);
         }
-        sc.<span class="tok-fn">close</span>();
+        sc.<span class="fn">close</span>();
     }
 }</code></pre>
-                  </div>
-                </div>
               </div>
-            </article>
+            </div>
+          </div>
+        </article>
 
-            <!-- 7. Loops -->
-            <article class="java-lesson" id="loops" data-topic="7">
-              <div class="java-lesson-header">
-                <span class="java-lesson-number">07</span>
-                <h3>Loops (for, while, do-while)</h3>
-              </div>
-              <p>
-                Loops let you repeat a block of code. Java has three loop types: <code>for</code>, <code>while</code>, and <code>do-while</code>.
-              </p>
-              <div class="java-concept-card">
-                <h4>for Loop</h4>
-                <p>Use <code>for</code> when you know how many times to iterate.</p>
-              </div>
-              <div class="java-code-block">
-                <div class="java-code-header">
-                  <span class="java-code-lang">Java</span>
-                  <button type="button" class="java-code-copy" aria-label="Copy code" data-code="// Count from 0 to 4
-for (int i = 0; i &lt; 5; i++) {
-    System.out.println(&quot;Count: &quot; + i);
+        <!-- ════════════════════════════════════════
+             LESSON 7: LOOPS
+             ════════════════════════════════════════ -->
+        <article class="jv-lesson" id="topic-loops" data-topic="6">
+          <div class="jv-lesson-header">
+            <span class="jv-lesson-number">07</span>
+            <h3>Loops (for, while, do-while)</h3>
+          </div>
+
+          <p>
+            Loops let you repeat a block of code. Java has three loop types: <code>for</code>, <code>while</code>, and <code>do-while</code>.
+          </p>
+
+          <div class="jv-concept">
+            <h4>for Loop</h4>
+            <p>Use <code>for</code> when you know how many times to iterate.</p>
+          </div>
+
+          <div class="jv-code-block">
+            <div class="jv-code-header">
+              <span class="jv-code-lang">Java</span>
+              <button type="button" class="jv-code-copy" aria-label="Copy code" data-code='// Count from 0 to 4
+for (int i = 0; i < 5; i++) {
+    System.out.println("Count: " + i);
 }
 
-// Iterate over an array
-String[] fruits = {&quot;apple&quot;, &quot;banana&quot;, &quot;cherry&quot;};
+// Enhanced for-loop (for-each)
+String[] fruits = {"apple", "banana", "cherry"};
 for (String fruit : fruits) {
     System.out.println(fruit);
-}">Copy</button>
-                </div>
-                <pre><code><span class="tok-cmt">// Count from 0 to 4</span>
-<span class="tok-kw">for</span> (<span class="tok-kw">int</span> i = <span class="tok-num">0</span>; i &lt; <span class="tok-num">5</span>; i++) {
-    <span class="tok-bi">System</span>.out.<span class="tok-fn">println</span>(<span class="tok-str">"Count: "</span> + i);
+}'><i class="fas fa-copy"></i> Copy</button>
+            </div>
+            <pre><code><span class="cmt">// Count from 0 to 4</span>
+<span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">0</span>; i < <span class="num">5</span>; i++) {
+    <span class="bi">System</span>.out.<span class="fn">println</span>(<span class="str">"Count: "</span> + i);
 }
 
-<span class="tok-cmt">// Enhanced for-loop (for-each)</span>
-<span class="tok-bi">String</span>[] fruits = {<span class="tok-str">"apple"</span>, <span class="tok-str">"banana"</span>, <span class="tok-str">"cherry"</span>};
-<span class="tok-kw">for</span> (<span class="tok-bi">String</span> fruit : fruits) {
-    <span class="tok-bi">System</span>.out.<span class="tok-fn">println</span>(fruit);
+<span class="cmt">// Enhanced for-loop (for-each)</span>
+<span class="bi">String</span>[] fruits = {<span class="str">"apple"</span>, <span class="str">"banana"</span>, <span class="str">"cherry"</span>};
+<span class="kw">for</span> (<span class="bi">String</span> fruit : fruits) {
+    <span class="bi">System</span>.out.<span class="fn">println</span>(fruit);
 }</code></pre>
-              </div>
-              <div class="java-output">
-                <div class="java-output-label">Output</div>
-                <pre>Count: 0
+          </div>
+
+          <div class="jv-output">
+            <div class="jv-output-label">Output</div>
+            <pre>Count: 0
 Count: 1
 Count: 2
 Count: 3
@@ -773,107 +815,117 @@ Count: 4
 apple
 banana
 cherry</pre>
-              </div>
-              <div class="java-concept-card">
-                <h4>while &amp; do-while Loops</h4>
-                <p><code>while</code> checks the condition first; <code>do-while</code> runs the body at least once.</p>
-              </div>
-              <div class="java-code-block">
-                <div class="java-code-header">
-                  <span class="java-code-lang">Java</span>
-                  <button type="button" class="java-code-copy" aria-label="Copy code" data-code="// while loop
+          </div>
+
+          <div class="jv-concept">
+            <h4>while &amp; do-while Loops</h4>
+            <p><code>while</code> checks the condition first; <code>do-while</code> runs the body at least once.</p>
+          </div>
+
+          <div class="jv-code-block">
+            <div class="jv-code-header">
+              <span class="jv-code-lang">Java</span>
+              <button type="button" class="jv-code-copy" aria-label="Copy code" data-code='// while loop
 int count = 0;
-while (count &lt; 5) {
-    System.out.println(&quot;While: &quot; + count);
+while (count < 5) {
+    System.out.println("While: " + count);
     count++;
 }
 
 // do-while loop
 int num = 0;
 do {
-    System.out.println(&quot;Do-while: &quot; + num);
+    System.out.println("Do-while: " + num);
     num++;
-} while (num &lt; 5);">Copy</button>
-                </div>
-                <pre><code><span class="tok-cmt">// while loop</span>
-<span class="tok-kw">int</span> count = <span class="tok-num">0</span>;
-<span class="tok-kw">while</span> (count &lt; <span class="tok-num">5</span>) {
-    <span class="tok-bi">System</span>.out.<span class="tok-fn">println</span>(<span class="tok-str">"While: "</span> + count);
+} while (num < 5);'><i class="fas fa-copy"></i> Copy</button>
+            </div>
+            <pre><code><span class="cmt">// while loop</span>
+<span class="kw">int</span> count = <span class="num">0</span>;
+<span class="kw">while</span> (count < <span class="num">5</span>) {
+    <span class="bi">System</span>.out.<span class="fn">println</span>(<span class="str">"While: "</span> + count);
     count++;
 }
 
-<span class="tok-cmt">// do-while loop</span>
-<span class="tok-kw">int</span> num = <span class="tok-num">0</span>;
-<span class="tok-kw">do</span> {
-    <span class="tok-bi">System</span>.out.<span class="tok-fn">println</span>(<span class="tok-str">"Do-while: "</span> + num);
+<span class="cmt">// do-while loop</span>
+<span class="kw">int</span> num = <span class="num">0</span>;
+<span class="kw">do</span> {
+    <span class="bi">System</span>.out.<span class="fn">println</span>(<span class="str">"Do-while: "</span> + num);
     num++;
-} <span class="tok-kw">while</span> (num &lt; <span class="tok-num">5</span>);</code></pre>
-              </div>
-              <div class="java-callout">
-                <span class="java-callout-icon">⚠️</span>
-                <p>Always ensure your loop condition eventually becomes <code>false</code> to avoid <strong>infinite loops</strong>. Use <code>break</code> to exit early and <code>continue</code> to skip the current iteration.</p>
-              </div>
+} <span class="kw">while</span> (num < <span class="num">5</span>);</code></pre>
+          </div>
 
-              <!-- Exercise -->
-              <div class="java-exercise" id="exercise-loops">
-                <div class="java-exercise-title">
-                  <i class="fas fa-dumbbell"></i> Practice: Loops
-                </div>
-                <p>Write two programs:</p>
-                <ol>
-                  <li>Use a <code>for</code> loop to print all even numbers from 2 to 20</li>
-                  <li>Use a <code>while</code> loop to calculate the sum of numbers from 1 to 100</li>
-                </ol>
-                <button type="button" class="java-exercise-toggle" aria-expanded="false" aria-controls="solution-loops">Show Solution</button>
-                <div class="java-exercise-solution" id="solution-loops">
-                  <div class="java-code-block">
-                    <div class="java-code-header">
-                      <span class="java-code-lang">Java</span>
-                      <button type="button" class="java-code-copy" aria-label="Copy code" data-code="// Even numbers 2-20
-for (int i = 2; i &lt;= 20; i += 2) {
+          <div class="jv-callout">
+            <p>Always ensure your loop condition eventually becomes <code>false</code> to avoid <strong>infinite loops</strong>. Use <code>break</code> to exit early and <code>continue</code> to skip the current iteration.</p>
+          </div>
+
+          <!-- Exercise -->
+          <div class="jv-exercise" id="exercise-loops">
+            <div class="jv-exercise-title">
+              Practice: Loops
+            </div>
+            <p>Write two programs:</p>
+            <ol>
+              <li>Use a <code>for</code> loop to print all even numbers from 2 to 20</li>
+              <li>Use a <code>while</code> loop to calculate the sum of numbers from 1 to 100</li>
+            </ol>
+            <button type="button" class="jv-exercise-toggle" aria-expanded="false" aria-controls="solution-loops">Show Solution</button>
+            <div class="jv-exercise-solution" id="solution-loops">
+              <div class="jv-code-block">
+                <div class="jv-code-header">
+                  <span class="jv-code-lang">Java</span>
+                  <button type="button" class="jv-code-copy" aria-label="Copy code" data-code='// Even numbers 2-20
+for (int i = 2; i <= 20; i += 2) {
     System.out.println(i);
 }
 
 // Sum of 1 to 100
 int sum = 0;
 int n = 1;
-while (n &lt;= 100) {
+while (n <= 100) {
     sum += n;
     n++;
 }
-System.out.println(&quot;Sum: &quot; + sum);">Copy</button>
-                    </div>
-                    <pre><code><span class="tok-cmt">// Even numbers 2-20</span>
-<span class="tok-kw">for</span> (<span class="tok-kw">int</span> i = <span class="tok-num">2</span>; i &lt;= <span class="tok-num">20</span>; i += <span class="tok-num">2</span>) {
-    <span class="tok-bi">System</span>.out.<span class="tok-fn">println</span>(i);
-}
-
-<span class="tok-cmt">// Sum of 1 to 100</span>
-<span class="tok-kw">int</span> sum = <span class="tok-num">0</span>;
-<span class="tok-kw">int</span> n = <span class="tok-num">1</span>;
-<span class="tok-kw">while</span> (n &lt;= <span class="tok-num">100</span>) {
-    sum += n;
-    n++;
-}
-<span class="tok-bi">System</span>.out.<span class="tok-fn">println</span>(<span class="tok-str">"Sum: "</span> + sum);</code></pre>
-                  </div>
+System.out.println("Sum: " + sum);'><i class="fas fa-copy"></i> Copy</button>
                 </div>
-              </div>
-            </article>
+                <pre><code><span class="cmt">// Even numbers 2-20</span>
+<span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">2</span>; i <= <span class="num">20</span>; i += <span class="num">2</span>) {
+    <span class="bi">System</span>.out.<span class="fn">println</span>(i);
+}
 
-            <!-- 8. Methods -->
-            <article class="java-lesson" id="methods" data-topic="8">
-              <div class="java-lesson-header">
-                <span class="java-lesson-number">08</span>
-                <h3>Methods</h3>
+<span class="cmt">// Sum of 1 to 100</span>
+<span class="kw">int</span> sum = <span class="num">0</span>;
+<span class="kw">int</span> n = <span class="num">1</span>;
+<span class="kw">while</span> (n <= <span class="num">100</span>) {
+    sum += n;
+    n++;
+}
+<span class="bi">System</span>.out.<span class="fn">println</span>(<span class="str">"Sum: "</span> + sum);</code></pre>
               </div>
-              <p>
-                Methods (also called functions) are reusable blocks of code. They help you avoid repetition and organize your program into logical pieces.
-              </p>
-              <div class="java-code-block">
-                <div class="java-code-header">
-                  <span class="java-code-lang">Java</span>
-                  <button type="button" class="java-code-copy" aria-label="Copy code" data-code="public class MethodExamples {
+            </div>
+          </div>
+        </article>
+
+        <!-- ════════════════════════════════════════
+             LESSON 8: METHODS
+             ════════════════════════════════════════ -->
+        <div class="jv-divider">
+          <span class="jv-divider-inner">Next Topic</span>
+        </div>
+
+        <article class="jv-lesson" id="topic-methods" data-topic="7">
+          <div class="jv-lesson-header">
+            <span class="jv-lesson-number">08</span>
+            <h3>Methods</h3>
+          </div>
+
+          <p>
+            Methods (also called functions) are reusable blocks of code. They help you avoid repetition and organize your program into logical pieces.
+          </p>
+
+          <div class="jv-code-block">
+            <div class="jv-code-header">
+              <span class="jv-code-lang">Java</span>
+              <button type="button" class="jv-code-copy" aria-label="Copy code" data-code='public class MethodExamples {
 
     // Method with parameters and return value
     public static int add(int a, int b) {
@@ -882,50 +934,53 @@ System.out.println(&quot;Sum: &quot; + sum);">Copy</button>
 
     // Void method (no return value)
     public static void greet(String name) {
-        System.out.println(&quot;Hello, &quot; + name + &quot;!&quot;);
+        System.out.println("Hello, " + name + "!");
     }
 
     public static void main(String[] args) {
         int sum = add(10, 5);
-        System.out.println(&quot;Sum: &quot; + sum);
+        System.out.println("Sum: " + sum);
 
-        greet(&quot;Alice&quot;);
+        greet("Alice");
     }
-}">Copy</button>
-                </div>
-                <pre><code><span class="tok-kw">public class</span> <span class="tok-bi">MethodExamples</span> {
+}'><i class="fas fa-copy"></i> Copy</button>
+            </div>
+            <pre><code><span class="kw">public class</span> <span class="bi">MethodExamples</span> {
 
-    <span class="tok-cmt">// Method with parameters and return value</span>
-    <span class="tok-kw">public static int</span> <span class="tok-fn">add</span>(<span class="tok-kw">int</span> a, <span class="tok-kw">int</span> b) {
-        <span class="tok-kw">return</span> a + b;
-    }
-
-    <span class="tok-cmt">// Void method (no return value)</span>
-    <span class="tok-kw">public static void</span> <span class="tok-fn">greet</span>(<span class="tok-bi">String</span> name) {
-        <span class="tok-bi">System</span>.out.<span class="tok-fn">println</span>(<span class="tok-str">"Hello, "</span> + name + <span class="tok-str">"!"</span>);
+    <span class="cmt">// Method with parameters and return value</span>
+    <span class="kw">public static int</span> <span class="fn">add</span>(<span class="kw">int</span> a, <span class="kw">int</span> b) {
+        <span class="kw">return</span> a + b;
     }
 
-    <span class="tok-kw">public static void</span> <span class="tok-fn">main</span>(<span class="tok-bi">String</span>[] args) {
-        <span class="tok-kw">int</span> sum = <span class="tok-fn">add</span>(<span class="tok-num">10</span>, <span class="tok-num">5</span>);
-        <span class="tok-bi">System</span>.out.<span class="tok-fn">println</span>(<span class="tok-str">"Sum: "</span> + sum);
+    <span class="cmt">// Void method (no return value)</span>
+    <span class="kw">public static void</span> <span class="fn">greet</span>(<span class="bi">String</span> name) {
+        <span class="bi">System</span>.out.<span class="fn">println</span>(<span class="str">"Hello, "</span> + name + <span class="str">"!"</span>);
+    }
 
-        <span class="tok-fn">greet</span>(<span class="tok-str">"Alice"</span>);
+    <span class="kw">public static void</span> <span class="fn">main</span>(<span class="bi">String</span>[] args) {
+        <span class="kw">int</span> sum = <span class="fn">add</span>(<span class="num">10</span>, <span class="num">5</span>);
+        <span class="bi">System</span>.out.<span class="fn">println</span>(<span class="str">"Sum: "</span> + sum);
+
+        <span class="fn">greet</span>(<span class="str">"Alice"</span>);
     }
 }</code></pre>
-              </div>
-              <div class="java-output">
-                <div class="java-output-label">Output</div>
-                <pre>Sum: 15
+          </div>
+
+          <div class="jv-output">
+            <div class="jv-output-label">Output</div>
+            <pre>Sum: 15
 Hello, Alice!</pre>
-              </div>
-              <div class="java-concept-card">
-                <h4>Method Overloading</h4>
-                <p>Java allows multiple methods with the same name as long as parameters differ (number, type, or order).</p>
-              </div>
-              <div class="java-code-block">
-                <div class="java-code-header">
-                  <span class="java-code-lang">Java</span>
-                  <button type="button" class="java-code-copy" aria-label="Copy code" data-code="public static int multiply(int a, int b) {
+          </div>
+
+          <div class="jv-concept">
+            <h4>Method Overloading</h4>
+            <p>Java allows multiple methods with the same name as long as parameters differ (number, type, or order).</p>
+          </div>
+
+          <div class="jv-code-block">
+            <div class="jv-code-header">
+              <span class="jv-code-lang">Java</span>
+              <button type="button" class="jv-code-copy" aria-label="Copy code" data-code='public static int multiply(int a, int b) {
     return a * b;
 }
 
@@ -935,42 +990,42 @@ public static double multiply(double a, double b) {
 
 // Usage
 System.out.println(multiply(5, 3));         // 15
-System.out.println(multiply(2.5, 4.0));     // 10.0">Copy</button>
-                </div>
-                <pre><code><span class="tok-kw">public static int</span> <span class="tok-fn">multiply</span>(<span class="tok-kw">int</span> a, <span class="tok-kw">int</span> b) {
-    <span class="tok-kw">return</span> a * b;
+System.out.println(multiply(2.5, 4.0));     // 10.0'><i class="fas fa-copy"></i> Copy</button>
+            </div>
+            <pre><code><span class="kw">public static int</span> <span class="fn">multiply</span>(<span class="kw">int</span> a, <span class="kw">int</span> b) {
+    <span class="kw">return</span> a * b;
 }
 
-<span class="tok-kw">public static double</span> <span class="tok-fn">multiply</span>(<span class="tok-kw">double</span> a, <span class="tok-kw">double</span> b) {
-    <span class="tok-kw">return</span> a * b;
+<span class="kw">public static double</span> <span class="fn">multiply</span>(<span class="kw">double</span> a, <span class="kw">double</span> b) {
+    <span class="kw">return</span> a * b;
 }
 
-<span class="tok-cmt">// Usage</span>
-<span class="tok-bi">System</span>.out.<span class="tok-fn">println</span>(<span class="tok-fn">multiply</span>(<span class="tok-num">5</span>, <span class="tok-num">3</span>));         <span class="tok-cmt">// 15</span>
-<span class="tok-bi">System</span>.out.<span class="tok-fn">println</span>(<span class="tok-fn">multiply</span>(<span class="tok-num">2.5</span>, <span class="tok-num">4.0</span>));     <span class="tok-cmt">// 10.0</span></code></pre>
-              </div>
+<span class="cmt">// Usage</span>
+<span class="bi">System</span>.out.<span class="fn">println</span>(<span class="fn">multiply</span>(<span class="num">5</span>, <span class="num">3</span>));         <span class="cmt">// 15</span>
+<span class="bi">System</span>.out.<span class="fn">println</span>(<span class="fn">multiply</span>(<span class="num">2.5</span>, <span class="num">4.0</span>));     <span class="cmt">// 10.0</span></code></pre>
+          </div>
 
-              <!-- Exercise -->
-              <div class="java-exercise" id="exercise-methods">
-                <div class="java-exercise-title">
-                  <i class="fas fa-dumbbell"></i> Practice: Methods
-                </div>
-                <ol>
-                  <li>Write a method <code>isEven(int n)</code> that returns <code>true</code> if n is even</li>
-                  <li>Write a method <code>factorial(int n)</code> that returns the factorial of n</li>
-                  <li>Write a method <code>reverseString(String s)</code> that returns the reversed string</li>
-                </ol>
-                <button type="button" class="java-exercise-toggle" aria-expanded="false" aria-controls="solution-methods">Show Solution</button>
-                <div class="java-exercise-solution" id="solution-methods">
-                  <div class="java-code-block">
-                    <div class="java-code-header">
-                      <span class="java-code-lang">Java</span>
-                      <button type="button" class="java-code-copy" aria-label="Copy code" data-code="public static boolean isEven(int n) {
+          <!-- Exercise -->
+          <div class="jv-exercise" id="exercise-methods">
+            <div class="jv-exercise-title">
+              Practice: Methods
+            </div>
+            <ol>
+              <li>Write a method <code>isEven(int n)</code> that returns <code>true</code> if n is even</li>
+              <li>Write a method <code>factorial(int n)</code> that returns the factorial of n</li>
+              <li>Write a method <code>reverseString(String s)</code> that returns the reversed string</li>
+            </ol>
+            <button type="button" class="jv-exercise-toggle" aria-expanded="false" aria-controls="solution-methods">Show Solution</button>
+            <div class="jv-exercise-solution" id="solution-methods">
+              <div class="jv-code-block">
+                <div class="jv-code-header">
+                  <span class="jv-code-lang">Java</span>
+                  <button type="button" class="jv-code-copy" aria-label="Copy code" data-code='public static boolean isEven(int n) {
     return n % 2 == 0;
 }
 
 public static int factorial(int n) {
-    if (n &lt;= 1) return 1;
+    if (n <= 1) return 1;
     return n * factorial(n - 1);
 }
 
@@ -980,289 +1035,412 @@ public static String reverseString(String s) {
 
 System.out.println(isEven(4));               // true
 System.out.println(factorial(5));            // 120
-System.out.println(reverseString(&quot;hello&quot;)); // olleh">Copy</button>
-                    </div>
-                    <pre><code><span class="tok-kw">public static boolean</span> <span class="tok-fn">isEven</span>(<span class="tok-kw">int</span> n) {
-    <span class="tok-kw">return</span> n % <span class="tok-num">2</span> == <span class="tok-num">0</span>;
-}
-
-<span class="tok-kw">public static int</span> <span class="tok-fn">factorial</span>(<span class="tok-kw">int</span> n) {
-    <span class="tok-kw">if</span> (n &lt;= <span class="tok-num">1</span>) <span class="tok-kw">return</span> <span class="tok-num">1</span>;
-    <span class="tok-kw">return</span> n * <span class="tok-fn">factorial</span>(n - <span class="tok-num">1</span>);
-}
-
-<span class="tok-kw">public static</span> <span class="tok-bi">String</span> <span class="tok-fn">reverseString</span>(<span class="tok-bi">String</span> s) {
-    <span class="tok-kw">return</span> <span class="tok-kw">new</span> <span class="tok-bi">StringBuilder</span>(s).<span class="tok-fn">reverse</span>().<span class="tok-fn">toString</span>();
-}
-
-<span class="tok-bi">System</span>.out.<span class="tok-fn">println</span>(<span class="tok-fn">isEven</span>(<span class="tok-num">4</span>));               <span class="tok-cmt">// true</span>
-<span class="tok-bi">System</span>.out.<span class="tok-fn">println</span>(<span class="tok-fn">factorial</span>(<span class="tok-num">5</span>));            <span class="tok-cmt">// 120</span>
-<span class="tok-bi">System</span>.out.<span class="tok-fn">println</span>(<span class="tok-fn">reverseString</span>(<span class="tok-str">"hello"</span>)); <span class="tok-cmt">// olleh</span></code></pre>
-                  </div>
+System.out.println(reverseString("hello")); // olleh'><i class="fas fa-copy"></i> Copy</button>
                 </div>
-              </div>
-            </article>
+                <pre><code><span class="kw">public static boolean</span> <span class="fn">isEven</span>(<span class="kw">int</span> n) {
+    <span class="kw">return</span> n % <span class="num">2</span> == <span class="num">0</span>;
+}
 
-            <!-- 9. Arrays and Strings -->
-            <article class="java-lesson" id="arrays-strings" data-topic="9">
-              <div class="java-lesson-header">
-                <span class="java-lesson-number">09</span>
-                <h3>Arrays &amp; Strings</h3>
-              </div>
-              <p>
-                Arrays store multiple values of the same type. Strings represent text and come with many built-in methods.
-              </p>
-              <div class="java-concept-card">
-                <h4>Arrays — Fixed-Size Collections</h4>
-                <p>Arrays in Java have a fixed length. You can create them with <code>new</code> or with curly braces.</p>
-              </div>
-              <div class="java-code-block">
-                <div class="java-code-header">
-                  <span class="java-code-lang">Java</span>
-                  <button type="button" class="java-code-copy" aria-label="Copy code" data-code="// Creating arrays
-int[] numbers = new int[5];         // [0, 0, 0, 0, 0]
-String[] fruits = {&quot;apple&quot;, &quot;banana&quot;, &quot;cherry&quot;};
+<span class="kw">public static int</span> <span class="fn">factorial</span>(<span class="kw">int</span> n) {
+    <span class="kw">if</span> (n <= <span class="num">1</span>) <span class="kw">return</span> <span class="num">1</span>;
+    <span class="kw">return</span> n * <span class="fn">factorial</span>(n - <span class="num">1</span>);
+}
 
-// Access and modify
+<span class="kw">public static</span> <span class="bi">String</span> <span class="fn">reverseString</span>(<span class="bi">String</span> s) {
+    <span class="kw">return</span> <span class="kw">new</span> <span class="bi">StringBuilder</span>(s).<span class="fn">reverse</span>().<span class="fn">toString</span>();
+}
+
+<span class="bi">System</span>.out.<span class="fn">println</span>(<span class="fn">isEven</span>(<span class="num">4</span>));               <span class="cmt">// true</span>
+<span class="bi">System</span>.out.<span class="fn">println</span>(<span class="fn">factorial</span>(<span class="num">5</span>));            <span class="cmt">// 120</span>
+<span class="bi">System</span>.out.<span class="fn">println</span>(<span class="fn">reverseString</span>(<span class="str">"hello"</span>)); <span class="cmt">// olleh</span></code></pre>
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <!-- ════════════════════════════════════════
+             LESSON 9: ARRAYS & STRINGS
+             ════════════════════════════════════════ -->
+        <article class="jv-lesson" id="topic-arrays-strings" data-topic="8">
+          <div class="jv-lesson-header">
+            <span class="jv-lesson-number">09</span>
+            <h3>Arrays &amp; Strings</h3>
+          </div>
+
+          <p>
+            Arrays store multiple values of the same type. Strings represent text and come with many built-in methods.
+          </p>
+
+          <div class="jv-concept">
+            <h4>Arrays — Fixed-Size Collections</h4>
+            <p>Arrays in Java have a fixed length. You can create them with <code>new</code> or with curly braces.</p>
+          </div>
+
+          <div class="jv-code-block">
+            <div class="jv-code-header">
+              <span class="jv-code-lang">Java</span>
+              <button type="button" class="jv-code-copy" aria-label="Copy code" data-code='// Declare and initialize
+int[] numbers = new int[3];
 numbers[0] = 10;
-System.out.println(numbers[0]);     // 10
-System.out.println(fruits[1]);      // banana
-System.out.println(&quot;Length: &quot; + fruits.length);">Copy</button>
-                </div>
-                <pre><code><span class="tok-cmt">// Creating arrays</span>
-<span class="tok-kw">int</span>[] numbers = <span class="tok-kw">new int</span>[<span class="tok-num">5</span>];         <span class="tok-cmt">// [0, 0, 0, 0, 0]</span>
-<span class="tok-bi">String</span>[] fruits = {<span class="tok-str">"apple"</span>, <span class="tok-str">"banana"</span>, <span class="tok-str">"cherry"</span>};
+numbers[1] = 20;
+numbers[2] = 30;
 
-<span class="tok-cmt">// Access and modify</span>
-numbers[<span class="tok-num">0</span>] = <span class="tok-num">10</span>;
-<span class="tok-bi">System</span>.out.<span class="tok-fn">println</span>(numbers[<span class="tok-num">0</span>]);     <span class="tok-cmt">// 10</span>
-<span class="tok-bi">System</span>.out.<span class="tok-fn">println</span>(fruits[<span class="tok-num">1</span>]);      <span class="tok-cmt">// banana</span>
-<span class="tok-bi">System</span>.out.<span class="tok-fn">println</span>(<span class="tok-str">"Length: "</span> + fruits.length);</code></pre>
-              </div>
-              <div class="java-concept-card">
-                <h4>String Methods</h4>
-                <p>Strings in Java are objects with many useful methods.</p>
-              </div>
-              <div class="java-code-block">
-                <div class="java-code-header">
-                  <span class="java-code-lang">Java</span>
-                  <button type="button" class="java-code-copy" aria-label="Copy code" data-code="String text = &quot;Hello, Java!&quot;;
+// Shortcut syntax
+int[] scores = {95, 87, 92};
 
-System.out.println(text.length());             // 12
-System.out.println(text.toUpperCase());        // HELLO, JAVA!
-System.out.println(text.toLowerCase());        // hello, java!
-System.out.println(text.substring(7));         // Java!
-System.out.println(text.replace(&quot;Java&quot;, &quot;World&quot;)); // Hello, World!
-System.out.println(text.contains(&quot;Java&quot;));     // true">Copy</button>
-                </div>
-                <pre><code><span class="tok-bi">String</span> text = <span class="tok-str">"Hello, Java!"</span>;
+// Length
+System.out.println("Length: " + scores.length);
 
-<span class="tok-bi">System</span>.out.<span class="tok-fn">println</span>(text.<span class="tok-fn">length</span>());             <span class="tok-cmt">// 12</span>
-<span class="tok-bi">System</span>.out.<span class="tok-fn">println</span>(text.<span class="tok-fn">toUpperCase</span>());        <span class="tok-cmt">// HELLO, JAVA!</span>
-<span class="tok-bi">System</span>.out.<span class="tok-fn">println</span>(text.<span class="tok-fn">toLowerCase</span>());        <span class="tok-cmt">// hello, java!</span>
-<span class="tok-bi">System</span>.out.<span class="tok-fn">println</span>(text.<span class="tok-fn">substring</span>(<span class="tok-num">7</span>));         <span class="tok-cmt">// Java!</span>
-<span class="tok-bi">System</span>.out.<span class="tok-fn">println</span>(text.<span class="tok-fn">replace</span>(<span class="tok-str">"Java"</span>, <span class="tok-str">"World"</span>)); <span class="tok-cmt">// Hello, World!</span>
-<span class="tok-bi">System</span>.out.<span class="tok-fn">println</span>(text.<span class="tok-fn">contains</span>(<span class="tok-str">"Java"</span>));     <span class="tok-cmt">// true</span></code></pre>
-              </div>
-
-              <!-- Exercise -->
-              <div class="java-exercise" id="exercise-arrays-strings">
-                <div class="java-exercise-title">
-                  <i class="fas fa-dumbbell"></i> Practice: Arrays &amp; Strings
-                </div>
-                <ol>
-                  <li>Create an array of 5 integers and calculate their sum using a for loop</li>
-                  <li>Write code to count how many vowels are in a given string</li>
-                </ol>
-                <button type="button" class="java-exercise-toggle" aria-expanded="false" aria-controls="solution-arrays-strings">Show Solution</button>
-                <div class="java-exercise-solution" id="solution-arrays-strings">
-                  <div class="java-code-block">
-                    <div class="java-code-header">
-                      <span class="java-code-lang">Java</span>
-                      <button type="button" class="java-code-copy" aria-label="Copy code" data-code="// Sum of array
-int[] nums = {10, 20, 30, 40, 50};
-int sum = 0;
-for (int n : nums) {
-    sum += n;
+// Loop through an array
+for (int i = 0; i < scores.length; i++) {
+    System.out.println(scores[i]);
 }
-System.out.println(&quot;Sum: &quot; + sum);
 
-// Count vowels
-String str = &quot;hello world&quot;;
+// For-each loop
+for (int score : scores) {
+    System.out.println(score);
+}'><i class="fas fa-copy"></i> Copy</button>
+            </div>
+            <pre><code><span class="cmt">// Declare and initialize</span>
+<span class="kw">int</span>[] numbers = <span class="kw">new</span> <span class="kw">int</span>[<span class="num">3</span>];
+numbers[<span class="num">0</span>] = <span class="num">10</span>;
+numbers[<span class="num">1</span>] = <span class="num">20</span>;
+numbers[<span class="num">2</span>] = <span class="num">30</span>;
+
+<span class="cmt">// Shortcut syntax</span>
+<span class="kw">int</span>[] scores = {<span class="num">95</span>, <span class="num">87</span>, <span class="num">92</span>};
+
+<span class="cmt">// Length</span>
+<span class="bi">System</span>.out.<span class="fn">println</span>(<span class="str">"Length: "</span> + scores.length);
+
+<span class="cmt">// Loop through an array</span>
+<span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">0</span>; i < scores.length; i++) {
+    <span class="bi">System</span>.out.<span class="fn">println</span>(scores[i]);
+}
+
+<span class="cmt">// For-each loop</span>
+<span class="kw">for</span> (<span class="kw">int</span> score : scores) {
+    <span class="bi">System</span>.out.<span class="fn">println</span>(score);
+}</code></pre>
+          </div>
+
+          <div class="jv-output">
+            <div class="jv-output-label">Output</div>
+            <pre>Length: 3
+95
+87
+92
+95
+87
+92</pre>
+          </div>
+
+          <div class="jv-concept">
+            <h4>Strings — Immutable Text</h4>
+            <p>Strings in Java are <strong>immutable</strong> — once created, they cannot be changed. Each method returns a new String.</p>
+          </div>
+
+          <div class="jv-code-block">
+            <div class="jv-code-header">
+              <span class="jv-code-lang">Java</span>
+              <button type="button" class="jv-code-copy" aria-label="Copy code" data-code='String str = "Hello, Java!";
+
+// Length
+System.out.println(str.length());           // 12
+
+// Character access
+System.out.println(str.charAt(0));          // H
+
+// Substring
+System.out.println(str.substring(7, 11));   // Java
+
+// Case conversion
+System.out.println(str.toUpperCase());      // HELLO, JAVA!
+System.out.println(str.toLowerCase());      // hello, java!
+
+// Replace
+System.out.println(str.replace("Java", "World"));
+
+// Check
+System.out.println(str.contains("Java"));   // true
+System.out.println(str.startsWith("Hello"));// true'><i class="fas fa-copy"></i> Copy</button>
+            </div>
+            <pre><code><span class="bi">String</span> str = <span class="str">"Hello, Java!"</span>;
+
+<span class="cmt">// Length</span>
+<span class="bi">System</span>.out.<span class="fn">println</span>(str.length());           <span class="cmt">// 12</span>
+
+<span class="cmt">// Character access</span>
+<span class="bi">System</span>.out.<span class="fn">println</span>(str.charAt(<span class="num">0</span>));          <span class="cmt">// H</span>
+
+<span class="cmt">// Substring</span>
+<span class="bi">System</span>.out.<span class="fn">println</span>(str.substring(<span class="num">7</span>, <span class="num">11</span>));   <span class="cmt">// Java</span>
+
+<span class="cmt">// Case conversion</span>
+<span class="bi">System</span>.out.<span class="fn">println</span>(str.toUpperCase());      <span class="cmt">// HELLO, JAVA!</span>
+<span class="bi">System</span>.out.<span class="fn">println</span>(str.toLowerCase());      <span class="cmt">// hello, java!</span>
+
+<span class="cmt">// Replace</span>
+<span class="bi">System</span>.out.<span class="fn">println</span>(str.replace(<span class="str">"Java"</span>, <span class="str">"World"</span>));
+
+<span class="cmt">// Check</span>
+<span class="bi">System</span>.out.<span class="fn">println</span>(str.contains(<span class="str">"Java"</span>));   <span class="cmt">// true</span>
+<span class="bi">System</span>.out.<span class="fn">println</span>(str.startsWith(<span class="str">"Hello"</span>));<span class="cmt">// true</span></code></pre>
+          </div>
+
+          <div class="jv-output">
+            <div class="jv-output-label">Output</div>
+            <pre>12
+H
+Java
+HELLO, JAVA!
+hello, java!
+Hello, World!
+true
+true</pre>
+          </div>
+
+          <!-- Exercise -->
+          <div class="jv-exercise" id="exercise-arrays-strings">
+            <div class="jv-exercise-title">
+              Practice: Arrays &amp; Strings
+            </div>
+            <ol>
+              <li>Create an <code>int</code> array <code>temperatures</code> with values <code>{72, 85, 68, 90, 77}</code></li>
+              <li>Write a loop to find the maximum temperature</li>
+              <li>Create a <code>String</code> <code>message</code> and count how many vowels it contains (a, e, i, o, u)</li>
+            </ol>
+            <button type="button" class="jv-exercise-toggle" aria-expanded="false" aria-controls="solution-arrays-strings">Show Solution</button>
+            <div class="jv-exercise-solution" id="solution-arrays-strings">
+              <div class="jv-code-block">
+                <div class="jv-code-header">
+                  <span class="jv-code-lang">Java</span>
+                  <button type="button" class="jv-code-copy" aria-label="Copy code" data-code='int[] temperatures = {72, 85, 68, 90, 77};
+int max = temperatures[0];
+for (int t : temperatures) {
+    if (t > max) max = t;
+}
+System.out.println("Max temp: " + max);
+
+String message = "Hello, World!";
 int vowels = 0;
-for (char c : str.toCharArray()) {
-    if (&quot;aeiou&quot;.indexOf(c) != -1) {
-        vowels++;
-    }
+for (int i = 0; i < message.length(); i++) {
+    char c = Character.toLowerCase(message.charAt(i));
+    if (c == &#39;a&#39; || c == &#39;e&#39; || c == &#39;i&#39; || c == &#39;o&#39; || c == &#39;u&#39;) vowels++;
 }
-System.out.println(&quot;Vowels: &quot; + vowels);">Copy</button>
-                    </div>
-                    <pre><code><span class="tok-cmt">// Sum of array</span>
-<span class="tok-kw">int</span>[] nums = {<span class="tok-num">10</span>, <span class="tok-num">20</span>, <span class="tok-num">30</span>, <span class="tok-num">40</span>, <span class="tok-num">50</span>};
-<span class="tok-kw">int</span> sum = <span class="tok-num">0</span>;
-<span class="tok-kw">for</span> (<span class="tok-kw">int</span> n : nums) {
-    sum += n;
-}
-<span class="tok-bi">System</span>.out.<span class="tok-fn">println</span>(<span class="tok-str">"Sum: "</span> + sum);
-
-<span class="tok-cmt">// Count vowels</span>
-<span class="tok-bi">String</span> str = <span class="tok-str">"hello world"</span>;
-<span class="tok-kw">int</span> vowels = <span class="tok-num">0</span>;
-<span class="tok-kw">for</span> (<span class="tok-kw">char</span> c : str.<span class="tok-fn">toCharArray</span>()) {
-    <span class="tok-kw">if</span> (<span class="tok-str">"aeiou"</span>.<span class="tok-fn">indexOf</span>(c) != -<span class="tok-num">1</span>) {
-        vowels++;
-    }
-}
-<span class="tok-bi">System</span>.out.<span class="tok-fn">println</span>(<span class="tok-str">"Vowels: "</span> + vowels);</code></pre>
-                  </div>
+System.out.println("Vowels: " + vowels);'><i class="fas fa-copy"></i> Copy</button>
                 </div>
-              </div>
-            </article>
+                <pre><code><span class="kw">int</span>[] temperatures = {<span class="num">72</span>, <span class="num">85</span>, <span class="num">68</span>, <span class="num">90</span>, <span class="num">77</span>};
+<span class="kw">int</span> max = temperatures[<span class="num">0</span>];
+<span class="kw">for</span> (<span class="kw">int</span> t : temperatures) {
+    <span class="kw">if</span> (t > max) max = t;
+}
+<span class="bi">System</span>.out.<span class="fn">println</span>(<span class="str">"Max temp: "</span> + max);
 
-            <!-- 10. Classes and Objects -->
-            <article class="java-lesson" id="classes-objects" data-topic="10">
-              <div class="java-lesson-header">
-                <span class="java-lesson-number">10</span>
-                <h3>Classes &amp; Objects</h3>
+<span class="bi">String</span> message = <span class="str">"Hello, World!"</span>;
+<span class="kw">int</span> vowels = <span class="num">0</span>;
+<span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">0</span>; i < message.length(); i++) {
+    <span class="kw">char</span> c = <span class="bi">Character</span>.toLowerCase(message.charAt(i));
+    <span class="kw">if</span> (c == <span class="str">&#39;a&#39;</span> || c == <span class="str">&#39;e&#39;</span> || c == <span class="str">&#39;i&#39;</span> || c == <span class="str">&#39;o&#39;</span> || c == <span class="str">&#39;u&#39;</span>) vowels++;
+}
+<span class="bi">System</span>.out.<span class="fn">println</span>(<span class="str">"Vowels: "</span> + vowels);</code></pre>
               </div>
-              <p>
-                A <strong>class</strong> is a blueprint for creating objects. An <strong>object</strong> is an instance of a class with its own state (fields) and behavior (methods).
-              </p>
-              <div class="java-code-block">
-                <div class="java-code-header">
-                  <span class="java-code-lang">Java</span>
-                  <button type="button" class="java-code-copy" aria-label="Copy code" data-code="// Define a class
-class Student {
+            </div>
+          </div>
+        </article>
+
+        <!-- ════════════════════════════════════════
+             LESSON 10: CLASSES & OBJECTS
+             ════════════════════════════════════════ -->
+        <div class="jv-divider">
+          <span class="jv-divider-inner">Next Topic</span>
+        </div>
+
+        <article class="jv-lesson" id="topic-classes" data-topic="9">
+          <div class="jv-lesson-header">
+            <span class="jv-lesson-number">10</span>
+            <h3>Classes &amp; Objects</h3>
+          </div>
+
+          <p>
+            Java is an <strong>object-oriented</strong> language. A <code>class</code> is a blueprint, and an <code>object</code> is an instance of that blueprint.
+          </p>
+
+          <div class="jv-concept">
+            <h4>Defining a Class</h4>
+            <p>A class bundles related fields (attributes) and methods (behavior) into a single unit.</p>
+          </div>
+
+          <div class="jv-code-block">
+            <div class="jv-code-header">
+              <span class="jv-code-lang">Java</span>
+              <button type="button" class="jv-code-copy" aria-label="Copy code" data-code='// Class definition
+class Person {
     String name;
     int age;
 
     // Constructor
-    Student(String name, int age) {
+    Person(String name, int age) {
         this.name = name;
         this.age = age;
     }
 
+    // Method
     void introduce() {
-        System.out.println(&quot;Hi, I'm &quot; + name + &quot; and I'm &quot; + age + &quot; years old.&quot;);
+        System.out.println("Hi, I&#39;m " + name + " and I&#39;m " + age + ".");
     }
 }
 
-// Create objects
-Student alice = new Student(&quot;Alice&quot;, 20);
-Student bob = new Student(&quot;Bob&quot;, 22);
+// Creating and using objects
+public class Main {
+    public static void main(String[] args) {
+        Person alice = new Person("Alice", 25);
+        Person bob = new Person("Bob", 30);
 
-alice.introduce();
-bob.introduce();">Copy</button>
-                </div>
-                <pre><code><span class="tok-cmt">// Define a class</span>
-<span class="tok-kw">class</span> <span class="tok-bi">Student</span> {
-    <span class="tok-bi">String</span> name;
-    <span class="tok-kw">int</span> age;
+        alice.introduce();  // Hi, I&#39;m Alice and I&#39;m 25.
+        bob.introduce();    // Hi, I&#39;m Bob and I&#39;m 30.
+    }
+}'><i class="fas fa-copy"></i> Copy</button>
+            </div>
+            <pre><code><span class="cmt">// Class definition</span>
+<span class="kw">class</span> <span class="bi">Person</span> {
+    <span class="bi">String</span> name;
+    <span class="kw">int</span> age;
 
-    <span class="tok-cmt">// Constructor</span>
-    <span class="tok-bi">Student</span>(<span class="tok-bi">String</span> name, <span class="tok-kw">int</span> age) {
-        <span class="tok-kw">this</span>.name = name;
-        <span class="tok-kw">this</span>.age = age;
+    <span class="cmt">// Constructor</span>
+    <span class="bi">Person</span>(<span class="bi">String</span> name, <span class="kw">int</span> age) {
+        <span class="kw">this</span>.name = name;
+        <span class="kw">this</span>.age = age;
     }
 
-    <span class="tok-kw">void</span> <span class="tok-fn">introduce</span>() {
-        <span class="tok-bi">System</span>.out.<span class="tok-fn">println</span>(<span class="tok-str">"Hi, I'm "</span> + name + <span class="tok-str">" and I'm "</span> + age + <span class="tok-str">" years old."</span>);
+    <span class="cmt">// Method</span>
+    <span class="kw">void</span> <span class="fn">introduce</span>() {
+        <span class="bi">System</span>.out.<span class="fn">println</span>(<span class="str">"Hi, I'm "</span> + name + <span class="str">" and I'm "</span> + age + <span class="str">"."</span>);
     }
 }
 
-<span class="tok-cmt">// Create objects</span>
-<span class="tok-bi">Student</span> alice = <span class="tok-kw">new</span> <span class="tok-bi">Student</span>(<span class="tok-str">"Alice"</span>, <span class="tok-num">20</span>);
-<span class="tok-bi">Student</span> bob = <span class="tok-kw">new</span> <span class="tok-bi">Student</span>(<span class="tok-str">"Bob"</span>, <span class="tok-num">22</span>);
+<span class="cmt">// Creating objects</span>
+<span class="kw">public class</span> <span class="bi">Main</span> {
+    <span class="kw">public static void</span> <span class="fn">main</span>(<span class="bi">String</span>[] args) {
+        <span class="bi">Person</span> alice = <span class="kw">new</span> <span class="bi">Person</span>(<span class="str">"Alice"</span>, <span class="num">25</span>);
+        <span class="bi">Person</span> bob = <span class="kw">new</span> <span class="bi">Person</span>(<span class="str">"Bob"</span>, <span class="num">30</span>);
 
-alice.<span class="tok-fn">introduce</span>();
-bob.<span class="tok-fn">introduce</span>();</code></pre>
-              </div>
-              <div class="java-output">
-                <div class="java-output-label">Output</div>
-                <pre>Hi, I'm Alice and I'm 20 years old.
-Hi, I'm Bob and I'm 22 years old.</pre>
-              </div>
-              <div class="java-callout">
-                <span class="java-callout-icon">💡</span>
-                <p><code>this</code> refers to the current object's fields. Constructors have the same name as the class and no return type. The <code>new</code> keyword creates an object in memory.</p>
-              </div>
+        alice.<span class="fn">introduce</span>();  <span class="cmt">// Hi, I'm Alice and I'm 25.</span>
+        bob.<span class="fn">introduce</span>();    <span class="cmt">// Hi, I'm Bob and I'm 30.</span>
+    }
+}</code></pre>
+          </div>
 
-              <!-- Exercise -->
-              <div class="java-exercise" id="exercise-classes">
-                <div class="java-exercise-title">
-                  <i class="fas fa-dumbbell"></i> Practice: Classes &amp; Objects
-                </div>
-                <p>Create a <code>Book</code> class with fields <code>title</code>, <code>author</code>, and <code>year</code>. Add a constructor and a method <code>displayInfo()</code> that prints the book details. Then create two book objects.</p>
-                <button type="button" class="java-exercise-toggle" aria-expanded="false" aria-controls="solution-classes">Show Solution</button>
-                <div class="java-exercise-solution" id="solution-classes">
-                  <div class="java-code-block">
-                    <div class="java-code-header">
-                      <span class="java-code-lang">Java</span>
-                      <button type="button" class="java-code-copy" aria-label="Copy code" data-code="class Book {
+          <div class="jv-output">
+            <div class="jv-output-label">Output</div>
+            <pre>Hi, I'm Alice and I'm 25.
+Hi, I'm Bob and I'm 30.</pre>
+          </div>
+
+          <div class="jv-concept">
+            <h4>The <code>this</code> Keyword</h4>
+            <p><code>this</code> refers to the current object instance. It disambiguates between constructor parameters and field names when they share the same name.</p>
+          </div>
+
+          <div class="jv-callout">
+            <p>The <code>new</code> keyword allocates memory and invokes the constructor. Each object gets its own copy of instance fields, so modifying <code>alice.age</code> does not affect <code>bob.age</code>.</p>
+          </div>
+
+          <!-- Exercise -->
+          <div class="jv-exercise" id="exercise-classes">
+            <div class="jv-exercise-title">
+              Practice: Classes &amp; Objects
+            </div>
+            <p>Define a <code>Book</code> class with:</p>
+            <ol>
+              <li>Fields: <code>title</code>, <code>author</code>, <code>yearPublished</code></li>
+              <li>A constructor that initializes all fields</li>
+              <li>A method <code>displayInfo()</code> that prints the book details</li>
+              <li>Create two Book objects and call <code>displayInfo()</code> on each</li>
+            </ol>
+            <button type="button" class="jv-exercise-toggle" aria-expanded="false" aria-controls="solution-classes">Show Solution</button>
+            <div class="jv-exercise-solution" id="solution-classes">
+              <div class="jv-code-block">
+                <div class="jv-code-header">
+                  <span class="jv-code-lang">Java</span>
+                  <button type="button" class="jv-code-copy" aria-label="Copy code" data-code='class Book {
     String title;
     String author;
-    int year;
+    int yearPublished;
 
-    Book(String title, String author, int year) {
+    Book(String title, String author, int yearPublished) {
         this.title = title;
         this.author = author;
-        this.year = year;
+        this.yearPublished = yearPublished;
     }
 
     void displayInfo() {
-        System.out.println(&quot;\&quot;&quot; + title + &quot;\&quot; by &quot; + author + &quot; (&quot; + year + &quot;)&quot;);
+        System.out.println(title + " by " + author + " (" + yearPublished + ")");
     }
 }
 
-// Usage
-Book book1 = new Book(&quot;1984&quot;, &quot;George Orwell&quot;, 1949);
-Book book2 = new Book(&quot;To Kill a Mockingbird&quot;, &quot;Harper Lee&quot;, 1960);
-book1.displayInfo();
-book2.displayInfo();">Copy</button>
-                    </div>
-                    <pre><code><span class="tok-kw">class</span> <span class="tok-bi">Book</span> {
-    <span class="tok-bi">String</span> title;
-    <span class="tok-bi">String</span> author;
-    <span class="tok-kw">int</span> year;
+public class Main {
+    public static void main(String[] args) {
+        Book book1 = new Book("1984", "George Orwell", 1949);
+        Book book2 = new Book("To Kill a Mockingbird", "Harper Lee", 1960);
 
-    <span class="tok-bi">Book</span>(<span class="tok-bi">String</span> title, <span class="tok-bi">String</span> author, <span class="tok-kw">int</span> year) {
-        <span class="tok-kw">this</span>.title = title;
-        <span class="tok-kw">this</span>.author = author;
-        <span class="tok-kw">this</span>.year = year;
+        book1.displayInfo();
+        book2.displayInfo();
     }
-
-    <span class="tok-kw">void</span> <span class="tok-fn">displayInfo</span>() {
-        <span class="tok-bi">System</span>.out.<span class="tok-fn">println</span>(<span class="tok-str">"\""</span> + title + <span class="tok-str">"\" by "</span> + author + <span class="tok-str">" ("</span> + year + <span class="tok-str">")"</span>);
-    }
-}
-
-<span class="tok-cmt">// Usage</span>
-<span class="tok-bi">Book</span> book1 = <span class="tok-kw">new</span> <span class="tok-bi">Book</span>(<span class="tok-str">"1984"</span>, <span class="tok-str">"George Orwell"</span>, <span class="tok-num">1949</span>);
-<span class="tok-bi">Book</span> book2 = <span class="tok-kw">new</span> <span class="tok-bi">Book</span>(<span class="tok-str">"To Kill a Mockingbird"</span>, <span class="tok-str">"Harper Lee"</span>, <span class="tok-num">1960</span>);
-book1.<span class="tok-fn">displayInfo</span>();
-book2.<span class="tok-fn">displayInfo</span>();</code></pre>
-                  </div>
+}'><i class="fas fa-copy"></i> Copy</button>
                 </div>
-              </div>
-            </article>
+                <pre><code><span class="kw">class</span> <span class="bi">Book</span> {
+    <span class="bi">String</span> title;
+    <span class="bi">String</span> author;
+    <span class="kw">int</span> yearPublished;
 
-            <!-- 11. Basic OOP Concepts -->
-            <article class="java-lesson" id="oop" data-topic="11">
-              <div class="java-lesson-header">
-                <span class="java-lesson-number">11</span>
-                <h3>Basic Object-Oriented Programming</h3>
+    <span class="bi">Book</span>(<span class="bi">String</span> title, <span class="bi">String</span> author, <span class="kw">int</span> yearPublished) {
+        <span class="kw">this</span>.title = title;
+        <span class="kw">this</span>.author = author;
+        <span class="kw">this</span>.yearPublished = yearPublished;
+    }
+
+    <span class="kw">void</span> <span class="fn">displayInfo</span>() {
+        <span class="bi">System</span>.out.<span class="fn">println</span>(title + <span class="str">" by "</span> + author + <span class="str">" ("</span> + yearPublished + <span class="str">")"</span>);
+    }
+}
+
+<span class="kw">public class</span> <span class="bi">Main</span> {
+    <span class="kw">public static void</span> <span class="fn">main</span>(<span class="bi">String</span>[] args) {
+        <span class="bi">Book</span> book1 = <span class="kw">new</span> <span class="bi">Book</span>(<span class="str">"1984"</span>, <span class="str">"George Orwell"</span>, <span class="num">1949</span>);
+        <span class="bi">Book</span> book2 = <span class="kw">new</span> <span class="bi">Book</span>(<span class="str">"To Kill a Mockingbird"</span>, <span class="str">"Harper Lee"</span>, <span class="num">1960</span>);
+
+        book1.<span class="fn">displayInfo</span>();
+        book2.<span class="fn">displayInfo</span>();
+    }
+}</code></pre>
               </div>
-              <p>
-                Java is built around Object-Oriented Programming (OOP). The four main pillars are: <strong>Encapsulation</strong>, <strong>Inheritance</strong>, <strong>Polymorphism</strong>, and <strong>Abstraction</strong>.
-              </p>
-              <div class="java-concept-card">
-                <h4>1. Encapsulation</h4>
-                <p>Bundle data and methods together, and restrict direct access to fields using <code>private</code> with public getters/setters.</p>
-              </div>
-              <div class="java-code-block">
-                <div class="java-code-header">
-                  <span class="java-code-lang">Java</span>
-                  <button type="button" class="java-code-copy" aria-label="Copy code" data-code="class Person {
+            </div>
+          </div>
+        </article>
+
+        <!-- ════════════════════════════════════════
+             LESSON 11: BASIC OOP
+             ════════════════════════════════════════ -->
+        <article class="jv-lesson" id="topic-oop" data-topic="10">
+          <div class="jv-lesson-header">
+            <span class="jv-lesson-number">11</span>
+            <h3>Basic Object-Oriented Programming</h3>
+          </div>
+
+          <p>
+            Java is built around Object-Oriented Programming (OOP). The four main pillars are: <strong>Encapsulation</strong>, <strong>Inheritance</strong>, <strong>Polymorphism</strong>, and <strong>Abstraction</strong>.
+          </p>
+
+          <div class="jv-concept">
+            <h4>1. Encapsulation</h4>
+            <p>Bundle data and methods together, and restrict direct access to fields using <code>private</code> with public getters/setters.</p>
+          </div>
+
+          <div class="jv-code-block">
+            <div class="jv-code-header">
+              <span class="jv-code-lang">Java</span>
+              <button type="button" class="jv-code-copy" aria-label="Copy code" data-code='class Person {
     private String name;
     private int age;
 
@@ -1276,37 +1454,38 @@ book2.<span class="tok-fn">displayInfo</span>();</code></pre>
     public void setAge(int age) {
         if (age > 0) this.age = age;
     }
-}">Copy</button>
-                </div>
-                <pre><code><span class="tok-kw">class</span> <span class="tok-bi">Person</span> {
-    <span class="tok-kw">private</span> <span class="tok-bi">String</span> name;
-    <span class="tok-kw">private</span> <span class="tok-kw">int</span> age;
+}'><i class="fas fa-copy"></i> Copy</button>
+            </div>
+            <pre><code><span class="kw">class</span> <span class="bi">Person</span> {
+    <span class="kw">private</span> <span class="bi">String</span> name;
+    <span class="kw">private</span> <span class="kw">int</span> age;
 
-    <span class="tok-kw">public</span> <span class="tok-bi">Person</span>(<span class="tok-bi">String</span> name, <span class="tok-kw">int</span> age) {
-        <span class="tok-kw">this</span>.name = name;
-        <span class="tok-kw">this</span>.age = age;
+    <span class="kw">public</span> <span class="bi">Person</span>(<span class="bi">String</span> name, <span class="kw">int</span> age) {
+        <span class="kw">this</span>.name = name;
+        <span class="kw">this</span>.age = age;
     }
 
-    <span class="tok-kw">public</span> <span class="tok-bi">String</span> <span class="tok-fn">getName</span>() { <span class="tok-kw">return</span> name; }
-    <span class="tok-kw">public int</span> <span class="tok-fn">getAge</span>() { <span class="tok-kw">return</span> age; }
-    <span class="tok-kw">public void</span> <span class="tok-fn">setAge</span>(<span class="tok-kw">int</span> age) {
-        <span class="tok-kw">if</span> (age > <span class="tok-num">0</span>) <span class="tok-kw">this</span>.age = age;
+    <span class="kw">public</span> <span class="bi">String</span> <span class="fn">getName</span>() { <span class="kw">return</span> name; }
+    <span class="kw">public int</span> <span class="fn">getAge</span>() { <span class="kw">return</span> age; }
+    <span class="kw">public void</span> <span class="fn">setAge</span>(<span class="kw">int</span> age) {
+        <span class="kw">if</span> (age > <span class="num">0</span>) <span class="kw">this</span>.age = age;
     }
 }</code></pre>
-              </div>
-              <div class="java-concept-card">
-                <h4>2. Inheritance</h4>
-                <p>Create a new class based on an existing one using the <code>extends</code> keyword. The child class inherits fields and methods from the parent.</p>
-              </div>
-              <div class="java-code-block">
-                <div class="java-code-header">
-                  <span class="java-code-lang">Java</span>
-                  <button type="button" class="java-code-copy" aria-label="Copy code" data-code="// Parent class
+          </div>
+
+          <div class="jv-concept">
+            <h4>2. Inheritance</h4>
+            <p>Create a new class based on an existing one using the <code>extends</code> keyword. The child class inherits fields and methods from the parent.</p>
+          </div>
+
+          <div class="jv-code-block">
+            <div class="jv-code-header">
+              <span class="jv-code-lang">Java</span>
+              <button type="button" class="jv-code-copy" aria-label="Copy code" data-code='// Parent class
 class Animal {
     String name;
-
     Animal(String name) { this.name = name; }
-    void speak() { System.out.println(name + &quot; makes a sound&quot;); }
+    void speak() { System.out.println(name + " makes a sound"); }
 }
 
 // Child class
@@ -1314,47 +1493,50 @@ class Dog extends Animal {
     Dog(String name) { super(name); }
 
     @Override
-    void speak() { System.out.println(name + &quot; barks!&quot;); }
+    void speak() { System.out.println(name + " barks!"); }
 }
 
-// Usage
-Animal a = new Dog(&quot;Buddy&quot;);
-a.speak();  // Buddy barks!">Copy</button>
-                </div>
-                <pre><code><span class="tok-cmt">// Parent class</span>
-<span class="tok-kw">class</span> <span class="tok-bi">Animal</span> {
-    <span class="tok-bi">String</span> name;
-    <span class="tok-bi">Animal</span>(<span class="tok-bi">String</span> name) { <span class="tok-kw">this</span>.name = name; }
-    <span class="tok-kw">void</span> <span class="tok-fn">speak</span>() { <span class="tok-bi">System</span>.out.<span class="tok-fn">println</span>(name + <span class="tok-str">" makes a sound"</span>); }
+// Polymorphism
+Animal a = new Dog("Buddy");
+a.speak();  // Buddy barks!'><i class="fas fa-copy"></i> Copy</button>
+            </div>
+            <pre><code><span class="cmt">// Parent class</span>
+<span class="kw">class</span> <span class="bi">Animal</span> {
+    <span class="bi">String</span> name;
+    <span class="bi">Animal</span>(<span class="bi">String</span> name) { <span class="kw">this</span>.name = name; }
+    <span class="kw">void</span> <span class="fn">speak</span>() { <span class="bi">System</span>.out.<span class="fn">println</span>(name + <span class="str">" makes a sound"</span>); }
 }
 
-<span class="tok-cmt">// Child class</span>
-<span class="tok-kw">class</span> <span class="tok-bi">Dog</span> <span class="tok-kw">extends</span> <span class="tok-bi">Animal</span> {
-    <span class="tok-bi">Dog</span>(<span class="tok-bi">String</span> name) { <span class="tok-kw">super</span>(name); }
+<span class="cmt">// Child class</span>
+<span class="kw">class</span> <span class="bi">Dog</span> <span class="kw">extends</span> <span class="bi">Animal</span> {
+    <span class="bi">Dog</span>(<span class="bi">String</span> name) { <span class="kw">super</span>(name); }
 
-    <span class="tok-fn">@Override</span>
-    <span class="tok-kw">void</span> <span class="tok-fn">speak</span>() { <span class="tok-bi">System</span>.out.<span class="tok-fn">println</span>(name + <span class="tok-str">" barks!"</span>); }
+    <span class="fn">@Override</span>
+    <span class="kw">void</span> <span class="fn">speak</span>() { <span class="bi">System</span>.out.<span class="fn">println</span>(name + <span class="str">" barks!"</span>); }
 }
 
-<span class="tok-cmt">// Polymorphism</span>
-<span class="tok-bi">Animal</span> a = <span class="tok-kw">new</span> <span class="tok-bi">Dog</span>(<span class="tok-str">"Buddy"</span>);
-a.<span class="tok-fn">speak</span>();  <span class="tok-cmt">// Buddy barks! (runtime polymorphism)</span></code></pre>
-              </div>
-              <div class="java-output">
-                <div class="java-output-label">Output</div>
-                <pre>Buddy barks!</pre>
-              </div>
-              <div class="java-concept-card">
-                <h4>3. Polymorphism &amp; Abstraction</h4>
-                <ul>
-                  <li><strong>Polymorphism</strong> – Same method name, different behavior (method overriding &amp; overloading)</li>
-                  <li><strong>Abstraction</strong> – Hide implementation details using <code>abstract</code> classes or <code>interfaces</code></li>
-                </ul>
-              </div>
-              <div class="java-code-block">
-                <div class="java-code-header">
-                  <span class="java-code-lang">Java</span>
-                  <button type="button" class="java-code-copy" aria-label="Copy code" data-code="// Abstract class
+<span class="cmt">// Polymorphism</span>
+<span class="bi">Animal</span> a = <span class="kw">new</span> <span class="bi">Dog</span>(<span class="str">"Buddy"</span>);
+a.<span class="fn">speak</span>();  <span class="cmt">// Buddy barks!</span></code></pre>
+          </div>
+
+          <div class="jv-output">
+            <div class="jv-output-label">Output</div>
+            <pre>Buddy barks!</pre>
+          </div>
+
+          <div class="jv-concept">
+            <h4>3. Polymorphism &amp; Abstraction</h4>
+            <ul>
+              <li><strong>Polymorphism</strong> — same method name, different behavior (overriding &amp; overloading)</li>
+              <li><strong>Abstraction</strong> — hide implementation details using <code>abstract</code> classes or <code>interfaces</code></li>
+            </ul>
+          </div>
+
+          <div class="jv-code-block">
+            <div class="jv-code-header">
+              <span class="jv-code-lang">Java</span>
+              <button type="button" class="jv-code-copy" aria-label="Copy code" data-code='// Abstract class
 abstract class Shape {
     abstract double area();
 }
@@ -1375,63 +1557,64 @@ class Rectangle extends Shape {
     double area() { return w * h; }
 }
 
-// Polymorphism
+// Polymorphism in action
 Shape[] shapes = {new Circle(5), new Rectangle(4, 6)};
 for (Shape s : shapes) {
     System.out.println(s.area());
-}">Copy</button>
-                </div>
-                <pre><code><span class="tok-cmt">// Abstract class</span>
-<span class="tok-kw">abstract class</span> <span class="tok-bi">Shape</span> {
-    <span class="tok-kw">abstract double</span> <span class="tok-fn">area</span>();
+}'><i class="fas fa-copy"></i> Copy</button>
+            </div>
+            <pre><code><span class="cmt">// Abstract class</span>
+<span class="kw">abstract class</span> <span class="bi">Shape</span> {
+    <span class="kw">abstract double</span> <span class="fn">area</span>();
 }
 
-<span class="tok-kw">class</span> <span class="tok-bi">Circle</span> <span class="tok-kw">extends</span> <span class="tok-bi">Shape</span> {
-    <span class="tok-kw">double</span> radius;
-    <span class="tok-bi">Circle</span>(<span class="tok-kw">double</span> r) { radius = r; }
+<span class="kw">class</span> <span class="bi">Circle</span> <span class="kw">extends</span> <span class="bi">Shape</span> {
+    <span class="kw">double</span> radius;
+    <span class="bi">Circle</span>(<span class="kw">double</span> r) { radius = r; }
 
-    <span class="tok-fn">@Override</span>
-    <span class="tok-kw">double</span> <span class="tok-fn">area</span>() { <span class="tok-kw">return</span> <span class="tok-bi">Math</span>.PI * radius * radius; }
+    <span class="fn">@Override</span>
+    <span class="kw">double</span> <span class="fn">area</span>() { <span class="kw">return</span> <span class="bi">Math</span>.PI * radius * radius; }
 }
 
-<span class="tok-kw">class</span> <span class="tok-bi">Rectangle</span> <span class="tok-kw">extends</span> <span class="tok-bi">Shape</span> {
-    <span class="tok-kw">double</span> w, h;
-    <span class="tok-bi">Rectangle</span>(<span class="tok-kw">double</span> w, <span class="tok-kw">double</span> h) { <span class="tok-kw">this</span>.w = w; <span class="tok-kw">this</span>.h = h; }
+<span class="kw">class</span> <span class="bi">Rectangle</span> <span class="kw">extends</span> <span class="bi">Shape</span> {
+    <span class="kw">double</span> w, h;
+    <span class="bi">Rectangle</span>(<span class="kw">double</span> w, <span class="kw">double</span> h) { <span class="kw">this</span>.w = w; <span class="kw">this</span>.h = h; }
 
-    <span class="tok-fn">@Override</span>
-    <span class="tok-kw">double</span> <span class="tok-fn">area</span>() { <span class="tok-kw">return</span> w * h; }
+    <span class="fn">@Override</span>
+    <span class="kw">double</span> <span class="fn">area</span>() { <span class="kw">return</span> w * h; }
 }
 
-<span class="tok-cmt">// Polymorphism in action</span>
-<span class="tok-bi">Shape</span>[] shapes = {<span class="tok-kw">new</span> <span class="tok-bi">Circle</span>(<span class="tok-num">5</span>), <span class="tok-kw">new</span> <span class="tok-bi">Rectangle</span>(<span class="tok-num">4</span>, <span class="tok-num">6</span>)};
-<span class="tok-kw">for</span> (<span class="tok-bi">Shape</span> s : shapes) {
-    <span class="tok-bi">System</span>.out.<span class="tok-fn">println</span>(s.<span class="tok-fn">area</span>());
+<span class="cmt">// Polymorphism in action</span>
+<span class="bi">Shape</span>[] shapes = {<span class="kw">new</span> <span class="bi">Circle</span>(<span class="num">5</span>), <span class="kw">new</span> <span class="bi">Rectangle</span>(<span class="num">4</span>, <span class="num">6</span>)};
+<span class="kw">for</span> (<span class="bi">Shape</span> s : shapes) {
+    <span class="bi">System</span>.out.<span class="fn">println</span>(s.<span class="fn">area</span>());
 }</code></pre>
-              </div>
-              <div class="java-output">
-                <div class="java-output-label">Output</div>
-                <pre>78.53981633974483
-24.0</pre>
-              </div>
+          </div>
 
-              <!-- Exercise -->
-              <div class="java-exercise" id="exercise-oop">
-                <div class="java-exercise-title">
-                  <i class="fas fa-dumbbell"></i> Practice: OOP Concepts
-                </div>
-                <p>Create a <code>Vehicle</code> base class and a <code>Car</code> subclass:</p>
-                <ol>
-                  <li><code>Vehicle</code> has a <code>brand</code> field and a method <code>honk()</code></li>
-                  <li><code>Car extends Vehicle</code> with an additional <code>model</code> field</li>
-                  <li>Override <code>honk()</code> in Car to print a car-specific sound</li>
-                  <li>Create a Car object and call its methods</li>
-                </ol>
-                <button type="button" class="java-exercise-toggle" aria-expanded="false" aria-controls="solution-oop">Show Solution</button>
-                <div class="java-exercise-solution" id="solution-oop">
-                  <div class="java-code-block">
-                    <div class="java-code-header">
-                      <span class="java-code-lang">Java</span>
-                      <button type="button" class="java-code-copy" aria-label="Copy code" data-code="class Vehicle {
+          <div class="jv-output">
+            <div class="jv-output-label">Output</div>
+            <pre>78.53981633974483
+24.0</pre>
+          </div>
+
+          <!-- Exercise -->
+          <div class="jv-exercise" id="exercise-oop">
+            <div class="jv-exercise-title">
+              Practice: OOP Concepts
+            </div>
+            <p>Create a <code>Vehicle</code> base class and a <code>Car</code> subclass:</p>
+            <ol>
+              <li><code>Vehicle</code> has a <code>brand</code> field and a method <code>honk()</code></li>
+              <li><code>Car extends Vehicle</code> with an additional <code>model</code> field</li>
+              <li>Override <code>honk()</code> in Car to print a car-specific sound</li>
+              <li>Create a Car object and call its methods</li>
+            </ol>
+            <button type="button" class="jv-exercise-toggle" aria-expanded="false" aria-controls="solution-oop">Show Solution</button>
+            <div class="jv-exercise-solution" id="solution-oop">
+              <div class="jv-code-block">
+                <div class="jv-code-header">
+                  <span class="jv-code-lang">Java</span>
+                  <button type="button" class="jv-code-copy" aria-label="Copy code" data-code='class Vehicle {
     String brand;
 
     Vehicle(String brand) {
@@ -1439,7 +1622,7 @@ for (Shape s : shapes) {
     }
 
     void honk() {
-        System.out.println(brand + &quot; goes beep beep!&quot;);
+        System.out.println(brand + " goes beep beep!");
     }
 }
 
@@ -1453,57 +1636,48 @@ class Car extends Vehicle {
 
     @Override
     void honk() {
-        System.out.println(brand + &quot; &quot; + model + &quot; goes HONK HONK!&quot;);
+        System.out.println(brand + " " + model + " goes HONK HONK!");
     }
 }
 
 // Usage
-Car myCar = new Car(&quot;Toyota&quot;, &quot;Camry&quot;);
-myCar.honk();  // Toyota Camry goes HONK HONK!">Copy</button>
-                    </div>
-                    <pre><code><span class="tok-kw">class</span> <span class="tok-bi">Vehicle</span> {
-    <span class="tok-bi">String</span> brand;
-    <span class="tok-bi">Vehicle</span>(<span class="tok-bi">String</span> brand) { <span class="tok-kw">this</span>.brand = brand; }
-    <span class="tok-kw">void</span> <span class="tok-fn">honk</span>() { <span class="tok-bi">System</span>.out.<span class="tok-fn">println</span>(brand + <span class="tok-str">" goes beep beep!"</span>); }
-}
-
-<span class="tok-kw">class</span> <span class="tok-bi">Car</span> <span class="tok-kw">extends</span> <span class="tok-bi">Vehicle</span> {
-    <span class="tok-bi">String</span> model;
-    <span class="tok-bi">Car</span>(<span class="tok-bi">String</span> brand, <span class="tok-bi">String</span> model) {
-        <span class="tok-kw">super</span>(brand);
-        <span class="tok-kw">this</span>.model = model;
-    }
-    <span class="tok-fn">@Override</span>
-    <span class="tok-kw">void</span> <span class="tok-fn">honk</span>() { <span class="tok-bi">System</span>.out.<span class="tok-fn">println</span>(brand + <span class="tok-str">" "</span> + model + <span class="tok-str">" goes HONK HONK!"</span>); }
-}
-
-<span class="tok-cmt">// Usage</span>
-<span class="tok-bi">Car</span> myCar = <span class="tok-kw">new</span> <span class="tok-bi">Car</span>(<span class="tok-str">"Toyota"</span>, <span class="tok-str">"Camry"</span>);
-myCar.<span class="tok-fn">honk</span>();  <span class="tok-cmt">// Toyota Camry goes HONK HONK!</span></code></pre>
-                  </div>
+Car myCar = new Car("Toyota", "Camry");
+myCar.honk();  // Toyota Camry goes HONK HONK!'><i class="fas fa-copy"></i> Copy</button>
                 </div>
-              </div>
-            </article>
+                <pre><code><span class="kw">class</span> <span class="bi">Vehicle</span> {
+    <span class="bi">String</span> brand;
+    <span class="bi">Vehicle</span>(<span class="bi">String</span> brand) { <span class="kw">this</span>.brand = brand; }
+    <span class="kw">void</span> <span class="fn">honk</span>() { <span class="bi">System</span>.out.<span class="fn">println</span>(brand + <span class="str">" goes beep beep!"</span>); }
+}
 
-          </main>
-        </div><!-- /.java-layout -->
-      </div>
+<span class="kw">class</span> <span class="bi">Car</span> <span class="kw">extends</span> <span class="bi">Vehicle</span> {
+    <span class="bi">String</span> model;
+    <span class="bi">Car</span>(<span class="bi">String</span> brand, <span class="bi">String</span> model) { <span class="kw">super</span>(brand); <span class="kw">this</span>.model = model; }
+
+    <span class="fn">@Override</span>
+    <span class="kw">void</span> <span class="fn">honk</span>() { <span class="bi">System</span>.out.<span class="fn">println</span>(brand + <span class="str">" "</span> + model + <span class="str">" goes HONK HONK!"</span>); }
+}
+
+<span class="cmt">// Usage</span>
+<span class="bi">Car</span> myCar = <span class="kw">new</span> <span class="bi">Car</span>(<span class="str">"Toyota"</span>, <span class="str">"Camry"</span>);
+myCar.<span class="fn">honk</span>();  <span class="cmt">// Toyota Camry goes HONK HONK!</span></code></pre>
+              </div>
+            </div>
+          </div>
+        </article>
+
     </section>
 
-    <!-- Footer -->
-    <div id="footer-placeholder"></div>
+    <!-- FOOTER -->
+    <footer class="jv-footer">
+      <p>Practice what you learned in an <a href="https://replit.com/languages/java10" target="_blank" rel="noopener noreferrer">online Java compiler &rarr;</a></p>
+      <p>Back to <a href="/pages/learning/languages.html">Programming Languages</a></p>
+    </footer>
+  </main>
 
-    <script src="/auth.js"></script>
-    <script src="/bootstrap-legacy.js"></script>
-
-    <script src="/script.js"></script>
-    <script type="module" src="/dist/legacy-bundle.mjs"></script>
-    <script src="/theme.js"></script>
-    <script src="./java-learning.js"></script>
-  
-  <script>
-    loadPartial('navbar-placeholder', '/partials/navbar.html');
-    loadPartial('footer-placeholder', '/partials/footer.html');
-  </script>
+  <script src="/auth.js"></script>
+  <script src="/theme.js"></script>
+  <script src="/script.js"></script>
+  <script src="java-learning.js"></script>
 </body>
 </html>

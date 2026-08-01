@@ -30,11 +30,12 @@ class MazePathfindingArena {
 
       hudLeftNodes: document.getElementById('hudLeftNodes'),
       hudLeftPathLen: document.getElementById('hudLeftPathLen'),
+      hudLeftPathCost: document.getElementById('hudLeftPathCost'),
       hudLeftTime: document.getElementById('hudLeftTime'),
       hudLeftEff: document.getElementById('hudLeftEff'),
 
-      hudRightNodes: document.getElementById('hudRightNodes'),
       hudRightPathLen: document.getElementById('hudRightPathLen'),
+      hudRightPathCost: document.getElementById('hudRightPathCost'),
       hudRightTime: document.getElementById('hudRightTime'),
       hudRightEff: document.getElementById('hudRightEff'),
 
@@ -212,13 +213,17 @@ class MazePathfindingArena {
   resetMetrics() {
     this.dom.hudLeftNodes.textContent = '0';
     this.dom.hudLeftPathLen.textContent = '—';
+    this.dom.hudLeftPathCost.textContent = '—';
     this.dom.hudLeftTime.textContent = '—';
     this.dom.hudLeftEff.textContent = '—';
+    this.dom.hudLeftPathCost.parentElement.classList.remove('mpa-winner', 'mpa-tie', 'mpa-loser');
 
     this.dom.hudRightNodes.textContent = '0';
     this.dom.hudRightPathLen.textContent = '—';
+    this.dom.hudRightPathCost.textContent = '—';
     this.dom.hudRightTime.textContent = '—';
     this.dom.hudRightEff.textContent = '—';
+    this.dom.hudRightPathCost.parentElement.classList.remove('mpa-winner', 'mpa-tie', 'mpa-loser');
 
     this.dom.hudMazeTime.textContent = '—';
   }
@@ -663,6 +668,7 @@ class MazePathfindingArena {
       isPath: false,
       pathIdx: 0,
       nodesExplored: leftRes.visited.length,
+      cost: leftRes.cost,
       execMs: leftRes.execMs,
     };
 
@@ -675,6 +681,7 @@ class MazePathfindingArena {
       isPath: false,
       pathIdx: 0,
       nodesExplored: rightRes.visited.length,
+      cost: rightRes.cost,
       execMs: rightRes.execMs,
     };
 
@@ -766,22 +773,43 @@ class MazePathfindingArena {
       return pathLen / nodes;
     };
 
+    let leftCost = null;
+    let rightCost = null;
+
     if (this.left) {
       const pathLen = this.left.path.length;
+      leftCost = this.left.cost;
       const nodes = this.left.nodesExplored;
       this.dom.hudLeftNodes.textContent = String(nodes);
       this.dom.hudLeftPathLen.textContent = pathLen ? String(pathLen) : '—';
+      this.dom.hudLeftPathCost.textContent = pathLen ? String(leftCost) : '—';
       this.dom.hudLeftTime.textContent = `${this.left.execMs.toFixed(1)} ms`;
       this.dom.hudLeftEff.textContent = pathLen ? eff(pathLen, nodes).toFixed(3) : '0.000';
     }
 
     if (this.right) {
       const pathLen = this.right.path.length;
+      rightCost = this.right.cost;
       const nodes = this.right.nodesExplored;
       this.dom.hudRightNodes.textContent = String(nodes);
       this.dom.hudRightPathLen.textContent = pathLen ? String(pathLen) : '—';
+      this.dom.hudRightPathCost.textContent = pathLen ? String(rightCost) : '—';
       this.dom.hudRightTime.textContent = `${this.right.execMs.toFixed(1)} ms`;
       this.dom.hudRightEff.textContent = pathLen ? eff(pathLen, nodes).toFixed(3) : '0.000';
+    }
+
+    // Compare paths
+    if (leftCost !== null && rightCost !== null && this.left.path.length > 0 && this.right.path.length > 0) {
+      if (leftCost < rightCost) {
+        this.dom.hudLeftPathCost.parentElement.classList.add('mpa-winner');
+        this.dom.hudRightPathCost.parentElement.classList.add('mpa-loser');
+      } else if (rightCost < leftCost) {
+        this.dom.hudRightPathCost.parentElement.classList.add('mpa-winner');
+        this.dom.hudLeftPathCost.parentElement.classList.add('mpa-loser');
+      } else {
+        this.dom.hudLeftPathCost.parentElement.classList.add('mpa-tie');
+        this.dom.hudRightPathCost.parentElement.classList.add('mpa-tie');
+      }
     }
   }
 
@@ -985,6 +1013,7 @@ class MazePathfindingArena {
 
     const execMs = performance.now() - startT;
     const path = found ? this.backtrackPath(parent, endNode) : [];
-    return { visited, path, execMs };
+    const cost = path.length > 0 ? path.length - 1 : 0; // True g-cost (number of edges)
+    return { visited, path, cost, execMs };
   }
 }

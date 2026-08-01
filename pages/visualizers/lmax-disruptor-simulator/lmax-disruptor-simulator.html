@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>LMAX Disruptor Concurrency Simulator | Algo Infinity Verse</title>
+    <meta
+      name="description"
+      content="Build a simulation of the LMAX Disruptor pattern. Visualize a Ring Buffer with multiple Producers and Consumers."
+    />
+    <link rel="stylesheet" href="/styles.css" />
+    <link rel="stylesheet" href="lmax-disruptor-simulator.css" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Poppins:wght@300;400;500;600;700&family=Fira+Code:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <link rel="stylesheet" href="/modules/quick-notes/quick-notes.css" />
+  </head>
+  <body data-page="lmax-disruptor-simulator">
+    <div id="loading-screen" class="hidden">
+      <div class="loader">
+        <div class="infinity-loader">∞</div>
+        <h2>Algo Infinity Verse</h2>
+        <div class="loading-bar"><div class="loading-progress"></div></div>
+      </div>
+    </div>
+
+    <button type="button" id="scrollTopBtn" aria-label="Scroll to top" class="scroll-top-btn">
+      <i class="fas fa-circle-chevron-up"></i>
+    </button>
+
+    <div id="navbar-placeholder"></div>
+
+    <!-- Hero -->
+    <section class="disruptor-hero">
+      <div class="hero-background">
+        <div class="stars"></div>
+        <div class="stars2"></div>
+        <div class="stars3"></div>
+      </div>
+      <div class="disruptor-hero-inner">
+        <div class="disruptor-hero-eyebrow">🚀 High-Frequency Trading Architecture</div>
+        <h1 class="disruptor-hero-title">LMAX Disruptor Simulator</h1>
+        <p class="disruptor-hero-sub">Mechanical Sympathy & Lock-Free Ring Buffers</p>
+        <p class="disruptor-hero-desc">
+          Visualize a lock-free Ring Buffer with Producers and Consumers using memory barriers and
+          sequence numbers. See how avoiding CPU cache-line false sharing allows processing millions
+          of messages per second.
+        </p>
+        <a href="#lab" class="btn btn-primary disruptor-btn-primary"
+          ><i class="fas fa-microchip"></i> Open Lab</a
+        >
+      </div>
+    </section>
+
+    <!-- Lab -->
+    <section id="lab" class="section disruptor-section">
+      <div class="container">
+        <!-- Controls -->
+        <div class="disruptor-control-card">
+          <div class="disruptor-ctrl-row">
+            <span class="disruptor-ctrl-label">Actions</span>
+            <button type="button" class="disruptor-ctrl-btn" id="publishBtn">
+              <i class="fas fa-upload"></i> Publish Event
+            </button>
+            <button type="button" class="disruptor-ctrl-btn" id="consumeBtn">
+              <i class="fas fa-download"></i> Consume Event
+            </button>
+
+            <span class="disruptor-ctrl-label" style="margin-left: 1rem">Ring Size</span>
+            <select id="ringSizeSelect" class="disruptor-select">
+              <option value="8">8 slots</option>
+              <option value="16" selected>16 slots</option>
+              <option value="32">32 slots</option>
+            </select>
+          </div>
+
+          <div class="disruptor-ctrl-row">
+            <span class="disruptor-ctrl-label">Mechanical Sympathy</span>
+            <label class="disruptor-toggle-wrap">
+              <input type="checkbox" id="cachePaddingToggle" class="disruptor-check" checked />
+              <span class="disruptor-toggle-slider"></span>
+              <span class="disruptor-toggle-state" id="cachePaddingState"
+                >Cache-Line Padding ON</span
+              >
+            </label>
+            <button type="button" class="disruptor-ctrl-btn disruptor-reset-btn" id="resetBtn">
+              <i class="fas fa-undo"></i> Reset
+            </button>
+          </div>
+        </div>
+
+        <!-- Status -->
+        <div class="disruptor-status" id="disruptorStatus">
+          Ready. Click 'Publish Event' to start filling the Ring Buffer.
+        </div>
+
+        <!-- Main Layout -->
+        <div class="disruptor-main-layout">
+          <!-- Canvas Area -->
+          <div class="disruptor-canvas-col">
+            <div class="disruptor-canvas-header">
+              <span class="disruptor-canvas-title">Ring Buffer</span>
+              <div class="disruptor-stats">
+                <span>Cursor: <strong id="cursorStat">0</strong></span>
+                <span>Consumer Seq: <strong id="consumerStat">0</strong></span>
+                <span>Throughput: <strong id="throughputStat">0 op/s</strong></span>
+              </div>
+            </div>
+            <div class="disruptor-canvas-wrap">
+              <canvas id="disruptorCanvas"></canvas>
+            </div>
+            <div class="disruptor-legend">
+              <span class="dl-item"><span class="dl-dot producer-dot"></span> Producer</span>
+              <span class="dl-item"><span class="dl-dot consumer-dot"></span> Consumer</span>
+              <span class="dl-item"><span class="dl-dot slot-filled-dot"></span> Filled Slot</span>
+            </div>
+          </div>
+
+          <!-- Cache Visualization -->
+          <div class="disruptor-side-col">
+            <div class="disruptor-panel">
+              <div class="disruptor-panel-title"><i class="fas fa-memory"></i> CPU Cache Lines</div>
+              <div class="disruptor-cache-view" id="cacheView">
+                <!-- Visualized cache lines -->
+              </div>
+              <div class="disruptor-false-sharing-alert hidden" id="falseSharingAlert">
+                <i class="fas fa-exclamation-triangle"></i> False Sharing Detected! Performance
+                degraded.
+              </div>
+            </div>
+
+            <div class="disruptor-panel">
+              <div class="disruptor-panel-title"><i class="fas fa-list"></i> Operation Log</div>
+              <div class="disruptor-log" id="opLog">
+                <div class="disruptor-log-empty">No operations yet.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div id="footer-placeholder"></div>
+
+    <script src="/auth.js"></script>
+    <script src="/bootstrap-legacy.js"></script>
+    <script src="/script.js"></script>
+    <script type="module" src="/dist/legacy-bundle.mjs"></script>
+    <script src="/theme.js"></script>
+    <script src="/auth-gate.js"></script>
+    <script src="lmax-disruptor-simulator.js"></script>
+    <script>
+      if (typeof loadPartial === 'function') {
+        loadPartial('navbar-placeholder', '/partials/navbar.html').then(function () {
+          if (typeof initNavbar === 'function') initNavbar();
+        });
+        loadPartial('footer-placeholder', '/partials/footer.html');
+      }
+    </script>
+    <script src="/modules/quick-notes/quick-notes.js"></script>
+  </body>
+</html>

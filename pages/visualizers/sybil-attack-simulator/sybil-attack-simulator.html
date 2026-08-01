@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>PoW vs PoS Sybil Attack Simulator | Algo Infinity Verse</title>
+    <meta
+      name="description"
+      content="Visualize how Proof-of-Work and Proof-of-Stake consensus mechanisms defend against 51% Sybil attacks using computational difficulty and economic slashing."
+    />
+
+    <link
+      href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Poppins:wght@300;400;500;600;700&family=Fira+Code:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+
+    <link rel="stylesheet" href="sybil-attack-simulator.css" />
+    <script src="/theme.js"></script>
+  </head>
+  <body class="sybil-body">
+    <nav class="navbar sybil-nav">
+      <div class="nav-logo">
+        <span class="logo-text">∞</span>
+        <span class="logo-title">Algo Infinity Verse</span>
+      </div>
+      <div class="engine-badge"><i class="fas fa-shield-alt"></i> Blockchain Security</div>
+    </nav>
+
+    <main class="sybil-workspace">
+      <header class="workspace-header">
+        <h1>PoW vs PoS Sybil Attack Simulator</h1>
+        <p class="subtitle">
+          See how consensus mechanisms prevent bad actors from taking over a network just by
+          spinning up thousands of fake identities (Sybil Attack). Proof-of-Work defends via
+          computational cost, while Proof-of-Stake defends via economic penalty (slashing).
+        </p>
+
+        <div class="control-panel">
+          <div class="mode-selector">
+            <button id="btnModePoW" class="btn btn-primary active">
+              <i class="fas fa-microchip"></i> Proof-of-Work
+            </button>
+            <button id="btnModePoS" class="btn btn-outline">
+              <i class="fas fa-coins"></i> Proof-of-Stake
+            </button>
+          </div>
+
+          <button id="btnReset" class="btn btn-danger">
+            <i class="fas fa-sync-alt"></i> Reset System
+          </button>
+        </div>
+      </header>
+
+      <div class="visualizer-content">
+        <section class="network-panel">
+          <div class="panel-header">
+            <h2><i class="fas fa-network-wired"></i> Network Nodes</h2>
+            <div class="stats-box">
+              <span class="stat-label">Total Nodes:</span>
+              <span class="stat-value" id="nodeCount">10</span>
+            </div>
+          </div>
+
+          <div class="nodes-container" id="nodesContainer">
+            <!-- Nodes will be injected here -->
+          </div>
+
+          <div class="attack-controls">
+            <h3><i class="fas fa-user-ninja"></i> Attacker Controls</h3>
+            <div class="attacker-actions">
+              <button id="btnAddSybil" class="btn btn-warning">
+                <i class="fas fa-ghost"></i> Add Sybil Identity (Fake Node)
+              </button>
+              <button id="btnBuyResource" class="btn btn-danger">
+                <i class="fas fa-shopping-cart"></i>
+                <span id="resourceLabel">Buy ASICs (Hashpower)</span>
+              </button>
+              <button id="btnAttemptAttack" class="btn btn-danger-solid">
+                <i class="fas fa-bolt"></i> Attempt 51% Attack
+              </button>
+            </div>
+            <p class="cost-info" id="costInfo">
+              Fake Nodes are cheap but add negligible Hashpower (1 TH/s). ASICs cost money but add
+              100 TH/s.
+            </p>
+          </div>
+        </section>
+
+        <section class="info-panel">
+          <div class="panel-header">
+            <h2><i class="fas fa-chart-pie"></i> Consensus Power Distribution</h2>
+          </div>
+
+          <div class="power-meter-container">
+            <div class="power-labels">
+              <span class="honest-label"><i class="fas fa-shield-alt"></i> Honest Network</span>
+              <span class="attacker-label"><i class="fas fa-user-secret"></i> Attacker Power</span>
+            </div>
+            <div class="power-bar">
+              <div class="power-fill-honest" id="powerHonest" style="width: 100%">100%</div>
+              <div class="power-fill-attacker" id="powerAttacker" style="width: 0%">0%</div>
+            </div>
+            <div class="threshold-line" title="51% Attack Threshold"></div>
+          </div>
+
+          <div class="resource-stats">
+            <div class="stat-card honest-card">
+              <h4>Honest Resources</h4>
+              <div class="stat-big" id="honestResourceVal">1000</div>
+              <div class="stat-unit" id="honestResourceUnit">TH/s</div>
+            </div>
+            <div class="stat-card attacker-card">
+              <h4>Attacker Resources</h4>
+              <div class="stat-big" id="attackerResourceVal">0</div>
+              <div class="stat-unit" id="attackerResourceUnit">TH/s</div>
+            </div>
+            <div class="stat-card cost-card">
+              <h4>Attacker Spent</h4>
+              <div class="stat-big" id="attackerCost">$0</div>
+              <div class="stat-unit">USD</div>
+            </div>
+          </div>
+
+          <div class="status-log" id="statusLog">
+            <div class="log-entry system">
+              System initialized in Proof-of-Work mode. Honest nodes control 100% of hashpower.
+            </div>
+          </div>
+
+          <div class="algorithm-details" id="algoDetails">
+            <h3>Proof-of-Work Defense:</h3>
+            <p>
+              In PoW, voting power is proportional to computational power (Hash Rate), not the
+              number of node identities. An attacker can easily spoof thousands of IP addresses
+              (Sybil nodes), but without physical ASICs and electricity, they cannot out-hash the
+              honest network to rewrite the chain.
+            </p>
+          </div>
+        </section>
+      </div>
+    </main>
+
+    <script src="sybil-attack-simulator.js"></script>
+  </body>
+</html>

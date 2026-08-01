@@ -1,34 +1,59 @@
-import {
-  handleGuestLogin,
-  handleSignup,
-  handleLogin,
-  handleLogout,
-  handleDeactivateAccount,
-  handleSession,
-} from '../handlers/authHandlers.js';
-import { handleAnalyzeResume } from '../handlers/resumeHandlers.js';
-import { handleSubmitFeedback } from '../handlers/feedbackHandlers.js';
-import { handleSubmitInterviewExperience } from '../handlers/interviewHandlers.js';
-import {
-  handleMemoryLog,
-  handleMemoryDue,
-  handleMemoryAll,
-  handleMemoryDelete,
-  handleMemoryStats,
-  handleMemoryReset,
-} from '../handlers/memoryHandlers.js';
-import { handleUserPersonality } from '../handlers/personalityHandlers.js';
-import { handleRefactoringDojoSubmit } from './refactoringDojoRoutes.js';
+// backend/routes/apiRoutes.js
+//
+// Issue #2402 — central route registry is now a *data* dispatcher.
+//
+// Prior to this refactor, every route was wired in a 110-line
+// `setupApiRoutes()` chain of inline `if (pathname === ...) return wrapHandler(...)`
+// blocks. New routes required touching the dispatcher, and the file
+// grew linearly with feature count. The registry now lives in
+// per-feature group modules under `./routeGroups/`, each exporting a
+// `{ name, routes, matchers? }` description. `setupApiRoutes` walks
+// those descriptions in a single pass:
+//
+//   1. For every group, walk every exact-match route in `routes[]`. The
+//      first `(method, path)` hit dispatches the (already-wrapped) handler.
+//   2. If no exact-match hit, walk every group's optional `matchers[]`
+//      in registration order. The first matcher that returns `true` ends
+//      the lookup.
+//   3. Otherwise return `null` so the caller (`backend/server.js`) can
+//      emit a 404.
+//
+// The cross-cutting infrastructure (`applySecurityHeaders`,
+// `checkRateLimit`, `sanitizeInput`, `sendError`, `wrapHandler`) stays
+// here because it is *machinery* shared by every group, not a route
+// definition. Group files describe WHAT to register; this file knows
+// HOW to register it.
+import { authenticationRoutes } from './routeGroups/authenticationRoutes.js';
+import { resumeRoutes } from './routeGroups/resumeRoutes.js';
+import { feedbackRoutes } from './routeGroups/feedbackRoutes.js';
+import { interviewRoutes } from './routeGroups/interviewRoutes.js';
+import { memoryRoutesGroup } from './routeGroups/memoryRoutesGroup.js';
+import { personalityRoutes } from './routeGroups/personalityRoutes.js';
+import { refactoringDojoRoutesGroup } from './routeGroups/refactoringDojoRoutesGroup.js';
+import { API_ROUTES } from './routeConstants.js';
 
-const MAX_TOPIC_LENGTH = 100;
+// Single source of truth for the registration order. Order matters only
+// for `matchers[]` (a path-pattern route can shadow another path-pattern
+// route if registered first); exact-match routes are order-independent
+// because their `path` is unique.
+const ROUTE_GROUPS = [
+  ...authenticationRoutes,
+  ...resumeRoutes,
+  ...feedbackRoutes,
+  ...interviewRoutes,
+  ...memoryRoutesGroup,
+  ...personalityRoutes,
+  ...refactoringDojoRoutesGroup,
+];
 
-const rateLimiter = new Map();
 const RATE_LIMIT_WINDOW = 60000;
 const RATE_LIMITS = {
   default: { maxRequests: 60, tier: 'default' },
   memory: { maxRequests: 30, tier: 'memory' },
   critical: { maxRequests: 10, tier: 'critical' },
 };
+
+const rateLimiter = new Map();
 
 const securityHeaders = {
   'X-Content-Type-Options': 'nosniff',
@@ -215,114 +240,53 @@ function wrapHandler(handler, tier = 'default', requiresAuth = true) {
   };
 }
 
+export { applySecurityHeaders, wrapHandler, sendError };
+
 export function setupApiRoutes(req, res, pathname) {
   req.pathname = pathname;
 
-  if (pathname === '/api/guest' && req.method === 'POST') {
-    return wrapHandler(handleGuestLogin, 'default', false)(req, res);
-  }
-
-  if (pathname === '/api/session' && req.method === 'GET') {
-    return wrapHandler(handleSession, 'default', false)(req, res);
-  }
-
-  if (pathname === '/api/signup' && req.method === 'POST') {
-    return wrapHandler(handleSignup, 'default', false)(req, res);
-  }
-
-  if (pathname === '/api/login' && req.method === 'POST') {
-    return wrapHandler(handleLogin, 'default', false)(req, res);
-  }
-
-  if (pathname === '/api/deactivate-account' && req.method === 'POST') {
-    return wrapHandler(handleDeactivateAccount, 'critical', true)(req, res);
-  }
-
-  if (pathname === '/api/logout' && req.method === 'POST') {
-    return wrapHandler(handleLogout, 'default', true)(req, res);
-  }
-
-  if (pathname === '/api/analyze-resume' && req.method === 'POST') {
-    return wrapHandler(handleAnalyzeResume, 'memory', true)(req, res);
-  }
-
-  if (pathname === '/api/feedback' && req.method === 'POST') {
-    return wrapHandler(handleSubmitFeedback, 'default', true)(req, res);
-  }
-
-  if (pathname === '/api/interview-experiences' && req.method === 'POST') {
-    return wrapHandler(handleSubmitInterviewExperience, 'default', true)(req, res);
-  }
-
-  // MEMORY ROUTES
-  if (pathname === '/api/memory/log' && req.method === 'POST') {
-    return wrapHandler(handleMemoryLog, 'memory', true)(req, res);
-  }
-
-  if (pathname === '/api/memory/due' && req.method === 'GET') {
-    return wrapHandler(handleMemoryDue, 'memory', true)(req, res);
-  }
-
-  if (pathname === '/api/memory/all' && req.method === 'GET') {
-    return wrapHandler(handleMemoryAll, 'memory', true)(req, res);
-  }
-
-  if (pathname === '/api/memory/stats' && req.method === 'GET') {
-    return wrapHandler(handleMemoryStats, 'memory', true)(req, res);
-  }
-
-  if (pathname === '/api/memory/reset' && req.method === 'POST') {
-    return wrapHandler(handleMemoryReset, 'critical', true)(req, res);
-  }
-
-  if (pathname.startsWith('/api/memory/') && req.method === 'DELETE') {
-    const rawTopic = pathname.replace('/api/memory/', '');
-    if (rawTopic && rawTopic.length > 0) {
-      try {
-        const decodedTopic = decodeURIComponent(rawTopic);
-        const trimmedTopic = decodedTopic.trim();
-
-        if (trimmedTopic.length > MAX_TOPIC_LENGTH) {
-          return sendError(
-            res,
-            400,
-            `Topic exceeds maximum length of ${MAX_TOPIC_LENGTH} characters.`,
-            'TOPIC_TOO_LONG'
-          );
-        }
-
-        if (!/^[a-zA-Z0-9\s\-_.]+$/.test(trimmedTopic)) {
-          return sendError(
-            res,
-            400,
-            'Topic contains unsupported characters. Only letters, numbers, spaces, hyphens, underscores, and periods are allowed.',
-            'INVALID_TOPIC'
-          );
-        }
-
-        req.params = req.params || {};
-        req.params.topic = trimmedTopic;
-        return wrapHandler(handleMemoryDelete, 'critical', true)(req, res);
-      } catch (error) {
-        if (error instanceof URIError) {
-          return sendError(
-            res,
-            400,
-            'Invalid URL-encoded route parameter. Please provide a valid topic identifier.',
-            'INVALID_TOPIC_ENCODING'
-          );
-        }
-        throw error;
+  // Pass 1: exact-match routes. Order-independent (each `path` is unique).
+  for (const group of ROUTE_GROUPS) {
+    for (const route of group.routes) {
+      if (pathname === route.path && req.method === route.method) {
+        return wrapHandler(route.handler, route.tier, route.requiresAuth)(req, res);
       }
     }
   }
 
-  if (pathname === '/api/user/personality' && req.method === 'GET') {
-    return wrapHandler(handleUserPersonality, 'default', true)(req, res);
+  // Pass 2: path-pattern matchers. Order-sensitive — the first matcher
+  // that returns `true` (handled the request) wins. Memory's `:topic`
+  // DELETE route lives here.
+  for (const group of ROUTE_GROUPS) {
+    if (!group.matchers) continue;
+    for (const matcher of group.matchers) {
+      const handled = matcher.match(req, res, pathname, { wrapHandler });
+      if (handled) return true;
+    }
   }
 
-  if (pathname === '/api/refactoring-dojo/submit' && req.method === 'POST') {
-    return wrapHandler(handleRefactoringDojoSubmit, 'default', true)(req, res);
+  if (pathname === API_ROUTES.EXPLAIN_CODE && req.method === 'POST') {
+    return wrapHandler(
+      async (req, res) => {
+        const { code, language } = req.body || {};
+        const result = await explainCode({ code, language });
+        res.statusCode = 200;
+        res.setHeader('Content-Type', 'application/json');
+        res.end(JSON.stringify(result));
+      },
+      'default',
+      false
+    )(req, res);
+  }
+
+  if (pathname === API_ROUTES.CHEAT_SHEET && (req.method === 'POST' || req.method === 'GET')) {
+    return wrapHandler(
+      async (req, res) => {
+        await cheatSheetHandler(req, res);
+      },
+      'default',
+      false
+    )(req, res);
   }
 
   return null;

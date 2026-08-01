@@ -88,14 +88,14 @@ describe('auth.service - validateUserForToken (Issue #2412)', () => {
   });
 
   describe('createAccessToken', () => {
-    it('throws synchronously when the user is invalid', () => {
-      expect(() => createAccessToken(null)).toThrow(/valid user object/);
-      expect(() => createAccessToken({ ...validUser, id: '' })).toThrow(/"id"/);
-      expect(() => createAccessToken({ name: 'Alice', email: 'a@b.com' })).toThrow(/"id"/);
+    it('throws when the user is invalid', async () => {
+      await expect(createAccessToken(null)).rejects.toThrow(/valid user object/);
+      await expect(createAccessToken({ ...validUser, id: '' })).rejects.toThrow(/"id"/);
+      await expect(createAccessToken({ name: 'Alice', email: 'a@b.com' })).rejects.toThrow(/"id"/);
     });
 
-    it('preserves existing behaviour for a valid user', () => {
-      const token = createAccessToken(validUser);
+    it('preserves existing behaviour for a valid user', async () => {
+      const token = await createAccessToken(validUser);
       expect(typeof token).toBe('string');
       // JWT = header.payload.signature, three dot-separated base64url segments.
       expect(token.split('.').length).toBe(3);

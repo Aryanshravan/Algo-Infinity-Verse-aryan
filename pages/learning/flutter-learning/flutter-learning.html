@@ -1,0 +1,1442 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Learn Flutter – Build Beautiful Mobile Apps | Algo Infinity Verse</title>
+  <meta name="description" content="Free interactive Flutter tutorial covering setup, widgets, layout, state management, navigation, and building your first app. Learn Flutter basics with hands-on examples." />
+
+  <link rel="stylesheet" href="/styles.css" />
+  <link rel="stylesheet" href="flutter-learning.css" />
+
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+
+  <script>
+    (function() {
+      try {
+        var t = localStorage.getItem('theme');
+        var p = window.matchMedia('(prefers-color-scheme: light)').matches;
+        var theme = t || (p ? 'light' : 'dark');
+        if (theme === 'light') document.documentElement.classList.add('light-mode');
+      } catch (e) {}
+    })();
+  </script>
+</head>
+<body data-page="flutter-learning" data-no-loading>
+  <div id="loading-screen" class="hidden">
+    <div class="loader">
+      <div class="infinity-loader">&#x221E;</div>
+      <h2>Loading Flutter Learning...</h2>
+    </div>
+  </div>
+
+  <main>
+    <!-- HERO SECTION -->
+    <section class="fl-hero">
+      <div class="fl-hero-bg">
+        <div class="fl-hero-glow"></div>
+      </div>
+
+      <a href="/pages/learning/languages.html" class="fl-back-btn" id="flBackBtn" aria-label="Go back to languages">
+        <i class="fas fa-arrow-left"></i>
+        <span>Languages</span>
+      </a>
+
+      <div class="fl-hero-content">
+        <h1 class="fl-hero-title" id="flHeroTitle">
+          <span class="fl-title-line">Learn Flutter</span>
+          <span class="fl-title-line"><span class="fl-title-caret">//</span> Build Beautiful Apps</span>
+        </h1>
+
+        <p class="fl-hero-subtitle">
+          Build native mobile apps from a single Dart codebase. From your first <code>flutter create</code> to state, layout, and navigation -- <strong>6 interactive lessons</strong> to get you shipping.
+        </p>
+
+        <!-- Widget-tree signature -->
+        <div class="fl-widget-tree" aria-hidden="true">
+          <div class="fl-wtree-node is-root">MaterialApp</div>
+          <div class="fl-wtree-link"></div>
+          <div class="fl-wtree-node">Scaffold</div>
+          <div class="fl-wtree-link"></div>
+          <div class="fl-wtree-row">
+            <div class="fl-wtree-node is-leaf">AppBar</div>
+            <div class="fl-wtree-node is-leaf">Column</div>
+            <div class="fl-wtree-node is-leaf">Text</div>
+          </div>
+        </div>
+
+        <!-- Stats -->
+        <div class="fl-hero-stats">
+          <div class="fl-stat">
+            <span class="fl-stat-value" id="topicCount">6</span>
+            <span class="fl-stat-label">Topics</span>
+          </div>
+          <div class="fl-stat">
+            <span class="fl-stat-value">18+</span>
+            <span class="fl-stat-label">Examples</span>
+          </div>
+          <div class="fl-stat">
+            <span class="fl-stat-value">6</span>
+            <span class="fl-stat-label">Exercises</span>
+          </div>
+        </div>
+
+        <!-- CTA -->
+        <div class="fl-hero-actions">
+          <a href="#topic-getting-started" class="fl-btn fl-btn-primary">
+            <i class="fas fa-play"></i> Start Learning
+          </a>
+          <a href="/pages/learning/languages.html" class="fl-btn fl-btn-secondary">
+            <i class="fas fa-th"></i> Browse Languages
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- TOPIC NAVIGATION PILLS -->
+    <section class="fl-section">
+        <nav class="fl-topic-nav" id="flTopicNav" aria-label="Lesson topics">
+          <a href="#topic-getting-started" class="fl-topic-pill active">Getting Started</a>
+          <a href="#topic-widgets" class="fl-topic-pill">Widgets</a>
+          <a href="#topic-layout" class="fl-topic-pill">Layout &amp; Styling</a>
+          <a href="#topic-state" class="fl-topic-pill">State &amp; Interaction</a>
+          <a href="#topic-navigation" class="fl-topic-pill">Navigation &amp; Lists</a>
+          <a href="#topic-first-app" class="fl-topic-pill">Your First App</a>
+          <a href="#topic-quiz" class="fl-topic-pill">Quiz</a>
+        </nav>
+
+        <!-- Progress dots -->
+        <div class="fl-progress" id="flProgress" aria-hidden="true">
+          <span class="fl-progress-dot active" data-topic="0"></span>
+          <span class="fl-progress-line" data-topic="0"></span>
+          <span class="fl-progress-dot" data-topic="1"></span>
+          <span class="fl-progress-line" data-topic="1"></span>
+          <span class="fl-progress-dot" data-topic="2"></span>
+          <span class="fl-progress-line" data-topic="2"></span>
+          <span class="fl-progress-dot" data-topic="3"></span>
+          <span class="fl-progress-line" data-topic="3"></span>
+          <span class="fl-progress-dot" data-topic="4"></span>
+          <span class="fl-progress-line" data-topic="4"></span>
+          <span class="fl-progress-dot" data-topic="5"></span>
+          <span class="fl-progress-line" data-topic="5"></span>
+          <span class="fl-progress-dot" data-topic="6"></span>
+        </div>
+
+        <!-- LESSON 1: GETTING STARTED -->
+        <article class="fl-lesson" id="topic-getting-started" data-topic="0">
+          <div class="fl-lesson-header">
+            <span class="fl-lesson-number">01</span>
+            <h3>Why Flutter &amp; Getting Started</h3>
+          </div>
+
+          <p>
+            Flutter is Google's open-source UI toolkit for building <strong>natively compiled apps</strong> for mobile, web, and desktop -- all from a single Dart codebase. Instead of writing separate apps for iOS and Android, you write the UI once and Flutter draws every pixel itself, giving you fast, consistent results everywhere.
+          </p>
+
+          <div class="fl-concept">
+            <h4>Why developers choose Flutter</h4>
+            <ul>
+              <li><strong>One codebase</strong> -- ship the same Dart code to iOS, Android, web, and desktop</li>
+              <li><strong>Hot Reload</strong> -- change code and see the UI update in under a second</li>
+              <li><strong>Native performance</strong> -- Dart compiles ahead-of-time (AOT) to machine code</li>
+              <li><strong>Rich widget catalog</strong> -- Material and Cupertino widgets out of the box</li>
+              <li><strong>Great tooling</strong> -- Android Studio, VS Code, and an excellent CLI</li>
+            </ul>
+          </div>
+
+          <div class="fl-code-block">
+            <div class="fl-code-header">
+              <span class="fl-code-lang">Terminal</span>
+              <button type="button" class="fl-code-copy" aria-label="Copy code" data-code="flutter create my_app
+cd my_app
+flutter pub get
+flutter analyze
+flutter run"><i class="fas fa-copy"></i> Copy</button>
+            </div>
+            <pre><code><span class="cmt"># Create a new Flutter project</span>
+<span class="fn">flutter</span> create my_app
+<span class="fn">cd</span> my_app
+<span class="fn">flutter</span> pub get
+<span class="fn">flutter</span> analyze
+<span class="fn">flutter</span> run</code></pre>
+          </div>
+
+          <p>
+            Every Flutter app starts from <code>main()</code>. It calls <code>runApp()</code> with your <strong>root widget</strong> -- the top of your widget tree. Everything you see on screen is a widget, and widgets are just Dart classes that describe part of the UI.
+          </p>
+
+          <div class="fl-code-block">
+            <div class="fl-code-header">
+              <span class="fl-code-lang">Dart</span>
+              <button type="button" class="fl-code-copy" aria-label="Copy code" data-code="import 'package:flutter/material.dart';
+
+void main() {
+  runApp(const MyApp());
+}
+
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'My Flutter App',
+      home: Scaffold(
+        appBar: AppBar(title: const Text('Welcome')),
+        body: const Center(
+          child: Text('Hello, Flutter!'),
+        ),
+      ),
+    );
+  }
+}"><i class="fas fa-copy"></i> Copy</button>
+            </div>
+            <pre><code><span class="kw">import</span> <span class="str">'package:flutter/material.dart'</span>;
+
+<span class="kw">void</span> <span class="fn">main</span>() {
+  <span class="fn">runApp</span>(<span class="kw">const</span> <span class="fn">MyApp</span>());
+}
+
+<span class="kw">class</span> <span class="fn">MyApp</span> <span class="kw">extends</span> <span class="type">StatelessWidget</span> {
+  <span class="kw">const</span> <span class="fn">MyApp</span>({<span class="kw">super</span>.key});
+
+  <span class="dec">@override</span>
+  <span class="type">Widget</span> <span class="fn">build</span>(<span class="type">BuildContext</span> context) {
+    <span class="kw">return</span> <span class="fn">MaterialApp</span>(
+      title: <span class="str">'My Flutter App'</span>,
+      home: <span class="fn">Scaffold</span>(
+        appBar: <span class="fn">AppBar</span>(title: <span class="kw">const</span> <span class="fn">Text</span>(<span class="str">'Welcome'</span>)),
+        body: <span class="kw">const</span> <span class="fn">Center</span>(
+          child: <span class="fn">Text</span>(<span class="str">'Hello, Flutter!'</span>),
+        ),
+      ),
+    );
+  }
+}</code></pre>
+          </div>
+
+          <div class="fl-table-wrap">
+            <table class="fl-table" aria-label="Flutter project structure">
+              <thead>
+                <tr>
+                  <th scope="col">Path</th>
+                  <th scope="col">Purpose</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><td><code>lib/main.dart</code></td><td>Entry point -- where your app starts</td></tr>
+                <tr><td><code>pubspec.yaml</code></td><td>Dependencies and assets (like package.json)</td></tr>
+                <tr><td><code>test/</code></td><td>Widget and unit tests</td></tr>
+                <tr><td><code>android/</code> &amp; <code>ios/</code></td><td>Native platform shells</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="fl-callout">
+            <p><strong>Prefer <code>const</code> constructors.</strong> When a widget can't change, mark it <code>const</code>. It lets Flutter skip rebuilding it entirely -- a simple, automatic performance win.</p>
+          </div>
+
+          <!-- Exercise -->
+          <div class="fl-exercise" id="exercise-getting-started">
+            <div class="fl-exercise-title">
+              Practice: Your First Project
+            </div>
+            <p>Write the Dart code that:</p>
+            <ol>
+              <li>Imports <code>package:flutter/material.dart</code></li>
+              <li>Defines a <code>main()</code> that runs a <code>MyApp</code> widget</li>
+              <li>Renders a <code>MaterialApp</code> with an app bar titled <code>"Counter"</code> and body text <code>"Count: 0"</code></li>
+            </ol>
+            <button type="button" class="fl-exercise-toggle" aria-expanded="false" aria-controls="solution-getting-started">Show Solution</button>
+            <div class="fl-exercise-solution" id="solution-getting-started">
+              <div class="fl-code-block">
+                <div class="fl-code-header">
+                  <span class="fl-code-lang">Dart</span>
+                  <button type="button" class="fl-code-copy" aria-label="Copy code" data-code="import 'package:flutter/material.dart';
+
+void main() {
+  runApp(const MyApp());
+}
+
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'Counter',
+      home: Scaffold(
+        appBar: AppBar(title: const Text('Counter')),
+        body: const Center(child: Text('Count: 0')),
+      ),
+    );
+  }
+}"><i class="fas fa-copy"></i> Copy</button>
+                </div>
+                <pre><code><span class="kw">import</span> <span class="str">'package:flutter/material.dart'</span>;
+
+<span class="kw">void</span> <span class="fn">main</span>() {
+  <span class="fn">runApp</span>(<span class="kw">const</span> <span class="fn">MyApp</span>());
+}
+
+<span class="kw">class</span> <span class="fn">MyApp</span> <span class="kw">extends</span> <span class="type">StatelessWidget</span> {
+  <span class="kw">const</span> <span class="fn">MyApp</span>({<span class="kw">super</span>.key});
+
+  <span class="dec">@override</span>
+  <span class="type">Widget</span> <span class="fn">build</span>(<span class="type">BuildContext</span> context) {
+    <span class="kw">return</span> <span class="fn">MaterialApp</span>(
+      title: <span class="str">'Counter'</span>,
+      home: <span class="fn">Scaffold</span>(
+        appBar: <span class="fn">AppBar</span>(title: <span class="kw">const</span> <span class="fn">Text</span>(<span class="str">'Counter'</span>)),
+        body: <span class="kw">const</span> <span class="fn">Center</span>(child: <span class="fn">Text</span>(<span class="str">'Count: 0'</span>)),
+      ),
+    );
+  }
+}</code></pre>
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <!-- LESSON 2: WIDGETS -->
+        <div class="fl-divider">
+          <span class="fl-divider-inner">Next Topic</span>
+        </div>
+
+        <article class="fl-lesson" id="topic-widgets" data-topic="1">
+          <div class="fl-lesson-header">
+            <span class="fl-lesson-number">02</span>
+            <h3>Widgets -- The Building Blocks</h3>
+          </div>
+
+          <p>
+            In Flutter, <strong>everything is a widget</strong>. Text, padding, rows, even the app itself -- all widgets. You build a UI by <strong>composing</strong> small widgets inside bigger ones, forming a <strong>widget tree</strong>. The parent passes data down to its children, and Flutter turns the whole tree into pixels.
+          </p>
+
+          <div class="fl-concept">
+            <h4>Widget fundamentals</h4>
+            <ul>
+              <li><strong>StatelessWidget</strong> -- describes UI that never changes on its own</li>
+              <li><strong>StatefulWidget</strong> -- holds mutable state and can rebuild itself</li>
+              <li>Widgets are <strong>immutable descriptions</strong> -- config in, pixels out</li>
+              <li>Common building blocks: <code>Text</code>, <code>Icon</code>, <code>Image</code>, <code>Container</code>, <code>Row</code>, <code>Column</code></li>
+            </ul>
+          </div>
+
+          <div class="fl-code-block">
+            <div class="fl-code-header">
+              <span class="fl-code-lang">Dart</span>
+              <button type="button" class="fl-code-copy" aria-label="Copy code" data-code="import 'package:flutter/material.dart';
+
+class GreetingCard extends StatelessWidget {
+  const GreetingCard({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        children: [
+          const Icon(Icons.waving_hand, size: 48, color: Colors.blueGrey),
+          const Text('Hello!', style: TextStyle(fontSize: 24)),
+          Text(
+            'Welcome to Flutter',
+            style: TextStyle(color: Colors.grey[600]),
+          ),
+        ],
+      ),
+    );
+  }
+}"><i class="fas fa-copy"></i> Copy</button>
+            </div>
+            <pre><code><span class="kw">import</span> <span class="str">'package:flutter/material.dart'</span>;
+
+<span class="kw">class</span> <span class="fn">GreetingCard</span> <span class="kw">extends</span> <span class="type">StatelessWidget</span> {
+  <span class="kw">const</span> <span class="fn">GreetingCard</span>({<span class="kw">super</span>.key});
+
+  <span class="dec">@override</span>
+  <span class="type">Widget</span> <span class="fn">build</span>(<span class="type">BuildContext</span> context) {
+    <span class="kw">return</span> <span class="fn">Padding</span>(
+      padding: <span class="kw">const</span> <span class="fn">EdgeInsets</span>.all(<span class="num">16.0</span>),
+      child: <span class="fn">Column</span>(
+        children: [
+          <span class="kw">const</span> <span class="fn">Icon</span>(<span class="fn">Icons</span>.waving_hand, size: <span class="num">48</span>, color: <span class="fn">Colors</span>.blueGrey),
+          <span class="kw">const</span> <span class="fn">Text</span>(<span class="str">'Hello!'</span>, style: <span class="fn">TextStyle</span>(fontSize: <span class="num">24</span>)),
+          <span class="fn">Text</span>(
+            <span class="str">'Welcome to Flutter'</span>,
+            style: <span class="fn">TextStyle</span>(color: <span class="fn">Colors</span>.grey[<span class="num">600</span>]),
+          ),
+        ],
+      ),
+    );
+  }
+}</code></pre>
+          </div>
+
+          <div class="fl-callout">
+            <p><strong>Composition over inheritance.</strong> Instead of subclassing to tweak behavior, you nest widgets. <code>Column</code> inside <code>Padding</code> inside <code>Center</code> -- each widget does one job, and you combine them freely.</p>
+          </div>
+
+          <div class="fl-table-wrap">
+            <table class="fl-table" aria-label="Common Flutter widgets">
+              <thead>
+                <tr>
+                  <th scope="col">Widget</th>
+                  <th scope="col">Role</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><td><code>Text</code></td><td>Displays a string of text</td></tr>
+                <tr><td><code>Icon</code></td><td>Renders a Material icon glyph</td></tr>
+                <tr><td><code>Image</code></td><td>Shows an image from network or assets</td></tr>
+                <tr><td><code>Container</code></td><td>Paints, pads, and constrains a child</td></tr>
+                <tr><td><code>Center</code></td><td>Centers its child within the parent</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Exercise -->
+          <div class="fl-exercise" id="exercise-widgets">
+            <div class="fl-exercise-title">
+              Practice: Compose a Widget Tree
+            </div>
+            <p>Build a <code>ProfileCard</code> widget that renders:</p>
+            <ol>
+              <li>A <code>Container</code> with padding of <code>12</code></li>
+              <li>A <code>Column</code> containing an <code>Icon(Icons.person)</code> and a <code>Text</code> with the name <code>"Ada Lovelace"</code></li>
+              <li>A second <code>Text</code> showing <code>"Developer"</code> in a smaller grey style</li>
+            </ol>
+            <button type="button" class="fl-exercise-toggle" aria-expanded="false" aria-controls="solution-widgets">Show Solution</button>
+            <div class="fl-exercise-solution" id="solution-widgets">
+              <div class="fl-code-block">
+                <div class="fl-code-header">
+                  <span class="fl-code-lang">Dart</span>
+                  <button type="button" class="fl-code-copy" aria-label="Copy code" data-code="class ProfileCard extends StatelessWidget {
+  const ProfileCard({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(12.0),
+      child: Column(
+        children: [
+          const Icon(Icons.person, size: 40),
+          const Text('Ada Lovelace', style: TextStyle(fontSize: 20)),
+          Text(
+            'Developer',
+            style: TextStyle(fontSize: 14, color: Colors.grey[600]),
+          ),
+        ],
+      ),
+    );
+  }
+}"><i class="fas fa-copy"></i> Copy</button>
+                </div>
+                <pre><code><span class="kw">class</span> <span class="fn">ProfileCard</span> <span class="kw">extends</span> <span class="type">StatelessWidget</span> {
+  <span class="kw">const</span> <span class="fn">ProfileCard</span>({<span class="kw">super</span>.key});
+
+  <span class="dec">@override</span>
+  <span class="type">Widget</span> <span class="fn">build</span>(<span class="type">BuildContext</span> context) {
+    <span class="kw">return</span> <span class="fn">Container</span>(
+      padding: <span class="kw">const</span> <span class="fn">EdgeInsets</span>.all(<span class="num">12.0</span>),
+      child: <span class="fn">Column</span>(
+        children: [
+          <span class="kw">const</span> <span class="fn">Icon</span>(<span class="fn">Icons</span>.person, size: <span class="num">40</span>),
+          <span class="kw">const</span> <span class="fn">Text</span>(<span class="str">'Ada Lovelace'</span>, style: <span class="fn">TextStyle</span>(fontSize: <span class="num">20</span>)),
+          <span class="fn">Text</span>(
+            <span class="str">'Developer'</span>,
+            style: <span class="fn">TextStyle</span>(fontSize: <span class="num">14</span>, color: <span class="fn">Colors</span>.grey[<span class="num">600</span>]),
+          ),
+        ],
+      ),
+    );
+  }
+}</code></pre>
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <!-- LESSON 3: LAYOUT & STYLING -->
+        <div class="fl-divider">
+          <span class="fl-divider-inner">Next Topic</span>
+        </div>
+
+        <article class="fl-lesson" id="topic-layout" data-topic="2">
+          <div class="fl-lesson-header">
+            <span class="fl-lesson-number">03</span>
+            <h3>Layout &amp; Styling</h3>
+          </div>
+
+          <p>
+            Layout widgets don't paint anything themselves -- they <strong>arrange their children</strong>. <code>Row</code> and <code>Column</code> place children along an axis, <code>Expanded</code> fills leftover space, and <code>Container</code> handles decoration, padding, and sizing. Styling lives in widget properties and the app-wide <code>ThemeData</code>.
+          </p>
+
+          <div class="fl-concept">
+            <h4>Key layout widgets</h4>
+            <ul>
+              <li><code>Row</code> -- children side by side, left to right</li>
+              <li><code>Column</code> -- children stacked top to bottom</li>
+              <li><code>Expanded</code> / <code>Flexible</code> -- take a share of the remaining space</li>
+              <li><code>Stack</code> -- children layered on top of each other</li>
+              <li><code>Padding</code> / <code>Center</code> -- add space or center a child</li>
+            </ul>
+          </div>
+
+          <div class="fl-code-block">
+            <div class="fl-code-header">
+              <span class="fl-code-lang">Dart</span>
+              <button type="button" class="fl-code-copy" aria-label="Copy code" data-code="class StatsRow extends StatelessWidget {
+  const StatsRow({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 16.0),
+      padding: const EdgeInsets.all(12.0),
+      decoration: BoxDecoration(
+        color: Colors.blueGrey[50],
+        borderRadius: BorderRadius.circular(8.0),
+      ),
+      child: const Row(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        children: [
+          Expanded(child: _Stat(label: 'Followers', value: '12k')),
+          Expanded(child: _Stat(label: 'Following', value: '340')),
+          Expanded(child: _Stat(label: 'Posts', value: '58')),
+        ],
+      ),
+    );
+  }
+}
+
+class _Stat extends StatelessWidget {
+  const _Stat({required this.label, required this.value});
+
+  final String label;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Text(value, style: const TextStyle(fontWeight: FontWeight.bold)),
+        Text(label),
+      ],
+    );
+  }
+}"><i class="fas fa-copy"></i> Copy</button>
+            </div>
+            <pre><code><span class="kw">class</span> <span class="fn">StatsRow</span> <span class="kw">extends</span> <span class="type">StatelessWidget</span> {
+  <span class="kw">const</span> <span class="fn">StatsRow</span>({<span class="kw">super</span>.key});
+
+  <span class="dec">@override</span>
+  <span class="type">Widget</span> <span class="fn">build</span>(<span class="type">BuildContext</span> context) {
+    <span class="kw">return</span> <span class="fn">Container</span>(
+      margin: <span class="kw">const</span> <span class="fn">EdgeInsets</span>.symmetric(horizontal: <span class="num">16.0</span>),
+      padding: <span class="kw">const</span> <span class="fn">EdgeInsets</span>.all(<span class="num">12.0</span>),
+      decoration: <span class="fn">BoxDecoration</span>(
+        color: <span class="fn">Colors</span>.blueGrey[<span class="num">50</span>],
+        borderRadius: <span class="fn">BorderRadius</span>.circular(<span class="num">8.0</span>),
+      ),
+      child: <span class="kw">const</span> <span class="fn">Row</span>(
+        mainAxisAlignment: <span class="fn">MainAxisAlignment</span>.spaceAround,
+        children: [
+          <span class="fn">Expanded</span>(child: <span class="fn">_Stat</span>(label: <span class="str">'Followers'</span>, value: <span class="str">'12k'</span>)),
+          <span class="fn">Expanded</span>(child: <span class="fn">_Stat</span>(label: <span class="str">'Following'</span>, value: <span class="str">'340'</span>)),
+          <span class="fn">Expanded</span>(child: <span class="fn">_Stat</span>(label: <span class="str">'Posts'</span>, value: <span class="str">'58'</span>)),
+        ],
+      ),
+    );
+  }
+}
+
+<span class="kw">class</span> <span class="fn">_Stat</span> <span class="kw">extends</span> <span class="type">StatelessWidget</span> {
+  <span class="kw">const</span> <span class="fn">_Stat</span>({<span class="kw">required</span> <span class="kw">this</span>.label, <span class="kw">required</span> <span class="kw">this</span>.value});
+
+  <span class="kw">final</span> <span class="type">String</span> label;
+  <span class="kw">final</span> <span class="type">String</span> value;
+
+  <span class="dec">@override</span>
+  <span class="type">Widget</span> <span class="fn">build</span>(<span class="type">BuildContext</span> context) {
+    <span class="kw">return</span> <span class="fn">Column</span>(
+      children: [
+        <span class="fn">Text</span>(value, style: <span class="kw">const</span> <span class="fn">TextStyle</span>(fontWeight: <span class="fn">FontWeight</span>.bold)),
+        <span class="fn">Text</span>(label),
+      ],
+    );
+  }
+}</code></pre>
+          </div>
+
+          <div class="fl-table-wrap">
+            <table class="fl-table" aria-label="Flutter layout widgets reference">
+              <thead>
+                <tr>
+                  <th scope="col">Widget</th>
+                  <th scope="col">Axis</th>
+                  <th scope="col">Use Case</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><td><code>Row</code></td><td>Horizontal</td><td>Toolbars, stat rows, button groups</td></tr>
+                <tr><td><code>Column</code></td><td>Vertical</td><td>Forms, cards, stacked content</td></tr>
+                <tr><td><code>Stack</code></td><td>None (layered)</td><td>Overlays, badges, backgrounds</td></tr>
+                <tr><td><code>Expanded</code></td><td>Parent's axis</td><td>Split space evenly across children</td></tr>
+                <tr><td><code>Center</code></td><td>--</td><td>Center content on screen</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="fl-callout">
+            <p><strong>Spacing tip:</strong> use <code>SizedBox(width: 8)</code> or <code>SizedBox(height: 8)</code> for small gaps, and <code>Padding</code> / <code>EdgeInsets</code> around groups. Reserve <code>Container</code> margins for spacing between widgets.</p>
+          </div>
+
+          <!-- Exercise -->
+          <div class="fl-exercise" id="exercise-layout">
+            <div class="fl-exercise-title">
+              Practice: Layout a Row
+            </div>
+            <p>Create a <code>Row</code> containing three colored <code>Container</code> squares (each <code>80x80</code>):</p>
+            <ol>
+              <li>One colored <code>Colors.blueGrey</code></li>
+              <li>One colored <code>Colors.amber</code></li>
+              <li>One colored <code>Colors.pinkAccent</code></li>
+              <li>Spread them evenly with <code>MainAxisAlignment.spaceBetween</code></li>
+            </ol>
+            <button type="button" class="fl-exercise-toggle" aria-expanded="false" aria-controls="solution-layout">Show Solution</button>
+            <div class="fl-exercise-solution" id="solution-layout">
+              <div class="fl-code-block">
+                <div class="fl-code-header">
+                  <span class="fl-code-lang">Dart</span>
+                  <button type="button" class="fl-code-copy" aria-label="Copy code" data-code="class ColorRow extends StatelessWidget {
+  const ColorRow({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return const Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        _Square(color: Colors.blueGrey),
+        _Square(color: Colors.amber),
+        _Square(color: Colors.pinkAccent),
+      ],
+    );
+  }
+}
+
+class _Square extends StatelessWidget {
+  const _Square({required this.color});
+
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 80,
+      height: 80,
+      color: color,
+    );
+  }
+}"><i class="fas fa-copy"></i> Copy</button>
+                </div>
+                <pre><code><span class="kw">class</span> <span class="fn">ColorRow</span> <span class="kw">extends</span> <span class="type">StatelessWidget</span> {
+  <span class="kw">const</span> <span class="fn">ColorRow</span>({<span class="kw">super</span>.key});
+
+  <span class="dec">@override</span>
+  <span class="type">Widget</span> <span class="fn">build</span>(<span class="type">BuildContext</span> context) {
+    <span class="kw">return</span> <span class="kw">const</span> <span class="fn">Row</span>(
+      mainAxisAlignment: <span class="fn">MainAxisAlignment</span>.spaceBetween,
+      children: [
+        <span class="fn">_Square</span>(color: <span class="fn">Colors</span>.blueGrey),
+        <span class="fn">_Square</span>(color: <span class="fn">Colors</span>.amber),
+        <span class="fn">_Square</span>(color: <span class="fn">Colors</span>.pinkAccent),
+      ],
+    );
+  }
+}
+
+<span class="kw">class</span> <span class="fn">_Square</span> <span class="kw">extends</span> <span class="type">StatelessWidget</span> {
+  <span class="kw">const</span> <span class="fn">_Square</span>({<span class="kw">required</span> <span class="kw">this</span>.color});
+
+  <span class="kw">final</span> <span class="type">Color</span> color;
+
+  <span class="dec">@override</span>
+  <span class="type">Widget</span> <span class="fn">build</span>(<span class="type">BuildContext</span> context) {
+    <span class="kw">return</span> <span class="fn">Container</span>(
+      width: <span class="num">80</span>,
+      height: <span class="num">80</span>,
+      color: color,
+    );
+  }
+}</code></pre>
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <!-- LESSON 4: STATE & INTERACTION -->
+        <div class="fl-divider">
+          <span class="fl-divider-inner">Next Topic</span>
+        </div>
+
+        <article class="fl-lesson" id="topic-state" data-topic="3">
+          <div class="fl-lesson-header">
+            <span class="fl-lesson-number">04</span>
+            <h3>State &amp; Interaction</h3>
+          </div>
+
+          <p>
+            A <code>StatelessWidget</code> renders the same UI forever. When data changes over time -- a counter, a text field, a checkbox -- you need a <code>StatefulWidget</code>. It keeps a separate <code>State</code> object, and calling <code>setState()</code> tells Flutter to rebuild that part of the tree.
+          </p>
+
+          <div class="fl-concept">
+            <h4>How state works</h4>
+            <ul>
+              <li><code>StatefulWidget</code> + <code>createState()</code> pair hold mutable data</li>
+              <li><code>setState(() { ... })</code> marks the widget dirty and schedules a rebuild</li>
+              <li>Buttons trigger callbacks: <code>onPressed</code>, <code>onChanged</code>, <code>onTap</code></li>
+              <li><strong>Hot Reload</strong> keeps state while updating code -- perfect for tweaking UI live</li>
+            </ul>
+          </div>
+
+          <div class="fl-code-block">
+            <div class="fl-code-header">
+              <span class="fl-code-lang">Dart</span>
+              <button type="button" class="fl-code-copy" aria-label="Copy code" data-code="class CounterPage extends StatefulWidget {
+  const CounterPage({super.key});
+
+  @override
+  State<CounterPage> createState() => _CounterPageState();
+}
+
+class _CounterPageState extends State<CounterPage> {
+  int _count = 0;
+
+  void _increment() {
+    setState(() {
+      _count++;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Counter')),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text('You pushed the button this many times:'),
+            Text('$_count', style: Theme.of(context).textTheme.headlineMedium),
+          ],
+        ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: _increment,
+        child: const Icon(Icons.add),
+      ),
+    );
+  }
+}"><i class="fas fa-copy"></i> Copy</button>
+            </div>
+            <pre><code><span class="kw">class</span> <span class="fn">CounterPage</span> <span class="kw">extends</span> <span class="type">StatefulWidget</span> {
+  <span class="kw">const</span> <span class="fn">CounterPage</span>({<span class="kw">super</span>.key});
+
+  <span class="dec">@override</span>
+  <span class="type">State</span>&lt;<span class="fn">CounterPage</span>&gt; <span class="fn">createState</span>() =&gt; <span class="fn">_CounterPageState</span>();
+}
+
+<span class="kw">class</span> <span class="fn">_CounterPageState</span> <span class="kw">extends</span> <span class="type">State</span>&lt;<span class="fn">CounterPage</span>&gt; {
+  <span class="kw">int</span> _count = <span class="num">0</span>;
+
+  <span class="kw">void</span> <span class="fn">_increment</span>() {
+    <span class="fn">setState</span>(() {
+      _count++;
+    });
+  }
+
+  <span class="dec">@override</span>
+  <span class="type">Widget</span> <span class="fn">build</span>(<span class="type">BuildContext</span> context) {
+    <span class="kw">return</span> <span class="fn">Scaffold</span>(
+      appBar: <span class="fn">AppBar</span>(title: <span class="kw">const</span> <span class="fn">Text</span>(<span class="str">'Counter'</span>)),
+      body: <span class="fn">Center</span>(
+        child: <span class="fn">Column</span>(
+          mainAxisAlignment: <span class="fn">MainAxisAlignment</span>.center,
+          children: [
+            <span class="fn">Text</span>(<span class="str">'You pushed the button this many times:'</span>),
+            <span class="fn">Text</span>(<span class="str">'$_count'</span>, style: <span class="fn">Theme</span>.of(context).textTheme.headlineMedium),
+          ],
+        ),
+      ),
+      floatingActionButton: <span class="fn">FloatingActionButton</span>(
+        onPressed: <span class="fn">_increment</span>,
+        child: <span class="kw">const</span> <span class="fn">Icon</span>(<span class="fn">Icons</span>.add),
+      ),
+    );
+  }
+}</code></pre>
+          </div>
+
+          <div class="fl-callout">
+            <p><strong><code>setState</code> is minimal.</strong> Only update values that affect the UI. Flutter rebuilds just the widgets that depend on changed data, so keep state local to the widget that owns it -- don't lift it up until you must.</p>
+          </div>
+
+          <!-- Exercise -->
+          <div class="fl-exercise" id="exercise-state">
+            <div class="fl-exercise-title">
+              Practice: Stateful Toggle
+            </div>
+            <p>Build a <code>LikeButton</code> stateful widget that:</p>
+            <ol>
+              <li>Holds a <code>bool _liked</code> state, starting at <code>false</code></li>
+              <li>Shows an <code>Icons.favorite_border</code> when not liked, <code>Icons.favorite</code> when liked</li>
+              <li>On <code>onPressed</code>, toggles <code>_liked</code> inside <code>setState</code></li>
+            </ol>
+            <button type="button" class="fl-exercise-toggle" aria-expanded="false" aria-controls="solution-state">Show Solution</button>
+            <div class="fl-exercise-solution" id="solution-state">
+              <div class="fl-code-block">
+                <div class="fl-code-header">
+                  <span class="fl-code-lang">Dart</span>
+                  <button type="button" class="fl-code-copy" aria-label="Copy code" data-code="class LikeButton extends StatefulWidget {
+  const LikeButton({super.key});
+
+  @override
+  State<LikeButton> createState() => _LikeButtonState();
+}
+
+class _LikeButtonState extends State<LikeButton> {
+  bool _liked = false;
+
+  void _toggle() {
+    setState(() {
+      _liked = !_liked;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return IconButton(
+      onPressed: _toggle,
+      icon: Icon(
+        _liked ? Icons.favorite : Icons.favorite_border,
+        color: _liked ? Colors.redAccent : null,
+      ),
+    );
+  }
+}"><i class="fas fa-copy"></i> Copy</button>
+                </div>
+                <pre><code><span class="kw">class</span> <span class="fn">LikeButton</span> <span class="kw">extends</span> <span class="type">StatefulWidget</span> {
+  <span class="kw">const</span> <span class="fn">LikeButton</span>({<span class="kw">super</span>.key});
+
+  <span class="dec">@override</span>
+  <span class="type">State</span>&lt;<span class="fn">LikeButton</span>&gt; <span class="fn">createState</span>() =&gt; <span class="fn">_LikeButtonState</span>();
+}
+
+<span class="kw">class</span> <span class="fn">_LikeButtonState</span> <span class="kw">extends</span> <span class="type">State</span>&lt;<span class="fn">LikeButton</span>&gt; {
+  <span class="kw">bool</span> _liked = <span class="kw">false</span>;
+
+  <span class="kw">void</span> <span class="fn">_toggle</span>() {
+    <span class="fn">setState</span>(() {
+      _liked = !_liked;
+    });
+  }
+
+  <span class="dec">@override</span>
+  <span class="type">Widget</span> <span class="fn">build</span>(<span class="type">BuildContext</span> context) {
+    <span class="kw">return</span> <span class="fn">IconButton</span>(
+      onPressed: <span class="fn">_toggle</span>,
+      icon: <span class="fn">Icon</span>(
+        _liked ? <span class="fn">Icons</span>.favorite : <span class="fn">Icons</span>.favorite_border,
+        color: _liked ? <span class="fn">Colors</span>.redAccent : <span class="kw">null</span>,
+      ),
+    );
+  }
+}</code></pre>
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <!-- LESSON 5: NAVIGATION & LISTS -->
+        <div class="fl-divider">
+          <span class="fl-divider-inner">Next Topic</span>
+        </div>
+
+        <article class="fl-lesson" id="topic-navigation" data-topic="4">
+          <div class="fl-lesson-header">
+            <span class="fl-lesson-number">05</span>
+            <h3>Navigation &amp; Lists</h3>
+          </div>
+
+          <p>
+            Apps have more than one screen. Flutter manages a <strong>navigation stack</strong>: <code>Navigator.push()</code> puts a new screen on top, <code>Navigator.pop()</code> removes it. For scrolling content, <code>ListView</code> builds items on demand -- the foundation of feeds and settings pages.
+          </p>
+
+          <div class="fl-concept">
+            <h4>Navigation essentials</h4>
+            <ul>
+              <li><code>MaterialPageRoute</code> -- the standard animated screen transition</li>
+              <li><code>Navigator.push(context, route)</code> -- go forward, pass data in the constructor</li>
+              <li><code>Navigator.pop(context)</code> -- go back, optionally returning a result</li>
+              <li><code>ListView.builder</code> -- lazily builds only the visible list items</li>
+            </ul>
+          </div>
+
+          <div class="fl-code-block">
+            <div class="fl-code-header">
+              <span class="fl-code-lang">Dart</span>
+              <button type="button" class="fl-code-copy" aria-label="Copy code" data-code="class HomePage extends StatelessWidget {
+  const HomePage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Topics')),
+      body: ListView.builder(
+        itemCount: topics.length,
+        itemBuilder: (context, index) {
+          final topic = topics[index];
+          return ListTile(
+            leading: const Icon(Icons.article_outlined),
+            title: Text(topic),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => TopicPage(title: topic),
+                ),
+              );
+            },
+          );
+        },
+      ),
+    );
+  }
+}
+
+class TopicPage extends StatelessWidget {
+  const TopicPage({super.key, required this.title});
+
+  final String title;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text(title)),
+      body: Center(child: Text('You are viewing $title')),
+    );
+  }
+}
+
+const topics = ['Widgets', 'Layout', 'State', 'Navigation'];"><i class="fas fa-copy"></i> Copy</button>
+            </div>
+            <pre><code><span class="kw">class</span> <span class="fn">HomePage</span> <span class="kw">extends</span> <span class="type">StatelessWidget</span> {
+  <span class="kw">const</span> <span class="fn">HomePage</span>({<span class="kw">super</span>.key});
+
+  <span class="dec">@override</span>
+  <span class="type">Widget</span> <span class="fn">build</span>(<span class="type">BuildContext</span> context) {
+    <span class="kw">return</span> <span class="fn">Scaffold</span>(
+      appBar: <span class="fn">AppBar</span>(title: <span class="kw">const</span> <span class="fn">Text</span>(<span class="str">'Topics'</span>)),
+      body: <span class="fn">ListView</span>.builder(
+        itemCount: topics.length,
+        itemBuilder: (context, index) {
+          <span class="kw">final</span> topic = topics[index];
+          <span class="kw">return</span> <span class="fn">ListTile</span>(
+            leading: <span class="kw">const</span> <span class="fn">Icon</span>(<span class="fn">Icons</span>.article_outlined),
+            title: <span class="fn">Text</span>(topic),
+            trailing: <span class="kw">const</span> <span class="fn">Icon</span>(<span class="fn">Icons</span>.chevron_right),
+            onTap: () {
+              <span class="fn">Navigator</span>.push(
+                context,
+                <span class="fn">MaterialPageRoute</span>(
+                  builder: (context) =&gt; <span class="fn">TopicPage</span>(title: topic),
+                ),
+              );
+            },
+          );
+        },
+      ),
+    );
+  }
+}
+
+<span class="kw">class</span> <span class="fn">TopicPage</span> <span class="kw">extends</span> <span class="type">StatelessWidget</span> {
+  <span class="kw">const</span> <span class="fn">TopicPage</span>({<span class="kw">super</span>.key, <span class="kw">required</span> <span class="kw">this</span>.title});
+
+  <span class="kw">final</span> <span class="type">String</span> title;
+
+  <span class="dec">@override</span>
+  <span class="type">Widget</span> <span class="fn">build</span>(<span class="type">BuildContext</span> context) {
+    <span class="kw">return</span> <span class="fn">Scaffold</span>(
+      appBar: <span class="fn">AppBar</span>(title: <span class="fn">Text</span>(title)),
+      body: <span class="fn">Center</span>(child: <span class="fn">Text</span>(<span class="str">'You are viewing $title'</span>)),
+    );
+  }
+}
+
+<span class="kw">const</span> topics = [<span class="str">'Widgets'</span>, <span class="str">'Layout'</span>, <span class="str">'State'</span>, <span class="str">'Navigation'</span>];</code></pre>
+          </div>
+
+          <div class="fl-callout">
+            <p><strong>Pass data forward, return results back.</strong> Construct the next screen with the data it needs, and use <code>Navigator.pop(context, result)</code> to hand a value to the previous screen -- for example, the selected item.</p>
+          </div>
+
+          <!-- Exercise -->
+          <div class="fl-exercise" id="exercise-navigation">
+            <div class="fl-exercise-title">
+              Practice: Push a Detail Screen
+            </div>
+            <p>Complete the pattern so that tapping a <code>ListTile</code>:</p>
+            <ol>
+              <li>Builds a <code>DetailScreen(title: item)</code></li>
+              <li>Navigates to it with <code>MaterialPageRoute</code></li>
+              <li>The detail screen shows the title in its <code>AppBar</code></li>
+            </ol>
+            <button type="button" class="fl-exercise-toggle" aria-expanded="false" aria-controls="solution-navigation">Show Solution</button>
+            <div class="fl-exercise-solution" id="solution-navigation">
+              <div class="fl-code-block">
+                <div class="fl-code-header">
+                  <span class="fl-code-lang">Dart</span>
+                  <button type="button" class="fl-code-copy" aria-label="Copy code" data-code="ListTile(
+  title: Text(item),
+  onTap: () {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => DetailScreen(title: item),
+      ),
+    );
+  },
+);
+
+class DetailScreen extends StatelessWidget {
+  const DetailScreen({super.key, required this.title});
+
+  final String title;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text(title)),
+      body: Center(child: Text('Details for $title')),
+    );
+  }
+}"><i class="fas fa-copy"></i> Copy</button>
+                </div>
+                <pre><code><span class="fn">ListTile</span>(
+  title: <span class="fn">Text</span>(item),
+  onTap: () {
+    <span class="fn">Navigator</span>.push(
+      context,
+      <span class="fn">MaterialPageRoute</span>(
+        builder: (context) =&gt; <span class="fn">DetailScreen</span>(title: item),
+      ),
+    );
+  },
+);
+
+<span class="kw">class</span> <span class="fn">DetailScreen</span> <span class="kw">extends</span> <span class="type">StatelessWidget</span> {
+  <span class="kw">const</span> <span class="fn">DetailScreen</span>({<span class="kw">super</span>.key, <span class="kw">required</span> <span class="kw">this</span>.title});
+
+  <span class="kw">final</span> <span class="type">String</span> title;
+
+  <span class="dec">@override</span>
+  <span class="type">Widget</span> <span class="fn">build</span>(<span class="type">BuildContext</span> context) {
+    <span class="kw">return</span> <span class="fn">Scaffold</span>(
+      appBar: <span class="fn">AppBar</span>(title: <span class="fn">Text</span>(title)),
+      body: <span class="fn">Center</span>(child: <span class="fn">Text</span>(<span class="str">'Details for $title'</span>)),
+    );
+  }
+}</code></pre>
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <!-- LESSON 6: YOUR FIRST APP -->
+        <div class="fl-divider">
+          <span class="fl-divider-inner">Next Topic</span>
+        </div>
+
+        <article class="fl-lesson" id="topic-first-app" data-topic="5">
+          <div class="fl-lesson-header">
+            <span class="fl-lesson-number">06</span>
+            <h3>Your First App &amp; Next Steps</h3>
+          </div>
+
+          <p>
+            Let's combine everything: state, layout, and interaction -- in one small <strong>task tracker</strong>. It uses a <code>StatefulWidget</code> to hold a list, renders it with <code>ListView.builder</code>, and adds new items with a text field.
+          </p>
+
+          <div class="fl-code-block">
+            <div class="fl-code-header">
+              <span class="fl-code-lang">Dart</span>
+              <button type="button" class="fl-code-copy" aria-label="Copy code" data-code="import 'package:flutter/material.dart';
+
+void main() {
+  runApp(const MaterialApp(home: TodoPage()));
+}
+
+class TodoPage extends StatefulWidget {
+  const TodoPage({super.key});
+
+  @override
+  State<TodoPage> createState() => _TodoPageState();
+}
+
+class _TodoPageState extends State<TodoPage> {
+  final _controller = TextEditingController();
+  final List<String> _todos = [];
+
+  void _addTodo() {
+    final text = _controller.text.trim();
+    if (text.isEmpty) return;
+    setState(() => _todos.add(text));
+    _controller.clear();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('My Tasks')),
+      body: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(12.0),
+            child: Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    controller: _controller,
+                    decoration: const InputDecoration(
+                      hintText: 'Add a task...',
+                      border: OutlineInputBorder(),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                IconButton.filled(
+                  onPressed: _addTodo,
+                  icon: const Icon(Icons.add),
+                ),
+              ],
+            ),
+          ),
+          Expanded(
+            child: _todos.isEmpty
+                ? const Center(child: Text('No tasks yet. Add one above!'))
+                : ListView.builder(
+                    itemCount: _todos.length,
+                    itemBuilder: (context, index) =>
+                        ListTile(leading: const Icon(Icons.check_circle_outline), title: Text(_todos[index])),
+                  ),
+          ),
+        ],
+      ),
+    );
+  }
+}"><i class="fas fa-copy"></i> Copy</button>
+            </div>
+            <pre><code><span class="kw">import</span> <span class="str">'package:flutter/material.dart'</span>;
+
+<span class="kw">void</span> <span class="fn">main</span>() {
+  <span class="fn">runApp</span>(<span class="kw">const</span> <span class="fn">MaterialApp</span>(home: <span class="fn">TodoPage</span>()));
+}
+
+<span class="kw">class</span> <span class="fn">TodoPage</span> <span class="kw">extends</span> <span class="type">StatefulWidget</span> {
+  <span class="kw">const</span> <span class="fn">TodoPage</span>({<span class="kw">super</span>.key});
+
+  <span class="dec">@override</span>
+  <span class="type">State</span>&lt;<span class="fn">TodoPage</span>&gt; <span class="fn">createState</span>() =&gt; <span class="fn">_TodoPageState</span>();
+}
+
+<span class="kw">class</span> <span class="fn">_TodoPageState</span> <span class="kw">extends</span> <span class="type">State</span>&lt;<span class="fn">TodoPage</span>&gt; {
+  <span class="kw">final</span> _controller = <span class="fn">TextEditingController</span>();
+  <span class="kw">final</span> <span class="type">List</span>&lt;<span class="type">String</span>&gt; _todos = [];
+
+  <span class="kw">void</span> <span class="fn">_addTodo</span>() {
+    <span class="kw">final</span> text = _controller.text.trim();
+    <span class="kw">if</span> (text.isEmpty) <span class="kw">return</span>;
+    <span class="fn">setState</span>(() =&gt; _todos.add(text));
+    _controller.clear();
+  }
+
+  <span class="dec">@override</span>
+  <span class="type">Widget</span> <span class="fn">build</span>(<span class="type">BuildContext</span> context) {
+    <span class="kw">return</span> <span class="fn">Scaffold</span>(
+      appBar: <span class="fn">AppBar</span>(title: <span class="kw">const</span> <span class="fn">Text</span>(<span class="str">'My Tasks'</span>)),
+      body: <span class="fn">Column</span>(
+        children: [
+          <span class="fn">Padding</span>(
+            padding: <span class="kw">const</span> <span class="fn">EdgeInsets</span>.all(<span class="num">12.0</span>),
+            child: <span class="fn">Row</span>(
+              children: [
+                <span class="fn">Expanded</span>(
+                  child: <span class="fn">TextField</span>(
+                    controller: _controller,
+                    decoration: <span class="kw">const</span> <span class="fn">InputDecoration</span>(
+                      hintText: <span class="str">'Add a task...'</span>,
+                      border: <span class="fn">OutlineInputBorder</span>(),
+                    ),
+                  ),
+                ),
+                <span class="kw">const</span> <span class="fn">SizedBox</span>(width: <span class="num">8</span>),
+                <span class="fn">IconButton</span>.filled(
+                  onPressed: <span class="fn">_addTodo</span>,
+                  icon: <span class="kw">const</span> <span class="fn">Icon</span>(<span class="fn">Icons</span>.add),
+                ),
+              ],
+            ),
+          ),
+          <span class="fn">Expanded</span>(
+            child: _todos.isEmpty
+                ? <span class="kw">const</span> <span class="fn">Center</span>(child: <span class="fn">Text</span>(<span class="str">'No tasks yet. Add one above!'</span>))
+                : <span class="fn">ListView</span>.builder(
+                    itemCount: _todos.length,
+                    itemBuilder: (context, index) =&gt;
+                        <span class="fn">ListTile</span>(leading: <span class="kw">const</span> <span class="fn">Icon</span>(<span class="fn">Icons</span>.check_circle_outline), title: <span class="fn">Text</span>(_todos[index])),
+                  ),
+          ),
+        ],
+      ),
+    );
+  }
+}</code></pre>
+          </div>
+
+          <div class="fl-concept">
+            <h4>Where to go next</h4>
+            <ul>
+              <li><strong>Dart</strong> -- Flutter is written in Dart; master the language at <a href="https://dart.dev/language" target="_blank" rel="noopener noreferrer" class="fl-inline-link">dart.dev</a></li>
+              <li><strong>App architecture</strong> -- learn state management (Provider, Riverpod, Bloc) for larger apps</li>
+              <li><strong>Networking</strong> -- fetch data with the <code>http</code> or <code>dio</code> packages</li>
+              <li><strong>Publishing</strong> -- package and ship to the App Store and Google Play</li>
+            </ul>
+          </div>
+
+          <div class="fl-callout">
+            <p>Ready to go further? Explore <a href="https://docs.flutter.dev/" target="_blank" rel="noopener noreferrer" class="fl-inline-link">the official Flutter docs</a>, the <a href="https://dart.dev" target="_blank" rel="noopener noreferrer" class="fl-inline-link">Dart language tour</a>, or browse <a href="/pages/learning/languages.html" class="fl-inline-link">other languages</a> on this platform to keep learning.</p>
+          </div>
+
+          <!-- Exercise -->
+          <div class="fl-exercise" id="exercise-first-app">
+            <div class="fl-exercise-title">
+              Practice: Challenge
+            </div>
+            <p>Extend the task tracker:</p>
+            <ol>
+              <li>Add a <code>bool</code> field to each task so items can be marked complete</li>
+              <li>Use <code>CheckboxListTile</code> instead of <code>ListTile</code></li>
+              <li>Show a check icon only for completed tasks</li>
+            </ol>
+            <button type="button" class="fl-exercise-toggle" aria-expanded="false" aria-controls="solution-first-app">Show Solution</button>
+            <div class="fl-exercise-solution" id="solution-first-app">
+              <div class="fl-code-block">
+                <div class="fl-code-header">
+                  <span class="fl-code-lang">Dart</span>
+                  <button type="button" class="fl-code-copy" aria-label="Copy code" data-code="class _TodoPageState extends State<TodoPage> {
+  final _controller = TextEditingController();
+  final List<_Task> _todos = [];
+
+  void _addTodo() {
+    final text = _controller.text.trim();
+    if (text.isEmpty) return;
+    setState(() => _todos.add(_Task(text)));
+    _controller.clear();
+  }
+
+  void _toggleTask(_Task task) {
+    setState(() => task.done = !task.done);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    // ... same scaffold, but itemBuilder becomes:
+    itemBuilder: (context, index) {
+      final task = _todos[index];
+      return CheckboxListTile(
+        value: task.done,
+        onChanged: (_) => _toggleTask(task),
+        title: Text(task.title),
+      );
+    },
+  }
+}
+
+class _Task {
+  _Task(this.title);
+  final String title;
+  bool done = false;
+}"><i class="fas fa-copy"></i> Copy</button>
+                </div>
+                <pre><code><span class="kw">class</span> <span class="fn">_TodoPageState</span> <span class="kw">extends</span> <span class="type">State</span>&lt;<span class="fn">TodoPage</span>&gt; {
+  <span class="kw">final</span> _controller = <span class="fn">TextEditingController</span>();
+  <span class="kw">final</span> <span class="type">List</span>&lt;<span class="fn">_Task</span>&gt; _todos = [];
+
+  <span class="kw">void</span> <span class="fn">_addTodo</span>() {
+    <span class="kw">final</span> text = _controller.text.trim();
+    <span class="kw">if</span> (text.isEmpty) <span class="kw">return</span>;
+    <span class="fn">setState</span>(() =&gt; _todos.add(<span class="fn">_Task</span>(text)));
+    _controller.clear();
+  }
+
+  <span class="kw">void</span> <span class="fn">_toggleTask</span>(<span class="fn">_Task</span> task) {
+    <span class="fn">setState</span>(() =&gt; task.done = !task.done);
+  }
+
+  <span class="dec">@override</span>
+  <span class="type">Widget</span> <span class="fn">build</span>(<span class="type">BuildContext</span> context) {
+    <span class="cmt">// ... same scaffold, but itemBuilder becomes:</span>
+    itemBuilder: (context, index) {
+      <span class="kw">final</span> task = _todos[index];
+      <span class="kw">return</span> <span class="fn">CheckboxListTile</span>(
+        value: task.done,
+        onChanged: (_) =&gt; <span class="fn">_toggleTask</span>(task),
+        title: <span class="fn">Text</span>(task.title),
+      );
+    },
+  }
+}
+
+<span class="kw">class</span> <span class="fn">_Task</span> {
+  <span class="fn">_Task</span>(<span class="kw">this</span>.title);
+  <span class="kw">final</span> <span class="type">String</span> title;
+  <span class="kw">bool</span> done = <span class="kw">false</span>;
+}</code></pre>
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <!-- QUIZ -->
+        <div class="fl-divider">
+          <span class="fl-divider-inner">Knowledge Check</span>
+        </div>
+
+        <article class="fl-lesson" id="topic-quiz" data-topic="6">
+          <div class="fl-lesson-header">
+            <span class="fl-lesson-number">Quiz</span>
+            <h3>Test What You've Learned</h3>
+          </div>
+          <p>Choose the best answer for each question, then submit to see your score and explanations.</p>
+
+          <div class="fl-quiz" id="flQuiz">
+            <div class="fl-quiz-title">
+              <i class="fas fa-question-circle"></i> Flutter Fundamentals Quiz
+            </div>
+
+            <div class="fl-quiz-container">
+              <!-- Q1 -->
+              <div class="fl-quiz-question-card">
+                <div class="fl-quiz-question-text">
+                  <span class="fl-quiz-question-num">Q1.</span>
+                  <span>What does Flutter compile your Dart code into for production apps?</span>
+                </div>
+                <div class="fl-quiz-options">
+                  <label class="fl-quiz-option"><input type="radio" name="q1" value="a"/><span>A) Interpreted bytecode</span></label>
+                  <label class="fl-quiz-option"><input type="radio" name="q1" value="b"/><span>B) Native machine code</span></label>
+                  <label class="fl-quiz-option"><input type="radio" name="q1" value="c"/><span>C) JavaScript bundles</span></label>
+                  <label class="fl-quiz-option"><input type="radio" name="q1" value="d"/><span>D) HTML and CSS</span></label>
+                </div>
+                <div class="fl-quiz-feedback" id="feedback-q1"></div>
+                <div class="fl-quiz-explanation" id="explanation-q1">Flutter compiles Dart <strong>ahead-of-time (AOT)</strong> to native machine code, which is why apps start fast and perform well on device. JavaScript and HTML come into play only for the web target.</div>
+              </div>
+
+              <!-- Q2 -->
+              <div class="fl-quiz-question-card">
+                <div class="fl-quiz-question-text">
+                  <span class="fl-quiz-question-num">Q2.</span>
+                  <span>In Flutter, everything you see on screen is built from...</span>
+                </div>
+                <div class="fl-quiz-options">
+                  <label class="fl-quiz-option"><input type="radio" name="q2" value="a"/><span>A) HTML elements</span></label>
+                  <label class="fl-quiz-option"><input type="radio" name="q2" value="b"/><span>B) View controllers</span></label>
+                  <label class="fl-quiz-option"><input type="radio" name="q2" value="c"/><span>C) Widgets</span></label>
+                  <label class="fl-quiz-option"><input type="radio" name="q2" value="d"/><span>D) CSS classes</span></label>
+                </div>
+                <div class="fl-quiz-feedback" id="feedback-q2"></div>
+                <div class="fl-quiz-explanation" id="explanation-q2">The core Flutter idea: <strong>everything is a widget</strong>. Text, layout, and even the whole app are widgets composed into a widget tree.</div>
+              </div>
+
+              <!-- Q3 -->
+              <div class="fl-quiz-question-card">
+                <div class="fl-quiz-question-text">
+                  <span class="fl-quiz-question-num">Q3.</span>
+                  <span>Which widget arranges its children side by side, left to right?</span>
+                </div>
+                <div class="fl-quiz-options">
+                  <label class="fl-quiz-option"><input type="radio" name="q3" value="a"/><span>A) Column</span></label>
+                  <label class="fl-quiz-option"><input type="radio" name="q3" value="b"/><span>B) Row</span></label>
+                  <label class="fl-quiz-option"><input type="radio" name="q3" value="c"/><span>C) Stack</span></label>
+                  <label class="fl-quiz-option"><input type="radio" name="q3" value="d"/><span>D) Center</span></label>
+                </div>
+                <div class="fl-quiz-feedback" id="feedback-q3"></div>
+                <div class="fl-quiz-explanation" id="explanation-q3"><strong>Row</strong> lays children out horizontally; <code>Column</code> is vertical, and <code>Stack</code> layers them.</div>
+              </div>
+
+              <!-- Q4 -->
+              <div class="fl-quiz-question-card">
+                <div class="fl-quiz-question-text">
+                  <span class="fl-quiz-question-num">Q4.</span>
+                  <span>Which method tells Flutter to rebuild a StatefulWidget's UI?</span>
+                </div>
+                <div class="fl-quiz-options">
+                  <label class="fl-quiz-option"><input type="radio" name="q4" value="a"/><span>A) initState()</span></label>
+                  <label class="fl-quiz-option"><input type="radio" name="q4" value="b"/><span>B) build()</span></label>
+                  <label class="fl-quiz-option"><input type="radio" name="q4" value="c"/><span>C) setState()</span></label>
+                  <label class="fl-quiz-option"><input type="radio" name="q4" value="d"/><span>D) dispose()</span></label>
+                </div>
+                <div class="fl-quiz-feedback" id="feedback-q4"></div>
+                <div class="fl-quiz-explanation" id="explanation-q4"><strong>setState()</strong> marks the widget dirty, scheduling a rebuild with the updated state. <code>initState()</code> runs once before the first build.</div>
+              </div>
+
+              <!-- Q5 -->
+              <div class="fl-quiz-question-card">
+                <div class="fl-quiz-question-text">
+                  <span class="fl-quiz-question-num">Q5.</span>
+                  <span>What is the correct way to navigate to a new screen in Flutter?</span>
+                </div>
+                <div class="fl-quiz-options">
+                  <label class="fl-quiz-option"><input type="radio" name="q5" value="a"/><span>A) Navigator.push(context, MaterialPageRoute(...))</span></label>
+                  <label class="fl-quiz-option"><input type="radio" name="q5" value="b"/><span>B) window.location.href = ...</span></label>
+                  <label class="fl-quiz-option"><input type="radio" name="q5" value="c"/><span>C) showScreen(screen)</span></label>
+                  <label class="fl-quiz-option"><input type="radio" name="q5" value="d"/><span>D) route.open(...)</span></label>
+                </div>
+                <div class="fl-quiz-feedback" id="feedback-q5"></div>
+                <div class="fl-quiz-explanation" id="explanation-q5">Screens are pushed onto a stack: <code>Navigator.push(context, MaterialPageRoute(builder: ...))</code>. <code>Navigator.pop(context)</code> goes back.</div>
+              </div>
+            </div>
+
+            <div class="fl-quiz-actions">
+              <button type="button" class="fl-quiz-btn" id="submitQuizBtn">Submit Quiz</button>
+              <button type="button" class="fl-quiz-btn-secondary" id="resetQuizBtn" style="display:none">Reset Quiz</button>
+            </div>
+
+            <div class="fl-quiz-score-banner" id="quizScoreBanner">
+              <div class="fl-quiz-score-title">Quiz Results</div>
+              <div class="fl-quiz-score-text">
+                You scored <span id="quizScoreValue">0 / 5</span>
+                <span id="quizScorePercent"></span>
+              </div>
+            </div>
+          </div>
+        </article>
+
+    </section>
+
+    <!-- FOOTER -->
+    <footer class="fl-footer">
+      <p>Practice your skills in the <a href="https://dartpad.dev/" target="_blank" rel="noopener noreferrer">DartPad &rarr;</a></p>
+      <p>Back to <a href="/pages/learning/languages.html">Programming Languages</a></p>
+    </footer>
+  </main>
+
+  <script src="/auth.js"></script>
+  <script src="/theme.js"></script>
+  <script src="/script.js"></script>
+  <script src="flutter-learning.js"></script>
+</body>
+</html>

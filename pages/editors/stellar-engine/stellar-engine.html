@@ -1,0 +1,319 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Stellar Engine Navigator | Algo Infinity Verse</title>
+    <link rel="stylesheet" href="/styles.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <!-- Monaco Editor -->
+    <script src="https://unpkg.com/monaco-editor@0.36.1/min/vs/loader.js"></script>
+    <style>
+      body { margin: 0; overflow: hidden; background: #000; font-family: 'Poppins', sans-serif; color: #fff; }
+      .app-container { display: flex; height: 100vh; }
+      
+      .sidebar { width: 450px; background: rgba(15, 23, 42, 0.95); border-right: 1px solid #f97316; display: flex; flex-direction: column; z-index: 10; }
+      .header { padding: 20px; border-bottom: 1px solid #334155; }
+      .header h2 { margin: 0; color: #f97316; font-family: 'Orbitron', sans-serif; font-size: 1.2rem; }
+      .header p { margin: 5px 0 0 0; font-size: 0.8rem; color: #94a3b8; }
+      
+      #editor-container { flex: 1; min-height: 300px; }
+      
+      .controls { padding: 20px; border-top: 1px solid #334155; background: rgba(0,0,0,0.5); }
+      .btn { background: linear-gradient(90deg, #ea580c, #c2410c); color: #fff; border: none; padding: 10px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; transition: 0.3s; }
+      .btn:hover { background: #f97316; transform: translateY(-2px); box-shadow: 0 0 15px rgba(249, 115, 22, 0.5); }
+      
+      .sim-container { flex: 1; position: relative; background: #020617; overflow: hidden; }
+      canvas { width: 100%; height: 100%; display: block; filter: contrast(1.1); }
+      
+      .hud { position: absolute; top: 20px; right: 20px; background: rgba(0,0,0,0.8); padding: 15px; border-radius: 8px; border: 1px solid #f97316; width: 300px; z-index: 10; pointer-events: none; }
+      .hud h3 { margin: 0 0 10px 0; color: #f97316; font-size: 1rem; font-family: 'Orbitron', sans-serif; }
+      .metric { display: flex; justify-content: space-between; font-size: 0.8rem; color: #cbd5e1; margin-bottom: 5px; }
+      .val { font-weight: bold; font-family: monospace; }
+      .val-orbit { color: #38bdf8; }
+      .val-dist { color: #facc15; }
+    </style>
+  </head>
+  <body>
+    
+    <div class="app-container">
+      <div class="sidebar">
+        <div class="header">
+          <h2><i class="fas fa-sun"></i> Shkadov Thruster</h2>
+          <p>Stellar Engine Navigation</p>
+        </div>
+        
+        <div id="editor-container"></div>
+        
+        <div class="controls">
+          <button class="btn" onclick="engageEngine()"><i class="fas fa-burn"></i> Ignite Stellar Engine</button>
+        </div>
+      </div>
+      
+      <div class="sim-container">
+        <!-- Nebula background -->
+        <div style="position: absolute; inset:0; background: radial-gradient(circle at 80% 20%, rgba(236, 72, 153, 0.2) 0%, transparent 50%), radial-gradient(circle at 20% 80%, rgba(14, 165, 233, 0.2) 0%, transparent 50%); pointer-events: none; z-index: 0;"></div>
+        
+        <canvas id="astroCanvas" style="position: relative; z-index: 1;"></canvas>
+        
+        <div class="hud">
+          <h3>System Telemetry</h3>
+          <div class="metric"><span>Distance to Target:</span> <span class="val val-dist" id="distVal">0 LY</span></div>
+          <div class="metric"><span>Planetary Stability:</span> <span class="val val-orbit" id="orbitVal">100%</span></div>
+          <div class="metric"><span>Engine Thrust:</span> <span class="val" id="thrustVal" style="color:#f97316">0%</span></div>
+          <div class="metric" style="margin-top: 10px; border-top: 1px solid #334155; padding-top: 5px;">
+            <span>System State:</span> <span class="val" id="statusVal" style="color:#94a3b8">DRIFTING</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      let editor;
+      require.config({ paths: { 'vs': 'https://unpkg.com/monaco-editor@0.36.1/min/vs' }});
+      require(['vs/editor/editor.main'], function() {
+        editor = monaco.editor.create(document.getElementById('editor-container'), {
+          value: `// Shkadov Thruster Navigation Algorithm
+// You control a mega-structure that reflects the star's own light to create thrust.
+// You must navigate the entire solar system to the target coordinates.
+// Warning: If you accelerate the star too abruptly, you will rip the planets out of orbit!
+
+function controlThrust(distanceX, distanceY, currentStability) {
+    // Return { thrustX: float (-1 to 1), thrustY: float (-1 to 1) }
+    // Accelerating slowly maintains planetary stability.
+    // Sharp turns or max thrust will destroy the solar system.
+    
+    // Naive logic: Point and floor it!
+    // Result: Planets are left behind in deep space to freeze.
+    
+    let mag = Math.sqrt(distanceX*distanceX + distanceY*distanceY);
+    
+    return {
+        thrustX: (distanceX / mag) * 1.0,
+        thrustY: (distanceY / mag) * 1.0
+    };
+}`,
+          language: 'javascript',
+          theme: 'vs-dark',
+          minimap: { enabled: false },
+          automaticLayout: true
+        });
+      });
+
+      const canvas = document.getElementById('astroCanvas');
+      const ctx = canvas.getContext('2d');
+      
+      let isSimulating = false;
+      let time = 0;
+      
+      let star = { x: 0, y: 0, vx: 0, vy: 0 };
+      let planets = [];
+      let target = { x: 0, y: 0 };
+      
+      let orbitalStability = 100;
+      let enginePower = 0;
+      
+      function resize() { 
+          canvas.width = canvas.clientWidth; 
+          canvas.height = canvas.clientHeight;
+      }
+      
+      setTimeout(resize, 100);
+      window.addEventListener('resize', resize);
+
+      function initSystem() {
+          star = { x: canvas.width/2, y: canvas.height/2, vx: 0, vy: 0 };
+          target = { x: canvas.width - 100, y: 100 }; // Top right corner
+          
+          planets = [
+              { distance: 40, angle: 0, speed: 0.05, mass: 10, color: '#facc15', orbitBroken: false, x:0, y:0, vx:0, vy:0 },
+              { distance: 80, angle: Math.PI, speed: 0.03, mass: 20, color: '#38bdf8', orbitBroken: false, x:0, y:0, vx:0, vy:0 },
+              { distance: 130, angle: Math.PI/2, speed: 0.02, mass: 50, color: '#ef4444', orbitBroken: false, x:0, y:0, vx:0, vy:0 }
+          ];
+          
+          // Initial physics setup
+          planets.forEach(p => {
+              p.x = star.x + Math.cos(p.angle) * p.distance;
+              p.y = star.y + Math.sin(p.angle) * p.distance;
+              // Orbital velocity v = sqrt(GM/r) roughly
+              let v = Math.sqrt(1000 / p.distance); // 1000 is fake GM
+              // Tangent vector
+              p.vx = -Math.sin(p.angle) * v;
+              p.vy = Math.cos(p.angle) * v;
+          });
+      }
+
+      function animate() {
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+          if (isSimulating) {
+              time += 1;
+              
+              let dx = target.x - star.x;
+              let dy = target.y - star.y;
+              let distToTarget = Math.sqrt(dx*dx + dy*dy);
+              
+              let thrustX = 0;
+              let thrustY = 0;
+              
+              try {
+                  eval(editor.getValue());
+                  let res = controlThrust(dx, dy, orbitalStability);
+                  if (res) {
+                      thrustX = Math.max(-1, Math.min(1, res.thrustX || 0));
+                      thrustY = Math.max(-1, Math.min(1, res.thrustY || 0));
+                  }
+              } catch(e) {}
+              
+              enginePower = Math.sqrt(thrustX*thrustX + thrustY*thrustY);
+              
+              // Apply thrust to star
+              let accelerationFactor = 0.05;
+              star.vx += thrustX * accelerationFactor;
+              star.vy += thrustY * accelerationFactor;
+              
+              star.x += star.vx;
+              star.y += star.vy;
+              
+              let stableCount = 0;
+              
+              // Physics for planets
+              planets.forEach(p => {
+                  if (!p.orbitBroken) {
+                      let pdx = star.x - p.x;
+                      let pdy = star.y - p.y;
+                      let pdistSq = pdx*pdx + pdy*pdy;
+                      let pdist = Math.sqrt(pdistSq);
+                      
+                      // Gravity from star
+                      let force = 1000 / pdistSq;
+                      p.vx += (pdx / pdist) * force;
+                      p.vy += (pdy / pdist) * force;
+                      
+                      p.x += p.vx;
+                      p.y += p.vy;
+                      
+                      // Check if orbit broke (too far, or too fast)
+                      if (pdist > p.distance * 2.5) {
+                          p.orbitBroken = true;
+                      } else {
+                          stableCount++;
+                      }
+                  } else {
+                      // Just drifts
+                      p.x += p.vx;
+                      p.y += p.vy;
+                  }
+              });
+              
+              orbitalStability = (stableCount / planets.length) * 100;
+              
+              // Win/Loss
+              if (orbitalStability === 0) {
+                  isSimulating = false;
+                  document.getElementById('statusVal').innerText = "SYSTEM COLLAPSED";
+                  document.getElementById('statusVal').style.color = "#ef4444";
+              } else if (distToTarget < 20 && orbitalStability === 100) {
+                  isSimulating = false;
+                  document.getElementById('statusVal').innerText = "NAVIGATION SUCCESSFUL";
+                  document.getElementById('statusVal').style.color = "#10b981";
+              } else {
+                  if (orbitalStability < 100) {
+                      document.getElementById('statusVal').innerText = "WARNING: ORBITAL SHEAR";
+                      document.getElementById('statusVal').style.color = "#f97316";
+                  } else {
+                      document.getElementById('statusVal').innerText = "NAVIGATING NEBULA...";
+                      document.getElementById('statusVal').style.color = "#38bdf8";
+                  }
+              }
+              
+              // HUD
+              document.getElementById('distVal').innerText = Math.floor(distToTarget) + " LY";
+              let orbEl = document.getElementById('orbitVal');
+              orbEl.innerText = orbitalStability.toFixed(0) + "%";
+              orbEl.style.color = orbitalStability < 100 ? "#ef4444" : "#10b981";
+              
+              document.getElementById('thrustVal').innerText = (enginePower * 100).toFixed(0) + "%";
+          }
+          
+          // Draw Target
+          ctx.beginPath();
+          ctx.arc(target.x, target.y, 20, 0, Math.PI*2);
+          ctx.strokeStyle = 'rgba(16, 185, 129, 0.5)';
+          ctx.setLineDash([5, 5]);
+          ctx.stroke();
+          ctx.setLineDash([]);
+          ctx.fillStyle = '#10b981';
+          ctx.font = '12px monospace';
+          ctx.fillText("TARGET X-9", target.x - 30, target.y - 30);
+          
+          // Draw Star
+          ctx.beginPath(); ctx.arc(star.x, star.y, 20, 0, Math.PI*2);
+          ctx.fillStyle = '#fef08a';
+          ctx.shadowBlur = 30;
+          ctx.shadowColor = '#eab308';
+          ctx.fill();
+          ctx.shadowBlur = 0;
+          
+          // Draw Shkadov Thruster (A giant mirror behind the star)
+          if (isSimulating) {
+              // Calculate direction of thrust
+              let thrustAngle = Math.atan2(star.vy, star.vx); // Actual movement direction
+              
+              ctx.beginPath();
+              // Arc mirror on the opposite side of thrust
+              ctx.arc(star.x, star.y, 25, thrustAngle + Math.PI/2, thrustAngle - Math.PI/2, false);
+              ctx.strokeStyle = '#94a3b8';
+              ctx.lineWidth = 4;
+              ctx.stroke();
+              
+              // Thrust beam
+              ctx.beginPath();
+              ctx.moveTo(star.x + Math.cos(thrustAngle)*20, star.y + Math.sin(thrustAngle)*20);
+              ctx.lineTo(star.x + Math.cos(thrustAngle)*60, star.y + Math.sin(thrustAngle)*60);
+              ctx.strokeStyle = \`rgba(249, 115, 22, \${enginePower})\`;
+              ctx.lineWidth = 10;
+              ctx.stroke();
+          }
+          
+          // Draw Planets
+          planets.forEach(p => {
+              if(!p.orbitBroken) {
+                  // Draw theoretical orbit path
+                  ctx.beginPath();
+                  ctx.arc(star.x, star.y, p.distance, 0, Math.PI*2);
+                  ctx.strokeStyle = 'rgba(255, 255, 255, 0.05)';
+                  ctx.lineWidth = 1;
+                  ctx.stroke();
+              }
+              
+              ctx.beginPath();
+              ctx.arc(p.x, p.y, p.mass > 20 ? 6 : 4, 0, Math.PI*2);
+              ctx.fillStyle = p.orbitBroken ? '#64748b' : p.color; // Turns gray if frozen/broken
+              ctx.shadowBlur = p.orbitBroken ? 0 : 10;
+              ctx.shadowColor = p.color;
+              ctx.fill();
+              ctx.shadowBlur = 0;
+          });
+
+          requestAnimationFrame(animate);
+      }
+      
+      initSystem();
+      animate();
+
+      function engageEngine() {
+          if(isSimulating) return;
+          initSystem();
+          isSimulating = true;
+          time = 0;
+          orbitalStability = 100;
+          enginePower = 0;
+          
+          document.getElementById('statusVal').innerText = "ENGINE IGNITED...";
+          document.getElementById('statusVal').style.color = "#f97316";
+      }
+    </script>
+  </body>
+</html>

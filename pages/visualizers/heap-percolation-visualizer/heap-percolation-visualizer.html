@@ -24,6 +24,7 @@
         } catch (e) {}
       })();
     </script>
+    <link rel="stylesheet" href="/modules/quick-notes/quick-notes.css" />
   </head>
   <body data-page="heap-percolation-visualizer">
     <div id="navbar-placeholder"></div>
@@ -55,7 +56,7 @@
           <h2 class="panel-title"><i class="fas fa-layer-group"></i> Heap Controls</h2>
 
           <div class="control-group">
-            <label for="heap-type">Heap Type</label>
+            <span class="control-label">Heap Type</span>
             <div class="tree-type-selector">
               <button type="button" class="btn-type active" id="btn-min-heap" data-type="min" aria-label="Switch to min heap" title="Switch to min heap">Min Heap</button>
               <button type="button" class="btn-type" id="btn-max-heap" data-type="max" aria-label="Switch to max heap" title="Switch to max heap">Max Heap</button>
@@ -143,5 +144,6 @@
       loadPartial('navbar-placeholder', '/partials/navbar.html');
       loadPartial('footer-placeholder', '/partials/footer.html');
     </script>
+    <script src="/modules/quick-notes/quick-notes.js"></script>
   </body>
 </html>

@@ -25,7 +25,15 @@ const els = {
   step3Card: document.getElementById('step3-card'),
   step4Card: document.getElementById('step4-card'),
 
+  maliciousInterceptCard: document.getElementById('malicious-intercept-card'),
+  maliciousExchangeCard: document.getElementById('malicious-exchange-card'),
+  btnMaliciousIntercept: document.getElementById('btnMaliciousIntercept'),
+  btnMaliciousExchange: document.getElementById('btnMaliciousExchange'),
+  maliciousLogContent: document.getElementById('maliciousLogContent'),
+
   userDataResult: document.getElementById('userDataResult'),
+  pkceToggle: document.getElementById('pkceToggle'),
+  pkceStatusLabel: document.getElementById('pkceStatusLabel'),
 };
 
 // Global state for the simulation
@@ -34,6 +42,7 @@ const state = {
   challenge: '',
   authCode: '',
   accessToken: '',
+  pkceEnabled: true,
 };
 
 function initOAuth() {
@@ -41,6 +50,24 @@ function initOAuth() {
   els.btnStep2.addEventListener('click', handleStep2);
   els.btnStep3.addEventListener('click', handleStep3);
   els.btnStep4.addEventListener('click', handleStep4);
+
+  els.btnMaliciousIntercept.addEventListener('click', handleMaliciousIntercept);
+  els.btnMaliciousExchange.addEventListener('click', handleMaliciousExchange);
+
+  els.pkceToggle.addEventListener('change', handleTogglePKCE);
+}
+
+function handleTogglePKCE(e) {
+  state.pkceEnabled = e.target.checked;
+  if (state.pkceEnabled) {
+    els.pkceStatusLabel.textContent = 'PKCE: ON (Secure)';
+    els.pkceStatusLabel.className = 'pkce-label secure';
+    document.querySelector('.crypto-box').style.opacity = '1';
+  } else {
+    els.pkceStatusLabel.textContent = 'PKCE: OFF (Vulnerable)';
+    els.pkceStatusLabel.className = 'pkce-label vulnerable';
+    document.querySelector('.crypto-box').style.opacity = '0.3';
+  }
 }
 
 // Helper: base64url encoding
@@ -73,21 +100,32 @@ async function generateCodeChallenge(code_verifier) {
 }
 
 async function handleStep1() {
-  // Generate verifier and challenge
-  state.verifier = generateRandomString(43); // RFC says 43-128 chars
-  state.challenge = await generateCodeChallenge(state.verifier);
-
-  els.codeVerifier.value = state.verifier;
-  els.codeChallenge.value = state.challenge;
-
   els.btnStep1.disabled = true;
 
-  // Log to Auth Server
-  logToAuth(`<span class="log-method">GET</span> /authorize
+  if (state.pkceEnabled) {
+    // Generate verifier and challenge
+    state.verifier = generateRandomString(43); // RFC says 43-128 chars
+    state.challenge = await generateCodeChallenge(state.verifier);
+
+    els.codeVerifier.value = state.verifier;
+    els.codeChallenge.value = state.challenge;
+
+    logToAuth(`<span class="log-method">GET</span> /authorize
 ?response_type=code
 &client_id=SPA_CLIENT
 &code_challenge=${state.challenge}
 &code_challenge_method=S256`);
+  } else {
+    state.verifier = '';
+    state.challenge = '';
+    els.codeVerifier.value = 'N/A';
+    els.codeChallenge.value = 'N/A';
+
+    logToAuth(`<span class="log-method">GET</span> /authorize
+?response_type=code
+&client_id=SPA_CLIENT
+<span class="log-method">/* No PKCE provided */</span>`);
+  }
 
   // Enable step 2
   els.step2Card.classList.remove('disabled');
@@ -111,9 +149,65 @@ function handleStep2() {
 Generated Authorization Code: ${state.authCode}
 Redirecting back to Client...`);
 
-  // Enable step 3
+  // Enable step 3 (Legit App) & Malicious Intercept (Attacker)
   els.step3Card.classList.remove('disabled');
   els.btnStep3.disabled = false;
+
+  els.maliciousInterceptCard.classList.remove('disabled');
+  els.btnMaliciousIntercept.disabled = false;
+}
+
+function handleMaliciousIntercept() {
+  els.btnMaliciousIntercept.disabled = true;
+
+  logToMalicious(`Intercepting Custom URI Scheme...
+<span class="log-status">Success!</span>
+Stolen Authorization Code: <span style="color:#fff">${state.authCode}</span>`);
+
+  els.maliciousExchangeCard.classList.remove('disabled');
+  els.btnMaliciousExchange.disabled = false;
+}
+
+function handleMaliciousExchange() {
+  els.btnMaliciousExchange.disabled = true;
+
+  logToMalicious(`---
+<span class="log-method">POST</span> /oauth/token
+{
+  "grant_type": "authorization_code",
+  "client_id": "SPA_CLIENT",
+  "code": "${state.authCode}"
+}`);
+
+  logToAuth(`---
+<span class="log-method">POST</span> /oauth/token [FROM ATTACKER]
+Code: ${state.authCode}`);
+
+  setTimeout(() => {
+    if (state.pkceEnabled) {
+      logToAuth(`<span class="log-method">400 Bad Request</span>
+PKCE required! Missing code_verifier.`);
+      logToMalicious(`<span class="log-method">400 Bad Request</span>
+Attack FAILED. Server demands PKCE verifier.`);
+    } else {
+      state.accessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.ATTACKER';
+      logToAuth(`<span class="log-status">200 OK</span>
+Issuing Access Token to Attacker: ${state.accessToken}`);
+      logToMalicious(`<span class="log-status">200 OK</span>
+Attack SUCCESS!
+Access Token: ${state.accessToken}`);
+
+      setTimeout(() => {
+        logToResource(`<span class="log-method">GET</span> /api/user_data [FROM ATTACKER]
+Authorization: Bearer ${state.accessToken}`);
+        setTimeout(() => {
+          logToResource(`<span class="log-method">ATTACK SUCCESS!</span>
+User data exfiltrated.`);
+          logToMalicious(`User Data Stolen!`);
+        }, 800);
+      }, 1000);
+    }
+  }, 1000);
 }
 
 async function handleStep3() {
@@ -130,21 +224,29 @@ async function handleStep3() {
 }`);
 
   // Auth Server verifies
-  const checkChallenge = await generateCodeChallenge(state.verifier);
-
-  setTimeout(() => {
-    if (checkChallenge === els.serverSavedChallenge.textContent) {
-      state.accessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...' + generateRandomString(10);
-      logToAuth(`<span class="log-status">200 OK</span>
+  setTimeout(async () => {
+    if (state.pkceEnabled) {
+      const checkChallenge = await generateCodeChallenge(state.verifier);
+      if (checkChallenge === els.serverSavedChallenge.textContent) {
+        state.accessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...' + generateRandomString(10);
+        logToAuth(`<span class="log-status">200 OK</span>
 PKCE Verification Passed!
 Issuing Access Token: ${state.accessToken}`);
 
-      // Enable Step 4
+        // Enable Step 4
+        els.step4Card.classList.remove('disabled');
+        els.btnStep4.disabled = false;
+      } else {
+        logToAuth(`<span class="log-method">400 Bad Request</span>
+PKCE Verification Failed!`);
+      }
+    } else {
+      // PKCE OFF, just give the token
+      state.accessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...' + generateRandomString(10);
+      logToAuth(`<span class="log-status">200 OK</span>
+Issuing Access Token: ${state.accessToken}`);
       els.step4Card.classList.remove('disabled');
       els.btnStep4.disabled = false;
-    } else {
-      logToAuth(`<span class="log-method">400 Bad Request</span>
-PKCE Verification Failed!`);
     }
   }, 800);
 }
@@ -182,4 +284,12 @@ function logToResource(msg) {
   }
   els.resourceLogContent.innerHTML += `<div class="log-entry">${msg}</div>`;
   els.resourceLogContent.scrollTop = els.resourceLogContent.scrollHeight;
+}
+
+function logToMalicious(msg) {
+  if (els.maliciousLogContent.innerHTML === 'Awaiting interception...') {
+    els.maliciousLogContent.innerHTML = '';
+  }
+  els.maliciousLogContent.innerHTML += `<div class="log-entry">${msg}</div>`;
+  els.maliciousLogContent.scrollTop = els.maliciousLogContent.scrollHeight;
 }

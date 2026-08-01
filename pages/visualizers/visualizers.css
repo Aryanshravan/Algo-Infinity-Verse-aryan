@@ -10,7 +10,7 @@
    ============================================ */
 
 /* ─── CSS Variables (scoped to visualizers page) ─── */
-[data-page="visualizers"] {
+[data-page='visualizers'] {
   --viz-bg: #070714;
   --viz-surface: #0d0d24;
   --viz-elevated: #151533;
@@ -27,7 +27,7 @@
 }
 
 /* ─── Hero Section ─── */
-[data-page="visualizers"] .viz-hero {
+[data-page='visualizers'] .viz-hero {
   position: relative;
   padding: 8rem 1.5rem 3rem;
   text-align: center;
@@ -102,7 +102,9 @@
 
 .viz-search:focus-within {
   border-color: var(--viz-accent);
-  box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.12), 0 4px 20px rgba(245, 158, 11, 0.06);
+  box-shadow:
+    0 0 0 3px rgba(245, 158, 11, 0.12),
+    0 4px 20px rgba(245, 158, 11, 0.06);
   background: #0f0f28;
 }
 
@@ -273,6 +275,23 @@
   isolation: isolate;
 }
 
+/* ─── Lazy Loading ─── */
+.lazy-card {
+  opacity: 0;
+  transform: translateY(20px);
+  visibility: hidden;
+  transition:
+    opacity 0.5s ease-out,
+    transform 0.5s ease-out,
+    visibility 0.5s ease-out;
+}
+
+.lazy-card.visible {
+  opacity: 1;
+  transform: translateY(0);
+  visibility: visible;
+}
+
 .viz-card::before {
   content: '';
   position: absolute;
@@ -364,6 +383,36 @@
   transform: translateX(3px);
 }
 
+/* ─── Category Section Header ─── */
+.viz-category-header {
+  grid-column: 1 / -1;
+  padding: 0.75rem 0 0.25rem;
+  margin-top: 0.5rem;
+}
+
+.viz-category-title {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--viz-text);
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+  position: relative;
+  display: inline-block;
+  padding-bottom: 0.35rem;
+}
+
+.viz-category-title::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: linear-gradient(90deg, var(--viz-primary), transparent);
+  border-radius: 1px;
+}
+
 /* ─── Empty State ─── */
 .viz-empty {
   text-align: center;
@@ -390,7 +439,7 @@
 }
 
 /* ─── Animation ─── */
-[data-page="visualizers"] .viz-card {
+[data-page='visualizers'] .viz-card {
   animation: vizCardFadeIn 0.35s ease both;
 }
 
@@ -405,9 +454,108 @@
   }
 }
 
+/* ─── Pagination ─── */
+.viz-pagination {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-top: 2.5rem;
+  flex-wrap: wrap;
+}
+
+.viz-page-btn {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.8rem;
+  font-weight: 500;
+  padding: 0.45rem 0.9rem;
+  border-radius: 8px;
+  background: transparent;
+  border: 1px solid var(--viz-border);
+  color: var(--viz-text-muted);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.viz-page-btn:hover:not(:disabled) {
+  border-color: var(--viz-primary);
+  color: var(--viz-primary);
+  background: rgba(var(--viz-primary-rgb), 0.06);
+}
+
+.viz-page-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.viz-page-btn:focus-visible {
+  outline: 2px solid var(--viz-primary);
+  outline-offset: 2px;
+}
+
+.viz-page-numbers {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.viz-page-num {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.8rem;
+  font-weight: 500;
+  min-width: 2rem;
+  height: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  background: transparent;
+  border: 1px solid transparent;
+  color: var(--viz-text-muted);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.viz-page-num:hover {
+  border-color: var(--viz-border-hover);
+  color: var(--viz-text);
+  background: var(--viz-surface);
+}
+
+.viz-page-num.active {
+  background: rgba(245, 158, 11, 0.12);
+  border-color: var(--viz-accent);
+  color: var(--viz-accent);
+  font-weight: 600;
+  cursor: default;
+}
+
+.viz-page-num:focus-visible {
+  outline: 2px solid var(--viz-primary);
+  outline-offset: 2px;
+}
+
+.viz-page-ellipsis {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.75rem;
+  color: var(--viz-text-muted);
+  padding: 0 0.25rem;
+  user-select: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .viz-page-btn {
+    transition: none;
+  }
+  .viz-page-num {
+    transition: none;
+  }
+}
+
 /* ─── Responsive ─── */
 @media (max-width: 768px) {
-  [data-page="visualizers"] .viz-hero {
+  [data-page='visualizers'] .viz-hero {
     padding: 6rem 1rem 2.5rem;
     min-height: auto;
   }

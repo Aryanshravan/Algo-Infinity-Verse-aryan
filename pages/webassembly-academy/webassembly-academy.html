@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebAssembly Academy — From WAT to the Browser</title>
+    <meta name="description" content="Master WebAssembly from the ground up — WASM basics & the binary format, module lifecycle (compile/instantiate), linear memory, imports & exports with JS interop, WAT & toolchains (Emscripten/rustc), SIMD & performance, and security & limitations — with a live WAT-to-WASM simulator and quizzes.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=Inter:wght@300;400;500;600;700&family=Fira+Code:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/pages/webassembly-academy/webassembly-academy.css">
+    <link rel="stylesheet" href="/styles/copy-code.css">
+    <link rel="stylesheet" href="/styles/eli5-toggle.css">
+</head>
+<body>
+    <!-- Mobile sidebar overlay -->
+    <div id="sidebar-overlay" class="sidebar-overlay"></div>
+
+    <!-- Sidebar -->
+    <aside id="sidebar" class="sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-logo">
+                <span class="wasm-logo" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
+                        <path d="M3.5 3h17a.5.5 0 0 1 .5.5v17a.5.5 0 0 1-.5.5h-17a.5.5 0 0 1-.5-.5v-17a.5.5 0 0 1 .5-.5zM4.7 5.9h1.9l1.1 5.4 1.2-5.4h1.7l1.2 5.4 1.1-5.4h1.9l-1.9 8.5h-1.7L9.7 9.6l-1.5 4.8H6.5L4.6 5.9h.1zm10.7 0h2.5l.2 4.3h2.7v4.2h-1.3v2.2H18v-2.2h-2.6V5.9h.1z" transform="translate(0 0) scale(0.98)"/>
+                    </svg>
+                </span>
+                <span>WebAssembly Academy</span>
+            </div>
+            <button id="close-sidebar-btn" class="sidebar-close-btn" aria-label="Close sidebar">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="sidebar-progress">
+            <div class="progress-label">
+                <span>Progress</span>
+                <span id="progress-text">0%</span>
+            </div>
+            <div class="progress-bar">
+                <div id="progress-bar" class="progress-fill" style="width: 0%"></div>
+            </div>
+        </div>
+        <ul id="module-list" class="module-list"></ul>
+    </aside>
+
+    <!-- Main content -->
+    <main class="main-content">
+        <header class="header">
+            <button id="open-sidebar-btn" class="sidebar-open-btn" aria-label="Open sidebar">
+                <i class="fas fa-bars"></i>
+            </button>
+            <h1 id="active-module-title" class="active-module-title"></h1>
+            <nav class="tab-nav" role="tablist">
+                <button data-tab="lesson" class="tab-btn active" role="tab" aria-selected="true">
+                    <i class="fa-solid fa-book-open mr-1"></i> Lesson Viewer
+                </button>
+                <button data-tab="simulator" class="tab-btn" role="tab" aria-selected="false">
+                    <i class="fa-solid fa-wand-magic-sparkles mr-1"></i> WAT → WASM Simulator
+                </button>
+                <button data-tab="quiz" class="tab-btn" role="tab" aria-selected="false">
+                    <i class="fa-solid fa-list-check mr-1"></i> Quiz
+                </button>
+            </nav>
+        </header>
+
+        <div class="content-area">
+            <!-- Lesson Tab -->
+            <div id="tab-lesson" class="tab-content active">
+                <div class="lesson-container">
+                    <div id="lesson-content" class="lesson-content"></div>
+                    <div class="lesson-footer">
+                        <button id="mark-complete-btn" class="mark-complete-btn">
+                            <i class="fas fa-check-circle mr-2"></i> Mark as Complete
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Simulator Tab -->
+            <div id="tab-simulator" class="tab-content">
+                <div class="simulator-split">
+                    <!-- Left: WAT editor -->
+                    <div class="simulator-editor">
+                        <div class="editor-header">
+                            <span class="editor-title"><i class="fa-solid fa-file-code mr-1"></i> main.wat — Text Format Editor</span>
+                            <div class="editor-actions">
+                                <select id="wat-preset-select" class="wat-preset-select" aria-label="WAT preset">
+                                    <option value="custom">Custom WAT</option>
+                                    <option value="factorial">Factorial (recursion)</option>
+                                    <option value="add_export">Add (exported function)</option>
+                                    <option value="memory_store">Linear memory store</option>
+                                    <option value="global_counter">Mutable global</option>
+                                    <option value="js_interop">JS interop (import)</option>
+                                    <option value="simd_add">SIMD i8x16.add</option>
+                                    <option value="fibonacci">Fibonacci (loop)</option>
+                                </select>
+                                <button id="compile-btn" class="connect-btn" title="Compile WAT to WASM binary">
+                                    <i class="fas fa-gears"></i> wat2wasm
+                                </button>
+                                <button id="run-btn" class="run-btn" title="Run to completion">
+                                    <i class="fas fa-play"></i> Run
+                                </button>
+                                <button id="step-fwd-btn" class="connect-btn" title="Step forward through execution">
+                                    <i class="fas fa-step-forward"></i> Step
+                                </button>
+                                <button id="step-back-btn" class="disconnect-btn" title="Step back">
+                                    <i class="fas fa-step-backward"></i> Step Back
+                                </button>
+                                <button id="clear-pg-btn" class="disconnect-btn" title="Reset to lesson example">
+                                    <i class="fas fa-rotate-left"></i> Reset
+                                </button>
+                            </div>
+                        </div>
+                        <textarea id="wat-editor" class="wat-editor" spellcheck="false" aria-label="WAT editor"></textarea>
+                        <div class="connection-settings">
+                            <span class="setting-hint"><i class="fa-solid fa-circle-info"></i> Write WebAssembly Text Format on the left, press <strong>wat2wasm</strong> to assemble it into binary, then <strong>Run</strong> or <strong>Step</strong> through the stack VM.</span>
+                            <label class="setting-label" title="Validate the emitted binary with WebAssembly.validate() when possible">
+                                <input type="checkbox" id="show-hex" checked>
+                                <span>Show binary hex dump</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Right: terminal + inspectors -->
+                    <div class="simulator-output">
+                        <div class="terminal-panel">
+                            <div class="panel-header">
+                                <span class="panel-title"><i class="fa-solid fa-terminal mr-1"></i> $ wasm-tools validate / wat2wasm</span>
+                                <span id="boot-status" class="boot-status">Ready</span>
+                            </div>
+                            <div id="wat-terminal" class="terminal-window">
+                                <p class="term-placeholder">// Press "wat2wasm" to assemble the module, then Run or Step through execution.</p>
+                            </div>
+                        </div>
+                        <div class="inspector-grid">
+                            <section class="inspector-card binary-card">
+                                <div class="inspector-header">
+                                    <span class="inspector-title"><i class="fa-solid fa-file-code mr-1"></i> WASM Binary (hex)</span>
+                                    <span id="binary-size" class="inspector-badge">0 bytes</span>
+                                </div>
+                                <div id="binary-hex" class="binary-hex">
+                                    <div class="inspector-empty">No module assembled yet.</div>
+                                </div>
+                            </section>
+                            <section class="inspector-card stack-card">
+                                <div class="inspector-header">
+                                    <span class="inspector-title"><i class="fa-solid fa-layer-group mr-1"></i> Operand Stack</span>
+                                    <span id="stack-depth-badge" class="inspector-badge">Depth: 0</span>
+                                </div>
+                                <div id="operand-stack" class="operand-stack">
+                                    <div class="inspector-empty">Stack is empty.</div>
+                                </div>
+                            </section>
+                            <section class="inspector-card memory-card">
+                                <div class="inspector-header">
+                                    <span class="inspector-title"><i class="fa-solid fa-memory mr-1"></i> Linear Memory</span>
+                                    <span id="memory-pages" class="inspector-badge">0 pages</span>
+                                </div>
+                                <div id="memory-hex" class="memory-hex">
+                                    <div class="inspector-empty">No memory declared.</div>
+                                </div>
+                            </section>
+                            <section class="inspector-card frame-card">
+                                <div class="inspector-header">
+                                    <span class="inspector-title"><i class="fa-solid fa-folder-tree mr-1"></i> Call Frames &amp; Locals</span>
+                                </div>
+                                <div id="frame-view" class="frame-view">
+                                    <div class="inspector-empty">No active call frames.</div>
+                                </div>
+                            </section>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quiz Tab -->
+            <div id="tab-quiz" class="tab-content">
+                <div id="quiz-container" class="quiz-container"></div>
+            </div>
+        </div>
+    </main>
+
+    <script src="/modules/eli5-toggle.js"></script>
+    <script src="/modules/eli5-webassembly-data.js"></script>
+    <script src="/pages/webassembly-academy/webassembly-academy.js"></script>
+    <script src="/modules/copy-code.js"></script>
+</body>
+</html>
