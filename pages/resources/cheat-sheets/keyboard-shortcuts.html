@@ -1,0 +1,335 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Keyboard Shortcuts — Algo Infinity Verse</title>
+    <meta
+      name="description"
+      content="A printable reference for every Algo Infinity Verse keyboard shortcut — app navigation, search, code editor, and visualizer controls."
+    />
+    <link rel="stylesheet" href="/styles.css" />
+    <link rel="stylesheet" href="/pages/home/home.css" />
+    <link rel="stylesheet" href="keyboard-shortcuts.css" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+
+    <!-- Theme Initialization Script -->
+    <script>
+      (function () {
+        try {
+          var storedTheme = localStorage.getItem('theme');
+          var prefersLight = window.matchMedia('(prefers-color-scheme: light)').matches;
+          var theme = storedTheme || (prefersLight ? 'light' : 'dark');
+          if (theme === 'light') {
+            document.documentElement.classList.add('light-mode');
+          } else {
+            document.documentElement.classList.remove('light-mode');
+          }
+        } catch (e) {}
+      })();
+    </script>
+  </head>
+  <body data-page="keyboard-shortcuts" data-no-loading>
+    <!-- Skip to content -->
+    <a href="#ks-main" class="skip-link">Skip to main content</a>
+
+    <!-- Scroll to Top Button -->
+    <button type="button" id="scrollTopBtn" class="scroll-top-btn" aria-label="Scroll to top">
+      <i class="fas fa-arrow-up"></i>
+    </button>
+
+    <!-- Navigation Bar -->
+    <div id="navbar-placeholder"></div>
+
+    <main id="ks-main" tabindex="-1">
+      <!-- ==================================================================== -->
+      <!-- HERO (homepage design pattern)                                        -->
+      <!-- ==================================================================== -->
+      <section class="hp-hero ks-hero">
+        <div class="hp-hero-shapes" aria-hidden="true">
+          <div class="hp-shape"></div>
+          <div class="hp-shape"></div>
+          <div class="hp-shape"></div>
+          <div class="hp-shape"></div>
+          <div class="hp-shape"></div>
+        </div>
+
+        <div class="hp-hero-content">
+          <h1 class="hp-hero-title">
+            Keyboard<br />
+            <span class="hp-gradient-text">Shortcuts</span>
+          </h1>
+
+          <p class="hp-hero-subtitle">
+            Every Algo Infinity Verse shortcut in one place — app navigation, search, code editor,
+            and visualizer controls. Print this page and keep a copy handy while you practice. On
+            macOS, <strong class="ks-mod">Ctrl</strong> = <strong class="ks-mod">⌘ Cmd</strong>,
+            <strong class="ks-mod">Alt</strong> = <strong class="ks-mod">⌥ Option</strong>.
+          </p>
+
+          <div class="hp-hero-actions">
+            <button type="button" id="ksPrintBtn" class="hp-btn hp-btn-primary">
+              <i class="fas fa-print"></i> Print / Save as PDF
+            </button>
+            <a href="/index.html" class="hp-btn hp-btn-secondary">
+              <i class="fas fa-arrow-left"></i> Back to Home
+            </a>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==================================================================== -->
+      <!-- SHORTCUT GRID                                                         -->
+      <!-- ==================================================================== -->
+      <section class="hp-section ks-shortcuts">
+        <div class="hp-section-header">
+          <div class="hp-section-eyebrow">Quick Reference</div>
+          <h2 class="hp-section-title">Every shortcut, at a glance</h2>
+          <p class="hp-section-subtitle">
+            Shortcuts are ignored while you're typing in an input field.
+          </p>
+        </div>
+
+        <div class="shortcuts-grid">
+          <!-- NAVIGATION -->
+          <div class="shortcuts-section hp-reveal">
+            <h3><i class="fas fa-compass" aria-hidden="true"></i> Navigation</h3>
+            <table class="shortcuts-table">
+              <tbody>
+                <tr>
+                  <td><kbd>Alt</kbd> + <kbd>H</kbd></td>
+                  <td>Go to Home</td>
+                </tr>
+                <tr>
+                  <td><kbd>Alt</kbd> + <kbd>T</kbd></td>
+                  <td>Go to Learning Topics</td>
+                </tr>
+                <tr>
+                  <td><kbd>Alt</kbd> + <kbd>P</kbd></td>
+                  <td>Go to Practice</td>
+                </tr>
+                <tr>
+                  <td><kbd>Alt</kbd> + <kbd>Q</kbd></td>
+                  <td>Go to Quiz</td>
+                </tr>
+                <tr>
+                  <td><kbd>Alt</kbd> + <kbd>D</kbd></td>
+                  <td>Go to Dashboard</td>
+                </tr>
+                <tr>
+                  <td><kbd>Alt</kbd> + <kbd>S</kbd></td>
+                  <td>Open Settings</td>
+                </tr>
+                <tr>
+                  <td><kbd>Alt</kbd> + <kbd>L</kbd></td>
+                  <td>Open Learn Menu</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- SEARCH -->
+          <div class="shortcuts-section hp-reveal" data-reveal-delay="50">
+            <h3><i class="fas fa-search" aria-hidden="true"></i> Search</h3>
+            <table class="shortcuts-table">
+              <tbody>
+                <tr>
+                  <td><kbd>Ctrl</kbd> + <kbd>K</kbd></td>
+                  <td>Focus Search</td>
+                </tr>
+                <tr>
+                  <td><kbd>/</kbd></td>
+                  <td>Focus Search</td>
+                </tr>
+                <tr>
+                  <td><kbd>Esc</kbd></td>
+                  <td>Clear Search / Close Modal</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- CODE EDITOR -->
+          <div class="shortcuts-section hp-reveal" data-reveal-delay="100">
+            <h3><i class="fas fa-code" aria-hidden="true"></i> Code Editor</h3>
+            <table class="shortcuts-table">
+              <tbody>
+                <tr>
+                  <td><kbd>Ctrl</kbd> + <kbd>Enter</kbd></td>
+                  <td>Run Code</td>
+                </tr>
+                <tr>
+                  <td><kbd>Ctrl</kbd> + <kbd>S</kbd></td>
+                  <td>Save / Submit Code</td>
+                </tr>
+                <tr>
+                  <td><kbd>Ctrl</kbd> + <kbd>/</kbd></td>
+                  <td>Toggle Comment</td>
+                </tr>
+                <tr>
+                  <td><kbd>Ctrl</kbd> + <kbd>Z</kbd></td>
+                  <td>Undo</td>
+                </tr>
+                <tr>
+                  <td><kbd>Ctrl</kbd> + <kbd>Y</kbd></td>
+                  <td>Redo</td>
+                </tr>
+                <tr>
+                  <td><kbd>Ctrl</kbd> + <kbd>F</kbd></td>
+                  <td>Find</td>
+                </tr>
+                <tr>
+                  <td><kbd>Ctrl</kbd> + <kbd>H</kbd></td>
+                  <td>Replace</td>
+                </tr>
+                <tr>
+                  <td><kbd>Ctrl</kbd> + <kbd>G</kbd></td>
+                  <td>Go to Line</td>
+                </tr>
+                <tr>
+                  <td><kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>F</kbd></td>
+                  <td>Format Document</td>
+                </tr>
+                <tr>
+                  <td><kbd>Ctrl</kbd> + <kbd>A</kbd></td>
+                  <td>Select All</td>
+                </tr>
+                <tr>
+                  <td><kbd>Ctrl</kbd> + <kbd>X</kbd></td>
+                  <td>Cut</td>
+                </tr>
+                <tr>
+                  <td><kbd>Ctrl</kbd> + <kbd>C</kbd></td>
+                  <td>Copy</td>
+                </tr>
+                <tr>
+                  <td><kbd>Ctrl</kbd> + <kbd>V</kbd></td>
+                  <td>Paste</td>
+                </tr>
+                <tr>
+                  <td><kbd>Shift</kbd> + <kbd>Alt</kbd> + <kbd>↓</kbd></td>
+                  <td>Duplicate Line</td>
+                </tr>
+                <tr>
+                  <td><kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>P</kbd></td>
+                  <td>Command Palette</td>
+                </tr>
+              </tbody>
+            </table>
+            <p class="ks-note">Redo on macOS is <kbd>⌘</kbd> + <kbd>Shift</kbd> + <kbd>Z</kbd>.</p>
+          </div>
+
+          <!-- GENERAL -->
+          <div class="shortcuts-section hp-reveal" data-reveal-delay="150">
+            <h3><i class="fas fa-globe" aria-hidden="true"></i> General</h3>
+            <table class="shortcuts-table">
+              <tbody>
+                <tr>
+                  <td><kbd>?</kbd></td>
+                  <td>Open Shortcuts Help</td>
+                </tr>
+                <tr>
+                  <td><kbd>Esc</kbd></td>
+                  <td>Close Modal / Dialog</td>
+                </tr>
+                <tr>
+                  <td><kbd>Tab</kbd></td>
+                  <td>Navigate to Next Element</td>
+                </tr>
+                <tr>
+                  <td><kbd>Shift</kbd> + <kbd>Tab</kbd></td>
+                  <td>Navigate to Previous Element</td>
+                </tr>
+                <tr>
+                  <td><kbd>D</kbd></td>
+                  <td>Toggle Dark / Light Theme</td>
+                </tr>
+                <tr>
+                  <td><kbd>&gt;</kbd></td>
+                  <td>Skip Splash Loading Animation</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- VISUALIZERS -->
+          <div class="shortcuts-section hp-reveal" data-reveal-delay="200">
+            <h3><i class="fas fa-play" aria-hidden="true"></i> Visualizers</h3>
+            <table class="shortcuts-table">
+              <tbody>
+                <tr>
+                  <td><kbd>Space</kbd></td>
+                  <td>Play / Pause</td>
+                </tr>
+                <tr>
+                  <td><kbd>R</kbd></td>
+                  <td>Reset / New</td>
+                </tr>
+                <tr>
+                  <td><kbd>←</kbd></td>
+                  <td>Step Back</td>
+                </tr>
+                <tr>
+                  <td><kbd>→</kbd></td>
+                  <td>Step Forward</td>
+                </tr>
+                <tr>
+                  <td><kbd>+</kbd> / <kbd>-</kbd></td>
+                  <td>Adjust Speed</td>
+                </tr>
+                <tr>
+                  <td><kbd>S</kbd></td>
+                  <td>Toggle Sound</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <p class="ks-tip">
+          <i class="fas fa-lightbulb" aria-hidden="true"></i>
+          Tip: press <kbd>?</kbd> on the homepage anytime to reopen the shortcuts dialog.
+        </p>
+      </section>
+    </main>
+
+    <script src="/auth.js"></script>
+    <script src="/bootstrap-legacy.js"></script>
+    <script src="/script.js"></script>
+    <script type="module" src="/dist/legacy-bundle.mjs"></script>
+    <script src="/theme.js"></script>
+    <!-- Homepage JS: powers hp-reveal scroll animations -->
+    <script src="/pages/home/home.js"></script>
+    <script>
+      (function () {
+        var isMac =
+          /Mac|iPhone|iPad|iPod/.test(navigator.platform || '') ||
+          (navigator.userAgentData && navigator.userAgentData.platform === 'macOS');
+        if (isMac) {
+          document.querySelectorAll('.ks-shortcuts kbd').forEach(function (el) {
+            if (el.textContent === 'Ctrl') el.textContent = 'Ctrl/Cmd';
+            if (el.textContent === 'Alt') el.textContent = 'Alt/Option';
+          });
+        }
+
+        var printBtn = document.getElementById('ksPrintBtn');
+        if (printBtn) {
+          printBtn.addEventListener('click', function () {
+            window.print();
+          });
+        }
+
+        if (typeof loadPartial === 'function') {
+          loadPartial('navbar-placeholder', '/partials/navbar.html');
+        }
+      })();
+    </script>
+  </body>
+</html>

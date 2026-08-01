@@ -16,6 +16,32 @@ export function fromBase64Url(input) {
   return Buffer.from(normalized, 'base64').toString('utf8');
 }
 
+let lazyRedisClient = null;
+let lazyRedisChecked = false;
+let lazyRedisAvailable = false;
+
+async function getRedisClient() {
+  if (lazyRedisChecked) return lazyRedisAvailable ? lazyRedisClient : null;
+  lazyRedisChecked = true;
+  if (!process.env.REDIS_URL) return null;
+  try {
+    const { default: IORedis } = await import('ioredis');
+    lazyRedisClient = new IORedis(process.env.REDIS_URL, {
+      maxRetriesPerRequest: 1,
+      connectTimeout: 1000,
+      retryStrategy: () => null,
+      enableOfflineQueue: false,
+    });
+    lazyRedisClient.on('error', () => {
+      lazyRedisAvailable = false;
+    });
+    lazyRedisAvailable = true;
+    return lazyRedisClient;
+  } catch (err) {
+    return null;
+  }
+}
+
 export function sessionSecret() {
   const secret = process.env.SESSION_SECRET;
   if (!secret) {
@@ -46,7 +72,7 @@ export function createSessionToken(user) {
   return `${body}.${sign(body)}`;
 }
 
-export function verifySessionToken(token) {
+export async function verifySessionToken(token) {
   if (!token) return null;
   const parts = token.split('.');
   if (parts.length !== 3) return null;
@@ -65,6 +91,18 @@ export function verifySessionToken(token) {
   try {
     const session = JSON.parse(fromBase64Url(payload));
     if (!session.exp || session.exp < Math.floor(Date.now() / 1000)) return null;
+
+    const client = await getRedisClient();
+    if (client && lazyRedisAvailable) {
+      try {
+        const sessionHash = crypto.createHash('sha256').update(token).digest('hex');
+        const exists = await client.exists(`session:${sessionHash}`);
+        if (!exists) return null;
+      } catch (err) {
+        console.error('[Redis] Error checking session token:', err.message);
+      }
+    }
+
     return session;
   } catch {
     return null;
@@ -80,9 +118,9 @@ export function parseCookies(cookieHeader = '') {
   }, {});
 }
 
-export function getSession(req) {
+export async function getSession(req) {
   const cookies = parseCookies(req.headers.cookie || '');
-  return verifySessionToken(cookies[SESSION_COOKIE]);
+  return await verifySessionToken(cookies[SESSION_COOKIE]);
 }
 
 export function sessionCookie(token, req) {

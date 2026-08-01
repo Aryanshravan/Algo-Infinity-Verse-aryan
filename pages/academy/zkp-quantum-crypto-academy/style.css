@@ -1,0 +1,147 @@
+/* ============================================================
+   Post-Quantum Cryptography & ZKP Masterclass CSS
+   ============================================================ */
+
+:root {
+  --zk-bg-dark: #0b0f19;
+  --zk-card-bg-dark: rgba(21, 29, 46, 0.85);
+  --zk-border-dark: rgba(255, 255, 255, 0.1);
+  --zk-text-dark: #f1f5f9;
+  --zk-text-muted-dark: #94a3b8;
+
+  --zk-accent: #8b5cf6;
+  --zk-success: #10b981;
+  --zk-danger: #ef4444;
+  --zk-radius: 12px;
+}
+
+.light-mode {
+  --zk-bg-dark: #f8fafc;
+  --zk-card-bg-dark: #ffffff;
+  --zk-border-dark: #e2e8f0;
+  --zk-text-dark: #0f172a;
+  --zk-text-muted-dark: #64748b;
+}
+
+body[data-page="zkp-academy"] {
+  margin: 0; padding: 0;
+  background-color: var(--zk-bg-dark);
+  color: var(--zk-text-dark);
+  font-family: 'Inter', sans-serif;
+  min-height: 100vh;
+}
+
+.zk-header {
+  background: var(--zk-card-bg-dark);
+  border-bottom: 1px solid var(--zk-border-dark);
+  padding: 16px 24px;
+}
+
+.zk-header-container {
+  max-width: 1600px; margin: 0 auto;
+  display: flex; align-items: center; justify-content: space-between;
+}
+
+.zk-back-btn {
+  display: flex; align-items: center; gap: 8px;
+  color: var(--zk-text-muted-dark); text-decoration: none;
+  font-weight: 500; font-size: 0.9rem; padding: 8px 14px;
+  border-radius: 8px; background: rgba(255, 255, 255, 0.05);
+}
+
+.zk-title-area h1 { margin: 0; font-size: 1.4rem; font-family: 'Space Grotesk', sans-serif; }
+.zk-title-area p { margin: 4px 0 0 0; font-size: 0.85rem; color: var(--zk-text-muted-dark); }
+
+.zk-icon-btn {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--zk-border-dark); color: var(--zk-text-dark);
+  width: 40px; height: 40px; border-radius: 50%; cursor: pointer;
+}
+
+.zk-main { max-width: 1600px; margin: 0 auto; padding: 20px 24px; display: flex; flex-direction: column; gap: 20px; }
+
+.zk-hero {
+  background: rgba(139, 92, 246, 0.08);
+  border: 1px solid var(--zk-accent);
+  border-radius: var(--zk-radius);
+  padding: 20px;
+  display: flex; justify-content: space-between; align-items: center;
+}
+
+.zk-hero h2 { margin: 0; font-size: 1.2rem; font-family: 'Space Grotesk', sans-serif; }
+.zk-hero p { margin: 4px 0 0 0; font-size: 0.85rem; color: var(--zk-text-muted-dark); }
+
+.zk-hero-stats { display: flex; gap: 16px; }
+
+.zk-stat-card {
+  background: var(--zk-card-bg-dark);
+  border: 1px solid var(--zk-border-dark);
+  border-radius: 8px; padding: 10px 16px;
+  display: flex; flex-direction: column; gap: 4px;
+}
+
+.zk-stat-label { font-size: 0.75rem; color: var(--zk-text-muted-dark); }
+.zk-stat-val { font-weight: 700; font-family: 'JetBrains Mono', monospace; }
+.zk-green { color: var(--zk-success); }
+.zk-danger { color: var(--zk-danger); }
+
+.zk-grid { display: grid; grid-template-columns: 1fr 440px; gap: 20px; }
+@media (max-width: 1100px) { .zk-grid { grid-template-columns: 1fr; } }
+
+.zk-card {
+  background: var(--zk-card-bg-dark);
+  border: 1px solid var(--zk-border-dark);
+  border-radius: var(--zk-radius);
+}
+
+.zk-card-header {
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--zk-border-dark);
+  display: flex; justify-content: space-between; align-items: center;
+}
+
+.zk-card-header h2, .zk-card-header h3 { margin: 0; font-size: 1.1rem; font-family: 'Space Grotesk', sans-serif; }
+
+.zk-badge-purple { background: rgba(139, 92, 246, 0.2); color: var(--zk-accent); padding: 4px 8px; border-radius: 6px; font-size: 0.75rem; }
+
+.zk-card-body { padding: 20px; display: flex; flex-direction: column; gap: 16px; }
+
+.zk-form-group { display: flex; flex-direction: column; gap: 6px; }
+.zk-form-group label { font-size: 0.85rem; font-weight: 600; color: var(--zk-text-muted-dark); }
+
+.zk-input {
+  padding: 10px 12px; border-radius: 8px;
+  border: 1px solid var(--zk-border-dark);
+  background: rgba(0, 0, 0, 0.2); color: var(--zk-text-dark);
+  font-family: 'JetBrains Mono', monospace; font-size: 0.9rem;
+}
+
+.zk-steps-flow { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+
+.zk-step-box {
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid var(--zk-border-dark);
+  border-radius: 8px; padding: 12px;
+}
+
+.zk-step-box h4 { margin: 0 0 6px 0; font-size: 0.8rem; color: var(--zk-accent); }
+
+.zk-action-row { display: flex; gap: 12px; }
+
+.zk-btn {
+  padding: 10px 16px; border-radius: 8px; font-size: 0.85rem; font-weight: 600;
+  border: 1px solid var(--zk-border-dark); cursor: pointer;
+  display: inline-flex; align-items: center; gap: 8px;
+}
+
+.zk-btn-primary { background: var(--zk-accent); color: #fff; border-color: var(--zk-accent); }
+.zk-btn-success { background: var(--zk-success); color: #fff; border-color: var(--zk-success); }
+
+.zk-result-box {
+  padding: 14px; border-radius: 8px; font-size: 0.85rem;
+  background: rgba(0, 0, 0, 0.2); border: 1px solid var(--zk-border-dark);
+}
+
+.zk-table { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
+.zk-table th, .zk-table td { padding: 8px 10px; border-bottom: 1px solid var(--zk-border-dark); text-align: left; }
+.zk-table th { background: rgba(0, 0, 0, 0.2); color: var(--zk-text-muted-dark); }

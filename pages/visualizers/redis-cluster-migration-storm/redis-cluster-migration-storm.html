@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Redis Cluster Hash Slot Migration Storm | Algo Infinity Verse</title>
+    <meta
+      name="description"
+      content="Visualize Redis Cluster hash slot distribution, Master node failures, and the ensuing Migration Storm."
+    />
+
+    <link rel="stylesheet" href="../../../styles.css" />
+    <link rel="stylesheet" href="redis-cluster-migration-storm.css" />
+
+    <link
+      href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Poppins:wght@300;400;500;600;700&family=Fira+Code:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+
+    <link rel="stylesheet" href="/modules/quick-notes/quick-notes.css" />
+  </head>
+  <body data-page="redis-cluster-migration-storm">
+    <div id="loading-screen">
+      <div class="loader">
+        <div class="infinity-loader">∞</div>
+        <h2>Algo Infinity Verse</h2>
+        <div class="loading-bar"><div class="loading-progress"></div></div>
+      </div>
+    </div>
+
+    <button id="scrollTopBtn" aria-label="Scroll to top" class="scroll-top-btn">
+      <i class="fas fa-circle-chevron-up"></i>
+    </button>
+
+    <div id="navbar-placeholder"></div>
+
+    <section class="hero rc-hero">
+      <div class="hero-background">
+        <div class="stars"></div>
+        <div class="stars2"></div>
+        <div class="stars3"></div>
+      </div>
+      <div class="hero-content">
+        <h1 class="hero-title">
+          <span class="title-line">Redis Cluster</span>
+          <span class="main-title rc-gradient">Hash Slot Migration Storm</span>
+          <span class="subtitle">Master Failures & Quorum Re-synchronization</span>
+        </h1>
+        <p class="section-subtitle">
+          Observe 16,384 hash slots distributed across 3 Master nodes. Trigger a Master failure to
+          animate the Slave node promotion, followed by a "Migration Storm" where hash slots are
+          re-synchronized across the cluster to re-establish quorum.
+        </p>
+        <div class="hero-buttons">
+          <a href="#simulator" class="btn btn-primary rc-btn-primary">
+            <i class="fas fa-server"></i> Open Visualizer
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <section id="simulator" class="section">
+      <div class="container">
+        <!-- Control Panel -->
+        <div class="rc-control-card">
+          <div class="rc-actions-row">
+            <button class="btn rc-btn-primary rc-action-btn" id="rcFailNodeBtn">
+              <i class="fas fa-bolt"></i> Trigger Master Failure
+            </button>
+            <button class="btn btn-secondary rc-action-btn" id="rcResetBtn">
+              <i class="fas fa-undo"></i> Reset Cluster
+            </button>
+          </div>
+        </div>
+
+        <!-- Status Indicator -->
+        <div class="rc-status-container">
+          <div class="rc-status-icon"><i class="fas fa-check-circle" id="rcStatusIcon"></i></div>
+          <div class="rc-status-text" id="rcStatusText">
+            Cluster is healthy. 16,384 hash slots distributed evenly across 3 Masters.
+          </div>
+        </div>
+
+        <!-- Main Visualizer Area -->
+        <div class="rc-main-layout">
+          <div class="rc-cluster-area" id="rcClusterArea">
+            <!-- SVG for connections and particles -->
+            <svg class="rc-connections" id="rcConnections"></svg>
+
+            <div class="rc-node-layer" id="rcNodeLayer">
+              <!-- Nodes will be injected here via JS -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div id="footer-placeholder"></div>
+
+    <script src="../../../auth.js"></script>
+    <script src="../../../script.js"></script>
+    <script src="../../../theme.js"></script>
+    <script src="../../../auth-gate.js"></script>
+    <script src="redis-cluster-migration-storm.js"></script>
+    <script>
+      if (typeof loadPartial === 'function') {
+        loadPartial('navbar-placeholder', '/partials/navbar.html').then(function () {
+          if (typeof initNavbar === 'function') initNavbar();
+        });
+        loadPartial('footer-placeholder', '/partials/footer.html');
+      }
+    </script>
+    <script src="/modules/quick-notes/quick-notes.js"></script>
+  </body>
+</html>

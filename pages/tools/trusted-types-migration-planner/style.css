@@ -1,0 +1,386 @@
+/* ===== Trusted Types Migration Planner ===== */
+:root {
+  --tt-glass: rgba(255, 255, 255, 0.04);
+  --tt-border: rgba(255, 255, 255, 0.1);
+  --tt-muted: rgba(255, 255, 255, 0.62);
+  --tt-accent: #34d399;
+  --tt-accent-2: #60a5fa;
+  --tt-accent-dim: rgba(52, 211, 153, 0.14);
+  --tt-warn: #fbbf24;
+  --tt-danger: #f87171;
+  --tt-ok: #4ade80;
+  --tt-code-bg: rgba(0, 0, 0, 0.35);
+  --tt-radius: 14px;
+}
+
+html.light-mode {
+  --tt-glass: rgba(15, 23, 42, 0.04);
+  --tt-border: rgba(15, 23, 42, 0.12);
+  --tt-muted: rgba(15, 23, 42, 0.65);
+  --tt-accent-dim: rgba(5, 150, 105, 0.1);
+  --tt-code-bg: rgba(15, 23, 42, 0.06);
+}
+
+.tt-skip-link {
+  position: absolute;
+  left: 1rem;
+  top: -100px;
+  z-index: 10000;
+  padding: 0.6rem 1rem;
+  background: var(--tt-accent);
+  color: #0a0a14;
+  font-weight: 700;
+  border-radius: 8px;
+  text-decoration: none;
+}
+
+.tt-skip-link:focus {
+  top: 1rem;
+  outline: 3px solid #fff;
+  outline-offset: 2px;
+}
+
+.tt-hero {
+  position: relative;
+  overflow: hidden;
+  padding: 7.5rem 1.5rem 4rem;
+  text-align: center;
+  border-bottom: 1px solid var(--tt-border);
+  background:
+    radial-gradient(ellipse at top right, rgba(52, 211, 153, 0.16), transparent 55%),
+    radial-gradient(ellipse at bottom left, rgba(96, 165, 250, 0.12), transparent 50%);
+}
+
+.tt-hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1.1rem;
+  padding: 0.35rem 0.9rem;
+  border-radius: 999px;
+  border: 1px solid rgba(52, 211, 153, 0.45);
+  background: var(--tt-accent-dim);
+  color: var(--tt-accent);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.tt-hero h1 {
+  margin: 0 0 1rem;
+  font-family: 'Orbitron', sans-serif;
+  font-size: clamp(1.9rem, 5vw, 3rem);
+  font-weight: 900;
+  line-height: 1.15;
+}
+
+.tt-hero-accent {
+  display: inline-block;
+  background: linear-gradient(135deg, #34d399, #60a5fa);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.tt-hero p {
+  max-width: 720px;
+  margin: 0 auto 2rem;
+  color: var(--tt-muted);
+  font-size: 1.05rem;
+  line-height: 1.65;
+  font-family: 'Poppins', sans-serif;
+}
+
+.tt-hero-stats {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1rem;
+}
+
+.tt-stat {
+  min-width: 120px;
+  padding: 0.85rem 1.1rem;
+  border: 1px solid var(--tt-border);
+  border-radius: var(--tt-radius);
+  background: var(--tt-glass);
+}
+
+.tt-stat-val {
+  display: block;
+  font-family: 'Orbitron', sans-serif;
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: var(--tt-accent);
+}
+
+.tt-stat-label {
+  font-size: 0.75rem;
+  color: var(--tt-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.tt-main {
+  padding: 2rem 0 4rem;
+  font-family: 'Poppins', sans-serif;
+}
+
+.tt-workspace {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+@media (max-width: 900px) {
+  .tt-workspace {
+    grid-template-columns: 1fr;
+  }
+}
+
+.tt-panel {
+  padding: 1.4rem;
+  border: 1px solid var(--tt-border);
+  border-radius: 18px;
+  background: var(--tt-glass);
+  backdrop-filter: blur(12px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
+}
+
+.tt-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.tt-panel-title {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.tt-panel-title h2 {
+  margin: 0;
+  font-family: 'Orbitron', sans-serif;
+  font-size: 1.05rem;
+}
+
+.tt-panel-icon {
+  color: var(--tt-accent);
+}
+
+.tt-label {
+  display: block;
+  font-weight: 600;
+  font-size: 0.88rem;
+  margin-bottom: 0.45rem;
+}
+
+.tt-textarea {
+  width: 100%;
+  min-height: 220px;
+  padding: 0.85rem;
+  border-radius: 12px;
+  border: 1px solid var(--tt-border);
+  background: var(--tt-code-bg);
+  color: inherit;
+  font-family: 'Fira Code', ui-monospace, monospace;
+  font-size: 0.82rem;
+  line-height: 1.5;
+  resize: vertical;
+}
+
+.tt-textarea:focus-visible {
+  outline: 3px solid var(--tt-accent-2);
+  outline-offset: 1px;
+}
+
+.tt-hint {
+  margin: 0.45rem 0 0;
+  font-size: 0.82rem;
+  color: var(--tt-muted);
+}
+
+.tt-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+  margin-top: 1rem;
+}
+
+.tt-status {
+  margin-top: 0.75rem;
+  font-size: 0.88rem;
+  color: var(--tt-muted);
+}
+
+.tt-empty {
+  color: var(--tt-muted);
+  margin: 0;
+}
+
+.tt-findings {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  max-height: 420px;
+  overflow-y: auto;
+}
+
+.tt-finding {
+  border: 1px solid var(--tt-border);
+  border-radius: 12px;
+  padding: 0.85rem 1rem;
+  background: rgba(0, 0, 0, 0.15);
+}
+
+html.light-mode .tt-finding {
+  background: rgba(15, 23, 42, 0.03);
+}
+
+.tt-finding-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.35rem;
+}
+
+.tt-sev {
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 0.15rem 0.45rem;
+  border-radius: 999px;
+}
+
+.tt-sev-high {
+  background: rgba(248, 113, 113, 0.18);
+  color: var(--tt-danger);
+}
+
+.tt-sev-medium {
+  background: rgba(251, 191, 36, 0.18);
+  color: var(--tt-warn);
+}
+
+.tt-sev-low {
+  background: rgba(96, 165, 250, 0.18);
+  color: var(--tt-accent-2);
+}
+
+.tt-finding-title {
+  font-weight: 700;
+  font-size: 0.92rem;
+}
+
+.tt-finding-meta {
+  font-size: 0.78rem;
+  color: var(--tt-muted);
+}
+
+.tt-finding-snip {
+  margin: 0.5rem 0 0;
+  padding: 0.55rem 0.7rem;
+  border-radius: 8px;
+  background: var(--tt-code-bg);
+  font-family: 'Fira Code', ui-monospace, monospace;
+  font-size: 0.75rem;
+  overflow-x: auto;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.tt-roadmap {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+}
+
+.tt-roadmap-item {
+  display: flex;
+  gap: 0.65rem;
+  align-items: flex-start;
+  border: 1px solid var(--tt-border);
+  border-radius: 10px;
+  padding: 0.7rem 0.85rem;
+  background: rgba(0, 0, 0, 0.12);
+}
+
+html.light-mode .tt-roadmap-item {
+  background: rgba(15, 23, 42, 0.03);
+}
+
+.tt-roadmap-item input {
+  margin-top: 0.2rem;
+  accent-color: var(--tt-accent);
+}
+
+.tt-roadmap-item label {
+  cursor: pointer;
+  font-size: 0.9rem;
+  line-height: 1.45;
+}
+
+.tt-tips ul {
+  margin: 0;
+  padding-left: 1.2rem;
+  line-height: 1.55;
+}
+
+.tt-tips code {
+  font-family: 'Fira Code', ui-monospace, monospace;
+  font-size: 0.85em;
+  padding: 0.1em 0.3em;
+  border-radius: 4px;
+  background: var(--tt-code-bg);
+}
+
+.tt-subhead {
+  margin: 0 0 0.5rem;
+  font-size: 0.85rem;
+  color: var(--tt-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.tt-diff-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+@media (max-width: 700px) {
+  .tt-diff-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.tt-mono-block {
+  margin: 0;
+  padding: 0.85rem;
+  border-radius: 12px;
+  border: 1px solid var(--tt-border);
+  background: var(--tt-code-bg);
+  font-family: 'Fira Code', ui-monospace, monospace;
+  font-size: 0.75rem;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  word-break: break-word;
+  max-height: 280px;
+  overflow: auto;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tt-panel {
+    box-shadow: none;
+  }
+}

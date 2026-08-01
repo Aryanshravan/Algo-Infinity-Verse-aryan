@@ -1,0 +1,868 @@
+/* ============================================================
+   Algo Infinity Verse — Execution History Page
+   Design pattern: learning-topics landing page
+   Palette: warm pastels (peach, rose, sky, sand) — no purple/cyan/lime
+   ============================================================ */
+
+/* ─── 1. DESIGN TOKENS (scoped) ─── */
+[data-page="execution-history"] {
+  --eh-bg: #080c14;
+  --eh-surface: #111827;
+  --eh-elevated: #1e293b;
+  --eh-peach: #F2D5C4;
+  --eh-peach-rgb: 242, 213, 196;
+  --eh-rose: #EDC8D2;
+  --eh-rose-rgb: 237, 200, 210;
+  --eh-sky: #C0D4EA;
+  --eh-sky-rgb: 192, 212, 234;
+  --eh-sand: #E8D5C4;
+  --eh-sand-rgb: 232, 213, 196;
+  --eh-coral: #F0C4C4;
+  --eh-coral-rgb: 240, 196, 196;
+  --eh-text: #f1f5f9;
+  --eh-text-muted: #64748b;
+  --eh-text-tertiary: #475569;
+  --eh-border: rgba(242, 213, 196, 0.08);
+  --eh-border-hover: rgba(242, 213, 196, 0.18);
+  --eh-radius: 12px;
+  --eh-radius-lg: 20px;
+  --eh-max-width: 1200px;
+
+  /* Semantic */
+  --eh-success-bg: rgba(237, 200, 210, 0.1);
+  --eh-success-color: var(--eh-rose);
+  --eh-error-bg: rgba(240, 196, 196, 0.1);
+  --eh-error-color: var(--eh-coral);
+  --eh-trace-bg: rgba(192, 212, 234, 0.1);
+  --eh-trace-color: var(--eh-sky);
+}
+
+body[data-page="execution-history"] {
+  background: var(--eh-bg);
+  min-height: 100vh;
+}
+
+/* Light mode overrides */
+.light-mode {
+  --eh-bg: #f8f6f3;
+  --eh-surface: #ffffff;
+  --eh-elevated: #f0eee8;
+  --eh-text: #2c1e4a;
+  --eh-text-muted: #6b5b7f;
+  --eh-text-tertiary: #9a8bae;
+  --eh-border: rgba(212, 168, 142, 0.12);
+  --eh-border-hover: rgba(212, 168, 142, 0.25);
+  --eh-peach: #d4a88e;
+  --eh-peach-rgb: 212, 168, 142;
+  --eh-rose: #c4909a;
+  --eh-rose-rgb: 196, 144, 154;
+  --eh-sky: #8aa8c4;
+  --eh-sky-rgb: 138, 168, 196;
+  --eh-sand: #c4a88e;
+  --eh-coral: #c48a8a;
+  --eh-success-bg: rgba(196, 144, 154, 0.1);
+  --eh-error-bg: rgba(196, 138, 138, 0.1);
+  --eh-trace-bg: rgba(138, 168, 196, 0.1);
+}
+
+/* ─── 2. HERO SECTION (matches learning-topics pattern) ─── */
+[data-page="execution-history"] .eh-hero {
+  position: relative;
+  padding: 8rem 1.5rem 3rem;
+  text-align: center;
+  overflow: hidden;
+  background: var(--eh-bg);
+  min-height: 50vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.eh-hero-bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.eh-hero-grid {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(242, 213, 196, 0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(242, 213, 196, 0.025) 1px, transparent 1px);
+  background-size: 48px 48px;
+  mask-image: radial-gradient(ellipse 60% 50% at 50% 40%, black 30%, transparent 70%);
+  -webkit-mask-image: radial-gradient(ellipse 60% 50% at 50% 40%, black 30%, transparent 70%);
+}
+
+.eh-hero-content {
+  position: relative;
+  z-index: 1;
+  max-width: 720px;
+  width: 100%;
+}
+
+.eh-hero-title {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: clamp(2.2rem, 5vw, 3.5rem);
+  font-weight: 700;
+  background: linear-gradient(135deg, var(--eh-peach), var(--eh-rose), var(--eh-sky));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  line-height: 1.1;
+  margin-bottom: 1rem;
+  letter-spacing: -1px;
+}
+
+.eh-hero-subtitle {
+  font-family: 'Inter', sans-serif;
+  font-size: 1.05rem;
+  color: var(--eh-text-muted);
+  line-height: 1.6;
+  max-width: 540px;
+  margin: 0 auto;
+}
+
+/* ─── 3. FILTER BAR ─── */
+.eh-filters {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1.5rem 1.5rem;
+  max-width: var(--eh-max-width);
+  margin: 0 auto;
+}
+
+.eh-filter-select,
+.eh-filter-date {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.75rem;
+  font-weight: 500;
+  padding: 0.45rem 1rem;
+  border-radius: 100px;
+  background: transparent;
+  border: 1px solid var(--eh-border);
+  color: var(--eh-text-muted);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+.eh-filter-select:hover,
+.eh-filter-date:hover {
+  border-color: var(--eh-peach);
+  color: var(--eh-peach);
+  background: rgba(var(--eh-peach-rgb), 0.06);
+}
+
+.eh-filter-select:focus-visible,
+.eh-filter-date:focus-visible {
+  outline: 2px solid var(--eh-peach);
+  outline-offset: 2px;
+  border-color: var(--eh-peach);
+}
+
+.eh-filter-date {
+  color-scheme: dark;
+  padding: 0.45rem 1rem 0.45rem 1rem;
+}
+
+.light-mode .eh-filter-date {
+  color-scheme: light;
+}
+
+.eh-filter-select option {
+  background: var(--eh-surface);
+  color: var(--eh-text);
+}
+
+.eh-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0.45rem 1.2rem;
+  border-radius: 100px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.75rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: none;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.eh-btn-primary {
+  background: rgba(var(--eh-peach-rgb), 0.1);
+  border: 1px solid var(--eh-peach);
+  color: var(--eh-peach);
+  box-shadow: 0 0 12px rgba(var(--eh-peach-rgb), 0.08);
+}
+
+.eh-btn-primary:hover {
+  background: rgba(var(--eh-peach-rgb), 0.18);
+  transform: translateY(-1px);
+}
+
+.eh-btn-ghost {
+  background: transparent;
+  color: var(--eh-text-muted);
+  border: 1px solid var(--eh-border);
+}
+
+.eh-btn-ghost:hover {
+  border-color: var(--eh-rose);
+  color: var(--eh-rose);
+  background: rgba(var(--eh-rose-rgb), 0.06);
+}
+
+.eh-btn-sm {
+  padding: 0.3rem 0.75rem;
+  font-size: 0.68rem;
+  gap: 4px;
+  line-height: 1.2;
+}
+
+.eh-btn-sm i {
+  font-size: 0.55rem;
+}
+
+/* Empty state buttons — extra compact */
+.eh-empty .eh-btn {
+  padding: 0.2rem 0.65rem;
+  font-size: 0.65rem;
+  gap: 3px;
+  line-height: 1.1;
+}
+
+.eh-btn-icon {
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+}
+
+/* ─── 4. CONTAINER & LIST ─── */
+.eh-section {
+  padding: 2rem 1.5rem 5rem;
+  background: var(--eh-bg);
+}
+
+.eh-container {
+  max-width: var(--eh-max-width);
+  margin: 0 auto;
+  padding: 0 1.5rem 4rem;
+}
+
+.eh-count {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.85rem;
+  color: var(--eh-text-muted);
+  margin-bottom: 1rem;
+}
+
+.eh-count span {
+  color: var(--eh-peach);
+  font-weight: 600;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.eh-cards {
+  display: grid;
+  gap: 0.75rem;
+}
+
+@media (min-width: 768px) {
+  .eh-cards {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 767px) {
+  .eh-cards {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ─── 5. CARD (matches learning-topics card pattern) ─── */
+.eh-card {
+  position: relative;
+  background: var(--eh-surface);
+  border: 1px solid var(--eh-border);
+  border-radius: var(--eh-radius);
+  padding: 1.25rem;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+  text-decoration: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  isolation: isolate;
+  overflow: hidden;
+}
+
+.eh-card::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: var(--eh-radius);
+  background: linear-gradient(135deg, rgba(var(--eh-peach-rgb), 0.08), transparent 60%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  z-index: -1;
+}
+
+.eh-card:hover {
+  border-color: var(--eh-border-hover);
+  transform: translateY(-3px);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
+}
+
+.eh-card:hover::before {
+  opacity: 1;
+}
+
+.eh-card:focus-visible {
+  outline: 2px solid var(--eh-peach);
+  outline-offset: 2px;
+}
+
+/* Staggered reveal animation */
+.eh-card.eh-reveal {
+  animation: ehFadeSlideUp 0.4s ease both;
+}
+
+@keyframes ehFadeSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.eh-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.eh-card-lang {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--eh-text);
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.eh-card-status {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.65rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 0.2rem 0.6rem;
+  border-radius: 4px;
+}
+
+.eh-status-success {
+  background: var(--eh-success-bg);
+  color: var(--eh-success-color);
+  border: 1px solid rgba(var(--eh-rose-rgb), 0.12);
+}
+
+.eh-status-error {
+  background: var(--eh-error-bg);
+  color: var(--eh-error-color);
+  border: 1px solid rgba(var(--eh-coral-rgb), 0.12);
+}
+
+.eh-card-body {
+  margin: 0;
+}
+
+.eh-card-preview {
+  font-family: 'JetBrains Mono', 'Fira Code', monospace;
+  font-size: 0.72rem;
+  color: var(--eh-text-muted);
+  overflow: hidden;
+  max-height: 2.2em;
+  line-height: 1.15;
+  margin: 0;
+  white-space: pre-wrap;
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+}
+
+.eh-card-preview code {
+  background: none;
+  padding: 0;
+}
+
+.eh-card-footer {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding-top: 0.5rem;
+  margin-top: auto;
+  border-top: 1px solid var(--eh-border);
+  font-family: 'Inter', sans-serif;
+  font-size: 0.72rem;
+  color: var(--eh-text-tertiary);
+  flex-wrap: wrap;
+}
+
+.eh-card-footer i {
+  font-size: 0.62rem;
+  opacity: 0.7;
+}
+
+.eh-card-trace {
+  color: var(--eh-trace-color);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  margin-left: auto;
+}
+
+.eh-card-trace i {
+  opacity: 1;
+}
+
+/* ─── 6. LOADING & EMPTY STATES ─── */
+.eh-loading {
+  text-align: center;
+  padding: 4rem 2rem;
+  color: var(--eh-text-muted);
+  font-family: 'Inter', sans-serif;
+}
+
+.eh-loading i {
+  font-size: 1.5rem;
+  margin-bottom: 0.75rem;
+  display: block;
+  color: var(--eh-peach);
+  opacity: 0.5;
+}
+
+.eh-empty {
+  text-align: center;
+  padding: 4rem 2rem;
+  color: var(--eh-text-muted);
+}
+
+.eh-empty i {
+  font-size: 2.5rem;
+  margin-bottom: 1rem;
+  opacity: 0.4;
+}
+
+.eh-empty h3 {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 1.2rem;
+  color: var(--eh-text);
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+}
+
+.eh-empty p {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.9rem;
+  margin: 0 0 1.25rem;
+}
+
+/* ─── 7. REPLAY VIEW ─── */
+.eh-replay-layout {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.eh-replay-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.5rem 0.25rem 1rem;
+  flex-wrap: wrap;
+  border-bottom: 1px solid var(--eh-border);
+  margin-bottom: 1rem;
+}
+
+.eh-replay-title {
+  font-family: 'Inter', sans-serif;
+  font-weight: 600;
+  font-size: 0.88rem;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--eh-text);
+  min-width: 0;
+}
+
+.eh-replay-stats {
+  display: flex;
+  gap: 1rem;
+  font-size: 0.75rem;
+  color: var(--eh-text-muted);
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.eh-replay-main {
+  display: grid;
+  grid-template-columns: 1fr 380px;
+  gap: 1rem;
+}
+
+@media (max-width: 900px) {
+  .eh-replay-main {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ─── 7a. Code Panel ─── */
+.eh-replay-code-panel {
+  background: var(--eh-surface);
+  border: 1px solid var(--eh-border);
+  border-radius: var(--eh-radius);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.eh-replay-panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.6rem 1rem;
+  background: var(--eh-bg);
+  border-bottom: 1px solid var(--eh-border);
+  font-family: 'Inter', sans-serif;
+  font-size: 0.77rem;
+  font-weight: 600;
+  color: var(--eh-text-muted);
+}
+
+.eh-code-display {
+  overflow: auto;
+  max-height: 70vh;
+  flex: 1;
+}
+
+.eh-code-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: 'JetBrains Mono', 'Fira Code', monospace;
+  font-size: 0.77rem;
+}
+
+.eh-code-line {
+  transition: background 0.15s ease;
+}
+
+.eh-line-num {
+  width: 3rem;
+  text-align: right;
+  padding: 0.08rem 0.6rem;
+  color: var(--eh-text-tertiary);
+  user-select: none;
+  border-right: 1px solid var(--eh-border);
+  vertical-align: top;
+  font-size: 0.7rem;
+  opacity: 0.5;
+}
+
+.eh-line-code {
+  padding: 0.08rem 0.75rem;
+  white-space: pre-wrap;
+}
+
+.eh-line-code pre {
+  margin: 0;
+  background: none;
+  padding: 0;
+}
+
+.eh-line-code code {
+  background: none;
+  padding: 0;
+}
+
+.eh-line-active {
+  background: rgba(var(--eh-peach-rgb), 0.08);
+}
+
+.eh-line-active .eh-line-num {
+  color: var(--eh-peach);
+  font-weight: 700;
+  opacity: 1;
+  background: rgba(var(--eh-peach-rgb), 0.06);
+}
+
+.eh-line-executed .eh-line-num {
+  color: var(--eh-rose);
+  opacity: 0.8;
+}
+
+/* ─── 7b. Step Controls ─── */
+.eh-replay-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.6rem 1rem;
+  border-top: 1px solid var(--eh-border);
+  background: var(--eh-bg);
+}
+
+/* Signature: Step progress bar */
+.eh-step-progress-wrap {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  min-width: 0;
+}
+
+.eh-step-progress {
+  flex: 1;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 100px;
+  overflow: hidden;
+  position: relative;
+  min-width: 40px;
+}
+
+.light-mode .eh-step-progress {
+  background: rgba(0, 0, 0, 0.06);
+}
+
+.eh-step-progress-fill {
+  height: 100%;
+  border-radius: 100px;
+  background: linear-gradient(90deg, var(--eh-peach), var(--eh-rose));
+  transition: width 0.3s ease;
+  width: 0%;
+}
+
+#ehStepCounter {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.7rem;
+  color: var(--eh-text-muted);
+  white-space: nowrap;
+  min-width: 56px;
+  text-align: center;
+}
+
+/* ─── 7c. Sidebar (Variables + Output) ─── */
+.eh-replay-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.eh-vars-panel,
+.eh-output-panel {
+  background: var(--eh-surface);
+  border: 1px solid var(--eh-border);
+  border-radius: var(--eh-radius);
+  overflow: hidden;
+}
+
+.eh-vars-body,
+.eh-output-body {
+  padding: 0.75rem;
+  max-height: 30vh;
+  overflow: auto;
+  font-family: 'JetBrains Mono', 'Fira Code', monospace;
+  font-size: 0.75rem;
+}
+
+.eh-output-body pre {
+  margin: 0;
+  background: none;
+  padding: 0;
+  white-space: pre-wrap;
+  font-family: inherit;
+  font-size: inherit;
+}
+
+.eh-stderr {
+  color: var(--eh-coral);
+}
+
+.eh-vars-empty {
+  color: var(--eh-text-muted);
+  font-family: 'Inter', sans-serif;
+  font-size: 0.78rem;
+  padding: 0.5rem 0;
+  text-align: center;
+}
+
+.eh-vars-step {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.7rem;
+  color: var(--eh-text-tertiary);
+  margin-bottom: 0.5rem;
+}
+
+.eh-vars-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.eh-var-item {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.25rem 0;
+  border-bottom: 1px solid var(--eh-border);
+  font-size: 0.75rem;
+}
+
+.eh-var-item:last-child {
+  border-bottom: none;
+}
+
+.eh-var-name {
+  font-weight: 600;
+  color: var(--eh-peach);
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.eh-var-eq {
+  color: var(--eh-text-tertiary);
+}
+
+.eh-var-value {
+  color: var(--eh-sky);
+  word-break: break-all;
+}
+
+.eh-val-null,
+.eh-val-undefined {
+  color: var(--eh-text-tertiary);
+  font-style: italic;
+}
+.eh-val-bool { color: var(--eh-rose); }
+.eh-val-number { color: var(--eh-sand); }
+.eh-val-string { color: var(--eh-sky); }
+
+/* Trace badge */
+.eh-trace-badge {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.65rem;
+  font-weight: 500;
+  padding: 0.2rem 0.6rem;
+  border-radius: 4px;
+  background: transparent;
+  border: 1px solid var(--eh-border);
+  color: var(--eh-text-muted);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.eh-trace-badge.has-trace {
+  background: var(--eh-trace-bg);
+  border-color: rgba(var(--eh-sky-rgb), 0.15);
+  color: var(--eh-trace-color);
+}
+
+/* ─── 8. RESPONSIVE ─── */
+@media (max-width: 768px) {
+  [data-page="execution-history"] .eh-hero {
+    padding: 6rem 1rem 2.5rem;
+    min-height: auto;
+  }
+
+  .eh-hero-title {
+    font-size: 2rem;
+  }
+
+  .eh-hero-subtitle {
+    font-size: 0.9rem;
+  }
+
+  .eh-filters {
+    padding: 0.5rem 1rem 1rem;
+    gap: 0.35rem;
+  }
+
+  .eh-filter-select,
+  .eh-filter-date {
+    font-size: 0.7rem;
+    padding: 0.35rem 0.75rem;
+  }
+
+  .eh-container {
+    padding: 0;
+  }
+
+  .eh-card {
+    padding: 1rem;
+  }
+
+  .eh-replay-stats {
+    gap: 0.6rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .eh-filters {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .eh-filter-select,
+  .eh-filter-date {
+    width: 100%;
+    text-align: center;
+  }
+
+  .eh-btn {
+    justify-content: center;
+  }
+}
+
+/* ─── 9. FOCUS VISIBLE OVERRIDE (global CSS gives cyan !important) ─── */
+[data-page="execution-history"] :focus-visible {
+  outline: 2px solid var(--eh-peach) !important;
+  outline-offset: 2px !important;
+}
+
+/* ─── 10. REDUCED MOTION ─── */
+@media (prefers-reduced-motion: reduce) {
+  .eh-card.eh-reveal {
+    animation: none;
+    opacity: 1;
+  }
+
+  .eh-card:hover {
+    transform: none;
+  }
+
+  .eh-step-progress-fill {
+    transition: none;
+  }
+
+  .eh-code-line {
+    transition: none;
+  }
+}

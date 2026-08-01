@@ -25,6 +25,7 @@
         } catch (e) {}
       })();
     </script>
+    <link rel="stylesheet" href="/modules/quick-notes/quick-notes.css" />
 </head>
   <body data-page="segment-tree-simulator">
 
@@ -102,6 +103,19 @@
                 <span class="st-op-sep">val</span>
                 <input type="number" id="stUpdateVal" class="st-input-sm" value="10" aria-label="Update value" placeholder="v" />
                 <button type="button" class="btn st-op-btn st-op-update" id="stUpdateBtn">Update</button>
+              </div>
+            </div>
+
+            <!-- Range Update (Lazy Propagation) -->
+            <div class="st-op-group">
+              <div class="st-op-title"><i class="fas fa-layer-group"></i> Range Update (Lazy)</div>
+              <div class="st-op-inputs">
+                <input type="number" id="stRangeL" class="st-input-sm" value="1" min="0" aria-label="Range update left" placeholder="L" />
+                <span class="st-op-sep">to</span>
+                <input type="number" id="stRangeR" class="st-input-sm" value="3" min="0" aria-label="Range update right" placeholder="R" />
+                <span class="st-op-sep">+</span>
+                <input type="number" id="stRangeVal" class="st-input-sm" value="5" aria-label="Range add value" placeholder="val" />
+                <button type="button" class="btn st-op-btn st-op-update" id="stRangeUpdateBtn">Add to Range</button>
               </div>
             </div>
 
@@ -256,5 +270,6 @@
         });
       }
     </script>
+    <script src="/modules/quick-notes/quick-notes.js"></script>
   </body>
 </html>

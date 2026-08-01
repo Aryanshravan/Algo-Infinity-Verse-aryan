@@ -240,43 +240,141 @@ function djLoadPreset(p) {
   djDrawGraph();
 }
 
+/* ─── Indexed Min-Heap Priority Queue ─── */
+class MinHeap {
+  constructor() {
+    this.heap = [];
+    this.nodeIndexMap = new Map();
+  }
+
+  size() {
+    return this.heap.length;
+  }
+
+  isEmpty() {
+    return this.heap.length === 0;
+  }
+
+  swap(i, j) {
+    let temp = this.heap[i];
+    this.heap[i] = this.heap[j];
+    this.heap[j] = temp;
+
+    this.nodeIndexMap.set(this.heap[i].u, i);
+    this.nodeIndexMap.set(this.heap[j].u, j);
+  }
+
+  bubbleUp(idx) {
+    while (idx > 0) {
+      let parentIdx = Math.floor((idx - 1) / 2);
+      if (this.heap[idx].d < this.heap[parentIdx].d) {
+        this.swap(idx, parentIdx);
+        idx = parentIdx;
+      } else {
+        break;
+      }
+    }
+  }
+
+  siftDown(idx) {
+    let size = this.heap.length;
+    while (true) {
+      let left = 2 * idx + 1;
+      let right = 2 * idx + 2;
+      let smallest = idx;
+
+      if (left < size && this.heap[left].d < this.heap[smallest].d) {
+        smallest = left;
+      }
+      if (right < size && this.heap[right].d < this.heap[smallest].d) {
+        smallest = right;
+      }
+
+      if (smallest !== idx) {
+        this.swap(idx, smallest);
+        idx = smallest;
+      } else {
+        break;
+      }
+    }
+  }
+
+  insert(u, d) {
+    if (this.nodeIndexMap.has(u)) {
+      this.decreaseKey(u, d);
+      return;
+    }
+    let node = { u, d };
+    this.heap.push(node);
+    let idx = this.heap.length - 1;
+    this.nodeIndexMap.set(u, idx);
+    this.bubbleUp(idx);
+  }
+
+  decreaseKey(u, newDist) {
+    if (!this.nodeIndexMap.has(u)) return;
+    let idx = this.nodeIndexMap.get(u);
+    if (newDist < this.heap[idx].d) {
+      this.heap[idx].d = newDist;
+      this.bubbleUp(idx);
+    }
+  }
+
+  extractMin() {
+    if (this.isEmpty()) return null;
+    let min = this.heap[0];
+    let last = this.heap.pop();
+    this.nodeIndexMap.delete(min.u);
+
+    if (this.heap.length > 0) {
+      this.heap[0] = last;
+      this.nodeIndexMap.set(last.u, 0);
+      this.siftDown(0);
+    }
+    return min;
+  }
+
+  toArray() {
+    return this.heap.map((item) => ({ u: item.u, d: item.d }));
+  }
+}
+
 /* ─── Algorithm (Step Generator) ─── */
 function djGenSteps() {
   let steps = [];
   let N = djState.nodes.length;
+  if (N === 0) return steps;
+
   let adj = Array.from({ length: N }, () => []);
   djState.edges.forEach((e) => {
     adj[e.u].push({ v: e.v, w: e.w });
-    adj[e.v].push({ v: e.u, w: e.w }); // Undirected
+    adj[e.v].push({ v: e.u, w: e.w });
   });
 
   let dist = Array(N).fill(Infinity);
   let parent = Array(N).fill(null);
   let settled = new Set();
 
-  // Custom simple priority queue for generation
-  let pq = []; // {u, d}
+  let pq = new MinHeap();
 
   dist[djState.source] = 0;
-  pq.push({ u: djState.source, d: 0 });
+  pq.insert(djState.source, 0);
 
-  let pathEdges = []; // Collect tree edges
+  let pathEdges = [];
 
   steps.push({
     type: 'init',
     evaluating: -1,
     relaxingEdge: null,
-    pq: [...pq],
+    pq: pq.toArray(),
     dist: [...dist],
     settled: new Set(settled),
     pathEdges: [...pathEdges],
     msg: `Initialize distances. Start node ${djState.source} distance is 0, others Infinity. Push start to Priority Queue.`,
   });
 
-  while (pq.length > 0) {
-    // Sort and extract min
-    pq.sort((a, b) => a.d - b.d);
-    let curr = pq.shift();
+  while (!pq.isEmpty()) {
+    let curr = pq.extractMin();
     let u = curr.u;
 
     if (settled.has(u)) continue;
@@ -285,7 +383,7 @@ function djGenSteps() {
       type: 'evaluating',
       evaluating: u,
       relaxingEdge: null,
-      pq: [...pq],
+      pq: pq.toArray(),
       dist: [...dist],
       settled: new Set(settled),
       pathEdges: [...pathEdges],
@@ -307,7 +405,7 @@ function djGenSteps() {
         type: 'relaxing',
         evaluating: u,
         relaxingEdge: { u: u, v: v },
-        pq: [...pq],
+        pq: pq.toArray(),
         dist: [...dist],
         settled: new Set(settled),
         pathEdges: [...pathEdges],
@@ -318,25 +416,22 @@ function djGenSteps() {
         dist[v] = dist[u] + w;
         parent[v] = u;
 
-        // Update or insert into PQ
-        let existingIdx = pq.findIndex((item) => item.u === v);
-        if (existingIdx !== -1) {
-          pq[existingIdx].d = dist[v];
+        if (pq.nodeIndexMap.has(v)) {
+          pq.decreaseKey(v, dist[v]);
         } else {
-          pq.push({ u: v, d: dist[v] });
+          pq.insert(v, dist[v]);
         }
-        pq.sort((a, b) => a.d - b.d); // Keep it sorted visually
 
         steps.push({
           type: 'updated',
           evaluating: u,
           relaxingEdge: { u: u, v: v },
-          pq: [...pq],
+          pq: pq.toArray(),
           dist: [...dist],
           settled: new Set(settled),
           pathEdges: [...pathEdges],
           updatedNode: v,
-          msg: `Relax edge! New shorter path found to ${v}: ${dist[u]} + ${w} = ${dist[v]}. Added/Updated in PQ.`,
+          msg: `Relax edge! New shorter path found to ${v}: ${dist[u]} + ${w} = ${dist[v]}. Added/Updated in PQ via decreaseKey.`,
         });
       }
     }

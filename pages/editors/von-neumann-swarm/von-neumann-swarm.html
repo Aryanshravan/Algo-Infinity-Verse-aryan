@@ -1,0 +1,364 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Von Neumann Probe Swarm Replicator | Algo Infinity Verse</title>
+    <link rel="stylesheet" href="/styles.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <!-- Monaco Editor -->
+    <script src="https://unpkg.com/monaco-editor@0.36.1/min/vs/loader.js"></script>
+    <style>
+      body { margin: 0; overflow: hidden; background: #000; font-family: 'Poppins', sans-serif; color: #fff; }
+      .app-container { display: flex; height: 100vh; }
+      
+      .sidebar { width: 450px; background: rgba(15, 23, 42, 0.95); border-right: 1px solid #14b8a6; display: flex; flex-direction: column; z-index: 10; }
+      .header { padding: 20px; border-bottom: 1px solid #334155; }
+      .header h2 { margin: 0; color: #14b8a6; font-family: 'Orbitron', sans-serif; font-size: 1.2rem; }
+      .header p { margin: 5px 0 0 0; font-size: 0.8rem; color: #94a3b8; }
+      
+      #editor-container { flex: 1; min-height: 300px; }
+      
+      .controls { padding: 20px; border-top: 1px solid #334155; background: rgba(0,0,0,0.5); }
+      .btn { background: linear-gradient(90deg, #0d9488, #0f766e); color: #fff; border: none; padding: 10px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; transition: 0.3s; }
+      .btn:hover { background: #14b8a6; transform: translateY(-2px); box-shadow: 0 0 15px rgba(20, 184, 166, 0.5); }
+      
+      .sim-container { flex: 1; position: relative; background: #020617; overflow: hidden; }
+      canvas { width: 100%; height: 100%; display: block; filter: contrast(1.1); }
+      
+      .hud { position: absolute; top: 20px; right: 20px; background: rgba(0,0,0,0.8); padding: 15px; border-radius: 8px; border: 1px solid #14b8a6; width: 300px; z-index: 10; pointer-events: none; }
+      .hud h3 { margin: 0 0 10px 0; color: #14b8a6; font-size: 1rem; font-family: 'Orbitron', sans-serif; }
+      .metric { display: flex; justify-content: space-between; font-size: 0.8rem; color: #cbd5e1; margin-bottom: 5px; }
+      .val { font-weight: bold; font-family: monospace; }
+      .val-swarm { color: #38bdf8; }
+      .val-res { color: #facc15; }
+    </style>
+  </head>
+  <body>
+    
+    <div class="app-container">
+      <div class="sidebar">
+        <div class="header">
+          <h2><i class="fas fa-project-diagram"></i> Von Neumann Swarm</h2>
+          <p>Self-Replicating Automata</p>
+        </div>
+        
+        <div id="editor-container"></div>
+        
+        <div class="controls">
+          <button class="btn" onclick="deploySeed()"><i class="fas fa-seedling"></i> Deploy Seed Probe</button>
+        </div>
+      </div>
+      
+      <div class="sim-container">
+        <!-- Asteroid Belt Background -->
+        <div style="position: absolute; inset:0; background: radial-gradient(circle at center, #020617 0%, #0f172a 100%); pointer-events: none; z-index: 0;"></div>
+        
+        <canvas id="swarmCanvas" style="position: relative; z-index: 1;"></canvas>
+        
+        <div class="hud">
+          <h3>Swarm Telemetry</h3>
+          <div class="metric"><span>Probe Population:</span> <span class="val val-swarm" id="popVal">0</span></div>
+          <div class="metric"><span>Total Resources:</span> <span class="val val-res" id="resVal">0%</span></div>
+          <div class="metric"><span>Star Systems Explored:</span> <span class="val" id="expVal" style="color:#d946ef">0</span></div>
+          <div class="metric" style="margin-top: 10px; border-top: 1px solid #334155; padding-top: 5px;">
+            <span>Ecosystem State:</span> <span class="val" id="statusVal" style="color:#94a3b8">STANDBY</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      let editor;
+      require.config({ paths: { 'vs': 'https://unpkg.com/monaco-editor@0.36.1/min/vs' }});
+      require(['vs/editor/editor.main'], function() {
+        editor = monaco.editor.create(document.getElementById('editor-container'), {
+          value: `// Von Neumann Probe Replication Algorithm
+// Probes mine asteroids. 100 resource units = 1 new probe.
+// You must balance mining for replication vs exploring new systems.
+// If they replicate too fast, they eat everything and starve (Grey Goo).
+// If they explore too much, they run out of energy and die.
+
+function probeBehavior(currentEnergy, totalSwarmPopulation, availableLocalResources) {
+    // Return { action: string ("MINE", "REPLICATE", "EXPLORE") }
+    
+    // Naive logic: Replicate endlessly!
+    // Result: Swarm hits 10,000 probes in 5 seconds, eats the whole belt, then starves to death.
+    
+    if (currentEnergy > 100) {
+        return { action: "REPLICATE" };
+    } else {
+        return { action: "MINE" };
+    }
+}`,
+          language: 'javascript',
+          theme: 'vs-dark',
+          minimap: { enabled: false },
+          automaticLayout: true
+        });
+      });
+
+      const canvas = document.getElementById('swarmCanvas');
+      const ctx = canvas.getContext('2d');
+      
+      let isSimulating = false;
+      let time = 0;
+      
+      let probes = [];
+      let asteroids = [];
+      let systemsExplored = 0;
+      let totalInitialResources = 0;
+      
+      function resize() { 
+          canvas.width = canvas.clientWidth; 
+          canvas.height = canvas.clientHeight;
+          generateAsteroids();
+      }
+      
+      function generateAsteroids() {
+          asteroids = [];
+          totalInitialResources = 0;
+          for(let i=0; i<150; i++) {
+              let res = 200 + Math.random()*300;
+              asteroids.push({
+                  x: Math.random() * canvas.width,
+                  y: Math.random() * canvas.height,
+                  resources: res,
+                  maxResources: res,
+                  radius: Math.sqrt(res) * 0.5
+              });
+              totalInitialResources += res;
+          }
+      }
+      
+      setTimeout(resize, 100);
+      window.addEventListener('resize', resize);
+
+      function animate() {
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+          let currentTotalResources = 0;
+          asteroids.forEach(a => currentTotalResources += a.resources);
+
+          if (isSimulating) {
+              time += 1;
+              
+              for(let i=probes.length-1; i>=0; i--) {
+                  let p = probes[i];
+                  
+                  // Consume idle energy
+                  p.energy -= 0.5;
+                  
+                  // Run user logic
+                  let action = "MINE";
+                  try {
+                      eval(editor.getValue());
+                      let res = probeBehavior(p.energy, probes.length, currentTotalResources);
+                      if (res && res.action) action = res.action;
+                  } catch(e) {}
+                  
+                  if (action === "REPLICATE") {
+                      if (p.energy >= 100) {
+                          p.energy -= 100;
+                          // Spawn new probe
+                          probes.push({
+                              x: p.x + (Math.random()-0.5)*20,
+                              y: p.y + (Math.random()-0.5)*20,
+                              vx: (Math.random()-0.5)*2,
+                              vy: (Math.random()-0.5)*2,
+                              energy: 50,
+                              color: '#38bdf8'
+                          });
+                          p.color = '#f472b6'; // Flash pink when replicating
+                      } else {
+                          // Failed to replicate, wasted turn
+                          p.color = '#ef4444';
+                      }
+                      // Move slowly
+                      p.x += p.vx * 0.5;
+                      p.y += p.vy * 0.5;
+                  } 
+                  else if (action === "EXPLORE") {
+                      // Move fast towards edges
+                      p.energy -= 1.5; // High energy cost
+                      
+                      // Push towards closest edge
+                      let dLeft = p.x;
+                      let dRight = canvas.width - p.x;
+                      let dTop = p.y;
+                      let dBot = canvas.height - p.y;
+                      
+                      let min = Math.min(dLeft, dRight, dTop, dBot);
+                      if(min === dLeft) p.vx -= 0.5;
+                      else if(min === dRight) p.vx += 0.5;
+                      else if(min === dTop) p.vy -= 0.5;
+                      else p.vy += 0.5;
+                      
+                      p.vx = Math.max(-5, Math.min(5, p.vx));
+                      p.vy = Math.max(-5, Math.min(5, p.vy));
+                      
+                      p.x += p.vx;
+                      p.y += p.vy;
+                      p.color = '#d946ef'; // Purple for exploring
+                      
+                      // Check if successfully explored (left screen)
+                      if (p.x < 0 || p.x > canvas.width || p.y < 0 || p.y > canvas.height) {
+                          systemsExplored++;
+                          probes.splice(i, 1); // Probe left this system
+                          continue;
+                      }
+                  } 
+                  else { // MINE
+                      // Find nearest asteroid with resources
+                      let nearest = null;
+                      let minDist = Infinity;
+                      asteroids.forEach(a => {
+                          if (a.resources > 0) {
+                              let dist = Math.pow(a.x - p.x, 2) + Math.pow(a.y - p.y, 2);
+                              if (dist < minDist) {
+                                  minDist = dist;
+                                  nearest = a;
+                              }
+                          }
+                      });
+                      
+                      if (nearest) {
+                          let dist = Math.sqrt(minDist);
+                          if (dist < nearest.radius + 5) {
+                              // Mine it
+                              let harvest = Math.min(5, nearest.resources);
+                              nearest.resources -= harvest;
+                              nearest.radius = Math.max(0, Math.sqrt(nearest.resources) * 0.5);
+                              p.energy += harvest;
+                              p.vx *= 0.5; // Slow down
+                              p.vy *= 0.5;
+                              
+                              // Visual mining laser
+                              ctx.beginPath();
+                              ctx.moveTo(p.x, p.y);
+                              ctx.lineTo(nearest.x, nearest.y);
+                              ctx.strokeStyle = 'rgba(20, 184, 166, 0.5)';
+                              ctx.stroke();
+                          } else {
+                              // Move towards it
+                              p.vx += ((nearest.x - p.x) / dist) * 0.5;
+                              p.vy += ((nearest.y - p.y) / dist) * 0.5;
+                          }
+                      }
+                      
+                      p.vx = Math.max(-3, Math.min(3, p.vx));
+                      p.vy = Math.max(-3, Math.min(3, p.vy));
+                      p.x += p.vx;
+                      p.y += p.vy;
+                      p.color = '#14b8a6'; // Teal for mining
+                  }
+                  
+                  // Starvation
+                  if (p.energy <= 0) {
+                      probes.splice(i, 1);
+                      continue;
+                  }
+                  
+                  // Cap energy
+                  if (p.energy > 500) p.energy = 500;
+              }
+              
+              // End States
+              if (probes.length === 0) {
+                  isSimulating = false;
+                  if (systemsExplored >= 100) {
+                      document.getElementById('statusVal').innerText = "GALAXY COLONIZED SUCCESSFULLY";
+                      document.getElementById('statusVal').style.color = "#10b981";
+                  } else {
+                      document.getElementById('statusVal').innerText = "SWARM EXTINCT (STARVATION)";
+                      document.getElementById('statusVal').style.color = "#ef4444";
+                  }
+              } else if (probes.length > 2000) { // Limit for performance
+                  isSimulating = false;
+                  document.getElementById('statusVal').innerText = "GREY GOO SCENARIO (OVERPOPULATION)";
+                  document.getElementById('statusVal').style.color = "#ef4444";
+              } else if (systemsExplored >= 100) {
+                  isSimulating = false;
+                  document.getElementById('statusVal').innerText = "GALAXY COLONIZED SUCCESSFULLY";
+                  document.getElementById('statusVal').style.color = "#10b981";
+              } else {
+                  if (currentTotalResources < totalInitialResources * 0.1 && probes.length > 100) {
+                      document.getElementById('statusVal').innerText = "WARNING: RESOURCE DEPLETION IMMINENT";
+                      document.getElementById('statusVal').style.color = "#f97316";
+                  } else {
+                      document.getElementById('statusVal').innerText = "SWARM ACTIVE...";
+                      document.getElementById('statusVal').style.color = "#14b8a6";
+                  }
+              }
+              
+              // HUD
+              let popEl = document.getElementById('popVal');
+              popEl.innerText = probes.length;
+              if (probes.length > 500) popEl.style.color = "#ef4444"; // Grey goo warning
+              else popEl.style.color = "#38bdf8";
+              
+              let pct = (currentTotalResources / totalInitialResources) * 100;
+              let resEl = document.getElementById('resVal');
+              resEl.innerText = pct.toFixed(1) + "%";
+              if (pct < 20) resEl.style.color = "#ef4444";
+              else resEl.style.color = "#facc15";
+              
+              document.getElementById('expVal').innerText = systemsExplored;
+          }
+          
+          // Draw Asteroids
+          asteroids.forEach(a => {
+              if (a.resources > 0) {
+                  ctx.beginPath();
+                  ctx.arc(a.x, a.y, a.radius, 0, Math.PI*2);
+                  ctx.fillStyle = '#475569';
+                  ctx.fill();
+                  ctx.strokeStyle = '#94a3b8';
+                  ctx.lineWidth = 1;
+                  ctx.stroke();
+              }
+          });
+          
+          // Draw Probes
+          probes.forEach(p => {
+              ctx.beginPath();
+              // Draw triangle
+              ctx.moveTo(p.x + Math.cos(Math.atan2(p.vy, p.vx)) * 5, p.y + Math.sin(Math.atan2(p.vy, p.vx)) * 5);
+              ctx.lineTo(p.x + Math.cos(Math.atan2(p.vy, p.vx) + 2.5) * 4, p.y + Math.sin(Math.atan2(p.vy, p.vx) + 2.5) * 4);
+              ctx.lineTo(p.x + Math.cos(Math.atan2(p.vy, p.vx) - 2.5) * 4, p.y + Math.sin(Math.atan2(p.vy, p.vx) - 2.5) * 4);
+              ctx.closePath();
+              
+              ctx.fillStyle = p.color;
+              ctx.fill();
+          });
+
+          requestAnimationFrame(animate);
+      }
+      
+      animate();
+
+      function deploySeed() {
+          if(isSimulating) return;
+          generateAsteroids();
+          isSimulating = true;
+          time = 0;
+          probes = [];
+          systemsExplored = 0;
+          
+          // Deploy one seed probe
+          probes.push({
+              x: canvas.width / 2,
+              y: canvas.height / 2,
+              vx: 0,
+              vy: 0,
+              energy: 500, // Starts fully charged
+              color: '#38bdf8'
+          });
+          
+          document.getElementById('statusVal').innerText = "SEED DEPLOYED...";
+          document.getElementById('statusVal').style.color = "#14b8a6";
+      }
+    </script>
+  </body>
+</html>

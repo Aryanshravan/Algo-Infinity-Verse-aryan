@@ -1,0 +1,220 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Idempotency Replay Auditor | Algo Infinity Verse</title>
+  <meta name="description" content="Audit client retry and server handler code for weak idempotency keys, double-charge risk, concurrent collisions, and hardening patches — client-side." />
+  <link rel="stylesheet" href="/styles.css" />
+  <link rel="stylesheet" href="style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Poppins:wght@300;400;500;600;700&family=Fira+Code:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <script>
+    (function () {
+      try {
+        var storedTheme = localStorage.getItem('theme');
+        var prefersLight = window.matchMedia('(prefers-color-scheme: light)').matches;
+        var theme = storedTheme || (prefersLight ? 'light' : 'dark');
+        if (theme === 'light') {
+          document.documentElement.classList.add('light-mode');
+        } else {
+          document.documentElement.classList.remove('light-mode');
+        }
+      } catch (e) {}
+    })();
+  </script>
+</head>
+<body data-page="ai-idempotency-replay-auditor">
+  <a href="#idem-main" class="idem-skip-link">Skip to main content</a>
+  <button type="button" id="scrollTopBtn" class="scroll-top-btn" aria-label="Scroll to top">
+    <i class="fas fa-arrow-up" aria-hidden="true"></i>
+  </button>
+
+  
+  <div id="navbar-placeholder"></div>
+
+  <header class="idem-hero">
+    <div class="idem-hero-badge">
+      <i class="fas fa-rotate" aria-hidden="true"></i>
+      Replay Safety Lab
+    </div>
+    <h1>
+      AI Idempotency
+      <span class="idem-hero-accent">Replay Auditor</span>
+    </h1>
+    <p>
+      Paste client retry logic and server handlers to detect weak keys, scope mistakes,
+      double-charge risk, and simulate concurrent retries — fully client-side.
+    </p>
+    <div class="idem-hero-stats" aria-live="polite">
+      <div class="idem-stat">
+        <span class="idem-stat-val" id="statFindings">0</span>
+        <span class="idem-stat-label">Findings</span>
+      </div>
+      <div class="idem-stat">
+        <span class="idem-stat-val" id="statRisk">—</span>
+        <span class="idem-stat-label">Replay risk</span>
+      </div>
+      <div class="idem-stat">
+        <span class="idem-stat-val" id="statCollisions">0</span>
+        <span class="idem-stat-label">Sim collisions</span>
+      </div>
+    </div>
+  </header>
+
+  <main id="idem-main" class="idem-main">
+    <div class="container">
+      <div class="idem-workspace">
+        <section class="idem-panel" aria-labelledby="idem-input-title">
+          <div class="idem-panel-header">
+            <div class="idem-panel-title">
+              <i class="fas fa-code idem-panel-icon" aria-hidden="true"></i>
+              <h2 id="idem-input-title">Retry &amp; handler snippets</h2>
+            </div>
+          </div>
+
+          <div class="idem-editors">
+            <div class="idem-editor-block">
+              <label class="idem-label" for="idemClientCode">Client retry logic</label>
+              <textarea
+                id="idemClientCode"
+                class="idem-textarea"
+                rows="12"
+                spellcheck="false"
+                placeholder="// fetch with retries…"
+                aria-describedby="idemClientHint"
+              ></textarea>
+              <p id="idemClientHint" class="idem-hint">
+                Look for retry loops, missing <code>Idempotency-Key</code> headers, and regenerated keys per attempt.
+              </p>
+            </div>
+            <div class="idem-editor-block">
+              <label class="idem-label" for="idemServerCode">Server handler</label>
+              <textarea
+                id="idemServerCode"
+                class="idem-textarea"
+                rows="12"
+                spellcheck="false"
+                placeholder="// charge / create order handler…"
+                aria-describedby="idemServerHint"
+              ></textarea>
+              <p id="idemServerHint" class="idem-hint">
+                Detect key lookup, lock/TTL usage, and unsafe scopes (e.g. key = userId only).
+              </p>
+            </div>
+          </div>
+
+          <fieldset class="idem-sim">
+            <legend class="idem-label">Concurrent retry collision simulator</legend>
+            <div class="idem-sim-row">
+              <div>
+                <label class="idem-label" for="idemParallelN">Parallel submits (N)</label>
+                <input type="number" id="idemParallelN" class="idem-input" min="2" max="50" value="8" inputmode="numeric" />
+              </div>
+              <div class="idem-sim-actions">
+                <button type="button" id="idemSimBtn" class="btn btn-secondary">
+                  <i class="fas fa-bolt" aria-hidden="true"></i> Run collision sim
+                </button>
+              </div>
+            </div>
+            <p class="idem-hint">Simulates N concurrent retries against the detected key strategy (weak vs safe).</p>
+          </fieldset>
+
+          <div class="idem-controls">
+            <button type="button" id="idemLoadDemoBtn" class="btn btn-secondary">
+              <i class="fas fa-flask" aria-hidden="true"></i> Load weak idempotency demo
+            </button>
+            <button type="button" id="idemAuditBtn" class="btn btn-primary">
+              <i class="fas fa-shield-halved" aria-hidden="true"></i> Audit idempotency
+            </button>
+            <button type="button" id="idemClearBtn" class="btn btn-outline">
+              <i class="fas fa-eraser" aria-hidden="true"></i> Clear
+            </button>
+            <button type="button" id="idemExportBtn" class="btn btn-outline" disabled>
+              <i class="fas fa-download" aria-hidden="true"></i> Export audit report
+            </button>
+          </div>
+          <div id="idemStatus" class="idem-status" role="status" aria-live="polite"></div>
+        </section>
+
+        <section class="idem-panel idem-report-panel" aria-labelledby="idem-report-title">
+          <div class="idem-panel-header">
+            <div class="idem-panel-title">
+              <i class="fas fa-clipboard-check idem-panel-icon" aria-hidden="true"></i>
+              <h2 id="idem-report-title">Audit results</h2>
+            </div>
+          </div>
+
+          <div id="idemEmpty" class="idem-empty">
+            <i class="fas fa-rotate" aria-hidden="true"></i>
+            <p>No audit yet. Load the weak demo or paste client/server snippets, then run the audit.</p>
+          </div>
+
+          <div id="idemResults" hidden>
+            <div class="idem-score-card">
+              <div>
+                <h3 id="idemRiskHeading">Replay / double-charge risk</h3>
+                <p id="idemRiskBlurb" class="idem-muted"></p>
+              </div>
+              <div class="idem-score-ring" id="idemScoreRing" aria-hidden="true">
+                <span id="idemScoreVal">0</span>
+              </div>
+            </div>
+
+            <section class="idem-section" aria-labelledby="idemFindingsHeading">
+              <h3 id="idemFindingsHeading"><i class="fas fa-triangle-exclamation" aria-hidden="true"></i> Key &amp; scope findings</h3>
+              <ul id="idemFindingList" class="idem-findings"></ul>
+            </section>
+
+            <section class="idem-section" aria-labelledby="idemSimHeading">
+              <h3 id="idemSimHeading"><i class="fas fa-bolt" aria-hidden="true"></i> Collision simulation</h3>
+              <div id="idemSimOut" class="idem-sim-out"></div>
+            </section>
+
+            <section class="idem-section" aria-labelledby="idemRecHeading">
+              <h3 id="idemRecHeading"><i class="fas fa-key" aria-hidden="true"></i> Safe key design &amp; TTL</h3>
+              <div id="idemRecs" class="idem-recs"></div>
+            </section>
+          </div>
+        </section>
+      </div>
+
+      <div class="idem-diff-grid">
+        <section class="idem-panel" aria-labelledby="idem-before-title">
+          <div class="idem-panel-header">
+            <div class="idem-panel-title">
+              <i class="fas fa-file-code idem-panel-icon" aria-hidden="true"></i>
+              <h2 id="idem-before-title">Before (as pasted)</h2>
+            </div>
+          </div>
+          <pre id="idemBefore" class="idem-code-panel" tabindex="0"><code>Run an audit to capture the original snippets.</code></pre>
+        </section>
+        <section class="idem-panel" aria-labelledby="idem-after-title">
+          <div class="idem-panel-header">
+            <div class="idem-panel-title">
+              <i class="fas fa-wand-magic-sparkles idem-panel-icon" aria-hidden="true"></i>
+              <h2 id="idem-after-title">After (hardening patch)</h2>
+            </div>
+          </div>
+          <pre id="idemAfter" class="idem-code-panel idem-code-after" tabindex="0"><code>Hardened client + server patches appear here.</code></pre>
+        </section>
+      </div>
+    </div>
+  </main>
+
+  <div id="footer-placeholder"></div>
+
+  <script src="/auth.js"></script>
+  <script src="/bootstrap-legacy.js"></script>
+  <script src="/script.js"></script>
+  <script type="module" src="/dist/legacy-bundle.mjs"></script>
+  <script src="/theme.js"></script>
+  <script src="script.js"></script>
+  <script>
+    if (typeof loadPartial === 'function') {
+      loadPartial('navbar-placeholder', '/partials/navbar.html');
+      loadPartial('footer-placeholder', '/partials/footer.html');
+    }
+  </script>
+</body>
+</html>

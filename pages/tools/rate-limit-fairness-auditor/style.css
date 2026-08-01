@@ -1,0 +1,433 @@
+/* ===== Rate Limit Fairness Auditor ===== */
+:root {
+  --rlim-glass: rgba(255, 255, 255, 0.04);
+  --rlim-border: rgba(255, 255, 255, 0.1);
+  --rlim-muted: rgba(255, 255, 255, 0.62);
+  --rlim-accent: #38bdf8;
+  --rlim-accent-dim: rgba(56, 189, 248, 0.15);
+  --rlim-warn: #fbbf24;
+  --rlim-danger: #f87171;
+  --rlim-ok: #4ade80;
+  --rlim-code-bg: rgba(0, 0, 0, 0.35);
+}
+
+html.light-mode {
+  --rlim-glass: rgba(15, 23, 42, 0.04);
+  --rlim-border: rgba(15, 23, 42, 0.12);
+  --rlim-muted: rgba(15, 23, 42, 0.65);
+  --rlim-accent-dim: rgba(14, 165, 233, 0.12);
+  --rlim-code-bg: rgba(15, 23, 42, 0.06);
+}
+
+.rlim-skip-link {
+  position: absolute;
+  left: 1rem;
+  top: -100px;
+  z-index: 10000;
+  padding: 0.6rem 1rem;
+  background: var(--rlim-accent);
+  color: #0a0a14;
+  font-weight: 700;
+  border-radius: 8px;
+  text-decoration: none;
+}
+
+.rlim-skip-link:focus {
+  top: 1rem;
+  outline: 3px solid #fff;
+  outline-offset: 2px;
+}
+
+.rlim-hero {
+  position: relative;
+  overflow: hidden;
+  padding: 7.5rem 1.5rem 4rem;
+  text-align: center;
+  border-bottom: 1px solid var(--rlim-border);
+  background:
+    radial-gradient(ellipse at top right, rgba(56, 189, 248, 0.16), transparent 55%),
+    radial-gradient(ellipse at bottom left, rgba(129, 140, 248, 0.1), transparent 50%);
+}
+
+.rlim-hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1.1rem;
+  padding: 0.35rem 0.9rem;
+  border-radius: 999px;
+  border: 1px solid rgba(56, 189, 248, 0.4);
+  background: var(--rlim-accent-dim);
+  color: var(--rlim-accent);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.rlim-hero h1 {
+  margin: 0 0 1rem;
+  font-family: 'Orbitron', sans-serif;
+  font-size: clamp(1.9rem, 5vw, 3rem);
+  font-weight: 900;
+  line-height: 1.15;
+}
+
+.rlim-hero-accent {
+  display: inline-block;
+  background: linear-gradient(135deg, #38bdf8, #818cf8);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.rlim-hero p {
+  max-width: 720px;
+  margin: 0 auto 2rem;
+  color: var(--rlim-muted);
+  font-size: 1.05rem;
+  line-height: 1.65;
+  font-family: 'Poppins', sans-serif;
+}
+
+.rlim-hero-stats {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1rem;
+}
+
+.rlim-stat {
+  min-width: 110px;
+  padding: 0.85rem 1.1rem;
+  border: 1px solid var(--rlim-border);
+  border-radius: 14px;
+  background: var(--rlim-glass);
+}
+
+.rlim-stat-val {
+  display: block;
+  font-family: 'Orbitron', sans-serif;
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: var(--rlim-accent);
+}
+
+.rlim-stat-label {
+  font-size: 0.75rem;
+  color: var(--rlim-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.rlim-main {
+  padding: 2rem 0 4rem;
+  font-family: 'Poppins', sans-serif;
+}
+
+.rlim-workspace,
+.rlim-results-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+@media (max-width: 900px) {
+  .rlim-workspace,
+  .rlim-results-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.rlim-panel {
+  padding: 1.4rem;
+  border: 1px solid var(--rlim-border);
+  border-radius: 18px;
+  background: var(--rlim-glass);
+  backdrop-filter: blur(12px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
+}
+
+.rlim-panel-header {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1.2rem;
+  padding-bottom: 0.9rem;
+  border-bottom: 1px solid var(--rlim-border);
+}
+
+.rlim-panel-title {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.rlim-panel-title h2 {
+  margin: 0;
+  font-size: 1.15rem;
+  font-weight: 700;
+}
+
+.rlim-panel-icon {
+  color: var(--rlim-accent);
+}
+
+.rlim-label {
+  display: block;
+  margin-bottom: 0.45rem;
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+.rlim-hint,
+.rlim-status {
+  margin: 0.55rem 0 0;
+  font-size: 0.78rem;
+  color: var(--rlim-muted);
+  line-height: 1.45;
+}
+
+.rlim-fieldset {
+  margin: 0 0 1rem;
+  padding: 0.9rem 1rem;
+  border: 1px solid var(--rlim-border);
+  border-radius: 12px;
+}
+
+.rlim-radio-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.rlim-radio {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+.rlim-radio input {
+  accent-color: var(--rlim-accent);
+  width: 1rem;
+  height: 1rem;
+}
+
+.rlim-field-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.85rem;
+  margin-bottom: 0.5rem;
+}
+
+@media (max-width: 640px) {
+  .rlim-field-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.rlim-input {
+  width: 100%;
+  padding: 0.55rem 0.7rem;
+  border: 1px solid var(--rlim-border);
+  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.25);
+  color: inherit;
+  font: inherit;
+  font-size: 0.9rem;
+}
+
+html.light-mode .rlim-input {
+  background: rgba(255, 255, 255, 0.9);
+}
+
+.rlim-input:focus {
+  outline: 2px solid var(--rlim-accent);
+  outline-offset: 2px;
+  border-color: rgba(56, 189, 248, 0.55);
+}
+
+.rlim-sim-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.65rem;
+  margin-bottom: 0.75rem;
+}
+
+@media (max-width: 520px) {
+  .rlim-sim-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.rlim-sim-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.4rem;
+  padding: 0.85rem 1rem;
+  border: 1px solid var(--rlim-border);
+  border-radius: 12px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-align: left;
+  transition: border-color 0.2s ease, background 0.2s ease, transform 0.15s ease;
+}
+
+.rlim-sim-btn i {
+  color: var(--rlim-accent);
+}
+
+.rlim-sim-btn:hover,
+.rlim-sim-btn:focus-visible {
+  border-color: rgba(56, 189, 248, 0.55);
+  outline: none;
+}
+
+.rlim-sim-btn[aria-pressed="true"] {
+  background: var(--rlim-accent-dim);
+  border-color: rgba(56, 189, 248, 0.65);
+  transform: translateY(-1px);
+}
+
+.rlim-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin-top: 1rem;
+}
+
+.rlim-controls .btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.rlim-empty,
+.rlim-empty-li {
+  color: var(--rlim-muted);
+  font-size: 0.9rem;
+  margin: 0;
+  list-style: none;
+}
+
+.rlim-score-cards {
+  display: grid;
+  gap: 0.65rem;
+  margin-bottom: 1rem;
+}
+
+.rlim-score-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 0.9rem;
+  border: 1px solid var(--rlim-border);
+  border-radius: 10px;
+}
+
+.rlim-score-card strong {
+  display: block;
+  font-size: 0.9rem;
+  margin-bottom: 0.15rem;
+}
+
+.rlim-score-card span {
+  font-size: 0.78rem;
+  color: var(--rlim-muted);
+}
+
+.rlim-score-val {
+  font-family: 'Orbitron', sans-serif;
+  font-weight: 700;
+  font-size: 1.05rem;
+  color: var(--rlim-accent);
+}
+
+.rlim-score-val.warn { color: var(--rlim-warn); }
+.rlim-score-val.danger { color: var(--rlim-danger); }
+.rlim-score-val.ok { color: var(--rlim-ok); }
+
+.rlim-meter-block {
+  margin-top: 0.5rem;
+}
+
+.rlim-meter {
+  height: 12px;
+  border-radius: 999px;
+  border: 1px solid var(--rlim-border);
+  background: rgba(0, 0, 0, 0.25);
+  overflow: hidden;
+}
+
+html.light-mode .rlim-meter {
+  background: rgba(15, 23, 42, 0.08);
+}
+
+.rlim-meter-fill {
+  height: 100%;
+  width: 0;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #38bdf8, #4ade80);
+  transition: width 0.45s ease;
+}
+
+.rlim-log {
+  margin: 0;
+  padding: 0.9rem 1rem;
+  max-height: 280px;
+  overflow: auto;
+  border-radius: 10px;
+  border: 1px solid var(--rlim-border);
+  background: var(--rlim-code-bg);
+  font-family: 'Fira Code', monospace;
+  font-size: 0.78rem;
+  line-height: 1.55;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.rlim-recs {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 0.55rem;
+}
+
+.rlim-recs li {
+  position: relative;
+  padding: 0.7rem 0.85rem 0.7rem 2.2rem;
+  border: 1px solid var(--rlim-border);
+  border-radius: 10px;
+  font-size: 0.88rem;
+  line-height: 1.45;
+}
+
+.rlim-recs li:not(.rlim-empty-li)::before {
+  content: '';
+  position: absolute;
+  left: 0.85rem;
+  top: 0.95rem;
+  width: 0.55rem;
+  height: 0.55rem;
+  border-radius: 50%;
+  background: var(--rlim-accent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rlim-sim-btn,
+  .rlim-meter-fill {
+    transition: none;
+  }
+}

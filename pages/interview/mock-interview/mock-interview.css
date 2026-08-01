@@ -1,0 +1,658 @@
+/* ==========================================================================
+   DSA MOCK INTERVIEW SIMULATOR — STYLES
+   ========================================================================== */
+
+.mis-main-wrapper {
+  min-height: calc(100vh - 80px);
+  background: var(--dark-bg, #0b0f19);
+  color: var(--text-color, #f3f4f6);
+  font-family:
+    'Inter',
+    -apple-system,
+    BlinkMacSystemFont,
+    sans-serif;
+  padding-bottom: 3rem;
+}
+
+.mis-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+}
+
+.mis-view {
+  display: block;
+}
+
+/* Hero Section */
+.mis-hero {
+  position: relative;
+  padding: 2.5rem 0 2rem;
+  background: radial-gradient(circle at 50% 0%, rgba(56, 189, 248, 0.15), transparent 70%);
+  border-bottom: 1px solid var(--glass-border, rgba(255, 255, 255, 0.08));
+  margin-bottom: 2rem;
+}
+
+.mis-hero-bg {
+  position: absolute;
+  top: -50%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 1000px;
+  height: 500px;
+  background: radial-gradient(circle, rgba(124, 58, 237, 0.12) 0%, rgba(0, 0, 0, 0) 70%);
+  pointer-events: none;
+}
+
+.mis-back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--text-muted, #9ca3af);
+  text-decoration: none;
+  font-size: 0.9rem;
+  font-weight: 500;
+  margin-bottom: 1rem;
+  transition: color 0.2s ease;
+}
+
+.mis-back-btn:hover {
+  color: var(--accent, #38bdf8);
+}
+
+.mis-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: rgba(56, 189, 248, 0.2);
+  color: #38bdf8;
+  border: 1px solid rgba(56, 189, 248, 0.3);
+  padding: 0.3rem 0.8rem;
+  border-radius: 50px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  margin-bottom: 0.75rem;
+}
+
+.mis-hero-title {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+  color: #fff;
+}
+
+.mis-hero-title span {
+  background: linear-gradient(135deg, #38bdf8, #a855f7);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.mis-hero-subtitle {
+  color: var(--text-muted, #9ca3af);
+  font-size: 1.05rem;
+  max-width: 800px;
+  line-height: 1.6;
+}
+
+/* Layout Grid Setup */
+.mis-setup-grid {
+  display: grid;
+  grid-template-columns: 460px 1fr;
+  gap: 2rem;
+  align-items: start;
+}
+
+@media (max-width: 1024px) {
+  .mis-setup-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.mis-card {
+  background: var(--dark-card, #111827);
+  border: 1px solid var(--glass-border, rgba(255, 255, 255, 0.08));
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+  margin-bottom: 1.5rem;
+}
+
+.mis-card h2,
+.mis-card h3 {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #f3f4f6;
+  margin-bottom: 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.mis-card h2 i,
+.mis-card h3 i {
+  color: #38bdf8;
+}
+
+/* Form Controls */
+.mis-form-group {
+  margin-bottom: 1.25rem;
+}
+
+.mis-form-group label {
+  display: block;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #d1d5db;
+  margin-bottom: 0.5rem;
+}
+
+.mis-select {
+  width: 100%;
+  padding: 0.65rem 0.8rem;
+  background: #0f172a;
+  color: #f3f4f6;
+  border: 1px solid var(--glass-border, rgba(255, 255, 255, 0.12));
+  border-radius: 8px;
+  font-size: 0.9rem;
+  outline: none;
+}
+
+.mis-mode-switch {
+  display: flex;
+  background: rgba(15, 23, 42, 0.6);
+  padding: 4px;
+  border-radius: 8px;
+  border: 1px solid var(--glass-border, rgba(255, 255, 255, 0.08));
+}
+
+.mis-mode-btn {
+  flex: 1;
+  padding: 0.65rem;
+  border: none;
+  background: transparent;
+  color: #9ca3af;
+  font-size: 0.85rem;
+  font-weight: 600;
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  transition: all 0.2s ease;
+}
+
+.mis-mode-btn.active {
+  background: #38bdf8;
+  color: #0f172a;
+  box-shadow: 0 2px 8px rgba(56, 189, 248, 0.4);
+}
+
+.mis-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.4rem;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  transition: all 0.2s ease;
+}
+
+.mis-btn-lg {
+  width: 100%;
+  padding: 0.9rem;
+  font-size: 1rem;
+}
+
+.mis-btn-primary {
+  background: linear-gradient(135deg, #0284c7, #2563eb);
+  color: #fff;
+  box-shadow: 0 4px 14px rgba(2, 132, 199, 0.35);
+}
+
+.mis-btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(2, 132, 199, 0.5);
+}
+
+.mis-btn-secondary {
+  background: #1e293b;
+  color: #e2e8f0;
+  border: 1px solid var(--glass-border, rgba(255, 255, 255, 0.12));
+}
+
+.mis-btn-danger {
+  background: linear-gradient(135deg, #dc2626, #b91c1c);
+  color: #fff;
+}
+
+.mis-btn-sm {
+  padding: 0.4rem 0.8rem;
+  font-size: 0.82rem;
+  border-radius: 6px;
+  cursor: pointer;
+  background: #1e293b;
+  color: #cbd5e1;
+  border: 1px solid var(--glass-border, rgba(255, 255, 255, 0.1));
+}
+
+/* Stats Row */
+.mis-stats-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.mis-stat-card {
+  background: var(--dark-card, #111827);
+  border: 1px solid var(--glass-border, rgba(255, 255, 255, 0.08));
+  border-radius: 12px;
+  padding: 1.25rem;
+  text-align: center;
+}
+
+.mis-stat-val {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #38bdf8;
+  margin-bottom: 0.3rem;
+}
+
+.mis-stat-label {
+  font-size: 0.8rem;
+  color: #9ca3af;
+}
+
+/* Active Timed Interview View */
+.mis-active-toolbar {
+  height: 60px;
+  background: #111827;
+  border-bottom: 1px solid var(--glass-border, rgba(255, 255, 255, 0.08));
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 1.5rem;
+}
+
+.mis-toolbar-left {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.mis-company-badge {
+  background: rgba(245, 158, 11, 0.2);
+  color: #fbbf24;
+  border: 1px solid rgba(251, 191, 36, 0.3);
+  padding: 0.2rem 0.6rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.mis-problem-title {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #fff;
+  margin: 0;
+}
+
+.mis-diff-tag {
+  font-size: 0.75rem;
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+  font-weight: 600;
+}
+
+.mis-diff-tag.easy {
+  background: rgba(34, 197, 94, 0.2);
+  color: #4ade80;
+}
+.mis-diff-tag.medium {
+  background: rgba(245, 158, 11, 0.2);
+  color: #fbbf24;
+}
+.mis-diff-tag.hard {
+  background: rgba(239, 68, 68, 0.2);
+  color: #f87171;
+}
+
+.mis-timer-box {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: #0f172a;
+  border: 1px solid #38bdf8;
+  padding: 0.4rem 1rem;
+  border-radius: 50px;
+  color: #38bdf8;
+  font-family: 'Orbitron', monospace;
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+.mis-timer-box.warning {
+  border-color: #ef4444;
+  color: #ef4444;
+  animation: misBlink 1s infinite;
+}
+
+@keyframes misBlink {
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.mis-active-workspace {
+  display: grid;
+  grid-template-columns: 420px 1fr;
+  height: calc(100vh - 140px);
+}
+
+.mis-problem-pane {
+  background: #0d1117;
+  border-right: 1px solid #30363d;
+  padding: 1.5rem;
+  overflow-y: auto;
+}
+
+.mis-problem-desc {
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: #c9d1d9;
+  margin-bottom: 1.5rem;
+}
+
+.mis-constraints-list {
+  padding-left: 1.25rem;
+  color: #8b949e;
+  font-size: 0.85rem;
+  margin-bottom: 1.5rem;
+}
+
+.mis-examples-box {
+  background: #161b22;
+  border: 1px solid #30363d;
+  border-radius: 8px;
+  padding: 1rem;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.82rem;
+}
+
+.mis-editor-pane {
+  display: flex;
+  flex-direction: column;
+  background: #090d13;
+}
+
+.mis-editor-toolbar {
+  height: 42px;
+  background: #161b22;
+  border-bottom: 1px solid #30363d;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 1rem;
+}
+
+.mis-select-sm {
+  background: #0d1117;
+  color: #f3f4f6;
+  border: 1px solid #30363d;
+  border-radius: 4px;
+  padding: 0.2rem 0.5rem;
+  font-size: 0.8rem;
+}
+
+.mis-code-box {
+  flex: 1;
+  display: flex;
+  position: relative;
+}
+
+.mis-gutter {
+  width: 40px;
+  background: #161b22;
+  border-right: 1px solid #30363d;
+  color: #484f58;
+  font-family: monospace;
+  font-size: 0.85rem;
+  line-height: 1.5rem;
+  padding: 0.85rem 0.4rem 0.85rem 0;
+  text-align: right;
+  user-select: none;
+}
+
+.mis-textarea {
+  flex: 1;
+  background: transparent;
+  color: #e6edf3;
+  border: none;
+  outline: none;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.9rem;
+  line-height: 1.5rem;
+  padding: 0.85rem;
+  resize: none;
+  white-space: pre;
+}
+
+.mis-console-box {
+  height: 160px;
+  background: #0d1117;
+  border-top: 1px solid #30363d;
+  display: flex;
+  flex-direction: column;
+}
+
+.mis-console-header {
+  height: 32px;
+  background: #161b22;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 1rem;
+  font-size: 0.8rem;
+  color: #58a6ff;
+  font-weight: 600;
+}
+
+.mis-status-badge {
+  font-size: 0.7rem;
+  padding: 0.1rem 0.4rem;
+  border-radius: 4px;
+  background: #1e293b;
+  color: #94a3b8;
+}
+
+.mis-console-body {
+  flex: 1;
+  padding: 0.75rem 1rem;
+  overflow-y: auto;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.82rem;
+  color: #c9d1d9;
+}
+
+/* Post-Interview Evaluation Report Card */
+.mis-report-container {
+  max-width: 1000px;
+  padding-top: 2rem;
+}
+
+.mis-report-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.mis-report-paper {
+  background: #0d1117;
+  color: #c9d1d9;
+  border: 1px solid #30363d;
+  border-radius: 12px;
+  padding: 2.5rem;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+}
+
+.mis-paper-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 2px solid #30363d;
+  padding-bottom: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.mis-paper-title h2 {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 1.5rem;
+  color: #f0f6fc;
+  margin-bottom: 0.3rem;
+}
+
+.mis-score-gauge-box {
+  text-align: center;
+}
+
+.mis-score-circle {
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  border: 4px solid #10b981;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #10b981;
+  box-shadow: 0 0 16px rgba(16, 185, 129, 0.3);
+}
+
+.mis-score-label {
+  margin-top: 0.4rem;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #10b981;
+}
+
+.mis-subscores-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.mis-subcard {
+  background: #161b22;
+  border: 1px solid #30363d;
+  border-radius: 8px;
+  padding: 1rem;
+  text-align: center;
+}
+
+.mis-subcard-title {
+  font-size: 0.8rem;
+  color: #8b949e;
+  margin-bottom: 0.3rem;
+}
+
+.mis-subcard-val {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #38bdf8;
+}
+
+.mis-report-section {
+  margin-bottom: 2rem;
+}
+
+.mis-report-section h3 {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 1.15rem;
+  color: #f0f6fc;
+  border-bottom: 1px solid #21262d;
+  padding-bottom: 0.4rem;
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.mis-comp-comparison-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.mis-comp-box {
+  background: #161b22;
+  border: 1px solid #30363d;
+  border-radius: 8px;
+  padding: 1rem;
+}
+
+.mis-comp-box.optimal {
+  border-color: #238636;
+}
+
+.mis-sw-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.mis-sw-box {
+  background: #161b22;
+  border: 1px solid #30363d;
+  border-radius: 8px;
+  padding: 1rem;
+}
+
+.mis-bullet-list {
+  padding-left: 1.25rem;
+  line-height: 1.6;
+  font-size: 0.9rem;
+}
+
+.mis-paper-footer {
+  border-top: 1px solid #30363d;
+  padding-top: 1rem;
+  margin-top: 2rem;
+  font-size: 0.75rem;
+  color: #8b949e;
+  text-align: center;
+}
+
+/* Print Styles */
+@media print {
+  .no-print,
+  #navbar-placeholder,
+  #footer-placeholder,
+  .mis-report-header {
+    display: none !important;
+  }
+  body,
+  .mis-main-wrapper {
+    background: #fff !important;
+    color: #000 !important;
+  }
+  .mis-report-paper {
+    background: #fff !important;
+    color: #111 !important;
+    box-shadow: none !important;
+    border: none !important;
+  }
+}

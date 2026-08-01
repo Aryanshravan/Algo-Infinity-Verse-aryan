@@ -3,6 +3,71 @@
    ============================================ */
 
 const aiTools = [
+  // ── Featured (new) ──
+  {
+    name: 'AI Idempotency Replay Auditor',
+    path: '/pages/ai-features/ai-idempotency-replay-auditor/index.html',
+    category: 'Crypto & Security',
+    icon: 'fa-clone',
+    desc: 'Detect missing idempotency keys, simulate retry collisions, and generate safe key-scope hardening patches.',
+  },
+  {
+    name: 'AI CQRS Consistency Detector',
+    path: '/pages/ai-features/ai-cqrs-consistency-detector/index.html',
+    category: 'Analysis & Profiling',
+    icon: 'fa-stream',
+    desc: 'Find event ordering gaps, missing projections, and dual-write risks with rebuild vs catch-up coaching.',
+  },
+  {
+    name: 'AI Prompt Injection Defense Lab',
+    path: '/pages/ai-features/ai-prompt-injection-defense-lab/index.html',
+    category: 'Crypto & Security',
+    icon: 'fa-user-secret',
+    desc: 'Detect prompt injection and jailbreaks, score tool-call abuse, and generate hardened system-prompt patches.',
+  },
+  {
+    name: 'AI DSA Hallucination Detector',
+    path: '/pages/ai-features/ai-dsa-hallucination-detector/index.html',
+    category: 'Learning Assistants',
+    icon: 'fa-magnifying-glass-chart',
+    desc: 'Fact-check AI DSA explanations for wrong complexities and false invariants with rewrite suggestions.',
+  },
+  {
+    name: 'AI Code Review Comment Scorer',
+    path: '/pages/ai-features/ai-code-review-comment-scorer/index.html',
+    category: 'Code Quality',
+    icon: 'fa-comments',
+    desc: 'Score PR review comments for clarity, actionability, and toxicity — with inclusive rewrite coaching.',
+  },
+  {
+    name: 'AI Code Smell Scanner',
+    path: '/pages/ai-features/ai-code-smell-scanner/index.html',
+    category: 'Code Quality',
+    icon: 'fa-broom',
+    desc: 'AST-based architectural smell scanner (God Object, Feature Envy, deep nesting) with complexity scores and refactor patches.',
+  },
+  {
+    name: 'AI OpenAPI Contract Linter',
+    path: '/pages/ai-features/ai-openapi-contract-linter/index.html',
+    category: 'Code Quality',
+    icon: 'fa-file-contract',
+    desc: 'Diff OpenAPI/Swagger specs for breaking changes, OWASP API Top 10 risks, compatibility score, and AI-style security patches.',
+  },
+  {
+    name: 'AI Distributed Tracing Analyzer',
+    path: '/pages/ai-features/ai-distributed-tracing-analyzer/index.html',
+    category: 'Analysis & Profiling',
+    icon: 'fa-diagram-project',
+    desc: 'Parse OpenTelemetry traces, compute critical path latency, detect cascading timeouts and N+1 queries, and get remediation tips.',
+  },
+  {
+    name: 'WebGPU KV-Cache Profiler',
+    path: '/pages/ai-features/webgpu-kv-cache-profiler/index.html',
+    category: 'Advanced Tech',
+    icon: 'fa-microchip',
+    desc: 'Profile LLM KV-cache VRAM across FP16/INT8/INT4, context lengths, and PagedAttention — with max batch and exportable reports.',
+  },
+
   // ── Learning Assistants ──
   {
     name: 'AI Tutor',
@@ -31,6 +96,13 @@ const aiTools = [
     category: 'Learning Assistants',
     icon: 'fa-face-smile',
     desc: 'Real-time facial tracking and body language analysis for interview prep using TensorFlow.js.',
+  },
+  {
+    name: 'OpenAPI Playground',
+    path: '/pages/tools/openapi-playground/index.html',
+    category: 'Learning Assistants',
+    icon: 'fa-file-code',
+    desc: 'Write OpenAPI specs in YAML/JSON with live syntax highlighting and see them render as interactive Swagger-style documentation in real-time.',
   },
 
   // ── Analysis & Profiling ──
@@ -315,6 +387,20 @@ const aiTools = [
     category: 'Data & Visualization',
     icon: 'fa-flag-checkered',
     desc: 'Compete head-to-head in real-time P2P algorithm races against other learners.',
+  },
+  {
+    name: 'Complexity Diff Studio',
+    path: '/pages/ai-features/complexity-diff-studio/complexity-diff-studio.html',
+    category: 'Analysis & Profiling',
+    icon: 'fa-code-compare',
+    desc: 'Diff two implementations of the same problem and compare their time/space complexity side by side.',
+  },
+  {
+    name: 'RL Grid World',
+    path: '/pages/ai/rl-grid-world/index.html',
+    category: 'Simulations',
+    icon: 'fa-robot',
+    desc: 'Watch a reinforcement learning agent explore a grid world, learning an optimal policy through trial and reward.',
   },
 ];
 

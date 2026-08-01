@@ -3,241 +3,204 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>CNN Layer & Feature Map Explorer | Algo Infinity Verse</title>
-
+    <title>CNN Feature Map Explorer | Algo Infinity Verse</title>
+    <meta
+      name="description"
+      content="Interactive visualizer for Convolutional Neural Networks (CNNs). Draw a digit and watch convolutions, ReLU, and Max Pooling extract features in real-time."
+    />
     <link
-      href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Fira+Code:wght@400;500;600&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Poppins:wght@300;400;500;600;700&family=Fira+Code:wght@400;500;600&display=swap"
       rel="stylesheet"
     />
     <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
     />
-
-    <!-- External Stylesheets -->
-    <link rel="stylesheet" href="/styles.css" />
+    <link rel="stylesheet" href="../../../styles.css" />
     <link rel="stylesheet" href="cnn-visualizer.css" />
+    <script src="../../../modules/toast.js"></script>
   </head>
   <body class="cnn-body">
-    <!-- Navbar Placeholder -->
     <div id="navbar-placeholder"></div>
 
-    <main class="workspace">
-      <!-- Left Panel: Controls -->
-      <div class="panel-left">
-        <div class="panel-header">
-          <h3><i class="fas fa-eye"></i> CNN Explorer</h3>
+    <section class="cnn-hero">
+      <div class="cnn-hero-bg"></div>
+      <div class="cnn-hero-inner">
+        <div class="cnn-eyebrow">Deep Learning Architecture</div>
+        <h1 class="cnn-title">CNN Feature Map Explorer</h1>
+        <p class="cnn-desc">
+          Break open the AI black box. Draw a digit below and physically watch the
+          <strong>Convolutional Filters</strong>, <strong>ReLU Non-Linearity</strong>, and
+          <strong>Max Pooling</strong> mathematically extract features in real-time.
+        </p>
+      </div>
+    </section>
+
+    <div class="cnn-dashboard container">
+      <!-- Top Controls -->
+      <div class="cnn-panel glass-panel mb-4">
+        <div class="cnn-panel-header">
+          <i class="fas fa-sliders-h"></i> Neural Network Hyperparameters
         </div>
 
-        <div class="control-section">
-          <p class="desc-text">
-            Explore how Convolutional Neural Networks extract features from images. Upload your own
-            image or use a preset shape, select a filter, and step through the sliding window math.
-          </p>
-
-          <!-- Input Selection -->
-          <div class="input-group">
-            <label for="imageSelect">Select Input Pattern</label>
-            <select id="imageSelect" class="styled-select">
-              <option value="smiley">Smiley Face</option>
-              <option value="cross">Cross Pattern</option>
-              <option value="circle">Circle Pattern</option>
-              <option value="stripes">Vertical Stripes</option>
-            </select>
-          </div>
-
-          <div class="input-group">
-            <label class="file-upload-label" for="fileInput">
-              <i class="fas fa-upload"></i> Upload Custom Image
-            </label>
-            <input
-              type="file"
-              id="fileInput"
-              accept="image/*"
-              class="file-input"
-              style="display: none"
-            />
-            <small class="hint">Images will be resized to 14x14 grayscale.</small>
-          </div>
-
-          <!-- Kernel Selection -->
-          <div class="input-group">
-            <label for="kernelSelect">Convolution Kernel</label>
-            <select id="kernelSelect" class="styled-select">
-              <option value="sobelV">Sobel Vertical (Edges)</option>
-              <option value="sobelH">Sobel Horizontal (Edges)</option>
-              <option value="ridge">Ridge / Laplacian (All Edges)</option>
+        <div class="cnn-controls-grid">
+          <!-- Kernel Editor -->
+          <div class="cnn-control-group">
+            <label class="text-primary"
+              ><i class="fas fa-border-all"></i> Filter Kernel Matrix (3x3)</label
+            >
+            <div class="cnn-kernel-editor">
+              <input type="number" id="k00" value="-1" step="1" />
+              <input type="number" id="k01" value="-1" step="1" />
+              <input type="number" id="k02" value="-1" step="1" />
+              <input type="number" id="k10" value="-1" step="1" />
+              <input type="number" id="k11" value="8" step="1" />
+              <input type="number" id="k12" value="-1" step="1" />
+              <input type="number" id="k20" value="-1" step="1" />
+              <input type="number" id="k21" value="-1" step="1" />
+              <input type="number" id="k22" value="-1" step="1" />
+            </div>
+            <select class="cnn-select w-100 mt-2" id="kernelPreset">
+              <option value="edge">Edge Detection (Omni)</option>
+              <option value="sobelX">Vertical Edges (Sobel X)</option>
+              <option value="sobelY">Horizontal Edges (Sobel Y)</option>
               <option value="sharpen">Sharpen</option>
-              <option value="gaussian">Gaussian Blur</option>
-              <option value="identity">Identity</option>
+              <option value="blur">Gaussian Blur</option>
             </select>
           </div>
 
-          <!-- Padding & Stride -->
-          <div class="row-inputs">
-            <div class="input-group">
-              <label for="paddingSelect">Padding</label>
-              <select id="paddingSelect" class="styled-select">
-                <option value="0">0 (Valid)</option>
-                <option value="1">1 (Same)</option>
-              </select>
+          <!-- Activations & Toggles -->
+          <div class="cnn-control-group">
+            <label class="text-warning"><i class="fas fa-bolt"></i> Activation & Pooling</label>
+
+            <div class="toggle-row mb-2">
+              <span class="text-sm">ReLU Activation <code class="font-fira">max(0, x)</code></span>
+              <label class="switch">
+                <input type="checkbox" id="reluToggle" checked />
+                <span class="slider round"></span>
+              </label>
             </div>
-            <div class="input-group">
-              <label for="strideSelect">Stride</label>
-              <select id="strideSelect" class="styled-select">
-                <option value="1">1</option>
-                <option value="2">2</option>
-              </select>
+
+            <div class="toggle-row">
+              <span class="text-sm">2x2 Max Pooling Layer</span>
+              <label class="switch">
+                <input type="checkbox" id="poolToggle" checked />
+                <span class="slider round"></span>
+              </label>
             </div>
+
+            <p class="cnn-hint text-center mt-2">
+              Toggle ReLU to see negative pixel values clamp to zero.
+            </p>
           </div>
 
-          <!-- Activation Functions -->
-          <div class="input-group">
-            <label for="activationSelect">Activation Function</label>
-            <select id="activationSelect" class="styled-select">
-              <option value="relu">ReLU (max(0, x))</option>
-              <option value="identity">Identity (Linear)</option>
-            </select>
-          </div>
-
-          <!-- Pooling Layer Settings -->
-          <div class="input-group">
-            <label for="poolingSelect">Pooling Type (2x2, Stride 2)</label>
-            <select id="poolingSelect" class="styled-select">
-              <option value="max">Max Pooling</option>
-              <option value="avg">Average Pooling</option>
-            </select>
-          </div>
-
-          <!-- Hyperparameters -->
-          <div class="sliders-container">
-            <div class="slider-group">
-              <div class="slider-header">
-                <label for="speedSlider">Animation Speed</label>
-                <span id="speedVal" class="val-badge">300ms</span>
-              </div>
-              <input
-                type="range"
-                id="speedSlider"
-                min="50"
-                max="1000"
-                step="50"
-                value="300"
-                aria-label="Animation Speed"
-              />
-            </div>
-          </div>
-
-          <!-- Actions -->
-          <div class="action-buttons-col">
-            <div class="row-btns">
-              <button type="button" id="playBtn" class="btn btn-primary">
-                <i class="fas fa-play"></i> Play
+          <!-- Execution Mode -->
+          <div class="cnn-control-group">
+            <label class="text-success"><i class="fas fa-play"></i> Execution Mode</label>
+            <div class="cnn-btn-group mb-2">
+              <button class="btn btn-primary active" id="btnModeLive">
+                <i class="fas fa-bolt"></i> Live Inference
               </button>
-              <button type="button" id="stepBtn" class="btn btn-accent">
-                <i class="fas fa-step-forward"></i> Step
+              <button class="btn btn-secondary" id="btnModeStep">
+                <i class="fas fa-step-forward"></i> Step-by-Step
               </button>
             </div>
-            <button type="button" id="resetBtn" class="btn btn-secondary">
-              <i class="fas fa-undo"></i> Reset Animation
+            <button class="btn btn-success w-100 mb-2" id="btnNextStep" style="display: none">
+              <i class="fas fa-forward"></i> Next Step
+            </button>
+            <button class="btn btn-danger w-100" id="btnClear">
+              <i class="fas fa-trash"></i> Clear Canvas
             </button>
           </div>
+        </div>
+      </div>
 
-          <!-- Explanations & Math Breakdown -->
-          <div class="stats-panel">
-            <div class="stat-header">Interactive Dot Product</div>
-            <div id="mathFormula" class="math-box">
-              Select a cell on the feature map or click 'Play' to see the sliding dot product.
+      <!-- Network Pipeline Container (Scrollable) -->
+      <div class="cnn-pipeline-wrapper">
+        <div class="cnn-pipeline">
+          <!-- Layer 1: Input -->
+          <div class="cnn-layer glass-panel" id="layer-input">
+            <div class="layer-title text-primary">
+              <i class="fas fa-pen"></i> 1. Input Canvas (28x28)
+            </div>
+            <div class="canvas-container">
+              <!-- Overlay to show the 3x3 sliding window -->
+              <div class="sliding-window" id="inputWindow"></div>
+              <canvas id="inputCanvas" width="280" height="280"></canvas>
+            </div>
+            <div class="layer-desc">
+              Draw a digit here. Pixel intensities (0-255) are fed into the network.
+            </div>
+          </div>
+
+          <div class="pipeline-arrow"><i class="fas fa-arrow-right"></i></div>
+
+          <!-- Layer 2: Convolution + ReLU -->
+          <div class="cnn-layer glass-panel" id="layer-conv">
+            <div class="layer-title text-warning">
+              <i class="fas fa-border-all"></i> 2. Convolution + ReLU (26x26)
+            </div>
+            <div class="canvas-container">
+              <canvas id="convCanvas" width="260" height="260"></canvas>
+              <!-- Math tooltip anchor -->
+              <div id="mathTooltip" class="math-tooltip"></div>
+            </div>
+            <div class="layer-desc">
+              The 3x3 filter scans the input. Hover over any pixel to inspect the matrix
+              multiplication!
+            </div>
+          </div>
+
+          <div class="pipeline-arrow"><i class="fas fa-arrow-right"></i></div>
+
+          <!-- Layer 3: Max Pooling -->
+          <div class="cnn-layer glass-panel" id="layer-pool">
+            <div class="layer-title text-success">
+              <i class="fas fa-compress-arrows-alt"></i> 3. Max Pooling (13x13)
+            </div>
+            <div class="canvas-container">
+              <canvas id="poolCanvas" width="260" height="260"></canvas>
+              <!-- Rendered scaled up for visibility -->
+            </div>
+            <div class="layer-desc">
+              Takes the max value of every 2x2 block, compressing data and ensuring spatial
+              invariance.
+            </div>
+          </div>
+
+          <div class="pipeline-arrow"><i class="fas fa-arrow-right"></i></div>
+
+          <!-- Layer 4: Dense Output -->
+          <div class="cnn-layer glass-panel" id="layer-dense">
+            <div class="layer-title text-danger">
+              <i class="fas fa-brain"></i> 4. Classification
+            </div>
+            <div class="dense-container" id="denseOutput">
+              <!-- 0-9 bars injected here -->
+            </div>
+            <div class="layer-desc">
+              Features flattened and fed to a Softmax output layer. (Simulated predictions based on
+              edge density).
             </div>
           </div>
         </div>
       </div>
+    </div>
 
-      <!-- Right Panel: visual stages of CNN -->
-      <div class="panel-right">
-        <div class="stage-container">
-          <!-- Stage 1: Input Grid -->
-          <div class="stage-card">
-            <div class="stage-title">Input Image (14x14)</div>
-            <div class="grid-wrapper">
-              <div id="inputGrid" class="grid-container pixel-grid"></div>
-            </div>
-          </div>
-
-          <!-- Kernel Weights -->
-          <div class="stage-card compact-card">
-            <div class="stage-title">Kernel (3x3)</div>
-            <div class="grid-wrapper">
-              <div id="kernelGrid" class="grid-container kernel-grid"></div>
-            </div>
-          </div>
-
-          <!-- Stage 2: Feature Map -->
-          <div class="stage-card">
-            <div class="stage-title">Feature Map (Conv + Act)</div>
-            <div class="grid-wrapper">
-              <div id="featureMapGrid" class="grid-container pixel-grid"></div>
-            </div>
-          </div>
-
-          <!-- Stage 3: Pooling Map -->
-          <div class="stage-card">
-            <div class="stage-title">Pooled Map (Downsampled)</div>
-            <div class="grid-wrapper">
-              <div id="pooledGrid" class="grid-container pixel-grid"></div>
-            </div>
-          </div>
-
-          <!-- Stage 4: Dense + Prediction -->
-          <div class="stage-card prediction-card">
-            <div class="stage-title">Softmax Prediction</div>
-            <div class="prediction-list" id="predictionList">
-              <div class="pred-row">
-                <span class="pred-label">Cat</span>
-                <div class="progress-bar-wrap">
-                  <div class="progress-bar" id="bar-cat" style="width: 25%"></div>
-                </div>
-                <span class="pred-pct" id="val-cat">25%</span>
-              </div>
-              <div class="pred-row">
-                <span class="pred-label">Dog</span>
-                <div class="progress-bar-wrap">
-                  <div class="progress-bar" id="bar-dog" style="width: 15%"></div>
-                </div>
-                <span class="pred-pct" id="val-dog">15%</span>
-              </div>
-              <div class="pred-row">
-                <span class="pred-label">Car</span>
-                <div class="progress-bar-wrap">
-                  <div class="progress-bar" id="bar-car" style="width: 40%"></div>
-                </div>
-                <span class="pred-pct" id="val-car">40%</span>
-              </div>
-              <div class="pred-row">
-                <span class="pred-label">Plane</span>
-                <div class="progress-bar-wrap">
-                  <div class="progress-bar" id="bar-plane" style="width: 20%"></div>
-                </div>
-                <span class="pred-pct" id="val-plane">20%</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </main>
-
-    <!-- Footer Placeholder -->
     <div id="footer-placeholder"></div>
 
-    <script src="/auth.js"></script>
-    <script src="/bootstrap-legacy.js"></script>
-    <script src="/script.js"></script>
-    <script type="module" src="/dist/legacy-bundle.mjs"></script>
-    <script src="/theme.js"></script>
+    <script src="../../../auth.js"></script>
+    <script src="../../../script.js"></script>
+    <script src="../../../theme.js"></script>
+    <script src="../../../auth-gate.js"></script>
     <script src="cnn-visualizer.js"></script>
     <script>
-      loadPartial('navbar-placeholder', '/partials/navbar.html');
-      loadPartial('footer-placeholder', '/partials/footer.html');
+      if (typeof loadPartial === 'function') {
+        loadPartial('navbar-placeholder', '/partials/navbar.html').then(function () {
+          if (typeof initNavbar === 'function') initNavbar();
+        });
+        loadPartial('footer-placeholder', '/partials/footer.html');
+      }
     </script>
   </body>
 </html>

@@ -113,6 +113,38 @@
             margin: 0;
         }
 
+        .back-link {
+            position: fixed;
+            top: 1.5rem;
+            left: 1.5rem;
+            z-index: 1000;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.55rem 1rem 0.55rem 0.85rem;
+            background: var(--card-bg);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 100px;
+            color: var(--text-muted);
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.85rem;
+            text-decoration: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+        }
+
+        .back-link:hover {
+            border-color: rgba(139, 92, 246, 0.5);
+            color: var(--accent);
+            background: rgba(139, 92, 246, 0.08);
+        }
+
+        .back-link:hover .back-arrow {
+            transform: translateX(-3px);
+        }
+
         /* Micro-animations */
         @keyframes slideUp {
             from { opacity: 0; transform: translateY(30px); }
@@ -132,6 +164,11 @@
     </style>
 </head>
 <body>
+
+    <a href="/" class="back-link" aria-label="Back to home page">
+        <span class="back-arrow">&larr;</span>
+        <span>Back</span>
+    </a>
 
     <section class="hero">
         <h1>Master System Design</h1>

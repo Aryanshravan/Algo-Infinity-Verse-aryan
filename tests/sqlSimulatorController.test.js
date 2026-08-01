@@ -3,6 +3,12 @@
 // Verifies resetDatabase() validates that initDB() produced a usable
 // database handle before reporting success (Issue #2400) and that
 // executeQuery() refuses to run against an uninitialized database.
+//
+// Issue #2404: the controller now routes its responses through
+// `sendJson(res, status, body)` from `utils/helpers.js`, which under the
+// hood invokes `res.writeHead(status, ...)` then `res.end(JSON.stringify(body))`.
+// The mock below captures the same observable contract so the assertions
+// on `(code, payload)` remain identical.
 
 import { jest } from '@jest/globals';
 
@@ -14,14 +20,14 @@ describe('SQL Simulator controller — DB init validation (Issue #2400)', () => 
   function callHandler(handler, body) {
     return new Promise((resolve) => {
       const res = {
-        _code: 200,
+        _code: undefined,
         _payload: undefined,
-        status(code) {
+        writeHead(code) {
           this._code = code;
           return this;
         },
-        json(payload) {
-          this._payload = payload;
+        end(body) {
+          this._payload = body ? JSON.parse(body) : undefined;
           resolve({ code: this._code, payload: this._payload });
         },
       };
@@ -111,6 +117,127 @@ describe('SQL Simulator controller — DB init validation (Issue #2400)', () => 
       // a late failure (500). Either way it must NOT be success:true.
       expect([500, 503]).toContain(out.code);
       expect(out.payload?.success).toBe(false);
+    });
+  });
+
+  // Issue #2404 — the controller must not bypass the shared response
+  // helper. Prior to #2404, the controller emitted `res.status().json()`
+  // which meant response headers (Content-Type, security headers applied
+  // in `apiRoutes.js` via `applySecurityHeaders`) were not consistent with
+  // the rest of the API surface. The cases below pin the new contract:
+  // the controller routes through `sendJson` which calls `res.writeHead`
+  // then `res.end(JSON.stringify(body))` — the `status`/`json` chain must
+  // NOT be invoked.
+  describe('response-shape invariant (Issue #2404)', () => {
+    let resetDatabase;
+    let executeQuery;
+    let initDB;
+    let getDb;
+
+    beforeAll(async () => {
+      const service = await import('../backend/services/sqlSimulatorService.js');
+      initDB = service.initDB;
+      getDb = service.getDb;
+      const mod = await import('../backend/controllers/sqlSimulatorController.js');
+      resetDatabase = mod.resetDatabase;
+      executeQuery = mod.executeQuery;
+    });
+
+    beforeEach(() => {
+      initDB();
+    });
+
+    function callHandlerWithSpy(handler, body) {
+      return new Promise((resolve) => {
+        const calls = { status: 0, json: 0, writeHead: 0, end: 0 };
+        const res = {
+          writeHead(code) {
+            calls.writeHead += 1;
+            calls._code = code;
+            return this;
+          },
+          end(bodyStr) {
+            calls.end += 1;
+            resolve({
+              code: calls._code,
+              body: bodyStr ? JSON.parse(bodyStr) : undefined,
+              calls,
+            });
+          },
+          status(code) {
+            calls.status += 1;
+            calls._code = code;
+            return this;
+          },
+          json(payload) {
+            calls.json += 1;
+            resolve({ code: calls._code, body: payload, calls });
+          },
+        };
+        const req = { body };
+        handler(req, res);
+      });
+    }
+
+    it('resetDatabase uses sendJson (writeHead+end) and not status/json', async () => {
+      const out = await callHandlerWithSpy(resetDatabase, {});
+      expect(out.calls.writeHead).toBe(1);
+      expect(out.calls.end).toBe(1);
+      expect(out.calls.status).toBe(0);
+      expect(out.calls.json).toBe(0);
+      expect(out.code).toBe(200);
+      expect(out.body.success).toBe(true);
+    });
+
+    it('executeQuery uses sendJson (writeHead+end) and not status/json on success', async () => {
+      const out = await callHandlerWithSpy(executeQuery, {
+        query: 'SELECT 1 AS n',
+      });
+      expect(out.calls.writeHead).toBe(1);
+      expect(out.calls.end).toBe(1);
+      expect(out.calls.status).toBe(0);
+      expect(out.calls.json).toBe(0);
+      expect(out.code).toBe(200);
+      expect(out.body.success).toBe(true);
+      expect(out.body.results[0].n).toBe(1);
+    });
+
+    it('executeQuery uses sendJson even for the 400 empty-query path', async () => {
+      const out = await callHandlerWithSpy(executeQuery, {});
+      expect(out.calls.status).toBe(0);
+      expect(out.calls.json).toBe(0);
+      expect(out.calls.writeHead).toBe(1);
+      expect(out.calls.end).toBe(1);
+      expect(out.code).toBe(400);
+      expect(out.body.error).toMatch(/SQL query is required/);
+    });
+
+    it('executeQuery uses sendJson even for the 400 bad-SQL path', async () => {
+      const out = await callHandlerWithSpy(executeQuery, {
+        query: 'SELECT * FROM no_such_table',
+      });
+      expect(out.calls.status).toBe(0);
+      expect(out.calls.json).toBe(0);
+      expect(out.calls.writeHead).toBe(1);
+      expect(out.calls.end).toBe(1);
+      expect([400, 500]).toContain(out.code);
+      expect(out.body.error).toBeTruthy();
+    });
+
+    it('executeQuery uses sendJson for the 503 DB-not-initialised path', async () => {
+      const liveDb = getDb();
+      try {
+        liveDb.close();
+      } catch (e) {
+        void e;
+      }
+      const out = await callHandlerWithSpy(executeQuery, { query: 'SELECT 1' });
+      expect(out.calls.status).toBe(0);
+      expect(out.calls.json).toBe(0);
+      expect(out.calls.writeHead).toBe(1);
+      expect(out.calls.end).toBe(1);
+      expect([500, 503]).toContain(out.code);
+      expect(out.body.success).toBe(false);
     });
   });
 

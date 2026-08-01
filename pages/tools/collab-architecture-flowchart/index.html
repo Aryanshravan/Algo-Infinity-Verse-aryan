@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Real-Time Collaborative System Architecture Diagrammer — Algo Infinity Verse</title>
+  <meta name="description" content="Collaborative WebRTC system architecture flow diagrammer with live P2P canvas sync, microservice icons, smart connectors, and PNG export." />
+  
+  <link rel="stylesheet" href="../../../styles.css" />
+  <link rel="stylesheet" href="style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+
+  <script>
+    (function() {
+      try {
+        var t = localStorage.getItem('theme');
+        var p = window.matchMedia('(prefers-color-scheme: light)').matches;
+        var theme = t || (p ? 'light' : 'dark');
+        if (theme === 'light') document.documentElement.classList.add('light-mode');
+      } catch (e) {}
+    })();
+  </script>
+</head>
+<body data-page="collab-diagrammer">
+
+  <header class="caf-header">
+    <div class="caf-header-container">
+      <a href="../tools.html" class="caf-back-btn">
+        <i class="fas fa-arrow-left"></i>
+        <span>Developer Tools</span>
+      </a>
+      <div class="caf-title-area">
+        <h1><i class="fas fa-diagram-project"></i> Real-Time Collaborative System Architecture Flow Diagrammer</h1>
+        <p>WebRTC P2P Multi-User Canvas Sync, Architectural Component Library &amp; Connector Routing</p>
+      </div>
+      <div class="caf-header-actions">
+        <button id="btnCreateRoom" class="caf-btn-room"><i class="fas fa-users-viewfinder"></i> Share Room (P2P)</button>
+        <button id="themeToggleBtn" class="caf-icon-btn" title="Toggle Theme">
+          <i class="fas fa-moon"></i>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="caf-main">
+    <!-- P2P STATUS BAR -->
+    <div class="caf-room-bar" id="roomBar">
+      <div class="caf-room-info">
+        <span class="caf-status-dot active"></span>
+        <span id="roomStatusText">WebRTC P2P Peer Room: <strong>#arch-session-8821</strong> (2 Peers Online)</span>
+      </div>
+      <button id="btnCopyInvite" class="caf-btn-sm"><i class="fas fa-copy"></i> Copy Join Link</button>
+    </div>
+
+    <!-- WORKSPACE CANVAS GRID -->
+    <div class="caf-workspace">
+      <!-- SIDEBAR: ARCHITECTURAL COMPONENT PALETTE -->
+      <aside class="caf-palette caf-card">
+        <h3><i class="fas fa-cubes"></i> System Elements</h3>
+        <p class="caf-hint">Click or drag elements onto canvas</p>
+        <div class="caf-palette-items">
+          <div class="caf-item" data-type="loadbalancer"><i class="fas fa-scale-balanced"></i> Load Balancer</div>
+          <div class="caf-item" data-type="gateway"><i class="fas fa-torii-gate"></i> API Gateway</div>
+          <div class="caf-item" data-type="service"><i class="fas fa-server"></i> Microservice</div>
+          <div class="caf-item" data-type="database"><i class="fas fa-database"></i> SQL / NoSQL DB</div>
+          <div class="caf-item" data-type="cache"><i class="fas fa-bolt"></i> Redis Cache</div>
+          <div class="caf-item" data-type="queue"><i class="fas fa-list-ol"></i> Kafka Queue</div>
+          <div class="caf-item" data-type="storage"><i class="fas fa-box-archive"></i> S3 Storage</div>
+          <div class="caf-item" data-type="cdn"><i class="fas fa-globe"></i> CDN Edge</div>
+        </div>
+
+        <div class="caf-actions-panel">
+          <h3><i class="fas fa-wrench"></i> Canvas Actions</h3>
+          <button id="btnClearCanvas" class="caf-btn-tool warning"><i class="fas fa-trash-can"></i> Clear Canvas</button>
+          <button id="btnExportJson" class="caf-btn-tool"><i class="fas fa-file-code"></i> Export JSON</button>
+          <button id="btnExportPng" class="caf-btn-tool primary"><i class="fas fa-download"></i> Export PNG</button>
+        </div>
+      </aside>
+
+      <!-- INTERACTIVE CANVAS -->
+      <div class="caf-canvas-wrapper caf-card" id="canvasWrapper">
+        <div class="caf-canvas" id="architectureCanvas">
+          <!-- Connectors & SVG Lines will be drawn here -->
+          <svg id="svgConnectors" class="caf-svg-layer"></svg>
+          <div id="nodesContainer" class="caf-nodes-layer"></div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script src="script.js" type="module"></script>
+</body>
+</html>

@@ -1,429 +1,494 @@
-/**
- * lsm-tree.js
- * Visualizes an LSM-Tree Storage Engine.
- * Handles MemTable inserts, Write-Ahead Log (WAL), Bloom Filters, 
- * Flush to Disk (Level 0), and Tiered Compaction logic.
- */
-
-document.addEventListener("DOMContentLoaded", () => {
-    initLSMTree();
+document.addEventListener('DOMContentLoaded', () => {
+  initLSM();
 });
 
 // ==========================================
-// 1. ENGINE CONFIG & STATE
+// 1. STATE & CONSTANTS
 // ==========================================
-const CONFIG = {
-    MEMTABLE_MAX: 4,      // Flush when reached
-    L0_MAX_SSTABLES: 4,   // Compact when reached
-    L1_MAX_SSTABLES: 10,
-    BLOOM_SIZE: 10        // Size of bloom filter bit array
-};
+const MEM_CAPACITY = 5;
+const L0_CAPACITY = 4; // SSTables in L0 before compaction
+const BLOOM_SIZE = 8;
+const HASH_FNS = 2;
 
 let state = {
-    seqNumber: 0, // Logical timestamp for conflict resolution
-    wal: [],
-    memTable: [], // Array of { key, val, seq, isTombstone }
-    disk: {
-        level0: [], // Array of SSTable objects
-        level1: [],
-        level2: []
-    },
-    sstCounter: 1,
-    isCompacting: false
+  wal: [], // [{op: 'PUT'|'DEL', k, v}]
+  memtable: new Map(), // sorted visually
+  levels: {
+    0: [], // Array of SSTable objects { id, bloom:[], data: [{k, v, tomb}] }
+    1: [],
+    2: [],
+  },
 };
+
+let sstCounter = 0;
+let isCompacting = false;
+let isReading = false;
 
 // DOM Elements
 const els = {
-    inputKey: document.getElementById('inputKey'),
-    inputValue: document.getElementById('inputValue'),
-    btnInsert: document.getElementById('btnInsert'),
-    btnDelete: document.getElementById('btnDelete'),
-    btnRead: document.getElementById('btnRead'),
-    btnSimulate: document.getElementById('btnSimulateLoad'),
-    
-    walLog: document.getElementById('walLog'),
-    walEmpty: document.getElementById('walEmpty'),
-    queryLogs: document.getElementById('queryLogs'),
-    engineBadge: document.getElementById('engineBadge'),
-    
-    memTableContainer: document.getElementById('memTableContainer'),
-    memTableList: document.getElementById('memTableList'),
-    memTableEmpty: document.getElementById('memTableEmpty'),
-    memSizeDisplay: document.getElementById('memSizeDisplay'),
-    
-    level0Track: document.getElementById('level0Track'),
-    level1Track: document.getElementById('level1Track'),
-    level2Track: document.getElementById('level2Track'),
+  k: document.getElementById('inputKey'),
+  v: document.getElementById('inputValue'),
+  btnPut: document.getElementById('btnPut'),
+  btnDel: document.getElementById('btnDelete'),
+  btnBulk: document.getElementById('btnBulkLoad'),
+  btnCrash: document.getElementById('btnCrash'),
+
+  rKey: document.getElementById('readKey'),
+  btnGet: document.getElementById('btnGet'),
+  readLog: document.getElementById('readPathLog'),
+
+  memList: document.getElementById('memTableList'),
+  memCap: document.getElementById('memCapacity'),
+  walTrack: document.getElementById('walTrack'),
+  status: document.getElementById('statusBoard'),
+
+  tracks: {
+    0: document.getElementById('track-L0'),
+    1: document.getElementById('track-L1'),
+    2: document.getElementById('track-L2'),
+  },
+
+  bloom: {
+    overlay: document.getElementById('bloomOverlay'),
+    targetKey: document.getElementById('bloomTargetKey'),
+    targetSST: document.getElementById('bloomTargetSST'),
+    bits: document.getElementById('bloomBitArray'),
+    result: document.getElementById('bloomResult'),
+  },
 };
 
-function initLSMTree() {
-    bindEvents();
-}
-
-function bindEvents() {
-    els.btnInsert.addEventListener('click', () => {
-        const k = parseInt(els.inputKey.value);
-        const v = els.inputValue.value.trim();
-        if (isNaN(k) || !v) return void 0;
-        handleWrite(k, v, false);
-    });
-
-    els.btnDelete.addEventListener('click', () => {
-        const k = parseInt(els.inputKey.value);
-        if (isNaN(k)) return void 0;
-        handleWrite(k, null, true);
-    });
-
-    els.btnRead.addEventListener('click', async () => {
-        if (state.isCompacting) return void 0;
-        const k = parseInt(els.inputKey.value);
-        if (isNaN(k)) return void 0;
-        await handleRead(k);
-    });
-
-    els.btnSimulate.addEventListener('click', simulateWorkload);
-}
-
-function logQuery(msg, type = 'sys') {
-    const div = document.createElement('div');
-    div.className = `log-entry ${type}`;
-    div.textContent = msg;
-    els.queryLogs.appendChild(div);
-    els.queryLogs.scrollTop = els.queryLogs.scrollHeight;
-}
-
-const sleep = ms => new Promise(r => setTimeout(r, ms));
-
 // ==========================================
-// 2. WRITE PATH (WAL & MEMTABLE)
+// 2. CORE LOGIC (WRITE PATH)
 // ==========================================
-async function handleWrite(key, val, isTombstone) {
-    if (state.isCompacting) return;
-    
-    state.seqNumber++;
-    const entry = { key, val, seq: state.seqNumber, isTombstone };
 
-    // 1. Append to WAL
-    state.wal.push(entry);
-    renderWALEntry(entry);
+function initLSM() {
+  els.btnPut.addEventListener('click', () => handleWrite('PUT'));
+  els.btnDel.addEventListener('click', () => handleWrite('DEL'));
+  els.btnBulk.addEventListener('click', bulkLoad);
+  els.btnCrash.addEventListener('click', simulateCrash);
+  els.btnGet.addEventListener('click', handleRead);
 
-    // 2. Insert into MemTable (Keep Sorted)
-    // Remove existing key if present to represent in-place update in memory
-    state.memTable = state.memTable.filter(item => item.key !== key);
-    state.memTable.push(entry);
-    state.memTable.sort((a, b) => a.key - b.key); // Sorted by Key
+  renderMemTable();
+  renderLevels();
+}
 
+function updateStatus(msg, isWarn = false) {
+  els.status.textContent = msg;
+  if (isWarn) {
+    els.status.classList.add('status-compaction');
+  } else {
+    els.status.classList.remove('status-compaction');
+  }
+}
+
+async function handleWrite(op) {
+  if (isCompacting) return;
+
+  let key = els.k.value.trim();
+  let val = els.v.value.trim();
+  if (!key) return;
+  if (op === 'DEL') val = 'TOMBSTONE';
+
+  // 1. Write to WAL
+  state.wal.push({ op, k: key, v: val });
+  renderWAL();
+
+  // 2. Write to MemTable
+  state.memtable.set(key, { v: val, tomb: op === 'DEL' });
+  renderMemTable();
+
+  els.k.value = '';
+  els.v.value = '';
+
+  // 3. Check Capacity
+  if (state.memtable.size >= MEM_CAPACITY) {
+    await flushMemTable();
+  }
+}
+
+async function bulkLoad() {
+  if (isCompacting) return;
+  const items = 10;
+  for (let i = 0; i < items; i++) {
+    els.k.value = `key${Math.floor(Math.random() * 100)}`;
+    els.v.value = `val${Math.floor(Math.random() * 1000)}`;
+    await handleWrite('PUT');
+    // small delay for visual if needed, but synchronous flush will block
+  }
+}
+
+async function simulateCrash() {
+  if (isCompacting) return;
+
+  // Wipe RAM
+  state.memtable.clear();
+  renderMemTable();
+
+  updateStatus('POWER OUTAGE! Wiping RAM...', true);
+  await sleep(1000);
+
+  updateStatus('Rebuilding from WAL...', true);
+
+  // Replay WAL
+  for (let entry of state.wal) {
+    state.memtable.set(entry.k, { v: entry.v, tomb: entry.op === 'DEL' });
     renderMemTable();
+    await sleep(200);
+  }
 
-    // 3. Check Flush condition
-    if (state.memTable.length >= CONFIG.MEMTABLE_MAX) {
-        await flushMemTable();
+  updateStatus('System Recovered.');
+
+  if (state.memtable.size >= MEM_CAPACITY) {
+    await flushMemTable();
+  }
+}
+
+async function flushMemTable() {
+  isCompacting = true;
+  updateStatus('Flushing MemTable to L0...', true);
+  await sleep(800);
+
+  // Sort memtable
+  const sortedData = Array.from(state.memtable.entries())
+    .sort((a, b) => a[0].localeCompare(b[0]))
+    .map(([k, meta]) => ({ k, v: meta.v, tomb: meta.tomb }));
+
+  // Build SSTable
+  const id = `SST-${++sstCounter}`;
+  const bloom = buildBloomFilter(sortedData);
+
+  const sst = { id, bloom, data: sortedData };
+
+  // Clear RAM
+  state.memtable.clear();
+  state.wal = [];
+  renderMemTable();
+  renderWAL();
+
+  // Add to L0
+  state.levels[0].unshift(sst); // newest first (L0 reads reverse chrono)
+  renderLevels();
+
+  await sleep(500);
+  updateStatus('System Idle...');
+  isCompacting = false;
+
+  // Trigger compaction if L0 full
+  if (state.levels[0].length >= L0_CAPACITY) {
+    await triggerCompaction(0);
+  }
+}
+
+// ==========================================
+// 3. COMPACTION ENGINE
+// ==========================================
+
+async function triggerCompaction(level) {
+  if (level > 1) return; // L2 is our max for visualization
+  isCompacting = true;
+  updateStatus(`Compacting L${level} -> L${level + 1}...`, true);
+
+  // Highlight SSTables participating
+  const tracksEl = els.tracks[level];
+  Array.from(tracksEl.children).forEach((c) => c.classList.add('compacting'));
+  if (els.tracks[level + 1]) {
+    Array.from(els.tracks[level + 1].children).forEach((c) => c.classList.add('compacting'));
+  }
+
+  await sleep(1000);
+
+  // In a real system, we select overlapping SSTs. Here we just merge all L_n + L_{n+1}
+  const allSsts = [...state.levels[level], ...state.levels[level + 1]];
+
+  // Merge all data, resolving versions (newer wins)
+  // To resolve, we must process from newest to oldest.
+  // Since L0 is [newest, oldest] and L1 is older, we reverse to process oldest to newest so newest overwrites.
+  allSsts.reverse();
+
+  const mergedMap = new Map();
+  allSsts.forEach((sst) => {
+    sst.data.forEach((item) => {
+      mergedMap.set(item.k, item); // latest overrides
+    });
+  });
+
+  // Sort
+  let mergedArray = Array.from(mergedMap.values()).sort((a, b) => a.k.localeCompare(b.k));
+
+  // If compacting into deep level (L2), physically purge Tombstones!
+  if (level + 1 === 2) {
+    mergedArray = mergedArray.filter((i) => !i.tomb);
+  }
+
+  // Chunk into new SSTables (Max 5 keys per SST for visual)
+  const newSSTs = [];
+  for (let i = 0; i < mergedArray.length; i += 5) {
+    const chunk = mergedArray.slice(i, i + 5);
+    newSSTs.push({
+      id: `SST-${++sstCounter}`,
+      bloom: buildBloomFilter(chunk),
+      data: chunk,
+    });
+  }
+
+  // Update levels
+  state.levels[level] = [];
+  state.levels[level + 1] = newSSTs;
+
+  renderLevels();
+  updateStatus('System Idle...');
+  isCompacting = false;
+
+  // Cascade if needed (Visual limits)
+  if (level + 1 === 1 && state.levels[1].length > 4) {
+    await triggerCompaction(1);
+  }
+}
+
+// ==========================================
+// 4. READ PATH & BLOOM FILTERS
+// ==========================================
+
+// Simple pseudo-hash
+function hashKey(key, seed) {
+  let hash = 0;
+  for (let i = 0; i < key.length; i++) {
+    hash = (hash << 5) - hash + key.charCodeAt(i) + seed;
+    hash = hash & hash; // Convert to 32bit int
+  }
+  return Math.abs(hash) % BLOOM_SIZE;
+}
+
+function buildBloomFilter(data) {
+  const bits = new Array(BLOOM_SIZE).fill(0);
+  data.forEach((item) => {
+    if (!item.tomb) {
+      for (let i = 1; i <= HASH_FNS; i++) {
+        bits[hashKey(item.k, i)] = 1;
+      }
     }
+  });
+  return bits;
 }
 
-function renderWALEntry(entry) {
-    els.walEmpty.style.display = 'none';
-    const div = document.createElement('div');
-    div.className = `wal-entry ${entry.isTombstone ? 'del' : ''}`;
-    const cmd = entry.isTombstone ? 'DEL' : 'PUT';
-    const valStr = entry.isTombstone ? 'null' : `'${entry.val}'`;
-    div.innerHTML = `<span>[Seq:${entry.seq}] ${cmd}</span> <span>K:${entry.key} V:${valStr}</span>`;
-    els.walLog.appendChild(div);
-    els.walLog.scrollTop = els.walLog.scrollHeight;
+function checkBloomFilter(key, bloomArray) {
+  const checks = [];
+  let maybe = true;
+  for (let i = 1; i <= HASH_FNS; i++) {
+    const idx = hashKey(key, i);
+    checks.push(idx);
+    if (bloomArray[idx] === 0) maybe = false;
+  }
+  return { maybe, checks };
 }
+
+function logRead(msg, type = 'info') {
+  const div = document.createElement('div');
+  div.className = `log-step`;
+  if (type === 'hit') div.classList.add('log-hit');
+  if (type === 'miss') div.classList.add('log-miss');
+  if (type === 'bloom') div.classList.add('log-bloom');
+  div.textContent = msg;
+  els.readLog.appendChild(div);
+  els.readLog.scrollTop = els.readLog.scrollHeight;
+}
+
+async function handleRead() {
+  if (isCompacting || isReading) return;
+  const key = els.rKey.value.trim();
+  if (!key) return;
+
+  isReading = true;
+  els.readLog.innerHTML = ''; // clear
+  logRead(`GET: Searching for '${key}'`);
+
+  // 1. Check MemTable
+  logRead(`Checking MemTable (RAM)...`);
+  await sleep(400);
+  if (state.memtable.has(key)) {
+    const item = state.memtable.get(key);
+    if (item.tomb) {
+      logRead(`HIT (Tombstone): '${key}' was explicitly deleted.`, 'hit');
+    } else {
+      logRead(`HIT: Found in MemTable! Value: ${item.v}`, 'hit');
+    }
+    isReading = false;
+    return;
+  }
+
+  logRead(`MISS: Not in MemTable. Falling back to Disk.`, 'miss');
+
+  // 2. Check Disk Levels (L0, then L1, then L2)
+  for (let L = 0; L <= 2; L++) {
+    const ssts = state.levels[L];
+    if (ssts.length === 0) continue;
+
+    logRead(`Scanning Level ${L}...`);
+
+    for (let sst of ssts) {
+      // Highlight SST
+      const blockId = `ui-${sst.id}`;
+      const blockEl = document.getElementById(blockId);
+      if (blockEl) blockEl.classList.add('reading');
+
+      // Bloom Check
+      logRead(`Checking Bloom Filter for ${sst.id}...`, 'bloom');
+      const { maybe, checks } = checkBloomFilter(key, sst.bloom);
+      await animateBloomModal(key, sst.id, sst.bloom, checks, maybe);
+
+      if (!maybe) {
+        logRead(`Bloom Result: Definitive NOT PRESENT. Skipped Disk Read!`, 'bloom');
+        if (blockEl) blockEl.classList.remove('reading');
+        continue; // Skip disk read
+      }
+
+      logRead(`Bloom Result: MAYBE. Performing expensive Disk Binary Search...`, 'miss');
+      await sleep(600);
+
+      // Binary search in sorted array
+      const found = sst.data.find((i) => i.k === key);
+
+      if (found) {
+        // Highlight row
+        if (blockEl) {
+          const rId = `row-${sst.id}-${key}`;
+          const rEl = document.getElementById(rId);
+          if (rEl) rEl.classList.add('highlight');
+        }
+
+        if (found.tomb) {
+          logRead(`HIT (Tombstone): '${key}' was deleted.`, 'hit');
+        } else {
+          logRead(`HIT: Found on Disk! Value: ${found.v}`, 'hit');
+        }
+        setTimeout(() => {
+          if (blockEl) blockEl.classList.remove('reading');
+        }, 1000);
+        isReading = false;
+        return;
+      } else {
+        logRead(`FALSE POSITIVE! Wasted disk read. Key not found.`, 'miss');
+      }
+      if (blockEl) blockEl.classList.remove('reading');
+    }
+  }
+
+  logRead(`404 NOT FOUND: Key '${key}' does not exist in DB.`, 'miss');
+  isReading = false;
+}
+
+async function animateBloomModal(key, sstId, bloomArray, checks, isMaybe) {
+  const o = els.bloom.overlay;
+  els.bloom.targetKey.textContent = key;
+  els.bloom.targetSST.textContent = sstId;
+
+  // Render bits
+  els.bloom.bits.innerHTML = '';
+  const bitEls = [];
+  for (let i = 0; i < BLOOM_SIZE; i++) {
+    const b = document.createElement('div');
+    b.className = 'b-box';
+    b.textContent = bloomArray[i];
+    els.bloom.bits.appendChild(b);
+    bitEls.push(b);
+  }
+
+  els.bloom.result.textContent = 'Hashing...';
+  els.bloom.result.className = 'lsm-bloom-result';
+
+  o.classList.add('visible');
+
+  // Animate checks
+  for (let i = 0; i < checks.length; i++) {
+    await sleep(300);
+    const idx = checks[i];
+    bitEls[idx].classList.add('hit');
+  }
+
+  await sleep(500);
+  if (isMaybe) {
+    els.bloom.result.textContent = 'Result: MAYBE';
+    els.bloom.result.classList.add('res-maybe');
+  } else {
+    els.bloom.result.textContent = 'Result: ABSOLUTELY NOT';
+    els.bloom.result.classList.add('res-miss');
+  }
+
+  await sleep(1200);
+  o.classList.remove('visible');
+}
+
+// ==========================================
+// 5. RENDERING ENGINE
+// ==========================================
 
 function renderMemTable() {
-    els.memSizeDisplay.textContent = state.memTable.length;
-    
-    if (state.memTable.length === 0) {
-        els.memTableEmpty.style.display = 'block';
-        els.memTableList.innerHTML = '';
-        return;
-    }
-    
-    els.memTableEmpty.style.display = 'none';
-    els.memTableList.innerHTML = '';
-    
-    state.memTable.forEach(item => {
-        const div = document.createElement('div');
-        div.className = 'kv-pair';
-        div.style.border = '1px solid #475569';
-        if (item.isTombstone) {
-            div.innerHTML = `<span class="kv-key">${item.key}</span><span class="kv-tombstone">DEL</span>`;
-        } else {
-            div.innerHTML = `<span class="kv-key">${item.key}</span><span class="kv-val">${item.val}</span>`;
-        }
-        els.memTableList.appendChild(div);
+  els.memList.innerHTML = '';
+  const sortedKeys = Array.from(state.memtable.keys()).sort();
+
+  sortedKeys.forEach((k) => {
+    const item = state.memtable.get(k);
+    const row = document.createElement('div');
+    row.className = 'data-row';
+    if (item.tomb) row.classList.add('tombstone');
+
+    row.innerHTML = `<span>${k}</span><span>${item.v}</span>`;
+    els.memList.appendChild(row);
+  });
+
+  els.memCap.textContent = `${state.memtable.size} / ${MEM_CAPACITY}`;
+}
+
+function renderWAL() {
+  els.walTrack.innerHTML = '';
+  // Show last 10 for visual constraints
+  const visibleWal = state.wal.slice(-10);
+  visibleWal.forEach((e) => {
+    const d = document.createElement('div');
+    d.className = `wal-entry ${e.op === 'DEL' ? 'tomb' : ''}`;
+    d.textContent = e.k;
+    els.walTrack.appendChild(d);
+  });
+  els.walTrack.scrollLeft = els.walTrack.scrollWidth;
+}
+
+function renderLevels() {
+  for (let L = 0; L <= 2; L++) {
+    const track = els.tracks[L];
+    track.innerHTML = '';
+
+    state.levels[L].forEach((sst) => {
+      const block = document.createElement('div');
+      block.className = 'sstable-block';
+      block.id = `ui-${sst.id}`;
+
+      // Header
+      let html = `<div class="sst-header">${sst.id}</div>`;
+
+      // Bloom
+      html += `<div class="sst-bloom">`;
+      sst.bloom.forEach((bit) => {
+        html += `<div class="bloom-bit ${bit === 1 ? 'on' : ''}"></div>`;
+      });
+      html += `</div>`;
+
+      // Body
+      html += `<div class="sst-body">`;
+      sst.data.forEach((d) => {
+        html += `<div class="sst-row ${d.tomb ? 'tomb' : ''}" id="row-${sst.id}-${d.k}">
+                    <span>${d.k}</span>
+                    <span>${d.tomb ? 'DEL' : d.v.substring(0, 4)}</span>
+                </div>`;
+      });
+      html += `</div>`;
+
+      block.innerHTML = html;
+      track.appendChild(block);
     });
+  }
 }
 
-// ==========================================
-// 3. FLUSH & SSTABLE CREATION
-// ==========================================
-async function flushMemTable() {
-    logQuery("MemTable full. Flushing to Level 0...", "info");
-    els.memTableContainer.classList.add('flash-flush');
-    await sleep(400);
-
-    // Create SSTable Data Structure
-    const sstable = createSSTable(state.memTable);
-    
-    // Push to Disk Level 0
-    state.disk.level0.push(sstable);
-    
-    // Clear Memory
-    state.memTable = [];
-    state.wal = [];
-    els.walLog.innerHTML = '<div class="empty-state-text" id="walEmpty">WAL flushed to disk.</div>';
-    els.walEmpty = document.getElementById('walEmpty');
-    
-    renderMemTable();
-    renderDisk();
-    
-    els.memTableContainer.classList.remove('flash-flush');
-    logQuery(`Flushed SSTable_${sstable.id} to L0.`, "success");
-
-    // Check Compaction condition
-    if (state.disk.level0.length >= CONFIG.L0_MAX_SSTABLES) {
-        await triggerCompaction(0);
-    }
-}
-
-class BloomFilter {
-    constructor(size) {
-        this.size = size;
-        this.bits = new Array(size).fill(0);
-    }
-    // Simple mock hash functions
-    add(key) {
-        this.bits[key % this.size] = 1;
-        this.bits[(key * 3) % this.size] = 1;
-    }
-    mightContain(key) {
-        return this.bits[key % this.size] === 1 && this.bits[(key * 3) % this.size] === 1;
-    }
-}
-
-function createSSTable(dataArray) {
-    const filter = new BloomFilter(CONFIG.BLOOM_SIZE);
-    dataArray.forEach(item => filter.add(item.key));
-    
-    return {
-        id: state.sstCounter++,
-        keys: [...dataArray], // clone
-        bloomFilter: filter,
-        minKey: dataArray[0].key,
-        maxKey: dataArray[dataArray.length - 1].key
-    };
-}
-
-// ==========================================
-// 4. COMPACTION ENGINE
-// ==========================================
-async function triggerCompaction(level) {
-    state.isCompacting = true;
-    els.engineBadge.classList.add('compacting');
-    els.engineBadge.innerHTML = '<i class="fas fa-cog fa-spin"></i> Compacting...';
-    
-    const currentLevelArr = state.disk[`level${level}`];
-    const nextLevelArr = state.disk[`level${level + 1}`];
-    
-    logQuery(`Triggering Compaction for Level ${level}...`, "info");
-    
-    // Visual flash
-    const track = document.getElementById(`level${level}Track`);
-    track.classList.add('flash-compact');
-    await sleep(1000);
-
-    // 1. Gather all tables from current level (and potentially overlapping ones in next level for true LSM, but for visual simplicity we just push down current level and merge).
-    // To be more accurate to Level-tiered compaction: we merge L(i) with overlapping L(i+1). 
-    // Here we merge ALL of L0 into new tables, and append to L1. If L1 is full, we merge ALL L1 into L2.
-    
-    let allData = [];
-    currentLevelArr.forEach(sst => allData = allData.concat(sst.keys));
-    if (nextLevelArr) {
-        nextLevelArr.forEach(sst => allData = allData.concat(sst.keys));
-    }
-
-    // 2. Merge Sort and Deduplicate
-    // Sort by Key ascending. If keys tie, sort by Sequence Number descending (latest wins)
-    allData.sort((a, b) => {
-        if (a.key === b.key) return b.seq - a.seq; 
-        return a.key - b.key;
-    });
-
-    let mergedData = [];
-    let lastKey = null;
-    
-    allData.forEach(item => {
-        if (item.key !== lastKey) {
-            // Drop tombstones ONLY if we are merging into the final deep archive level
-            // In a real DB, you keep tombstones until max level so they can mask older records.
-            if (level === 1 && item.isTombstone) {
-                // Drop it completely
-            } else {
-                mergedData.push(item);
-            }
-            lastKey = item.key;
-        }
-    });
-
-    // 3. Chunk into new SSTables
-    let newSSTables = [];
-    for (let i = 0; i < mergedData.length; i += CONFIG.MEMTABLE_MAX) {
-        const chunk = mergedData.slice(i, i + CONFIG.MEMTABLE_MAX);
-        newSSTables.push(createSSTable(chunk));
-    }
-
-    // 4. Update Disk State
-    state.disk[`level${level}`] = []; // Clear current level
-    if (level < 2) {
-        state.disk[`level${level + 1}`] = newSSTables;
-    }
-    
-    renderDisk();
-    track.classList.remove('flash-compact');
-    logQuery(`Compaction complete. Promoted to Level ${level + 1}.`, "success");
-
-    // 5. Cascade Compaction if next level overflowed
-    if (level === 0 && state.disk.level1.length >= CONFIG.L1_MAX_SSTABLES) {
-        await triggerCompaction(1);
-    }
-
-    state.isCompacting = false;
-    els.engineBadge.classList.remove('compacting');
-    els.engineBadge.innerHTML = '<i class="fas fa-database"></i> NoSQL Engine: Active';
-}
-
-// ==========================================
-// 5. READ PATH (GET)
-// ==========================================
-async function handleRead(key) {
-    logQuery(`> Searching for Key: ${key}...`, "sys");
-    
-    // 1. Check MemTable
-    const memResult = state.memTable.find(item => item.key === key);
-    if (memResult) {
-        if (memResult.isTombstone) return logQuery(`Key ${key} was DELETED in MemTable.`, "error");
-        return logQuery(`Found Key ${key} in MemTable -> '${memResult.val}'`, "success");
-    }
-
-    // 2. Check Disk Levels (L0 -> L1 -> L2)
-    // Because L0 can have overlapping keys, we should search L0 backwards (newest first)
-    // Then L1, L2.
-    const searchOrder = [
-        { name: 'L0', tables: [...state.disk.level0].reverse() }, // L0 flushed sequentially, newest at end
-        { name: 'L1', tables: state.disk.level1 },
-        { name: 'L2', tables: state.disk.level2 }
-    ];
-
-    for (let tier of searchOrder) {
-        for (let sst of tier.tables) {
-            
-            // Visual feedback
-            const sstDOM = document.getElementById(`sst-${sst.id}`);
-            if (sstDOM) sstDOM.classList.add('searching');
-            await sleep(300); // Simulate disk seek latency
-            
-            // Bloom Filter Check
-            if (!sst.bloomFilter.mightContain(key)) {
-                logQuery(`Bloom Filter skipped SSTable_${sst.id} in ${tier.name}.`);
-                if (sstDOM) sstDOM.classList.remove('searching');
-                continue;
-            }
-            
-            // False positive or Hit? Binary search the keys array
-            const hit = sst.keys.find(item => item.key === key);
-            
-            if (hit) {
-                // Highlight hit row
-                const row = document.getElementById(`sst-${sst.id}-k-${key}`);
-                if (row) row.classList.add('found');
-                await sleep(500);
-                
-                if (sstDOM) sstDOM.classList.remove('searching');
-                if (row) row.classList.remove('found');
-                
-                if (hit.isTombstone) return logQuery(`Key ${key} found as TOMBSTONE in ${tier.name}.`, "error");
-                return logQuery(`Found Key ${key} in ${tier.name} (SSTable_${sst.id}) -> '${hit.val}'`, "success");
-            } else {
-                logQuery(`Bloom Filter False Positive in SSTable_${sst.id}!`);
-            }
-            
-            if (sstDOM) sstDOM.classList.remove('searching');
-        }
-    }
-
-    logQuery(`Key ${key} does not exist in the database.`, "error");
-}
-
-// ==========================================
-// 6. DISK UI RENDERING
-// ==========================================
-function renderDisk() {
-    renderLevel(state.disk.level0, els.level0Track);
-    renderLevel(state.disk.level1, els.level1Track);
-    renderLevel(state.disk.level2, els.level2Track);
-}
-
-function renderLevel(tables, container) {
-    container.innerHTML = '';
-    
-    tables.forEach(sst => {
-        const div = document.createElement('div');
-        div.className = 'sstable';
-        div.id = `sst-${sst.id}`;
-        
-        // Render Bloom Filter Bits visually
-        let bloomHtml = `<div class="bloom-filter">`;
-        sst.bloomFilter.bits.forEach(bit => {
-            bloomHtml += `<div class="bloom-bit ${bit ? 'active' : ''}"></div>`;
-        });
-        bloomHtml += `</div>`;
-        
-        // Render Keys
-        let keysHtml = `<div class="sstable-data">`;
-        sst.keys.forEach(k => {
-            if (k.isTombstone) {
-                keysHtml += `<div class="kv-pair" id="sst-${sst.id}-k-${k.key}"><span class="kv-key">${k.key}</span><span class="kv-tombstone">DEL</span></div>`;
-            } else {
-                keysHtml += `<div class="kv-pair" id="sst-${sst.id}-k-${k.key}"><span class="kv-key">${k.key}</span><span class="kv-val">${k.val}</span></div>`;
-            }
-        });
-        keysHtml += `</div>`;
-
-        div.innerHTML = `
-            <div class="sstable-header">SSTable_${sst.id}</div>
-            ${bloomHtml}
-            ${keysHtml}
-        `;
-        container.appendChild(div);
-    });
-}
-
-// ==========================================
-// 7. SIMULATION UTILITIES
-// ==========================================
-async function simulateWorkload() {
-    if (state.isCompacting) return void 0;
-    
-    els.btnSimulate.disabled = true;
-    els.btnSimulate.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Blasting Data...';
-    
-    for (let i = 1; i <= 20; i++) {
-        // Randomly update existing keys to force overwrites/tombstones
-        const key = Math.floor(Math.random() * 15) + 1;
-        const val = `V_${Math.random().toString(36).substring(2,5).toUpperCase()}`;
-        
-        // 10% chance to delete
-        if (Math.random() > 0.9) {
-            await handleWrite(key, null, true);
-        } else {
-            await handleWrite(key, val, false);
-        }
-        await sleep(150); // Small delay for visual tracking
-    }
-    
-    els.btnSimulate.disabled = false;
-    els.btnSimulate.innerHTML = '<i class="fas fa-bolt"></i> Simulate Write-Heavy Workload';
+// Utils
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }

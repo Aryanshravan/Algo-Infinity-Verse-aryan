@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Contest Archive — Algo Infinity Verse</title>
+    <meta
+      name="description"
+      content="Browse every past coding contest on Algo Infinity Verse — revisit the date each round ran, attempt its problems for practice, and see the final leaderboard standings."
+    />
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Algo Infinity Verse" />
+    <meta property="og:title" content="Contest Archive — Algo Infinity Verse" />
+    <meta
+      property="og:description"
+      content="Revisit finished coding contests: re-attempt their problems for practice and see the final standings."
+    />
+
+    <link rel="stylesheet" href="/styles.css" />
+    <link rel="stylesheet" href="/pages/home/home.css" />
+    <link rel="stylesheet" href="archive.css" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+
+    <!-- Theme Initialization Script -->
+    <script>
+      (function () {
+        try {
+          var storedTheme = localStorage.getItem('theme');
+          var prefersLight = window.matchMedia('(prefers-color-scheme: light)').matches;
+          var theme = storedTheme || (prefersLight ? 'light' : 'dark');
+          if (theme === 'light') {
+            document.documentElement.classList.add('light-mode');
+          } else {
+            document.documentElement.classList.remove('light-mode');
+          }
+        } catch (e) {}
+      })();
+    </script>
+  </head>
+  <body data-page="contest-archive" data-no-loading>
+    <!-- Skip to content -->
+    <a href="#main" class="skip-link">Skip to main content</a>
+
+    <!-- Scroll to Top Button -->
+    <button type="button" id="scrollTopBtn" class="scroll-top-btn" aria-label="Scroll to top">
+      <i class="fas fa-arrow-up"></i>
+    </button>
+
+    <!-- Navigation Bar -->
+    <div id="navbar-placeholder"></div>
+
+    <main id="main" tabindex="-1">
+      <!-- ==================================================================== -->
+      <!-- HERO + LATEST PODIUM (homepage design pattern)                        -->
+      <!-- ==================================================================== -->
+      <section class="hp-hero ca-hero">
+        <div class="hp-hero-shapes" aria-hidden="true">
+          <div class="hp-shape"></div>
+          <div class="hp-shape"></div>
+          <div class="hp-shape"></div>
+          <div class="hp-shape"></div>
+          <div class="hp-shape"></div>
+        </div>
+
+        <div class="hp-hero-content ca-hero-content">
+          <h1 class="hp-hero-title">
+            The record of<br />
+            <span class="hp-gradient-text">every contest</span>
+          </h1>
+
+          <p class="hp-hero-subtitle">
+            Finished rounds never fade. Browse past contests, attempt their problems for practice,
+            and see how the final standings played out.
+          </p>
+
+          <div class="hp-hero-actions">
+            <a href="#past-contests" class="hp-btn hp-btn-primary">
+              <i class="fas fa-book-open"></i> Browse the archive
+            </a>
+            <a href="contest.html" class="hp-btn hp-btn-secondary">
+              <i class="fas fa-trophy"></i> Compete in live contests
+            </a>
+          </div>
+
+          <!-- Latest round winners — the podium -->
+          <div class="ca-podium-wrap" id="caPodiumWrap" hidden>
+            <p class="ca-podium-label" id="caPodiumLabel"></p>
+            <div class="ca-podium" id="caPodium"></div>
+          </div>
+
+          <div class="hp-hero-stats ca-hero-stats">
+            <div class="hp-stat-item">
+              <span class="hp-stat-number" id="caStatContests">0</span>
+              <span class="hp-stat-label">Rounds hosted</span>
+            </div>
+            <div class="hp-stat-item">
+              <span class="hp-stat-number" id="caStatProblems">0</span>
+              <span class="hp-stat-label">Problems in the archive</span>
+            </div>
+            <div class="hp-stat-item">
+              <span class="hp-stat-number" id="caStatParticipants">0</span>
+              <span class="hp-stat-label">All-time participants</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==================================================================== -->
+      <!-- PAST CONTESTS — chronological roll of honor                          -->
+      <!-- ==================================================================== -->
+      <section id="past-contests" class="hp-section">
+        <div class="hp-section-header">
+          <div class="hp-section-eyebrow">Roll of Honor</div>
+          <h2 class="hp-section-title">Past contests</h2>
+          <p class="hp-section-subtitle">
+            Every round stays open for practice — problems and final standings live on below, newest
+            first.
+          </p>
+        </div>
+
+        <div class="ca-list-wrap">
+          <div class="ca-list" id="caList">
+            <noscript>
+              <p class="ca-nojs">Enable JavaScript to load the contest archive.</p>
+            </noscript>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==================================================================== -->
+      <!-- CTA BAND                                                              -->
+      <!-- ==================================================================== -->
+      <section class="hp-cta-band hp-reveal">
+        <h2 class="hp-cta-title">The next round starts soon</h2>
+        <p class="hp-cta-subtitle">
+          Compete against the community, climb the leaderboard, and add your name to the roll of
+          honor.
+        </p>
+        <a href="contest.html" class="hp-btn hp-btn-primary">
+          <i class="fas fa-flag-checkered"></i> View live contests
+        </a>
+      </section>
+    </main>
+
+    <script src="/auth.js"></script>
+    <script src="/bootstrap-legacy.js"></script>
+    <script src="/script.js"></script>
+    <script type="module" src="/dist/legacy-bundle.mjs"></script>
+    <script src="/theme.js"></script>
+    <script src="/data/contest-archive.js"></script>
+    <script src="archive.js"></script>
+    <!-- Homepage JS: powers hp-reveal scroll animations -->
+    <script src="/pages/home/home.js"></script>
+    <script>
+      if (typeof loadPartial === 'function') {
+        loadPartial('navbar-placeholder', '/partials/navbar.html');
+      }
+    </script>
+  </body>
+</html>

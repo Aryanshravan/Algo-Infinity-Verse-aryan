@@ -1,0 +1,117 @@
+name: Lock Conversations
+
+on:
+  issues:
+    types: [closed]
+  pull_request:
+    types: [closed]
+  workflow_dispatch:
+
+permissions:
+  issues: write
+  pull-requests: write
+
+jobs:
+  lock-single:
+    if: github.event_name != 'workflow_dispatch'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Lock closed issue
+        if: github.event_name == 'issues'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            await github.rest.issues.lock({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              lock_reason: "resolved"
+            });
+
+      - name: Lock merged PR
+        if: github.event_name == 'pull_request' && github.event.pull_request.merged == true
+        uses: actions/github-script@v7
+        with:
+          script: |
+            await github.rest.issues.lock({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              lock_reason: "resolved"
+            });
+
+  lock-existing:
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Lock all closed issues and merged PRs
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const per_page = 100;
+
+            // Lock closed issues
+            let page = 1;
+            while (true) {
+              const { data: issues } = await github.rest.issues.listForRepo({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                state: "closed",
+                per_page,
+                page
+              });
+
+              if (issues.length === 0) break;
+
+              for (const issue of issues) {
+                if (issue.pull_request) continue;
+
+                try {
+                  await github.rest.issues.lock({
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    issue_number: issue.number,
+                    lock_reason: "resolved"
+                  });
+                  console.log(`Locked issue #${issue.number}`);
+                } catch (e) {
+                  console.log(`Skipped issue #${issue.number}`);
+                }
+              }
+
+              page++;
+            }
+
+            // Lock merged PRs
+            page = 1;
+            while (true) {
+              const { data: prs } = await github.rest.pulls.list({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                state: "closed",
+                per_page,
+                page
+              });
+
+              if (prs.length === 0) break;
+
+              for (const pr of prs) {
+                if (!pr.merged_at) continue;
+
+                try {
+                  await github.rest.issues.lock({
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    issue_number: pr.number,
+                    lock_reason: "resolved"
+                  });
+                  console.log(`Locked PR #${pr.number}`);
+                } catch (e) {
+                  console.log(`Skipped PR #${pr.number}`);
+                }
+              }
+
+              page++;
+            }

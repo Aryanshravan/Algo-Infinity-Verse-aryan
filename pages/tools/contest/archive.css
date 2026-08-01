@@ -1,0 +1,637 @@
+/* ============================================================
+   Algo Infinity Verse — Contest Archive
+   Built on the homepage design system (pages/home/home.css)
+   Palette + type are inherited from the --hp-* design tokens.
+   ============================================================ */
+
+/* ── 1. PAGE ── */
+body[data-page='contest-archive'] {
+  background: var(--hp-bg);
+}
+
+/* Accent that adapts to light mode: default = hp lavender rgb,
+   light mode = the overridden --hp-lavender (#8B5CF6) rgb. */
+:root {
+  --ca-lav-rgb: var(--hp-lavender-rgb);
+}
+html.light-mode {
+  --ca-lav-rgb: 139, 92, 246;
+}
+
+/* ── 2. HERO ── */
+.ca-hero {
+  min-height: 0;
+  padding: 140px 32px 72px;
+}
+
+.ca-hero-content {
+  max-width: 820px;
+}
+
+.ca-hero .favorite-btn {
+  display: none;
+}
+
+.ca-hero-stats {
+  margin-top: 8px;
+}
+
+/* ── 3. PODIUM (signature element) ── */
+.ca-podium-wrap {
+  margin: 44px auto 0;
+  max-width: 760px;
+  text-align: center;
+}
+
+.ca-podium-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.78rem;
+  letter-spacing: 0.04em;
+  color: var(--hp-text-tertiary);
+  margin: 0 0 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.ca-podium-label::before,
+.ca-podium-label::after {
+  content: '';
+  width: 24px;
+  height: 1px;
+  background: rgba(var(--ca-lav-rgb), 0.35);
+}
+
+.ca-podium {
+  display: grid;
+  grid-template-columns: 1fr 1.15fr 1fr;
+  align-items: end;
+  gap: 18px;
+}
+
+.ca-podium-cell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  text-align: center;
+  opacity: 0;
+  animation: caPodiumUp 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.ca-podium-cell--2nd {
+  animation-delay: 0.05s;
+}
+.ca-podium-cell--1st {
+  animation-delay: 0.15s;
+}
+.ca-podium-cell--3rd {
+  animation-delay: 0.25s;
+}
+
+@keyframes caPodiumUp {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.ca-podium-rank {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--hp-text-tertiary);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.ca-podium-cell--1st .ca-podium-rank {
+  color: var(--hp-peach);
+}
+
+.ca-podium-cell--1st .ca-podium-rank i {
+  font-size: 0.75rem;
+  color: var(--hp-peach);
+}
+
+.ca-podium-name {
+  font-family: 'DM Serif Display', Georgia, serif;
+  font-size: 1.15rem;
+  color: var(--hp-text);
+  line-height: 1.2;
+  padding: 0 6px;
+}
+
+.ca-podium-score {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.78rem;
+  color: var(--hp-text-secondary);
+}
+
+.ca-podium-solved {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.7rem;
+  color: var(--hp-text-tertiary);
+  margin-bottom: 10px;
+}
+
+.ca-podium-base {
+  width: 100%;
+  border-radius: 14px 14px 4px 4px;
+  position: relative;
+}
+
+.ca-podium-cell--1st .ca-podium-base {
+  height: 132px;
+  background: linear-gradient(180deg, rgba(242, 213, 196, 0.95), rgba(242, 213, 196, 0.45));
+  border: 1px solid rgba(242, 213, 196, 0.55);
+  box-shadow: 0 12px 40px rgba(242, 213, 196, 0.14);
+}
+
+.ca-podium-cell--2nd .ca-podium-base {
+  height: 88px;
+  background: linear-gradient(180deg, rgba(192, 212, 234, 0.9), rgba(192, 212, 234, 0.4));
+  border: 1px solid rgba(192, 212, 234, 0.5);
+}
+
+.ca-podium-cell--3rd .ca-podium-base {
+  height: 64px;
+  background: linear-gradient(180deg, rgba(237, 200, 210, 0.9), rgba(237, 200, 210, 0.4));
+  border: 1px solid rgba(237, 200, 210, 0.5);
+}
+
+/* ── 4. CONTEST LIST / TIMELINE ── */
+.ca-list-wrap {
+  max-width: 980px;
+  margin: 0 auto;
+}
+
+.ca-list {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.ca-list::before {
+  content: '';
+  position: absolute;
+  /* Aligned with the centre of the round badges: card padding 28px + half of
+     the 56px badge width. */
+  left: 56px;
+  top: 12px;
+  bottom: 12px;
+  width: 1px;
+  background: linear-gradient(
+    to bottom,
+    transparent,
+    rgba(var(--ca-lav-rgb), 0.25) 6%,
+    rgba(var(--ca-lav-rgb), 0.25) 94%,
+    transparent
+  );
+}
+
+.ca-contest {
+  background: var(--hp-card);
+  border: 1px solid var(--hp-card-border);
+  border-radius: var(--hp-radius);
+  transition:
+    background var(--hp-transition),
+    border-color var(--hp-transition);
+}
+
+.ca-contest:hover {
+  background: var(--hp-card-hover);
+  border-color: var(--hp-card-border-hover);
+}
+
+.ca-contest[open] {
+  border-color: rgba(var(--ca-lav-rgb), 0.3);
+}
+
+.ca-contest-summary {
+  list-style: none;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 24px 28px;
+  cursor: pointer;
+  border-radius: inherit;
+}
+
+.ca-contest-summary::-webkit-details-marker {
+  display: none;
+}
+
+.ca-contest-summary:focus-visible {
+  outline: 2px solid var(--hp-lavender) !important;
+  outline-offset: -2px;
+  border-radius: var(--hp-radius);
+}
+
+.ca-round {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--hp-lavender);
+  background: rgba(var(--ca-lav-rgb), 0.1);
+  border: 1px solid rgba(var(--ca-lav-rgb), 0.22);
+  width: 56px;
+  height: 56px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.ca-contest-main {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.ca-contest-name {
+  font-family: 'DM Serif Display', Georgia, serif;
+  font-size: 1.3rem;
+  color: var(--hp-text);
+  line-height: 1.2;
+}
+
+.ca-contest-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 14px;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.78rem;
+  color: var(--hp-text-tertiary);
+}
+
+.ca-contest-meta i {
+  font-size: 0.68rem;
+  color: var(--hp-text-tertiary);
+  margin-right: 4px;
+}
+
+.ca-contest-side {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.ca-count {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.72rem;
+  color: var(--hp-text-tertiary);
+}
+
+.ca-chevron {
+  color: var(--hp-text-tertiary);
+  transition: transform var(--hp-transition);
+}
+
+.ca-contest[open] .ca-chevron {
+  transform: rotate(180deg);
+}
+
+/* Difficulty chips */
+.ca-diff {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.68rem;
+  font-weight: 500;
+  text-transform: capitalize;
+  letter-spacing: 0.03em;
+  padding: 4px 10px;
+  border-radius: 100px;
+  white-space: nowrap;
+}
+
+.ca-diff--easy {
+  background: rgba(196, 226, 208, 0.12);
+  color: var(--hp-mint);
+  border: 1px solid rgba(196, 226, 208, 0.24);
+}
+
+.ca-diff--medium {
+  background: rgba(242, 213, 196, 0.12);
+  color: var(--hp-peach);
+  border: 1px solid rgba(242, 213, 196, 0.24);
+}
+
+.ca-diff--hard {
+  background: rgba(237, 200, 210, 0.12);
+  color: var(--hp-rose);
+  border: 1px solid rgba(237, 200, 210, 0.24);
+}
+
+/* ── 5. EXPANDED BODY ── */
+.ca-contest-body {
+  display: grid;
+  grid-template-columns: 1.1fr 1fr;
+  gap: 32px;
+  padding: 26px 28px 30px;
+  border-top: 1px solid rgba(var(--ca-lav-rgb), 0.1);
+}
+
+.ca-problems h3,
+.ca-standings h3 {
+  font-family: 'DM Serif Display', Georgia, serif;
+  font-size: 1.05rem;
+  font-weight: 400;
+  color: var(--hp-text);
+  margin: 0 0 14px;
+}
+
+.ca-problem-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.ca-problem-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  transition: background var(--hp-transition-fast);
+}
+
+.ca-problem-row:hover {
+  background: rgba(var(--ca-lav-rgb), 0.07);
+}
+
+.ca-problem-letter {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--hp-lavender);
+  width: 24px;
+  flex-shrink: 0;
+}
+
+.ca-problem-title {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--hp-text);
+  text-decoration: none;
+  flex: 1;
+  min-width: 0;
+  transition: color var(--hp-transition-fast);
+}
+
+.ca-problem-title:hover {
+  color: var(--hp-lavender);
+}
+
+.ca-problem-tags {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.7rem;
+  color: var(--hp-text-tertiary);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.ca-practice-hint {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.75rem;
+  color: var(--hp-text-tertiary);
+  margin: 16px 0 0;
+  padding: 10px 12px;
+  background: rgba(var(--ca-lav-rgb), 0.05);
+  border-radius: 10px;
+}
+
+.ca-practice-hint i {
+  color: var(--hp-lavender);
+  font-size: 0.75rem;
+}
+
+/* Standings */
+.ca-stand-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: 'Inter', sans-serif;
+}
+
+.ca-stand-table th {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.66rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--hp-text-tertiary);
+  text-align: left;
+  padding: 6px 10px;
+  border-bottom: 1px solid rgba(var(--ca-lav-rgb), 0.16);
+}
+
+.ca-stand-table th:last-child,
+.ca-stand-table td:last-child {
+  text-align: right;
+}
+
+.ca-stand-table td {
+  padding: 10px;
+  border-bottom: 1px solid rgba(var(--ca-lav-rgb), 0.08);
+  color: var(--hp-text-secondary);
+  font-size: 0.85rem;
+  vertical-align: middle;
+}
+
+.ca-stand-table tr:last-child td {
+  border-bottom: none;
+}
+
+.ca-stand-rank {
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 600;
+  color: var(--hp-text-tertiary);
+  width: 34px;
+}
+
+.ca-stand-row--top1 .ca-stand-rank {
+  color: var(--hp-peach);
+}
+.ca-stand-row--top2 .ca-stand-rank {
+  color: var(--hp-sky);
+}
+.ca-stand-row--top3 .ca-stand-rank {
+  color: var(--hp-lavender);
+}
+
+.ca-stand-avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: rgba(var(--ca-lav-rgb), 0.12);
+  color: var(--hp-lavender);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.62rem;
+  font-weight: 600;
+  margin-right: 8px;
+}
+
+.ca-stand-name {
+  font-weight: 500;
+  color: var(--hp-text);
+}
+
+.ca-stand-score {
+  font-family: 'JetBrains Mono', monospace;
+  color: var(--hp-lavender);
+}
+
+/* ── 6. NO-JS / EMPTY STATE ── */
+.ca-nojs {
+  font-family: 'Inter', sans-serif;
+  color: var(--hp-text-secondary);
+  text-align: center;
+  padding: 40px 0;
+}
+
+/* ── 7. LIGHT MODE ── */
+html.light-mode .ca-contest:hover {
+  background: var(--hp-card);
+  border-color: rgba(139, 92, 246, 0.28);
+}
+
+html.light-mode .ca-podium-cell--1st .ca-podium-base {
+  background: linear-gradient(180deg, #f2d5c4, rgba(242, 213, 196, 0.45));
+}
+
+html.light-mode .ca-podium-cell--2nd .ca-podium-base {
+  background: linear-gradient(180deg, #c0d4ea, rgba(192, 212, 234, 0.4));
+}
+
+html.light-mode .ca-podium-cell--3rd .ca-podium-base {
+  background: linear-gradient(180deg, #edc8d2, rgba(237, 200, 210, 0.4));
+}
+
+/* ── 8. REDUCED MOTION ── */
+@media (prefers-reduced-motion: reduce) {
+  .ca-podium-cell {
+    opacity: 1;
+    animation: none;
+  }
+
+  .ca-chevron {
+    transition: none;
+  }
+}
+
+/* ── 9. RESPONSIVE - TABLET ── */
+@media (max-width: 1024px) {
+  .ca-hero {
+    padding: 120px 24px 56px;
+  }
+}
+
+/* ── 10. RESPONSIVE - MOBILE ── */
+@media (max-width: 640px) {
+  .ca-hero {
+    padding: 96px 16px 40px;
+  }
+
+  .ca-podium-wrap {
+    margin-top: 32px;
+  }
+
+  .ca-podium {
+    gap: 10px;
+  }
+
+  .ca-podium-name {
+    font-size: 0.95rem;
+  }
+
+  .ca-podium-score {
+    font-size: 0.7rem;
+  }
+
+  .ca-podium-solved {
+    font-size: 0.62rem;
+    margin-bottom: 6px;
+  }
+
+  .ca-podium-cell--1st .ca-podium-base {
+    height: 96px;
+  }
+  .ca-podium-cell--2nd .ca-podium-base {
+    height: 64px;
+  }
+  .ca-podium-cell--3rd .ca-podium-base {
+    height: 48px;
+  }
+
+  .ca-list {
+    gap: 12px;
+  }
+
+  .ca-list::before {
+    /* Mobile: card padding 16px + half of the 40px badge width */
+    left: 36px;
+  }
+
+  .ca-round {
+    width: 40px;
+    height: 40px;
+    font-size: 0.72rem;
+    border-radius: 10px;
+  }
+
+  .ca-contest-summary {
+    flex-wrap: wrap;
+    gap: 12px;
+    padding: 16px;
+  }
+
+  .ca-contest-name {
+    font-size: 1.1rem;
+  }
+
+  .ca-contest-meta {
+    font-size: 0.72rem;
+    gap: 4px 10px;
+  }
+
+  .ca-contest-side {
+    margin-left: 0;
+    width: 100%;
+    justify-content: space-between;
+    gap: 10px;
+  }
+
+  .ca-contest-body {
+    grid-template-columns: 1fr;
+    gap: 24px;
+    padding: 18px 16px 22px;
+  }
+
+  .ca-problem-tags {
+    gap: 6px;
+  }
+}

@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Linux eBPF Bytecode Verifier & JIT Simulator — Algo Infinity Verse</title>
+  <meta name="description" content="Simulate Linux Kernel eBPF assembly execution, static safety verifier checks, eBPF Maps, and XDP packet filtering." />
+  <link rel="stylesheet" href="/styles.css" />
+  <link rel="stylesheet" href="style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Poppins:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <script>
+    (function () {
+      try {
+        var storedTheme = localStorage.getItem('theme');
+        var prefersLight = window.matchMedia('(prefers-color-scheme: light)').matches;
+        var theme = storedTheme || (prefersLight ? 'light' : 'dark');
+        if (theme === 'light') {
+          document.documentElement.classList.add('light-mode');
+        } else {
+          document.documentElement.classList.remove('light-mode');
+        }
+      } catch (e) {}
+    })();
+  </script>
+</head>
+<body data-page="ebpf-visualizer">
+  <div id="navbar-placeholder"></div>
+
+  <header class="tool-hero">
+    <div class="tool-hero-badge">
+      <i class="fas fa-microchip" aria-hidden="true"></i> Kernel & Systems Engineering
+    </div>
+    <h1>Linux eBPF Kernel Bytecode <span class="accent-text">Verifier & JIT Simulator</span></h1>
+    <p>
+      Step through eBPF assembly bytecode, inspect register state tracking (R0–R10), run the static safety verifier, interact with eBPF Maps, and simulate XDP packet filtering in real time.
+    </p>
+  </header>
+
+  <main class="tool-container">
+    <!-- Preset & Controls Toolbar -->
+    <section class="toolbar-card">
+      <div class="toolbar-group">
+        <label for="ebpfPresetSelect"><i class="fas fa-code-branch"></i> Program Preset:</label>
+        <select id="ebpfPresetSelect" class="tool-select">
+          <option value="xdp_drop">XDP Packet Filter (Drop Port 80)</option>
+          <option value="map_counter">eBPF Hash Map Packet Counter</option>
+          <option value="bounds_check">Verifier Bounds Guard Demo</option>
+          <option value="invalid_access">Verifier Rejection: Uninitialized Register</option>
+        </select>
+      </div>
+      <div class="toolbar-actions">
+        <button id="btnRunVerifier" class="tool-btn primary-btn"><i class="fas fa-shield-halved"></i> Run Verifier Check</button>
+        <button id="btnStepExec" class="tool-btn secondary-btn"><i class="fas fa-step-forward"></i> Step Execution</button>
+        <button id="btnRunJit" class="tool-btn accent-btn"><i class="fas fa-bolt"></i> Run JIT Program</button>
+        <button id="btnResetVm" class="tool-btn danger-btn"><i class="fas fa-rotate-left"></i> Reset VM</button>
+      </div>
+    </section>
+
+    <!-- Main Workspace Grid -->
+    <div class="workspace-grid">
+      <!-- Left Panel: Assembly Editor & Bytecode -->
+      <section class="panel-card editor-panel">
+        <div class="panel-header">
+          <h3><i class="fas fa-terminal"></i> eBPF Bytecode Assembly</h3>
+          <span class="badge" id="instructionCountBadge">0 Insns</span>
+        </div>
+        <textarea id="ebpfCodeEditor" spellcheck="false" placeholder="Enter eBPF assembly instructions..."></textarea>
+        <div class="bytecode-table-wrapper">
+          <table class="bytecode-table" id="bytecodeTable">
+            <thead>
+              <tr>
+                <th>PC</th>
+                <th>Opcode</th>
+                <th>Dst</th>
+                <th>Src</th>
+                <th>Offset</th>
+                <th>Imm / Symbol</th>
+              </tr>
+            </thead>
+            <tbody id="bytecodeTableBody"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- Right Panel: Register State & Verifier Logs -->
+      <section class="panel-card state-panel">
+        <div class="panel-header">
+          <h3><i class="fas fa-memory"></i> Kernel Register State (R0 - R10)</h3>
+          <span class="status-indicator" id="vmStatusIndicator">IDLE</span>
+        </div>
+        
+        <div class="register-grid" id="registerGrid">
+          <!-- Registers R0 to R10 dynamically rendered here -->
+        </div>
+
+        <div class="verifier-console-box">
+          <div class="panel-header compact">
+            <h4><i class="fas fa-stethoscope"></i> Static Verifier Inspection Console</h4>
+            <span id="verifierResultBadge" class="result-badge pass">PASS</span>
+          </div>
+          <div class="console-output" id="verifierLogs">
+            <div class="log-line info">[INIT] eBPF Verifier engine ready. Load a program to begin analysis.</div>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- Bottom Section: eBPF Maps & XDP Network Filter Simulator -->
+    <div class="secondary-grid">
+      <!-- eBPF Maps -->
+      <section class="panel-card maps-panel">
+        <div class="panel-header">
+          <h3><i class="fas fa-database"></i> eBPF Shared Kernel Maps</h3>
+          <div class="map-controls">
+            <select id="mapTypeSelect" class="tool-select compact">
+              <option value="BPF_MAP_TYPE_HASH">BPF_MAP_TYPE_HASH</option>
+              <option value="BPF_MAP_TYPE_ARRAY">BPF_MAP_TYPE_ARRAY</option>
+              <option value="BPF_MAP_TYPE_RINGBUF">BPF_MAP_TYPE_RINGBUF</option>
+            </select>
+          </div>
+        </div>
+        <div class="map-grid-container" id="mapGridContainer">
+          <!-- Map Key-Value storage dynamic grid -->
+        </div>
+      </section>
+
+      <!-- XDP Packet Simulator -->
+      <section class="panel-card xdp-panel">
+        <div class="panel-header">
+          <h3><i class="fas fa-network-wired"></i> XDP Packet Filter Simulator</h3>
+          <button id="btnSendPacket" class="tool-btn compact-btn"><i class="fas fa-paper-plane"></i> Send Test Packet</button>
+        </div>
+        <div class="xdp-controls">
+          <label>Protocol:
+            <select id="pktProto" class="tool-select compact"><option value="TCP">TCP</option><option value="UDP">UDP</option><option value="ICMP">ICMP</option></select>
+          </label>
+          <label>Port: <input type="number" id="pktPort" value="80" class="tool-input" min="1" max="65535" /></label>
+          <label>Payload: <input type="text" id="pktPayload" value="GET /index.html" class="tool-input" /></label>
+        </div>
+        <div class="xdp-action-result" id="xdpActionResult">
+          <span class="xdp-badge xdp-idle">WAITING FOR PACKET</span>
+        </div>
+        <div class="packet-stream" id="packetStreamLog"></div>
+      </section>
+    </div>
+  </main>
+
+  <script src="/modules/navbar.js" type="module"></script>
+  <script src="script.js"></script>
+</body>
+</html>

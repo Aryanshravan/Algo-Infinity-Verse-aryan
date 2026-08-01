@@ -1,0 +1,185 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Secret Scan False-Positive Coach | Algo Infinity Verse</title>
+  <meta name="description" content="Paste diff hunks, run entropy + pattern hybrid secret detection, score false positives, coach rotate vs allowlist, and export a triage report." />
+  <link rel="stylesheet" href="/styles.css" />
+  <link rel="stylesheet" href="style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Poppins:wght@300;400;500;600;700&family=Fira+Code:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <script>
+    (function () {
+      try {
+        var storedTheme = localStorage.getItem('theme');
+        var prefersLight = window.matchMedia('(prefers-color-scheme: light)').matches;
+        var theme = storedTheme || (prefersLight ? 'light' : 'dark');
+        if (theme === 'light') {
+          document.documentElement.classList.add('light-mode');
+        } else {
+          document.documentElement.classList.remove('light-mode');
+        }
+      } catch (e) {}
+    })();
+  </script>
+</head>
+
+<body data-page="ai-secret-scan-false-positive-coach">
+  <a href="#secret-main" class="secret-skip-link">Skip to main content</a>
+  <button type="button" id="scrollTopBtn" class="scroll-top-btn" aria-label="Scroll to top">
+    <i class="fas fa-arrow-up" aria-hidden="true"></i>
+  </button>
+
+  <div id="navbar-placeholder"></div>
+
+  <header class="secret-hero">
+    <div class="secret-hero-badge">
+      <i class="fas fa-key" aria-hidden="true"></i>
+      Secret Triage Lab
+    </div>
+    <h1>
+      AI Secret Scan
+      <span class="secret-hero-accent">False-Positive Coach</span>
+    </h1>
+    <p>
+      Paste diff hunks, run entropy + pattern hybrid detection, score context-aware false positives,
+      coach rotate vs allowlist, and download a triage report — client-side only.
+    </p>
+    <div class="secret-hero-stats" aria-live="polite">
+      <div class="secret-stat">
+        <span class="secret-stat-val" id="statHits">0</span>
+        <span class="secret-stat-label">Detector hits</span>
+      </div>
+      <div class="secret-stat">
+        <span class="secret-stat-val" id="statLikely">0</span>
+        <span class="secret-stat-label">Likely leaks</span>
+      </div>
+      <div class="secret-stat">
+        <span class="secret-stat-val" id="statFp">0</span>
+        <span class="secret-stat-label">Likely FPs</span>
+      </div>
+      <div class="secret-stat">
+        <span class="secret-stat-val" id="statAction">—</span>
+        <span class="secret-stat-label">Top action</span>
+      </div>
+    </div>
+  </header>
+
+  <main id="secret-main" class="secret-main">
+    <div class="container">
+      <div class="secret-workspace">
+        <section class="secret-panel" aria-labelledby="secret-input-title">
+          <div class="secret-panel-header">
+            <div class="secret-panel-title">
+              <i class="fas fa-code-compare secret-panel-icon" aria-hidden="true"></i>
+              <h2 id="secret-input-title">Diff hunks / snippets</h2>
+            </div>
+          </div>
+
+          <label class="secret-label" for="secretDiffInput">Paste unified diff or config snippets</label>
+          <textarea
+            id="secretDiffInput"
+            class="secret-textarea"
+            rows="16"
+            spellcheck="false"
+            placeholder="@@ -1,6 +1,8 @@&#10;+AWS_SECRET_ACCESS_KEY=...&#10;+const EXAMPLE_KEY = 'sk_test_...'"
+            aria-describedby="secretDiffHint"
+          ></textarea>
+          <p id="secretDiffHint" class="secret-hint">
+            Hybrid detector combines regex patterns (AWS, Stripe, GitHub, JWT-ish) with Shannon entropy on long tokens.
+          </p>
+
+          <div class="secret-controls">
+            <button type="button" id="secretLoadDemoBtn" class="btn btn-secondary">
+              <i class="fas fa-flask" aria-hidden="true"></i> Load leak + FP demos
+            </button>
+            <button type="button" id="secretScanBtn" class="btn btn-primary">
+              <i class="fas fa-magnifying-glass" aria-hidden="true"></i> Scan &amp; triage
+            </button>
+            <button type="button" id="secretClearBtn" class="btn btn-outline">
+              <i class="fas fa-eraser" aria-hidden="true"></i> Clear
+            </button>
+            <button type="button" id="secretExportBtn" class="btn btn-outline" disabled>
+              <i class="fas fa-download" aria-hidden="true"></i> Export triage report
+            </button>
+          </div>
+          <div id="secretStatus" class="secret-status" role="status" aria-live="polite"></div>
+        </section>
+
+        <section class="secret-panel secret-report-panel" aria-labelledby="secret-report-title">
+          <div class="secret-panel-header">
+            <div class="secret-panel-title">
+              <i class="fas fa-clipboard-list secret-panel-icon" aria-hidden="true"></i>
+              <h2 id="secret-report-title">Triage results</h2>
+            </div>
+          </div>
+
+          <div id="secretEmpty" class="secret-empty">
+            <i class="fas fa-key" aria-hidden="true"></i>
+            <p>No scan yet. Load leak + false-positive demos or paste a diff, then run triage.</p>
+          </div>
+
+          <div id="secretResults" hidden>
+            <div class="secret-score-card">
+              <div>
+                <h3 id="secretRiskHeading">Triage confidence</h3>
+                <p id="secretRiskBlurb" class="secret-muted"></p>
+              </div>
+              <div class="secret-score-ring" id="secretScoreRing" aria-hidden="true">
+                <span id="secretScoreVal">0</span>
+              </div>
+            </div>
+
+            <section class="secret-section" aria-labelledby="secretFindingsHeading">
+              <h3 id="secretFindingsHeading"><i class="fas fa-bug" aria-hidden="true"></i> Detector findings</h3>
+              <ul id="secretFindingList" class="secret-findings"></ul>
+            </section>
+
+            <section class="secret-section" aria-labelledby="secretCoachHeading">
+              <h3 id="secretCoachHeading"><i class="fas fa-user-shield" aria-hidden="true"></i> Rotate vs allowlist coach</h3>
+              <div id="secretCoachOut" class="secret-coach-out"></div>
+            </section>
+          </div>
+        </section>
+      </div>
+
+      <div class="secret-diff-grid" id="secretRewritePanel" hidden>
+        <section class="secret-panel" aria-labelledby="secret-env-title">
+          <div class="secret-panel-header">
+            <div class="secret-panel-title">
+              <i class="fas fa-file-shield secret-panel-icon" aria-hidden="true"></i>
+              <h2 id="secret-env-title">Safe .env rewrite tips</h2>
+            </div>
+          </div>
+          <pre id="secretEnvTips" class="secret-code-panel secret-code-after" tabindex="0"><code>Tips appear after triage.</code></pre>
+        </section>
+        <section class="secret-panel" aria-labelledby="secret-summary-title">
+          <div class="secret-panel-header">
+            <div class="secret-panel-title">
+              <i class="fas fa-list-check secret-panel-icon" aria-hidden="true"></i>
+              <h2 id="secret-summary-title">Action summary</h2>
+            </div>
+          </div>
+          <div id="secretActionSummary" class="secret-coach-out"></div>
+        </section>
+      </div>
+    </div>
+  </main>
+
+  <div id="footer-placeholder"></div>
+
+  <script src="/auth.js"></script>
+  <script src="/bootstrap-legacy.js"></script>
+  <script src="/script.js"></script>
+  <script type="module" src="/dist/legacy-bundle.mjs"></script>
+  <script src="/theme.js"></script>
+  <script src="script.js"></script>
+  <script>
+    if (typeof loadPartial === 'function') {
+      loadPartial('navbar-placeholder', '/partials/navbar.html');
+      loadPartial('footer-placeholder', '/partials/footer.html');
+    }
+  </script>
+</body>
+</html>

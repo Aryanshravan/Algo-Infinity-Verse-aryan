@@ -74,7 +74,7 @@ function createEventDot(nodeId, vector, type) {
 
   const dot = document.createElement('div');
   dot.className = 'event-dot';
-  dot.style.top = `${eventCounter * 40}px`;
+  dot.style.top = `${node.events.length * 60 + 20}px`;
 
   const label = document.createElement('div');
   label.className = 'event-label';
@@ -138,22 +138,60 @@ function finishSend(targetId) {
   nodes[senderId].clock[nodes[senderId].index]++;
   updateVectorUI(senderId);
   const sendEvent = createEventDot(senderId, nodes[senderId].clock, 'send');
+  const payloadClock = [...nodes[senderId].clock];
 
-  // 2. Receiver ticks, merges clock, creates receive event
-  // Math.max for each element
+  // 2. Animate packet flight
+  const overlay = document.getElementById('packetOverlay');
+  const r1 = sendEvent.dotEl.getBoundingClientRect();
+  const overlayRect = overlay.getBoundingClientRect();
+  
+  const packet = document.createElement('div');
+  packet.className = 'message-packet';
+  packet.textContent = `[${payloadClock.join(',')}]`;
+  packet.style.left = (r1.left + r1.width / 2 - overlayRect.left) + 'px';
+  packet.style.top = (r1.top + r1.height / 2 - overlayRect.top) + 'px';
+  overlay.appendChild(packet);
+  
+  // Reflow to ensure starting position is registered
+  packet.offsetHeight;
+
+  // Determine target coordinates (we predict where the next dot will be)
   const receiver = nodes[targetId];
-  receiver.clock[receiver.index]++;
-  for (let i = 0; i < 3; i++) {
-    if (i !== receiver.index) {
-      receiver.clock[i] = Math.max(receiver.clock[i], nodes[senderId].clock[i]);
-    }
-  }
-  updateVectorUI(targetId);
-  const receiveEvent = createEventDot(targetId, receiver.clock, 'receive');
+  const targetTop = receiver.events.length * 60 + 20;
+  // We need to calculate target absolute left. It is in the center of the receiver column.
+  const rCol = receiver.timelineEl.getBoundingClientRect();
+  const x2 = rCol.left + rCol.width / 2 - overlayRect.left;
+  const y2 = rCol.top + targetTop - overlayRect.top;
 
-  // 3. Draw Arrow
-  sendEvent.targetEvent = receiveEvent;
-  drawAllArrows();
+  packet.style.left = x2 + 'px';
+  packet.style.top = y2 + 'px';
+
+  // 3. After animation completes, receiver processes message
+  setTimeout(() => {
+    packet.classList.add('flash-merge');
+    
+    // Standard Vector Clock Receive Logic
+    // Step A: Max of local clock and received clock
+    for (let i = 0; i < 3; i++) {
+      receiver.clock[i] = Math.max(receiver.clock[i], payloadClock[i]);
+    }
+    // Step B: Increment own logical clock
+    receiver.clock[receiver.index]++;
+    
+    updateVectorUI(targetId);
+    const receiveEvent = createEventDot(targetId, receiver.clock, 'receive');
+    
+    // Draw Arrow
+    sendEvent.targetEvent = receiveEvent;
+    drawAllArrows();
+
+    setTimeout(() => {
+      if (overlay.contains(packet)) {
+        overlay.removeChild(packet);
+      }
+    }, 300);
+
+  }, 1000); // Wait 1s for the CSS transition
 }
 
 function drawAllArrows() {
@@ -190,6 +228,24 @@ function drawAllArrows() {
 }
 
 // Causality Analyzer
+function updateConcurrencyHighlighter() {
+  allEvents.forEach(e => e.dotEl.classList.remove('concurrent-glow'));
+
+  if (selectedEvents.length === 1) {
+    const sel = selectedEvents[0];
+    allEvents.forEach(ev => {
+      if (ev.id !== sel.id) {
+        const v1_less_v2 = compareVectors(sel.vector, ev.vector);
+        const v2_less_v1 = compareVectors(ev.vector, sel.vector);
+        if (!v1_less_v2 && !v2_less_v1) {
+          // They are concurrent
+          ev.dotEl.classList.add('concurrent-glow');
+        }
+      }
+    });
+  }
+}
+
 function selectForAnalyzer(eventObj) {
   // Toggle off if already selected
   const idx = selectedEvents.findIndex((e) => e.id === eventObj.id);
@@ -197,6 +253,7 @@ function selectForAnalyzer(eventObj) {
     selectedEvents.splice(idx, 1);
     eventObj.dotEl.classList.remove('selected');
     updateAnalyzerUI();
+    updateConcurrencyHighlighter();
     return;
   }
 
@@ -209,6 +266,7 @@ function selectForAnalyzer(eventObj) {
   selectedEvents.push(eventObj);
   eventObj.dotEl.classList.add('selected');
   updateAnalyzerUI();
+  updateConcurrencyHighlighter();
 }
 
 function updateAnalyzerUI() {
@@ -269,4 +327,5 @@ function resetAll() {
   selectedEvents = [];
   drawAllArrows();
   updateAnalyzerUI();
+  updateConcurrencyHighlighter();
 }

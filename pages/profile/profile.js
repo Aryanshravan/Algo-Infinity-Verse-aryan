@@ -244,7 +244,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const WEEKS = 26;
     const dow = today.getDay();
     const start = new Date(today);
-    start.setDate(start.getDate() - (WEEKS * 7 - 1) - dow);
+    start.setDate(start.getDate() - ((WEEKS * 7 - 1) - dow));
     start.setHours(0, 0, 0, 0);
 
     const weeks = [];

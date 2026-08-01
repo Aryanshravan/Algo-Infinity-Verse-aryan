@@ -1,0 +1,355 @@
+/* ===== CSS Anchor Positioning Fallback Lab ===== */
+:root {
+  --anchor-glass: rgba(255, 255, 255, 0.04);
+  --anchor-border: rgba(255, 255, 255, 0.1);
+  --anchor-muted: rgba(255, 255, 255, 0.62);
+  --anchor-accent: #34d399;
+  --anchor-accent-dim: rgba(52, 211, 153, 0.15);
+  --anchor-warn: #fbbf24;
+  --anchor-danger: #f87171;
+  --anchor-ok: #4ade80;
+  --anchor-info: #60a5fa;
+  --anchor-code-bg: rgba(0, 0, 0, 0.35);
+}
+
+html.light-mode {
+  --anchor-glass: rgba(15, 23, 42, 0.04);
+  --anchor-border: rgba(15, 23, 42, 0.12);
+  --anchor-muted: rgba(15, 23, 42, 0.65);
+  --anchor-accent-dim: rgba(16, 185, 129, 0.12);
+  --anchor-code-bg: rgba(15, 23, 42, 0.06);
+}
+
+.anchor-skip-link {
+  position: absolute;
+  left: 1rem;
+  top: -100px;
+  z-index: 10000;
+  padding: 0.6rem 1rem;
+  background: var(--anchor-accent);
+  color: #0a0a14;
+  font-weight: 700;
+  border-radius: 8px;
+  text-decoration: none;
+}
+
+.anchor-skip-link:focus {
+  top: 1rem;
+  outline: 3px solid #fff;
+  outline-offset: 2px;
+}
+
+.anchor-hero {
+  position: relative;
+  overflow: hidden;
+  padding: 7.5rem 1.5rem 4rem;
+  text-align: center;
+  border-bottom: 1px solid var(--anchor-border);
+  background:
+    radial-gradient(ellipse at top right, rgba(52, 211, 153, 0.18), transparent 55%),
+    radial-gradient(ellipse at bottom left, rgba(96, 165, 250, 0.1), transparent 50%);
+}
+
+.anchor-hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1.1rem;
+  padding: 0.35rem 0.9rem;
+  border-radius: 999px;
+  border: 1px solid rgba(52, 211, 153, 0.45);
+  background: var(--anchor-accent-dim);
+  color: var(--anchor-accent);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.anchor-hero h1 {
+  margin: 0 0 1rem;
+  font-family: 'Orbitron', sans-serif;
+  font-size: clamp(1.9rem, 5vw, 3rem);
+  font-weight: 900;
+  line-height: 1.15;
+}
+
+.anchor-hero-accent {
+  display: inline-block;
+  background: linear-gradient(135deg, #34d399, #60a5fa);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.anchor-hero p {
+  max-width: 720px;
+  margin: 0 auto 2rem;
+  color: var(--anchor-muted);
+  font-size: 1.05rem;
+  line-height: 1.65;
+  font-family: 'Poppins', sans-serif;
+}
+
+.anchor-hero-stats {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1rem;
+}
+
+.anchor-stat {
+  min-width: 110px;
+  padding: 0.85rem 1.1rem;
+  border: 1px solid var(--anchor-border);
+  border-radius: 14px;
+  background: var(--anchor-glass);
+}
+
+.anchor-stat-val {
+  display: block;
+  font-family: 'Orbitron', sans-serif;
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--anchor-accent);
+}
+
+.anchor-stat-label {
+  font-size: 0.75rem;
+  color: var(--anchor-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.anchor-main {
+  padding: 2rem 0 4rem;
+  font-family: 'Poppins', sans-serif;
+}
+
+.anchor-workspace {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+@media (max-width: 900px) {
+  .anchor-workspace {
+    grid-template-columns: 1fr;
+  }
+}
+
+.anchor-panel {
+  padding: 1.4rem;
+  border: 1px solid var(--anchor-border);
+  border-radius: 18px;
+  background: var(--anchor-glass);
+  backdrop-filter: blur(12px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
+}
+
+.anchor-panel-header {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1.2rem;
+  padding-bottom: 0.9rem;
+  border-bottom: 1px solid var(--anchor-border);
+}
+
+.anchor-panel-title {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.anchor-panel-title h2 {
+  margin: 0;
+  font-size: 1.15rem;
+  font-weight: 700;
+}
+
+.anchor-panel-icon {
+  color: var(--anchor-accent);
+}
+
+.anchor-label {
+  display: block;
+  margin-bottom: 0.45rem;
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+.anchor-hint,
+.anchor-status {
+  margin: 0.5rem 0 0;
+  font-size: 0.78rem;
+  color: var(--anchor-muted);
+  line-height: 1.45;
+}
+
+.anchor-textarea {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0.9rem 1rem;
+  border: 1px solid var(--anchor-border);
+  border-radius: 12px;
+  background: var(--anchor-code-bg);
+  color: inherit;
+  font-family: 'Fira Code', ui-monospace, monospace;
+  font-size: 0.78rem;
+  line-height: 1.5;
+  resize: vertical;
+}
+
+.anchor-demo-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+  margin: 0.85rem 0;
+}
+
+.anchor-demo-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.5rem 0.85rem;
+  border: 1px solid var(--anchor-border);
+  border-radius: 10px;
+  background: transparent;
+  color: inherit;
+  font-family: 'Poppins', sans-serif;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.anchor-demo-btn:hover,
+.anchor-demo-btn:focus-visible {
+  border-color: rgba(52, 211, 153, 0.55);
+  background: var(--anchor-accent-dim);
+  outline: none;
+}
+
+.anchor-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+}
+
+.anchor-empty,
+.anchor-empty-li {
+  color: var(--anchor-muted);
+  font-size: 0.9rem;
+}
+
+.anchor-findings .anchor-finding {
+  padding: 0.75rem 0.9rem;
+  margin-bottom: 0.65rem;
+  border-radius: 10px;
+  border: 1px solid var(--anchor-border);
+  background: rgba(0, 0, 0, 0.15);
+}
+
+.anchor-finding-sev {
+  display: inline-block;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 0.35rem;
+  padding: 0.15rem 0.45rem;
+  border-radius: 6px;
+}
+
+.anchor-finding-sev.high {
+  background: rgba(248, 113, 113, 0.2);
+  color: var(--anchor-danger);
+}
+
+.anchor-finding-sev.med {
+  background: rgba(251, 191, 36, 0.2);
+  color: var(--anchor-warn);
+}
+
+.anchor-finding-sev.low {
+  background: rgba(96, 165, 250, 0.2);
+  color: var(--anchor-info);
+}
+
+.anchor-risk-meter {
+  margin-top: 1rem;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 0.5rem 0.75rem;
+  align-items: center;
+}
+
+.anchor-risk-label {
+  grid-column: 1 / -1;
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+.anchor-gauge {
+  height: 12px;
+  border-radius: 999px;
+  border: 1px solid var(--anchor-border);
+  background: var(--anchor-code-bg);
+  overflow: hidden;
+}
+
+.anchor-gauge-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #4ade80, #fbbf24, #f87171);
+  border-radius: inherit;
+  transition: width 0.35s ease;
+}
+
+.anchor-tips {
+  margin: 0;
+  padding-left: 1.15rem;
+  line-height: 1.6;
+}
+
+.anchor-tips li {
+  margin-bottom: 0.45rem;
+}
+
+.anchor-ba-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+@media (max-width: 700px) {
+  .anchor-ba-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.anchor-subhead {
+  margin: 0 0 0.5rem;
+  font-size: 0.88rem;
+  font-weight: 700;
+}
+
+.anchor-mono {
+  margin: 0;
+  max-height: 280px;
+  overflow: auto;
+  padding: 0.85rem 1rem;
+  border-radius: 12px;
+  background: var(--anchor-code-bg);
+  border: 1px solid var(--anchor-border);
+  font-family: 'Fira Code', ui-monospace, monospace;
+  font-size: 0.72rem;
+  line-height: 1.45;
+  white-space: pre-wrap;
+}
+
+html.light-mode .anchor-findings .anchor-finding {
+  background: rgba(15, 23, 42, 0.04);
+}

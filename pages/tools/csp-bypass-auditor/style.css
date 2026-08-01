@@ -1,0 +1,331 @@
+/* ===== CSP Bypass Auditor ===== */
+:root {
+  --csp-glass: rgba(255, 255, 255, 0.04);
+  --csp-border: rgba(255, 255, 255, 0.1);
+  --csp-muted: rgba(255, 255, 255, 0.62);
+  --csp-accent: #f87171;
+  --csp-accent-dim: rgba(248, 113, 113, 0.15);
+  --csp-warn: #fbbf24;
+  --csp-danger: #ef4444;
+  --csp-ok: #4ade80;
+  --csp-info: #60a5fa;
+  --csp-code-bg: rgba(0, 0, 0, 0.35);
+}
+
+html.light-mode {
+  --csp-glass: rgba(15, 23, 42, 0.04);
+  --csp-border: rgba(15, 23, 42, 0.12);
+  --csp-muted: rgba(15, 23, 42, 0.65);
+  --csp-accent-dim: rgba(220, 38, 38, 0.1);
+  --csp-code-bg: rgba(15, 23, 42, 0.06);
+}
+
+.csp-skip-link {
+  position: absolute;
+  left: 1rem;
+  top: -100px;
+  z-index: 10000;
+  padding: 0.6rem 1rem;
+  background: var(--csp-accent);
+  color: #0a0a14;
+  font-weight: 700;
+  border-radius: 8px;
+  text-decoration: none;
+}
+
+.csp-skip-link:focus {
+  top: 1rem;
+  outline: 3px solid #fff;
+  outline-offset: 2px;
+}
+
+.csp-hero {
+  position: relative;
+  overflow: hidden;
+  padding: 7.5rem 1.5rem 4rem;
+  text-align: center;
+  border-bottom: 1px solid var(--csp-border);
+  background:
+    radial-gradient(ellipse at top right, rgba(248, 113, 113, 0.18), transparent 55%),
+    radial-gradient(ellipse at bottom left, rgba(251, 191, 36, 0.1), transparent 50%);
+}
+
+.csp-hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1.1rem;
+  padding: 0.35rem 0.9rem;
+  border-radius: 999px;
+  border: 1px solid rgba(248, 113, 113, 0.45);
+  background: var(--csp-accent-dim);
+  color: var(--csp-accent);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.csp-hero h1 {
+  margin: 0 0 1rem;
+  font-family: 'Orbitron', sans-serif;
+  font-size: clamp(1.9rem, 5vw, 3rem);
+  font-weight: 900;
+  line-height: 1.15;
+}
+
+.csp-hero-accent {
+  display: inline-block;
+  background: linear-gradient(135deg, #f87171, #fbbf24);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.csp-hero p {
+  max-width: 720px;
+  margin: 0 auto 2rem;
+  color: var(--csp-muted);
+  font-size: 1.05rem;
+  line-height: 1.65;
+  font-family: 'Poppins', sans-serif;
+}
+
+.csp-hero-stats {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1rem;
+}
+
+.csp-stat {
+  min-width: 120px;
+  padding: 0.85rem 1.1rem;
+  border: 1px solid var(--csp-border);
+  border-radius: 14px;
+  background: var(--csp-glass);
+}
+
+.csp-stat-val {
+  display: block;
+  font-family: 'Orbitron', sans-serif;
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: var(--csp-accent);
+}
+
+.csp-stat-label {
+  font-size: 0.75rem;
+  color: var(--csp-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.csp-main {
+  padding: 2rem 0 4rem;
+  font-family: 'Poppins', sans-serif;
+}
+
+.csp-workspace {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+@media (max-width: 900px) {
+  .csp-workspace {
+    grid-template-columns: 1fr;
+  }
+}
+
+.csp-panel {
+  padding: 1.4rem;
+  border: 1px solid var(--csp-border);
+  border-radius: 18px;
+  background: var(--csp-glass);
+  backdrop-filter: blur(12px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
+}
+
+.csp-panel-header {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1.2rem;
+  padding-bottom: 0.9rem;
+  border-bottom: 1px solid var(--csp-border);
+}
+
+.csp-panel-title {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.csp-panel-title h2 {
+  margin: 0;
+  font-size: 1.15rem;
+  font-weight: 700;
+}
+
+.csp-panel-icon {
+  color: var(--csp-accent);
+}
+
+.csp-label {
+  display: block;
+  margin-bottom: 0.45rem;
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+.csp-hint {
+  margin: 0.5rem 0 0;
+  font-size: 0.78rem;
+  color: var(--csp-muted);
+  line-height: 1.45;
+}
+
+.csp-subhead {
+  margin: 0.85rem 0 0.45rem;
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.csp-textarea {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0.9rem 1rem;
+  border: 1px solid var(--csp-border);
+  border-radius: 12px;
+  background: var(--csp-code-bg);
+  color: inherit;
+  font-family: 'Fira Code', ui-monospace, monospace;
+  font-size: 0.82rem;
+  line-height: 1.5;
+  resize: vertical;
+  min-height: 140px;
+}
+
+.csp-textarea:focus {
+  outline: 2px solid var(--csp-accent);
+  outline-offset: 2px;
+}
+
+.csp-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  margin-top: 1rem;
+}
+
+.csp-status-live {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--csp-accent);
+}
+
+.csp-empty {
+  color: var(--csp-muted);
+  font-size: 0.9rem;
+}
+
+.csp-directives {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  max-height: 360px;
+  overflow-y: auto;
+}
+
+.csp-directive {
+  padding: 0.65rem 0.85rem;
+  border-radius: 10px;
+  border: 1px solid var(--csp-border);
+  font-size: 0.82rem;
+  font-family: 'Fira Code', ui-monospace, monospace;
+  line-height: 1.4;
+}
+
+.csp-directive.is-unsafe {
+  border-left: 4px solid var(--csp-danger);
+}
+
+.csp-directive.is-ok {
+  border-left: 4px solid var(--csp-ok);
+}
+
+.csp-directive .dir-name {
+  font-weight: 700;
+  color: var(--csp-accent);
+  font-family: 'Poppins', sans-serif;
+  display: block;
+  margin-bottom: 0.25rem;
+  font-size: 0.8rem;
+}
+
+.csp-findings {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  margin-bottom: 1rem;
+}
+
+.csp-finding {
+  padding: 0.8rem 0.95rem;
+  border-radius: 12px;
+  border: 1px solid var(--csp-border);
+  border-left: 4px solid var(--csp-warn);
+  font-size: 0.85rem;
+  line-height: 1.45;
+}
+
+.csp-finding.sev-high {
+  border-left-color: var(--csp-danger);
+}
+
+.csp-finding.sev-medium {
+  border-left-color: var(--csp-warn);
+}
+
+.csp-finding.sev-low {
+  border-left-color: var(--csp-info);
+}
+
+.csp-bypass {
+  margin: 0;
+  padding-left: 1.2rem;
+  font-size: 0.88rem;
+  line-height: 1.55;
+  color: var(--csp-muted);
+}
+
+.csp-bypass li {
+  margin-bottom: 0.4rem;
+}
+
+.csp-mono-block {
+  margin: 0;
+  padding: 0.9rem 1rem;
+  border-radius: 12px;
+  border: 1px solid var(--csp-border);
+  background: var(--csp-code-bg);
+  font-family: 'Fira Code', ui-monospace, monospace;
+  font-size: 0.75rem;
+  line-height: 1.5;
+  overflow-x: auto;
+  white-space: pre-wrap;
+  word-break: break-word;
+  min-height: 80px;
+}
+
+.csp-diff .diff-add {
+  color: var(--csp-ok);
+}
+
+.csp-diff .diff-del {
+  color: var(--csp-danger);
+}

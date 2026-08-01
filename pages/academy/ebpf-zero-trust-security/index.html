@@ -1,0 +1,241 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>eBPF Zero-Trust Security Academy | Algo Infinity Verse</title>
+  <meta name="description" content="Learn eBPF kernel probes, XDP filtering, Falco rules, ring buffers, and zero-trust runtime policy with interactive labs and a self-assessment quiz." />
+  <link rel="stylesheet" href="/styles.css" />
+  <link rel="stylesheet" href="style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Poppins:wght@300;400;500;600;700&family=Fira+Code:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <script>
+    (function () {
+      try {
+        var storedTheme = localStorage.getItem('theme');
+        var prefersLight = window.matchMedia('(prefers-color-scheme: light)').matches;
+        var theme = storedTheme || (prefersLight ? 'light' : 'dark');
+        if (theme === 'light') {
+          document.documentElement.classList.add('light-mode');
+        } else {
+          document.documentElement.classList.remove('light-mode');
+        }
+      } catch (e) {}
+    })();
+  </script>
+</head>
+<body data-page="ebpf-zero-trust-security">
+  <a href="#ebpf-main" class="ebpf-skip-link">Skip to main content</a>
+  <button type="button" id="scrollTopBtn" class="scroll-top-btn" aria-label="Scroll to top">
+    <i class="fas fa-arrow-up" aria-hidden="true"></i>
+  </button>
+
+  <div id="navbar-placeholder"></div>
+
+  <header class="ebpf-hero">
+    <div class="ebpf-hero-badge">
+      <i class="fas fa-shield-halved" aria-hidden="true"></i>
+      Runtime Security Academy
+    </div>
+    <h1>
+      eBPF Zero-Trust
+      <span class="ebpf-hero-accent">Security</span>
+    </h1>
+    <p>
+      Master kernel probes, XDP filters, Falco rules, and zero-trust runtime policy —
+      then test detection logic against live-style syscall events.
+    </p>
+    <div class="ebpf-hero-stats" aria-live="polite">
+      <div class="ebpf-stat">
+        <span class="ebpf-stat-val" id="statModulesDone">0</span>
+        <span class="ebpf-stat-label">Modules done</span>
+      </div>
+      <div class="ebpf-stat">
+        <span class="ebpf-stat-val" id="statModulesTotal">8</span>
+        <span class="ebpf-stat-label">Total modules</span>
+      </div>
+      <div class="ebpf-stat">
+        <span class="ebpf-stat-val" id="statProgressPct">0%</span>
+        <span class="ebpf-stat-label">Progress</span>
+      </div>
+      <div class="ebpf-stat">
+        <span class="ebpf-stat-val" id="statQuizBest">—</span>
+        <span class="ebpf-stat-label">Quiz best</span>
+      </div>
+    </div>
+    <div class="ebpf-progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-label="Course progress" id="heroProgressBar">
+      <div class="ebpf-progress-fill" id="heroProgressFill"></div>
+    </div>
+  </header>
+
+  <main id="ebpf-main" class="ebpf-main">
+    <div class="ebpf-container">
+
+      <!-- Learning modules -->
+      <section class="ebpf-section" aria-labelledby="modules-title">
+        <div class="ebpf-section-head">
+          <h2 id="modules-title">
+            <i class="fas fa-book-open" aria-hidden="true"></i>
+            Learning modules
+          </h2>
+          <p>Work through eight focused lessons. Mark each complete to track progress.</p>
+        </div>
+
+        <div class="ebpf-modules-layout">
+          <nav class="ebpf-module-nav" aria-label="Module list">
+            <ul class="ebpf-module-list" id="moduleList" role="list"></ul>
+          </nav>
+
+          <article class="ebpf-lesson-panel" id="lessonPanel" aria-labelledby="lessonTitle">
+            <div class="ebpf-lesson-header">
+              <h3 id="lessonTitle">Select a module</h3>
+              <span class="ebpf-lesson-badge" id="lessonBadge" hidden>Completed</span>
+            </div>
+            <div class="ebpf-lesson-body" id="lessonBody">
+              <p class="ebpf-muted">Choose a module from the sidebar to begin.</p>
+            </div>
+            <div class="ebpf-lesson-actions">
+              <button type="button" class="ebpf-btn ebpf-btn-primary" id="markCompleteBtn" disabled>
+                <i class="fas fa-check" aria-hidden="true"></i>
+                Mark complete
+              </button>
+              <button type="button" class="ebpf-btn ebpf-btn-ghost" id="prevModuleBtn" disabled>
+                <i class="fas fa-chevron-left" aria-hidden="true"></i>
+                Previous
+              </button>
+              <button type="button" class="ebpf-btn ebpf-btn-ghost" id="nextModuleBtn" disabled>
+                Next
+                <i class="fas fa-chevron-right" aria-hidden="true"></i>
+              </button>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <!-- Falco rule tester -->
+      <section class="ebpf-section" aria-labelledby="falco-title">
+        <div class="ebpf-section-head">
+          <h2 id="falco-title">
+            <i class="fas fa-flask" aria-hidden="true"></i>
+            Falco Security Rule Tester
+          </h2>
+          <p>Paste a Falco-like YAML rule and evaluate it against sample syscall events.</p>
+        </div>
+
+        <div class="ebpf-lab-grid">
+          <div class="ebpf-panel">
+            <label class="ebpf-label" for="falcoRule">Falco-like YAML rule</label>
+            <textarea id="falcoRule" class="ebpf-textarea" rows="14" spellcheck="false" aria-describedby="falcoRuleHint">- rule: Detect Shell Spawn
+  desc: Alert when a shell is executed
+  condition: evt.type = execve and proc.name in (bash, sh, dash)
+  output: "Shell spawned (user=%user.name command=%proc.cmdline)"
+  priority: WARNING
+  tags: [process, shell]</textarea>
+            <p id="falcoRuleHint" class="ebpf-hint">Supports simple keyword/condition matching: evt.type, proc.name, fd.name, and common operators.</p>
+            <div class="ebpf-btn-row">
+              <button type="button" class="ebpf-btn ebpf-btn-primary" id="evaluateRuleBtn">
+                <i class="fas fa-bolt" aria-hidden="true"></i>
+                Evaluate rule
+              </button>
+              <button type="button" class="ebpf-btn ebpf-btn-secondary" id="loadSampleRuleBtn">
+                <i class="fas fa-file-code" aria-hidden="true"></i>
+                Load sample
+              </button>
+            </div>
+          </div>
+
+          <div class="ebpf-panel">
+            <fieldset class="ebpf-fieldset">
+              <legend class="ebpf-label">Sample syscall events</legend>
+              <div class="ebpf-event-picks" id="eventPicks" role="group" aria-label="Select events to test"></div>
+            </fieldset>
+
+            <label class="ebpf-label" for="eventPaste">Or paste JSON event lines</label>
+            <textarea id="eventPaste" class="ebpf-textarea ebpf-textarea-sm" rows="6" spellcheck="false" placeholder='{"evt.type":"execve","proc.name":"bash",...}' aria-describedby="eventPasteHint"></textarea>
+            <p id="eventPasteHint" class="ebpf-hint">One JSON object per line. Empty paste uses the selected sample events above.</p>
+
+            <div id="falcoResults" class="ebpf-results" role="status" aria-live="polite">
+              <p class="ebpf-muted">Run Evaluate to see which events would fire the rule.</p>
+            </div>
+            <div id="falcoTips" class="ebpf-tips" hidden aria-live="polite"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Syscall trace simulator -->
+      <section class="ebpf-section" aria-labelledby="trace-title">
+        <div class="ebpf-section-head">
+          <h2 id="trace-title">
+            <i class="fas fa-terminal" aria-hidden="true"></i>
+            Syscall Trace Log Simulator
+          </h2>
+          <p>Stream sample kernel events as they would appear from an eBPF ring buffer consumer.</p>
+        </div>
+
+        <div class="ebpf-panel ebpf-trace-panel">
+          <div class="ebpf-trace-toolbar">
+            <button type="button" class="ebpf-btn ebpf-btn-primary" id="startTraceBtn">
+              <i class="fas fa-play" aria-hidden="true"></i>
+              Start stream
+            </button>
+            <button type="button" class="ebpf-btn ebpf-btn-secondary" id="pauseTraceBtn" disabled>
+              <i class="fas fa-pause" aria-hidden="true"></i>
+              Pause
+            </button>
+            <button type="button" class="ebpf-btn ebpf-btn-ghost" id="clearTraceBtn">
+              <i class="fas fa-trash" aria-hidden="true"></i>
+              Clear
+            </button>
+            <span class="ebpf-trace-status" id="traceStatus" aria-live="polite">Idle</span>
+          </div>
+          <div class="ebpf-trace-log" id="traceLog" role="log" aria-label="Syscall trace output" aria-live="polite" tabindex="0"></div>
+        </div>
+      </section>
+
+      <!-- Quiz -->
+      <section class="ebpf-section" aria-labelledby="quiz-title">
+        <div class="ebpf-section-head">
+          <h2 id="quiz-title">
+            <i class="fas fa-clipboard-question" aria-hidden="true"></i>
+            Self-assessment quiz
+          </h2>
+          <p>Seven questions covering probes, XDP, Falco, and zero-trust runtime controls. Best score is saved.</p>
+        </div>
+
+        <div class="ebpf-panel">
+          <form id="quizForm" class="ebpf-quiz" novalidate>
+            <div id="quizQuestions"></div>
+            <div class="ebpf-btn-row">
+              <button type="submit" class="ebpf-btn ebpf-btn-primary" id="submitQuizBtn">
+                <i class="fas fa-paper-plane" aria-hidden="true"></i>
+                Submit quiz
+              </button>
+              <button type="button" class="ebpf-btn ebpf-btn-ghost" id="resetQuizBtn">
+                <i class="fas fa-rotate-left" aria-hidden="true"></i>
+                Reset
+              </button>
+            </div>
+          </form>
+          <div id="quizResult" class="ebpf-quiz-result" role="status" aria-live="polite" hidden></div>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <div id="footer-placeholder"></div>
+
+  <script src="/auth.js"></script>
+  <script src="/bootstrap-legacy.js"></script>
+  <script src="/script.js"></script>
+  <script type="module" src="/dist/legacy-bundle.mjs"></script>
+  <script src="/theme.js"></script>
+  <script src="script.js"></script>
+  <script>
+    if (typeof loadPartial === 'function') {
+      loadPartial('navbar-placeholder', '/partials/navbar.html');
+      loadPartial('footer-placeholder', '/partials/footer.html');
+    }
+  </script>
+</body>
+</html>

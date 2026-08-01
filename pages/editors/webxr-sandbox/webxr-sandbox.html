@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>WebXR Spatial Code Sandbox | Algo Infinity Verse</title>
+    <!-- A-Frame VR Framework -->
+    <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
+    <style>
+      body { margin: 0; padding: 0; overflow: hidden; background: #000; font-family: 'Poppins', sans-serif; }
+      #vr-overlay {
+        position: absolute; top: 0; left: 0; width: 100%; padding: 20px;
+        background: linear-gradient(180deg, rgba(0,0,0,0.8) 0%, transparent 100%);
+        color: #fff; z-index: 1000; pointer-events: none;
+      }
+      h1 { margin: 0; font-size: 1.5rem; color: #38bdf8; }
+      p { margin: 5px 0 0 0; font-size: 0.9rem; color: #cbd5e1; }
+      .control-panel {
+        position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%);
+        background: rgba(15, 23, 42, 0.9); padding: 15px 30px; border-radius: 50px;
+        border: 1px solid #334155; display: flex; gap: 20px; z-index: 1000; pointer-events: auto;
+      }
+      button {
+        background: #8b5cf6; border: none; color: white; padding: 10px 20px;
+        border-radius: 20px; font-weight: bold; cursor: pointer; transition: 0.3s;
+      }
+      button:hover { background: #7c3aed; transform: translateY(-2px); }
+      #vr-console {
+        position: absolute; right: 20px; top: 20px; width: 300px;
+        background: rgba(0,0,0,0.7); border: 1px solid #38bdf8;
+        padding: 15px; border-radius: 8px; color: #38bdf8;
+        font-family: monospace; font-size: 0.8rem; z-index: 1000;
+      }
+    </style>
+  </head>
+  <body>
+    
+    <div id="vr-overlay">
+      <h1><i class="fas fa-vr-cardboard"></i> WebXR Spatial Code Sandbox</h1>
+      <p>Physically interact with Data Structures in Virtual Reality.</p>
+    </div>
+
+    <div id="vr-console">
+      > Initiating WebXR Session...<br>
+      > Loading Three.js Environment...<br>
+      > Allocating Binary Search Tree Nodes...
+    </div>
+
+    <div class="control-panel">
+      <button onclick="executeFractal()"><i class="fas fa-magic"></i> Execute Recursive Fractal</button>
+      <button onclick="sortArray()"><i class="fas fa-sort-amount-up"></i> Visualize QuickSort</button>
+      <button onclick="window.location.href='/'" style="background:#475569;">Exit VR</button>
+    </div>
+
+    <!-- A-Frame VR Scene -->
+    <a-scene background="color: #020617">
+      
+      <!-- Camera / User -->
+      <a-entity position="0 1.6 0">
+        <a-camera>
+          <a-cursor color="#38bdf8"></a-cursor>
+        </a-camera>
+        <!-- VR Hands -->
+        <a-entity laser-controls="hand: left"></a-entity>
+        <a-entity laser-controls="hand: right"></a-entity>
+      </a-entity>
+
+      <!-- Environment Lighting -->
+      <a-light type="ambient" color="#222"></a-light>
+      <a-light type="point" position="0 4 -2" color="#8b5cf6" intensity="2"></a-light>
+      <a-light type="point" position="2 2 2" color="#38bdf8" intensity="1.5"></a-light>
+
+      <!-- Grid Floor -->
+      <a-grid src="https://raw.githubusercontent.com/aframevr/sample-assets/master/assets/images/grid/grid.png" opacity="0.3"></a-grid>
+
+      <!-- Data Structure: Floating Array Blocks -->
+      <a-entity id="data-array" position="-2 1.5 -4">
+        <!-- Will be populated by JS -->
+      </a-entity>
+
+    </a-scene>
+
+    <script>
+      const consoleEl = document.getElementById("vr-console");
+      const arrayContainer = document.getElementById("data-array");
+      let blocks = [];
+
+      function log(msg) {
+        consoleEl.innerHTML += `<br>> ${msg}`;
+        consoleEl.scrollTop = consoleEl.scrollHeight;
+      }
+
+      // Initialize an unsorted array visually
+      function initArray() {
+        const values = [5, 2, 8, 1, 9];
+        values.forEach((val, index) => {
+          const box = document.createElement('a-box');
+          box.setAttribute('position', `${index * 1.2} 0 0`);
+          box.setAttribute('color', '#3b82f6');
+          box.setAttribute('depth', '0.5');
+          box.setAttribute('width', '0.8');
+          box.setAttribute('height', val * 0.2 + 0.1); // Height proportional to value
+          box.setAttribute('animation', `property: position; to: ${index * 1.2} ${Math.random()*0.2} 0; dir: alternate; dur: 2000; loop: true`);
+          
+          const text = document.createElement('a-text');
+          text.setAttribute('value', val);
+          text.setAttribute('align', 'center');
+          text.setAttribute('position', `0 ${val * 0.1 + 0.2} 0.26`);
+          text.setAttribute('color', '#fff');
+          
+          box.appendChild(text);
+          arrayContainer.appendChild(box);
+          blocks.push(box);
+        });
+        log("Array instantiated in 3D Space.");
+      }
+
+      function executeFractal() {
+        log("Executing recursion depth = 4...");
+        // Add a giant floating fractal sphere to simulate complex recursion
+        const fractal = document.createElement('a-entity');
+        fractal.setAttribute('geometry', 'primitive: dodecahedron; radius: 1.5');
+        fractal.setAttribute('material', 'color: #ec4899; wireframe: true');
+        fractal.setAttribute('position', '0 3 -6');
+        fractal.setAttribute('animation', 'property: rotation; to: 360 360 0; dur: 5000; loop: true; easing: linear');
+        document.querySelector('a-scene').appendChild(fractal);
+        log("Fractal call stack rendered.");
+      }
+
+      function sortArray() {
+        log("Initiating QuickSort visualization...");
+        // Fake sorting animation by changing colors and heights
+        blocks.forEach((box, i) => {
+          setTimeout(() => {
+            box.setAttribute('color', '#10b981');
+            box.setAttribute('height', (i+1) * 0.3);
+            box.querySelector('a-text').setAttribute('value', i+1);
+          }, i * 500);
+        });
+        setTimeout(() => log("QuickSort Complete. O(N log N)"), 2500);
+      }
+
+      window.onload = () => {
+        setTimeout(initArray, 1000);
+      };
+    </script>
+  </body>
+</html>

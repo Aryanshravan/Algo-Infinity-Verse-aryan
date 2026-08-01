@@ -1,0 +1,364 @@
+/* ═══════════════════════════════════════════════════════════════
+   QUICK NOTES — Algorithm Visualizer Inline Notes Widget
+   ═══════════════════════════════════════════════════════════════
+   Dark theme matching the app's #0a0a1a aesthetic with warm
+   undertones (no purple, cyan, or lime).
+   Positioned above the scroll-to-top button at bottom-right.
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ─── Container ─── */
+.quick-note-container {
+  position: fixed;
+  bottom: 30px;
+  right: 30px;
+  z-index: 999;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.5rem;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+/* ─── Toggle Button (sticky-note icon) ─── */
+.quick-note-toggle {
+  position: relative;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #1A1625;
+  border: 1.5px solid #3A2E3E;
+  color: #8A7D72;
+  cursor: pointer;
+  box-shadow:
+    0 2px 8px rgba(0, 0, 0, 0.30),
+    0 4px 16px rgba(0, 0, 0, 0.15);
+  transition:
+    background 0.25s ease,
+    border-color 0.25s ease,
+    color 0.25s ease,
+    transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1),
+    box-shadow 0.25s ease;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.quick-note-toggle:hover {
+  background: #262133;
+  border-color: #D4A574;
+  color: #E8DCC8;
+  transform: scale(1.08);
+  box-shadow:
+    0 4px 16px rgba(212, 165, 116, 0.12),
+    0 6px 24px rgba(0, 0, 0, 0.20);
+}
+
+.quick-note-toggle:active {
+  transform: scale(0.94);
+  transition-duration: 0.12s;
+}
+
+.quick-note-toggle.is-active {
+  background: #262133;
+  border-color: #D4A574;
+  color: #E8DCC8;
+  box-shadow:
+    0 0 0 3px rgba(212, 165, 116, 0.10),
+    0 2px 8px rgba(0, 0, 0, 0.30);
+}
+
+.quick-note-toggle:focus-visible {
+  outline: 2px solid #D4A574 !important;
+  outline-offset: 3px !important;
+  box-shadow: none !important;
+}
+
+.quick-note-toggle svg {
+  width: 22px;
+  height: 22px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition: stroke 0.25s ease;
+}
+
+/* ─── Note count badge ─── */
+.quick-note-badge {
+  position: absolute;
+  top: -3px;
+  right: -3px;
+  width: 17px;
+  height: 17px;
+  border-radius: 50%;
+  background: #D4A574;
+  color: #1A1625;
+  font-size: 0.58rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transform: scale(0.5);
+  transition:
+    opacity 0.3s ease,
+    transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  pointer-events: none;
+}
+
+.quick-note-badge.visible {
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* ─── Panel ─── */
+.quick-note-panel {
+  position: absolute;
+  bottom: calc(100% + 12px);
+  right: 0;
+  width: 340px;
+  max-height: 0;
+  overflow: hidden;
+  border-radius: 14px;
+  background: #1A1625;
+  border: 1px solid #3A2E3E;
+  box-shadow:
+    0 12px 40px rgba(0, 0, 0, 0.45),
+    0 2px 8px rgba(0, 0, 0, 0.25);
+  transition:
+    max-height 0.35s cubic-bezier(0.4, 0, 0.2, 1),
+    opacity 0.3s ease,
+    transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  opacity: 0;
+  transform: translateY(8px) scale(0.97);
+  transform-origin: bottom right;
+}
+
+.quick-note-panel.open {
+  max-height: 380px;
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+/* ─── Panel Header ─── */
+.quick-note-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.8rem 1rem 0.6rem;
+  border-bottom: 1px solid #2F2835;
+}
+
+.quick-note-title-group {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.quick-note-title-icon {
+  width: 18px;
+  height: 18px;
+  color: #D4A574;
+  flex-shrink: 0;
+}
+
+.quick-note-title-icon path:first-child {
+  fill: #2F2835;
+  stroke: #D4A574;
+}
+
+.quick-note-title-icon polyline {
+  stroke: #D4A574;
+}
+
+.quick-note-title {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #E8DCC8;
+  letter-spacing: -0.01em;
+}
+
+.quick-note-close {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  color: #6B5F57;
+  cursor: pointer;
+  font-size: 1.1rem;
+  transition:
+    background 0.2s ease,
+    color 0.2s ease;
+}
+
+.quick-note-close:hover {
+  background: rgba(212, 165, 116, 0.10);
+  color: #E8DCC8;
+}
+
+.quick-note-close:focus-visible {
+  outline: 2px solid #D4A574 !important;
+  outline-offset: 1px !important;
+  box-shadow: none !important;
+}
+
+/* ─── Textarea ─── */
+.quick-note-textarea {
+  width: 100%;
+  min-height: 160px;
+  max-height: 220px;
+  padding: 0.85rem 1rem;
+  border: none;
+  background: transparent;
+  color: #E8DCC8;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.85rem;
+  line-height: 1.6;
+  resize: none;
+  outline: none;
+  box-sizing: border-box;
+  caret-color: #D4A574;
+}
+
+.quick-note-textarea::placeholder {
+  color: #5A4F48;
+  font-style: italic;
+  font-size: 0.82rem;
+}
+
+.quick-note-textarea:focus {
+  background: rgba(38, 33, 51, 0.5);
+}
+
+.quick-note-textarea:focus-visible {
+  outline: 2px solid #D4A574 !important;
+  outline-offset: -2px !important;
+  box-shadow: none !important;
+}
+
+/* ─── Footer ─── */
+.quick-note-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.45rem 1rem 0.65rem;
+  border-top: 1px solid #2F2835;
+}
+
+.quick-note-status {
+  font-size: 0.7rem;
+  color: #6B5F57;
+  transition: color 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.quick-note-status.saving {
+  color: #6B5F57;
+}
+
+.quick-note-status.saved {
+  color: #7CB89A;
+}
+
+.quick-note-status .dot {
+  display: inline-block;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: currentColor;
+  opacity: 0.7;
+}
+
+.quick-note-char-count {
+  font-size: 0.65rem;
+  color: #4A423C;
+  font-family: 'JetBrains Mono', 'Fira Code', monospace;
+}
+
+/* ─── Clear button ─── */
+.quick-note-clear {
+  background: none;
+  border: none;
+  color: #4A423C;
+  font-size: 0.7rem;
+  cursor: pointer;
+  padding: 2px 6px;
+  border-radius: 6px;
+  transition:
+    background 0.2s ease,
+    color 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.quick-note-clear:focus-visible {
+  outline: 2px solid #D4A574 !important;
+  outline-offset: 2px !important;
+  box-shadow: none !important;
+}
+
+.quick-note-clear:hover {
+  background: rgba(232, 106, 106, 0.10);
+  color: #E86A6A;
+}
+
+/* ─── Enter animation for the whole widget ─── */
+.quick-note-container {
+  animation: quickNoteFadeIn 0.4s ease both;
+}
+
+@keyframes quickNoteFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ─── Mobile ─── */
+@media (max-width: 600px) {
+  .quick-note-container {
+    bottom: 30px;
+    right: 24px;
+  }
+
+  .quick-note-panel {
+    width: calc(100vw - 28px);
+    max-width: 340px;
+    right: 0;
+  }
+
+  .quick-note-toggle {
+    width: 40px;
+    height: 40px;
+  }
+
+  .quick-note-toggle svg {
+    width: 20px;
+    height: 20px;
+  }
+}
+
+/* ─── Reduced motion ─── */
+@media (prefers-reduced-motion: reduce) {
+  .quick-note-toggle,
+  .quick-note-panel,
+  .quick-note-container {
+    transition: none;
+    animation: none;
+  }
+}

@@ -1,0 +1,1430 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Learn Swift – Safe &amp; Expressive iOS Development | Algo Infinity Verse</title>
+  <meta name="description" content="Free interactive Swift tutorial covering fundamentals, optionals, protocols, closures, memory management, and iOS ecosystem basics. Write safe, modern code with confidence." />
+
+  <link rel="stylesheet" href="/styles.css" />
+  <link rel="stylesheet" href="swift-learning.css" />
+
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+
+  <script>
+    (function() {
+      try {
+        var t = localStorage.getItem('theme');
+        var p = window.matchMedia('(prefers-color-scheme: light)').matches;
+        var theme = t || (p ? 'light' : 'dark');
+        if (theme === 'light') document.documentElement.classList.add('light-mode');
+      } catch (e) {}
+    })();
+  </script>
+</head>
+<body data-page="swift-learning" data-no-loading>
+  <div id="loading-screen" class="hidden">
+    <div class="loader">
+      <div class="infinity-loader">&#x221E;</div>
+      <h2>Loading Swift Learning...</h2>
+    </div>
+  </div>
+
+  <main>
+    <!-- ════════════════════════════════════════
+         HERO SECTION
+         ════════════════════════════════════════ -->
+    <section class="sw-hero">
+      <div class="sw-hero-bg">
+        <div class="sw-hero-glow"></div>
+      </div>
+
+      <a href="/pages/learning/languages.html" class="sw-back-btn" id="swBackBtn" aria-label="Go back to languages">
+        <i class="fas fa-arrow-left"></i>
+        <span>Languages</span>
+      </a>
+
+      <div class="sw-hero-content">
+        <!-- 'let' binding signature motif -->
+        <div class="sw-let-sig" aria-hidden="true">
+          <span class="sw-sig-kw">let</span>
+          <span class="sw-sig-name">universe</span>
+          <span class="sw-sig-op">=</span>
+          <span class="sw-sig-str">"algorithms"</span>
+        </div>
+
+        <h1 class="sw-hero-title" id="swHeroTitle">
+          <span class="sw-title-line">Learn Swift</span>
+          <span class="sw-title-line">Safe &amp; Expressive</span>
+        </h1>
+
+        <p class="sw-hero-subtitle">
+          Master the modern language that powers iOS, macOS, and beyond. From <code>let</code> and optionals to protocols, closures, and ARC — <strong>8 interactive lessons</strong> to write safe, expressive code.
+        </p>
+
+        <!-- Stats -->
+        <div class="sw-hero-stats">
+          <div class="sw-stat">
+            <span class="sw-stat-value" id="topicCount">8</span>
+            <span class="sw-stat-label">Topics</span>
+          </div>
+          <div class="sw-stat">
+            <span class="sw-stat-value">25+</span>
+            <span class="sw-stat-label">Examples</span>
+          </div>
+          <div class="sw-stat">
+            <span class="sw-stat-value">8</span>
+            <span class="sw-stat-label">Exercises</span>
+          </div>
+        </div>
+
+        <!-- CTA -->
+        <div class="sw-hero-actions">
+          <a href="#topic-fundamentals" class="sw-btn sw-btn-primary">
+            <i class="fas fa-play"></i> Start Learning
+          </a>
+          <a href="/pages/practice/problems.html" class="sw-btn sw-btn-secondary">
+            <i class="fas fa-code"></i> Open Code Editor
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- ════════════════════════════════════════
+         TOPIC NAVIGATION PILLS
+         ════════════════════════════════════════ -->
+    <section class="sw-section">
+      <div class="sw-container">
+        <nav class="sw-topic-nav" id="swTopicNav" aria-label="Lesson topics">
+          <a href="#topic-fundamentals" class="sw-topic-pill active">Fundamentals</a>
+          <a href="#topic-optionals" class="sw-topic-pill">Optionals &amp; Safety</a>
+          <a href="#topic-protocols" class="sw-topic-pill">Protocols &amp; Extensions</a>
+          <a href="#topic-closures" class="sw-topic-pill">Closures</a>
+          <a href="#topic-memory" class="sw-topic-pill">Memory &amp; ARC</a>
+          <a href="#topic-ios" class="sw-topic-pill">iOS Ecosystem</a>
+          <a href="#topic-errors" class="sw-topic-pill">Error Handling</a>
+          <a href="#topic-generics" class="sw-topic-pill">Generics</a>
+        </nav>
+
+        <!-- Progress dots -->
+        <div class="sw-progress" id="swProgress" aria-hidden="true">
+          <span class="sw-progress-dot active" data-topic="0"></span>
+          <span class="sw-progress-line" data-topic="0"></span>
+          <span class="sw-progress-dot" data-topic="1"></span>
+          <span class="sw-progress-line" data-topic="1"></span>
+          <span class="sw-progress-dot" data-topic="2"></span>
+          <span class="sw-progress-line" data-topic="2"></span>
+          <span class="sw-progress-dot" data-topic="3"></span>
+          <span class="sw-progress-line" data-topic="3"></span>
+          <span class="sw-progress-dot" data-topic="4"></span>
+          <span class="sw-progress-line" data-topic="4"></span>
+          <span class="sw-progress-dot" data-topic="5"></span>
+          <span class="sw-progress-line" data-topic="5"></span>
+          <span class="sw-progress-dot" data-topic="6"></span>
+          <span class="sw-progress-line" data-topic="6"></span>
+          <span class="sw-progress-dot" data-topic="7"></span>
+        </div>
+
+        <!-- ════════════════════════════════════════
+             LESSON 1: SWIFT FUNDAMENTALS
+             ════════════════════════════════════════ -->
+        <article class="sw-lesson" id="topic-fundamentals" data-topic="0">
+          <div class="sw-lesson-header">
+            <span class="sw-lesson-number">01</span>
+            <h3>Swift Fundamentals</h3>
+          </div>
+
+          <p>
+            Swift is a <strong>type-safe</strong>, compiled language introduced by Apple in 2014. Every value has a type the compiler knows, which catches entire classes of bugs before your code runs. The two keywords you will use most are <code>let</code> for constants and <code>var</code> for variables.
+          </p>
+
+          <div class="sw-concept">
+            <h4>let vs var</h4>
+            <ul>
+              <li><strong><code>let</code></strong> — declares a constant. Its value can never change once set. Prefer this by default.</li>
+              <li><strong><code>var</code></strong> — declares a variable. Its value can be reassigned at any time.</li>
+              <li>Swift uses <strong>type inference</strong> — you rarely need to write the type explicitly.</li>
+            </ul>
+          </div>
+
+          <div class="sw-code-block">
+            <div class="sw-code-header">
+              <span class="sw-code-lang">Swift</span>
+              <button type="button" class="sw-code-copy" aria-label="Copy code" data-code='// Constants with let -- value cannot change
+let appName = "Algo Infinity"
+let maxRetries = 3
+
+// Variables with var -- value can change
+var score = 100
+score += 50
+
+// Type inference -- Swift infers Int, Double, Bool, String
+var lives = 3
+var health = 99.5
+var isAlive = true
+var player = "Alice"
+
+// Explicit type annotations
+var level: Int = 7
+var greeting: String = "Hello"
+
+// String interpolation
+let message = "\(player) has \(lives) lives left"
+
+// Collections
+var scores: [Int] = [98, 87, 92]
+var lookup: [String: Int] = ["Alice": 98]
+
+// Control flow
+if score >= 150 {
+    print("New high score!")
+} else {
+    print("Keep going...")
+}
+
+for i in 1...3 {
+    print("Attempt \(i)")
+}
+
+// Functions
+func greet(name: String) -> String {
+    return "Welcome, \(name)!"
+}'>
+              <i class="fas fa-copy"></i> Copy
+            </button>
+          </div>
+          <pre><code><span class="cmt">// Constants with let -- value cannot change</span>
+<span class="kw">let</span> appName = <span class="str">"Algo Infinity"</span>
+<span class="kw">let</span> maxRetries = <span class="num">3</span>
+
+<span class="cmt">// Variables with var -- value can change</span>
+<span class="kw">var</span> score = <span class="num">100</span>
+score += <span class="num">50</span>
+
+<span class="cmt">// Type inference</span>
+<span class="kw">var</span> lives = <span class="num">3</span>
+<span class="kw">var</span> health = <span class="num">99.5</span>
+<span class="kw">var</span> isAlive = <span class="kw">true</span>
+<span class="kw">var</span> player = <span class="str">"Alice"</span>
+
+<span class="cmt">// Explicit type annotations</span>
+<span class="kw">var</span> level: <span class="type">Int</span> = <span class="num">7</span>
+<span class="kw">var</span> greeting: <span class="type">String</span> = <span class="str">"Hello"</span>
+
+<span class="cmt">// String interpolation</span>
+<span class="kw">let</span> message = <span class="str">"\(player) has \(lives) lives left"</span>
+
+<span class="cmt">// Collections</span>
+<span class="kw">var</span> scores: [<span class="type">Int</span>] = [<span class="num">98</span>, <span class="num">87</span>, <span class="num">92</span>]
+<span class="kw">var</span> lookup: [<span class="type">String</span>: <span class="type">Int</span>] = [<span class="str">"Alice"</span>: <span class="num">98</span>]
+
+<span class="cmt">// Control flow</span>
+<span class="kw">if</span> score >= <span class="num">150</span> {
+    <span class="fn">print</span>(<span class="str">"New high score!"</span>)
+} <span class="kw">else</span> {
+    <span class="fn">print</span>(<span class="str">"Keep going..."</span>)
+}
+
+<span class="kw">for</span> i <span class="kw">in</span> <span class="num">1</span>...<span class="num">3</span> {
+    <span class="fn">print</span>(<span class="str">"Attempt \(i)"</span>)
+}
+
+<span class="cmt">// Functions</span>
+<span class="kw">func</span> <span class="fn">greet</span>(name: <span class="type">String</span>) -> <span class="type">String</span> {
+    <span class="kw">return</span> <span class="str">"Welcome, \(name)!"</span>
+}</code></pre>
+          </div>
+
+          <div class="sw-callout">
+            <p><strong>Prefer <code>let</code> by default.</strong> Immutability makes your code easier to reason about and safe to share across threads. Only reach for <code>var</code> when a value genuinely needs to change.</p>
+          </div>
+
+          <div class="sw-table-wrap">
+            <table class="sw-table" aria-label="Swift basic types">
+              <thead>
+                <tr>
+                  <th scope="col">Type</th>
+                  <th scope="col">Example</th>
+                  <th scope="col">Description</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><td><code>Int</code></td><td><code>42</code></td><td>Whole numbers</td></tr>
+                <tr><td><code>Double</code></td><td><code>3.14159</code></td><td>Floating-point numbers</td></tr>
+                <tr><td><code>Bool</code></td><td><code>true</code></td><td><code>true</code> or <code>false</code></td></tr>
+                <tr><td><code>String</code></td><td><code>"hello"</code></td><td>Text, always double-quoted</td></tr>
+                <tr><td><code>Character</code></td><td><code>"S"</code></td><td>A single Unicode character</td></tr>
+                <tr><td><code>[T]</code></td><td><code>[1, 2, 3]</code></td><td>Ordered array</td></tr>
+                <tr><td><code>[K: V]</code></td><td><code>["a": 1]</code></td><td>Key-value dictionary</td></tr>
+                <tr><td><code>Set&lt;T&gt;</code></td><td><code>Set([1, 2])</code></td><td>Unordered unique values</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Exercise -->
+          <div class="sw-exercise" id="exercise-fundamentals">
+            <div class="sw-exercise-title">
+              Practice: Fundamentals
+            </div>
+            <p>Which keyword should you use to declare a value that must never change?</p>
+            <ol>
+              <li><code>var</code></li>
+              <li><code>let</code></li>
+              <li><code>const</code></li>
+              <li><code>final</code></li>
+            </ol>
+            <button type="button" class="sw-exercise-toggle" aria-expanded="false" aria-controls="solution-fundamentals">Show Solution</button>
+            <div class="sw-exercise-solution" id="solution-fundamentals">
+              <p><strong>Correct Answer: B</strong></p>
+              <p><code>let</code> declares a constant in Swift. Unlike <code>const</code> in other languages, <code>let</code> applies to the reference itself — the value cannot be reassigned after initialization.</p>
+            </div>
+          </div>
+        </article>
+
+        <!-- ════════════════════════════════════════
+             LESSON 2: OPTIONALS & SAFETY
+             ════════════════════════════════════════ -->
+        <article class="sw-lesson" id="topic-optionals" data-topic="1">
+          <div class="sw-lesson-header">
+            <span class="sw-lesson-number">02</span>
+            <h3>Optionals &amp; Safety</h3>
+          </div>
+
+          <p>
+            Swift's signature feature is <strong>optional safety</strong>. An optional is a type that may hold a value <em>or</em> be <code>nil</code>. The compiler forces you to handle the <code>nil</code> case, which eliminates the "null pointer" crashes that plague other languages.
+          </p>
+
+          <div class="sw-concept">
+            <h4>Declaring &amp; Unwrapping Optionals</h4>
+            <ul>
+              <li>Declare with a <code>?</code> suffix: <code>String?</code> — the value may be absent</li>
+              <li><code>if let</code> — safely bind the value to a new constant</li>
+              <li><code>guard let</code> — early exit when the value is <code>nil</code></li>
+              <li><code>??</code> (nil coalescing) — provide a default value</li>
+              <li><code>?</code> optional chaining — short-circuit a whole chain</li>
+              <li><code>!</code> force unwrap — crashes if <code>nil</code>; use sparingly</li>
+            </ul>
+          </div>
+
+          <div class="sw-code-block">
+            <div class="sw-code-header">
+              <span class="sw-code-lang">Swift</span>
+              <button type="button" class="sw-code-copy" aria-label="Copy code" data-code='// Declaring an optional
+var username: String? = "alice"
+username = nil
+
+// Optional binding with if let
+if let name = username {
+    print("Hello, \(name)")
+} else {
+    print("No username")
+}
+
+// guard let -- early exit
+func validate(_ name: String?) {
+    guard let safeName = name else {
+        print("Name is missing")
+        return
+    }
+    print("Valid: \(safeName)")
+}
+
+// Nil coalescing with ??
+let displayName = username ?? "Guest"
+
+// Optional chaining
+let length = username?.count ?? 0
+
+// Force unwrap -- use with care
+// let forced = username!  // crashes if nil
+'>
+              <i class="fas fa-copy"></i> Copy
+            </button>
+          </div>
+          <pre><code><span class="cmt">// Declaring an optional</span>
+<span class="kw">var</span> username: <span class="type">String</span>? = <span class="str">"alice"</span>
+username = <span class="kw">nil</span>
+
+<span class="cmt">// Optional binding with if let</span>
+<span class="kw">if let</span> name = username {
+    <span class="fn">print</span>(<span class="str">"Hello, \(name)"</span>)
+} <span class="kw">else</span> {
+    <span class="fn">print</span>(<span class="str">"No username"</span>)
+}
+
+<span class="cmt">// guard let -- early exit</span>
+<span class="kw">func</span> <span class="fn">validate</span>(<span class="kw">_</span> name: <span class="type">String</span>?) {
+    <span class="kw">guard let</span> safeName = name <span class="kw">else</span> {
+        <span class="fn">print</span>(<span class="str">"Name is missing"</span>)
+        <span class="kw">return</span>
+    }
+    <span class="fn">print</span>(<span class="str">"Valid: \(safeName)"</span>)
+}
+
+<span class="cmt">// Nil coalescing with ??</span>
+<span class="kw">let</span> displayName = username ?? <span class="str">"Guest"</span>
+
+<span class="cmt">// Optional chaining</span>
+<span class="kw">let</span> length = username?.count ?? <span class="num">0</span>
+
+<span class="cmt">// Force unwrap -- use with care</span>
+<span class="cmt">// let forced = username!  // crashes if nil</span></code></pre>
+          </div>
+
+          <div class="sw-callout">
+            <p><strong>Never force-unwrap unless you are certain.</strong> A force unwrap (<code>!</code>) on <code>nil</code> crashes your app. Prefer <code>if let</code>, <code>guard let</code>, and <code>??</code> — they are just as fast and impossible to crash.</p>
+          </div>
+
+          <div class="sw-table-wrap">
+            <table class="sw-table" aria-label="Optional unwrapping strategies">
+              <thead>
+                <tr>
+                  <th scope="col">Strategy</th>
+                  <th scope="col">Syntax</th>
+                  <th scope="col">Use Case</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><td>Optional binding</td><td><code>if let x = opt</code></td><td>Use the value inside a block</td></tr>
+                <tr><td>Guard</td><td><code>guard let x = opt</code></td><td>Fail fast, then keep the value</td></tr>
+                <tr><td>Nil coalescing</td><td><code>opt ?? default</code></td><td>Provide a fallback value</td></tr>
+                <tr><td>Optional chaining</td><td><code>opt?.property</code></td><td>Access a chain safely</td></tr>
+                <tr><td>Force unwrap</td><td><code>opt!</code></td><td>Only when nil is impossible</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Exercise -->
+          <div class="sw-exercise" id="exercise-optionals">
+            <div class="sw-exercise-title">
+              Practice: Optionals
+            </div>
+            <p>Given <code>var email: String? = nil</code>, what is the value of <code>email ?? "no-email@example.com"</code>?</p>
+            <ol>
+              <li><code>nil</code></li>
+              <li><code>no-email@example.com</code></li>
+              <li>Compile error</li>
+              <li>A crash</li>
+            </ol>
+            <button type="button" class="sw-exercise-toggle" aria-expanded="false" aria-controls="solution-optionals">Show Solution</button>
+            <div class="sw-exercise-solution" id="solution-optionals">
+              <p><strong>Correct Answer: B</strong></p>
+              <p>The nil coalescing operator <code>??</code> returns the right-hand side whenever the optional is <code>nil</code>. Since <code>email</code> is <code>nil</code>, the result is the fallback string.</p>
+            </div>
+          </div>
+        </article>
+
+        <!-- ════════════════════════════════════════
+             LESSON 3: PROTOCOLS & EXTENSIONS
+             ════════════════════════════════════════ -->
+        <div class="sw-divider">
+          <span class="sw-divider-inner">Next Topic</span>
+        </div>
+
+        <article class="sw-lesson" id="topic-protocols" data-topic="2">
+          <div class="sw-lesson-header">
+            <span class="sw-lesson-number">03</span>
+            <h3>Protocols &amp; Extensions</h3>
+          </div>
+
+          <p>
+            Swift is a <strong>protocol-oriented</strong> language. A protocol is a blueprint of requirements — properties and methods — that conforming types must provide. Combined with extensions, protocols let you share behavior without inheritance hierarchies.
+          </p>
+
+          <div class="sw-concept">
+            <h4>Protocol Fundamentals</h4>
+            <ul>
+              <li>Declare with the <code>protocol</code> keyword — a list of requirements</li>
+              <li>Conform with <code>struct Car: Vehicle</code> — multiple protocols separated by commas</li>
+              <li>Protocols can <strong>inherit</strong> other protocols</li>
+              <li><code>extension</code> adds methods and properties to any type — even existing ones</li>
+              <li>Extensions can provide <strong>default implementations</strong> of protocol requirements</li>
+            </ul>
+          </div>
+
+          <div class="sw-code-block">
+            <div class="sw-code-header">
+              <span class="sw-code-lang">Swift</span>
+              <button type="button" class="sw-code-copy" aria-label="Copy code" data-code='// Defining a protocol
+protocol Vehicle {
+    var speed: Int { get }
+    func start()
+}
+
+// Conforming to a protocol
+struct Car: Vehicle {
+    var speed: Int = 120
+    func start() {
+        print("Engine on")
+    }
+}
+
+// Protocol inheritance
+protocol ElectricVehicle: Vehicle {
+    func charge()
+}
+
+struct Tesla: ElectricVehicle {
+    var speed: Int = 200
+    func start() { print("Silent power") }
+    func charge() { print("Charging...") }
+}
+
+// Extensions add behavior to existing types
+extension Int {
+    var squared: Int { return self * self }
+    func isEven() -> Bool { return self % 2 == 0 }
+}
+
+// Default protocol implementation
+extension Vehicle {
+    func describe() -> String {
+        return "Moving at \(speed) km/h"
+    }
+}
+'>
+              <i class="fas fa-copy"></i> Copy
+            </button>
+          </div>
+          <pre><code><span class="cmt">// Defining a protocol</span>
+<span class="kw">protocol</span> <span class="fn">Vehicle</span> {
+    <span class="kw">var</span> speed: <span class="type">Int</span> { <span class="kw">get</span> }
+    <span class="kw">func</span> <span class="fn">start</span>()
+}
+
+<span class="cmt">// Conforming to a protocol</span>
+<span class="kw">struct</span> <span class="fn">Car</span>: <span class="fn">Vehicle</span> {
+    <span class="kw">var</span> speed: <span class="type">Int</span> = <span class="num">120</span>
+    <span class="kw">func</span> <span class="fn">start</span>() {
+        <span class="fn">print</span>(<span class="str">"Engine on"</span>)
+    }
+}
+
+<span class="cmt">// Protocol inheritance</span>
+<span class="kw">protocol</span> <span class="fn">ElectricVehicle</span>: <span class="fn">Vehicle</span> {
+    <span class="kw">func</span> <span class="fn">charge</span>()
+}
+
+<span class="kw">struct</span> <span class="fn">Tesla</span>: <span class="fn">ElectricVehicle</span> {
+    <span class="kw">var</span> speed: <span class="type">Int</span> = <span class="num">200</span>
+    <span class="kw">func</span> <span class="fn">start</span>() { <span class="fn">print</span>(<span class="str">"Silent power"</span>) }
+    <span class="kw">func</span> <span class="fn">charge</span>() { <span class="fn">print</span>(<span class="str">"Charging..."</span>) }
+}
+
+<span class="cmt">// Extensions add behavior to existing types</span>
+<span class="kw">extension</span> <span class="type">Int</span> {
+    <span class="kw">var</span> squared: <span class="type">Int</span> { <span class="kw">return</span> <span class="kw">self</span> * <span class="kw">self</span> }
+    <span class="kw">func</span> <span class="fn">isEven</span>() -> <span class="type">Bool</span> { <span class="kw">return</span> <span class="kw">self</span> % <span class="num">2</span> == <span class="num">0</span> }
+}
+
+<span class="cmt">// Default protocol implementation</span>
+<span class="kw">extension</span> <span class="fn">Vehicle</span> {
+    <span class="kw">func</span> <span class="fn">describe</span>() -> <span class="type">String</span> {
+        <span class="kw">return</span> <span class="str">"Moving at \(speed) km/h"</span>
+    }
+}</code></pre>
+          </div>
+
+          <div class="sw-callout">
+            <p><strong>Protocol-oriented programming</strong> (POP) prefers composition over inheritance: structs + protocols + extensions give you code reuse without the fragility of deep class hierarchies. This is the Swift community's recommended default.</p>
+          </div>
+
+          <!-- Exercise -->
+          <div class="sw-exercise" id="exercise-protocols">
+            <div class="sw-exercise-title">
+              Practice: Protocols &amp; Extensions
+            </div>
+            <p>Write a <code>protocol Named</code> with a requirement <code>var name: String { get }</code>, then write an extension that provides a default method <code>greeting()</code> returning <code>"Hi, I am \(name)"</code>.</p>
+            <button type="button" class="sw-exercise-toggle" aria-expanded="false" aria-controls="solution-protocols">Show Solution</button>
+            <div class="sw-exercise-solution" id="solution-protocols">
+              <div class="sw-code-block">
+                <div class="sw-code-header">
+                  <span class="sw-code-lang">Swift</span>
+                  <button type="button" class="sw-code-copy" aria-label="Copy code" data-code='protocol Named {
+    var name: String { get }
+}
+
+extension Named {
+    func greeting() -> String {
+        return "Hi, I am \(name)"
+    }
+}
+
+struct User: Named {
+    var name: String
+}
+
+let alice = User(name: "Alice")
+print(alice.greeting())  // Hi, I am Alice
+'>
+                    <i class="fas fa-copy"></i> Copy
+                  </button>
+                </div>
+                <pre><code><span class="kw">protocol</span> <span class="fn">Named</span> {
+    <span class="kw">var</span> name: <span class="type">String</span> { <span class="kw">get</span> }
+}
+
+<span class="kw">extension</span> <span class="fn">Named</span> {
+    <span class="kw">func</span> <span class="fn">greeting</span>() -> <span class="type">String</span> {
+        <span class="kw">return</span> <span class="str">"Hi, I am \(name)"</span>
+    }
+}
+
+<span class="kw">struct</span> <span class="fn">User</span>: <span class="fn">Named</span> {
+    <span class="kw">var</span> name: <span class="type">String</span>
+}
+
+<span class="kw">let</span> alice = <span class="fn">User</span>(name: <span class="str">"Alice"</span>)
+<span class="fn">print</span>(alice.<span class="fn">greeting</span>())  <span class="cmt">// Hi, I am Alice</span></code></pre>
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <!-- ════════════════════════════════════════
+             LESSON 4: CLOSURES
+             ════════════════════════════════════════ -->
+        <article class="sw-lesson" id="topic-closures" data-topic="3">
+          <div class="sw-lesson-header">
+            <span class="sw-lesson-number">04</span>
+            <h3>Closures &amp; Higher-Order Functions</h3>
+          </div>
+
+          <p>
+            A closure is a <strong>self-contained block of functionality</strong> that captures and stores references to the constants and variables from its surrounding context. Closures are Swift's version of lambdas — and they power the standard library's higher-order functions.
+          </p>
+
+          <div class="sw-concept">
+            <h4>Closure Essentials</h4>
+            <ul>
+              <li>Full syntax: <code>{ (a: Int, b: Int) -&gt; Int in a + b }</code></li>
+              <li>Shorthand argument names: <code>$0</code>, <code>$1</code> replace explicit parameters</li>
+              <li><strong>Trailing closure</strong> syntax drops the parentheses when a closure is the last argument</li>
+              <li><code>@escaping</code> marks closures that outlive the function call (e.g. stored callbacks)</li>
+              <li>Higher-order functions: <code>map</code>, <code>filter</code>, <code>reduce</code>, <code>sorted</code></li>
+            </ul>
+          </div>
+
+          <div class="sw-code-block">
+            <div class="sw-code-header">
+              <span class="sw-code-lang">Swift</span>
+              <button type="button" class="sw-code-copy" aria-label="Copy code" data-code='// Closure syntax
+let add: (Int, Int) -> Int = { (a, b) in
+    return a + b
+}
+
+// Shorthand arguments
+let multiply: (Int, Int) -> Int = { $0 * $1 }
+
+// Capturing values
+func makeCounter() -> () -> Int {
+    var count = 0
+    return {
+        count += 1
+        return count
+    }
+}
+
+// Higher-order functions
+let numbers = [3, 1, 4, 1, 5]
+let doubled = numbers.map { $0 * 2 }
+let evens = numbers.filter { $0 % 2 == 0 }
+let sum = numbers.reduce(0) { $0 + $1 }
+
+// Trailing closure syntax
+let sorted = numbers.sorted { $0 < $1 }
+
+// Escaping closure
+func fetchData(completion: @escaping (String) -> Void) {
+    DispatchQueue.global().async {
+        completion("Data loaded")
+    }
+}
+'>
+              <i class="fas fa-copy"></i> Copy
+            </button>
+          </div>
+          <pre><code><span class="cmt">// Closure syntax</span>
+<span class="kw">let</span> add: (<span class="type">Int</span>, <span class="type">Int</span>) -> <span class="type">Int</span> = { (a, b) <span class="kw">in</span>
+    <span class="kw">return</span> a + b
+}
+
+<span class="cmt">// Shorthand arguments</span>
+<span class="kw">let</span> multiply: (<span class="type">Int</span>, <span class="type">Int</span>) -> <span class="type">Int</span> = { $<span class="num">0</span> * $<span class="num">1</span> }
+
+<span class="cmt">// Capturing values</span>
+<span class="kw">func</span> <span class="fn">makeCounter</span>() -> () -> <span class="type">Int</span> {
+    <span class="kw">var</span> count = <span class="num">0</span>
+    <span class="kw">return</span> {
+        count += <span class="num">1</span>
+        <span class="kw">return</span> count
+    }
+}
+
+<span class="cmt">// Higher-order functions</span>
+<span class="kw">let</span> numbers = [<span class="num">3</span>, <span class="num">1</span>, <span class="num">4</span>, <span class="num">1</span>, <span class="num">5</span>]
+<span class="kw">let</span> doubled = numbers.<span class="fn">map</span> { $<span class="num">0</span> * <span class="num">2</span> }
+<span class="kw">let</span> evens = numbers.<span class="fn">filter</span> { $<span class="num">0</span> % <span class="num">2</span> == <span class="num">0</span> }
+<span class="kw">let</span> sum = numbers.<span class="fn">reduce</span>(<span class="num">0</span>) { $<span class="num">0</span> + $<span class="num">1</span> }
+
+<span class="cmt">// Trailing closure syntax</span>
+<span class="kw">let</span> sorted = numbers.<span class="fn">sorted</span> { $<span class="num">0</span> &lt; $<span class="num">1</span> }
+
+<span class="cmt">// Escaping closure</span>
+<span class="kw">func</span> <span class="fn">fetchData</span>(completion: <span class="kw">@escaping</span> (<span class="type">String</span>) -> <span class="type">Void</span>) {
+    <span class="type">DispatchQueue</span>.global().<span class="fn">async</span> {
+        <span class="fn">completion</span>(<span class="str">"Data loaded"</span>)
+    }
+}</code></pre>
+          </div>
+
+          <div class="sw-table-wrap">
+            <table class="sw-table" aria-label="Higher-order functions">
+              <thead>
+                <tr>
+                  <th scope="col">Function</th>
+                  <th scope="col">Purpose</th>
+                  <th scope="col">Example</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><td><code>map</code></td><td>Transform every element</td><td><code>[1,2].map { $0 * 2 }</code> → <code>[2,4]</code></td></tr>
+                <tr><td><code>filter</code></td><td>Keep matching elements</td><td><code>[1,2,3].filter { $0 &gt; 1 }</code> → <code>[2,3]</code></td></tr>
+                <tr><td><code>reduce</code></td><td>Combine into one value</td><td><code>[1,2,3].reduce(0) { $0 + $1 }</code> → <code>6</code></td></tr>
+                <tr><td><code>sorted</code></td><td>Order elements</td><td><code>[3,1].sorted { $0 &lt; $1 }</code> → <code>[1,3]</code></td></tr>
+                <tr><td><code>forEach</code></td><td>Run for each element</td><td><code>[1,2].forEach { print($0) }</code></td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="sw-callout">
+            <p><strong>Closures capture by reference.</strong> The <code>makeCounter</code> example above keeps its own <code>count</code> alive after the function returns — that is Swift's closure capturing in action.</p>
+          </div>
+
+          <!-- Exercise -->
+          <div class="sw-exercise" id="exercise-closures">
+            <div class="sw-exercise-title">
+              Practice: Closures
+            </div>
+            <p>Using <code>[1, 2, 3, 4, 5]</code>, write a single expression that filters even numbers and returns their squares, e.g. <code>[4, 16]</code>.</p>
+            <button type="button" class="sw-exercise-toggle" aria-expanded="false" aria-controls="solution-closures">Show Solution</button>
+            <div class="sw-exercise-solution" id="solution-closures">
+              <div class="sw-code-block">
+                <div class="sw-code-header">
+                  <span class="sw-code-lang">Swift</span>
+                  <button type="button" class="sw-code-copy" aria-label="Copy code" data-code='let result = [1, 2, 3, 4, 5]
+    .filter { $0 % 2 == 0 }
+    .map { $0 * $0 }
+// result == [4, 16]
+'>
+                    <i class="fas fa-copy"></i> Copy
+                  </button>
+                </div>
+                <pre><code><span class="kw">let</span> result = [<span class="num">1</span>, <span class="num">2</span>, <span class="num">3</span>, <span class="num">4</span>, <span class="num">5</span>]
+    .<span class="fn">filter</span> { $<span class="num">0</span> % <span class="num">2</span> == <span class="num">0</span> }
+    .<span class="fn">map</span> { $<span class="num">0</span> * $<span class="num">0</span> }
+<span class="cmt">// result == [4, 16]</span></code></pre>
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <!-- ════════════════════════════════════════
+             LESSON 5: MEMORY MANAGEMENT & ARC
+             ════════════════════════════════════════ -->
+        <div class="sw-divider">
+          <span class="sw-divider-inner">Next Topic</span>
+        </div>
+
+        <article class="sw-lesson" id="topic-memory" data-topic="4">
+          <div class="sw-lesson-header">
+            <span class="sw-lesson-number">05</span>
+            <h3>Memory Management &amp; ARC</h3>
+          </div>
+
+          <p>
+            Swift manages memory automatically with <strong>Automatic Reference Counting (ARC)</strong>. Every reference to a class instance keeps a count; when the count reaches zero, the instance is deallocated. The two things you must understand: <strong>value types vs reference types</strong> and <strong>retain cycles</strong>.
+          </p>
+
+          <div class="sw-concept">
+            <h4>Value vs Reference Types</h4>
+            <ul>
+              <li><strong>Value types</strong> (<code>struct</code>, <code>enum</code>) — copied on assignment; no ARC involved</li>
+              <li><strong>Reference types</strong> (<code>class</code>) — share one instance; ARC tracks references</li>
+              <li><code>weak</code> references don't increase the retain count — they become <code>nil</code> automatically</li>
+              <li><code>unowned</code> references don't increase the count and assume the object lives forever</li>
+            </ul>
+          </div>
+
+          <div class="sw-code-block">
+            <div class="sw-code-header">
+              <span class="sw-code-lang">Swift</span>
+              <button type="button" class="sw-code-copy" aria-label="Copy code" data-code='class Person {
+    var name: String
+    var pet: Pet?
+    init(name: String) { self.name = name }
+    deinit { print("\(name) deallocated") }
+}
+
+class Pet {
+    var name: String
+    weak var owner: Person?   // weak breaks the cycle
+    init(name: String) { self.name = name }
+    deinit { print("\(name) deallocated") }
+}
+
+var alice: Person? = Person(name: "Alice")
+var rex: Pet? = Pet(name: "Rex")
+alice?.pet = rex
+rex?.owner = alice
+
+// Break the strong references
+alice = nil
+rex = nil
+// Both deallocated -- no retain cycle
+
+// Capture lists prevent retain cycles in closures
+class DataLoader {
+    func load(completion: @escaping () -> Void) {
+        DispatchQueue.global().async { [weak self] in
+            guard let self else { return }
+            self.doWork()
+        }
+    }
+    func doWork() { print("Working") }
+}
+'>
+              <i class="fas fa-copy"></i> Copy
+            </button>
+          </div>
+          <pre><code><span class="kw">class</span> <span class="fn">Person</span> {
+    <span class="kw">var</span> name: <span class="type">String</span>
+    <span class="kw">var</span> pet: <span class="fn">Pet</span>?
+    <span class="kw">init</span>(name: <span class="type">String</span>) { <span class="kw">self</span>.name = name }
+    <span class="kw">deinit</span> { <span class="fn">print</span>(<span class="str">"\(name) deallocated"</span>) }
+}
+
+<span class="kw">class</span> <span class="fn">Pet</span> {
+    <span class="kw">var</span> name: <span class="type">String</span>
+    <span class="kw">weak var</span> owner: <span class="fn">Person</span>?   <span class="cmt">// weak breaks the cycle</span>
+    <span class="kw">init</span>(name: <span class="type">String</span>) { <span class="kw">self</span>.name = name }
+    <span class="kw">deinit</span> { <span class="fn">print</span>(<span class="str">"\(name) deallocated"</span>) }
+}
+
+<span class="kw">var</span> alice: <span class="fn">Person</span>? = <span class="fn">Person</span>(name: <span class="str">"Alice"</span>)
+<span class="kw">var</span> rex: <span class="fn">Pet</span>? = <span class="fn">Pet</span>(name: <span class="str">"Rex"</span>)
+alice?.pet = rex
+rex?.owner = alice
+
+<span class="cmt">// Break the strong references</span>
+alice = <span class="kw">nil</span>
+rex = <span class="kw">nil</span>
+<span class="cmt">// Both deallocated -- no retain cycle</span>
+
+<span class="cmt">// Capture lists prevent retain cycles in closures</span>
+<span class="kw">class</span> <span class="fn">DataLoader</span> {
+    <span class="kw">func</span> <span class="fn">load</span>(completion: <span class="kw">@escaping</span> () -> <span class="type">Void</span>) {
+        <span class="type">DispatchQueue</span>.global().<span class="fn">async</span> { [<span class="kw">weak self</span>] <span class="kw">in</span>
+            <span class="kw">guard let</span> self <span class="kw">else</span> { <span class="kw">return</span> }
+            self.<span class="fn">doWork</span>()
+        }
+    }
+    <span class="kw">func</span> <span class="fn">doWork</span>() { <span class="fn">print</span>(<span class="str">"Working"</span>) }
+}</code></pre>
+          </div>
+
+          <div class="sw-table-wrap">
+            <table class="sw-table" aria-label="Reference types comparison">
+              <thead>
+                <tr>
+                  <th scope="col">Attribute</th>
+                  <th scope="col">Strong</th>
+                  <th scope="col">Weak</th>
+                  <th scope="col">Unowned</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><td>Increases retain count</td><td>Yes</td><td>No</td><td>No</td></tr>
+                <tr><td>Becomes nil automatically</td><td>No</td><td>Yes</td><td>No</td></tr>
+                <tr><td>Must be optional</td><td>No</td><td>Yes</td><td>No</td></tr>
+                <tr><td>Typical use</td><td>Ownership</td><td>Parent-child backrefs</td><td>Guaranteed lifetime</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="sw-callout">
+            <p><strong>Retain cycle = memory leak.</strong> If A holds B strongly and B holds A strongly, neither is ever deallocated. Fix with <code>weak</code> on one side (or <code>[weak self]</code> / <code>[unowned self]</code> inside closures).</p>
+          </div>
+
+          <!-- Exercise -->
+          <div class="sw-exercise" id="exercise-memory">
+            <div class="sw-exercise-title">
+              Practice: Memory &amp; ARC
+            </div>
+            <p>Two class instances reference each other with strong properties. When both external variables are set to <code>nil</code>, what happens?</p>
+            <ol>
+              <li>Both deallocate immediately</li>
+              <li>Neither deallocates — a retain cycle leaks them</li>
+              <li>Only the first deallocates</li>
+              <li>The app crashes</li>
+            </ol>
+            <button type="button" class="sw-exercise-toggle" aria-expanded="false" aria-controls="solution-memory">Show Solution</button>
+            <div class="sw-exercise-solution" id="solution-memory">
+              <p><strong>Correct Answer: B</strong></p>
+              <p>Two strong references that point at each other form a <strong>retain cycle</strong>. ARC can never drop the count to zero, so both objects leak. Declare one property <code>weak</code> to break the cycle.</p>
+            </div>
+          </div>
+        </article>
+
+        <!-- ════════════════════════════════════════
+             LESSON 6: iOS ECOSYSTEM BASICS
+             ════════════════════════════════════════ -->
+        <article class="sw-lesson" id="topic-ios" data-topic="5">
+          <div class="sw-lesson-header">
+            <span class="sw-lesson-number">06</span>
+            <h3>iOS Ecosystem Basics</h3>
+          </div>
+
+          <p>
+            Swift is the language of the Apple platform. Understanding the <strong>iOS ecosystem</strong> means knowing the two UI frameworks, the app lifecycle, and modern <strong>async/await</strong> concurrency.
+          </p>
+
+          <div class="sw-concept">
+            <h4>The iOS Toolkit</h4>
+            <ul>
+              <li><strong>SwiftUI</strong> — Apple's modern declarative UI framework (iOS 13+)</li>
+              <li><strong>UIKit</strong> — the classic imperative framework, still used in production apps</li>
+              <li><strong>App lifecycle</strong> — <code>@main</code> entry point, scenes, and the run loop</li>
+              <li><strong>async/await</strong> — structured concurrency replacing callbacks and delegate spaghetti</li>
+              <li><strong>Swift Package Manager</strong> — dependency management built into Xcode</li>
+            </ul>
+          </div>
+
+          <div class="sw-code-block">
+            <div class="sw-code-header">
+              <span class="sw-code-lang">Swift</span>
+              <button type="button" class="sw-code-copy" aria-label="Copy code" data-code='// SwiftUI app entry point
+import SwiftUI
+
+@main
+struct AlgoApp: App {
+    var body: some Scene {
+        WindowGroup {
+            ContentView()
+        }
+    }
+}
+
+// A SwiftUI view -- declarative UI
+struct ContentView: View {
+    var body: some View {
+        Text("Hello, Algo Infinity")
+            .padding()
+    }
+}
+
+// UIKit equivalent -- imperative UI
+import UIKit
+
+class ViewController: UIViewController {
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        view.backgroundColor = .systemBackground
+    }
+}
+
+// Async/await concurrency
+func fetchProblems() async throws -> [String] {
+    let url = URL(string: "https://api.example.com/problems")!
+    let (data, _) = try await URLSession.shared.data(from: url)
+    return try JSONDecoder().decode([String].self, from: data)
+}
+
+Task {
+    let problems = try await fetchProblems()
+    print(problems)
+}
+'>
+              <i class="fas fa-copy"></i> Copy
+            </button>
+          </div>
+          <pre><code><span class="cmt">// SwiftUI app entry point</span>
+<span class="kw">import</span> SwiftUI
+
+<span class="kw">@main</span>
+<span class="kw">struct</span> <span class="fn">AlgoApp</span>: <span class="fn">App</span> {
+    <span class="kw">var</span> body: <span class="kw">some</span> <span class="fn">Scene</span> {
+        <span class="fn">WindowGroup</span> {
+            <span class="fn">ContentView</span>()
+        }
+    }
+}
+
+<span class="cmt">// A SwiftUI view -- declarative UI</span>
+<span class="kw">struct</span> <span class="fn">ContentView</span>: <span class="fn">View</span> {
+    <span class="kw">var</span> body: <span class="kw">some</span> <span class="fn">View</span> {
+        <span class="fn">Text</span>(<span class="str">"Hello, Algo Infinity"</span>)
+            .<span class="fn">padding</span>()
+    }
+}
+
+<span class="cmt">// UIKit equivalent -- imperative UI</span>
+<span class="kw">import</span> UIKit
+
+<span class="kw">class</span> <span class="fn">ViewController</span>: <span class="fn">UIViewController</span> {
+    <span class="kw">override func</span> <span class="fn">viewDidLoad</span>() {
+        <span class="kw">super</span>.<span class="fn">viewDidLoad</span>()
+        view.backgroundColor = .systemBackground
+    }
+}
+
+<span class="cmt">// Async/await concurrency</span>
+<span class="kw">func</span> <span class="fn">fetchProblems</span>() <span class="kw">async throws</span> -> [<span class="type">String</span>] {
+    <span class="kw">let</span> url = <span class="type">URL</span>(string: <span class="str">"https://api.example.com/problems"</span>)!
+    <span class="kw">let</span> (data, <span class="kw">_</span>) = <span class="kw">try await</span> <span class="type">URLSession</span>.shared.<span class="fn">data</span>(from: url)
+    <span class="kw">return try</span> <span class="type">JSONDecoder</span>().<span class="fn">decode</span>([<span class="type">String</span>].<span class="kw">self</span>, from: data)
+}
+
+<span class="fn">Task</span> {
+    <span class="kw">let</span> problems = <span class="kw">try await</span> <span class="fn">fetchProblems</span>()
+    <span class="fn">print</span>(problems)
+}</code></pre>
+          </div>
+
+          <div class="sw-table-wrap">
+            <table class="sw-table" aria-label="SwiftUI vs UIKit comparison">
+              <thead>
+                <tr>
+                  <th scope="col">Aspect</th>
+                  <th scope="col">SwiftUI</th>
+                  <th scope="col">UIKit</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><td>Paradigm</td><td>Declarative</td><td>Imperative</td></tr>
+                <tr><td>Introduced</td><td>iOS 13 (2019)</td><td>iOS 2 (2008)</td></tr>
+                <tr><td>State handling</td><td>Automatic via bindings</td><td>Manual delegation</td></tr>
+                <tr><td>Learning curve</td><td>Gentler, modern</td><td>Steeper, battle-tested</td></tr>
+                <tr><td>Best for</td><td>New apps</td><td>Complex custom UI</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="sw-callout">
+            <p>Ready to practice? Open the <a href="/pages/practice/problems.html" class="sw-inline-link">Code Editor</a> and write Swift against real problems — or head to the <a href="https://swift.org/getting-started/" target="_blank" rel="noopener noreferrer" class="sw-inline-link">Swift.org getting-started guide</a> to install the toolchain locally.</p>
+          </div>
+
+          <!-- Exercise -->
+          <div class="sw-exercise" id="exercise-ios">
+            <div class="sw-exercise-title">
+              Practice: iOS Ecosystem
+            </div>
+            <p>Which keyword marks the entry point of a SwiftUI app?</p>
+            <ol>
+              <li><code>@main</code></li>
+              <li><code>@entry</code></li>
+              <li><code>@start</code></li>
+              <li><code>@app</code></li>
+            </ol>
+            <button type="button" class="sw-exercise-toggle" aria-expanded="false" aria-controls="solution-ios">Show Solution</button>
+            <div class="sw-exercise-solution" id="solution-ios">
+              <p><strong>Correct Answer: A</strong></p>
+              <p><code>@main</code> marks the type that contains the entry point. In a SwiftUI app, the <code>App</code> protocol's conforming struct is annotated <code>@main</code> and declares its <code>Scene</code> in <code>body</code>.</p>
+            </div>
+          </div>
+        </article>
+
+        <!-- ════════════════════════════════════════
+             LESSON 7: ERROR HANDLING & RESULT
+             ════════════════════════════════════════ -->
+        <div class="sw-divider">
+          <span class="sw-divider-inner">Next Topic</span>
+        </div>
+
+        <article class="sw-lesson" id="topic-errors" data-topic="6">
+          <div class="sw-lesson-header">
+            <span class="sw-lesson-number">07</span>
+            <h3>Error Handling &amp; Result</h3>
+          </div>
+
+          <p>
+            Swift handles errors <strong>explicitly</strong>. A function that can fail declares <code>throws</code>, and callers must handle the error with <code>do-catch</code>, <code>try?</code>, or <code>try!</code>. This makes error paths visible and prevents silent failures.
+          </p>
+
+          <div class="sw-concept">
+            <h4>Error Handling Tools</h4>
+            <ul>
+              <li><strong><code>throws</code></strong> — marks a function that can fail</li>
+              <li><strong><code>do-catch</code></strong> — runs risky code and handles errors</li>
+              <li><strong><code>try?</code></strong> — convert the result into an optional (nil on failure)</li>
+              <li><strong><code>try!</code></strong> — force unwrap the result (crashes on failure — use sparingly)</li>
+              <li><strong><code>defer</code></strong> — run cleanup code when the scope exits, even on error</li>
+              <li><strong><code>Result</code></strong> — represent success or failure as a value</li>
+            </ul>
+          </div>
+
+          <div class="sw-code-block">
+            <div class="sw-code-header">
+              <span class="sw-code-lang">Swift</span>
+              <button type="button" class="sw-code-copy" aria-label="Copy code" data-code='// Define a custom error type
+enum FileError: Error {
+    case notFound
+    case permissionDenied
+}
+
+// A function that can throw
+func readFile(named name: String) throws -> String {
+    if name.isEmpty {
+        throw FileError.notFound
+    }
+    return "Contents of \(name)"
+}
+
+// do-catch
+func loadConfig() {
+    do {
+        let data = try readFile(named: "config.txt")
+        print(data)
+    } catch FileError.notFound {
+        print("Config file missing")
+    } catch {
+        print("Other error: \(error)")
+    }
+}
+
+// try? -- optional result
+let maybeData = try? readFile(named: "config.txt")
+
+// defer -- cleanup runs at scope exit
+func processFile() throws {
+    defer { print("Closing file") }
+    let data = try readFile(named: "data.txt")
+    print(data)
+}
+
+// Result type
+func fetchUser(id: Int) -> Result<String, Error> {
+    guard id &gt; 0 else { return .failure(FileError.notFound) }
+    return .success("User \(id)")
+}
+
+let result = fetchUser(id: 42)
+switch result {
+case .success(let name): print(name)
+case .failure(let error): print(error)
+}'>
+              <i class="fas fa-copy"></i> Copy
+            </button>
+          </div>
+          <pre><code><span class="cmt">// Define a custom error type</span>
+<span class="kw">enum</span> <span class="fn">FileError</span>: <span class="type">Error</span> {
+    <span class="kw">case</span> notFound
+    <span class="kw">case</span> permissionDenied
+}
+
+<span class="cmt">// A function that can throw</span>
+<span class="kw">func</span> <span class="fn">readFile</span>(named name: <span class="type">String</span>) <span class="kw">throws</span> -> <span class="type">String</span> {
+    <span class="kw">if</span> name.isEmpty {
+        <span class="kw">throw</span> <span class="fn">FileError</span>.notFound
+    }
+    <span class="kw">return</span> <span class="str">"Contents of \(name)"</span>
+}
+
+<span class="cmt">// do-catch</span>
+<span class="kw">func</span> <span class="fn">loadConfig</span>() {
+    <span class="kw">do</span> {
+        <span class="kw">let</span> data = <span class="kw">try</span> <span class="fn">readFile</span>(named: <span class="str">"config.txt"</span>)
+        <span class="fn">print</span>(data)
+    } <span class="kw">catch</span> <span class="fn">FileError</span>.notFound {
+        <span class="fn">print</span>(<span class="str">"Config file missing"</span>)
+    } <span class="kw">catch</span> {
+        <span class="fn">print</span>(<span class="str">"Other error: \(error)"</span>)
+    }
+}
+
+<span class="cmt">// try? -- optional result</span>
+<span class="kw">let</span> maybeData = <span class="kw">try?</span> <span class="fn">readFile</span>(named: <span class="str">"config.txt"</span>)
+
+<span class="cmt">// defer -- cleanup runs at scope exit</span>
+<span class="kw">func</span> <span class="fn">processFile</span>() <span class="kw">throws</span> {
+    <span class="kw">defer</span> { <span class="fn">print</span>(<span class="str">"Closing file"</span>) }
+    <span class="kw">let</span> data = <span class="kw">try</span> <span class="fn">readFile</span>(named: <span class="str">"data.txt"</span>)
+    <span class="fn">print</span>(data)
+}
+
+<span class="cmt">// Result type</span>
+<span class="kw">func</span> <span class="fn">fetchUser</span>(id: <span class="type">Int</span>) -> <span class="type">Result</span>&lt;<span class="type">String</span>, <span class="type">Error</span>&gt; {
+    <span class="kw">guard</span> id &gt; <span class="num">0</span> <span class="kw">else</span> { <span class="kw">return</span> .<span class="fn">failure</span>(<span class="fn">FileError</span>.notFound) }
+    <span class="kw">return</span> .<span class="fn">success</span>(<span class="str">"User \(id)"</span>)
+}
+
+<span class="kw">let</span> result = <span class="fn">fetchUser</span>(id: <span class="num">42</span>)
+<span class="kw">switch</span> result {
+<span class="kw">case</span> .<span class="fn">success</span>(<span class="kw">let</span> name): <span class="fn">print</span>(name)
+<span class="kw">case</span> .<span class="fn">failure</span>(<span class="kw">let</span> error): <span class="fn">print</span>(error)
+}</code></pre>
+          </div>
+
+          <div class="sw-table-wrap">
+            <table class="sw-table" aria-label="Error handling strategies">
+              <thead>
+                <tr>
+                  <th scope="col">Strategy</th>
+                  <th scope="col">Syntax</th>
+                  <th scope="col">Use Case</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><td><code>do-catch</code></td><td><code>try f()</code> in a <code>do</code> block</td><td>Handle errors inline</td></tr>
+                <tr><td><code>try?</code></td><td><code>let x = try? f()</code></td><td>Treat failure as nil</td></tr>
+                <tr><td><code>try!</code></td><td><code>let x = try! f()</code></td><td>Failure is impossible</td></tr>
+                <tr><td><code>Result</code></td><td><code>Result&lt;T, Error&gt;</code></td><td>Return success/failure as a value</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="sw-callout">
+            <p><strong>Prefer <code>do-catch</code> and <code>try?</code>.</strong> <code>try!</code> crashes the program if the call throws — only use it when you are certain the operation cannot fail (e.g., reading a bundled resource).</p>
+          </div>
+
+          <!-- Exercise -->
+          <div class="sw-exercise" id="exercise-errors">
+            <div class="sw-exercise-title">
+              Practice: Error Handling
+            </div>
+            <p>Define an <code>enum NetworkError: Error</code> with a case <code>invalidURL</code>. Write a function <code>fetch(from urlString: String) throws -> Data</code> that throws <code>NetworkError.invalidURL</code> when the string does not start with <code>"https://"</code>.</p>
+            <button type="button" class="sw-exercise-toggle" aria-expanded="false" aria-controls="solution-errors">Show Solution</button>
+            <div class="sw-exercise-solution" id="solution-errors">
+              <div class="sw-code-block">
+                <div class="sw-code-header">
+                  <span class="sw-code-lang">Swift</span>
+                  <button type="button" class="sw-code-copy" aria-label="Copy code" data-code='enum NetworkError: Error {
+    case invalidURL
+}
+
+func fetch(from urlString: String) throws -> Data {
+    guard urlString.hasPrefix("https://") else {
+        throw NetworkError.invalidURL
+    }
+    return Data(urlString.utf8)
+}
+
+// Usage
+do {
+    let data = try fetch(from: "https://api.example.com")
+    print(data)
+} catch {
+    print("Request failed")
+}'>
+                    <i class="fas fa-copy"></i> Copy
+                  </button>
+                </div>
+                <pre><code><span class="kw">enum</span> <span class="fn">NetworkError</span>: <span class="type">Error</span> {
+    <span class="kw">case</span> invalidURL
+}
+
+<span class="kw">func</span> <span class="fn">fetch</span>(from urlString: <span class="type">String</span>) <span class="kw">throws</span> -> <span class="type">Data</span> {
+    <span class="kw">guard</span> urlString.<span class="fn">hasPrefix</span>(<span class="str">"https://"</span>) <span class="kw">else</span> {
+        <span class="kw">throw</span> <span class="fn">NetworkError</span>.invalidURL
+    }
+    <span class="kw">return</span> <span class="type">Data</span>(urlString.utf8)
+}
+
+<span class="cmt">// Usage</span>
+<span class="kw">do</span> {
+    <span class="kw">let</span> data = <span class="kw">try</span> <span class="fn">fetch</span>(from: <span class="str">"https://api.example.com"</span>)
+    <span class="fn">print</span>(data)
+} <span class="kw">catch</span> {
+    <span class="fn">print</span>(<span class="str">"Request failed"</span>)
+}</code></pre>
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <!-- ════════════════════════════════════════
+             LESSON 8: GENERICS & ADVANCED TYPES
+             ════════════════════════════════════════ -->
+        <article class="sw-lesson" id="topic-generics" data-topic="7">
+          <div class="sw-lesson-header">
+            <span class="sw-lesson-number">08</span>
+            <h3>Generics &amp; Advanced Types</h3>
+          </div>
+
+          <p>
+            <strong>Generics</strong> let you write flexible, reusable code that works with any type while keeping full type safety. Instead of repeating logic for each type, you write it once with a type placeholder — and the compiler checks correctness for every concrete type at compile time.
+          </p>
+
+          <div class="sw-concept">
+            <h4>Generic Fundamentals</h4>
+            <ul>
+              <li>Type parameters use angle brackets: <code>&lt;T&gt;</code>, <code>&lt;Element&gt;</code></li>
+              <li><strong>Generic functions</strong> — <code>func swap&lt;T&gt;(_ a: inout T, _ b: inout T)</code></li>
+              <li><strong>Generic types</strong> — <code>struct Stack&lt;Element&gt;</code></li>
+              <li><strong>Type constraints</strong> — <code>T: Equatable</code> limits what T can be</li>
+              <li><strong>Associated types</strong> — protocols declare placeholder types</li>
+              <li><strong><code>some</code></strong> — opaque return types (Swift 5.1+)</li>
+            </ul>
+          </div>
+
+          <div class="sw-code-block">
+            <div class="sw-code-header">
+              <span class="sw-code-lang">Swift</span>
+              <button type="button" class="sw-code-copy" aria-label="Copy code" data-code='// Generic function
+func firstElement&lt;T&gt;(of array: [T]) -&gt; T? {
+    return array.first
+}
+
+// Multiple type parameters
+func makePair&lt;A, B&gt;(_ a: A, _ b: B) -&gt; (A, B) {
+    return (a, b)
+}
+
+// Generic type
+struct Stack&lt;Element&gt; {
+    private var items: [Element] = []
+    mutating func push(_ item: Element) { items.append(item) }
+    mutating func pop() -&gt; Element? { return items.popLast() }
+}
+
+// Type constraint
+func areEqual&lt;T: Equatable&gt;(_ a: T, _ b: T) -&gt; Bool {
+    return a == b
+}
+
+// Associated types in protocols
+protocol Container {
+    associatedtype Item
+    var count: Int { get }
+    mutating func append(_ item: Item)
+}
+
+extension Stack: Container {
+    var count: Int { return items.count }
+    mutating func append(_ item: Element) { push(item) }
+}
+
+// Opaque return type (SwiftUI)
+import SwiftUI
+func makeView() -&gt; some View {
+    return Text("Hello")
+}'>
+              <i class="fas fa-copy"></i> Copy
+            </button>
+          </div>
+          <pre><code><span class="cmt">// Generic function</span>
+<span class="kw">func</span> <span class="fn">firstElement</span>&lt;<span class="type">T</span>&gt;(of array: [<span class="type">T</span>]) -&gt; <span class="type">T</span>? {
+    <span class="kw">return</span> array.first
+}
+
+<span class="cmt">// Multiple type parameters</span>
+<span class="kw">func</span> <span class="fn">makePair</span>&lt;<span class="type">A</span>, <span class="type">B</span>&gt;(<span class="kw">_</span> a: <span class="type">A</span>, <span class="kw">_</span> b: <span class="type">B</span>) -&gt; (<span class="type">A</span>, <span class="type">B</span>) {
+    <span class="kw">return</span> (a, b)
+}
+
+<span class="cmt">// Generic type</span>
+<span class="kw">struct</span> <span class="fn">Stack</span>&lt;<span class="type">Element</span>&gt; {
+    <span class="kw">private var</span> items: [<span class="type">Element</span>] = []
+    <span class="kw">mutating func</span> <span class="fn">push</span>(<span class="kw">_</span> item: <span class="type">Element</span>) { items.<span class="fn">append</span>(item) }
+    <span class="kw">mutating func</span> <span class="fn">pop</span>() -&gt; <span class="type">Element</span>? { <span class="kw">return</span> items.<span class="fn">popLast</span>() }
+}
+
+<span class="cmt">// Type constraint</span>
+<span class="kw">func</span> <span class="fn">areEqual</span>&lt;<span class="type">T</span>: <span class="type">Equatable</span>&gt;(<span class="kw">_</span> a: <span class="type">T</span>, <span class="kw">_</span> b: <span class="type">T</span>) -&gt; <span class="type">Bool</span> {
+    <span class="kw">return</span> a == b
+}
+
+<span class="cmt">// Associated types in protocols</span>
+<span class="kw">protocol</span> <span class="fn">Container</span> {
+    <span class="kw">associatedtype</span> <span class="type">Item</span>
+    <span class="kw">var</span> count: <span class="type">Int</span> { <span class="kw">get</span> }
+    <span class="kw">mutating func</span> <span class="fn">append</span>(<span class="kw">_</span> item: <span class="type">Item</span>)
+}
+
+<span class="kw">extension</span> <span class="fn">Stack</span>: <span class="fn">Container</span> {
+    <span class="kw">var</span> count: <span class="type">Int</span> { <span class="kw">return</span> items.count }
+    <span class="kw">mutating func</span> <span class="fn">append</span>(<span class="kw">_</span> item: <span class="type">Element</span>) { <span class="fn">push</span>(item) }
+}
+
+<span class="cmt">// Opaque return type (SwiftUI)</span>
+<span class="kw">import</span> SwiftUI
+<span class="kw">func</span> <span class="fn">makeView</span>() -&gt; <span class="kw">some</span> <span class="fn">View</span> {
+    <span class="kw">return</span> <span class="fn">Text</span>(<span class="str">"Hello"</span>)
+}</code></pre>
+          </div>
+
+          <div class="sw-table-wrap">
+            <table class="sw-table" aria-label="Generics concepts">
+              <thead>
+                <tr>
+                  <th scope="col">Concept</th>
+                  <th scope="col">Example</th>
+                  <th scope="col">Use Case</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><td>Generic function</td><td><code>firstElement&lt;T&gt;</code></td><td>Reusable logic over any type</td></tr>
+                <tr><td>Generic type</td><td><code>Stack&lt;Element&gt;</code></td><td>Type-safe containers</td></tr>
+                <tr><td>Type constraint</td><td><code>T: Equatable</code></td><td>Require specific capabilities</td></tr>
+                <tr><td>Associated type</td><td><code>associatedtype Item</code></td><td>Protocol-level generics</td></tr>
+                <tr><td>Opaque type</td><td><code>some View</code></td><td>Hide the concrete type</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="sw-callout">
+            <p><strong>Generics vs <code>Any</code>:</strong> <code>Any</code> erases type information and needs runtime casts. Generics preserve the exact type — you get compile-time safety, autocompletion, and zero runtime cost.</p>
+          </div>
+
+          <!-- Exercise -->
+          <div class="sw-exercise" id="exercise-generics">
+            <div class="sw-exercise-title">
+              Practice: Generics
+            </div>
+            <p>Write a generic function <code>repeatItem&lt;T&gt;(_ item: T, times: Int) -&gt; [T]</code> that returns an array with <code>item</code> repeated <code>times</code> times.</p>
+            <button type="button" class="sw-exercise-toggle" aria-expanded="false" aria-controls="solution-generics">Show Solution</button>
+            <div class="sw-exercise-solution" id="solution-generics">
+              <div class="sw-code-block">
+                <div class="sw-code-header">
+                  <span class="sw-code-lang">Swift</span>
+                  <button type="button" class="sw-code-copy" aria-label="Copy code" data-code='func repeatItem&lt;T&gt;(_ item: T, times: Int) -&gt; [T] {
+    return Array(repeating: item, count: times)
+}
+
+// Usage
+let names = repeatItem("Swift", times: 3)
+print(names)  // ["Swift", "Swift", "Swift"]'>
+                    <i class="fas fa-copy"></i> Copy
+                  </button>
+                </div>
+                <pre><code><span class="kw">func</span> <span class="fn">repeatItem</span>&lt;<span class="type">T</span>&gt;(<span class="kw">_</span> item: <span class="type">T</span>, times: <span class="type">Int</span>) -&gt; [<span class="type">T</span>] {
+    <span class="kw">return</span> <span class="type">Array</span>(repeating: item, count: times)
+}
+
+<span class="cmt">// Usage</span>
+<span class="kw">let</span> names = <span class="fn">repeatItem</span>(<span class="str">"Swift"</span>, times: <span class="num">3</span>)
+<span class="fn">print</span>(names)  <span class="cmt">// ["Swift", "Swift", "Swift"]</span></code></pre>
+              </div>
+            </div>
+          </div>
+        </article>
+
+      </div>
+    </section>
+
+    <!-- ════════════════════════════════════════
+         FOOTER
+         ════════════════════════════════════════ -->
+    <footer class="sw-footer">
+      <p>Practice your skills in the <a href="/pages/practice/problems.html">Code Editor →</a></p>
+      <p>Back to <a href="/pages/learning/languages.html">Programming Languages</a></p>
+    </footer>
+  </main>
+
+  <script src="/auth.js"></script>
+  <script src="/theme.js"></script>
+  <script src="/script.js"></script>
+  <script src="swift-learning.js"></script>
+</body>
+</html>

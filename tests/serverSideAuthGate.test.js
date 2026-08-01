@@ -49,7 +49,7 @@ describe('Server-side auth gate for private pages (#1227)', () => {
   });
 
   it('serves the private page to an authenticated user', async () => {
-    const token = createAccessToken({ id: 'u1', name: 'Test', email: 't@example.com' });
+    const token = await createAccessToken({ id: 'u1', name: 'Test', email: 't@example.com' });
     const res = await fetch(`${origin}${PRIVATE_PAGE}`, {
       redirect: 'manual',
       headers: { Cookie: `aiv_session=${token}` },

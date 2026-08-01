@@ -1,0 +1,290 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Saga Outbox Compensation Lab | Algo Infinity Verse</title>
+  <meta name="description" content="Learn saga choreography vs orchestration, compensation, idempotency, dual-write hazards, transactional outbox, failure injection, and ordering with a multi-step simulator and quiz." />
+  <link rel="stylesheet" href="/styles.css" />
+  <link rel="stylesheet" href="style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Poppins:wght@300;400;500;600;700&family=Fira+Code:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <script>
+    (function () {
+      try {
+        var storedTheme = localStorage.getItem('theme');
+        var prefersLight = window.matchMedia('(prefers-color-scheme: light)').matches;
+        var theme = storedTheme || (prefersLight ? 'light' : 'dark');
+        if (theme === 'light') {
+          document.documentElement.classList.add('light-mode');
+        } else {
+          document.documentElement.classList.remove('light-mode');
+        }
+      } catch (e) {}
+    })();
+  </script>
+</head>
+<body data-page="saga-outbox-compensation-lab">
+  <a href="#saga-main" class="saga-skip-link">Skip to main content</a>
+  <button type="button" id="scrollTopBtn" class="scroll-top-btn" aria-label="Scroll to top">
+    <i class="fas fa-arrow-up" aria-hidden="true"></i>
+  </button>
+
+  <div id="navbar-placeholder"></div>
+
+  <header class="saga-hero">
+    <div class="saga-hero-badge">
+      <i class="fas fa-diagram-project" aria-hidden="true"></i>
+      Distributed Systems Academy
+    </div>
+    <h1>
+      Saga Outbox
+      <span class="saga-hero-accent">Compensation Lab</span>
+    </h1>
+    <p>
+      Master choreography vs orchestration, compensation order, idempotency, dual-write vs
+      transactional outbox, failure injection, and message ordering — with a live saga simulator and quiz.
+    </p>
+    <div class="saga-hero-stats" aria-live="polite">
+      <div class="saga-stat">
+        <span class="saga-stat-val" id="statModulesDone">0</span>
+        <span class="saga-stat-label">Modules done</span>
+      </div>
+      <div class="saga-stat">
+        <span class="saga-stat-val" id="statModulesTotal">8</span>
+        <span class="saga-stat-label">Total modules</span>
+      </div>
+      <div class="saga-stat">
+        <span class="saga-stat-val" id="statProgressPct">0%</span>
+        <span class="saga-stat-label">Progress</span>
+      </div>
+      <div class="saga-stat">
+        <span class="saga-stat-val" id="statQuizBest">—</span>
+        <span class="saga-stat-label">Quiz best</span>
+      </div>
+    </div>
+    <div class="saga-progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-label="Course progress" id="heroProgressBar">
+      <div class="saga-progress-fill" id="heroProgressFill"></div>
+    </div>
+  </header>
+
+  <main id="saga-main" class="saga-main">
+    <div class="saga-container">
+
+      <section class="saga-section" aria-labelledby="modules-title">
+        <div class="saga-section-head">
+          <h2 id="modules-title">
+            <i class="fas fa-book-open" aria-hidden="true"></i>
+            Learning modules
+          </h2>
+          <p>Eight lessons on sagas, compensation, outbox, and dual-write. Mark each complete to track progress.</p>
+        </div>
+
+        <div class="saga-modules-layout">
+          <nav class="saga-module-nav" aria-label="Module list">
+            <ul class="saga-module-list" id="moduleList" role="list"></ul>
+          </nav>
+
+          <article class="saga-lesson-panel" id="lessonPanel" aria-labelledby="lessonTitle">
+            <div class="saga-lesson-header">
+              <h3 id="lessonTitle">Select a module</h3>
+              <span class="saga-lesson-badge" id="lessonBadge" hidden>Completed</span>
+            </div>
+            <div class="saga-lesson-body" id="lessonBody">
+              <p class="saga-muted">Choose a module from the sidebar to begin.</p>
+            </div>
+            <div class="saga-lesson-actions">
+              <button type="button" class="saga-btn saga-btn-primary" id="markCompleteBtn" disabled>
+                <i class="fas fa-check" aria-hidden="true"></i>
+                Mark complete
+              </button>
+              <button type="button" class="saga-btn saga-btn-ghost" id="prevModuleBtn" disabled>
+                <i class="fas fa-chevron-left" aria-hidden="true"></i>
+                Previous
+              </button>
+              <button type="button" class="saga-btn saga-btn-ghost" id="nextModuleBtn" disabled>
+                Next
+                <i class="fas fa-chevron-right" aria-hidden="true"></i>
+              </button>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section class="saga-section" aria-labelledby="sim-title">
+        <div class="saga-section-head">
+          <h2 id="sim-title">
+            <i class="fas fa-play" aria-hidden="true"></i>
+            Multi-step saga simulator
+          </h2>
+          <p>Run an order → reserve → charge → ship saga. Inject failures and watch compensation unwind in reverse order.</p>
+        </div>
+
+        <div class="saga-lab-grid">
+          <div class="saga-panel">
+            <fieldset class="saga-fieldset">
+              <legend class="saga-label">Saga style</legend>
+              <label class="saga-check">
+                <input type="radio" name="sagaStyle" id="styleOrch" value="orchestration" checked />
+                Orchestration (central coordinator)
+              </label>
+              <label class="saga-check">
+                <input type="radio" name="sagaStyle" id="styleChoreo" value="choreography" />
+                Choreography (event-driven peers)
+              </label>
+            </fieldset>
+
+            <label class="saga-label" for="failStep">Inject failure at step</label>
+            <select id="failStep" class="saga-select">
+              <option value="none">No failure</option>
+              <option value="reserve">2 — Inventory reserve</option>
+              <option value="charge">3 — Payment charge</option>
+              <option value="ship">4 — Shipping create</option>
+            </select>
+
+            <label class="saga-check">
+              <input type="checkbox" id="simIdempotent" checked />
+              Compensations are idempotent
+            </label>
+            <label class="saga-check">
+              <input type="checkbox" id="simReplayComp" />
+              Replay compensation twice (idempotency probe)
+            </label>
+
+            <div class="saga-btn-row">
+              <button type="button" class="saga-btn saga-btn-primary" id="runSagaBtn">
+                <i class="fas fa-bolt" aria-hidden="true"></i>
+                Run saga
+              </button>
+              <button type="button" class="saga-btn saga-btn-ghost" id="resetSagaBtn">
+                <i class="fas fa-rotate-left" aria-hidden="true"></i>
+                Reset
+              </button>
+            </div>
+          </div>
+
+          <div class="saga-panel">
+            <h3 class="saga-panel-subtitle">Execution &amp; compensation</h3>
+            <ol class="saga-step-rail" id="sagaStepRail" aria-label="Saga steps"></ol>
+            <div id="sagaSimOut" class="saga-outcome-box" role="status" aria-live="assertive">
+              <p class="saga-muted">Configure failure injection, then run the saga.</p>
+            </div>
+            <div id="sagaCompCheck" class="saga-comp-check" aria-live="polite"></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="saga-section" aria-labelledby="rec-title">
+        <div class="saga-section-head">
+          <h2 id="rec-title">
+            <i class="fas fa-lightbulb" aria-hidden="true"></i>
+            Outbox vs dual-write recommendation engine
+          </h2>
+          <p>Describe your write path and reliability needs. Get a recommendation for dual-write, outbox, or CDC.</p>
+        </div>
+
+        <div class="saga-lab-grid">
+          <div class="saga-panel">
+            <fieldset class="saga-fieldset">
+              <legend class="saga-label">Write pattern today</legend>
+              <label class="saga-check">
+                <input type="radio" name="writePattern" id="wpDual" value="dual" checked />
+                Dual-write (DB + broker separately)
+              </label>
+              <label class="saga-check">
+                <input type="radio" name="writePattern" id="wpOutbox" value="outbox" />
+                Transactional outbox already in place
+              </label>
+              <label class="saga-check">
+                <input type="radio" name="writePattern" id="wpCdc" value="cdc" />
+                CDC / change streams from DB
+              </label>
+            </fieldset>
+
+            <fieldset class="saga-fieldset">
+              <legend class="saga-label">Requirements</legend>
+              <label class="saga-check">
+                <input type="checkbox" id="reqExactlyOnce" checked />
+                No lost domain events after commit
+              </label>
+              <label class="saga-check">
+                <input type="checkbox" id="reqOrder" checked />
+                Per-aggregate ordering matters
+              </label>
+              <label class="saga-check">
+                <input type="checkbox" id="reqMultiDb" />
+                Multiple databases / polyglot stores
+              </label>
+              <label class="saga-check">
+                <input type="checkbox" id="reqLowOps" />
+                Prefer minimal ops complexity
+              </label>
+            </fieldset>
+
+            <div class="saga-btn-row">
+              <button type="button" class="saga-btn saga-btn-primary" id="recommendBtn">
+                <i class="fas fa-wand-magic-sparkles" aria-hidden="true"></i>
+                Recommend pattern
+              </button>
+              <button type="button" class="saga-btn saga-btn-ghost" id="resetRecBtn">
+                <i class="fas fa-rotate-left" aria-hidden="true"></i>
+                Reset
+              </button>
+            </div>
+          </div>
+
+          <div class="saga-panel">
+            <h3 class="saga-panel-subtitle">Recommendation</h3>
+            <div id="recResults" class="saga-results" role="status" aria-live="polite">
+              <p class="saga-muted">Select requirements and click Recommend.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="saga-section" aria-labelledby="quiz-title">
+        <div class="saga-section-head">
+          <h2 id="quiz-title">
+            <i class="fas fa-clipboard-question" aria-hidden="true"></i>
+            Self-assessment quiz
+          </h2>
+          <p>Seven questions on sagas, compensation, and outbox. Best score is saved in localStorage.</p>
+        </div>
+
+        <div class="saga-panel">
+          <form id="quizForm" class="saga-quiz" novalidate>
+            <div id="quizQuestions"></div>
+            <div class="saga-btn-row">
+              <button type="submit" class="saga-btn saga-btn-primary" id="submitQuizBtn">
+                <i class="fas fa-paper-plane" aria-hidden="true"></i>
+                Submit quiz
+              </button>
+              <button type="button" class="saga-btn saga-btn-ghost" id="resetQuizBtn">
+                <i class="fas fa-rotate-left" aria-hidden="true"></i>
+                Reset
+              </button>
+            </div>
+          </form>
+          <div id="quizResult" class="saga-quiz-result" role="status" aria-live="polite" hidden></div>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <div id="footer-placeholder"></div>
+
+  <script src="/auth.js"></script>
+  <script src="/bootstrap-legacy.js"></script>
+  <script src="/script.js"></script>
+  <script type="module" src="/dist/legacy-bundle.mjs"></script>
+  <script src="/theme.js"></script>
+  <script src="script.js"></script>
+  <script>
+    if (typeof loadPartial === 'function') {
+      loadPartial('navbar-placeholder', '/partials/navbar.html');
+      loadPartial('footer-placeholder', '/partials/footer.html');
+    }
+  </script>
+</body>
+</html>

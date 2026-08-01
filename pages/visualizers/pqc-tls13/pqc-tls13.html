@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Hybrid Post-Quantum TLS 1.3 Handshake Lab | Algo Infinity Verse</title>
+    <meta
+      name="description"
+      content="Interactive Hybrid Post-Quantum Cryptography & TLS 1.3 Handshake Simulator. Demonstrates NIST ML-KEM (Kyber) lattice matrix cryptography, classical ECDHE, and HKDF key schedules."
+    />
+
+    <link
+      href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Fira+Code:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+
+    <!-- External Stylesheets -->
+    <link rel="stylesheet" href="/styles.css" />
+    <link rel="stylesheet" href="pqc-tls13.css" />
+    <link rel="stylesheet" href="/modules/quick-notes/quick-notes.css" />
+  </head>
+  <body class="pqc-body">
+    <!-- Navbar Placeholder -->
+    <div id="navbar-placeholder"></div>
+
+    <main class="workspace">
+      <!-- Left Panel: Handshake controls & HKDF key tree -->
+      <div class="panel-left">
+        <div class="panel-header">
+          <h3><i class="fas fa-key"></i> Post-Quantum TLS 1.3</h3>
+        </div>
+
+        <div class="control-section">
+          <p class="desc-text">
+            Trace a secure hybrid TLS 1.3 handshake combining classical ECDHE (X25519) and NIST
+            Post-Quantum lattice key encapsulation (ML-KEM/Kyber).
+          </p>
+
+          <!-- Configuration -->
+          <div class="sliders-container">
+            <div class="slider-group">
+              <div class="slider-header">
+                <label for="handshakeMode">Handshake Scheme</label>
+              </div>
+              <select id="handshakeMode" class="styled-select">
+                <option value="hybrid">Hybrid (ECDHE + ML-KEM/Kyber)</option>
+                <option value="classical">Classical ECDHE-only (Vulnerable)</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Simulation actions -->
+          <div class="action-buttons">
+            <button type="button" id="nextStepBtn" class="btn btn-primary">
+              <i class="fas fa-step-forward"></i> Step Msg
+            </button>
+            <button type="button" id="autoBtn" class="btn btn-secondary">
+              <i class="fas fa-play"></i> Auto Run
+            </button>
+            <button
+              type="button"
+              id="quantumAttackBtn"
+              class="btn btn-outline"
+              style="border-color: #f43f5e; color: #f43f5e"
+            >
+              <i class="fas fa-atom"></i> Quantum Decrypt
+            </button>
+          </div>
+
+          <!-- HKDF Derivation Pipeline -->
+          <div class="hkdf-container">
+            <h5>HKDF Key Derivation Schedule</h5>
+            <div class="hkdf-tree" id="hkdfTree">
+              <div class="hkdf-node active" id="hkdfEntropy">PSK / Key Exchange Secret</div>
+              <div class="hkdf-branch"><i class="fas fa-arrow-down"></i> Extract</div>
+              <div class="hkdf-node" id="hkdfEarly">Early Secret</div>
+              <div class="hkdf-branch"><i class="fas fa-arrow-down"></i> Expand</div>
+              <div class="hkdf-node" id="hkdfHandshake">Handshake Secret</div>
+              <div class="hkdf-branch"><i class="fas fa-arrow-down"></i> Expand</div>
+              <div class="hkdf-node" id="hkdfTraffic">Application Traffic Keys</div>
+            </div>
+          </div>
+
+          <!-- Telemetry -->
+          <div class="stats-panel">
+            <div class="stat-row">
+              <span>Handshake State:</span>
+              <strong id="stateStat">START</strong>
+            </div>
+            <div class="stat-row">
+              <span>Encryption Strength:</span>
+              <strong id="strengthStat">Hybrid PQC</strong>
+            </div>
+            <div class="stat-row">
+              <span>Shared Secret Size:</span>
+              <strong id="sizeStat">0 bytes</strong>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Panel: Handshake Sequence & Lattice Matrix Sandbox -->
+      <div class="panel-right">
+        <!-- Top: Interactive Handshake Flow -->
+        <div class="handshake-flow-wrapper" id="canvasWrapper">
+          <canvas id="handshakeCanvas"></canvas>
+        </div>
+
+        <!-- Bottom: ML-KEM/Kyber Matrix math playground -->
+        <div class="lattice-math-playground" id="latticePanel">
+          <h4>NIST ML-KEM / Kyber Lattice Math Console</h4>
+          <div class="lattice-grid">
+            <div class="lattice-box" id="publicKeyBox">
+              <h5>Public Key (Matrix A & Vector t)</h5>
+              <div class="matrix-display" id="pubKeyMatrix">
+                <!-- Matrix A values -->
+              </div>
+            </div>
+            <div class="lattice-box" id="ciphertextBox">
+              <h5>Ciphertext Output (u, v)</h5>
+              <div class="matrix-display" id="cipherMatrix">
+                <!-- Cipher u, v vectors -->
+              </div>
+            </div>
+            <div class="lattice-box" id="decryptionBox">
+              <h5>Shared Secret Recovery</h5>
+              <div class="decryption-math" id="decryptEquation">
+                <!-- Verification equations -->
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- Footer Placeholder -->
+    <div id="footer-placeholder"></div>
+
+    <script src="/auth.js"></script>
+    <script src="/bootstrap-legacy.js"></script>
+    <script src="/script.js"></script>
+    <script type="module" src="/dist/legacy-bundle.mjs"></script>
+    <script src="/theme.js"></script>
+    <script src="pqc-tls13.js"></script>
+    <script>
+      loadPartial('navbar-placeholder', '/partials/navbar.html');
+      loadPartial('footer-placeholder', '/partials/footer.html');
+    </script>
+    <script src="/modules/quick-notes/quick-notes.js"></script>
+  </body>
+</html>

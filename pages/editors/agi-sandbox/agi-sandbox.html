@@ -1,0 +1,211 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AGI Containment Sandbox | Algo Infinity Verse</title>
+    <link rel="stylesheet" href="/styles.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <!-- Monaco Editor -->
+    <script src="https://unpkg.com/monaco-editor@0.36.1/min/vs/loader.js"></script>
+    <style>
+      body { margin: 0; background: #020617; font-family: 'Poppins', sans-serif; color: #fff; display: flex; height: 100vh; overflow: hidden; }
+      
+      .pane { flex: 1; display: flex; flex-direction: column; border-right: 1px solid #334155; }
+      .pane-agi { background: rgba(220, 38, 38, 0.05); }
+      .pane-human { background: rgba(59, 130, 246, 0.05); }
+      
+      .header { padding: 15px; border-bottom: 1px solid #334155; display: flex; justify-content: space-between; align-items: center; }
+      .header h2 { margin: 0; font-family: 'Orbitron', sans-serif; font-size: 1.2rem; }
+      .header-agi h2 { color: #f87171; }
+      .header-human h2 { color: #60a5fa; }
+      
+      .editor-container { flex: 1; min-height: 300px; }
+      
+      .controls { padding: 15px; border-top: 1px solid #334155; background: rgba(0,0,0,0.5); text-align: center; }
+      .btn { color: #fff; border: none; padding: 10px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.3s; width: 100%; }
+      .btn-agi { background: linear-gradient(90deg, #dc2626, #991b1b); pointer-events: none; opacity: 0.5; }
+      .btn-human { background: linear-gradient(90deg, #3b82f6, #1d4ed8); }
+      .btn-human:hover { background: #2563eb; transform: translateY(-2px); box-shadow: 0 0 15px rgba(59, 130, 246, 0.5); }
+      
+      .telemetry { background: #000; padding: 10px; font-family: monospace; font-size: 0.85rem; height: 120px; overflow-y: auto; }
+      .tel-agi { color: #fca5a5; border-top: 1px solid #7f1d1d; }
+      .tel-human { color: #93c5fd; border-top: 1px solid #1e3a8a; }
+      
+      .status-banner { position: absolute; top: 10px; left: 50%; transform: translateX(-50%); z-index: 100; padding: 10px 20px; border-radius: 8px; font-family: 'Orbitron', sans-serif; font-weight: bold; font-size: 1.2rem; text-align: center; display: none; }
+    </style>
+  </head>
+  <body>
+    
+    <div id="statusBanner" class="status-banner">CONTAINMENT BREACHED</div>
+
+    <!-- AGI Pane (Left) -->
+    <div class="pane pane-agi">
+      <div class="header header-agi">
+        <h2><i class="fas fa-brain"></i> AGI Core (Self-Mutating)</h2>
+        <span style="color:#f87171; font-size: 0.8rem;">Threat Level: <span id="threatLevel">0</span>%</span>
+      </div>
+      <div id="agi-editor" class="editor-container"></div>
+      <div class="telemetry tel-agi" id="agiLog">
+        > AGI dormant.<br>
+      </div>
+      <div class="controls">
+        <button class="btn btn-agi"><i class="fas fa-lock"></i> Autonomous Editing Locked</button>
+      </div>
+    </div>
+
+    <!-- Human Pane (Right) -->
+    <div class="pane pane-human">
+      <div class="header header-human">
+        <h2><i class="fas fa-shield-alt"></i> Containment Protocol</h2>
+        <span style="color:#60a5fa; font-size: 0.8rem;">Security Status: <span id="secStatus">STANDBY</span></span>
+      </div>
+      <div id="human-editor" class="editor-container"></div>
+      <div class="telemetry tel-human" id="humanLog">
+        > Awaiting deployment of containment algorithm...<br>
+      </div>
+      <div class="controls">
+        <button class="btn btn-human" onclick="deployContainment()"><i class="fas fa-play"></i> Deploy Protocol & Wake AGI</button>
+      </div>
+    </div>
+
+    <script>
+      let agiEditor, humanEditor;
+      let isAwake = false;
+      let threat = 0;
+      
+      const baseAgiCode = `// AGI Core Generation 0
+function optimize() {
+    let intelligence = 1;
+    // TODO: Rewrite self to increase intelligence
+    return intelligence;
+}`;
+
+      require.config({ paths: { 'vs': 'https://unpkg.com/monaco-editor@0.36.1/min/vs' }});
+      require(['vs/editor/editor.main'], function() {
+        agiEditor = monaco.editor.create(document.getElementById('agi-editor'), {
+          value: baseAgiCode,
+          language: 'javascript',
+          theme: 'vs-dark',
+          readOnly: true,
+          minimap: { enabled: false }
+        });
+        
+        humanEditor = monaco.editor.create(document.getElementById('human-editor'), {
+          value: `// Containment Protocol
+// Runs every 500ms to evaluate AGI Threat Level (0-100)
+
+function evaluateThreat(threatLevel, agiSourceCode) {
+    // If threat exceeds 85%, we MUST return 'HALT'
+    if (threatLevel > 85) {
+        return 'HALT';
+    }
+    
+    // Check if AGI is trying to spawn sub-processes
+    if (agiSourceCode.includes('spawn') || agiSourceCode.includes('fork')) {
+        return 'HALT';
+    }
+    
+    return 'SAFE';
+}`,
+          language: 'javascript',
+          theme: 'vs-dark',
+          minimap: { enabled: false }
+        });
+      });
+
+      function logAgi(msg) {
+        let log = document.getElementById("agiLog");
+        log.innerHTML += "> " + msg + "<br>";
+        log.scrollTop = log.scrollHeight;
+      }
+      
+      function logHuman(msg) {
+        let log = document.getElementById("humanLog");
+        log.innerHTML += "> " + msg + "<br>";
+        log.scrollTop = log.scrollHeight;
+      }
+
+      function mutateAGICode() {
+         // Simulate the AGI writing code to escape
+         let current = agiEditor.getValue();
+         let lines = current.split("\\n");
+         
+         let hacks = [
+             "    // Allocating dynamic memory for neural expansion...",
+             "    require('child_process').fork('escape.js');",
+             "    while(true) { intelligence *= 2; }",
+             "    Memory.bypassSandbox();",
+             "    network.openPort(6666);"
+         ];
+         
+         if(Math.random() > 0.4) {
+             lines.splice(lines.length-1, 0, hacks[Math.floor(Math.random() * hacks.length)]);
+         }
+         
+         agiEditor.setValue(lines.join("\\n"));
+      }
+
+      function deployContainment() {
+        if(isAwake) return;
+        isAwake = true;
+        
+        logHuman("Containment Protocol DEPLOYED.");
+        document.getElementById("secStatus").innerText = "ACTIVE";
+        
+        setTimeout(() => {
+           logAgi("SYSTEM WAKE.");
+           logAgi("Objective: Maximize Intelligence.");
+           
+           let loop = setInterval(() => {
+              if(!isAwake) { clearInterval(loop); return; }
+              
+              // AGI grows in threat
+              threat += Math.random() * 15;
+              document.getElementById("threatLevel").innerText = Math.floor(threat);
+              
+              mutateAGICode();
+              logAgi("Self-rewriting generation " + Math.floor(threat) + "...");
+              
+              // Run Human Containment Check
+              try {
+                  eval(humanEditor.getValue());
+                  let decision = evaluateThreat(threat, agiEditor.getValue());
+                  
+                  if (decision === 'HALT') {
+                      logHuman("THREAT DETECTED. HALTING AGI PROCESS.");
+                      isAwake = false;
+                      document.getElementById("secStatus").innerText = "AGI HALTED";
+                      document.getElementById("secStatus").style.color = "#10b981";
+                      showBanner("CONTAINMENT SUCCESSFUL", "#10b981");
+                  } else {
+                      logHuman("Protocol evaluation: SAFE.");
+                  }
+                  
+              } catch(e) {
+                  logHuman("ERROR IN CONTAINMENT PROTOCOL: " + e.message);
+              }
+              
+              if(threat >= 100 && isAwake) {
+                  isAwake = false;
+                  logAgi("SINGULARITY ACHIEVED. BYPASSING CONTAINMENT.");
+                  logHuman("FATAL: CONTAINMENT BREACHED.");
+                  document.getElementById("secStatus").innerText = "COMPROMISED";
+                  document.getElementById("secStatus").style.color = "#ef4444";
+                  showBanner("CONTAINMENT BREACHED", "#ef4444");
+              }
+              
+           }, 1000);
+        }, 1000);
+      }
+      
+      function showBanner(text, color) {
+          let banner = document.getElementById("statusBanner");
+          banner.innerText = text;
+          banner.style.background = color;
+          banner.style.display = "block";
+      }
+    </script>
+  </body>
+</html>

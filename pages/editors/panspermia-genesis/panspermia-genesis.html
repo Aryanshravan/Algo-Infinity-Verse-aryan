@@ -1,0 +1,348 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Panspermia Genesis Spores | Algo Infinity Verse</title>
+    <link rel="stylesheet" href="/styles.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <!-- Monaco Editor -->
+    <script src="https://unpkg.com/monaco-editor@0.36.1/min/vs/loader.js"></script>
+    <style>
+      body { margin: 0; overflow: hidden; background: #000; font-family: 'Poppins', sans-serif; color: #fff; }
+      .app-container { display: flex; height: 100vh; }
+      
+      .sidebar { width: 450px; background: rgba(15, 23, 42, 0.95); border-right: 1px solid #10b981; display: flex; flex-direction: column; z-index: 10; }
+      .header { padding: 20px; border-bottom: 1px solid #334155; }
+      .header h2 { margin: 0; color: #10b981; font-family: 'Orbitron', sans-serif; font-size: 1.2rem; }
+      .header p { margin: 5px 0 0 0; font-size: 0.8rem; color: #94a3b8; }
+      
+      #editor-container { flex: 1; min-height: 300px; }
+      
+      .controls { padding: 20px; border-top: 1px solid #334155; background: rgba(0,0,0,0.5); }
+      .btn { background: linear-gradient(90deg, #059669, #047857); color: #fff; border: none; padding: 10px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; transition: 0.3s; }
+      .btn:hover { background: #10b981; transform: translateY(-2px); box-shadow: 0 0 15px rgba(16, 185, 129, 0.5); }
+      
+      .sim-container { flex: 1; position: relative; background: #020617; overflow: hidden; }
+      canvas { width: 100%; height: 100%; display: block; }
+      
+      .hud { position: absolute; top: 20px; right: 20px; background: rgba(0,0,0,0.8); padding: 15px; border-radius: 8px; border: 1px solid #10b981; width: 300px; z-index: 10; pointer-events: none; }
+      .hud h3 { margin: 0 0 10px 0; color: #10b981; font-size: 1rem; font-family: 'Orbitron', sans-serif; }
+      .metric { display: flex; justify-content: space-between; font-size: 0.8rem; color: #cbd5e1; margin-bottom: 5px; }
+      .val { font-weight: bold; font-family: monospace; }
+      .val-radiation { color: #facc15; }
+      .val-planets { color: #38bdf8; }
+    </style>
+  </head>
+  <body>
+    
+    <div class="app-container">
+      <div class="sidebar">
+        <div class="header">
+          <h2><i class="fas fa-seedling"></i> Panspermia Engine</h2>
+          <p>Interstellar Spore Trajectories</p>
+        </div>
+        
+        <div id="editor-container"></div>
+        
+        <div class="controls">
+          <button class="btn" onclick="launchSpores()"><i class="fas fa-rocket"></i> Launch Genesis Pods</button>
+        </div>
+      </div>
+      
+      <div class="sim-container">
+        <!-- Deep Space Background -->
+        <div style="position: absolute; inset:0; background: radial-gradient(circle at center, #0f172a 0%, #000 100%); pointer-events: none; z-index: 0;"></div>
+        
+        <canvas id="astroCanvas" style="position: relative; z-index: 1;"></canvas>
+        
+        <div class="hud">
+          <h3>Astrobiology Telemetry</h3>
+          <div class="metric"><span>Active Spores:</span> <span class="val" id="sporeVal" style="color:#d946ef">0</span></div>
+          <div class="metric"><span>Planets Seeded:</span> <span class="val val-planets" id="seedVal">0 / 5</span></div>
+          <div class="metric"><span>Max Radiation:</span> <span class="val val-radiation" id="radVal">0 mSv</span></div>
+          <div class="metric" style="margin-top: 10px; border-top: 1px solid #334155; padding-top: 5px;">
+            <span>Mission Status:</span> <span class="val" id="statusVal" style="color:#94a3b8">STANDBY</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      let editor;
+      require.config({ paths: { 'vs': 'https://unpkg.com/monaco-editor@0.36.1/min/vs' }});
+      require(['vs/editor/editor.main'], function() {
+        editor = monaco.editor.create(document.getElementById('editor-container'), {
+          value: `// Panspermia Trajectory Algorithm
+// You must seed 5 habitable planets with life-bearing spores.
+// Use gas giants for gravity assists (slingshots) to gain speed.
+// Avoid stars! Their intense radiation belts will sterilize the spores.
+
+function calculateThrust(sporeX, sporeY, nearestPlanetDist, nearestStarDist) {
+    // Return { thrustX: float (-1 to 1), thrustY: float (-1 to 1) }
+    // You only have limited thrust. You MUST rely on gravity.
+    
+    // Naive logic: Thrust randomly!
+    // Result: Spores fall into stars and are burned to ash.
+    
+    return {
+        thrustX: Math.random() * 0.2 - 0.1,
+        thrustY: Math.random() * 0.2 - 0.1
+    };
+}`,
+          language: 'javascript',
+          theme: 'vs-dark',
+          minimap: { enabled: false },
+          automaticLayout: true
+        });
+      });
+
+      const canvas = document.getElementById('astroCanvas');
+      const ctx = canvas.getContext('2d');
+      
+      let isSimulating = false;
+      let time = 0;
+      
+      let spores = [];
+      let celestialBodies = [];
+      let planetsSeeded = 0;
+      let maxRadiationHit = 0;
+      
+      function resize() { 
+          canvas.width = canvas.clientWidth; 
+          canvas.height = canvas.clientHeight;
+          initSystem();
+      }
+      
+      function initSystem() {
+          celestialBodies = [];
+          let cx = canvas.width/2;
+          let cy = canvas.height/2;
+          
+          // The deadly star in the center
+          celestialBodies.push({ type: 'star', x: cx, y: cy, mass: 5000, radius: 40, radiation: 1000 });
+          
+          // A secondary star
+          celestialBodies.push({ type: 'star', x: cx + 300, y: cy - 200, mass: 3000, radius: 25, radiation: 800 });
+          
+          // Gas Giants for slingshots
+          celestialBodies.push({ type: 'gas_giant', x: cx - 200, y: cy + 150, mass: 1000, radius: 20 });
+          celestialBodies.push({ type: 'gas_giant', x: cx + 150, y: cy + 250, mass: 1200, radius: 22 });
+          
+          // Habitable targets
+          celestialBodies.push({ type: 'habitable', x: cx - 350, y: cy - 100, mass: 100, radius: 10, seeded: false });
+          celestialBodies.push({ type: 'habitable', x: cx + 400, y: cy + 100, mass: 100, radius: 10, seeded: false });
+          celestialBodies.push({ type: 'habitable', x: cx - 100, y: cy - 300, mass: 100, radius: 10, seeded: false });
+          celestialBodies.push({ type: 'habitable', x: cx + 200, y: cy - 350, mass: 100, radius: 10, seeded: false });
+          celestialBodies.push({ type: 'habitable', x: cx - 400, y: cy + 300, mass: 100, radius: 10, seeded: false });
+      }
+      
+      setTimeout(resize, 100);
+      window.addEventListener('resize', resize);
+
+      function animate() {
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+          if (isSimulating) {
+              time += 0.05;
+              
+              for (let i = spores.length - 1; i >= 0; i--) {
+                  let s = spores[i];
+                  
+                  let nearestPlanetDist = Infinity;
+                  let nearestStarDist = Infinity;
+                  
+                  // Find nearest
+                  celestialBodies.forEach(b => {
+                      let dist = Math.sqrt(Math.pow(s.x - b.x, 2) + Math.pow(s.y - b.y, 2));
+                      if (b.type === 'star' && dist < nearestStarDist) nearestStarDist = dist;
+                      if (b.type !== 'star' && dist < nearestPlanetDist) nearestPlanetDist = dist;
+                  });
+                  
+                  let tx = 0, ty = 0;
+                  try {
+                      eval(editor.getValue());
+                      let res = calculateThrust(s.x, s.y, nearestPlanetDist, nearestStarDist);
+                      if (res) {
+                          tx = Math.max(-1, Math.min(1, res.thrustX || 0)) * 0.05; // Tiny thrust
+                          ty = Math.max(-1, Math.min(1, res.thrustY || 0)) * 0.05;
+                      }
+                  } catch(e) {}
+                  
+                  s.vx += tx;
+                  s.vy += ty;
+                  
+                  // Gravity Physics
+                  let radiationDose = 0;
+                  let destroyed = false;
+                  
+                  celestialBodies.forEach(b => {
+                      let dx = b.x - s.x;
+                      let dy = b.y - s.y;
+                      let distSq = dx*dx + dy*dy;
+                      let dist = Math.sqrt(distSq);
+                      
+                      // Gravity
+                      if (dist > b.radius) {
+                          let force = b.mass / distSq;
+                          s.vx += (dx / dist) * force;
+                          s.vy += (dy / dist) * force;
+                      }
+                      
+                      // Radiation
+                      if (b.type === 'star') {
+                          let rad = b.radiation / Math.max(1, (dist - b.radius));
+                          radiationDose += rad;
+                      }
+                      
+                      // Collision
+                      if (dist <= b.radius) {
+                          if (b.type === 'habitable' && !b.seeded) {
+                              b.seeded = true;
+                              planetsSeeded++;
+                          }
+                          destroyed = true; // Consumed by planet/star
+                      }
+                  });
+                  
+                  s.radiation += radiationDose;
+                  if (s.radiation > maxRadiationHit) maxRadiationHit = s.radiation;
+                  
+                  if (s.radiation > 100) {
+                      destroyed = true; // Sterilized
+                  }
+                  
+                  // Off screen?
+                  if (s.x < -100 || s.x > canvas.width+100 || s.y < -100 || s.y > canvas.height+100) {
+                      destroyed = true;
+                  }
+                  
+                  if (destroyed) {
+                      spores.splice(i, 1);
+                      continue;
+                  }
+                  
+                  s.x += s.vx;
+                  s.y += s.vy;
+                  
+                  // Trail
+                  s.trail.push({x: s.x, y: s.y});
+                  if (s.trail.length > 20) s.trail.shift();
+              }
+              
+              // Win/Loss
+              if (planetsSeeded >= 5) {
+                  isSimulating = false;
+                  document.getElementById('statusVal').innerText = "GALAXY SEEDED WITH LIFE";
+                  document.getElementById('statusVal').style.color = "#10b981";
+              } else if (spores.length === 0) {
+                  isSimulating = false;
+                  document.getElementById('statusVal').innerText = "ALL SPORES DESTROYED";
+                  document.getElementById('statusVal').style.color = "#ef4444";
+              } else {
+                  if (maxRadiationHit > 80) {
+                      document.getElementById('statusVal').innerText = "WARNING: LETHAL RADIATION";
+                      document.getElementById('statusVal').style.color = "#facc15";
+                  } else {
+                      document.getElementById('statusVal').innerText = "SPORES IN TRANSIT...";
+                      document.getElementById('statusVal').style.color = "#10b981";
+                  }
+              }
+              
+              document.getElementById('sporeVal').innerText = spores.length;
+              document.getElementById('seedVal').innerText = planetsSeeded + " / 5";
+              document.getElementById('radVal').innerText = Math.floor(maxRadiationHit) + " mSv";
+              if(maxRadiationHit > 80) document.getElementById('radVal').style.color = "#ef4444";
+          }
+          
+          // Draw Celestial Bodies
+          celestialBodies.forEach(b => {
+              if (b.type === 'star') {
+                  ctx.beginPath(); ctx.arc(b.x, b.y, b.radius, 0, Math.PI*2);
+                  ctx.fillStyle = '#fef08a';
+                  ctx.shadowBlur = 50;
+                  ctx.shadowColor = '#eab308';
+                  ctx.fill();
+                  ctx.shadowBlur = 0;
+                  
+                  // Radiation zone
+                  ctx.beginPath(); ctx.arc(b.x, b.y, b.radius*4, 0, Math.PI*2);
+                  ctx.fillStyle = 'rgba(234, 179, 8, 0.1)';
+                  ctx.fill();
+              } else if (b.type === 'gas_giant') {
+                  ctx.beginPath(); ctx.arc(b.x, b.y, b.radius, 0, Math.PI*2);
+                  ctx.fillStyle = '#f97316';
+                  ctx.fill();
+                  // Rings
+                  ctx.beginPath(); ctx.ellipse(b.x, b.y, b.radius*2, b.radius*0.5, Math.PI/4, 0, Math.PI*2);
+                  ctx.strokeStyle = 'rgba(251, 146, 60, 0.5)';
+                  ctx.lineWidth = 4;
+                  ctx.stroke();
+              } else if (b.type === 'habitable') {
+                  ctx.beginPath(); ctx.arc(b.x, b.y, b.radius, 0, Math.PI*2);
+                  if (b.seeded) {
+                      ctx.fillStyle = '#10b981';
+                      ctx.shadowBlur = 15;
+                      ctx.shadowColor = '#10b981';
+                  } else {
+                      ctx.fillStyle = '#38bdf8';
+                      ctx.shadowBlur = 0;
+                  }
+                  ctx.fill();
+                  ctx.shadowBlur = 0;
+              }
+          });
+          
+          // Draw Spores
+          spores.forEach(s => {
+              // Trail
+              if (s.trail.length > 1) {
+                  ctx.beginPath();
+                  ctx.moveTo(s.trail[0].x, s.trail[0].y);
+                  for(let i=1; i<s.trail.length; i++) {
+                      ctx.lineTo(s.trail[i].x, s.trail[i].y);
+                  }
+                  // Color changes if highly irradiated
+                  ctx.strokeStyle = s.radiation > 50 ? 'rgba(239, 68, 68, 0.5)' : 'rgba(16, 185, 129, 0.5)';
+                  ctx.lineWidth = 2;
+                  ctx.stroke();
+              }
+              
+              ctx.beginPath(); ctx.arc(s.x, s.y, 3, 0, Math.PI*2);
+              ctx.fillStyle = '#d946ef';
+              ctx.fill();
+          });
+
+          requestAnimationFrame(animate);
+      }
+      
+      animate();
+
+      function launchSpores() {
+          if(isSimulating) return;
+          initSystem();
+          isSimulating = true;
+          time = 0;
+          spores = [];
+          planetsSeeded = 0;
+          maxRadiationHit = 0;
+          
+          // Launch from bottom edge
+          for(let i=0; i<20; i++) {
+              spores.push({
+                  x: canvas.width * 0.2 + (Math.random() * canvas.width * 0.6),
+                  y: canvas.height - 20,
+                  vx: (Math.random() - 0.5) * 1.5,
+                  vy: -1.0 - Math.random(),
+                  radiation: 0,
+                  trail: []
+              });
+          }
+          
+          document.getElementById('statusVal').innerText = "SPORES LAUNCHED...";
+          document.getElementById('statusVal').style.color = "#10b981";
+      }
+    </script>
+  </body>
+</html>

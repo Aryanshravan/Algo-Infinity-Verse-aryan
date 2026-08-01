@@ -1,0 +1,182 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CSS Anchor Positioning Fallback Lab | Algo Infinity Verse</title>
+  <meta name="description" content="Paste anchor/popover CSS, detect missing fallback and position-try rules, score viewport collision risk, get accessible placement suggestions and before/after snippets." />
+  <link rel="stylesheet" href="/styles.css" />
+  <link rel="stylesheet" href="style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Poppins:wght@300;400;500;600;700&family=Fira+Code:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <script>
+    (function () {
+      try {
+        var storedTheme = localStorage.getItem('theme');
+        var prefersLight = window.matchMedia('(prefers-color-scheme: light)').matches;
+        var theme = storedTheme || (prefersLight ? 'light' : 'dark');
+        if (theme === 'light') {
+          document.documentElement.classList.add('light-mode');
+        } else {
+          document.documentElement.classList.remove('light-mode');
+        }
+      } catch (e) {}
+    })();
+  </script>
+</head>
+<body data-page="css-anchor-positioning-fallback-lab">
+  <a href="#anchor-main" class="anchor-skip-link">Skip to main content</a>
+  <button type="button" id="scrollTopBtn" class="scroll-top-btn" aria-label="Scroll to top">
+    <i class="fas fa-arrow-up" aria-hidden="true"></i>
+  </button>
+
+  <div id="navbar-placeholder"></div>
+
+  <header class="anchor-hero">
+    <div class="anchor-hero-badge">
+      <i class="fas fa-anchor" aria-hidden="true"></i>
+      CSS Positioning Lab
+    </div>
+    <h1>
+      CSS Anchor Positioning
+      <span class="anchor-hero-accent">Fallback Lab</span>
+    </h1>
+    <p>
+      Paste anchor/popover CSS, detect missing <code>position-try</code> fallbacks,
+      score viewport collision risk, and export accessible placement guidance.
+    </p>
+    <div class="anchor-hero-stats" aria-live="polite">
+      <div class="anchor-stat">
+        <span class="anchor-stat-val" id="anchor-statScore">—</span>
+        <span class="anchor-stat-label">UX score</span>
+      </div>
+      <div class="anchor-stat">
+        <span class="anchor-stat-val" id="anchor-statCollision">—</span>
+        <span class="anchor-stat-label">Collision risk</span>
+      </div>
+      <div class="anchor-stat">
+        <span class="anchor-stat-val" id="anchor-statFallback">—</span>
+        <span class="anchor-stat-label">Fallbacks</span>
+      </div>
+      <div class="anchor-stat">
+        <span class="anchor-stat-val" id="anchor-statGaps">—</span>
+        <span class="anchor-stat-label">Gaps</span>
+      </div>
+    </div>
+  </header>
+
+  <main id="anchor-main" class="anchor-main">
+    <div class="container">
+      <div class="anchor-workspace">
+        <section class="anchor-panel" aria-labelledby="anchor-source-title">
+          <div class="anchor-panel-header">
+            <div class="anchor-panel-title">
+              <i class="fas fa-code anchor-panel-icon" aria-hidden="true"></i>
+              <h2 id="anchor-source-title">Anchor / popover CSS</h2>
+            </div>
+          </div>
+
+          <label class="anchor-label" for="anchor-input">Paste CSS using anchor() / position-area / popover</label>
+          <textarea
+            id="anchor-input"
+            class="anchor-textarea"
+            rows="14"
+            spellcheck="false"
+            aria-describedby="anchor-inputHint"
+          ></textarea>
+          <p id="anchor-inputHint" class="anchor-hint">Demos illustrate fragile vs resilient placement. Audit is static — no live Popover API required.</p>
+
+          <div class="anchor-demo-row" role="group" aria-label="Demo CSS">
+            <button type="button" class="anchor-demo-btn" id="anchor-demoFragile">
+              <i class="fas fa-triangle-exclamation" aria-hidden="true"></i> Fragile demo
+            </button>
+            <button type="button" class="anchor-demo-btn" id="anchor-demoTry">
+              <i class="fas fa-arrows-up-down-left-right" aria-hidden="true"></i> position-try demo
+            </button>
+            <button type="button" class="anchor-demo-btn" id="anchor-demoSafe">
+              <i class="fas fa-shield-halved" aria-hidden="true"></i> Accessible demo
+            </button>
+          </div>
+
+          <div class="anchor-controls">
+            <button type="button" id="anchor-auditBtn" class="btn btn-primary">
+              <i class="fas fa-magnifying-glass" aria-hidden="true"></i> Run positioning audit
+            </button>
+            <button type="button" id="anchor-exportBtn" class="btn btn-outline" disabled>
+              <i class="fas fa-download" aria-hidden="true"></i> Export UX audit
+            </button>
+          </div>
+          <p class="anchor-status" id="anchor-status" role="status" aria-live="polite">Idle — paste CSS or load a demo.</p>
+        </section>
+
+        <section class="anchor-panel" aria-labelledby="anchor-detect-title">
+          <div class="anchor-panel-header">
+            <div class="anchor-panel-title">
+              <i class="fas fa-circle-exclamation anchor-panel-icon" aria-hidden="true"></i>
+              <h2 id="anchor-detect-title">Missing fallback / position-try detector</h2>
+            </div>
+          </div>
+          <div id="anchor-findings" class="anchor-findings" aria-live="polite">
+            <p class="anchor-empty">Findings appear after audit.</p>
+          </div>
+          <div class="anchor-risk-meter">
+            <div class="anchor-risk-label">Viewport collision risk</div>
+            <div class="anchor-gauge" role="meter" id="anchor-riskGauge" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-label="Viewport collision risk">
+              <div class="anchor-gauge-fill" id="anchor-riskFill" style="width: 0%"></div>
+            </div>
+            <span id="anchor-riskPct">0%</span>
+          </div>
+        </section>
+      </div>
+
+      <div class="anchor-workspace">
+        <section class="anchor-panel" aria-labelledby="anchor-a11y-title">
+          <div class="anchor-panel-header">
+            <div class="anchor-panel-title">
+              <i class="fas fa-universal-access anchor-panel-icon" aria-hidden="true"></i>
+              <h2 id="anchor-a11y-title">Accessible placement suggestions</h2>
+            </div>
+          </div>
+          <ul id="anchor-suggestions" class="anchor-tips" aria-live="polite">
+            <li class="anchor-empty-li">Suggestions appear after audit.</li>
+          </ul>
+        </section>
+
+        <section class="anchor-panel" aria-labelledby="anchor-ba-title">
+          <div class="anchor-panel-header">
+            <div class="anchor-panel-title">
+              <i class="fas fa-code-compare anchor-panel-icon" aria-hidden="true"></i>
+              <h2 id="anchor-ba-title">Before / after CSS snippets</h2>
+            </div>
+          </div>
+          <div class="anchor-ba-grid">
+            <div>
+              <h3 class="anchor-subhead">Before</h3>
+              <pre class="anchor-mono" id="anchor-before" tabindex="0">Load a demo or audit.</pre>
+            </div>
+            <div>
+              <h3 class="anchor-subhead">After</h3>
+              <pre class="anchor-mono" id="anchor-after" tabindex="0">Hardened snippet appears here.</pre>
+            </div>
+          </div>
+        </section>
+      </div>
+    </div>
+  </main>
+
+  <div id="footer-placeholder"></div>
+
+  <script src="/auth.js"></script>
+  <script src="/bootstrap-legacy.js"></script>
+  <script src="/script.js"></script>
+  <script type="module" src="/dist/legacy-bundle.mjs"></script>
+  <script src="/theme.js"></script>
+  <script src="script.js"></script>
+  <script>
+    if (typeof loadPartial === 'function') {
+      loadPartial('navbar-placeholder', '/partials/navbar.html');
+      loadPartial('footer-placeholder', '/partials/footer.html');
+    }
+  </script>
+</body>
+</html>

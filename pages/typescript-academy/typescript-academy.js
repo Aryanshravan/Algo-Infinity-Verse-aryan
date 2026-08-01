@@ -1135,12 +1135,23 @@ const DOM = {
     previewFrame: document.getElementById('preview-frame')
 };
 
+let tsTerminal;
+
 function init() {
     loadProgress();
     updateProgressBar();
     setupEventListeners();
     renderSidebar();
     renderActiveState();
+
+    if (window.MiniTerminal) {
+        tsTerminal = new MiniTerminal('ts-terminal');
+        window.addEventListener('message', (event) => {
+            if (event.data && event.data.type === 'CONSOLE_LOG' && tsTerminal) {
+                tsTerminal.appendLog(event.data.level, event.data.payload);
+            }
+        });
+    }
 }
 
 function setupEventListeners() {
@@ -1427,7 +1438,7 @@ window.handleQuizSelection = function(questionId, optionIndex) {
 
 function runCode() {
     const userCode = DOM.codeEditor.value;
-    const logs = [];
+    if (tsTerminal) tsTerminal.clear();
     const errors = [];
 
     const iframe = DOM.previewFrame;
@@ -1439,8 +1450,7 @@ function runCode() {
         } else {
             parts.push('<div style="color:#16a34a;font-size:12px;font-weight:600;margin-bottom:10px">Compiled successfully</div>');
         }
-        parts.push('<div id="output-box">' + logs.join('\n') + '</div>');
-        iframe.srcdoc = '<!DOCTYPE html><html><head><meta charset="utf-8"><style>body{margin:0;padding:20px;font-family:ui-sans-serif,system-ui,-apple-system,sans-serif;background:#fff;color:#1f2937}#error-boundary{color:#dc2626;background:#fee2e2;padding:15px;border-radius:8px;margin:10px;font-family:monospace;white-space:pre-wrap;border:1px solid #fca5a5}#output-box{background:#1e293b;color:#e2e8f0;padding:16px;border-radius:8px;font-family:monospace;font-size:13px;line-height:1.6;white-space:pre-wrap;overflow-x:auto}</style></head><body>' + parts.join('') + '</body></html>';
+        iframe.srcdoc = '<!DOCTYPE html><html><head><meta charset="utf-8"><style>body{margin:0;padding:20px;font-family:ui-sans-serif,system-ui,-apple-system,sans-serif;background:#fff;color:#1f2937}#error-boundary{color:#dc2626;background:#fee2e2;padding:15px;border-radius:8px;margin:10px;font-family:monospace;white-space:pre-wrap;border:1px solid #fca5a5}</style></head><body>' + parts.join('') + '</body></html>';
     }
 
     if (typeof ts === 'undefined') {
@@ -1461,30 +1471,40 @@ function runCode() {
         });
 
         var compiledCode = result.outputText;
+        const injectedScript = `
+        <script>
+            const origLog = console.log;
+            const origWarn = console.warn;
+            const origError = console.error;
+            console.log = function(...args) { window.parent.postMessage({ type: 'CONSOLE_LOG', level: 'log', payload: args }, '*'); origLog.apply(console, args); };
+            console.warn = function(...args) { window.parent.postMessage({ type: 'CONSOLE_LOG', level: 'warn', payload: args }, '*'); origWarn.apply(console, args); };
+            console.error = function(...args) { window.parent.postMessage({ type: 'CONSOLE_LOG', level: 'error', payload: args }, '*'); origError.apply(console, args); };
 
-        var origLog = console.log;
-        console.log = function() {
-            var args = Array.prototype.slice.call(arguments);
-            var text = args.map(function(a) { return typeof a === 'object' ? JSON.stringify(a, null, 2) : String(a); }).join(' ');
-            logs.push(text);
-            origLog.apply(console, args);
-        };
+            window.onerror = function(msg) {
+                console.error(msg);
+                return false;
+            };
 
-        try {
-            var sandbox = { exports: {} };
-            var fnParams = ['exports', 'require', 'module'];
-            var fnArgs = [sandbox.exports, function() { throw new Error('require() not available in playground'); }, sandbox];
-            (new Function(fnParams.join(','), compiledCode)).apply(null, fnArgs);
-        } catch (execErr) {
-            errors.push(execErr.message || String(execErr));
-        } finally {
-            console.log = origLog;
-        }
+            try {
+                var sandbox = { exports: {} };
+                var fnParams = ['exports', 'require', 'module'];
+                var fnArgs = [sandbox.exports, function() { throw new Error('require() not available in playground'); }, sandbox];
+                (new Function(fnParams.join(','), \`${compiledCode.replace(/\\/g, '\\\\').replace(/`/g, '\\`').replace(/\$/g, '\\$')}\`)).apply(null, fnArgs);
+            } catch (execErr) {
+                console.error(execErr.message || String(execErr));
+            }
+        <\\/script>
+        `;
+
+        var parts = [];
+        parts.push('<div style="color:#16a34a;font-size:12px;font-weight:600;margin-bottom:10px">Compiled successfully</div>');
+        parts.push(injectedScript);
+        iframe.srcdoc = '<!DOCTYPE html><html><head><meta charset="utf-8"><style>body{margin:0;padding:20px;font-family:ui-sans-serif,system-ui,-apple-system,sans-serif;background:#fff;color:#1f2937}</style></head><body>' + parts.join('') + '</body></html>';
+
     } catch (compileErr) {
         errors.push(compileErr.message || String(compileErr));
+        updateOutput();
     }
-
-    updateOutput();
 }
 
 init();

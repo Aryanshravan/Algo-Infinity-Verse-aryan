@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI System Architecture Threat Modeling Scanner — Algo Infinity Verse</title>
+  <meta name="description" content="Automated AI STRIDE Security Threat Modeling Scanner evaluating microservices, data flow trust boundaries, unencrypted transport channels, and risk scores." />
+  
+  <link rel="stylesheet" href="../../../styles.css" />
+  <link rel="stylesheet" href="style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+
+  <script>
+    (function() {
+      try {
+        var t = localStorage.getItem('theme');
+        var p = window.matchMedia('(prefers-color-scheme: light)').matches;
+        var theme = t || (p ? 'light' : 'dark');
+        if (theme === 'light') document.documentElement.classList.add('light-mode');
+      } catch (e) {}
+    })();
+  </script>
+</head>
+<body data-page="threat-scanner">
+
+  <header class="tms-header">
+    <div class="tms-header-container">
+      <a href="../ai-features.html" class="tms-back-btn">
+        <i class="fas fa-arrow-left"></i>
+        <span>AI Tools</span>
+      </a>
+      <div class="tms-title-area">
+        <h1><i class="fas fa-robot"></i> AI Architecture Security Risk &amp; STRIDE Threat Modeling Scanner</h1>
+        <p>Automated STRIDE Threat Matrix (Spoofing, Tampering, Repudiation, Info Disclosure, DoS, Privilege Elevation)</p>
+      </div>
+      <div class="tms-header-actions">
+        <button id="themeToggleBtn" class="tms-icon-btn" title="Toggle Theme">
+          <i class="fas fa-moon"></i>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="tms-main">
+    <!-- TOOLBAR PRESET SELECTION -->
+    <div class="tms-toolbar tms-card">
+      <div class="tms-preset-group">
+        <label><i class="fas fa-cubes"></i> Architecture Topology Presets:</label>
+        <button class="tms-btn-preset active" data-preset="fintech">Fintech Payment Gateway Topology</button>
+        <button class="tms-btn-preset" data-preset="healthcare">EHR Healthcare Data Pipeline</button>
+        <button class="tms-btn-preset" data-preset="iot">IoT Edge Stream Ingestion</button>
+      </div>
+      <div class="tms-action-group">
+        <button id="btnRunScan" class="tms-btn-main"><i class="fas fa-shield-halved"></i> Run AI STRIDE Threat Scan</button>
+        <button id="btnPrintReport" class="tms-btn-sec"><i class="fas fa-file-pdf"></i> Export Audit Report</button>
+      </div>
+    </div>
+
+    <!-- MAIN TOPOLOGY BUILDER & RISK DASHBOARD -->
+    <div class="tms-grid">
+      <!-- TOPOLOGY DESIGNER -->
+      <div class="tms-card">
+        <div class="tms-card-header">
+          <h3><i class="fas fa-sitemap"></i> System Component Topology &amp; Trust Boundaries</h3>
+          <button id="btnAddNode" class="tms-btn-mini"><i class="fas fa-plus"></i> Add Component</button>
+        </div>
+        <div class="tms-card-body">
+          <div id="componentsList" class="tms-components-list"></div>
+        </div>
+      </div>
+
+      <!-- STRIDE RISK MATRIX SCOREBOARD -->
+      <div class="tms-card">
+        <div class="tms-card-header">
+          <h3><i class="fas fa-chart-pie"></i> STRIDE Threat Risk Index</h3>
+        </div>
+        <div class="tms-card-body">
+          <div class="tms-score-card">
+            <div class="tms-score-val" id="riskScoreVal">HIGH RISK</div>
+            <div class="tms-score-sub" id="riskScoreSub">12 Threats Identified (3 Critical)</div>
+          </div>
+
+          <div class="tms-stride-grid">
+            <div class="tms-stride-box" data-stride="S"><strong>S</strong>poofing <span id="cntS" class="tms-cnt">2</span></div>
+            <div class="tms-stride-box" data-stride="T"><strong>T</strong>ampering <span id="cntT" class="tms-cnt">3</span></div>
+            <div class="tms-stride-box" data-stride="R"><strong>R</strong>epudiation <span id="cntR" class="tms-cnt">1</span></div>
+            <div class="tms-stride-box" data-stride="I"><strong>I</strong>nfo Disclosure <span id="cntI" class="tms-cnt">4</span></div>
+            <div class="tms-stride-box" data-stride="D"><strong>D</strong>enial of Service <span id="cntD" class="tms-cnt">2</span></div>
+            <div class="tms-stride-box" data-stride="E"><strong>E</strong>levation of Privilege <span id="cntE" class="tms-cnt">1</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- DETAILED THREAT FINDINGS -->
+    <div class="tms-card" style="margin-top: 24px;">
+      <div class="tms-card-header">
+        <h3><i class="fas fa-bug"></i> AI Threat Modeling Findings &amp; Mitigation Roadmap</h3>
+      </div>
+      <div class="tms-card-body">
+        <div id="threatsContainer" class="tms-threats-container"></div>
+      </div>
+    </div>
+  </main>
+
+  <script src="script.js" type="module"></script>
+</body>
+</html>

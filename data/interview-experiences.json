@@ -1,0 +1,34 @@
+[
+  {
+    "id": "d9588601-38d3-4c4b-b0c8-7eec70e7b984",
+    "userId": "u1",
+    "userName": "Tester",
+    "company": "Acme",
+    "role": "Engineer",
+    "difficulty": "hard",
+    "rating": 4,
+    "title": "My interview",
+    "content": "It was great.",
+    "topics": [],
+    "rounds": null,
+    "offerStatus": null,
+    "upvotes": 0,
+    "createdAt": "2026-07-31T14:47:20.558Z"
+  },
+  {
+    "id": "c5dd4872-5045-47b1-bc0a-76d67ae6d66e",
+    "userId": "u1",
+    "userName": "Tester",
+    "company": "Acme",
+    "role": "Engineer",
+    "difficulty": "hard",
+    "rating": 4,
+    "title": "My interview",
+    "content": "It was great.",
+    "topics": [],
+    "rounds": null,
+    "offerStatus": null,
+    "upvotes": 0,
+    "createdAt": "2026-07-31T14:47:45.067Z"
+  }
+]

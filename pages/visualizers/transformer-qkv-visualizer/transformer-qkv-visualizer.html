@@ -1,0 +1,202 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Transformer QKV Attention | Algo Infinity Verse</title>
+    <meta
+      name="description"
+      content="Interactive simulation of the Self-Attention mechanism that powers LLMs like GPT-4. Visualize QKV matrix math and dot products in real-time."
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Poppins:wght@300;400;500;600;700&family=Fira+Code:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <link rel="stylesheet" href="../../../styles.css" />
+    <link rel="stylesheet" href="transformer-qkv-visualizer.css" />
+    <script src="../../../modules/toast.js"></script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script
+      id="MathJax-script"
+      async
+      src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"
+    ></script>
+  </head>
+  <body class="tf-body">
+    <div id="navbar-placeholder"></div>
+
+    <section class="tf-hero">
+      <div class="tf-hero-bg"></div>
+      <div class="tf-hero-inner">
+        <div class="tf-eyebrow">Deep Learning Architecture</div>
+        <h1 class="tf-title">Transformer Self-Attention</h1>
+        <p class="tf-desc">
+          Unveil the matrix math behind <strong>GPT-4</strong>. Watch sentences explode into
+          <strong>Query (Q)</strong>, <strong>Key (K)</strong>, and
+          <strong>Value (V)</strong> vectors, then physically calculate the dot-product Attention
+          Grid to generate contextual output.
+        </p>
+      </div>
+    </section>
+
+    <div class="tf-dashboard container">
+      <!-- Controls -->
+      <div class="tf-panel glass-panel mb-4">
+        <div class="tf-panel-header">
+          <i class="fas fa-sliders-h"></i> Attention Hyperparameters
+        </div>
+
+        <div class="tf-controls-grid">
+          <!-- Input -->
+          <div class="tf-control-group">
+            <label class="text-primary"
+              ><i class="fas fa-keyboard"></i> Sentence Input (4 Words Max)</label
+            >
+            <div class="d-flex" style="gap: 0.5rem">
+              <input
+                type="text"
+                id="sentenceInput"
+                class="tf-input flex-1"
+                value="i sit by river"
+              />
+              <button class="btn btn-primary" id="btnProcess">
+                <i class="fas fa-cog"></i> Run
+              </button>
+            </div>
+
+            <label class="text-primary mt-3"
+              ><i class="fas fa-bookmark"></i> Context Presets (Polysemy)</label
+            >
+            <div class="d-flex" style="gap: 0.5rem">
+              <button class="btn btn-secondary flex-1 text-xs" id="btnPresetRiver">
+                river bank
+              </button>
+              <button class="btn btn-secondary flex-1 text-xs" id="btnPresetMoney">
+                money bank
+              </button>
+            </div>
+          </div>
+
+          <!-- Softmax Controls -->
+          <div class="tf-control-group">
+            <label class="text-warning"><i class="fas fa-fire"></i> Softmax Temperature (T)</label>
+            <div class="d-flex justify-between text-xs mb-1">
+              <span>Deterministic (0.1)</span>
+              <span>Creative (2.0)</span>
+            </div>
+            <input
+              type="range"
+              id="sliderTemp"
+              min="0.1"
+              max="2.0"
+              step="0.1"
+              value="1.0"
+              class="tf-range"
+            />
+            <div class="text-center text-sm font-fira mt-1">T = <span id="valTemp">1.0</span></div>
+
+            <div class="toggle-row mt-3">
+              <span class="text-sm font-fira">Scale Factor \( \div \sqrt{d_k} \)</span>
+              <label class="switch">
+                <input type="checkbox" id="tglScale" checked />
+                <span class="slider round"></span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Equation -->
+          <div class="tf-control-group">
+            <label class="text-success"
+              ><i class="fas fa-square-root-alt"></i> The Core Equation</label
+            >
+            <div class="tf-equation-box">
+              \[ \text{Attention}(Q, K, V) = \text{softmax}\left(\frac{QK^T}{\sqrt{d_k}}\right)V \]
+            </div>
+            <p class="text-xs text-gray text-center mt-2">
+              Hover over the Attention Grid below to inspect the \( Q \cdot K^T \) math!
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pipeline Visualization -->
+      <div class="tf-pipeline-wrapper">
+        <div class="tf-pipeline">
+          <!-- QKV Splitting -->
+          <div class="tf-layer glass-panel" id="layer-qkv">
+            <div class="layer-title">
+              <i class="fas fa-project-diagram"></i> 1. Linear Projections (Q, K, V)
+            </div>
+
+            <div class="qkv-container" id="qkvRender">
+              <!-- JS Injects Words -> Q K V arrays here -->
+            </div>
+          </div>
+
+          <div class="pipeline-arrow"><i class="fas fa-arrow-right"></i></div>
+
+          <!-- Attention Grid -->
+          <div class="tf-layer glass-panel" id="layer-attention">
+            <div class="layer-title text-warning">
+              <i class="fas fa-border-all"></i> 2. \( Q \cdot K^T \) Attention Scores
+            </div>
+
+            <div class="attention-wrapper">
+              <div class="attn-labels-top" id="attnKeys">
+                <!-- Keys -->
+              </div>
+              <div class="attn-grid-flex">
+                <div class="attn-labels-left" id="attnQueries">
+                  <!-- Queries -->
+                </div>
+                <div class="attention-grid" id="attentionGrid">
+                  <!-- JS Injects 4x4 grid -->
+                </div>
+              </div>
+            </div>
+
+            <!-- Tooltip -->
+            <div class="tf-tooltip" id="mathTooltip">Hover to inspect dot product</div>
+          </div>
+
+          <div class="pipeline-arrow"><i class="fas fa-arrow-right"></i></div>
+
+          <!-- Final Output -->
+          <div class="tf-layer glass-panel" id="layer-output">
+            <div class="layer-title text-success">
+              <i class="fas fa-brain"></i> 3. Contextualized Output
+            </div>
+
+            <div class="qkv-container" id="outRender">
+              <!-- JS Injects Final Context Vectors -->
+            </div>
+            <div class="text-xs text-gray mt-3 text-center">
+              Each word's final meaning is now a weighted sum of all Values (V), dictated by the
+              Attention Grid!
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="footer-placeholder"></div>
+
+    <script src="../../../auth.js"></script>
+    <script src="../../../script.js"></script>
+    <script src="../../../theme.js"></script>
+    <script src="../../../auth-gate.js"></script>
+    <script src="transformer-qkv-visualizer.js"></script>
+    <script>
+      if (typeof loadPartial === 'function') {
+        loadPartial('navbar-placeholder', '/partials/navbar.html').then(function () {
+          if (typeof initNavbar === 'function') initNavbar();
+        });
+        loadPartial('footer-placeholder', '/partials/footer.html');
+      }
+    </script>
+  </body>
+</html>

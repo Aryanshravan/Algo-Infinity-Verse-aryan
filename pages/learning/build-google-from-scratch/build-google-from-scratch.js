@@ -49,7 +49,6 @@ function loadProgress() {
         localStorage.removeItem('googleCourseProgress');
     }
 }
-}
 
 function saveProgress() {
     localStorage.setItem('googleCourseProgress', JSON.stringify(progressState));

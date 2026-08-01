@@ -199,6 +199,8 @@ function initTypeScriptPlayground() {
     saveBtn: document.getElementById('tspSaveBtn'),
     resetBtn: document.getElementById('tspResetBtn'),
     runBtn: document.getElementById('tspRunBtn'),
+    vimToggle: document.getElementById('tspVimToggle'),
+    vimStatusBar: document.getElementById('vim-status-bar'),
     newFileBtn: document.getElementById('tspNewFileBtn'),
     fileList: document.getElementById('tspFileList'),
     monacoLoading: document.getElementById('tspMonacoLoading'),
@@ -297,6 +299,27 @@ function initTypeScriptPlayground() {
       els.monacoLoading.classList.add('hidden');
       renderFileList();
       refreshLive();
+
+      // Vim Mode logic
+      if (els.vimToggle) {
+        els.vimToggle.addEventListener('change', (e) => {
+          if (e.target.checked) {
+            if (window.MonacoVim) {
+              if (els.vimStatusBar) els.vimStatusBar.classList.remove('hidden');
+              editor.vimModeInstance = window.MonacoVim.initVimMode(editor, els.vimStatusBar);
+            } else {
+              flashStatus('error', 'Vim Mode script not loaded');
+              e.target.checked = false;
+            }
+          } else {
+            if (editor.vimModeInstance) {
+              editor.vimModeInstance.dispose();
+              editor.vimModeInstance = null;
+            }
+            if (els.vimStatusBar) els.vimStatusBar.classList.add('hidden');
+          }
+        });
+      }
     }, () => {
       showMonacoLoadError();
     });

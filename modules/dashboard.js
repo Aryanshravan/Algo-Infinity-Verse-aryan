@@ -451,7 +451,7 @@ function renderActivityHeatmap() {
   const WEEKS_TO_SHOW = 52;
   const dayOfWeek = today.getDay();
   const startDate = new Date(today);
-  startDate.setDate(startDate.getDate() - (WEEKS_TO_SHOW * 7 - 1) - dayOfWeek);
+  startDate.setDate(startDate.getDate() - ((WEEKS_TO_SHOW * 7 - 1) - dayOfWeek));
   startDate.setHours(0, 0, 0, 0);
 
   const weeks = [];

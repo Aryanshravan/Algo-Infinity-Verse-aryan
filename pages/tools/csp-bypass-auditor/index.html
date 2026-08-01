@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CSP Bypass Auditor | Algo Infinity Verse</title>
+  <meta name="description" content="Paste a Content-Security-Policy header, flag unsafe directives and missing controls, simulate bypass vectors, generate a hardened CSP with before/after diff, and export a security report." />
+  <link rel="stylesheet" href="/styles.css" />
+  <link rel="stylesheet" href="style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Poppins:wght@300;400;500;600;700&family=Fira+Code:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <script>
+    (function () {
+      try {
+        var storedTheme = localStorage.getItem('theme');
+        var prefersLight = window.matchMedia('(prefers-color-scheme: light)').matches;
+        var theme = storedTheme || (prefersLight ? 'light' : 'dark');
+        if (theme === 'light') {
+          document.documentElement.classList.add('light-mode');
+        } else {
+          document.documentElement.classList.remove('light-mode');
+        }
+      } catch (e) {}
+    })();
+  </script>
+</head>
+<body data-page="csp-bypass-auditor">
+  <a href="#csp-main" class="csp-skip-link">Skip to main content</a>
+  <button type="button" id="scrollTopBtn" class="scroll-top-btn" aria-label="Scroll to top">
+    <i class="fas fa-arrow-up" aria-hidden="true"></i>
+  </button>
+
+  <div id="navbar-placeholder"></div>
+
+  <header class="csp-hero">
+    <div class="csp-hero-badge">
+      <i class="fas fa-shield-virus" aria-hidden="true"></i>
+      Browser Security Lab
+    </div>
+    <h1>
+      CSP Bypass
+      <span class="csp-hero-accent">Auditor</span>
+    </h1>
+    <p>
+      Parse Content-Security-Policy headers, flag <code>unsafe-inline</code> / wildcards / missing
+      directives, walk simulated bypass vectors, and export a hardened policy with a diff.
+    </p>
+    <div class="csp-hero-stats" aria-live="polite">
+      <div class="csp-stat">
+        <span class="csp-stat-val" id="statRisk">—</span>
+        <span class="csp-stat-label">Risk score</span>
+      </div>
+      <div class="csp-stat">
+        <span class="csp-stat-val" id="statUnsafe">—</span>
+        <span class="csp-stat-label">Unsafe directives</span>
+      </div>
+      <div class="csp-stat">
+        <span class="csp-stat-val" id="statBypass">—</span>
+        <span class="csp-stat-label">Bypass vectors</span>
+      </div>
+    </div>
+  </header>
+
+  <main id="csp-main" class="csp-main">
+    <div class="container">
+      <div class="csp-workspace">
+        <section class="csp-panel" aria-labelledby="csp-input-title">
+          <div class="csp-panel-header">
+            <div class="csp-panel-title">
+              <i class="fas fa-file-code csp-panel-icon" aria-hidden="true"></i>
+              <h2 id="csp-input-title">CSP header</h2>
+            </div>
+          </div>
+
+          <label class="csp-label" for="cspInput">Paste Content-Security-Policy value</label>
+          <textarea
+            id="cspInput"
+            class="csp-textarea"
+            rows="8"
+            spellcheck="false"
+            aria-describedby="cspHint"
+            placeholder="default-src 'self'; script-src 'self' 'unsafe-inline'; …"
+          ></textarea>
+          <p class="csp-hint" id="cspHint">Accepts a raw header value (directives separated by semicolons).</p>
+
+          <div class="csp-controls">
+            <button type="button" id="loadSampleBtn" class="btn btn-secondary">
+              <i class="fas fa-flask" aria-hidden="true"></i> Load weak sample
+            </button>
+            <button type="button" id="auditBtn" class="btn btn-primary">
+              <i class="fas fa-magnifying-glass" aria-hidden="true"></i> Audit CSP
+            </button>
+            <button type="button" id="exportBtn" class="btn btn-outline" disabled>
+              <i class="fas fa-download" aria-hidden="true"></i> Export report
+            </button>
+          </div>
+        </section>
+
+        <section class="csp-panel" aria-labelledby="csp-directives-title">
+          <div class="csp-panel-header">
+            <div class="csp-panel-title">
+              <i class="fas fa-list csp-panel-icon" aria-hidden="true"></i>
+              <h2 id="csp-directives-title">Parsed directives</h2>
+            </div>
+            <span class="csp-status-live" id="auditStatus" role="status" aria-live="polite">Ready</span>
+          </div>
+          <div id="directivesList" class="csp-directives" aria-live="polite">
+            <p class="csp-empty">Paste a CSP and run the audit.</p>
+          </div>
+        </section>
+      </div>
+
+      <div class="csp-workspace">
+        <section class="csp-panel" aria-labelledby="csp-findings-title">
+          <div class="csp-panel-header">
+            <div class="csp-panel-title">
+              <i class="fas fa-triangle-exclamation csp-panel-icon" aria-hidden="true"></i>
+              <h2 id="csp-findings-title">Findings &amp; bypass checklist</h2>
+            </div>
+          </div>
+          <div id="findingsList" class="csp-findings" aria-live="polite">
+            <p class="csp-empty">Findings appear after audit.</p>
+          </div>
+          <ul id="bypassList" class="csp-bypass" aria-live="polite"></ul>
+        </section>
+
+        <section class="csp-panel" aria-labelledby="csp-hardened-title">
+          <div class="csp-panel-header">
+            <div class="csp-panel-title">
+              <i class="fas fa-lock csp-panel-icon" aria-hidden="true"></i>
+              <h2 id="csp-hardened-title">Hardened CSP + diff</h2>
+            </div>
+          </div>
+          <h3 class="csp-subhead">Suggested policy</h3>
+          <pre class="csp-mono-block" id="hardenedOut" aria-live="polite">—</pre>
+          <h3 class="csp-subhead">Before / after</h3>
+          <pre class="csp-mono-block csp-diff" id="diffOut" aria-live="polite">—</pre>
+        </section>
+      </div>
+    </div>
+  </main>
+
+  <div id="footer-placeholder"></div>
+
+  <script src="/auth.js"></script>
+  <script src="/bootstrap-legacy.js"></script>
+  <script src="/script.js"></script>
+  <script type="module" src="/dist/legacy-bundle.mjs"></script>
+  <script src="/theme.js"></script>
+  <script src="script.js"></script>
+  <script>
+    if (typeof loadPartial === 'function') {
+      loadPartial('navbar-placeholder', '/partials/navbar.html');
+      loadPartial('footer-placeholder', '/partials/footer.html');
+    }
+  </script>
+</body>
+</html>

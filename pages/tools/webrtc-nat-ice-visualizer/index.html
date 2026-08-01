@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Real-Time WebRTC NAT Traversal & ICE Simulator — Algo Infinity Verse</title>
+  <meta name="description" content="Simulate WebRTC P2P connection establishment, STUN/TURN handshakes, NAT types, SDP offer/answer exchanges, and ICE candidate gathering." />
+  <link rel="stylesheet" href="/styles.css" />
+  <link rel="stylesheet" href="style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Poppins:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <script>
+    (function () {
+      try {
+        var storedTheme = localStorage.getItem('theme');
+        var prefersLight = window.matchMedia('(prefers-color-scheme: light)').matches;
+        var theme = storedTheme || (prefersLight ? 'light' : 'dark');
+        if (theme === 'light') {
+          document.documentElement.classList.add('light-mode');
+        } else {
+          document.documentElement.classList.remove('light-mode');
+        }
+      } catch (e) {}
+    })();
+  </script>
+</head>
+<body data-page="webrtc-visualizer">
+  <div id="navbar-placeholder"></div>
+
+  <header class="tool-hero">
+    <div class="tool-hero-badge">
+      <i class="fas fa-network-wired" aria-hidden="true"></i> Networking & P2P Protocols
+    </div>
+    <h1>Real-Time WebRTC NAT Traversal <span class="accent-text">& ICE Candidate Simulator</span></h1>
+    <p>
+      Simulate P2P handshakes across Full Cone, Restricted, and Symmetric NATs. Watch SDP Offer/Answer exchanges, STUN binding requests, TURN relay allocations, and ICE connectivity checks.
+    </p>
+  </header>
+
+  <main class="tool-container">
+    <!-- Toolbar Controls -->
+    <section class="toolbar-card">
+      <div class="toolbar-group">
+        <label for="peerANatSelect">Peer A NAT Type:</label>
+        <select id="peerANatSelect" class="tool-select">
+          <option value="FULL_CONE">Full Cone NAT (Open)</option>
+          <option value="ADDR_RESTRICTED">Address-Restricted Cone NAT</option>
+          <option value="PORT_RESTRICTED">Port-Restricted Cone NAT</option>
+          <option value="SYMMETRIC">Symmetric NAT (STUN Blocked)</option>
+        </select>
+      </div>
+
+      <div class="toolbar-group">
+        <label for="peerBNatSelect">Peer B NAT Type:</label>
+        <select id="peerBNatSelect" class="tool-select">
+          <option value="FULL_CONE">Full Cone NAT (Open)</option>
+          <option value="ADDR_RESTRICTED">Address-Restricted Cone NAT</option>
+          <option value="PORT_RESTRICTED">Port-Restricted Cone NAT</option>
+          <option value="SYMMETRIC" selected>Symmetric NAT (STUN Blocked)</option>
+        </select>
+      </div>
+
+      <div class="toolbar-actions">
+        <button id="btnStartGathering" class="tool-btn primary-btn"><i class="fas fa-play"></i> Start ICE Handshake</button>
+        <button id="btnResetWebRtc" class="tool-btn secondary-btn"><i class="fas fa-rotate-left"></i> Reset</button>
+      </div>
+    </section>
+
+    <!-- Network Topology Map -->
+    <section class="panel-card topology-panel">
+      <div class="panel-header">
+        <h3><i class="fas fa-diagram-project"></i> Interactive P2P Network Topology</h3>
+        <span class="status-indicator" id="webrtcConnState">DISCONNECTED</span>
+      </div>
+      
+      <div class="topology-grid">
+        <div class="topo-node peer-node" id="nodePeerA">
+          <i class="fas fa-desktop"></i>
+          <strong>Peer A</strong>
+          <span class="ip-label">192.168.1.10</span>
+        </div>
+
+        <div class="topo-node router-node" id="nodeRouterA">
+          <i class="fas fa-shield-halved"></i>
+          <strong>Router A (NAT)</strong>
+          <span class="ip-label">203.0.113.5</span>
+        </div>
+
+        <div class="topo-center-servers">
+          <div class="topo-node server-node" id="nodeStun">
+            <i class="fas fa-server"></i>
+            <strong>STUN Server</strong>
+            <span class="ip-label">stun.l.google.com:19302</span>
+          </div>
+
+          <div class="topo-node server-node relay" id="nodeTurn">
+            <i class="fas fa-tower-cell"></i>
+            <strong>TURN Relay Server</strong>
+            <span class="ip-label">turn.matrix.org:3478</span>
+          </div>
+        </div>
+
+        <div class="topo-node router-node" id="nodeRouterB">
+          <i class="fas fa-shield-halved"></i>
+          <strong>Router B (NAT)</strong>
+          <span class="ip-label">198.51.100.22</span>
+        </div>
+
+        <div class="topo-node peer-node" id="nodePeerB">
+          <i class="fas fa-laptop"></i>
+          <strong>Peer B</strong>
+          <span class="ip-label">10.0.0.15</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- SDP & ICE Candidate Matrix Grid -->
+    <div class="workspace-grid">
+      <!-- SDP Inspector -->
+      <section class="panel-card sdp-panel">
+        <div class="panel-header">
+          <h3><i class="fas fa-file-code"></i> SDP Offer / Answer Inspector</h3>
+        </div>
+        <textarea id="sdpViewer" spellcheck="false" readonly placeholder="SDP Payload will appear here during offer/answer exchange..."></textarea>
+      </section>
+
+      <!-- ICE Candidate Matrix -->
+      <section class="panel-card matrix-panel">
+        <div class="panel-header">
+          <h3><i class="fas fa-table-list"></i> ICE Candidates & Pair Connectivity Matrix</h3>
+        </div>
+        <table class="candidate-table">
+          <thead>
+            <tr>
+              <th>Type</th>
+              <th>Protocol</th>
+              <th>IP:Port Address</th>
+              <th>Priority Score</th>
+              <th>Check Status</th>
+            </tr>
+          </thead>
+          <tbody id="iceCandidateTableBody"></tbody>
+        </table>
+      </section>
+    </div>
+
+    <!-- Packet Diagnostics Log -->
+    <section class="panel-card log-panel">
+      <div class="panel-header">
+        <h3><i class="fas fa-terminal"></i> Connection Diagnostics & Protocol Packet Log</h3>
+      </div>
+      <div class="packet-log-box" id="webrtcLogBox">
+        <div class="log-line info">[INIT] WebRTC NAT Traversal Simulator initialized. Click "Start ICE Handshake".</div>
+      </div>
+    </section>
+  </main>
+
+  <script src="/modules/navbar.js" type="module"></script>
+  <script src="script.js"></script>
+</body>
+</html>

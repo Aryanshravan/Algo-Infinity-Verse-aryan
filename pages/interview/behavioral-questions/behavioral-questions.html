@@ -280,13 +280,14 @@
     <!-- Footer -->
     <div id="footer-placeholder"></div>
 
-    <div class="modal" id="notesModal">
+    <div class="modal" id="notesModal" role="dialog" aria-modal="true" aria-labelledby="notesModalTitle">
       <div class="modal-content">
         <div class="modal-header">
           <h3 id="notesModalTitle">Problem Notes</h3>
-          <button type="button" class="modal-close" id="notesModalClose">&times;</button>
+          <button type="button" class="modal-close" id="notesModalClose" aria-label="Close notes modal">&times;</button>
         </div>
         <div class="modal-body">
+          <label for="notesEditor" class="visually-hidden">Your notes for this question</label>
           <textarea
             id="notesEditor"
             placeholder="Write your notes here..."
@@ -300,12 +301,12 @@
         </div>
       </div>
     </div>
-    <div class="modal" id="answerModal">
+    <div class="modal" id="answerModal" role="dialog" aria-modal="true" aria-labelledby="modalQuestion">
       <div class="modal-content">
         <div class="modal-header">
           <h3 id="modalQuestion"></h3>
 
-          <button type="button" class="modal-close" id="closeAnswer">&times;</button>
+          <button type="button" class="modal-close" id="closeAnswer" aria-label="Close answer modal">&times;</button>
         </div>
 
         <div class="modal-body">

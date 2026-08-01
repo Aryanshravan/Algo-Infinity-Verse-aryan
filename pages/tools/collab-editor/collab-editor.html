@@ -1,0 +1,259 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Collaborative Code Playground — Algo Infinity Verse</title>
+    <meta
+      name="description"
+      content="Real-time collaborative code editor with shared execution, remote cursor presence, live chat, and snapshot forking for pair programming and interview practice."
+    />
+
+    <!-- Core & Custom Styles -->
+    <link rel="stylesheet" href="/styles.css" />
+    <link rel="stylesheet" href="/pages/tools/tools.css" />
+    <link rel="stylesheet" href="collab-editor.css" />
+
+    <!-- Typography & Icons -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&family=Orbitron:wght@500;700;900&family=Fira+Code:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+
+    <!-- Socket.io Client -->
+    <script src="/socket.io/socket.io.js"></script>
+
+    <!-- Theme Pre-loader -->
+    <script>
+      (function () {
+        try {
+          var t = localStorage.getItem('theme');
+          var p = window.matchMedia('(prefers-color-scheme: light)').matches;
+          var theme = t || (p ? 'light' : 'dark');
+          if (theme === 'light') document.documentElement.classList.add('light-mode');
+          else document.documentElement.classList.remove('light-mode');
+        } catch (e) {}
+      })();
+    </script>
+  </head>
+  <body data-page="collab-editor">
+    <!-- Navigation Bar Placeholder -->
+    <div id="navbar-placeholder"></div>
+
+    <main class="cpe-main-wrapper">
+      <!-- TOP TOOLBAR & ROOM HEADER -->
+      <header class="cpe-toolbar">
+        <div class="cpe-toolbar-left">
+          <a href="/pages/tools/tools.html" class="cpe-back-btn" aria-label="Back to tools">
+            <i class="fas fa-arrow-left"></i> <span>Tools</span>
+          </a>
+
+          <div class="cpe-room-info">
+            <h1 class="cpe-room-title">
+              <i class="fas fa-code-compare"></i> Collaborative <span>Playground</span>
+            </h1>
+            <span class="cpe-room-badge" id="cpeRoomBadge"
+              ><i class="fas fa-circle-notch fa-spin"></i> Connecting...</span
+            >
+          </div>
+        </div>
+
+        <div class="cpe-toolbar-center">
+          <!-- Language Selector -->
+          <div class="cpe-lang-wrapper">
+            <label for="cpeLangSelect"><i class="fas fa-code"></i></label>
+            <select id="cpeLangSelect" class="cpe-select" aria-label="Select programming language">
+              <option value="javascript" selected>JavaScript (Node.js)</option>
+              <option value="python">Python 3</option>
+              <option value="cpp">C++ 17</option>
+              <option value="java">Java 17</option>
+              <option value="c">C Language</option>
+              <option value="swift">Swift</option>
+            </select>
+          </div>
+
+          <!-- Share Invite Button -->
+          <button
+            type="button"
+            id="cpeShareBtn"
+            class="cpe-btn cpe-btn-secondary"
+            title="Copy Invite Link"
+          >
+            <i class="fas fa-user-plus"></i> Invite Peers
+          </button>
+
+          <!-- Fork Snapshot Button -->
+          <button
+            type="button"
+            id="cpeForkBtn"
+            class="cpe-btn cpe-btn-secondary"
+            title="Save snapshot to personal history"
+          >
+            <i class="fas fa-code-fork"></i> Fork Snapshot
+          </button>
+
+          <!-- Run Code Button -->
+          <button
+            type="button"
+            id="cpeRunBtn"
+            class="cpe-btn cpe-btn-primary"
+            title="Execute Code (Shared Output)"
+          >
+            <i class="fas fa-play"></i> Run Code
+          </button>
+        </div>
+
+        <div class="cpe-toolbar-right">
+          <!-- Online Participants Avatars -->
+          <div class="cpe-participants-bar" id="cpeParticipantsBar">
+            <!-- User avatars rendered dynamically -->
+          </div>
+
+          <!-- Chat Toggle Button -->
+          <button
+            type="button"
+            id="cpeToggleChatBtn"
+            class="cpe-btn cpe-btn-icon"
+            title="Toggle Chat Sidebar"
+          >
+            <i class="fas fa-comments"></i>
+            <span class="cpe-chat-badge" id="cpeUnreadBadge" style="display: none">0</span>
+          </button>
+        </div>
+      </header>
+
+      <!-- WORKSPACE SPLIT CONTAINER (EDITOR + CONSOLE + CHAT) -->
+      <div class="cpe-workspace" id="cpeWorkspace">
+        <!-- MAIN EDITOR & OUTPUT COLUMN -->
+        <div class="cpe-editor-column">
+          <!-- CODE EDITOR CONTAINER -->
+          <div class="cpe-editor-box">
+            <div class="cpe-editor-gutter" id="cpeGutter">
+              <!-- Line numbers rendered dynamically -->
+            </div>
+
+            <div class="cpe-editor-area">
+              <!-- Remote Cursor Overlay Layer -->
+              <div class="cpe-remote-cursors" id="cpeRemoteCursors"></div>
+
+              <textarea
+                id="cpeCodeInput"
+                class="cpe-textarea"
+                placeholder="// Type or paste your code here to collaborate live..."
+                spellcheck="false"
+                autocomplete="off"
+                autocorrect="off"
+                autocapitalize="off"
+              ></textarea>
+            </div>
+          </div>
+
+          <!-- EDITOR FOOTER STATUS BAR -->
+          <div class="cpe-status-bar">
+            <div class="cpe-status-left">
+              <span class="cpe-sync-indicator" id="cpeSyncIndicator">
+                <span class="cpe-pulse-dot"></span> <span id="cpeSyncText">Synced with room</span>
+              </span>
+              <span class="cpe-pos-info" id="cpePosInfo">Ln 1, Col 1</span>
+            </div>
+
+            <div class="cpe-status-right">
+              <span id="cpeUserCountText"><i class="fas fa-users"></i> 1 Participant</span>
+              <button type="button" id="cpeResetCodeBtn" class="cpe-link-btn">
+                <i class="fas fa-rotate-left"></i> Reset Template
+              </button>
+            </div>
+          </div>
+
+          <!-- SHARED OUTPUT CONSOLE PANE -->
+          <div class="cpe-console-pane" id="cpeConsolePane">
+            <div class="cpe-console-header">
+              <div class="cpe-console-title">
+                <i class="fas fa-terminal"></i> Shared Output Console
+                <span class="cpe-status-tag" id="cpeExecStatusTag">Ready</span>
+                <span class="cpe-exec-time" id="cpeExecTime"></span>
+              </div>
+              <button
+                type="button"
+                id="cpeClearConsoleBtn"
+                class="cpe-btn-sm"
+                title="Clear console output"
+              >
+                <i class="fas fa-ban"></i> Clear Output
+              </button>
+            </div>
+
+            <div class="cpe-console-body" id="cpeConsoleOutput">
+              <div class="cpe-console-placeholder">
+                <i class="fas fa-play-circle"></i>
+                <p>
+                  Click "Run Code" to execute. Results will be shared live with everyone in this
+                  room.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- BUILT-IN CHAT SIDEBAR -->
+        <aside class="cpe-chat-sidebar" id="cpeChatSidebar">
+          <div class="cpe-chat-header">
+            <h3><i class="fas fa-messages"></i> Room Discussion</h3>
+            <button
+              type="button"
+              id="cpeCloseChatBtn"
+              class="cpe-close-btn"
+              aria-label="Close chat"
+            >
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
+
+          <div class="cpe-chat-history" id="cpeChatHistory">
+            <div class="cpe-system-msg">
+              <i class="fas fa-shield-halved"></i> Welcome to Collaborative Playground! Type in the
+              chat to talk with peers.
+            </div>
+          </div>
+
+          <div class="cpe-chat-input-box">
+            <input
+              type="text"
+              id="cpeChatInput"
+              placeholder="Send a message..."
+              autocomplete="off"
+              aria-label="Room chat message input"
+            />
+            <button
+              type="button"
+              id="cpeSendChatBtn"
+              class="cpe-btn cpe-btn-primary"
+              aria-label="Send message"
+            >
+              <i class="fas fa-paper-plane"></i>
+            </button>
+          </div>
+        </aside>
+      </div>
+    </main>
+
+    <!-- Footer Placeholder -->
+    <div id="footer-placeholder"></div>
+
+    <!-- Scripts -->
+    <script src="/auth.js"></script>
+    <script src="/theme.js"></script>
+    <script src="/script.js"></script>
+    <script type="module" src="/modules/code-executor.js"></script>
+    <script src="collab-editor.js"></script>
+
+    <script>
+      loadPartial('navbar-placeholder', '/partials/navbar.html');
+      loadPartial('footer-placeholder', '/partials/footer.html');
+    </script>
+  </body>
+</html>

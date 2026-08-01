@@ -7,13 +7,14 @@ const userName = urlParams.get('user') || 'Anonymous Hacker';
 
 if (!roomId) {
     window.location.href = 'index.html';
-    return;
-}
+}else{
+    document.getElementById('room-id-display').innerText = `[ROOM: ${roomId}]`;
 
-document.getElementById('room-id-display').innerText = `[ROOM: ${roomId}]`;
-
-// Join the room
-socket.emit('escape-join', { roomId, userId: socket.id || Date.now().toString(), userName });
+    // Join the room
+    socket.emit('escape-join', {
+         roomId,
+          userId: socket.id || Date.now().toString(),
+           userName });
 
 // --- Chat Logic ---
 const chatMessages = document.getElementById('chat-messages');
@@ -133,7 +134,7 @@ socket.on('escape-puzzle-solved', (data) => {
 let timeLeft = 15 * 60; // 15 minutes
 const timerDisplay = document.getElementById('mission-timer');
 
-setInterval(() => {
+const missionTimerId = setInterval(() => {
     if (timeLeft <= 0) return;
     timeLeft--;
     const m = Math.floor(timeLeft / 60).toString().padStart(2, '0');
@@ -145,5 +146,7 @@ setInterval(() => {
         statusAlert.innerText = "SECURITY ALERT TRIPPED. YOU HAVE BEEN DISCONNECTED.";
         statusAlert.style.display = "block";
         codeEditor.disabled = true;
+        clearInterval(missionTimerId);
     }
 }, 1000);
+}

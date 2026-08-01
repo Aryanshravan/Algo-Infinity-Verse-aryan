@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI JS Memory Safety Coach | Algo Infinity Verse</title>
+  <meta name="description" content="Paste TypedArray/WASM-style JS to detect alias and lifetime hazards, missing dispose/transfer, and get ownership rewrite suggestions — client-side." />
+  <link rel="stylesheet" href="/styles.css" />
+  <link rel="stylesheet" href="style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Poppins:wght@300;400;500;600;700&family=Fira+Code:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <script>
+    (function () {
+      try {
+        var storedTheme = localStorage.getItem('theme');
+        var prefersLight = window.matchMedia('(prefers-color-scheme: light)').matches;
+        var theme = storedTheme || (prefersLight ? 'light' : 'dark');
+        if (theme === 'light') {
+          document.documentElement.classList.add('light-mode');
+        } else {
+          document.documentElement.classList.remove('light-mode');
+        }
+      } catch (e) {}
+    })();
+  </script>
+</head>
+<body data-page="ai-js-memory-safety-coach">
+  <a href="#memsafe-main" class="memsafe-skip-link">Skip to main content</a>
+  <button type="button" id="scrollTopBtn" class="scroll-top-btn" aria-label="Scroll to top">
+    <i class="fas fa-arrow-up" aria-hidden="true"></i>
+  </button>
+
+  <div id="navbar-placeholder"></div>
+
+  <header class="memsafe-hero">
+    <div class="memsafe-hero-badge">
+      <i class="fas fa-memory" aria-hidden="true"></i>
+      Memory Safety Lab
+    </div>
+    <h1>
+      AI JS
+      <span class="memsafe-hero-accent">Memory Safety Coach</span>
+    </h1>
+    <p>
+      Paste buffer and interop snippets to spot alias/lifetime hazards, missing dispose or transfer,
+      and concurrent mutation hints — with ownership rewrite suggestions.
+    </p>
+    <div class="memsafe-hero-stats" aria-live="polite">
+      <div class="memsafe-stat">
+        <span class="memsafe-stat-val" id="statHazards">0</span>
+        <span class="memsafe-stat-label">Hazards</span>
+      </div>
+      <div class="memsafe-stat">
+        <span class="memsafe-stat-val" id="statCritical">0</span>
+        <span class="memsafe-stat-label">Critical</span>
+      </div>
+      <div class="memsafe-stat">
+        <span class="memsafe-stat-val" id="statSafety">—</span>
+        <span class="memsafe-stat-label">Safety score</span>
+      </div>
+    </div>
+  </header>
+
+  <main id="memsafe-main" class="memsafe-main">
+    <div class="container">
+      <div class="memsafe-workspace">
+        <section class="memsafe-panel" aria-labelledby="memsafe-input-title">
+          <div class="memsafe-panel-header">
+            <div class="memsafe-panel-title">
+              <i class="fas fa-code memsafe-panel-icon" aria-hidden="true"></i>
+              <h2 id="memsafe-input-title">Buffer / interop snippet</h2>
+            </div>
+          </div>
+
+          <div class="memsafe-editors">
+            <div class="memsafe-editor-block">
+              <label class="memsafe-label" for="memsafeCode">JavaScript (TypedArray / WASM-style)</label>
+              <textarea
+                id="memsafeCode"
+                class="memsafe-textarea"
+                rows="18"
+                spellcheck="false"
+                placeholder="// const buf = new Uint8Array(wasm.memory.buffer);&#10;// postMessage(buf.buffer);"
+                aria-describedby="memsafeCodeHint"
+              ></textarea>
+              <p id="memsafeCodeHint" class="memsafe-hint">
+                Static heuristics scan for shared <code>ArrayBuffer</code> aliases, missing
+                <code>transfer</code>/<code>close</code>/<code>free</code>, and concurrent mutation patterns.
+              </p>
+            </div>
+          </div>
+
+          <fieldset class="memsafe-presets">
+            <legend class="memsafe-label">Demo unsafe TypedArray / WASM-style presets</legend>
+            <div class="memsafe-preset-grid" role="group" aria-label="Load demo unsafe snippets">
+              <button type="button" class="btn btn-outline memsafe-preset-btn" data-preset="alias">
+                <i class="fas fa-link" aria-hidden="true"></i> Buffer alias
+              </button>
+              <button type="button" class="btn btn-outline memsafe-preset-btn" data-preset="transfer">
+                <i class="fas fa-paper-plane" aria-hidden="true"></i> Missing transfer
+              </button>
+              <button type="button" class="btn btn-outline memsafe-preset-btn" data-preset="lifetime">
+                <i class="fas fa-hourglass-half" aria-hidden="true"></i> Lifetime hazard
+              </button>
+              <button type="button" class="btn btn-outline memsafe-preset-btn" data-preset="concurrent">
+                <i class="fas fa-random" aria-hidden="true"></i> Concurrent mutation
+              </button>
+            </div>
+          </fieldset>
+
+          <div class="memsafe-controls">
+            <button type="button" id="memsafeAnalyzeBtn" class="btn btn-primary">
+              <i class="fas fa-shield-virus" aria-hidden="true"></i> Coach memory safety
+            </button>
+            <button type="button" id="memsafeClearBtn" class="btn btn-outline">
+              <i class="fas fa-eraser" aria-hidden="true"></i> Clear
+            </button>
+            <button type="button" id="memsafeExportBtn" class="btn btn-outline" disabled>
+              <i class="fas fa-download" aria-hidden="true"></i> Download checklist
+            </button>
+          </div>
+          <div id="memsafeStatus" class="memsafe-status" role="status" aria-live="polite"></div>
+        </section>
+
+        <section class="memsafe-panel memsafe-report-panel" aria-labelledby="memsafe-report-title">
+          <div class="memsafe-panel-header">
+            <div class="memsafe-panel-title">
+              <i class="fas fa-clipboard-check memsafe-panel-icon" aria-hidden="true"></i>
+              <h2 id="memsafe-report-title">Safety coaching report</h2>
+            </div>
+          </div>
+
+          <div id="memsafeEmpty" class="memsafe-empty">
+            <i class="fas fa-memory" aria-hidden="true"></i>
+            <p>No analysis yet. Load an unsafe demo or paste a snippet, then run the coach.</p>
+          </div>
+
+          <div id="memsafeResults" hidden>
+            <div class="memsafe-score-card" aria-labelledby="memsafeScoreHeading">
+              <div>
+                <h3 id="memsafeScoreHeading">Memory safety score</h3>
+                <p id="memsafeScoreBlurb" class="memsafe-muted"></p>
+              </div>
+              <div class="memsafe-score-ring" id="memsafeScoreRing" aria-hidden="true">
+                <span id="memsafeScoreVal">0</span>
+              </div>
+            </div>
+
+            <section class="memsafe-section" aria-labelledby="memsafeHazardHeading">
+              <h3 id="memsafeHazardHeading"><i class="fas fa-triangle-exclamation" aria-hidden="true"></i> Detected hazards</h3>
+              <ul id="memsafeHazardList" class="memsafe-findings"></ul>
+            </section>
+
+            <section class="memsafe-section" aria-labelledby="memsafeOwnHeading">
+              <h3 id="memsafeOwnHeading"><i class="fas fa-hand-holding-hand" aria-hidden="true"></i> Ownership rewrite suggestions</h3>
+              <pre id="memsafeRewrite" class="memsafe-code" tabindex="0" aria-label="Ownership rewrite suggestions"></pre>
+            </section>
+
+            <section class="memsafe-section" aria-labelledby="memsafeCheckHeading">
+              <h3 id="memsafeCheckHeading"><i class="fas fa-list-check" aria-hidden="true"></i> Memory-safety checklist</h3>
+              <ul id="memsafeCheckList" class="memsafe-findings" role="list"></ul>
+            </section>
+          </div>
+        </section>
+      </div>
+    </div>
+  </main>
+
+  <div id="footer-placeholder"></div>
+
+  <script src="/auth.js"></script>
+  <script src="/bootstrap-legacy.js"></script>
+  <script src="/script.js"></script>
+  <script type="module" src="/dist/legacy-bundle.mjs"></script>
+  <script src="/theme.js"></script>
+  <script src="script.js"></script>
+  <script>
+    if (typeof loadPartial === 'function') {
+      loadPartial('navbar-placeholder', '/partials/navbar.html');
+      loadPartial('footer-placeholder', '/partials/footer.html');
+    }
+  </script>
+</body>
+</html>

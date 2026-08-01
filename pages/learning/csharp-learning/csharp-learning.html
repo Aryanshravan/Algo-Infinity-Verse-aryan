@@ -1,0 +1,1362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Learn C# – .NET Fundamentals | Algo Infinity Verse</title>
+  <meta name="description" content="Free interactive C# tutorial covering syntax, types, OOP, LINQ, async/await, and the .NET ecosystem. Write real applications with confidence." />
+
+  <link rel="stylesheet" href="/styles.css" />
+  <link rel="stylesheet" href="csharp-learning.css" />
+
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+
+  <script>
+    (function() {
+      try {
+        var t = localStorage.getItem('theme');
+        var p = window.matchMedia('(prefers-color-scheme: light)').matches;
+        var theme = t || (p ? 'light' : 'dark');
+        if (theme === 'light') document.documentElement.classList.add('light-mode');
+      } catch (e) {}
+    })();
+  </script>
+</head>
+<body data-page="csharp-learning" data-no-loading>
+  <div id="loading-screen" class="hidden">
+    <div class="loader">
+      <div class="infinity-loader">&#x221E;</div>
+      <h2>Loading C# Learning...</h2>
+    </div>
+  </div>
+
+  <main>
+    <!-- ════════════════════════════════════════
+         HERO SECTION
+         ════════════════════════════════════════ -->
+    <section class="cs-hero">
+      <div class="cs-hero-bg">
+        <div class="cs-hero-glow"></div>
+      </div>
+
+      <a href="/pages/learning/languages.html" class="cs-back-btn" id="csBackBtn" aria-label="Go back to languages">
+        <i class="fas fa-arrow-left"></i>
+        <span>Languages</span>
+      </a>
+
+      <div class="cs-hero-content">
+        <!-- Sharp/bracket signature motif -->
+        <div class="cs-sharp" aria-hidden="true">
+          <span class="cs-sharp-symbol">#</span>
+          <span class="cs-sharp-bracket">&lt;</span>
+          <span class="cs-sharp-symbol">#</span>
+          <span class="cs-sharp-bracket">{</span>
+          <span class="cs-sharp-symbol">#</span>
+          <span class="cs-sharp-bracket">}</span>
+          <span class="cs-sharp-symbol">#</span>
+        </div>
+
+        <h1 class="cs-hero-title" id="csHeroTitle">
+          <span class="cs-title-line">Learn C#</span>
+          <span class="cs-title-line">.NET Fundamentals</span>
+        </h1>
+
+        <p class="cs-hero-subtitle">
+          Master the language of the .NET ecosystem. From types and syntax to LINQ and async patterns — <strong>12 interactive lessons</strong> to build robust applications with confidence.
+        </p>
+
+        <!-- Stats -->
+        <div class="cs-hero-stats">
+          <div class="cs-stat">
+            <span class="cs-stat-value" id="topicCount">12</span>
+            <span class="cs-stat-label">Topics</span>
+          </div>
+          <div class="cs-stat">
+            <span class="cs-stat-value">40+</span>
+            <span class="cs-stat-label">Examples</span>
+          </div>
+          <div class="cs-stat">
+            <span class="cs-stat-value">12</span>
+            <span class="cs-stat-label">Exercises</span>
+          </div>
+        </div>
+
+        <!-- CTA -->
+        <div class="cs-hero-actions">
+          <a href="#topic-introduction" class="cs-btn cs-btn-primary">
+            <i class="fas fa-play"></i> Start Learning
+          </a>
+          <a href="/pages/editors/csharp-editor/csharp-editor.html" class="cs-btn cs-btn-secondary">
+            <i class="fas fa-code"></i> Open Editor
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- ════════════════════════════════════════
+         TOPIC NAVIGATION PILLS
+         ════════════════════════════════════════ -->
+    <section class="cs-section">
+      <div class="cs-container">
+        <nav class="cs-topic-nav" id="csTopicNav" aria-label="Lesson topics">
+          <a href="#topic-introduction" class="cs-topic-pill active">Introduction</a>
+          <a href="#topic-setup" class="cs-topic-pill">Setup & SDK</a>
+          <a href="#topic-syntax" class="cs-topic-pill">Syntax & Types</a>
+          <a href="#topic-variables" class="cs-topic-pill">Variables & Constants</a>
+          <a href="#topic-operators" class="cs-topic-pill">Operators</a>
+          <a href="#topic-conditionals" class="cs-topic-pill">Control Flow</a>
+          <a href="#topic-loops" class="cs-topic-pill">Loops</a>
+          <a href="#topic-collections" class="cs-topic-pill">Collections</a>
+          <a href="#topic-oop" class="cs-topic-pill">OOP</a>
+          <a href="#topic-inheritance" class="cs-topic-pill">Inheritance</a>
+          <a href="#topic-linq" class="cs-topic-pill">LINQ</a>
+          <a href="#topic-async" class="cs-topic-pill">Async/Await</a>
+        </nav>
+
+        <!-- Progress dots -->
+        <div class="cs-progress" id="csProgress" aria-hidden="true">
+          <span class="cs-progress-dot active" data-topic="0"></span>
+          <span class="cs-progress-line" data-topic="0"></span>
+          <span class="cs-progress-dot" data-topic="1"></span>
+          <span class="cs-progress-line" data-topic="1"></span>
+          <span class="cs-progress-dot" data-topic="2"></span>
+          <span class="cs-progress-line" data-topic="2"></span>
+          <span class="cs-progress-dot" data-topic="3"></span>
+          <span class="cs-progress-line" data-topic="3"></span>
+          <span class="cs-progress-dot" data-topic="4"></span>
+          <span class="cs-progress-line" data-topic="4"></span>
+          <span class="cs-progress-dot" data-topic="5"></span>
+          <span class="cs-progress-line" data-topic="5"></span>
+          <span class="cs-progress-dot" data-topic="6"></span>
+          <span class="cs-progress-line" data-topic="6"></span>
+          <span class="cs-progress-dot" data-topic="7"></span>
+          <span class="cs-progress-line" data-topic="7"></span>
+          <span class="cs-progress-dot" data-topic="8"></span>
+          <span class="cs-progress-line" data-topic="8"></span>
+          <span class="cs-progress-dot" data-topic="9"></span>
+          <span class="cs-progress-line" data-topic="9"></span>
+          <span class="cs-progress-dot" data-topic="10"></span>
+          <span class="cs-progress-line" data-topic="10"></span>
+          <span class="cs-progress-dot" data-topic="11"></span>
+        </div>
+
+        <!-- ════════════════════════════════════════
+             LESSON 1: INTRODUCTION TO C# & .NET
+             ════════════════════════════════════════ -->
+        <article class="cs-lesson" id="topic-introduction" data-topic="0">
+          <div class="cs-lesson-header">
+            <span class="cs-lesson-number">01</span>
+            <h3>Introduction to C# &amp; .NET</h3>
+          </div>
+
+          <p>
+            <strong>C# (pronounced "C Sharp")</strong> is a modern, type-safe, object-oriented programming language developed by Microsoft. It runs on the <strong>.NET runtime</strong>, a cross-platform framework that provides memory management, security, and a rich class library.
+          </p>
+
+          <p>
+            Whether you are building web applications with ASP.NET, mobile apps with Xamarin or MAUI, desktop tools, cloud services, or even game development with Unity — C# is designed to be a <strong>"one language"</strong> that scales with your ambition.
+          </p>
+
+          <div class="cs-concept">
+            <h4>Why Learn C#?</h4>
+            <ul>
+              <li><strong>Type-Safe &amp; Productive:</strong> C# catches bugs at compile time with its strong type system. Features like nullable reference types, pattern matching, and records make code safer and more expressive.</li>
+              <li><strong>Cross-Platform:</strong> .NET runs on Windows, macOS, Linux, mobile devices, and even in containers — your C# code works everywhere.</li>
+              <li><strong>Rich Ecosystem:</strong> Hundreds of thousands of NuGet packages, mature frameworks (ASP.NET Core, Entity Framework), and first-class tooling with Visual Studio and VS Code.</li>
+              <li><strong>High Performance:</strong> .NET's JIT and AOT compilation delivers near-native performance, competitive with C++ and Rust.</li>
+            </ul>
+          </div>
+
+          <div class="cs-concept">
+            <h4>The .NET Runtime</h4>
+            <p>At the heart of C# is the <strong>Common Language Runtime (CLR)</strong>. Your C# source code is compiled into an intermediate language (IL) which the CLR executes and manages through garbage collection, exception handling, and JIT compilation.</p>
+          </div>
+
+          <!-- Exercise -->
+          <div class="cs-exercise" id="exercise-introduction">
+            <div class="cs-exercise-title">
+              Practice: Introduction to C#
+            </div>
+            <p>Which statement best describes how C# code is executed?</p>
+            <ol>
+              <li>A) C# source code is interpreted line-by-line by the browser at runtime.</li>
+              <li>B) C# is compiled into Intermediate Language (IL), which the Common Language Runtime (CLR) executes and manages.</li>
+              <li>C) C# compiles directly to native machine code with no intermediate layer.</li>
+              <li>D) C# runs on a virtual machine that emulates a full operating system.</li>
+            </ol>
+            <button type="button" class="cs-exercise-toggle" aria-expanded="false" aria-controls="solution-introduction">Show Solution</button>
+            <div class="cs-exercise-solution" id="solution-introduction">
+              <p><strong>Correct Answer: B</strong></p>
+              <p>C# compiles to Intermediate Language (IL), which the CLR then JIT-compiles to native code at runtime. This provides a balance of performance, safety, and cross-platform compatibility.</p>
+            </div>
+          </div>
+        </article>
+
+        <!-- ════════════════════════════════════════
+             LESSON 2: SETUP & DEVELOPMENT ENVIRONMENT
+             ════════════════════════════════════════ -->
+        <article class="cs-lesson" id="topic-setup" data-topic="1">
+          <div class="cs-lesson-header">
+            <span class="cs-lesson-number">02</span>
+            <h3>Setup &amp; Development Environment</h3>
+          </div>
+
+          <p>
+            To start writing C# code, you need the <strong>.NET SDK</strong> (Software Development Kit) and a code editor. The .NET SDK includes everything you need: the runtime, the compiler, and the <code>dotnet</code> CLI tool.
+          </p>
+
+          <div class="cs-concept">
+            <h4>Installation Options</h4>
+            <ul>
+              <li><strong>Visual Studio (Windows/Mac):</strong> Full-featured IDE with built-in debugger, IntelliSense, and project templates. Ideal for enterprise development.</li>
+              <li><strong>VS Code + C# Dev Kit:</strong> Lightweight, cross-platform editor with first-class C# support via the official C# Dev Kit extension.</li>
+              <li><strong>.NET SDK + CLI:</strong> All you need is the SDK and a text editor. The <code>dotnet</code> CLI handles project creation, building, testing, and publishing.</li>
+            </ul>
+          </div>
+
+          <h4>Creating Your First Project</h4>
+
+          <div class="cs-code-block">
+            <div class="cs-code-header">
+              <span class="cs-code-lang">CLI</span>
+              <button type="button" class="cs-code-copy" aria-label="Copy code" data-code="dotnet new console -n HelloWorld
+cd HelloWorld
+dotnet run"><i class="fas fa-copy"></i> Copy</button>
+            </div>
+            <pre><code><span class="kw">dotnet</span> new console -n HelloWorld
+<span class="kw">cd</span> HelloWorld
+<span class="kw">dotnet</span> run</code></pre>
+          </div>
+
+          <p>
+            The command <code>dotnet new console</code> scaffolds a simple "Hello, World!" program. Running <code>dotnet run</code> compiles and executes it in one step.
+          </p>
+
+          <div class="cs-callout">
+            <p><strong>Tip:</strong> Install the .NET SDK from <code>dotnet.microsoft.com</code>. Verify it's working by running <code>dotnet --version</code> in your terminal.</p>
+          </div>
+
+          <!-- Exercise -->
+          <div class="cs-exercise" id="exercise-setup">
+            <div class="cs-exercise-title">
+              Practice: Setup &amp; Environment
+            </div>
+            <p>Which command scaffolds a new C# console application in the current directory?</p>
+            <ol>
+              <li><code>dotnet new app</code></li>
+              <li><code>dotnet new console</code></li>
+              <li><code>dotnet init console</code></li>
+              <li><code>dotnet create project</code></li>
+            </ol>
+            <button type="button" class="cs-exercise-toggle" aria-expanded="false" aria-controls="solution-setup">Show Solution</button>
+            <div class="cs-exercise-solution" id="solution-setup">
+              <p><strong>Correct Answer: B</strong></p>
+              <p><code>dotnet new console</code> creates a console application project with a <code>.csproj</code> file and a <code>Program.cs</code> entry point. You can optionally add <code>-n Name</code> to specify the project name.</p>
+            </div>
+          </div>
+        </article>
+
+        <!-- ════════════════════════════════════════
+             LESSON 3: SYNTAX & BASIC TYPES
+             ════════════════════════════════════════ -->
+        <article class="cs-lesson" id="topic-syntax" data-topic="2">
+          <div class="cs-lesson-header">
+            <span class="cs-lesson-number">03</span>
+            <h3>Syntax &amp; Basic Types</h3>
+          </div>
+
+          <p>
+            C# uses a C-family syntax: statements end with a semicolon (<code>;</code>), code blocks are wrapped in curly braces (<code>{}</code>), and comments use <code>//</code> or <code>/* */</code>. Every executable C# program starts at the <code>Main</code> method (or uses top-level statements in modern .NET 6+).
+          </p>
+
+          <div class="cs-code-block">
+            <div class="cs-code-header">
+              <span class="cs-code-lang">C#</span>
+              <button type="button" class="cs-code-copy" aria-label="Copy code" data-code='using System;
+
+// Single-line comment
+/* Multi-line
+   comment block */
+
+Console.WriteLine("Hello, World!"); // Outputs text
+
+// Basic types
+int age = 30;
+double price = 19.99;
+char grade = "A";
+string name = "Alice";
+bool isActive = true;
+
+Console.WriteLine($"Name: {name}, Age: {age}");'><i class="fas fa-copy"></i> Copy</button>
+            </div>
+            <pre><code><span class="kw">using</span> System;
+
+<span class="cmt">// Single-line comment</span>
+<span class="cmt">/* Multi-line
+   comment block */</span>
+
+Console.<span class="fn">WriteLine</span>(<span class="str">"Hello, World!"</span>);
+
+<span class="cmt">// Basic types</span>
+<span class="type">int</span> age = <span class="num">30</span>;
+<span class="type">double</span> price = <span class="num">19.99</span>;
+<span class="type">char</span> grade = <span class="str">'A'</span>;
+<span class="type">string</span> name = <span class="str">"Alice"</span>;
+<span class="type">bool</span> isActive = <span class="kw">true</span>;
+
+Console.<span class="fn">WriteLine</span>(<span class="str">$"Name: {name}, Age: {age}"</span>);</code></pre>
+          </div>
+
+          <div class="cs-concept">
+            <h4>Core Data Types</h4>
+            <ul>
+              <li><strong><code>int</code></strong> — 32-bit signed integer (-2.1B to 2.1B)</li>
+              <li><strong><code>long</code></strong> — 64-bit signed integer</li>
+              <li><strong><code>float</code></strong> — 32-bit floating point</li>
+              <li><strong><code>double</code></strong> — 64-bit floating point (default for decimals)</li>
+              <li><strong><code>decimal</code></strong> — 128-bit high precision for financial calculations</li>
+              <li><strong><code>bool</code></strong> — true or false</li>
+              <li><strong><code>char</code></strong> — single Unicode character</li>
+              <li><strong><code>string</code></strong> — sequence of characters</li>
+            </ul>
+          </div>
+
+          <div class="cs-table-wrap">
+            <table class="cs-table" aria-label="C# primitive types">
+              <thead>
+                <tr>
+                  <th scope="col">Type</th>
+                  <th scope="col">Size</th>
+                  <th scope="col">Example</th>
+                  <th scope="col">Range</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><td><code>int</code></td><td>4 bytes</td><td><code>42</code></td><td>-2.1B to 2.1B</td></tr>
+                <tr><td><code>long</code></td><td>8 bytes</td><td><code>10000000000L</code></td><td>-9.2e18 to 9.2e18</td></tr>
+                <tr><td><code>float</code></td><td>4 bytes</td><td><code>3.14f</code></td><td>~7 digits precision</td></tr>
+                <tr><td><code>double</code></td><td>8 bytes</td><td><code>3.14159</code></td><td>~15-16 digits precision</td></tr>
+                <tr><td><code>decimal</code></td><td>16 bytes</td><td><code>19.99m</code></td><td>~28-29 digits precision</td></tr>
+                <tr><td><code>bool</code></td><td>1 byte</td><td><code>true</code></td><td>true / false</td></tr>
+                <tr><td><code>char</code></td><td>2 bytes</td><td><code>'A'</code></td><td>Single UTF-16 character</td></tr>
+                <tr><td><code>string</code></td><td>Variable</td><td><code>"Hello"</code></td><td>Sequence of characters</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Exercise -->
+          <div class="cs-exercise" id="exercise-syntax">
+            <div class="cs-exercise-title">
+              Practice: Syntax &amp; Types
+            </div>
+            <p>Which of the following C# type declarations will cause a compile-time error?</p>
+            <ol>
+              <li><code>int count = 100;</code></li>
+              <li><code>double price = 19.99;</code></li>
+              <li><code>string name = 'John';</code></li>
+              <li><code>bool isReady = false;</code></li>
+            </ol>
+            <button type="button" class="cs-exercise-toggle" aria-expanded="false" aria-controls="solution-syntax">Show Solution</button>
+            <div class="cs-exercise-solution" id="solution-syntax">
+              <p><strong>Correct Answer: C</strong></p>
+              <p>In C#, strings are enclosed in double quotes (<code>"John"</code>), while single quotes are used for <code>char</code> literals. <code>'John'</code> is invalid syntax because a <code>char</code> can only hold a single character.</p>
+            </div>
+          </div>
+        </article>
+
+        <!-- ════════════════════════════════════════
+             LESSON 4: VARIABLES, CONSTANTS & TYPE SYSTEM
+             ════════════════════════════════════════ -->
+        <article class="cs-lesson" id="topic-variables" data-topic="3">
+          <div class="cs-lesson-header">
+            <span class="cs-lesson-number">04</span>
+            <h3>Variables, Constants &amp; Type System</h3>
+          </div>
+
+          <p>
+            C# is a <strong>statically typed</strong> language — the type of every variable is known at compile time. You can declare types explicitly or use the <code>var</code> keyword for implicit typing when the type is obvious.
+          </p>
+
+          <div class="cs-code-block">
+            <div class="cs-code-header">
+              <span class="cs-code-lang">C#</span>
+              <button type="button" class="cs-code-copy" aria-label="Copy code" data-code='// Explicit typing
+string message = "Hello";
+int count = 42;
+
+// Implicit typing with var
+var name = "Alice";     // Compiler infers string
+var total = 99.99;       // Compiler infers double
+
+// Constants (compile-time)
+const double Pi = 3.14159;
+const string AppName = "MyApp";
+
+// Read-only field (runtime constant)
+readonly Guid InstanceId = Guid.NewGuid();
+
+// Nullable value types
+int? maybeNumber = null;  // Nullable<int>
+if (maybeNumber.HasValue) {
+    Console.WriteLine(maybeNumber.Value);
+}
+
+// Null-coalescing
+int result = maybeNumber ?? 0;'><i class="fas fa-copy"></i> Copy</button>
+            </div>
+            <pre><code><span class="cmt">// Explicit typing</span>
+<span class="type">string</span> message = <span class="str">"Hello"</span>;
+<span class="type">int</span> count = <span class="num">42</span>;
+
+<span class="cmt">// Implicit typing with var</span>
+<span class="kw">var</span> name = <span class="str">"Alice"</span>;     <span class="cmt">// Compiler infers string</span>
+<span class="kw">var</span> total = <span class="num">99.99</span>;       <span class="cmt">// Compiler infers double</span>
+
+<span class="cmt">// Constants (compile-time)</span>
+<span class="kw">const</span> <span class="type">double</span> Pi = <span class="num">3.14159</span>;
+<span class="kw">const</span> <span class="type">string</span> AppName = <span class="str">"MyApp"</span>;
+
+<span class="cmt">// Nullable value types</span>
+<span class="type">int</span>? maybeNumber = <span class="kw">null</span>;
+<span class="kw">if</span> (maybeNumber.<span class="fn">HasValue</span>) {
+    Console.<span class="fn">WriteLine</span>(maybeNumber.<span class="fn">Value</span>);
+}
+
+<span class="cmt">// Null-coalescing</span>
+<span class="type">int</span> result = maybeNumber ?? <span class="num">0</span>;</code></pre>
+          </div>
+
+          <div class="cs-concept">
+            <h4>var vs Explicit Types</h4>
+            <p>Use <code>var</code> when the type is obvious from the right-hand side (e.g., <code>var user = new User()</code>). Use explicit types when the type is not obvious or when you want to emphasize the type for readability.</p>
+          </div>
+
+          <!-- Exercise -->
+          <div class="cs-exercise" id="exercise-variables">
+            <div class="cs-exercise-title">
+              Practice: Variables &amp; Constants
+            </div>
+            <p>What is the main difference between <code>const</code> and <code>readonly</code> in C#?</p>
+            <ol>
+              <li><code>const</code> values can change at runtime; <code>readonly</code> values cannot.</li>
+              <li><code>const</code> is evaluated at compile time; <code>readonly</code> is evaluated at runtime and can be set in a constructor.</li>
+              <li><code>readonly</code> only works with strings; <code>const</code> works with any type.</li>
+              <li>There is no difference; they are interchangeable.</li>
+            </ol>
+            <button type="button" class="cs-exercise-toggle" aria-expanded="false" aria-controls="solution-variables">Show Solution</button>
+            <div class="cs-exercise-solution" id="solution-variables">
+              <p><strong>Correct Answer: B</strong></p>
+              <p><code>const</code> values must be known at compile time and are embedded directly into the IL. <code>readonly</code> fields can be assigned in the constructor or at declaration, making them useful for runtime values like GUIDs or dependency injections.</p>
+            </div>
+          </div>
+        </article>
+
+        <!-- ════════════════════════════════════════
+             LESSON 5: OPERATORS & EXPRESSIONS
+             ════════════════════════════════════════ -->
+        <article class="cs-lesson" id="topic-operators" data-topic="4">
+          <div class="cs-lesson-header">
+            <span class="cs-lesson-number">05</span>
+            <h3>Operators &amp; Expressions</h3>
+          </div>
+
+          <p>
+            C# offers a rich set of operators for arithmetic, comparison, logical operations, and more. Understanding operator precedence and behavior is essential for writing correct expressions.
+          </p>
+
+          <div class="cs-table-wrap">
+            <table class="cs-table" aria-label="C# operators categories">
+              <thead>
+                <tr>
+                  <th scope="col">Category</th>
+                  <th scope="col">Operators</th>
+                  <th scope="col">Examples &amp; Description</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><strong>Arithmetic</strong></td>
+                  <td><code>+ - * / % ++ --</code></td>
+                  <td><code>10 % 3</code> returns 1 (modulus); <code>++count</code> increments before use</td>
+                </tr>
+                <tr>
+                  <td><strong>Comparison</strong></td>
+                  <td><code>== != &lt; &gt; &lt;= &gt;=</code></td>
+                  <td><code>5 == "5"</code> is false (no implicit string-to-int conversion)</td>
+                </tr>
+                <tr>
+                  <td><strong>Logical</strong></td>
+                  <td><code>&amp;&amp; || !</code></td>
+                  <td>Short-circuit evaluation: <code>a &amp;&amp; b</code> skips <code>b</code> if <code>a</code> is false</td>
+                </tr>
+                <tr>
+                  <td><strong>Null-coalescing</strong></td>
+                  <td><code>?? ??= </code></td>
+                  <td><code>name ?? "Guest"</code> returns "Guest" if name is null</td>
+                </tr>
+                <tr>
+                  <td><strong>Ternary</strong></td>
+                  <td><code>? :</code></td>
+                  <td><code>age >= 18 ? "Adult" : "Minor"</code></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="cs-code-block">
+            <div class="cs-code-header">
+              <span class="cs-code-lang">C#</span>
+              <button type="button" class="cs-code-copy" aria-label="Copy code" data-code='int a = 10;
+int b = 3;
+
+// Arithmetic
+int sum = a + b;        // 13
+int remainder = a % b;  // 1 (modulus)
+
+// Comparison & logical
+bool isEqual = (a == b);              // false
+bool isInRange = (a > 0 && a < 20);  // true
+
+// Null-conditional
+string? input = null;
+int length = input?.Length ?? 0;     // 0 (safe navigation)
+
+// Ternary
+string status = (a > 5) ? "Large" : "Small"; // "Large"
+
+// Compound assignment
+int counter = 5;
+counter += 3;  // counter is now 8'><i class="fas fa-copy"></i> Copy</button>
+            </div>
+            <pre><code><span class="type">int</span> a = <span class="num">10</span>;
+<span class="type">int</span> b = <span class="num">3</span>;
+
+<span class="cmt">// Arithmetic</span>
+<span class="type">int</span> sum = a + b;        <span class="cmt">// 13</span>
+<span class="type">int</span> remainder = a % b;  <span class="cmt">// 1 (modulus)</span>
+
+<span class="cmt">// Comparison & logical</span>
+<span class="type">bool</span> isEqual = (a == b);              <span class="cmt">// false</span>
+<span class="type">bool</span> isInRange = (a > <span class="num">0</span> &amp;&amp; a &lt; <span class="num">20</span>);  <span class="cmt">// true</span>
+
+<span class="cmt">// Null-conditional</span>
+<span class="type">string</span>? input = <span class="kw">null</span>;
+<span class="type">int</span> length = input?.Length ?? <span class="num">0</span>;     <span class="cmt">// 0</span>
+
+<span class="cmt">// Ternary</span>
+<span class="type">string</span> status = (a > <span class="num">5</span>) ? <span class="str">"Large"</span> : <span class="str">"Small"</span>;
+
+<span class="cmt">// Compound assignment</span>
+<span class="type">int</span> counter = <span class="num">5</span>;
+counter += <span class="num">3</span>;  <span class="cmt">// counter is now 8</span></code></pre>
+          </div>
+
+          <!-- Exercise -->
+          <div class="cs-exercise" id="exercise-operators">
+            <div class="cs-exercise-title">
+              Practice: Operators
+            </div>
+            <p>What is the value of <code>result</code> after this code? <code>int? x = null; int result = x ?? 10 * 2;</code></p>
+            <button type="button" class="cs-exercise-toggle" aria-expanded="false" aria-controls="solution-operators">Show Solution</button>
+            <div class="cs-exercise-solution" id="solution-operators">
+              <p><strong>Answer: 20</strong></p>
+              <p>The null-coalescing operator <code>??</code> evaluates the right side when the left is null. Multiplication has higher precedence, so <code>10 * 2 = 20</code> becomes the default value.</p>
+            </div>
+          </div>
+        </article>
+
+        <!-- ════════════════════════════════════════
+             LESSON 6: CONTROL FLOW (CONDITIONALS)
+             ════════════════════════════════════════ -->
+        <div class="cs-divider">
+          <span class="cs-divider-inner">Next Topic</span>
+        </div>
+
+        <article class="cs-lesson" id="topic-conditionals" data-topic="5">
+          <div class="cs-lesson-header">
+            <span class="cs-lesson-number">06</span>
+            <h3>Control Flow — Conditionals</h3>
+          </div>
+
+          <p>
+            C# provides the standard conditional statements — <code>if</code>, <code>else</code>, <code>else if</code>, and <code>switch</code> — with modern enhancements like <strong>pattern matching</strong> and <strong>switch expressions</strong>.
+          </p>
+
+          <div class="cs-code-block">
+            <div class="cs-code-header">
+              <span class="cs-code-lang">C#</span>
+              <button type="button" class="cs-code-copy" aria-label="Copy code" data-code='int score = 85;
+
+// Traditional if/else if/else
+if (score >= 90) {
+    Console.WriteLine("Grade A");
+} else if (score >= 80) {
+    Console.WriteLine("Grade B");
+} else {
+    Console.WriteLine("Grade C");
+}
+
+// Switch statement (traditional)
+string day = "Monday";
+switch (day) {
+    case "Saturday":
+    case "Sunday":
+        Console.WriteLine("Weekend!");
+        break;
+    default:
+        Console.WriteLine("Weekday");
+        break;
+}
+
+// Switch expression (modern C#)
+string category = score switch {
+    >= 90 => "Excellent",
+    >= 70 => "Good",
+    _     => "Needs Improvement"
+};'><i class="fas fa-copy"></i> Copy</button>
+            </div>
+            <pre><code><span class="type">int</span> score = <span class="num">85</span>;
+
+<span class="cmt">// Traditional if/else if/else</span>
+<span class="kw">if</span> (score >= <span class="num">90</span>) {
+    Console.<span class="fn">WriteLine</span>(<span class="str">"Grade A"</span>);
+} <span class="kw">else if</span> (score >= <span class="num">80</span>) {
+    Console.<span class="fn">WriteLine</span>(<span class="str">"Grade B"</span>);
+} <span class="kw">else</span> {
+    Console.<span class="fn">WriteLine</span>(<span class="str">"Grade C"</span>);
+}
+
+<span class="cmt">// Switch expression</span>
+<span class="type">string</span> category = score <span class="kw">switch</span> {
+    >= <span class="num">90</span> => <span class="str">"Excellent"</span>,
+    >= <span class="num">70</span> => <span class="str">"Good"</span>,
+    _     => <span class="str">"Needs Improvement"</span>
+};</code></pre>
+          </div>
+
+          <div class="cs-concept">
+            <h4>Switch Expressions (C# 8.0+)</h4>
+            <p>Switch expressions are a concise, expression-based alternative to traditional switch statements. They use <code>=></code> syntax and must be exhaustive (cover all possible values with a <code>_</code> discard pattern for the default case).</p>
+          </div>
+
+          <!-- Exercise -->
+          <div class="cs-exercise" id="exercise-conditionals">
+            <div class="cs-exercise-title">
+              Practice: Control Flow
+            </div>
+            <p>In a C# switch expression, what does the <code>_</code> (underscore) pattern represent?</p>
+            <ol>
+              <li>A wildcard that matches any value not handled by previous cases</li>
+              <li>A syntax error — underscores are not allowed in switch expressions</li>
+              <li>A pattern that matches null values only</li>
+              <li>A discard that matches the last enumerated constant</li>
+            </ol>
+            <button type="button" class="cs-exercise-toggle" aria-expanded="false" aria-controls="solution-conditionals">Show Solution</button>
+            <div class="cs-exercise-solution" id="solution-conditionals">
+              <p><strong>Correct Answer: A</strong></p>
+              <p>The <code>_</code> discard pattern acts as the default case in switch expressions. It matches any value that wasn't matched by earlier patterns, ensuring the expression is exhaustive.</p>
+            </div>
+          </div>
+        </article>
+
+        <!-- ════════════════════════════════════════
+             LESSON 7: LOOPS & ITERATIONS
+             ════════════════════════════════════════ -->
+        <article class="cs-lesson" id="topic-loops" data-topic="6">
+          <div class="cs-lesson-header">
+            <span class="cs-lesson-number">07</span>
+            <h3>Loops &amp; Iterations</h3>
+          </div>
+
+          <p>
+            C# supports four loop constructs: <code>for</code>, <code>foreach</code>, <code>while</code>, and <code>do-while</code>. The <code>foreach</code> loop is particularly powerful with C#'s collection types and LINQ.
+          </p>
+
+          <div class="cs-code-block">
+            <div class="cs-code-header">
+              <span class="cs-code-lang">C#</span>
+              <button type="button" class="cs-code-copy" aria-label="Copy code" data-code='// For loop
+for (int i = 0; i < 5; i++) {
+    Console.WriteLine($"For: {i}");
+}
+
+// Foreach loop (preferred for collections)
+string[] fruits = { "Apple", "Banana", "Cherry" };
+foreach (var fruit in fruits) {
+    Console.WriteLine($"Fruit: {fruit}");
+}
+
+// While loop
+int count = 0;
+while (count < 3) {
+    Console.WriteLine($"While: {count}");
+    count++;
+}
+
+// Do-while (always runs at least once)
+int x = 0;
+do {
+    Console.WriteLine($"Do: {x}");
+    x++;
+} while (x < 3);
+
+// Break and continue
+for (int i = 0; i < 10; i++) {
+    if (i == 3) continue;  // Skip 3
+    if (i == 7) break;     // Stop at 7
+    Console.WriteLine(i);  // Prints: 0, 1, 2, 4, 5, 6
+}'><i class="fas fa-copy"></i> Copy</button>
+            </div>
+            <pre><code><span class="cmt">// For loop</span>
+<span class="kw">for</span> (<span class="type">int</span> i = <span class="num">0</span>; i &lt; <span class="num">5</span>; i++) {
+    Console.<span class="fn">WriteLine</span>(<span class="str">$"For: {i}"</span>);
+}
+
+<span class="cmt">// Foreach loop</span>
+<span class="type">string</span>[] fruits = { <span class="str">"Apple"</span>, <span class="str">"Banana"</span>, <span class="str">"Cherry"</span> };
+<span class="kw">foreach</span> (<span class="kw">var</span> fruit <span class="kw">in</span> fruits) {
+    Console.<span class="fn">WriteLine</span>(<span class="str">$"Fruit: {fruit}"</span>);
+}
+
+<span class="cmt">// While loop</span>
+<span class="type">int</span> count = <span class="num">0</span>;
+<span class="kw">while</span> (count &lt; <span class="num">3</span>) {
+    Console.<span class="fn">WriteLine</span>(<span class="str">$"While: {count}"</span>);
+    count++;
+}
+
+<span class="cmt">// Do-while</span>
+<span class="type">int</span> x = <span class="num">0</span>;
+<span class="kw">do</span> {
+    Console.<span class="fn">WriteLine</span>(<span class="str">$"Do: {x}"</span>);
+    x++;
+} <span class="kw">while</span> (x &lt; <span class="num">3</span>);</code></pre>
+          </div>
+
+          <div class="cs-output">
+            <div class="cs-output-label">Output</div>
+            <pre>For: 0 For: 1 For: 2 For: 3 For: 4
+Fruit: Apple Fruit: Banana Fruit: Cherry
+While: 0 While: 1 While: 2
+Do: 0 Do: 1 Do: 2</pre>
+          </div>
+
+          <!-- Exercise -->
+          <div class="cs-exercise" id="exercise-loops">
+            <div class="cs-exercise-title">
+              Practice: Loops
+            </div>
+            <p>Which loop construct is the most idiomatic choice for iterating through all elements of a <code>List&lt;string&gt;</code> in C#?</p>
+            <ol>
+              <li>for loop with an index counter</li>
+              <li>foreach loop</li>
+              <li>while loop with a manual counter</li>
+              <li>do-while loop</li>
+            </ol>
+            <button type="button" class="cs-exercise-toggle" aria-expanded="false" aria-controls="solution-loops">Show Solution</button>
+            <div class="cs-exercise-solution" id="solution-loops">
+              <p><strong>Correct Answer: B</strong></p>
+              <p>The <code>foreach</code> loop is the most idiomatic and readable choice for iterating over collections in C#. It abstracts away the index variable and works with any <code>IEnumerable&lt;T&gt;</code> type, including arrays, lists, and LINQ results.</p>
+            </div>
+          </div>
+        </article>
+
+        <!-- ════════════════════════════════════════
+             LESSON 8: ARRAYS & COLLECTIONS
+             ════════════════════════════════════════ -->
+        <div class="cs-divider">
+          <span class="cs-divider-inner">Next Topic</span>
+        </div>
+
+        <article class="cs-lesson" id="topic-collections" data-topic="7">
+          <div class="cs-lesson-header">
+            <span class="cs-lesson-number">08</span>
+            <h3>Arrays &amp; Collections</h3>
+          </div>
+
+          <p>
+            C# offers several collection types beyond simple arrays. The <code>System.Collections.Generic</code> namespace provides type-safe, performant collection classes like <code>List&lt;T&gt;</code>, <code>Dictionary&lt;TKey, TValue&gt;</code>, and <code>HashSet&lt;T&gt;</code>.
+          </p>
+
+          <div class="cs-code-block">
+            <div class="cs-code-header">
+              <span class="cs-code-lang">C#</span>
+              <button type="button" class="cs-code-copy" aria-label="Copy code" data-code='using System.Collections.Generic;
+
+// Arrays (fixed size)
+int[] numbers = { 1, 2, 3, 4, 5 };
+Console.WriteLine(numbers[0]);    // 1
+Console.WriteLine(numbers.Length); // 5
+
+// List<T> (dynamic size)
+List<string> names = new List<string>();
+names.Add("Alice");
+names.Add("Bob");
+names.Add("Charlie");
+Console.WriteLine(names.Count);     // 3
+Console.WriteLine(names[1]);         // Bob
+
+// Dictionary<TKey, TValue>
+Dictionary<string, int> ages = new() {
+    { "Alice", 30 },
+    { "Bob", 25 }
+};
+ages["Charlie"] = 35;
+Console.WriteLine(ages["Alice"]);  // 30
+
+// HashSet<T> (unique elements)
+HashSet<int> unique = new() { 1, 2, 3, 2, 1 };
+Console.WriteLine(unique.Count);   // 3
+
+// Collection initializers
+var scores = new List<int> { 85, 92, 78, 95 };'><i class="fas fa-copy"></i> Copy</button>
+            </div>
+            <pre><code><span class="kw">using</span> System.Collections.Generic;
+
+<span class="cmt">// Arrays (fixed size)</span>
+<span class="type">int</span>[] numbers = { <span class="num">1</span>, <span class="num">2</span>, <span class="num">3</span>, <span class="num">4</span>, <span class="num">5</span> };
+Console.<span class="fn">WriteLine</span>(numbers[<span class="num">0</span>]);    <span class="cmt">// 1</span>
+Console.<span class="fn">WriteLine</span>(numbers.Length); <span class="cmt">// 5</span>
+
+<span class="cmt">// List (dynamic size)</span>
+List&lt;<span class="type">string</span>&gt; names = <span class="kw">new</span> List&lt;<span class="type">string</span>&gt;();
+names.<span class="fn">Add</span>(<span class="str">"Alice"</span>);
+names.<span class="fn">Add</span>(<span class="str">"Bob"</span>);
+Console.<span class="fn">WriteLine</span>(names.Count);  <span class="cmt">// 2</span>
+
+<span class="cmt">// Dictionary</span>
+Dictionary&lt;<span class="type">string</span>, <span class="type">int</span>&gt; ages = <span class="kw">new</span>() {
+    { <span class="str">"Alice"</span>, <span class="num">30</span> },
+    { <span class="str">"Bob"</span>, <span class="num">25</span> }
+};
+Console.<span class="fn">WriteLine</span>(ages[<span class="str">"Alice"</span>]);  <span class="cmt">// 30</span>
+
+<span class="cmt">// HashSet (unique elements)</span>
+HashSet&lt;<span class="type">int</span>&gt; unique = <span class="kw">new</span>() { <span class="num">1</span>, <span class="num">2</span>, <span class="num">3</span>, <span class="num">2</span>, <span class="num">1</span> };
+Console.<span class="fn">WriteLine</span>(unique.Count);   <span class="cmt">// 3</span></code></pre>
+          </div>
+
+          <div class="cs-concept">
+            <h4>List&lt;T&gt; vs Array</h4>
+            <p>Use <strong>arrays</strong> when the size is fixed and known at compile time (e.g., coordinates). Use <strong>List&lt;T&gt;</strong> for dynamic collections where items are added or removed frequently. List&lt;T&gt; internally uses an array that is resized as needed.</p>
+          </div>
+
+          <!-- Exercise -->
+          <div class="cs-exercise" id="exercise-collections">
+            <div class="cs-exercise-title">
+              Practice: Collections
+            </div>
+            <p>What namespace is required to use <code>List&lt;T&gt;</code> and <code>Dictionary&lt;TKey, TValue&gt;</code> in C#?</p>
+            <ol>
+              <li><code>System</code></li>
+              <li><code>System.Linq</code></li>
+              <li><code>System.Collections.Generic</code></li>
+              <li><code>System.Collections</code></li>
+            </ol>
+            <button type="button" class="cs-exercise-toggle" aria-expanded="false" aria-controls="solution-collections">Show Solution</button>
+            <div class="cs-exercise-solution" id="solution-collections">
+              <p><strong>Correct Answer: C</strong></p>
+              <p>The generic collection types like <code>List&lt;T&gt;</code> and <code>Dictionary&lt;TKey, TValue&gt;</code> live in the <code>System.Collections.Generic</code> namespace. In modern .NET, many common namespaces are imported implicitly via global usings.</p>
+            </div>
+          </div>
+        </article>
+
+        <!-- ════════════════════════════════════════
+             LESSON 9: OBJECT-ORIENTED PROGRAMMING
+             ════════════════════════════════════════ -->
+        <article class="cs-lesson" id="topic-oop" data-topic="8">
+          <div class="cs-lesson-header">
+            <span class="cs-lesson-number">09</span>
+            <h3>Object-Oriented Programming — Classes &amp; Objects</h3>
+          </div>
+
+          <p>
+            C# is fundamentally an <strong>object-oriented</strong> language. Classes are the blueprint for creating objects, encapsulating data (fields/properties) and behavior (methods/events).
+          </p>
+
+          <div class="cs-code-block">
+            <div class="cs-code-header">
+              <span class="cs-code-lang">C#</span>
+              <button type="button" class="cs-code-copy" aria-label="Copy code" data-code='public class Person
+{
+    // ── Auto-implemented properties ──
+    public string Name { get; set; }
+    public int Age { get; set; }
+
+    // ── Read-only property ──
+    public bool IsAdult => Age >= 18;
+
+    // ── Constructor ──
+    public Person(string name, int age)
+    {
+        Name = name;
+        Age = age;
+    }
+
+    // ── Method ──
+    public void Introduce()
+    {
+        Console.WriteLine($"Hi, I am {Name} and I am {Age}.");
+    }
+
+    // ── Static method ──
+    public static Person CreateDefault()
+    {
+        return new Person("Unknown", 0);
+    }
+}
+
+// Usage
+var alice = new Person("Alice", 30);
+alice.Introduce();  // Hi, I am Alice and I am 30.
+
+var defaultPerson = Person.CreateDefault();'><i class="fas fa-copy"></i> Copy</button>
+            </div>
+            <pre><code><span class="mod">public</span> <span class="kw">class</span> <span class="fn">Person</span>
+{
+    <span class="cmt">// ── Auto-implemented properties ──</span>
+    <span class="mod">public</span> <span class="type">string</span> Name { <span class="kw">get</span>; <span class="kw">set</span>; }
+    <span class="mod">public</span> <span class="type">int</span> Age { <span class="kw">get</span>; <span class="kw">set</span>; }
+
+    <span class="cmt">// ── Read-only computed property ──</span>
+    <span class="mod">public</span> <span class="type">bool</span> IsAdult => Age >= <span class="num">18</span>;
+
+    <span class="cmt">// ── Constructor ──</span>
+    <span class="mod">public</span> <span class="fn">Person</span>(<span class="type">string</span> name, <span class="type">int</span> age)
+    {
+        Name = name;
+        Age = age;
+    }
+
+    <span class="cmt">// ── Method ──</span>
+    <span class="mod">public</span> <span class="type">void</span> <span class="fn">Introduce</span>()
+    {
+        Console.<span class="fn">WriteLine</span>(<span class="str">$"Hi, I am {Name}."</span>);
+    }
+
+    <span class="cmt">// ── Static method ──</span>
+    <span class="mod">public</span> <span class="kw">static</span> <span class="fn">Person</span> <span class="fn">CreateDefault</span>()
+    {
+        <span class="kw">return</span> <span class="kw">new</span> <span class="fn">Person</span>(<span class="str">"Unknown"</span>, <span class="num">0</span>);
+    }
+}
+
+<span class="cmt">// Usage</span>
+<span class="kw">var</span> alice = <span class="kw">new</span> <span class="fn">Person</span>(<span class="str">"Alice"</span>, <span class="num">30</span>);
+alice.<span class="fn">Introduce</span>();</code></pre>
+          </div>
+
+          <div class="cs-concept">
+            <h4>Properties vs Fields</h4>
+            <p>Properties (<code>get</code>/<code>set</code>) are the C# idiomatic way to expose data. Unlike public fields, properties allow validation, computed values, and can be bound to UI frameworks. Auto-properties (<code>{ get; set; }</code>) give you a private backing field automatically.</p>
+          </div>
+
+          <!-- Exercise -->
+          <div class="cs-exercise" id="exercise-oop">
+            <div class="cs-exercise-title">
+              Practice: OOP
+            </div>
+            <p>Given a property <code>public string FullName => $"{FirstName} {LastName}";</code>, what type of property is this?</p>
+            <ol>
+              <li>Auto-implemented property with a setter</li>
+              <li>Read-only computed property (expression-bodied)</li>
+              <li>Static property</li>
+              <li>Indexed property</li>
+            </ol>
+            <button type="button" class="cs-exercise-toggle" aria-expanded="false" aria-controls="solution-oop">Show Solution</button>
+            <div class="cs-exercise-solution" id="solution-oop">
+              <p><strong>Correct Answer: B</strong></p>
+              <p>This is a read-only computed property using the expression-bodied syntax (<code>=></code>). It has no setter and computes its value dynamically from <code>FirstName</code> and <code>LastName</code> each time it is accessed.</p>
+            </div>
+          </div>
+        </article>
+
+        <!-- ════════════════════════════════════════
+             LESSON 10: INHERITANCE & POLYMORPHISM
+             ════════════════════════════════════════ -->
+        <div class="cs-divider">
+          <span class="cs-divider-inner">Next Topic</span>
+        </div>
+
+        <article class="cs-lesson" id="topic-inheritance" data-topic="9">
+          <div class="cs-lesson-header">
+            <span class="cs-lesson-number">10</span>
+            <h3>Inheritance &amp; Polymorphism</h3>
+          </div>
+
+          <p>
+            Inheritance allows a class to derive from a base class, reusing and extending its behavior. C# supports single inheritance (one base class) with multiple interface implementations, plus <code>abstract</code> classes and <code>virtual</code>/<code>override</code> for polymorphic behavior.
+          </p>
+
+          <div class="cs-concept">
+            <h4>Key Concepts</h4>
+            <ul>
+              <li><strong>Base/Derived:</strong> <code>class Dog : Animal</code> — Dog inherits from Animal</li>
+              <li><strong>virtual/override:</strong> Mark base methods as <code>virtual</code>, override them in derived classes</li>
+              <li><strong>abstract:</strong> Cannot be instantiated; defines a contract that derived classes must implement</li>
+              <li><strong>interface:</strong> Pure contract — no implementation, no state. A class can implement multiple interfaces</li>
+              <li><strong>sealed:</strong> Prevents further inheritance</li>
+            </ul>
+          </div>
+
+          <div class="cs-code-block">
+            <div class="cs-code-header">
+              <span class="cs-code-lang">C#</span>
+              <button type="button" class="cs-code-copy" aria-label="Copy code" data-code='// ── Abstract base class ──
+public abstract class Animal
+{
+    public string Name { get; set; }
+
+    public Animal(string name) => Name = name;
+
+    // Virtual method (can be overridden)
+    public virtual void Speak()
+    {
+        Console.WriteLine($"{Name} makes a sound.");
+    }
+
+    // Abstract method (must be implemented)
+    public abstract void Move();
+}
+
+// ── Derived class ──
+public class Dog : Animal
+{
+    public Dog(string name) : base(name) { }
+
+    public override void Speak()
+    {
+        Console.WriteLine($"{Name} barks!");
+    }
+
+    public override void Move()
+    {
+        Console.WriteLine($"{Name} runs.");
+    }
+}
+
+// Polymorphism
+Animal myPet = new Dog("Buddy");
+myPet.Speak();  // Buddy barks!
+myPet.Move();   // Buddy runs.'><i class="fas fa-copy"></i> Copy</button>
+            </div>
+            <pre><code><span class="cmt">// ── Abstract base class ──</span>
+<span class="mod">public</span> <span class="kw">abstract</span> <span class="kw">class</span> <span class="fn">Animal</span>
+{
+    <span class="mod">public</span> <span class="type">string</span> Name { <span class="kw">get</span>; <span class="kw">set</span>; }
+    <span class="mod">public</span> <span class="fn">Animal</span>(<span class="type">string</span> name) => Name = name;
+
+    <span class="mod">public</span> <span class="kw">virtual</span> <span class="type">void</span> <span class="fn">Speak</span>()
+    {
+        Console.<span class="fn">WriteLine</span>(<span class="str">$"{Name} makes a sound."</span>);
+    }
+
+    <span class="mod">public</span> <span class="kw">abstract</span> <span class="type">void</span> <span class="fn">Move</span>();
+}
+
+<span class="cmt">// ── Derived class ──</span>
+<span class="mod">public</span> <span class="kw">class</span> <span class="fn">Dog</span> : <span class="fn">Animal</span>
+{
+    <span class="mod">public</span> <span class="fn">Dog</span>(<span class="type">string</span> name) : <span class="kw">base</span>(name) { }
+
+    <span class="mod">public</span> <span class="kw">override</span> <span class="type">void</span> <span class="fn">Speak</span>()
+    {
+        Console.<span class="fn">WriteLine</span>(<span class="str">$"{Name} barks!"</span>);
+    }
+
+    <span class="mod">public</span> <span class="kw">override</span> <span class="type">void</span> <span class="fn">Move</span>()
+    {
+        Console.<span class="fn">WriteLine</span>(<span class="str">$"{Name} runs."</span>);
+    }
+}
+
+<span class="cmt">// Polymorphism</span>
+Animal myPet = <span class="kw">new</span> <span class="fn">Dog</span>(<span class="str">"Buddy"</span>);
+myPet.<span class="fn">Speak</span>();  <span class="cmt">// Buddy barks!</span>
+myPet.<span class="fn">Move</span>();   <span class="cmt">// Buddy runs.</span></code></pre>
+          </div>
+
+          <div class="cs-callout">
+            <p><strong>Records (C# 9.0+):</strong> For simple data containers, use <code>record</code> types — they give you value equality, immutability, and a concise <code>with</code> syntax for non-destructive mutation: <code>public record Person(string Name, int Age);</code></p>
+          </div>
+
+          <!-- Exercise -->
+          <div class="cs-exercise" id="exercise-inheritance">
+            <div class="cs-exercise-title">
+              Practice: Inheritance
+            </div>
+            <p>If a base class has a method marked <code>abstract</code>, what must a non-abstract derived class do?</p>
+            <ol>
+              <li>Nothing — abstract methods are optional to implement</li>
+              <li>Mark the method as <code>new</code> to hide it</li>
+              <li>Provide an <code>override</code> implementation for the abstract method</li>
+              <li>Seal the method to prevent further overriding</li>
+            </ol>
+            <button type="button" class="cs-exercise-toggle" aria-expanded="false" aria-controls="solution-inheritance">Show Solution</button>
+            <div class="cs-exercise-solution" id="solution-inheritance">
+              <p><strong>Correct Answer: C</strong></p>
+              <p>Any concrete (non-abstract) derived class must provide an <code>override</code> implementation for all inherited abstract members. If it does not, it must itself be declared <code>abstract</code>.</p>
+            </div>
+          </div>
+        </article>
+
+        <!-- ════════════════════════════════════════
+             LESSON 11: LINQ & LAMBDA EXPRESSIONS
+             ════════════════════════════════════════ -->
+        <article class="cs-lesson" id="topic-linq" data-topic="10">
+          <div class="cs-lesson-header">
+            <span class="cs-lesson-number">11</span>
+            <h3>LINQ &amp; Lambda Expressions</h3>
+          </div>
+
+          <p>
+            <strong>Language Integrated Query (LINQ)</strong> is one of C#'s most powerful features. It allows you to write declarative, SQL-like queries against collections, databases, XML, and more — all with compile-time type checking and IntelliSense.
+          </p>
+
+          <div class="cs-code-block">
+            <div class="cs-code-header">
+              <span class="cs-code-lang">C#</span>
+              <button type="button" class="cs-code-copy" aria-label="Copy code" data-code='using System.Linq;
+
+var numbers = new List<int> { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
+
+// ── LINQ with method syntax ──
+var evenNumbers = numbers.Where(n => n % 2 == 0);
+var squares = numbers.Select(n => n * n);
+var sum = numbers.Sum();
+var firstLarge = numbers.FirstOrDefault(n => n > 5);
+
+// ── LINQ with query syntax ──
+var query =
+    from n in numbers
+    where n % 2 == 0
+    orderby n descending
+    select n * n;
+
+// ── Lambda expressions ──
+Func<int, bool> isEven = (int x) => x % 2 == 0;
+Func<int, int> doubleIt = x => x * 2;
+
+// ── Chaining operations ──
+var result = numbers
+    .Where(n => n > 3)
+    .OrderByDescending(n => n)
+    .Select(n => $"Number: {n}")
+    .ToList();'><i class="fas fa-copy"></i> Copy</button>
+            </div>
+            <pre><code><span class="kw">using</span> System.Linq;
+
+<span class="kw">var</span> numbers = <span class="kw">new</span> List&lt;<span class="type">int</span>&gt; {
+    <span class="num">1</span>, <span class="num">2</span>, <span class="num">3</span>, <span class="num">4</span>, <span class="num">5</span>,
+    <span class="num">6</span>, <span class="num">7</span>, <span class="num">8</span>, <span class="num">9</span>, <span class="num">10</span>
+};
+
+<span class="cmt">// LINQ with method syntax</span>
+<span class="kw">var</span> evenNumbers = numbers.<span class="fn">Where</span>(n => n % <span class="num">2</span> == <span class="num">0</span>);
+<span class="kw">var</span> squares = numbers.<span class="fn">Select</span>(n => n * n);
+<span class="kw">var</span> sum = numbers.<span class="fn">Sum</span>();
+
+<span class="cmt">// LINQ with query syntax</span>
+<span class="kw">var</span> query =
+    <span class="kw">from</span> n <span class="kw">in</span> numbers
+    <span class="kw">where</span> n % <span class="num">2</span> == <span class="num">0</span>
+    <span class="kw">orderby</span> n <span class="kw">descending</span>
+    <span class="kw">select</span> n * n;
+
+<span class="cmt">// Lambda expressions</span>
+Func&lt;<span class="type">int</span>, <span class="type">bool</span>&gt; isEven = (<span class="type">int</span> x) => x % <span class="num">2</span> == <span class="num">0</span>;
+Func&lt;<span class="type">int</span>, <span class="type">int</span>&gt; doubleIt = x => x * <span class="num">2</span>;</code></pre>
+          </div>
+
+          <div class="cs-output">
+            <div class="cs-output-label">Output</div>
+            <pre>evenNumbers: 2, 4, 6, 8, 10
+squares: 1, 4, 9, 16, 25, ...
+sum: 55
+query: 100, 64, 36, 16, 4</pre>
+          </div>
+
+          <div class="cs-concept">
+            <h4>Deferred Execution</h4>
+            <p>LINQ queries use <strong>deferred execution</strong> — the query is not executed until you iterate over the results (e.g., with <code>foreach</code>, <code>.ToList()</code>, or <code>.First()</code>). This means the query always reflects the latest data in the source collection.</p>
+          </div>
+
+          <!-- Exercise -->
+          <div class="cs-exercise" id="exercise-linq">
+            <div class="cs-exercise-title">
+              Practice: LINQ
+            </div>
+            <p>Given <code>var nums = new List&lt;int&gt; { 1, 2, 3, 4, 5 };</code>, what is the result of <code>nums.Where(n => n > 3).Select(n => n * 10)</code>?</p>
+            <ol>
+              <li><code>[40, 50]</code></li>
+              <li><code>[30, 40, 50]</code></li>
+              <li><code>[10, 20, 30, 40, 50]</code></li>
+              <li><code>[4, 5]</code></li>
+            </ol>
+            <button type="button" class="cs-exercise-toggle" aria-expanded="false" aria-controls="solution-linq">Show Solution</button>
+            <div class="cs-exercise-solution" id="solution-linq">
+              <p><strong>Correct Answer: A</strong></p>
+              <p>The <code>Where</code> clause filters to numbers greater than 3 (4 and 5). Then <code>Select</code> multiplies each by 10, resulting in 40 and 50.</p>
+            </div>
+          </div>
+        </article>
+
+        <!-- ════════════════════════════════════════
+             LESSON 12: ASYNC/AWAIT & .NET ECOSYSTEM
+             ════════════════════════════════════════ -->
+        <div class="cs-divider">
+          <span class="cs-divider-inner">Final Topic</span>
+        </div>
+
+        <article class="cs-lesson" id="topic-async" data-topic="11">
+          <div class="cs-lesson-header">
+            <span class="cs-lesson-number">12</span>
+            <h3>Async/Await &amp; .NET Ecosystem</h3>
+          </div>
+
+          <p>
+            Asynchronous programming is central to modern C#. The <code>async</code> and <code>await</code> keywords let you write non-blocking code that reads like synchronous code — perfect for I/O operations, web requests, and database calls.
+          </p>
+
+          <div class="cs-concept">
+            <h4>Async/Await Fundamentals</h4>
+            <ul>
+              <li><strong>async</strong> keyword marks a method as asynchronous. It returns <code>Task</code> or <code>Task&lt;T&gt;</code>.</li>
+              <li><strong>await</strong> yields control to the caller until the awaited operation completes — without blocking the thread.</li>
+              <li><strong>Task</strong> represents an asynchronous operation. Use <code>Task.Run()</code> for CPU-bound work, native async methods for I/O.</li>
+              <li>Async methods should end with the <code>Async</code> suffix by convention (e.g., <code>GetDataAsync</code>).</li>
+            </ul>
+          </div>
+
+          <div class="cs-code-block">
+            <div class="cs-code-header">
+              <span class="cs-code-lang">C#</span>
+              <button type="button" class="cs-code-copy" aria-label="Copy code" data-code='using System.Net.Http;
+
+public class DataService
+{
+    private readonly HttpClient _httpClient = new();
+
+    // ── Async method ──
+    public async Task<string> FetchDataAsync(string url)
+    {
+        Console.WriteLine("Fetching data...");
+
+        // Await yields control — thread is not blocked
+        string result = await _httpClient.GetStringAsync(url);
+
+        Console.WriteLine("Data received!");
+        return result;
+    }
+
+    // ── Parallel async operations ──
+    public async Task ProcessMultipleAsync()
+    {
+        var task1 = FetchDataAsync("https://api.example.com/data1");
+        var task2 = FetchDataAsync("https://api.example.com/data2");
+
+        // Both requests run concurrently
+        string[] results = await Task.WhenAll(task1, task2);
+
+        Console.WriteLine($"Got {results.Length} results");
+    }
+}
+
+// ── Top-level usage ──
+var service = new DataService();
+string data = await service.FetchDataAsync("https://example.com");'><i class="fas fa-copy"></i> Copy</button>
+            </div>
+            <pre><code><span class="mod">public</span> <span class="kw">class</span> <span class="fn">DataService</span>
+{
+    <span class="mod">private</span> <span class="kw">readonly</span> HttpClient _httpClient = <span class="kw">new</span>();
+
+    <span class="mod">public</span> <span class="kw">async</span> Task&lt;<span class="type">string</span>&gt; <span class="fn">FetchDataAsync</span>(<span class="type">string</span> url)
+    {
+        Console.<span class="fn">WriteLine</span>(<span class="str">"Fetching data..."</span>);
+        <span class="type">string</span> result = <span class="kw">await</span> _httpClient.<span class="fn">GetStringAsync</span>(url);
+        Console.<span class="fn">WriteLine</span>(<span class="str">"Data received!"</span>);
+        <span class="kw">return</span> result;
+    }
+
+    <span class="mod">public</span> <span class="kw">async</span> Task <span class="fn">ProcessMultipleAsync</span>()
+    {
+        <span class="kw">var</span> task1 = <span class="fn">FetchDataAsync</span>(<span class="str">"url1"</span>);
+        <span class="kw">var</span> task2 = <span class="fn">FetchDataAsync</span>(<span class="str">"url2"</span>);
+        <span class="type">string</span>[] results = <span class="kw">await</span> Task.<span class="fn">WhenAll</span>(task1, task2);
+    }
+}</code></pre>
+          </div>
+
+          <div class="cs-concept">
+            <h4>.NET Ecosystem Overview</h4>
+            <ul>
+              <li><strong>ASP.NET Core</strong> — Build web APIs, MVC applications, and Blazor UI</li>
+              <li><strong>Entity Framework Core</strong> — Object-relational mapper for databases</li>
+              <li><strong>MAUI / Xamarin</strong> — Cross-platform mobile and desktop apps</li>
+              <li><strong>Unity</strong> — Game development with C# scripting</li>
+              <li><strong>Azure SDK</strong> — Cloud services, serverless functions, and AI</li>
+            </ul>
+          </div>
+
+          <div class="cs-table-wrap">
+            <table class="cs-table" aria-label=".NET framework comparison">
+              <thead>
+                <tr>
+                  <th scope="col">Framework</th>
+                  <th scope="col">Purpose</th>
+                  <th scope="col">Use Case</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><td><strong>ASP.NET Core</strong></td><td>Web framework</td><td>REST APIs, MVC, real-time</td></tr>
+                <tr><td><strong>EF Core</strong></td><td>ORM / Database</td><td>CRUD, migrations, queries</td></tr>
+                <tr><td><strong>Blazor</strong></td><td>Web UI framework</td><td>Interactive SPA with C# (no JS)</td></tr>
+                <tr><td><strong>MAUI</strong></td><td>Cross-platform UI</td><td>Desktop & mobile apps</td></tr>
+                <tr><td><strong>SignalR</strong></td><td>Real-time comms</td><td>WebSockets, live updates</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="cs-callout">
+            <p><strong>Tip:</strong> Start with <code>dotnet new webapi</code> to create an ASP.NET Core Web API project. It scaffolds a complete REST API with minimal setup — perfect for learning modern .NET.</p>
+          </div>
+
+          <!-- Exercise -->
+          <div class="cs-exercise" id="exercise-async">
+            <div class="cs-exercise-title">
+              Practice: Async/Await
+            </div>
+            <p>What does the <code>await</code> keyword do inside an async method?</p>
+            <ol>
+              <li>Blocks the current thread until the operation completes</li>
+              <li>Yields control to the caller while the asynchronous operation runs, then resumes when complete</li>
+              <li>Creates a new thread to run the operation</li>
+              <li>Throws an exception if the operation takes too long</li>
+            </ol>
+            <button type="button" class="cs-exercise-toggle" aria-expanded="false" aria-controls="solution-async">Show Solution</button>
+            <div class="cs-exercise-solution" id="solution-async">
+              <p><strong>Correct Answer: B</strong></p>
+              <p><code>await</code> suspends the method's execution and returns control to the caller. The thread is freed to do other work. When the awaited operation completes, execution resumes where it left off — without blocking.</p>
+            </div>
+          </div>
+        </article>
+
+      </div>
+    </section>
+
+    <!-- ════════════════════════════════════════
+         FOOTER
+         ════════════════════════════════════════ -->
+    <footer class="cs-footer">
+      <p>Practice your skills in the <a href="/pages/editors/csharp-editor/csharp-editor.html">C# Editor →</a></p>
+      <p>Back to <a href="/pages/learning/languages.html">Programming Languages</a></p>
+    </footer>
+  </main>
+
+  <script src="/auth.js"></script>
+  <script src="/theme.js"></script>
+  <script src="/script.js"></script>
+  <script src="csharp-learning.js"></script>
+</body>
+</html>

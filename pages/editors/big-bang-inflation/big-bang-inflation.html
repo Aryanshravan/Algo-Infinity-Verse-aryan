@@ -1,0 +1,282 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Big Bang Inflationary Epoch Simulator | Algo Infinity Verse</title>
+    <link rel="stylesheet" href="/styles.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <!-- Monaco Editor -->
+    <script src="https://unpkg.com/monaco-editor@0.36.1/min/vs/loader.js"></script>
+    <style>
+      body { margin: 0; overflow: hidden; background: #000; font-family: 'Poppins', sans-serif; color: #fff; }
+      .app-container { display: flex; height: 100vh; }
+      
+      .sidebar { width: 450px; background: rgba(15, 23, 42, 0.95); border-right: 1px solid #a855f7; display: flex; flex-direction: column; z-index: 10; }
+      .header { padding: 20px; border-bottom: 1px solid #334155; }
+      .header h2 { margin: 0; color: #a855f7; font-family: 'Orbitron', sans-serif; font-size: 1.2rem; }
+      .header p { margin: 5px 0 0 0; font-size: 0.8rem; color: #94a3b8; }
+      
+      #editor-container { flex: 1; min-height: 300px; }
+      
+      .controls { padding: 20px; border-top: 1px solid #334155; background: rgba(0,0,0,0.5); }
+      .btn { background: linear-gradient(90deg, #9333ea, #7e22ce); color: #fff; border: none; padding: 10px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; transition: 0.3s; }
+      .btn:hover { background: #a855f7; transform: translateY(-2px); box-shadow: 0 0 15px rgba(168, 85, 247, 0.5); }
+      
+      .sim-container { flex: 1; position: relative; background: #000; overflow: hidden; }
+      canvas { width: 100%; height: 100%; display: block; mix-blend-mode: screen; }
+      
+      .hud { position: absolute; top: 20px; right: 20px; background: rgba(0,0,0,0.8); padding: 15px; border-radius: 8px; border: 1px solid #a855f7; width: 300px; z-index: 10; pointer-events: none; }
+      .hud h3 { margin: 0 0 10px 0; color: #a855f7; font-size: 1rem; font-family: 'Orbitron', sans-serif; }
+      .metric { display: flex; justify-content: space-between; font-size: 0.8rem; color: #cbd5e1; margin-bottom: 5px; }
+      .val { font-weight: bold; font-family: monospace; }
+      .val-size { color: #38bdf8; }
+      .val-density { color: #facc15; }
+    </style>
+  </head>
+  <body>
+    
+    <div class="app-container">
+      <div class="sidebar">
+        <div class="header">
+          <h2><i class="fas fa-atom"></i> Genesis Protocol</h2>
+          <p>Cosmic Inflationary Epoch</p>
+        </div>
+        
+        <div id="editor-container"></div>
+        
+        <div class="controls">
+          <button class="btn" onclick="igniteBigBang()"><i class="fas fa-meteor"></i> Ignite Big Bang</button>
+        </div>
+      </div>
+      
+      <div class="sim-container">
+        
+        <canvas id="cosmosCanvas" style="position: relative; z-index: 1;"></canvas>
+        
+        <div class="hud">
+          <h3>Cosmological Telemetry</h3>
+          <div class="metric"><span>Time since Bang:</span> <span class="val" id="timeVal" style="color:#cbd5e1">10^-36 s</span></div>
+          <div class="metric"><span>Universe Scale:</span> <span class="val val-size" id="sizeVal">0.001</span></div>
+          <div class="metric"><span>Energy Density:</span> <span class="val val-density" id="densityVal">Infinity</span></div>
+          <div class="metric"><span>Curvature (k):</span> <span class="val" id="curveVal" style="color:#ef4444">1.0 (Curved)</span></div>
+          <div class="metric" style="margin-top: 10px; border-top: 1px solid #334155; padding-top: 5px;">
+            <span>Cosmic State:</span> <span class="val" id="statusVal" style="color:#94a3b8">SINGULARITY</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      let editor;
+      require.config({ paths: { 'vs': 'https://unpkg.com/monaco-editor@0.36.1/min/vs' }});
+      require(['vs/editor/editor.main'], function() {
+        editor = monaco.editor.create(document.getElementById('editor-container'), {
+          value: `// Cosmic Inflation Algorithm
+// You control the Inflaton scalar field.
+// Inject energy to drive rapid expansion and flatten spacetime (k -> 0).
+// Warning: If expansion is too slow, gravity wins (Big Crunch).
+// If too fast, matter can never form (Heat Death/Big Rip).
+
+function controlInflaton(universeScale, energyDensity, curvature) {
+    // Return a float [0.0 to 10.0] representing the inflation driving force.
+    
+    // Naive logic: Explode it as fast as possible!
+    // Result: The universe expands too fast. Atoms never form. Heat Death.
+    
+    return 10.0;
+}`,
+          language: 'javascript',
+          theme: 'vs-dark',
+          minimap: { enabled: false },
+          automaticLayout: true
+        });
+      });
+
+      const canvas = document.getElementById('cosmosCanvas');
+      const ctx = canvas.getContext('2d');
+      
+      let isSimulating = false;
+      let planckTime = 0;
+      
+      let scale = 0.001; // Initial tiny size
+      let expansionRate = 0;
+      let energyDensity = 1000; // Extremely hot/dense
+      let curvature = 1.0; // Start highly curved
+      
+      let particles = [];
+      
+      function resize() { 
+          canvas.width = canvas.clientWidth; 
+          canvas.height = canvas.clientHeight;
+      }
+      
+      setTimeout(resize, 100);
+      window.addEventListener('resize', resize);
+
+      function animate() {
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+          let cx = canvas.width / 2;
+          let cy = canvas.height / 2;
+
+          if (isSimulating) {
+              planckTime += 1;
+              
+              let inflatonForce = 0;
+              
+              try {
+                  eval(editor.getValue());
+                  let res = controlInflaton(scale, energyDensity, curvature);
+                  if (typeof res === 'number') inflatonForce = Math.max(0, res);
+              } catch(e) {}
+              
+              // Cosmology Physics Engine
+              // Expansion rate driven by inflaton force, but resisted by gravity (density)
+              expansionRate += (inflatonForce * 0.1);
+              expansionRate -= (energyDensity * 0.001); // Gravity pulling back
+              
+              scale += expansionRate * 0.01;
+              
+              // Density dilutes as volume increases (scale^3 roughly)
+              if (scale > 0.001) {
+                  energyDensity = 1000 / (scale * scale * scale);
+              }
+              
+              // Inflation flattens curvature
+              // The faster you expand, the closer k gets to 0
+              if (expansionRate > 0) {
+                  curvature -= (expansionRate * 0.02);
+              }
+              if (curvature < 0) curvature = 0;
+              
+              // Check States
+              if (scale <= 0.0001) {
+                  isSimulating = false;
+                  document.getElementById('statusVal').innerText = "BIG CRUNCH (GRAVITY WON)";
+                  document.getElementById('statusVal').style.color = "#ef4444";
+              } else if (scale > 100 && energyDensity < 0.1) {
+                  isSimulating = false;
+                  document.getElementById('statusVal').innerText = "BIG RIP / HEAT DEATH";
+                  document.getElementById('statusVal').style.color = "#ef4444";
+              } else if (planckTime > 300 && curvature < 0.05 && energyDensity > 1.0 && energyDensity < 10.0) {
+                  isSimulating = false;
+                  document.getElementById('statusVal').innerText = "PERFECT FLAT UNIVERSE";
+                  document.getElementById('statusVal').style.color = "#10b981";
+              } else {
+                  if (expansionRate > 20) {
+                      document.getElementById('statusVal').innerText = "WARNING: RUNAWAY INFLATION";
+                      document.getElementById('statusVal').style.color = "#f97316";
+                  } else if (energyDensity > 500) {
+                      document.getElementById('statusVal').innerText = "WARNING: GRAVITATIONAL COLLAPSE";
+                      document.getElementById('statusVal').style.color = "#facc15";
+                  } else {
+                      document.getElementById('statusVal').innerText = "EPOCH ACTIVE...";
+                      document.getElementById('statusVal').style.color = "#a855f7";
+                  }
+              }
+              
+              // HUD Updates
+              document.getElementById('timeVal').innerText = "10^-" + Math.max(10, (36 - Math.floor(planckTime/10))) + " s";
+              document.getElementById('sizeVal').innerText = scale.toFixed(3) + " x";
+              document.getElementById('densityVal').innerText = energyDensity.toFixed(1) + " Planck";
+              document.getElementById('curveVal').innerText = curvature.toFixed(3);
+              
+              if (curvature < 0.1) document.getElementById('curveVal').style.color = "#10b981"; // Flat is good
+              else document.getElementById('curveVal').style.color = "#ef4444";
+          }
+          
+          // Visualizer
+          if (scale > 0) {
+              let visualRadius = Math.min(canvas.width, scale * 50);
+              
+              // Expanding sphere of universe
+              let grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, visualRadius);
+              
+              // Color based on density (Hot/White to Cool/Blue-Black)
+              if (energyDensity > 500) {
+                  grad.addColorStop(0, '#fff');
+                  grad.addColorStop(0.5, '#fef08a');
+                  grad.addColorStop(1, '#ea580c');
+              } else if (energyDensity > 50) {
+                  grad.addColorStop(0, '#fde047');
+                  grad.addColorStop(0.8, '#c026d3');
+                  grad.addColorStop(1, '#4c1d95');
+              } else {
+                  grad.addColorStop(0, '#38bdf8');
+                  grad.addColorStop(0.5, '#1e3a8a');
+                  grad.addColorStop(1, '#000');
+              }
+              
+              ctx.fillStyle = grad;
+              ctx.beginPath(); ctx.arc(cx, cy, visualRadius, 0, Math.PI*2); ctx.fill();
+              
+              // Draw Curvature Grid
+              // High curvature = warped grid. Low curvature = straight grid.
+              ctx.strokeStyle = 'rgba(255,255,255,0.2)';
+              ctx.lineWidth = 1;
+              
+              let step = visualRadius / 5;
+              for(let i = -5; i <= 5; i++) {
+                  // Verticals
+                  ctx.beginPath();
+                  for(let y = -5; y <= 5; y++) {
+                      let vx = cx + (i * step);
+                      let vy = cy + (y * step);
+                      
+                      // Warp effect based on curvature
+                      let distFromCenter = Math.sqrt(Math.pow(vx-cx, 2) + Math.pow(vy-cy, 2));
+                      let warpFactor = (curvature * distFromCenter * 0.1);
+                      
+                      if (y === -5) ctx.moveTo(vx + warpFactor, vy + warpFactor);
+                      else ctx.lineTo(vx + warpFactor, vy + warpFactor);
+                  }
+                  ctx.stroke();
+                  
+                  // Horizontals
+                  ctx.beginPath();
+                  for(let x = -5; x <= 5; x++) {
+                      let vx = cx + (x * step);
+                      let vy = cy + (i * step);
+                      
+                      let distFromCenter = Math.sqrt(Math.pow(vx-cx, 2) + Math.pow(vy-cy, 2));
+                      let warpFactor = (curvature * distFromCenter * 0.1);
+                      
+                      if (x === -5) ctx.moveTo(vx + warpFactor, vy + warpFactor);
+                      else ctx.lineTo(vx + warpFactor, vy + warpFactor);
+                  }
+                  ctx.stroke();
+              }
+              
+              // Draw Quantum Fluctuations
+              ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+              for(let i=0; i<Math.min(200, energyDensity); i++) {
+                  let a = Math.random() * Math.PI * 2;
+                  let r = Math.random() * visualRadius;
+                  ctx.beginPath();
+                  ctx.arc(cx + Math.cos(a)*r, cy + Math.sin(a)*r, Math.random()*2, 0, Math.PI*2);
+                  ctx.fill();
+              }
+          }
+
+          requestAnimationFrame(animate);
+      }
+      
+      animate();
+
+      function igniteBigBang() {
+          if(isSimulating) return;
+          isSimulating = true;
+          planckTime = 0;
+          
+          scale = 0.01;
+          expansionRate = 0;
+          energyDensity = 1000; 
+          curvature = 1.0; 
+          
+          document.getElementById('statusVal').innerText = "INFLATION IGNITED...";
+          document.getElementById('statusVal').style.color = "#a855f7";
+      }
+    </script>
+  </body>
+</html>

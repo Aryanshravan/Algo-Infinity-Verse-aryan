@@ -1,0 +1,244 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Terraforming Atmospheric Orchestrator | Algo Infinity Verse</title>
+    <link rel="stylesheet" href="/styles.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <!-- Monaco Editor -->
+    <script src="https://unpkg.com/monaco-editor@0.36.1/min/vs/loader.js"></script>
+    <style>
+      body { margin: 0; overflow: hidden; background: #000; font-family: 'Poppins', sans-serif; color: #fff; }
+      .app-container { display: flex; height: 100vh; }
+      
+      .sidebar { width: 450px; background: rgba(15, 23, 42, 0.95); border-right: 1px solid #f97316; display: flex; flex-direction: column; z-index: 10; }
+      .header { padding: 20px; border-bottom: 1px solid #334155; }
+      .header h2 { margin: 0; color: #f97316; font-family: 'Orbitron', sans-serif; font-size: 1.2rem; }
+      .header p { margin: 5px 0 0 0; font-size: 0.8rem; color: #94a3b8; }
+      
+      #editor-container { flex: 1; min-height: 300px; }
+      
+      .controls { padding: 20px; border-top: 1px solid #334155; background: rgba(0,0,0,0.5); }
+      .btn { background: linear-gradient(90deg, #ea580c, #c2410c); color: #fff; border: none; padding: 10px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; transition: 0.3s; }
+      .btn:hover { background: #f97316; transform: translateY(-2px); box-shadow: 0 0 15px rgba(249, 115, 22, 0.5); }
+      
+      .sim-container { flex: 1; position: relative; background: #020617; overflow: hidden; display: flex; justify-content: center; align-items: center; }
+      
+      #marsBackground { position: absolute; inset: 0; background: url('https://images.unsplash.com/photo-1614728263952-84ea256f9679?q=80&w=2600&auto=format&fit=crop') center/cover; filter: sepia(0.8) hue-rotate(330deg) saturate(2); transition: filter 5s ease; z-index: 0; }
+      
+      canvas { position: absolute; z-index: 1; }
+      
+      .hud { position: absolute; top: 20px; right: 20px; background: rgba(0,0,0,0.8); padding: 15px; border-radius: 8px; border: 1px solid #f97316; width: 260px; z-index: 10; pointer-events: none; }
+      .hud h3 { margin: 0 0 10px 0; color: #f97316; font-size: 1rem; font-family: 'Orbitron', sans-serif; }
+      .metric { display: flex; justify-content: space-between; font-size: 0.8rem; color: #cbd5e1; margin-bottom: 5px; }
+      .val { font-weight: bold; font-family: monospace; }
+      .val-temp { color: #facc15; }
+      .val-pressure { color: #38bdf8; }
+      
+      .progress-container { margin-top: 15px; background: #334155; height: 10px; border-radius: 5px; overflow: hidden; }
+      .progress-bar { height: 100%; background: #10b981; width: 0%; transition: width 0.2s; }
+    </style>
+  </head>
+  <body>
+    
+    <div class="app-container">
+      <div class="sidebar">
+        <div class="header">
+          <h2><i class="fas fa-globe-americas"></i> Terraforming Orchestrator</h2>
+          <p>Balance thermodynamics to create a habitable world</p>
+        </div>
+        
+        <div id="editor-container"></div>
+        
+        <div class="controls">
+          <button class="btn" onclick="startTerraforming()"><i class="fas fa-industry"></i> Activate Processors</button>
+        </div>
+      </div>
+      
+      <div class="sim-container">
+        <div id="marsBackground"></div>
+        <canvas id="atmCanvas"></canvas>
+        
+        <div class="hud">
+          <h3>Planetary Telemetry</h3>
+          <div class="metric"><span>Global Temp:</span> <span class="val val-temp" id="tempVal">-60°C</span></div>
+          <div class="metric"><span>Atmospheric Pressure:</span> <span class="val val-pressure" id="presVal">0.01 atm</span></div>
+          <div class="metric"><span>O2 Concentration:</span> <span class="val" id="o2Val" style="color:#a7f3d0">0.1%</span></div>
+          <div class="progress-container"><div class="progress-bar" id="habBar"></div></div>
+          <div class="metric" style="margin-top: 10px; border-top: 1px solid #334155; padding-top: 5px;">
+            <span>Ecosystem Status:</span> <span class="val" id="statusVal" style="color:#ef4444">BARREN</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      let editor;
+      require.config({ paths: { 'vs': 'https://unpkg.com/monaco-editor@0.36.1/min/vs' }});
+      require(['vs/editor/editor.main'], function() {
+        editor = monaco.editor.create(document.getElementById('editor-container'), {
+          value: `// Atmospheric Processor Control Algorithm
+// Goal: Earth-normal (Temp: 15°C, Pressure: 1.0 atm, O2: 21%)
+// Releasing CF4 (Greenhouse Gas) raises Temperature and Pressure wildly.
+// Releasing O2 raises Pressure and O2 levels, but can cause fires if too high.
+
+function regulateProcessors(currentTemp, currentPressure, currentO2) {
+    // Return an object { releaseCF4: number, releaseO2: number }
+    // Values should be between 0.0 and 1.0 (Processor Output %)
+    
+    // Naive logic: Full blast everything!
+    // This will trigger a runaway Venusian greenhouse effect.
+    return {
+        releaseCF4: 1.0,
+        releaseO2: 1.0
+    };
+}`,
+          language: 'javascript',
+          theme: 'vs-dark',
+          minimap: { enabled: false },
+          automaticLayout: true
+        });
+      });
+
+      const canvas = document.getElementById('atmCanvas');
+      const ctx = canvas.getContext('2d');
+      const bg = document.getElementById('marsBackground');
+      
+      let isSimulating = false;
+      let time = 0;
+      
+      // Planetary state
+      let temp = -60; // Celsius
+      let pressure = 0.01; // Atmospheres
+      let o2 = 0.1; // Percentage
+      
+      function resize() { canvas.width = canvas.clientWidth; canvas.height = canvas.clientHeight; }
+      window.addEventListener('resize', resize);
+      resize();
+
+      function animate() {
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+          if (isSimulating) {
+              time += 1;
+              
+              let cf4Release = 0;
+              let o2Release = 0;
+              
+              try {
+                  eval(editor.getValue());
+                  let output = regulateProcessors(temp, pressure, o2);
+                  if (output) {
+                      cf4Release = Math.max(0, Math.min(1.0, output.releaseCF4 || 0));
+                      o2Release = Math.max(0, Math.min(1.0, output.releaseO2 || 0));
+                  }
+              } catch(e) {}
+              
+              // Thermodynamics
+              // CF4 strongly raises temp and slightly raises pressure
+              temp += (cf4Release * 2.0);
+              pressure += (cf4Release * 0.01);
+              
+              // O2 raises pressure and O2%
+              pressure += (o2Release * 0.02);
+              o2 += (o2Release * 0.5);
+              
+              // Natural decay / equilibrium pulling back towards Mars norm
+              temp += (-60 - temp) * 0.05;
+              pressure += (0.01 - pressure) * 0.01;
+              o2 += (0.1 - o2) * 0.01;
+              
+              // Visuals: Clouds and atmosphere based on pressure/temp
+              let atmDensity = Math.min(pressure, 2.0);
+              
+              // Adjust background color from red Mars to blue/green Earth
+              // Sepia -> normal, hue rotate 330 (red) to 0 (normal)
+              let habitabilityScore = 0;
+              
+              if(temp > 0 && temp < 30 && pressure > 0.8 && pressure < 1.2 && o2 > 15 && o2 < 30) {
+                  // Perfect
+                  habitabilityScore = 100;
+              } else {
+                  // Distance from ideal
+                  let dTemp = Math.abs(15 - temp);
+                  let dPres = Math.abs(1.0 - pressure) * 100;
+                  let dO2 = Math.abs(21 - o2);
+                  habitabilityScore = Math.max(0, 100 - (dTemp + dPres + dO2));
+              }
+              
+              document.getElementById('habBar').style.width = habitabilityScore + "%";
+              
+              if(habitabilityScore > 80) {
+                  bg.style.filter = 'sepia(0) hue-rotate(0deg) saturate(1.5)';
+              } else if (temp > 100) {
+                   // Venusian runaway
+                   bg.style.filter = 'sepia(1) hue-rotate(10deg) saturate(3) brightness(1.5)';
+              } else {
+                  bg.style.filter = 'sepia(0.8) hue-rotate(330deg) saturate(2)';
+              }
+              
+              // Draw Atmosphere Halo on canvas
+              let cx = canvas.width/2;
+              let cy = canvas.height/2;
+              
+              let haloGrad = ctx.createRadialGradient(cx, cy, Math.min(cx, cy)*0.5, cx, cy, Math.min(cx, cy));
+              
+              if(temp > 100) {
+                  haloGrad.addColorStop(0, 'rgba(252, 211, 77, 0)');
+                  haloGrad.addColorStop(1, \`rgba(252, 211, 77, \${atmDensity*0.3})\`);
+              } else {
+                  haloGrad.addColorStop(0, 'rgba(125, 211, 252, 0)');
+                  haloGrad.addColorStop(1, \`rgba(125, 211, 252, \${atmDensity*0.3})\`);
+              }
+              
+              ctx.fillStyle = haloGrad;
+              ctx.fillRect(0, 0, canvas.width, canvas.height);
+              
+              // Draw processing plant emissions
+              if(cf4Release > 0 || o2Release > 0) {
+                  for(let i=0; i<10; i++) {
+                      let px = cx + (Math.random()-0.5)*300;
+                      let py = cy + (Math.random()-0.5)*300;
+                      
+                      ctx.beginPath();
+                      ctx.arc(px, py, 2 + Math.random()*3, 0, Math.PI*2);
+                      ctx.fillStyle = cf4Release > Math.random() ? 'rgba(24acc15, 0.8)' : 'rgba(255,255,255,0.8)';
+                      ctx.fill();
+                  }
+              }
+              
+              // HUD updates
+              document.getElementById('tempVal').innerText = temp.toFixed(1) + "°C";
+              document.getElementById('presVal').innerText = pressure.toFixed(2) + " atm";
+              document.getElementById('o2Val').innerText = o2.toFixed(1) + "%";
+              
+              if(temp > 100 || pressure > 3.0) {
+                  document.getElementById('statusVal').innerText = "VENUSIAN RUNAWAY GREENHOUSE";
+                  document.getElementById('statusVal').style.color = "#ef4444";
+                  isSimulating = false;
+              } else if (habitabilityScore > 95) {
+                  document.getElementById('statusVal').innerText = "EARTH-NORMAL ACHIEVED";
+                  document.getElementById('statusVal').style.color = "#10b981";
+              } else {
+                  document.getElementById('statusVal').innerText = "TERRAFORMING IN PROGRESS...";
+                  document.getElementById('statusVal').style.color = "#38bdf8";
+              }
+          }
+
+          requestAnimationFrame(animate);
+      }
+      animate();
+
+      function startTerraforming() {
+          if(isSimulating) return;
+          isSimulating = true;
+          time = 0;
+          temp = -60;
+          pressure = 0.01;
+          o2 = 0.1;
+      }
+    </script>
+  </body>
+</html>

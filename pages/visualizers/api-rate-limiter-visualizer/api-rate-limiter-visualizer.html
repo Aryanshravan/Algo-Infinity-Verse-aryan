@@ -20,6 +20,7 @@
 
     <link rel="stylesheet" href="/styles.css" />
     <link rel="stylesheet" href="api-rate-limiter-visualizer.css" />
+    <link rel="stylesheet" href="/modules/quick-notes/quick-notes.css" />
   </head>
   <body class="gw-body">
     <nav class="navbar gw-nav">
@@ -42,6 +43,7 @@
             <select id="algorithmSelect">
               <option value="token_bucket">Token Bucket</option>
               <option value="leaky_bucket">Leaky Bucket</option>
+              <option value="comparison">Token vs Leaky (Side-by-Side)</option>
               <option value="fixed_window">Fixed Window</option>
               <option value="sliding_window">Sliding Window</option>
             </select>
@@ -112,21 +114,60 @@
       </div>
 
       <div class="panel-right">
-        <div class="visualization-area">
-          <div class="bucket-container" id="bucketContainer">
-            <div class="bucket">
-              <div class="bucket-fill" id="bucketFill"></div>
+        <div class="visualization-area" id="visArea">
+          <div class="panel-wrapper" id="primaryPanel">
+            <h4
+              id="primaryTitle"
+              style="
+                display: none;
+                text-align: center;
+                margin-bottom: 1rem;
+                color: #f8fafc;
+                font-family: 'Orbitron', sans-serif;
+              "
+            >
+              Token Bucket
+            </h4>
+            <div class="bucket-container" id="bucketContainer">
+              <div class="bucket">
+                <div class="bucket-fill" id="bucketFill"></div>
+              </div>
+              <div class="bucket-label" id="bucketStatus">Tokens: 5 / 5</div>
             </div>
-            <div class="bucket-label" id="bucketStatus">Tokens: 5 / 5</div>
+
+            <div class="requests-track" id="requestsTrack">
+              <!-- Animated requests will appear here -->
+            </div>
           </div>
 
-          <div class="requests-track" id="requestsTrack">
-            <!-- Animated requests will appear here -->
+          <div class="panel-wrapper" id="secondaryPanel" style="display: none">
+            <h4
+              id="secondaryTitle"
+              style="
+                text-align: center;
+                margin-bottom: 1rem;
+                color: #f8fafc;
+                font-family: 'Orbitron', sans-serif;
+              "
+            >
+              Leaky Bucket
+            </h4>
+            <div class="bucket-container" id="secondaryBucketContainer">
+              <div class="bucket">
+                <div class="bucket-fill" id="secondaryBucketFill"></div>
+              </div>
+              <div class="bucket-label" id="secondaryBucketStatus">Water: 0 / 5</div>
+            </div>
+
+            <div class="requests-track" id="secondaryRequestsTrack">
+              <!-- Animated requests will appear here -->
+            </div>
           </div>
         </div>
       </div>
     </main>
 
     <script src="api-rate-limiter-visualizer.js"></script>
+    <script src="/modules/quick-notes/quick-notes.js"></script>
   </body>
 </html>

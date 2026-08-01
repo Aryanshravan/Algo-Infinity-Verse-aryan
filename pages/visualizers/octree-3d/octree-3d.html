@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Octree 3D Spatial Partitioning Sandbox | Algo Infinity Verse</title>
+    <meta
+      name="description"
+      content="Interactive Octree 3D Spatial Partitioning & Ray-Casting Sandbox. Recursively subdivides 3D space, showing bounding boxes, point cloud clustering, and ray intersection testing."
+    />
+
+    <link
+      href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Fira+Code:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+
+    <!-- External Stylesheets -->
+    <link rel="stylesheet" href="/styles.css" />
+    <link rel="stylesheet" href="octree-3d.css" />
+    <link rel="stylesheet" href="/modules/quick-notes/quick-notes.css" />
+  </head>
+  <body class="octree-body">
+    <!-- Navbar Placeholder -->
+    <div id="navbar-placeholder"></div>
+
+    <main class="workspace">
+      <!-- Left Panel: Controls -->
+      <div class="panel-left">
+        <div class="panel-header">
+          <h3><i class="fas fa-cubes"></i> Octree 3D Sandbox</h3>
+        </div>
+
+        <div class="control-section">
+          <p class="desc-text">
+            Explore 3D spatial indexing. Generate 3D point cloud structures, subdivide space into 8
+            recursive octants, and trace ray-casting queries.
+          </p>
+
+          <!-- Presets -->
+          <div class="input-group">
+            <label for="pointPreset">Point Cloud Preset</label>
+            <select id="pointPreset" class="styled-select">
+              <option value="sphere">3D Sphere Shell</option>
+              <option value="cube">3D Cube Box</option>
+              <option value="spiral">3D Double Helix</option>
+              <option value="random">Random Clusters</option>
+            </select>
+          </div>
+
+          <!-- Parameters -->
+          <div class="sliders-container">
+            <div class="slider-group">
+              <div class="slider-header">
+                <label for="capacitySlider">Block Capacity Limit</label>
+                <span id="capacityVal" class="val-badge">4</span>
+              </div>
+              <input type="range" id="capacitySlider" min="2" max="12" step="1" value="4" />
+            </div>
+
+            <div class="slider-group">
+              <div class="slider-header">
+                <label for="depthSlider">Max Octree Depth</label>
+                <span id="depthVal" class="val-badge">4</span>
+              </div>
+              <input type="range" id="depthSlider" min="1" max="6" step="1" value="4" />
+            </div>
+          </div>
+
+          <!-- Toggles -->
+          <div class="toggles-container">
+            <label class="toggle-item">
+              <input type="checkbox" id="showBoxesToggle" checked />
+              <span>Show Octant Bounding Boxes</span>
+            </label>
+            <label class="toggle-item">
+              <input type="checkbox" id="showRayToggle" checked />
+              <span>Enable Interactive Ray-Casting</span>
+            </label>
+            <label class="toggle-item">
+              <input type="checkbox" id="rotateToggle" checked />
+              <span>Auto-Rotate Camera</span>
+            </label>
+          </div>
+
+          <!-- Actions -->
+          <div class="action-buttons">
+            <button type="button" id="randomizeBtn" class="btn btn-primary">
+              <i class="fas fa-dice"></i> Respawn Cloud
+            </button>
+            <button type="button" id="clearBtn" class="btn btn-outline">
+              <i class="fas fa-trash-alt"></i> Clear Sandbox
+            </button>
+          </div>
+
+          <!-- Telemetry -->
+          <div class="stats-panel">
+            <div class="stat-row">
+              <span>Total Points:</span>
+              <strong id="pointsStat">0</strong>
+            </div>
+            <div class="stat-row">
+              <span>Total Nodes:</span>
+              <strong id="nodesStat">1</strong>
+            </div>
+            <div class="stat-row">
+              <span>Active Depth:</span>
+              <strong id="activeDepthStat">0</strong>
+            </div>
+            <div class="legend-hint">
+              <small
+                ><strong>Controls:</strong> Drag on canvas to rotate perspective view. Scroll mouse
+                wheel to zoom camera in/out.</small
+              >
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Panel: Canvas -->
+      <div class="panel-right">
+        <div class="canvas-wrapper" id="canvasWrapper">
+          <canvas id="octreeCanvas"></canvas>
+        </div>
+      </div>
+    </main>
+
+    <!-- Footer Placeholder -->
+    <div id="footer-placeholder"></div>
+
+    <script src="/auth.js"></script>
+    <script src="/bootstrap-legacy.js"></script>
+    <script src="/script.js"></script>
+    <script type="module" src="/dist/legacy-bundle.mjs"></script>
+    <script src="/theme.js"></script>
+    <script src="octree-3d.js"></script>
+    <script>
+      loadPartial('navbar-placeholder', '/partials/navbar.html');
+      loadPartial('footer-placeholder', '/partials/footer.html');
+    </script>
+    <script src="/modules/quick-notes/quick-notes.js"></script>
+  </body>
+</html>

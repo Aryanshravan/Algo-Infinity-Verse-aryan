@@ -527,3 +527,18 @@
     min-height: 420px;
   }
 }
+/* Vim Status Bar */
+.vim-status-bar {
+  background: var(--surface-2);
+  color: var(--text-primary);
+  font-family: var(--code-font, 'Fira Code', monospace);
+  font-size: 13px;
+  padding: 4px 10px;
+  border-top: 1px solid var(--border-color);
+  display: flex;
+  align-items: center;
+  min-height: 24px;
+}
+.vim-status-bar.hidden {
+  display: none;
+}

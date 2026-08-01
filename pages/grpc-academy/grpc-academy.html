@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>gRPC &amp; Protobuf Academy — High-Performance RPC</title>
+    <meta name="description" content="Learn gRPC and Protocol Buffers from the ground up — message definitions, service definitions, and how gRPC clients and servers communicate over HTTP/2.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=Inter:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="grpc-academy.css">
+    <link rel="stylesheet" href="/styles/eli5-toggle.css">
+    <link rel="stylesheet" href="/styles/copy-code.css">
+</head>
+<body>
+    <!-- Mobile sidebar overlay -->
+    <div id="sidebar-overlay" class="sidebar-overlay"></div>
+
+    <!-- Sidebar -->
+    <aside id="sidebar" class="sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-logo">
+                <svg viewBox="0 0 24 24" width="32" height="32">
+                    <circle cx="12" cy="12" r="10" fill="#244c5a"/>
+                    <text x="12" y="16" text-anchor="middle" font-size="14" font-weight="bold" fill="#fff" font-family="system-ui, sans-serif">gR</text>
+                </svg>
+                <span>gRPC &amp; Protobuf Academy</span>
+            </div>
+            <button id="close-sidebar-btn" class="sidebar-close-btn" aria-label="Close sidebar">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="sidebar-progress">
+            <div class="progress-label">
+                <span>Progress</span>
+                <span id="progress-text">0%</span>
+            </div>
+            <div class="progress-bar">
+                <div id="progress-bar" class="progress-fill" style="width: 0%"></div>
+            </div>
+        </div>
+        <ul id="module-list" class="module-list"></ul>
+    </aside>
+
+    <!-- Main content -->
+    <main class="main-content">
+        <header class="header">
+            <button id="open-sidebar-btn" class="sidebar-open-btn" aria-label="Open sidebar">
+                <i class="fas fa-bars"></i>
+            </button>
+            <h1 id="active-module-title" class="active-module-title"></h1>
+            <nav class="tab-nav" role="tablist">
+                <button data-tab="lesson" class="tab-btn active" role="tab" aria-selected="true">
+                    <i class="fa-solid fa-book-open mr-1"></i> Lesson Viewer
+                </button>
+                <button data-tab="simulator" class="tab-btn" role="tab" aria-selected="false">
+                    <i class="fa-solid fa-terminal mr-1"></i> Playground
+                </button>
+                <button data-tab="quiz" class="tab-btn" role="tab" aria-selected="false">
+                    <i class="fa-solid fa-list-check mr-1"></i> Quiz
+                </button>
+            </nav>
+        </header>
+
+        <div class="content-area">
+            <!-- Lesson Tab -->
+            <div id="tab-lesson" class="tab-content active">
+                <div class="lesson-container">
+                    <div id="lesson-content" class="lesson-content"></div>
+                    <div class="lesson-footer">
+                        <button id="mark-complete-btn" class="mark-complete-btn">
+                            <i class="fas fa-check-circle mr-2"></i> Mark as Complete
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Simulator Tab -->
+            <div id="tab-simulator" class="tab-content">
+                <div class="simulator-split">
+                    <div class="simulator-editor">
+                        <div class="editor-header">
+                            <span class="editor-title"><i class="fa-solid fa-brackets-curly mr-1"></i> .proto Message Editor</span>
+                            <div class="editor-actions">
+                                <button id="encode-msg-btn" class="connect-btn" title="Encode message to binary">
+                                    <i class="fas fa-magnet"></i> Encode
+                                </button>
+                                <button id="clear-pg-btn" class="disconnect-btn" title="Reset playground">
+                                    <i class="fas fa-times"></i> Reset
+                                </button>
+                            </div>
+                        </div>
+                        <div id="proto-editor" class="proto-editor" contenteditable="true" spellcheck="false" role="textbox" aria-label="Protobuf message editor"></div>
+                        <div class="connection-settings">
+                            <label class="setting-label">
+                                <input type="checkbox" id="show-wire-format" checked>
+                                <span>Show wire-format bytes</span>
+                            </label>
+                            <label class="setting-label">
+                                <input type="checkbox" id="show-streams" checked>
+                                <span>Animate HTTP/2 streams</span>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="simulator-output">
+                        <div class="output-header">
+                            <span class="output-title"><i class="fa-solid fa-diagram-project mr-1"></i> gRPC Call Log</span>
+                            <span id="event-count" class="event-count">0 events</span>
+                        </div>
+                        <div id="event-log" class="event-log">
+                            <div class="output-placeholder">
+                                <i class="fa-solid fa-plug"></i>
+                                <p>Type a message in the .proto editor, then click <strong>Encode</strong> to see how gRPC serializes and transmits your data.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quiz Tab -->
+            <div id="tab-quiz" class="tab-content">
+                <div id="quiz-container" class="quiz-container"></div>
+            </div>
+        </div>
+    </main>
+
+    <script src="/modules/eli5-toggle.js"></script>
+    <script src="/modules/eli5-grpc-data.js"></script>
+    <script src="grpc-academy.js"></script>
+    <script src="/modules/copy-code.js"></script>
+</body>
+</html>

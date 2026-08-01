@@ -1,0 +1,467 @@
+/* ===== AI Tenant Isolation Test Planner ===== */
+:root {
+  --tenant-glass: rgba(255, 255, 255, 0.04);
+  --tenant-border: rgba(255, 255, 255, 0.1);
+  --tenant-muted: rgba(255, 255, 255, 0.62);
+  --tenant-accent: #34d399;
+  --tenant-accent-2: #60a5fa;
+  --tenant-accent-dim: rgba(52, 211, 153, 0.14);
+  --tenant-error: #f87171;
+  --tenant-warn: #fbbf24;
+  --tenant-info: #60a5fa;
+  --tenant-ok: #4ade80;
+}
+
+html.light-mode {
+  --tenant-glass: rgba(15, 23, 42, 0.04);
+  --tenant-border: rgba(15, 23, 42, 0.12);
+  --tenant-muted: rgba(15, 23, 42, 0.65);
+  --tenant-accent-dim: rgba(5, 150, 105, 0.12);
+}
+
+.tenant-skip-link {
+  position: absolute;
+  left: 1rem;
+  top: -100px;
+  z-index: 10000;
+  padding: 0.6rem 1rem;
+  background: var(--tenant-accent);
+  color: #0a0a14;
+  font-weight: 700;
+  border-radius: 8px;
+  text-decoration: none;
+}
+
+.tenant-skip-link:focus {
+  top: 1rem;
+  outline: 3px solid #fff;
+  outline-offset: 2px;
+}
+
+.tenant-hero {
+  position: relative;
+  overflow: hidden;
+  padding: 7.5rem 1.5rem 4rem;
+  text-align: center;
+  border-bottom: 1px solid var(--tenant-border);
+  background:
+    radial-gradient(ellipse at top right, rgba(52, 211, 153, 0.16), transparent 55%),
+    radial-gradient(ellipse at bottom left, rgba(96, 165, 250, 0.12), transparent 50%);
+}
+
+.tenant-hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1.1rem;
+  padding: 0.35rem 0.9rem;
+  border-radius: 999px;
+  border: 1px solid rgba(52, 211, 153, 0.4);
+  background: var(--tenant-accent-dim);
+  color: var(--tenant-accent);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.tenant-hero h1 {
+  margin: 0 0 1rem;
+  font-family: 'Orbitron', sans-serif;
+  font-size: clamp(1.9rem, 5vw, 3rem);
+  font-weight: 900;
+  line-height: 1.15;
+}
+
+.tenant-hero-accent {
+  display: inline-block;
+  background: linear-gradient(135deg, #34d399, #60a5fa);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.tenant-hero p {
+  max-width: 740px;
+  margin: 0 auto 2rem;
+  color: var(--tenant-muted);
+  font-size: 1.05rem;
+  line-height: 1.65;
+  font-family: 'Poppins', sans-serif;
+}
+
+.tenant-hero-stats {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1rem;
+}
+
+.tenant-stat {
+  min-width: 120px;
+  padding: 0.85rem 1.1rem;
+  border: 1px solid var(--tenant-border);
+  border-radius: 14px;
+  background: var(--tenant-glass);
+}
+
+.tenant-stat-val {
+  display: block;
+  font-family: 'Orbitron', sans-serif;
+  font-size: 1.45rem;
+  font-weight: 700;
+}
+
+.tenant-stat-label {
+  font-size: 0.75rem;
+  color: var(--tenant-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+#statRoutes { color: var(--tenant-accent); }
+#statIdor { color: var(--tenant-warn); }
+#statNegatives { color: var(--tenant-info); }
+#statHighRisk { color: var(--tenant-error); }
+
+.tenant-main {
+  padding: 2rem 0 4rem;
+  font-family: 'Poppins', sans-serif;
+}
+
+.tenant-workspace {
+  display: grid;
+  grid-template-columns: minmax(300px, 1fr) minmax(320px, 1.05fr);
+  gap: 1.5rem;
+  align-items: start;
+  margin-bottom: 1.5rem;
+}
+
+@media (max-width: 980px) {
+  .tenant-workspace {
+    grid-template-columns: 1fr;
+  }
+}
+
+.tenant-grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+@media (max-width: 900px) {
+  .tenant-grid-2 {
+    grid-template-columns: 1fr;
+  }
+}
+
+.tenant-panel {
+  padding: 1.4rem;
+  border: 1px solid var(--tenant-border);
+  border-radius: 18px;
+  background: var(--tenant-glass);
+  backdrop-filter: blur(12px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
+  margin-bottom: 1.5rem;
+}
+
+.tenant-panel-header {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1.2rem;
+  padding-bottom: 0.9rem;
+  border-bottom: 1px solid var(--tenant-border);
+}
+
+.tenant-panel-title {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.tenant-panel-title h2 {
+  margin: 0;
+  font-size: 1.15rem;
+  font-weight: 700;
+}
+
+.tenant-panel-icon {
+  color: var(--tenant-accent);
+}
+
+.tenant-label {
+  display: block;
+  margin: 0.85rem 0 0.4rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.tenant-label:first-of-type {
+  margin-top: 0;
+}
+
+.tenant-textarea {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0.85rem 1rem;
+  border: 1px solid var(--tenant-border);
+  border-radius: 12px;
+  background: rgba(0, 0, 0, 0.25);
+  color: inherit;
+  font-family: 'Fira Code', monospace;
+  font-size: 0.78rem;
+  line-height: 1.5;
+  resize: vertical;
+}
+
+html.light-mode .tenant-textarea {
+  background: rgba(255, 255, 255, 0.85);
+}
+
+.tenant-textarea:focus {
+  outline: 2px solid var(--tenant-accent);
+  outline-offset: 2px;
+  border-color: var(--tenant-accent);
+}
+
+.tenant-hint {
+  margin: 0.5rem 0 0;
+  font-size: 0.8rem;
+  color: var(--tenant-muted);
+  line-height: 1.5;
+}
+
+.tenant-hint code {
+  font-family: 'Fira Code', monospace;
+  font-size: 0.75rem;
+}
+
+.tenant-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  align-items: center;
+  margin-top: 1.1rem;
+}
+
+.tenant-status {
+  margin-top: 0.85rem;
+  min-height: 1.25rem;
+  font-size: 0.85rem;
+  color: var(--tenant-muted);
+}
+
+.tenant-status.is-error { color: var(--tenant-error); }
+.tenant-status.is-ok { color: var(--tenant-ok); }
+
+.tenant-empty {
+  text-align: center;
+  padding: 2.5rem 1rem;
+  color: var(--tenant-muted);
+}
+
+.tenant-empty i {
+  font-size: 2rem;
+  margin-bottom: 0.75rem;
+  color: var(--tenant-accent);
+  opacity: 0.85;
+}
+
+.tenant-section {
+  margin-bottom: 1.5rem;
+}
+
+.tenant-section h3 {
+  margin: 0 0 0.85rem;
+  font-size: 0.95rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--tenant-accent);
+}
+
+.tenant-muted {
+  margin: 0.25rem 0 0;
+  font-size: 0.82rem;
+  color: var(--tenant-muted);
+  line-height: 1.5;
+}
+
+.tenant-score-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.4rem;
+  padding: 1rem 1.1rem;
+  border: 1px solid var(--tenant-border);
+  border-radius: 14px;
+  background: rgba(0, 0, 0, 0.15);
+}
+
+html.light-mode .tenant-score-card {
+  background: rgba(255, 255, 255, 0.55);
+}
+
+.tenant-score-card h3 {
+  margin: 0;
+  font-size: 0.95rem;
+}
+
+.tenant-score-ring {
+  flex-shrink: 0;
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  border: 3px solid var(--tenant-warn);
+  background: var(--tenant-accent-dim);
+  font-family: 'Orbitron', sans-serif;
+  font-size: 1.35rem;
+  font-weight: 700;
+}
+
+.tenant-score-ring.is-low { border-color: var(--tenant-ok); color: var(--tenant-ok); }
+.tenant-score-ring.is-mid { border-color: var(--tenant-warn); color: var(--tenant-warn); }
+.tenant-score-ring.is-high { border-color: var(--tenant-error); color: var(--tenant-error); }
+
+.tenant-table-wrap {
+  overflow-x: auto;
+  border: 1px solid var(--tenant-border);
+  border-radius: 12px;
+}
+
+.tenant-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.82rem;
+}
+
+.tenant-table th,
+.tenant-table td {
+  padding: 0.65rem 0.75rem;
+  text-align: left;
+  border-bottom: 1px solid var(--tenant-border);
+  vertical-align: top;
+}
+
+.tenant-table th {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--tenant-muted);
+  background: rgba(0, 0, 0, 0.15);
+}
+
+html.light-mode .tenant-table th {
+  background: rgba(15, 23, 42, 0.05);
+}
+
+.tenant-table code {
+  font-family: 'Fira Code', monospace;
+  font-size: 0.76rem;
+}
+
+.tenant-gap {
+  display: inline-block;
+  padding: 0.12rem 0.45rem;
+  border-radius: 6px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.tenant-gap.is-high {
+  background: rgba(248, 113, 113, 0.18);
+  color: var(--tenant-error);
+}
+
+.tenant-gap.is-medium {
+  background: rgba(251, 191, 36, 0.18);
+  color: var(--tenant-warn);
+}
+
+.tenant-gap.is-low {
+  background: rgba(74, 222, 128, 0.18);
+  color: var(--tenant-ok);
+}
+
+.tenant-neg-list,
+.tenant-risk-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.tenant-risk-list {
+  list-style: none;
+  counter-reset: risk;
+}
+
+.tenant-neg-item,
+.tenant-risk-item {
+  padding: 0.9rem 1rem;
+  border: 1px solid var(--tenant-border);
+  border-radius: 12px;
+  background: rgba(0, 0, 0, 0.12);
+}
+
+html.light-mode .tenant-neg-item,
+html.light-mode .tenant-risk-item {
+  background: rgba(255, 255, 255, 0.55);
+}
+
+.tenant-risk-item {
+  counter-increment: risk;
+  border-left: 4px solid var(--tenant-error);
+}
+
+.tenant-risk-item.is-medium { border-left-color: var(--tenant-warn); }
+.tenant-risk-item.is-low { border-left-color: var(--tenant-ok); }
+
+.tenant-neg-item h4,
+.tenant-risk-item h4 {
+  margin: 0 0 0.4rem;
+  font-size: 0.9rem;
+}
+
+.tenant-neg-item p,
+.tenant-risk-item p {
+  margin: 0.25rem 0;
+  font-size: 0.82rem;
+  color: var(--tenant-muted);
+  line-height: 1.5;
+}
+
+.tenant-aaa {
+  font-family: 'Fira Code', monospace;
+  font-size: 0.75rem;
+  display: block;
+  margin-top: 0.2rem;
+}
+
+.tenant-empty[hidden],
+#tenantResults[hidden],
+#tenantDetailPanels[hidden] {
+  display: none !important;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .tenant-neg-item,
+  .tenant-risk-item {
+    animation: tenant-fade 0.35s ease both;
+  }
+
+  @keyframes tenant-fade {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: none; }
+  }
+}

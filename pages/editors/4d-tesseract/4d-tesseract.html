@@ -1,0 +1,281 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>4D Tesseract Hologram | Algo Infinity Verse</title>
+    <link rel="stylesheet" href="/styles.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <!-- Monaco Editor -->
+    <script src="https://unpkg.com/monaco-editor@0.36.1/min/vs/loader.js"></script>
+    <style>
+      body { margin: 0; overflow: hidden; background: #000; font-family: 'Poppins', sans-serif; color: #fff; }
+      .app-container { display: flex; height: 100vh; }
+      
+      .sidebar { width: 450px; background: rgba(15, 23, 42, 0.95); border-right: 1px solid #c084fc; display: flex; flex-direction: column; z-index: 10; }
+      .header { padding: 20px; border-bottom: 1px solid #334155; }
+      .header h2 { margin: 0; color: #c084fc; font-family: 'Orbitron', sans-serif; font-size: 1.2rem; }
+      .header p { margin: 5px 0 0 0; font-size: 0.8rem; color: #94a3b8; }
+      
+      #editor-container { flex: 1; min-height: 300px; }
+      
+      .controls { padding: 20px; border-top: 1px solid #334155; background: rgba(0,0,0,0.5); }
+      .btn { background: linear-gradient(90deg, #9333ea, #7e22ce); color: #fff; border: none; padding: 10px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; transition: 0.3s; }
+      .btn:hover { background: #a855f7; transform: translateY(-2px); box-shadow: 0 0 15px rgba(168, 85, 247, 0.5); }
+      
+      .sim-container { flex: 1; position: relative; background: radial-gradient(circle at center, #1e1b4b 0%, #000 100%); overflow: hidden; }
+      canvas { width: 100%; height: 100%; display: block; }
+      
+      .hud { position: absolute; top: 20px; left: 20px; background: rgba(0,0,0,0.8); padding: 15px; border-radius: 8px; border: 1px solid #c084fc; width: 250px; z-index: 10; pointer-events: none; }
+      .hud h3 { margin: 0 0 10px 0; color: #c084fc; font-size: 1rem; font-family: 'Orbitron', sans-serif; }
+      .metric { display: flex; justify-content: space-between; font-size: 0.8rem; color: #cbd5e1; margin-bottom: 5px; }
+      .val { font-weight: bold; font-family: monospace; }
+      .val-w { color: #f472b6; }
+    </style>
+  </head>
+  <body>
+    
+    <div class="app-container">
+      <div class="sidebar">
+        <div class="header">
+          <h2><i class="fas fa-cube"></i> Holographic Tesseract</h2>
+          <p>Solve the hypercube using 4D Rotation Matrices</p>
+        </div>
+        
+        <div id="editor-container"></div>
+        
+        <div class="controls">
+          <button class="btn" onclick="applyRotation()"><i class="fas fa-sync"></i> Apply Quaternions / Rotation</button>
+        </div>
+      </div>
+      
+      <div class="sim-container">
+        <!-- Hologram Grid Background -->
+        <div style="position: absolute; inset:0; background: 
+            linear-gradient(rgba(192, 132, 252, 0.05) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(192, 132, 252, 0.05) 1px, transparent 1px);
+            background-size: 40px 40px; pointer-events: none; z-index: 0; transform: perspective(500px) rotateX(60deg);"></div>
+        
+        <canvas id="hypercubeCanvas" style="position: relative; z-index: 1;"></canvas>
+        
+        <div class="hud">
+          <h3>Spatial Coordinates</h3>
+          <div class="metric"><span>X-Y Plane:</span> <span class="val" id="xyVal">0.0°</span></div>
+          <div class="metric"><span>X-Z Plane:</span> <span class="val" id="xzVal">0.0°</span></div>
+          <div class="metric"><span>X-W Plane:</span> <span class="val val-w" id="xwVal">0.0°</span></div>
+          <div class="metric"><span>Y-W Plane:</span> <span class="val val-w" id="ywVal">0.0°</span></div>
+          <div class="metric" style="margin-top: 10px; border-top: 1px solid #334155; padding-top: 5px;">
+            <span>Alignment Phase:</span> <span class="val" id="statusVal" style="color:#f472b6">MISALIGNED</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      let editor;
+      require.config({ paths: { 'vs': 'https://unpkg.com/monaco-editor@0.36.1/min/vs' }});
+      require(['vs/editor/editor.main'], function() {
+        editor = monaco.editor.create(document.getElementById('editor-container'), {
+          value: `// 4D Rotation Matrix Controller
+// Apply rotation angles (in radians) across the 6 planes of 4D space.
+
+function updateHypercubeRotations() {
+    // Goal: Align the hypercube so the XW and YW projections form a perfect star.
+    return {
+        XY: 0.005, // Standard 3D rotation
+        XZ: 0.01,  // Standard 3D rotation
+        YZ: 0.00,
+        XW: 0.02,  // 4D rotation (turns inside out)
+        YW: 0.015, // 4D rotation
+        ZW: 0.00
+    };
+}`,
+          language: 'javascript',
+          theme: 'vs-dark',
+          minimap: { enabled: false },
+          automaticLayout: true
+        });
+      });
+
+      const canvas = document.getElementById('hypercubeCanvas');
+      const ctx = canvas.getContext('2d');
+      
+      function resize() { canvas.width = canvas.clientWidth; canvas.height = canvas.clientHeight; }
+      window.addEventListener('resize', resize);
+      resize();
+
+      // 16 points of a hypercube (x,y,z,w) from -1 to 1
+      let points = [];
+      for(let x=-1; x<=1; x+=2) {
+          for(let y=-1; y<=1; y+=2) {
+              for(let z=-1; z<=1; z+=2) {
+                  for(let w=-1; w<=1; w+=2) {
+                      points.push({x, y, z, w});
+                  }
+              }
+          }
+      }
+
+      // Edges between points that differ by exactly 1 coordinate
+      let edges = [];
+      for(let i=0; i<16; i++) {
+          for(let j=i+1; j<16; j++) {
+              let diffs = 0;
+              if(points[i].x !== points[j].x) diffs++;
+              if(points[i].y !== points[j].y) diffs++;
+              if(points[i].z !== points[j].z) diffs++;
+              if(points[i].w !== points[j].w) diffs++;
+              if(diffs === 1) edges.push([i, j]);
+          }
+      }
+
+      let angles = { XY: 0, XZ: 0, YZ: 0, XW: 0, YW: 0, ZW: 0 };
+      let speeds = { XY: 0.01, XZ: 0.01, YZ: 0, XW: 0.02, YW: 0, ZW: 0 };
+
+      function matMul(vec, mat) {
+          return {
+              x: vec.x*mat[0][0] + vec.y*mat[0][1] + vec.z*mat[0][2] + vec.w*mat[0][3],
+              y: vec.x*mat[1][0] + vec.y*mat[1][1] + vec.z*mat[1][2] + vec.w*mat[1][3],
+              z: vec.x*mat[2][0] + vec.y*mat[2][1] + vec.z*mat[2][2] + vec.w*mat[2][3],
+              w: vec.x*mat[3][0] + vec.y*mat[3][1] + vec.z*mat[3][2] + vec.w*mat[3][3]
+          };
+      }
+
+      function rotate4D(p) {
+          // Simplified rotation matrices for some planes
+          let res = { ...p };
+          
+          // XY
+          let cXY = Math.cos(angles.XY), sXY = Math.sin(angles.XY);
+          let tx = res.x, ty = res.y;
+          res.x = tx*cXY - ty*sXY;
+          res.y = tx*sXY + ty*cXY;
+
+          // XZ
+          let cXZ = Math.cos(angles.XZ), sXZ = Math.sin(angles.XZ);
+          tx = res.x; let tz = res.z;
+          res.x = tx*cXZ - tz*sXZ;
+          res.z = tx*sXZ + tz*cXZ;
+
+          // XW (The 4D inside-out fold)
+          let cXW = Math.cos(angles.XW), sXW = Math.sin(angles.XW);
+          tx = res.x; let tw = res.w;
+          res.x = tx*cXW - tw*sXW;
+          res.w = tx*sXW + tw*cXW;
+          
+          // YW
+          let cYW = Math.cos(angles.YW), sYW = Math.sin(angles.YW);
+          ty = res.y; tw = res.w;
+          res.y = ty*cYW - tw*sYW;
+          res.w = ty*sYW + tw*cYW;
+
+          return res;
+      }
+
+      function animate() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
+        let cx = canvas.width / 2;
+        let cy = canvas.height / 2;
+
+        angles.XY += speeds.XY;
+        angles.XZ += speeds.XZ;
+        angles.XW += speeds.XW;
+        angles.YW += speeds.YW;
+
+        // Project 4D to 3D, then 3D to 2D
+        let projected2D = [];
+        
+        for(let i=0; i<points.length; i++) {
+            let p4 = rotate4D(points[i]);
+            
+            // 4D -> 3D stereographic projection (distance w = 2)
+            let wScale = 1 / (2 - p4.w);
+            let p3 = {
+                x: p4.x * wScale,
+                y: p4.y * wScale,
+                z: p4.z * wScale
+            };
+            
+            // 3D -> 2D projection
+            let scale = 300;
+            let zScale = 1 / (2 - p3.z);
+            let p2 = {
+                x: cx + p3.x * scale * zScale,
+                y: cy + p3.y * scale * zScale
+            };
+            
+            projected2D.push({ p2, p4, wScale });
+        }
+
+        // Draw Edges
+        ctx.lineWidth = 2;
+        for(let i=0; i<edges.length; i++) {
+            let a = projected2D[edges[i][0]];
+            let b = projected2D[edges[i][1]];
+            
+            // Color based on w-axis depth (the 4th dimension)
+            let avgW = (a.p4.w + b.p4.w) / 2;
+            let hue = (avgW + 1) * 180; // Map -1,1 to 0,360
+            let alpha = 0.5 + (avgW * 0.5); // Fade things "deeper" in 4D space
+            
+            ctx.beginPath();
+            ctx.moveTo(a.p2.x, a.p2.y);
+            ctx.lineTo(b.p2.x, b.p2.y);
+            ctx.strokeStyle = \`hsla(\${hue}, 100%, 70%, \${alpha})\`;
+            
+            // Glow effect
+            ctx.shadowBlur = 10;
+            ctx.shadowColor = \`hsl(\${hue}, 100%, 70%)\`;
+            
+            ctx.stroke();
+            ctx.shadowBlur = 0;
+        }
+
+        // Draw Nodes
+        for(let i=0; i<projected2D.length; i++) {
+            let a = projected2D[i];
+            ctx.beginPath();
+            ctx.arc(a.p2.x, a.p2.y, 4 * a.wScale, 0, Math.PI*2);
+            let hue = (a.p4.w + 1) * 180;
+            ctx.fillStyle = \`hsl(\${hue}, 100%, 80%)\`;
+            ctx.fill();
+        }
+
+        // Update HUD
+        document.getElementById('xyVal').innerText = ((angles.XY * 180 / Math.PI) % 360).toFixed(1) + "°";
+        document.getElementById('xzVal').innerText = ((angles.XZ * 180 / Math.PI) % 360).toFixed(1) + "°";
+        document.getElementById('xwVal').innerText = ((angles.XW * 180 / Math.PI) % 360).toFixed(1) + "°";
+        document.getElementById('ywVal').innerText = ((angles.YW * 180 / Math.PI) % 360).toFixed(1) + "°";
+        
+        // Puzzle solved check (if XW > YW and spinning fast)
+        if(speeds.XW > 0.03 && speeds.YW > 0.03) {
+            document.getElementById('statusVal').innerText = "TESSERACT ALIGNED";
+            document.getElementById('statusVal').style.color = "#10b981";
+        }
+
+        requestAnimationFrame(animate);
+      }
+      animate();
+
+      function applyRotation() {
+          try {
+              eval(editor.getValue());
+              let newSpeeds = updateHypercubeRotations();
+              if(newSpeeds) {
+                  speeds.XY = newSpeeds.XY || 0;
+                  speeds.XZ = newSpeeds.XZ || 0;
+                  speeds.XW = newSpeeds.XW || 0;
+                  speeds.YW = newSpeeds.YW || 0;
+                  
+                  document.getElementById('statusVal').innerText = "CALCULATING MATRICES...";
+                  document.getElementById('statusVal').style.color = "#38bdf8";
+              }
+          } catch(e) {
+              alert("Math Error: " + e.message);
+          }
+      }
+    </script>
+  </body>
+</html>

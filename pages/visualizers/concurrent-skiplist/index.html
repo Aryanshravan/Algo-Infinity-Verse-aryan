@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Concurrent Skip List (Lock-Free CAS) Visualizer - Algo-Infinity-Verse</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="app-container">
+    <header class="header">
+      <div class="brand">
+        <a href="../../../index.html" class="back-btn"><i class="fas fa-arrow-left"></i> Home</a>
+        <h1><i class="fas fa-network-wired icon-glow"></i> Lock-Free Concurrent Skip List</h1>
+      </div>
+      <div class="stats-pills">
+        <div class="pill"><span class="label">CAS Retries:</span> <span id="stat-cas-retries">0</span></div>
+        <div class="pill"><span class="label">Active Threads:</span> <span id="stat-active-threads">0</span></div>
+        <div class="pill"><span class="label">Max Height Level:</span> <span id="stat-max-level">4</span></div>
+      </div>
+    </header>
+
+    <main class="main-content">
+      <!-- Control Panel -->
+      <section class="control-panel glass-card">
+        <div class="input-group">
+          <input type="number" id="key-input" placeholder="Key e.g. 37" style="width: 100px;">
+          <button id="btn-cas-insert" class="btn btn-primary"><i class="fas fa-plus"></i> Lock-Free Insert</button>
+          <button id="btn-cas-delete" class="btn btn-danger"><i class="fas fa-trash"></i> 2-Phase Delete</button>
+          <button id="btn-start-threads" class="btn btn-secondary"><i class="fas fa-microchip"></i> Spawn Worker Threads</button>
+          <button id="btn-stop-threads" class="btn btn-outline"><i class="fas fa-stop"></i> Stop Worker Threads</button>
+        </div>
+
+        <div class="config-row">
+          <div class="cfg-item">
+            <label for="cfg-max-level">Max Level:</label>
+            <input type="number" id="cfg-max-level" min="2" max="6" value="4" style="width: 60px;">
+          </div>
+          <div class="cfg-item">
+            <label for="cfg-threads">Worker Threads:</label>
+            <input type="number" id="cfg-threads" min="1" max="6" value="3" style="width: 60px;">
+          </div>
+          <div class="cfg-item">
+            <label for="cfg-prob">Coin Flip Bias (p):</label>
+            <input type="number" id="cfg-prob" step="0.1" min="0.1" max="0.9" value="0.5" style="width: 70px;">
+          </div>
+        </div>
+
+        <div class="legend">
+          <span class="legend-item"><span class="color-box thread-1"></span> Thread #1 (Reader)</span>
+          <span class="legend-item"><span class="color-box thread-2"></span> Thread #2 (Writer)</span>
+          <span class="legend-item"><span class="color-box cas-retry"></span> CAS Retry Contention</span>
+          <span class="legend-item"><span class="color-box marked-node"></span> Logically Marked (Tombstone)</span>
+        </div>
+      </section>
+
+      <!-- Visualization Canvas -->
+      <section class="visualizer-area glass-card">
+        <div class="canvas-header">
+          <h3><i class="fas fa-stream"></i> Level-Based Pointer Graph</h3>
+          <span class="hint"><i class="fas fa-info-circle"></i> Observe Compare-And-Swap (CAS) atomic pointer updates</span>
+        </div>
+        <div class="canvas-container">
+          <canvas id="skiplist-canvas"></canvas>
+        </div>
+      </section>
+
+      <!-- Execution Trace Log & Contention Stats -->
+      <div class="info-grid">
+        <section class="info-card glass-card">
+          <h3><i class="fas fa-terminal"></i> Lock-Free CAS Operation Log</h3>
+          <div id="cas-log" class="log-container">
+            <div class="log-entry">Concurrent Skip List initialized with Head/Tail sentinel nodes.</div>
+          </div>
+        </section>
+
+        <section class="info-card glass-card">
+          <h3><i class="fas fa-bolt"></i> Contention & CAS Performance</h3>
+          <div class="metrics-grid">
+            <div class="metric">
+              <span class="m-val" id="metric-cas-success">0</span>
+              <span class="m-lbl">Successful CAS Swaps</span>
+            </div>
+            <div class="metric">
+              <span class="m-val" id="metric-cas-failed">0</span>
+              <span class="m-lbl">CAS Failures & Retries</span>
+            </div>
+            <div class="metric">
+              <span class="m-val" id="metric-unlinked">0</span>
+              <span class="m-lbl">Physically Unlinked Nodes</span>
+            </div>
+          </div>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <script type="module" src="skiplist.js"></script>
+</body>
+</html>

@@ -1,0 +1,326 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PQC Migration Masterclass | Algo Infinity Verse</title>
+  <meta name="description" content="Learn NIST post-quantum cryptography, Shor/Grover threats, ML-KEM, ML-DSA, SPHINCS+, hybrid key exchange, and a practical migration playbook with interactive labs." />
+  <link rel="stylesheet" href="/styles.css" />
+  <link rel="stylesheet" href="style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Poppins:wght@300;400;500;600;700&family=Fira+Code:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <script>
+    (function () {
+      try {
+        var storedTheme = localStorage.getItem('theme');
+        var prefersLight = window.matchMedia('(prefers-color-scheme: light)').matches;
+        var theme = storedTheme || (prefersLight ? 'light' : 'dark');
+        if (theme === 'light') {
+          document.documentElement.classList.add('light-mode');
+        } else {
+          document.documentElement.classList.remove('light-mode');
+        }
+      } catch (e) {}
+    })();
+  </script>
+</head>
+<body data-page="pqc-migration-masterclass">
+  <a href="#pqc-main" class="pqc-skip-link">Skip to main content</a>
+  <button type="button" id="scrollTopBtn" class="scroll-top-btn" aria-label="Scroll to top">
+    <i class="fas fa-arrow-up" aria-hidden="true"></i>
+  </button>
+
+  <div id="navbar-placeholder"></div>
+
+  <header class="pqc-hero">
+    <div class="pqc-hero-badge">
+      <i class="fas fa-atom" aria-hidden="true"></i>
+      Post-Quantum Cryptography Academy
+    </div>
+    <h1>
+      PQC Migration
+      <span class="pqc-hero-accent">Masterclass</span>
+    </h1>
+    <p>
+      Master NIST FIPS 203/204 algorithms, quantum threats to RSA/ECC, hybrid handshakes,
+      and a practical playbook for migrating applications to quantum-safe crypto.
+    </p>
+    <div class="pqc-hero-stats" aria-live="polite">
+      <div class="pqc-stat">
+        <span class="pqc-stat-val" id="statModulesDone">0</span>
+        <span class="pqc-stat-label">Modules done</span>
+      </div>
+      <div class="pqc-stat">
+        <span class="pqc-stat-val" id="statModulesTotal">8</span>
+        <span class="pqc-stat-label">Total modules</span>
+      </div>
+      <div class="pqc-stat">
+        <span class="pqc-stat-val" id="statProgressPct">0%</span>
+        <span class="pqc-stat-label">Progress</span>
+      </div>
+      <div class="pqc-stat">
+        <span class="pqc-stat-val" id="statQuizBest">—</span>
+        <span class="pqc-stat-label">Quiz best</span>
+      </div>
+    </div>
+    <div class="pqc-progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-label="Course progress" id="heroProgressBar">
+      <div class="pqc-progress-fill" id="heroProgressFill"></div>
+    </div>
+  </header>
+
+  <main id="pqc-main" class="pqc-main">
+    <div class="pqc-container">
+
+      <!-- Learning modules -->
+      <section class="pqc-section" aria-labelledby="modules-title">
+        <div class="pqc-section-head">
+          <h2 id="modules-title">
+            <i class="fas fa-book-open" aria-hidden="true"></i>
+            Learning modules
+          </h2>
+          <p>Work through eight focused lessons. Mark each complete to track progress in localStorage.</p>
+        </div>
+
+        <div class="pqc-modules-layout">
+          <nav class="pqc-module-nav" aria-label="Module list">
+            <ul class="pqc-module-list" id="moduleList" role="list"></ul>
+          </nav>
+
+          <article class="pqc-lesson-panel" id="lessonPanel" aria-labelledby="lessonTitle">
+            <div class="pqc-lesson-header">
+              <h3 id="lessonTitle">Select a module</h3>
+              <span class="pqc-lesson-badge" id="lessonBadge" hidden>Completed</span>
+            </div>
+            <div class="pqc-lesson-body" id="lessonBody">
+              <p class="pqc-muted">Choose a module from the sidebar to begin.</p>
+            </div>
+            <div class="pqc-lesson-actions">
+              <button type="button" class="pqc-btn pqc-btn-primary" id="markCompleteBtn" disabled>
+                <i class="fas fa-check" aria-hidden="true"></i>
+                Mark complete
+              </button>
+              <button type="button" class="pqc-btn pqc-btn-ghost" id="prevModuleBtn" disabled>
+                <i class="fas fa-chevron-left" aria-hidden="true"></i>
+                Previous
+              </button>
+              <button type="button" class="pqc-btn pqc-btn-ghost" id="nextModuleBtn" disabled>
+                Next
+                <i class="fas fa-chevron-right" aria-hidden="true"></i>
+              </button>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <!-- Cryptographic suite auditor -->
+      <section class="pqc-section" aria-labelledby="auditor-title">
+        <div class="pqc-section-head">
+          <h2 id="auditor-title">
+            <i class="fas fa-shield-halved" aria-hidden="true"></i>
+            Cryptographic suite auditor
+          </h2>
+          <p>Select algorithms to compare key sizes, quantum safety, and migration advice.</p>
+        </div>
+
+        <div class="pqc-lab-grid">
+          <div class="pqc-panel">
+            <fieldset class="pqc-fieldset">
+              <legend class="pqc-label">Select algorithms to compare</legend>
+              <div class="pqc-algo-picks" id="algoPicks" role="group" aria-label="Cryptographic algorithms"></div>
+            </fieldset>
+            <div class="pqc-btn-row">
+              <button type="button" class="pqc-btn pqc-btn-primary" id="compareAlgosBtn">
+                <i class="fas fa-scale-balanced" aria-hidden="true"></i>
+                Compare selected
+              </button>
+              <button type="button" class="pqc-btn pqc-btn-ghost" id="selectAllAlgosBtn">
+                <i class="fas fa-check-double" aria-hidden="true"></i>
+                Select all
+              </button>
+            </div>
+          </div>
+
+          <div class="pqc-panel">
+            <h3 class="pqc-panel-subtitle">Comparison report</h3>
+            <div id="auditorResults" class="pqc-results" role="status" aria-live="polite">
+              <p class="pqc-muted">Select one or more algorithms and click Compare.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Quantum attack timeline estimator -->
+      <section class="pqc-section" aria-labelledby="timeline-title">
+        <div class="pqc-section-head">
+          <h2 id="timeline-title">
+            <i class="fas fa-clock-rotate-left" aria-hidden="true"></i>
+            Quantum attack timeline estimator
+          </h2>
+          <p>Educational heuristics for Shor/Grover impact under adjustable qubit-growth assumptions — not a prediction.</p>
+        </div>
+
+        <div class="pqc-panel">
+          <div class="pqc-slider-grid">
+            <div class="pqc-slider-block">
+              <label class="pqc-label" for="qubitsNow">Logical qubits available today (est.)</label>
+              <div class="pqc-slider-row">
+                <input type="range" id="qubitsNow" min="50" max="5000" step="50" value="200" aria-describedby="qubitsNowVal" />
+                <span class="pqc-slider-val" id="qubitsNowVal">200</span>
+              </div>
+            </div>
+            <div class="pqc-slider-block">
+              <label class="pqc-label" for="qubitsPerYear">Qubit growth per year (heuristic)</label>
+              <div class="pqc-slider-row">
+                <input type="range" id="qubitsPerYear" min="50" max="2000" step="50" value="400" aria-describedby="qubitsPerYearVal" />
+                <span class="pqc-slider-val" id="qubitsPerYearVal">400</span>
+              </div>
+            </div>
+            <div class="pqc-slider-block">
+              <label class="pqc-label" for="errorRateImprove">Error-rate improvement factor / decade</label>
+              <div class="pqc-slider-row">
+                <input type="range" id="errorRateImprove" min="1" max="20" step="1" value="5" aria-describedby="errorRateImproveVal" />
+                <span class="pqc-slider-val" id="errorRateImproveVal">5×</span>
+              </div>
+            </div>
+            <div class="pqc-slider-block">
+              <label class="pqc-label" for="rsaBits">RSA modulus size to model (bits)</label>
+              <div class="pqc-slider-row">
+                <input type="range" id="rsaBits" min="1024" max="4096" step="512" value="2048" aria-describedby="rsaBitsVal" />
+                <span class="pqc-slider-val" id="rsaBitsVal">2048</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="pqc-btn-row">
+            <button type="button" class="pqc-btn pqc-btn-primary" id="estimateTimelineBtn">
+              <i class="fas fa-calculator" aria-hidden="true"></i>
+              Estimate timeline
+            </button>
+            <button type="button" class="pqc-btn pqc-btn-secondary" id="resetTimelineBtn">
+              <i class="fas fa-rotate-left" aria-hidden="true"></i>
+              Reset defaults
+            </button>
+          </div>
+
+          <div id="timelineResults" class="pqc-timeline-results" role="status" aria-live="polite">
+            <p class="pqc-muted">Adjust sliders and estimate. Results are illustrative teaching aids only.</p>
+          </div>
+          <p class="pqc-disclaimer">
+            <i class="fas fa-circle-info" aria-hidden="true"></i>
+            Disclaimer: qubit counts, error correction overhead, and cryptanalysis estimates vary widely.
+            Use this tool to build intuition — not for compliance or threat forecasting.
+          </p>
+        </div>
+      </section>
+
+      <!-- Hybrid handshake simulator -->
+      <section class="pqc-section" aria-labelledby="handshake-title">
+        <div class="pqc-section-head">
+          <h2 id="handshake-title">
+            <i class="fas fa-handshake" aria-hidden="true"></i>
+            Hybrid handshake simulator
+          </h2>
+          <p>Walk through classical ECDH → Kyber encapsulate → combine secrets → derive keys.</p>
+        </div>
+
+        <div class="pqc-panel">
+          <div class="pqc-handshake-toolbar">
+            <button type="button" class="pqc-btn pqc-btn-primary" id="startHandshakeBtn">
+              <i class="fas fa-play" aria-hidden="true"></i>
+              Start / restart
+            </button>
+            <button type="button" class="pqc-btn pqc-btn-secondary" id="nextHandshakeBtn" disabled>
+              <i class="fas fa-forward-step" aria-hidden="true"></i>
+              Next step
+            </button>
+            <button type="button" class="pqc-btn pqc-btn-ghost" id="autoHandshakeBtn">
+              <i class="fas fa-bolt" aria-hidden="true"></i>
+              Auto-play
+            </button>
+            <span class="pqc-handshake-status" id="handshakeStatus" aria-live="polite">Idle</span>
+          </div>
+
+          <ol class="pqc-handshake-steps" id="handshakeSteps" aria-label="Hybrid handshake steps">
+            <li class="pqc-hs-step" data-step="0">
+              <span class="pqc-hs-num">1</span>
+              <div class="pqc-hs-body">
+                <strong>Classical ECDH (X25519)</strong>
+                <p>Client &amp; server exchange ephemeral public keys and compute a shared classical secret.</p>
+              </div>
+            </li>
+            <li class="pqc-hs-step" data-step="1">
+              <span class="pqc-hs-num">2</span>
+              <div class="pqc-hs-body">
+                <strong>Kyber-768 encapsulate</strong>
+                <p>Client encapsulates to the server’s ML-KEM public key; ciphertext travels on the wire.</p>
+              </div>
+            </li>
+            <li class="pqc-hs-step" data-step="2">
+              <span class="pqc-hs-num">3</span>
+              <div class="pqc-hs-body">
+                <strong>Combine secrets</strong>
+                <p>Concatenate (or KDF-mix) classical ECDH output with Kyber shared secret.</p>
+              </div>
+            </li>
+            <li class="pqc-hs-step" data-step="3">
+              <span class="pqc-hs-num">4</span>
+              <div class="pqc-hs-body">
+                <strong>Derive session keys</strong>
+                <p>HKDF expands the hybrid secret into traffic keys — secure if either component holds.</p>
+              </div>
+            </li>
+          </ol>
+
+          <div id="handshakeDetail" class="pqc-handshake-detail" role="status" aria-live="polite">
+            <p class="pqc-muted">Press Start to begin the visual hybrid handshake flow.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Quiz -->
+      <section class="pqc-section" aria-labelledby="quiz-title">
+        <div class="pqc-section-head">
+          <h2 id="quiz-title">
+            <i class="fas fa-clipboard-question" aria-hidden="true"></i>
+            Self-assessment quiz
+          </h2>
+          <p>Seven questions on NIST PQC, quantum threats, and hybrid migration. Best score is saved.</p>
+        </div>
+
+        <div class="pqc-panel">
+          <form id="quizForm" class="pqc-quiz" novalidate>
+            <div id="quizQuestions"></div>
+            <div class="pqc-btn-row">
+              <button type="submit" class="pqc-btn pqc-btn-primary" id="submitQuizBtn">
+                <i class="fas fa-paper-plane" aria-hidden="true"></i>
+                Submit quiz
+              </button>
+              <button type="button" class="pqc-btn pqc-btn-ghost" id="resetQuizBtn">
+                <i class="fas fa-rotate-left" aria-hidden="true"></i>
+                Reset
+              </button>
+            </div>
+          </form>
+          <div id="quizResult" class="pqc-quiz-result" role="status" aria-live="polite" hidden></div>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <div id="footer-placeholder"></div>
+
+  <script src="/auth.js"></script>
+  <script src="/bootstrap-legacy.js"></script>
+  <script src="/script.js"></script>
+  <script type="module" src="/dist/legacy-bundle.mjs"></script>
+  <script src="/theme.js"></script>
+  <script src="script.js"></script>
+  <script>
+    if (typeof loadPartial === 'function') {
+      loadPartial('navbar-placeholder', '/partials/navbar.html');
+      loadPartial('footer-placeholder', '/partials/footer.html');
+    }
+  </script>
+</body>
+</html>

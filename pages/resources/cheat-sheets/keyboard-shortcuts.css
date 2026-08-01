@@ -1,0 +1,356 @@
+/* ============================================================
+   Keyboard Shortcuts Cheat Sheet
+   Reuses the homepage design system (pages/home/home.css).
+   ============================================================ */
+
+/* Background to match homepage palette */
+body[data-page='keyboard-shortcuts'] {
+  background: var(--hp-bg);
+}
+
+/* Compact hero (homepage .hp-hero is 90vh — trim it) */
+.ks-hero {
+  min-height: auto;
+  padding: 150px 32px 72px;
+}
+
+.ks-hero .hp-hero-content {
+  max-width: 820px;
+}
+
+.ks-hero .hp-hero-subtitle {
+  font-size: clamp(0.95rem, 1.6vw, 1.1rem);
+}
+
+.ks-mod {
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 600;
+  color: var(--hp-text);
+  background: rgba(var(--hp-lavender-rgb), 0.08);
+  border: 1px solid rgba(var(--hp-lavender-rgb), 0.18);
+  border-radius: 6px;
+  padding: 1px 7px;
+  white-space: nowrap;
+}
+
+/* ── Shortcut grid (home.css styles .shortcuts-section h4; add h3) ── */
+.ks-shortcuts .shortcuts-section h3 {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--hp-text);
+  margin: 0 0 12px 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  letter-spacing: 0.02em;
+}
+
+.ks-shortcuts .shortcuts-section h3 i {
+  font-size: 0.9rem;
+}
+
+.ks-shortcuts .shortcuts-section:has(h3 i.fa-compass) {
+  background: rgba(212, 196, 240, 0.05);
+  border: 1px solid rgba(212, 196, 240, 0.1);
+}
+
+.ks-shortcuts .shortcuts-section:has(h3 i.fa-compass):hover {
+  box-shadow: 0 4px 20px rgba(212, 196, 240, 0.06);
+  border-color: rgba(212, 196, 240, 0.18);
+}
+
+.ks-shortcuts .shortcuts-section:has(h3 i.fa-search) {
+  background: rgba(192, 212, 234, 0.05);
+  border: 1px solid rgba(192, 212, 234, 0.1);
+}
+
+.ks-shortcuts .shortcuts-section:has(h3 i.fa-search):hover {
+  box-shadow: 0 4px 20px rgba(192, 212, 234, 0.06);
+  border-color: rgba(192, 212, 234, 0.18);
+}
+
+.ks-shortcuts .shortcuts-section:has(h3 i.fa-code) {
+  background: rgba(188, 200, 240, 0.05);
+  border: 1px solid rgba(188, 200, 240, 0.1);
+}
+
+.ks-shortcuts .shortcuts-section:has(h3 i.fa-code):hover {
+  box-shadow: 0 4px 20px rgba(188, 200, 240, 0.06);
+  border-color: rgba(188, 200, 240, 0.18);
+}
+
+.ks-shortcuts .shortcuts-section:has(h3 i.fa-globe) {
+  background: rgba(242, 213, 196, 0.04);
+  border: 1px solid rgba(242, 213, 196, 0.1);
+}
+
+.ks-shortcuts .shortcuts-section:has(h3 i.fa-globe):hover {
+  box-shadow: 0 4px 20px rgba(242, 213, 196, 0.06);
+  border-color: rgba(242, 213, 196, 0.18);
+}
+
+.ks-shortcuts .shortcuts-section:has(h3 i.fa-play) {
+  background: rgba(237, 200, 210, 0.05);
+  border: 1px solid rgba(237, 200, 210, 0.1);
+}
+
+.ks-shortcuts .shortcuts-section:has(h3 i.fa-play):hover {
+  box-shadow: 0 4px 20px rgba(237, 200, 210, 0.06);
+  border-color: rgba(237, 200, 210, 0.18);
+}
+
+.ks-shortcuts .shortcuts-section:has(h3 i.fa-compass) h3 i {
+  color: var(--hp-lavender);
+}
+.ks-shortcuts .shortcuts-section:has(h3 i.fa-search) h3 i {
+  color: var(--hp-sky);
+}
+.ks-shortcuts .shortcuts-section:has(h3 i.fa-code) h3 i {
+  color: var(--hp-periwinkle);
+}
+.ks-shortcuts .shortcuts-section:has(h3 i.fa-globe) h3 i {
+  color: var(--hp-peach);
+}
+.ks-shortcuts .shortcuts-section:has(h3 i.fa-play) h3 i {
+  color: var(--hp-rose);
+}
+
+/* Editor redo note */
+.ks-note {
+  margin: 12px 0 0;
+  font-size: 0.72rem;
+  color: var(--hp-text-tertiary);
+}
+
+.ks-note kbd {
+  padding: 1px 6px;
+  font-size: 0.65rem;
+}
+
+/* Bottom tip */
+.ks-tip {
+  margin: 40px 0 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  text-align: center;
+  font-size: 0.88rem;
+  color: var(--hp-text-secondary);
+}
+
+.ks-tip i {
+  color: var(--hp-lavender);
+}
+
+.ks-tip kbd {
+  display: inline-block;
+  padding: 2px 8px;
+  background: rgba(30, 41, 59, 0.9);
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  border-radius: 5px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  font-family: 'JetBrains Mono', monospace;
+  color: #e2e8f0;
+}
+
+/* ── Responsive: keep the modal's 2-col grid from getting cramped ── */
+@media (max-width: 640px) {
+  .ks-hero {
+    padding: 130px 24px 56px;
+  }
+
+  .shortcuts-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ===== PRINT STYLES ===== */
+@media print {
+  @page {
+    margin: 1cm;
+  }
+
+  html,
+  body {
+    background: #ffffff !important;
+    color: #000000 !important;
+  }
+
+  body {
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  /* Hide non-content chrome */
+  #navbar-placeholder,
+  #footer-placeholder,
+  .navbar,
+  .footer,
+  #scrollTopBtn,
+  .scroll-top-btn,
+  .skip-link,
+  .ks-hero .hp-hero-shapes,
+  .ks-hero .hp-hero-actions {
+    display: none !important;
+  }
+
+  /* Strip hero gradients/overlays, keep just the title + subtitle */
+  .ks-hero {
+    background: #ffffff !important;
+    padding: 0 0 0.5cm !important;
+    min-height: 0 !important;
+    animation: none !important;
+  }
+
+  .ks-hero::after {
+    display: none !important;
+  }
+
+  .ks-hero .hp-hero-title,
+  .ks-hero .hp-hero-subtitle,
+  .ks-hero .hp-gradient-text {
+    color: #000000 !important;
+    -webkit-text-fill-color: initial;
+    animation: none !important;
+  }
+
+  .ks-hero .hp-hero-title {
+    font-size: 1.6rem;
+    margin-bottom: 0.3cm;
+  }
+
+  .ks-hero .hp-hero-subtitle {
+    font-size: 0.78rem;
+    margin-bottom: 0;
+    color: #000000 !important;
+  }
+
+  .ks-mod {
+    background: #f1f5f9;
+    border-color: #94a3b8;
+    color: #000000;
+  }
+
+  .ks-shortcuts {
+    padding: 0.5cm 0 0 !important;
+  }
+
+  .ks-shortcuts .hp-section-header {
+    margin-bottom: 0.4cm;
+  }
+
+  .ks-shortcuts .hp-section-eyebrow {
+    color: #334155 !important;
+    margin-bottom: 0.15cm;
+  }
+
+  .ks-shortcuts .hp-section-eyebrow::before {
+    background: #334155;
+  }
+
+  .ks-shortcuts .hp-section-title {
+    font-size: 1.15rem;
+    color: #000000 !important;
+  }
+
+  .ks-shortcuts .hp-section-subtitle {
+    font-size: 0.72rem;
+    margin-top: 0.2cm;
+    color: #000000 !important;
+  }
+
+  /* Force reveal-hidden cards visible on paper */
+  .hp-reveal {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+
+  .shortcuts-grid {
+    gap: 0.45cm;
+  }
+
+  .shortcuts-section {
+    background: #ffffff !important;
+    border: 1px solid #94a3b8;
+    box-shadow: none !important;
+    border-radius: 6px;
+    padding: 0.35cm 0.4cm;
+    transform: none !important;
+  }
+
+  .ks-shortcuts .shortcuts-section h3 {
+    color: #000000 !important;
+    font-size: 0.78rem;
+    margin-bottom: 0.25cm;
+    padding-bottom: 0.15cm;
+    border-bottom: 1px solid #cbd5e1;
+  }
+
+  .ks-shortcuts .shortcuts-section:has(h3 i.fa-compass),
+  .ks-shortcuts .shortcuts-section:has(h3 i.fa-search),
+  .ks-shortcuts .shortcuts-section:has(h3 i.fa-code),
+  .ks-shortcuts .shortcuts-section:has(h3 i.fa-globe),
+  .ks-shortcuts .shortcuts-section:has(h3 i.fa-play) {
+    background: #ffffff !important;
+    border-color: #94a3b8;
+  }
+
+  .ks-shortcuts .shortcuts-section:has(h3 i.fa-compass) h3 i,
+  .ks-shortcuts .shortcuts-section:has(h3 i.fa-search) h3 i,
+  .ks-shortcuts .shortcuts-section:has(h3 i.fa-code) h3 i,
+  .ks-shortcuts .shortcuts-section:has(h3 i.fa-globe) h3 i,
+  .ks-shortcuts .shortcuts-section:has(h3 i.fa-play) h3 i {
+    color: #334155;
+  }
+
+  .shortcuts-table {
+    font-size: 0.68rem;
+  }
+
+  .shortcuts-table tr {
+    border-bottom: 1px solid #e2e8f0;
+  }
+
+  .shortcuts-table tr:hover {
+    background: none;
+  }
+
+  .shortcuts-table td {
+    padding: 0.16cm 0.1cm;
+    color: #000000 !important;
+  }
+
+  .shortcuts-table td:first-child {
+    color: #000000 !important;
+    min-width: 0;
+    white-space: normal;
+  }
+
+  .shortcuts-table kbd,
+  .ks-note kbd,
+  .ks-tip kbd {
+    background: #f1f5f9 !important;
+    border: 1px solid #94a3b8;
+    color: #000000 !important;
+    box-shadow: none !important;
+    font-size: 0.58rem;
+    padding: 1px 5px;
+  }
+
+  .ks-note,
+  .ks-tip {
+    color: #000000 !important;
+  }
+
+  .ks-note {
+    font-size: 0.62rem;
+  }
+
+  .ks-tip {
+    font-size: 0.68rem;
+    margin-top: 0.5cm;
+  }
+}

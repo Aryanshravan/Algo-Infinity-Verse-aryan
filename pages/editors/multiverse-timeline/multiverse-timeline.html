@@ -1,0 +1,291 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Multiverse Timeline Resolver | Algo Infinity Verse</title>
+    <link rel="stylesheet" href="/styles.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <!-- Monaco Editor -->
+    <script src="https://unpkg.com/monaco-editor@0.36.1/min/vs/loader.js"></script>
+    <style>
+      body { margin: 0; overflow: hidden; background: #000; font-family: 'Poppins', sans-serif; color: #fff; }
+      .app-container { display: flex; height: 100vh; }
+      
+      .sidebar { width: 450px; background: rgba(15, 23, 42, 0.95); border-right: 1px solid #c026d3; display: flex; flex-direction: column; z-index: 10; }
+      .header { padding: 20px; border-bottom: 1px solid #334155; }
+      .header h2 { margin: 0; color: #c026d3; font-family: 'Orbitron', sans-serif; font-size: 1.2rem; }
+      .header p { margin: 5px 0 0 0; font-size: 0.8rem; color: #94a3b8; }
+      
+      #editor-container { flex: 1; min-height: 300px; }
+      
+      .controls { padding: 20px; border-top: 1px solid #334155; background: rgba(0,0,0,0.5); }
+      .btn { background: linear-gradient(90deg, #a21caf, #86198f); color: #fff; border: none; padding: 10px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; transition: 0.3s; }
+      .btn:hover { background: #c026d3; transform: translateY(-2px); box-shadow: 0 0 15px rgba(192, 38, 211, 0.5); }
+      
+      .sim-container { flex: 1; position: relative; background: #020617; overflow: hidden; }
+      canvas { width: 100%; height: 100%; display: block; filter: contrast(1.2); }
+      
+      .hud { position: absolute; top: 20px; left: 20px; background: rgba(0,0,0,0.8); padding: 15px; border-radius: 8px; border: 1px solid #c026d3; width: 280px; z-index: 10; pointer-events: none; }
+      .hud h3 { margin: 0 0 10px 0; color: #c026d3; font-size: 1rem; font-family: 'Orbitron', sans-serif; }
+      .metric { display: flex; justify-content: space-between; font-size: 0.8rem; color: #cbd5e1; margin-bottom: 5px; }
+      .val { font-weight: bold; font-family: monospace; }
+      .val-paradox { color: #ef4444; }
+      .val-diverge { color: #facc15; }
+    </style>
+  </head>
+  <body>
+    
+    <div class="app-container">
+      <div class="sidebar">
+        <div class="header">
+          <h2><i class="fas fa-history"></i> Multiverse Timeline</h2>
+          <p>Quantum Causality Resolver</p>
+        </div>
+        
+        <div id="editor-container"></div>
+        
+        <div class="controls">
+          <button class="btn" onclick="initiateChronos()"><i class="fas fa-hourglass-start"></i> Engage Chronos Engine</button>
+        </div>
+      </div>
+      
+      <div class="sim-container">
+        <!-- Grid Background -->
+        <div style="position: absolute; inset:0; background: 
+            linear-gradient(rgba(192, 38, 211, 0.1) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(192, 38, 211, 0.1) 1px, transparent 1px);
+            background-size: 50px 50px; pointer-events: none; z-index: 0; opacity: 0.3;"></div>
+            
+        <canvas id="timeCanvas" style="position: relative; z-index: 1;"></canvas>
+        
+        <div class="hud">
+          <h3>Temporal Telemetry</h3>
+          <div class="metric"><span>Paradox Risk:</span> <span class="val val-paradox" id="paradoxVal">0%</span></div>
+          <div class="metric"><span>Active Divergences:</span> <span class="val val-diverge" id="divergeVal">0</span></div>
+          <div class="metric"><span>Causality Flow:</span> <span class="val" id="flowVal" style="color:#38bdf8">1.0 C</span></div>
+          <div class="metric" style="margin-top: 10px; border-top: 1px solid #334155; padding-top: 5px;">
+            <span>Reality State:</span> <span class="val" id="statusVal" style="color:#94a3b8">STABLE (Trunk)</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      let editor;
+      require.config({ paths: { 'vs': 'https://unpkg.com/monaco-editor@0.36.1/min/vs' }});
+      require(['vs/editor/editor.main'], function() {
+        editor = monaco.editor.create(document.getElementById('editor-container'), {
+          value: `// Temporal Divergence Resolution Algorithm
+// Time travelers keep branching the timeline (divergence).
+// You must prune these branches back into the main trunk.
+// If you pull too hard, you create a grandfather paradox (causality breaks).
+// If you ignore them, the multiverse shatters from too many timelines.
+
+function resolveDivergence(divergenceDistance, currentParadoxRisk) {
+    // Return { chronalPull: float (0.0 to 1.0) }
+    // chronalPull > 0 pulls the timeline back to the center trunk.
+    // However, strong pulls generate paradox risk exponentially.
+    
+    // Naive logic: YANK IT BACK!
+    // Result: Grandfather paradox immediately shatters reality.
+    
+    return {
+        chronalPull: 1.0
+    };
+}`,
+          language: 'javascript',
+          theme: 'vs-dark',
+          minimap: { enabled: false },
+          automaticLayout: true
+        });
+      });
+
+      const canvas = document.getElementById('timeCanvas');
+      const ctx = canvas.getContext('2d');
+      
+      let isSimulating = false;
+      let time = 0; // The meta-time
+      
+      let branches = [];
+      let paradoxRisk = 0;
+      
+      function resize() { 
+          canvas.width = canvas.clientWidth; 
+          canvas.height = canvas.clientHeight;
+      }
+      
+      setTimeout(resize, 100);
+      window.addEventListener('resize', resize);
+
+      function animate() {
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+          let cx = canvas.width / 2;
+
+          if (isSimulating) {
+              time += 1;
+              
+              // Random time travel events cause branches
+              if (Math.random() < 0.1 && branches.length < 50) {
+                  branches.push({
+                      id: Math.random(),
+                      y: 0, // Starts at the present moment (top of screen)
+                      x: (Math.random() - 0.5) * 50, // Initial tiny divergence
+                      velocity: (Math.random() - 0.5) * 2 // Drifts away from trunk (cx)
+                  });
+              }
+              
+              // Natural paradox decay (reality heals itself slowly)
+              paradoxRisk -= 0.5;
+              
+              let totalPullForce = 0;
+              
+              for(let i = branches.length - 1; i >= 0; i--) {
+                  let b = branches[i];
+                  b.y += 2; // Moves down the timeline (into the past)
+                  
+                  // Natural drift
+                  b.x += b.velocity;
+                  b.velocity *= 1.01; // Exponentially diverges
+                  
+                  // Run user algorithm
+                  let pull = 0;
+                  try {
+                      eval(editor.getValue());
+                      let res = resolveDivergence(Math.abs(b.x), paradoxRisk);
+                      if (res && res.chronalPull !== undefined) {
+                          pull = Math.max(0, Math.min(1.0, res.chronalPull));
+                      }
+                  } catch(e) {}
+                  
+                  // Apply pull back to center (0 relative to cx)
+                  let force = pull * 5.0;
+                  if (b.x > 0) {
+                      b.x -= force;
+                      b.velocity -= force * 0.1;
+                  } else {
+                      b.x += force;
+                      b.velocity += force * 0.1;
+                  }
+                  
+                  // Paradox generation
+                  // If you pull a branch that has diverged too far, it creates massive paradox
+                  if (pull > 0) {
+                      let strain = (Math.abs(b.x) / 100) * pull;
+                      paradoxRisk += strain;
+                  }
+                  
+                  // Resolved?
+                  if (Math.abs(b.x) < 2) {
+                      branches.splice(i, 1);
+                      continue;
+                  }
+                  
+                  // Shatter bounds?
+                  if (Math.abs(b.x) > canvas.width / 2) {
+                      isSimulating = false;
+                      document.getElementById('statusVal').innerText = "MULTIVERSE SHATTERED (TOO MANY BRANCHES)";
+                      document.getElementById('statusVal').style.color = "#ef4444";
+                  }
+              }
+              
+              if (paradoxRisk < 0) paradoxRisk = 0;
+              
+              // Win/Loss
+              if (paradoxRisk >= 100) {
+                  isSimulating = false;
+                  document.getElementById('statusVal').innerText = "CAUSALITY COLLAPSE (GRANDFATHER PARADOX)";
+                  document.getElementById('statusVal').style.color = "#ef4444";
+              } else if (time > 1000 && paradoxRisk < 20 && branches.length < 5) {
+                  isSimulating = false;
+                  document.getElementById('statusVal').innerText = "TIMELINE SECURED (SACRED TIMELINE)";
+                  document.getElementById('statusVal').style.color = "#10b981";
+              } else {
+                  if (paradoxRisk > 70) {
+                      document.getElementById('statusVal').innerText = "WARNING: HIGH PARADOX STRAIN";
+                      document.getElementById('statusVal').style.color = "#f97316";
+                  } else if (branches.length > 20) {
+                      document.getElementById('statusVal').innerText = "WARNING: REALITY FRACTURING";
+                      document.getElementById('statusVal').style.color = "#facc15";
+                  } else {
+                      document.getElementById('statusVal').innerText = "MAINTAINING CAUSALITY...";
+                      document.getElementById('statusVal').style.color = "#c026d3";
+                  }
+              }
+              
+              // HUD
+              let pxEl = document.getElementById('paradoxVal');
+              pxEl.innerText = paradoxRisk.toFixed(1) + "%";
+              if(paradoxRisk > 70) pxEl.style.color = "#ef4444";
+              else if(paradoxRisk > 40) pxEl.style.color = "#facc15";
+              else pxEl.style.color = "#10b981";
+              
+              document.getElementById('divergeVal').innerText = branches.length;
+          }
+          
+          // Draw Main Trunk (Sacred Timeline)
+          ctx.strokeStyle = paradoxRisk > 80 ? 'rgba(239, 68, 68, 0.8)' : 'rgba(56, 189, 248, 0.8)';
+          ctx.lineWidth = 10;
+          ctx.shadowBlur = 20;
+          ctx.shadowColor = ctx.strokeStyle;
+          ctx.beginPath();
+          ctx.moveTo(cx, 0);
+          ctx.lineTo(cx, canvas.height);
+          ctx.stroke();
+          ctx.shadowBlur = 0;
+          
+          // Draw Branches
+          for(let i = 0; i < branches.length; i++) {
+              let b = branches[i];
+              
+              // Color based on divergence
+              let divAmt = Math.abs(b.x);
+              let r = Math.min(255, divAmt * 2);
+              let g = Math.max(0, 255 - divAmt);
+              
+              ctx.strokeStyle = \`rgba(\${r}, \${g}, 200, 0.7)\`;
+              ctx.lineWidth = 3;
+              
+              // Draw a bezier curve from the trunk down to the branch's current pos
+              ctx.beginPath();
+              // In a real visualization we'd store the history of the branch, but for effect we'll just draw a curve from top
+              let startY = Math.max(0, b.y - 300); 
+              ctx.moveTo(cx, startY);
+              ctx.bezierCurveTo(cx, b.y - 100, cx + b.x, b.y - 50, cx + b.x, b.y);
+              ctx.stroke();
+              
+              // Draw the current "traveler" node
+              ctx.fillStyle = '#fff';
+              ctx.beginPath();
+              ctx.arc(cx + b.x, b.y, 4, 0, Math.PI*2);
+              ctx.fill();
+          }
+          
+          // Screen shake if paradox high
+          if (paradoxRisk > 50) {
+              let shakeX = (Math.random() - 0.5) * (paradoxRisk / 10);
+              let shakeY = (Math.random() - 0.5) * (paradoxRisk / 10);
+              ctx.setTransform(1, 0, 0, 1, shakeX, shakeY);
+          } else {
+              ctx.setTransform(1, 0, 0, 1, 0, 0);
+          }
+
+          requestAnimationFrame(animate);
+      }
+      
+      animate();
+
+      function initiateChronos() {
+          if(isSimulating) return;
+          isSimulating = true;
+          time = 0;
+          branches = [];
+          paradoxRisk = 0;
+          
+          document.getElementById('statusVal').innerText = "ENGINE ENGAGED...";
+          document.getElementById('statusVal').style.color = "#c026d3";
+      }
+    </script>
+  </body>
+</html>

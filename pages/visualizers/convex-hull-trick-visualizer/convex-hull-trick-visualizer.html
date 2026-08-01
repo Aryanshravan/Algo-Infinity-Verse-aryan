@@ -1,0 +1,219 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Convex Hull Trick Visualizer | Algo Infinity Verse</title>
+    <meta name="description" content="Turn O(N) per-query line evaluation into O(log N) — watch dominated lines get discarded from the envelope, then query the hull, then solve a real DP with it." />
+    <link rel="stylesheet" href="../../../styles.css" />
+    <link rel="stylesheet" href="convex-hull-trick-visualizer.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Poppins:wght@300;400;500;600;700&family=Fira+Code:wght@400;500;600&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <link rel="stylesheet" href="/modules/quick-notes/quick-notes.css" />
+  </head>
+  <body data-page="convex-hull-trick-visualizer">
+
+    <div id="navbar-placeholder"></div>
+
+    <button id="scrollTopBtn" aria-label="Scroll to top" class="scroll-top-btn">
+      <i class="fas fa-circle-chevron-up"></i>
+    </button>
+
+    <section class="cht-hero">
+      <div class="cht-hero-bg"><canvas id="chtHeroCanvas" class="cht-hero-canvas"></canvas></div>
+      <div class="cht-hero-inner">
+        <div class="cht-hero-eyebrow">📐 DP Optimization · O(N²) → O(N log N)</div>
+        <h1 class="cht-hero-title">Convex Hull Trick</h1>
+        <p class="cht-hero-sub">Most lines you add will never be the answer to anything. Discard them immediately.</p>
+        <p class="cht-hero-desc">Given a growing set of lines y = mx + b, most recurrences only need the minimum (or maximum) y at a query x. Instead of checking every line, maintain only the ones that can ever win — the lower envelope — and answer queries in O(log N).</p>
+        <a href="#lab" class="btn btn-primary cht-btn-primary"><i class="fas fa-chart-line"></i> Build the Envelope</a>
+      </div>
+    </section>
+
+    <section id="lab" class="section cht-section">
+      <div class="container">
+
+        <div class="cht-mode-tabs">
+          <button class="cht-mode-tab active" data-mode="hull"><i class="fas fa-draw-polygon"></i> Convex Hull Trick</button>
+          <button class="cht-mode-tab" data-mode="lichao"><i class="fas fa-sitemap"></i> Li Chao Tree</button>
+          <button class="cht-mode-tab" data-mode="dp"><i class="fas fa-flask"></i> DP Application</button>
+        </div>
+
+        <!-- Convex Hull Trick panel -->
+        <div class="cht-panel active" id="chtPanelHull">
+
+          <div class="cht-control-card">
+            <div class="cht-row">
+              <span class="cht-row-label">Slope (m)</span>
+              <input type="number" id="chtSlopeInput" class="cht-num-input" value="2" />
+              <span class="cht-row-label">Intercept (b)</span>
+              <input type="number" id="chtInterceptInput" class="cht-num-input" value="0" />
+              <button class="btn cht-btn-primary cht-add-btn" id="chtAddLineBtn"><i class="fas fa-plus"></i> Add Line</button>
+              <button class="btn btn-secondary cht-random-btn" id="chtRandomBtn"><i class="fas fa-shuffle"></i> Add 6 Random Lines</button>
+              <button class="btn btn-secondary cht-reset-btn" id="chtResetBtn"><i class="fas fa-undo"></i> Reset</button>
+            </div>
+            <div class="cht-row">
+              <span class="cht-row-label">Query x</span>
+              <input type="number" id="chtQueryInput" class="cht-num-input" value="3" />
+              <button class="btn cht-btn-primary cht-query-btn" id="chtQueryBtn"><i class="fas fa-magnifying-glass"></i> Query Minimum</button>
+            </div>
+          </div>
+
+          <div class="cht-status" id="chtStatus">Add lines one at a time — watch dominated lines get discarded the instant they can never win.</div>
+
+          <div class="cht-main-layout">
+
+            <div class="cht-plane-section">
+              <div class="cht-panel-title"><i class="fas fa-chart-line"></i> Coordinate Plane — Envelope Highlighted</div>
+              <canvas id="chtPlaneCanvas" class="cht-plane-canvas"></canvas>
+            </div>
+
+            <div class="cht-right-panel">
+
+              <div class="cht-panel-card">
+                <div class="cht-panel-title"><i class="fas fa-list-ol"></i> Envelope (Sorted by Slope)</div>
+                <div class="cht-hull-list" id="chtHullList"><div class="cht-empty">No lines yet.</div></div>
+              </div>
+
+              <div class="cht-panel-card">
+                <div class="cht-panel-title"><i class="fas fa-gauge-high"></i> Query Cost</div>
+                <div class="cht-stat-rows">
+                  <div class="cht-stat-row"><span>Lines added total</span><span id="chtLinesAdded">0</span></div>
+                  <div class="cht-stat-row"><span>Lines in envelope</span><span id="chtEnvelopeSize">0</span></div>
+                  <div class="cht-stat-row"><span>Naive query cost</span><span id="chtNaiveCost">—</span></div>
+                  <div class="cht-stat-row"><span>Hull query cost (binary search)</span><span id="chtHullCost">—</span></div>
+                </div>
+              </div>
+
+              <div class="cht-panel-card">
+                <div class="cht-panel-title"><i class="fas fa-list-check"></i> Log</div>
+                <div class="cht-log" id="chtLog"><div class="cht-empty">No activity yet.</div></div>
+              </div>
+
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Li Chao Tree panel -->
+        <div class="cht-panel" id="chtPanelLichao">
+
+          <div class="cht-control-card">
+            <div class="cht-row">
+              <span class="cht-row-label">Slope (m)</span>
+              <input type="number" id="lcSlopeInput" class="cht-num-input" value="1" />
+              <span class="cht-row-label">Intercept (b)</span>
+              <input type="number" id="lcInterceptInput" class="cht-num-input" value="0" />
+              <button class="btn cht-btn-primary cht-add-btn" id="lcAddLineBtn"><i class="fas fa-plus"></i> Insert Line</button>
+              <button class="btn btn-secondary cht-random-btn" id="lcRandomBtn"><i class="fas fa-shuffle"></i> Insert 6 Random (Non-Monotonic)</button>
+              <button class="btn btn-secondary cht-reset-btn" id="lcResetBtn"><i class="fas fa-undo"></i> Reset</button>
+            </div>
+            <div class="cht-row">
+              <span class="cht-row-label">Query x</span>
+              <input type="number" id="lcQueryInput" class="cht-num-input" value="3" />
+              <button class="btn cht-btn-primary cht-query-btn" id="lcQueryBtn"><i class="fas fa-magnifying-glass"></i> Query at x</button>
+            </div>
+          </div>
+
+          <div class="cht-status" id="lcStatus">Li Chao Tree handles queries in ANY order (not just monotonic) — each segment-tree node owns the best line for its x-range.</div>
+
+          <div class="cht-main-layout">
+            <div class="cht-plane-section">
+              <div class="cht-panel-title"><i class="fas fa-chart-line"></i> Coordinate Plane — Best Line per Node's Range</div>
+              <canvas id="lcPlaneCanvas" class="cht-plane-canvas"></canvas>
+            </div>
+            <div class="cht-right-panel">
+              <div class="cht-panel-card">
+                <div class="cht-panel-title"><i class="fas fa-sitemap"></i> Segment Tree Nodes</div>
+                <div class="cht-hull-list" id="lcTreeList"><div class="cht-empty">No lines yet.</div></div>
+              </div>
+              <div class="cht-panel-card">
+                <div class="cht-panel-title"><i class="fas fa-list-check"></i> Log</div>
+                <div class="cht-log" id="lcLog"><div class="cht-empty">No activity yet.</div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- DP Application panel -->
+        <div class="cht-panel" id="chtPanelDp">
+
+          <div class="cht-control-card">
+            <div class="cht-row">
+              <span class="cht-row-label">Items (heights, e.g. building costs)</span>
+              <button class="btn btn-secondary cht-dp-random-btn" id="chtDpRandomBtn"><i class="fas fa-shuffle"></i> Randomize 10 Items</button>
+              <button class="btn cht-btn-primary cht-dp-run-btn" id="chtDpRunBtn"><i class="fas fa-play"></i> Run DP with CHT</button>
+            </div>
+          </div>
+
+          <div class="cht-status" id="chtDpStatus">Classic "minimum cost to partition into groups, cost = (sum in group)² + penalty" DP — each transition IS a line query.</div>
+
+          <div class="cht-dp-items" id="chtDpItems"></div>
+
+          <div class="cht-main-layout">
+            <div class="cht-plane-section">
+              <div class="cht-panel-title"><i class="fas fa-table-cells"></i> DP Table — OPT[i]</div>
+              <div class="cht-dp-table" id="chtDpTable"></div>
+            </div>
+            <div class="cht-right-panel">
+              <div class="cht-panel-card">
+                <div class="cht-panel-title"><i class="fas fa-gauge-high"></i> Complexity</div>
+                <div class="cht-stat-rows">
+                  <div class="cht-stat-row"><span>Naive O(N²) transitions</span><span id="chtDpNaiveOps">—</span></div>
+                  <div class="cht-stat-row"><span>CHT O(N log N) transitions</span><span id="chtDpChtOps">—</span></div>
+                  <div class="cht-stat-row"><span>Results match</span><span id="chtDpMatch">—</span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <section id="learn" class="section">
+      <div class="container">
+        <h2 class="section-title"><span class="title-icon">📐</span> Why Dominated Lines Vanish</h2>
+        <div class="cht-learn-grid">
+          <div class="cht-learn-card" style="--lc:#06b6d4">
+            <div class="cht-learn-icon">📉</div>
+            <h3>The Lower Envelope</h3>
+            <p>Sort lines by slope. A line is only ever optimal (for a minimum query) over some contiguous range of x — the envelope is exactly the sequence of lines that are each optimal somewhere.</p>
+          </div>
+          <div class="cht-learn-card" style="--lc:#a855f7">
+            <div class="cht-learn-icon">🚫</div>
+            <h3>The "bad" Test</h3>
+            <p>Given three consecutive lines by slope, the middle one is dominated (never optimal anywhere) if the intersection of the outer two lines occurs at an x where the middle line is already worse. This single geometric test is checked every time a new line is added.</p>
+          </div>
+          <div class="cht-learn-card" style="--lc:#22c55e">
+            <div class="cht-learn-icon">🔍</div>
+            <h3>Binary Search on the Hull</h3>
+            <p>Because the envelope's optimal x-ranges are sorted, binary searching for which line wins at a given x takes O(log N) — dramatically cheaper than evaluating all N lines directly.</p>
+          </div>
+          <div class="cht-learn-card" style="--lc:#f59e0b">
+            <div class="cht-learn-icon">🌲</div>
+            <h3>Li Chao Tree for Non-Monotonic Queries</h3>
+            <p>If lines arrive in arbitrary slope order or queries aren't sorted, a Li Chao Tree — a segment tree where each node keeps only the best line for its x-range — handles insertion and query both in O(log(range size)) without needing the sorted-envelope structure at all.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div id="footer-placeholder"></div>
+
+    <script src="../../../auth.js"></script>
+    <script src="../../../script.js"></script>
+    <script src="../../../theme.js"></script>
+    <script src="../../../auth-gate.js"></script>
+    <script src="convex-hull-trick-visualizer.js"></script>
+    <script>
+      if (typeof loadPartial === 'function') {
+        loadPartial('navbar-placeholder', '/partials/navbar.html').then(function() {
+          if (typeof initNavbar === 'function') initNavbar();
+        });
+        loadPartial('footer-placeholder', '/partials/footer.html');
+      }
+    </script>
+    <script src="/modules/quick-notes/quick-notes.js"></script>
+  </body>
+</html>

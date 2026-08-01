@@ -18,12 +18,14 @@ let ST_COL = {
   PARTIAL : { fill: 'rgba(245,158,11,0.25)',  stroke: '#f59e0b',  text: '#fde68a' },
   NONE    : { fill: 'rgba(100,116,139,0.12)', stroke: '#64748b',  text: '#64748b' },
   UPDATED : { fill: 'rgba(6,182,212,0.25)',   stroke: '#06b6d4',  text: '#a5f3fc' },
+  LAZY    : { fill: 'rgba(236,72,153,0.25)',  stroke: '#ec4899',  text: '#fbcfe8' },
 };
 
 /* ─── State ─── */
 let stState = {
   arr       : [],
   tree      : [],        // segment tree array (1-indexed)
+  lazy      : [],        // lazy propagation tags (1-indexed)
   n         : 0,
   nodePos   : {},        // nodePos[idx] = {x, y, r}
   nodeColor : {},        // nodeColor[idx] = key of ST_COL
@@ -35,6 +37,7 @@ let stState = {
   hoveredIndex: null,
   arrBackup : null,
   treeBackup: null,
+  lazyBackup: null,
 };
 
 /* ─── Pulse Animation State ─── */
@@ -68,8 +71,24 @@ function stBuild(arr) {
   return tree;
 }
 
-/* ─── Generate Query Steps ─── */
-function stGenQuerySteps(tree, n, l, r) {
+/* ─── Lazy Propagation: Push Down ─── */
+function stPushDown(tree, lazy, node, start, end) {
+  if (lazy[node] !== 0) {
+    let mid = Math.floor((start + end) / 2);
+    let leftChild = 2 * node;
+    let rightChild = 2 * node + 1;
+    let leftSize = mid - start + 1;
+    let rightSize = end - mid;
+    tree[leftChild] += lazy[node] * leftSize;
+    tree[rightChild] += lazy[node] * rightSize;
+    lazy[leftChild] += lazy[node];
+    lazy[rightChild] += lazy[node];
+    lazy[node] = 0;
+  }
+}
+
+/* ─── Generate Query Steps (with lazy push-down) ─── */
+function stGenQuerySteps(tree, lazy, n, l, r) {
   let steps = [];
   function query(node, start, end, l, r) {
     if (r < start || end < l) {
@@ -81,6 +100,12 @@ function stGenQuerySteps(tree, n, l, r) {
       steps.push({ type: 'visit', node: node, color: 'MATCH', start: start, end: end,
         msg: 'Node ' + node + ' [' + start + '..' + end + '] — fully inside [' + l + '..' + r + ']. Return ' + tree[node] + '.' });
       return tree[node];
+    }
+    // Push down pending lazy tags before descending
+    if (start !== end && lazy[node] !== 0) {
+      steps.push({ type: 'propagate-lazy', node: node, color: 'LAZY', start: start, end: end,
+        msg: 'Node ' + node + ' [' + start + '..' + end + ']: flushing pending lazy tag (' + lazy[node] + ') to children before query.' });
+      stPushDown(tree, lazy, node, start, end);
     }
     steps.push({ type: 'visit', node: node, color: 'PARTIAL', start: start, end: end,
       msg: 'Node ' + node + ' [' + start + '..' + end + '] — partial overlap. Recurse into children.' });
@@ -94,6 +119,64 @@ function stGenQuerySteps(tree, n, l, r) {
   let result = query(1, 0, n - 1, l, r);
   steps.push({ type: 'result', node: -1, color: null,
     msg: 'Query sum [' + l + '..' + r + '] = ' + result, result: result });
+  return steps;
+}
+
+/* ─── Generate Range Update Steps (Lazy Propagation) ─── */
+function stGenRangeUpdateSteps(tree, lazy, arr, n, l, r, val) {
+  let steps = [];
+  steps.push({ type: 'start', node: -1, color: null,
+    msg: 'Range Update: add ' + val + ' to all elements in [' + l + '..' + r + '] using lazy propagation.' });
+
+  function rangeUpdate(node, start, end, l, r, val) {
+    // Push down any existing lazy tag before processing
+    if (start !== end && lazy[node] !== 0) {
+      steps.push({ type: 'propagate-lazy', node: node, color: 'LAZY', start: start, end: end,
+        msg: 'Node ' + node + ' [' + start + '..' + end + ']: flushing pending lazy tag (' + lazy[node] + ') to children.' });
+      stPushDown(tree, lazy, node, start, end);
+    }
+
+    if (r < start || end < l) {
+      steps.push({ type: 'visit', node: node, color: 'NONE', start: start, end: end,
+        msg: 'Node ' + node + ' [' + start + '..' + end + '] — no overlap with [' + l + '..' + r + ']. Skip.' });
+      return;
+    }
+
+    if (l <= start && end <= r) {
+      // Fully covered — apply lazy tag
+      let rangeLen = end - start + 1;
+      tree[node] += val * rangeLen;
+      lazy[node] += val;
+      steps.push({ type: 'update', node: node, color: 'UPDATED', start: start, end: end, val: tree[node],
+        msg: 'Node ' + node + ' [' + start + '..' + end + ']: fully inside range. Sum += ' + val + ' × ' + rangeLen + ' = ' + tree[node] + '. Lazy tag set to ' + lazy[node] + '.' });
+      return;
+    }
+
+    steps.push({ type: 'visit', node: node, color: 'PARTIAL', start: start, end: end,
+      msg: 'Node ' + node + ' [' + start + '..' + end + '] — partial overlap. Descending.' });
+
+    let mid = Math.floor((start + end) / 2);
+    rangeUpdate(2 * node, start, mid, l, r, val);
+    rangeUpdate(2 * node + 1, mid + 1, end, l, r, val);
+    tree[node] = tree[2 * node] + tree[2 * node + 1];
+    steps.push({ type: 'propagate', node: node, color: 'UPDATED', val: tree[node], start: start, end: end,
+      msg: 'Node ' + node + ' [' + start + '..' + end + ']: recalculated sum = ' + tree[node] + '.' });
+  }
+
+  rangeUpdate(1, 0, n - 1, l, r, val);
+
+  // Update arr to reflect lazy changes
+  function resolveArr(node, start, end) {
+    if (start === end) { arr[start] = tree[node]; return; }
+    if (lazy[node] !== 0) stPushDown(tree, lazy, node, start, end);
+    let mid = Math.floor((start + end) / 2);
+    resolveArr(2 * node, start, mid);
+    resolveArr(2 * node + 1, mid + 1, end);
+  }
+  resolveArr(1, 0, n - 1);
+
+  steps.push({ type: 'result', node: -1, color: null,
+    msg: 'Range update complete. Added ' + val + ' to all elements in [' + l + '..' + r + '].', result: val });
   return steps;
 }
 
@@ -546,6 +629,7 @@ function stResetAnim() {
   if (stState.arrBackup) {
     stState.arr = stState.arrBackup.slice();
     stState.tree = stState.treeBackup.slice();
+    stState.lazy = stState.lazyBackup ? stState.lazyBackup.slice() : new Array(4 * stState.n).fill(0);
   }
   stState.stepIdx = 0;
   stResetColors();
@@ -596,12 +680,14 @@ function stDoBuild() {
   stState.arr     = raw;
   stState.n       = raw.length;
   stState.tree    = stBuild(raw);
+  stState.lazy    = new Array(4 * raw.length).fill(0);
   stState.steps   = [];
   stState.stepIdx = 0;
   stState.built   = true;
   stState.playing = false;
   stState.arrBackup = null;
   stState.treeBackup = null;
+  stState.lazyBackup = null;
 
   // Resize canvas
   let canvas = document.getElementById('stCanvas');
@@ -662,12 +748,15 @@ function stDoQuery() {
   }
   stState.arrBackup = stState.arr.slice();
   stState.treeBackup = stState.tree.slice();
+  stState.lazyBackup = stState.lazy.slice();
 
   stResetColors();
   let resultPanel = document.getElementById('stResultPanel');
   if (resultPanel) resultPanel.classList.add('hidden');
 
-  stState.steps   = stGenQuerySteps(stState.tree, n, l, r);
+  let treeCopyQ = stState.tree.slice();
+  let lazyCopyQ = stState.lazy.slice();
+  stState.steps   = stGenQuerySteps(treeCopyQ, lazyCopyQ, n, l, r);
   stState.stepIdx = 0;
   stUpdateStepCounter();
   stUpdatePlaybackBtns();
@@ -698,9 +787,11 @@ function stDoUpdate() {
   if (stState.arrBackup) {
     stState.arr = stState.arrBackup.slice();
     stState.tree = stState.treeBackup.slice();
+    stState.lazy = stState.lazyBackup ? stState.lazyBackup.slice() : new Array(4 * stState.n).fill(0);
   }
   stState.arrBackup = stState.arr.slice();
   stState.treeBackup = stState.tree.slice();
+  stState.lazyBackup = stState.lazy.slice();
 
   let oldVal = stState.arr[idx];
   stResetColors();
@@ -723,7 +814,54 @@ function stDoUpdate() {
   stDraw();
 }
 
-/* ─── Prompt Update dialog ─── */
+/* ─── Range Update (Lazy Propagation) ─── */
+function stDoRangeUpdate() {
+  if (!stState.built) { console.warn("Alert:", 'Build the tree first.'); return; }
+  stPause();
+
+  let lEl = document.getElementById('stRangeL');
+  let rEl = document.getElementById('stRangeR');
+  let valEl = document.getElementById('stRangeVal');
+  let l   = parseInt(lEl ? lEl.value : 0);
+  let r   = parseInt(rEl ? rEl.value : 0);
+  let val = parseInt(valEl ? valEl.value : 0);
+  let n   = stState.n;
+
+  if (isNaN(l) || isNaN(r) || isNaN(val) || l < 0 || r >= n || l > r) {
+    let statusEl = document.getElementById('stStatus');
+    if (statusEl) { statusEl.textContent = 'Invalid range. Use 0-indexed values where L ≤ R < ' + n + '.'; statusEl.className = 'st-status-bar update'; }
+    return;
+  }
+
+  if (stState.arrBackup) {
+    stState.arr = stState.arrBackup.slice();
+    stState.tree = stState.treeBackup.slice();
+    stState.lazy = stState.lazyBackup ? stState.lazyBackup.slice() : new Array(4 * n).fill(0);
+  }
+  stState.arrBackup = stState.arr.slice();
+  stState.treeBackup = stState.tree.slice();
+  stState.lazyBackup = stState.lazy.slice();
+
+  stResetColors();
+  let resultPanel = document.getElementById('stResultPanel');
+  if (resultPanel) resultPanel.classList.add('hidden');
+
+  let treeCopy = stState.tree.slice();
+  let lazyCopy = stState.lazy.slice();
+  let arrCopy = stState.arr.slice();
+  stState.steps = stGenRangeUpdateSteps(treeCopy, lazyCopy, arrCopy, n, l, r, val);
+
+  stState.stepIdx = 0;
+  stUpdateStepCounter();
+  stUpdatePlaybackBtns();
+
+  let statusEl = document.getElementById('stStatus');
+  if (statusEl) { statusEl.textContent = 'Range update: add ' + val + ' to [' + l + '..' + r + '] ready. Press Play or Step.'; statusEl.className = 'st-status-bar update'; }
+  stRenderArray();
+  stDraw();
+}
+
+
 function stPromptUpdate(idx) {
   let n = stState.n;
   if (idx < 0 || idx >= n) return;
@@ -757,9 +895,12 @@ function stInit() {
   let resetBtn  = document.getElementById('stResetBtn');
   let speedSlider = document.getElementById('stSpeed');
 
+  let rangeUpdateBtn = document.getElementById('stRangeUpdateBtn');
+
   if (buildBtn)  buildBtn.addEventListener('click', stDoBuild);
   if (queryBtn)  queryBtn.addEventListener('click',  stDoQuery);
   if (updateBtn) updateBtn.addEventListener('click', stDoUpdate);
+  if (rangeUpdateBtn) rangeUpdateBtn.addEventListener('click', stDoRangeUpdate);
   if (playBtn)   playBtn.addEventListener('click',   stPlay);
   if (pauseBtn)  pauseBtn.addEventListener('click',  stPause);
   if (stepBtn)   stepBtn.addEventListener('click',   stStep);

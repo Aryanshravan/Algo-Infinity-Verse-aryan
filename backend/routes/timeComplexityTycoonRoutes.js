@@ -3,6 +3,7 @@ import path from 'path';
 import { getSession } from '../utils/sessionToken.js';
 
 import { DATA_DIR } from '../utils/helpers.js';
+import { API_ROUTES } from './routeConstants.js';
 
 const TYCOON_FILE = path.join(DATA_DIR, 'time_complexity_tycoon_best.json');
 const MAX_ENTRIES = 5000;
@@ -35,14 +36,14 @@ function sendJson(res, status, body) {
 }
 
 export async function setupTimeComplexityTycoonRoutes(req, res, pathname) {
-  if (!pathname.startsWith('/api/time-complexity-tycoon')) return null;
+  if (!pathname.startsWith(API_ROUTES.TIME_COMPLEXITY_PREFIX)) return null;
 
   const session = getSession(req);
   if (!session) {
     return sendJson(res, 401, { error: 'Login required.' });
   }
 
-  if (pathname === '/api/time-complexity-tycoon/best' && req.method === 'GET') {
+  if (pathname === API_ROUTES.TIME_COMPLEXITY_BEST && req.method === 'GET') {
     try {
       const store = await readStore();
       const entry = store[session.sub] || null;
@@ -56,7 +57,7 @@ export async function setupTimeComplexityTycoonRoutes(req, res, pathname) {
     }
   }
 
-  if (pathname === '/api/time-complexity-tycoon/best' && req.method === 'POST') {
+  if (pathname === API_ROUTES.TIME_COMPLEXITY_BEST && req.method === 'POST') {
     try {
       let payload = {};
       if (req.body && typeof req.body === 'object') payload = req.body;

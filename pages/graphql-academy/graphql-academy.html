@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GraphQL Academy — Master GraphQL</title>
+    <meta name="description" content="Learn GraphQL from schema design to production: SDL & types, queries & mutations, resolvers & DataLoader, subscriptions, Apollo Client, and federation & security — with a live query playground and quizzes.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=Inter:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="graphql-academy.css">
+    <link rel="stylesheet" href="/styles/eli5-toggle.css">
+    <link rel="stylesheet" href="/styles/copy-code.css">
+</head>
+<body>
+    <!-- Mobile sidebar overlay -->
+    <div id="sidebar-overlay" class="sidebar-overlay"></div>
+
+    <!-- Sidebar -->
+    <aside id="sidebar" class="sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-logo">
+                <svg viewBox="0 0 24 24" width="32" height="32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path fill-rule="evenodd" clip-rule="evenodd" d="M12.04 0L12 0.035L11.96 0L2 5.22V18.78L11.96 24L12 23.965L12.04 24L22 18.78V5.22L12.04 0ZM4.5 16.885V7.115L11 3.415V11.97L4.5 16.885ZM11.2 13.315V20.58L5.5 17.355L11.2 13.315ZM12.8 13.315L18.5 17.355L12.8 20.58V13.315ZM13 11.97V3.415L19.5 7.115V16.885L13 11.97ZM12 7.43L15.24 9.7L12 11.97L8.76 9.7L12 7.43Z" fill="#e10098"/>
+                </svg>
+                <span>GraphQL Academy</span>
+            </div>
+            <button id="close-sidebar-btn" class="sidebar-close-btn" aria-label="Close sidebar">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="sidebar-progress">
+            <div class="progress-label">
+                <span>Progress</span>
+                <span id="progress-text">0%</span>
+            </div>
+            <div class="progress-bar">
+                <div id="progress-bar" class="progress-fill" style="width: 0%"></div>
+            </div>
+        </div>
+        <ul id="module-list" class="module-list"></ul>
+    </aside>
+
+    <!-- Main content -->
+    <main class="main-content">
+        <header class="header">
+            <button id="open-sidebar-btn" class="sidebar-open-btn" aria-label="Open sidebar">
+                <i class="fas fa-bars"></i>
+            </button>
+            <h1 id="active-module-title" class="active-module-title"></h1>
+            <nav class="tab-nav" role="tablist">
+                <button data-tab="lesson" class="tab-btn active" role="tab" aria-selected="true">
+                    <i class="fa-solid fa-book-open mr-1"></i> Lesson Viewer
+                </button>
+                <button data-tab="simulator" class="tab-btn" role="tab" aria-selected="false">
+                    <i class="fa-solid fa-terminal mr-1"></i> Playground
+                </button>
+                <button data-tab="quiz" class="tab-btn" role="tab" aria-selected="false">
+                    <i class="fa-solid fa-list-check mr-1"></i> Quiz
+                </button>
+            </nav>
+        </header>
+
+        <div class="content-area">
+            <!-- Lesson Tab -->
+            <div id="tab-lesson" class="tab-content active">
+                <div class="lesson-container">
+                    <div id="lesson-content" class="lesson-content"></div>
+                    <div class="lesson-footer">
+                        <div class="lesson-footer-row">
+                            <button id="mark-complete-btn" class="mark-complete-btn">
+                                <i class="fas fa-check-circle mr-2"></i> Mark as Complete
+                            </button>
+                            <div id="lesson-nav" class="lesson-nav"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Playground Tab (Live GraphQL Query Sandbox) -->
+            <div id="tab-simulator" class="tab-content">
+                <div class="simulator-split">
+                    <div class="simulator-editor">
+                        <div class="editor-header">
+                            <span class="editor-title"><i class="fa-solid fa-code mr-1"></i> GraphQL Query Editor <span class="gql-pill">gql</span></span>
+                            <div class="editor-actions">
+                                <button id="data-loader-toggle" class="data-loader-toggle off" title="Toggle DataLoader batching to compare database call counts">
+                                    <i class="fa-solid fa-layer-group"></i> DataLoader
+                                </button>
+                                <button id="schema-btn" class="schema-btn" title="View the mock schema (SDL)">
+                                    <i class="fa-solid fa-sitemap"></i> SDL Schema
+                                </button>
+                                <button id="run-code-btn" class="run-btn" title="Run GraphQL Operation (Cmd/Ctrl + Enter)">
+                                    <i class="fas fa-play"></i> Run Query
+                                </button>
+                                <button id="reset-code-btn" class="reset-btn" title="Reset to Lesson Query">
+                                    <i class="fas fa-undo"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <textarea id="code-editor" spellcheck="false" autocomplete="off" autocorrect="off" autocapitalize="off"></textarea>
+                    </div>
+                    <div class="simulator-output">
+                        <div class="output-header">
+                            <span class="output-title"><i class="fa-solid fa-server mr-1"></i> GraphQL Response</span>
+                            <div class="output-meta">
+                                <span id="response-status" class="status-chip">idle</span>
+                                <span id="db-calls" class="db-chip">0 db calls</span>
+                                <button id="clear-output-btn" class="clear-btn" title="Clear Output">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div id="output-frame" class="output-frame">
+                            <div class="output-placeholder">
+                                <i class="fa-solid fa-play-circle"></i>
+                                <p>Write a query or mutation, then click <strong>Run Query</strong></p>
+                            </div>
+                        </div>
+
+                        <!-- Live Subscription Feed -->
+                        <div class="sub-feed">
+                            <div class="sub-feed-header">
+                                <span class="sub-feed-title"><i class="fa-solid fa-bolt mr-1" style="color:#19d3c5;"></i> Subscriptions: <code>bookAdded</code> <span id="sub-indicator" class="sub-indicator"></span></span>
+                                <div class="sub-feed-actions">
+                                    <button id="sub-toggle-btn" class="data-loader-toggle off" title="Subscribe / unsubscribe to bookAdded">
+                                        <i class="fa-solid fa-rss"></i> Subscribe
+                                    </button>
+                                    <button id="sub-simulate-btn" class="sub-simulate-btn" title="Publish a simulated bookAdded event">
+                                        <i class="fa-solid fa-paper-plane"></i> Publish Event
+                                    </button>
+                                </div>
+                            </div>
+                            <div id="sub-feed-body" class="sub-feed-body">
+                                <div class="sub-empty">Not subscribed yet. Click <strong>Subscribe</strong> to listen for <code>bookAdded</code> events.</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quiz Tab -->
+            <div id="tab-quiz" class="tab-content">
+                <div id="quiz-container" class="quiz-container"></div>
+            </div>
+        </div>
+    </main>
+
+    <!-- SDL Schema Modal -->
+    <div id="schema-modal" class="schema-modal" role="dialog" aria-modal="true" aria-labelledby="schema-modal-title">
+        <div class="schema-modal-card">
+            <div class="schema-modal-header">
+                <h3 id="schema-modal-title"><i class="fa-solid fa-sitemap"></i> Mock GraphQL Schema (SDL)</h3>
+                <button id="schema-close-btn" class="schema-close-btn" aria-label="Close schema"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="schema-modal-body">
+                <pre id="schema-content"></pre>
+            </div>
+        </div>
+    </div>
+
+    <script src="/modules/eli5-toggle.js"></script>
+    <script src="/modules/eli5-graphql-data.js"></script>
+    <script src="graphql-academy.js"></script>
+    <script src="/modules/copy-code.js"></script>
+</body>
+</html>

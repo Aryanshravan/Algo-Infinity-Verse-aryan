@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>BGP Route Dampening Sandbox | Algo-Infinity-Verse</title>
+    <meta
+      name="description"
+      content="Simulate BGP route dampening and visualize penalty calculation and suppression thresholds."
+    />
+    <link rel="stylesheet" href="bgp-route-dampening-sandbox.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/modules/quick-notes/quick-notes.css" />
+  </head>
+  <body>
+    <div class="app-container">
+      <header class="glass-header">
+        <div class="logo">
+          <i class="fa-solid fa-globe logo-icon"></i>
+          <span>Algo <span class="highlight">Infinity</span> Verse</span>
+        </div>
+        <div class="title-section">
+          <h1>
+            BGP Route Dampening Sandbox <span class="badge badge-algo">Internet Architecture</span>
+          </h1>
+          <p>Simulate route flapping, exponential penalty, and suppression thresholds</p>
+        </div>
+        <a
+          href="https://github.com/Eshajha19/Algo-Infinity-Verse"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="github-link"
+          aria-label="GitHub Repository"
+        >
+          <i class="fa-brands fa-github"></i>
+        </a>
+      </header>
+
+      <main class="workspace">
+        <aside class="sidebar">
+          <section class="glass-panel control-panel">
+            <h2><i class="fa-solid fa-sliders"></i> Configuration</h2>
+
+            <div class="control-card mt-3">
+              <label>Penalty per Flap: <span id="val-penalty-flap">1000</span></label>
+              <input
+                type="range"
+                id="param-penalty"
+                min="500"
+                max="2000"
+                step="100"
+                value="1000"
+                class="w-100 mt-2"
+              />
+            </div>
+
+            <div class="control-card mt-3">
+              <label>Suppress Limit: <span id="val-suppress-limit">2000</span></label>
+              <input
+                type="range"
+                id="param-suppress"
+                min="1000"
+                max="5000"
+                step="100"
+                value="2000"
+                class="w-100 mt-2"
+              />
+            </div>
+
+            <div class="control-card mt-3">
+              <label>Reuse Limit: <span id="val-reuse-limit">750</span></label>
+              <input
+                type="range"
+                id="param-reuse"
+                min="100"
+                max="1500"
+                step="50"
+                value="750"
+                class="w-100 mt-2"
+              />
+            </div>
+
+            <div class="control-card mt-3">
+              <label>Half-Life (sec): <span id="val-halflife">5</span></label>
+              <input
+                type="range"
+                id="param-halflife"
+                min="1"
+                max="15"
+                step="1"
+                value="5"
+                class="w-100 mt-2"
+              />
+            </div>
+
+            <div class="control-card actions-card mt-3">
+              <button id="btn-flap" class="btn btn-warning w-100 mt-2">
+                <i class="fa-solid fa-bolt"></i> Trigger Route Flap
+              </button>
+              <button id="btn-reset" class="btn btn-primary w-100 mt-2">
+                <i class="fa-solid fa-undo"></i> Reset Simulator
+              </button>
+            </div>
+          </section>
+        </aside>
+
+        <section class="visualizer-stage glass-panel">
+          <div class="stage-header">
+            <div class="status-display">
+              <span class="status-label">Route Status:</span>
+              <span id="status-text" class="status-message text-success">Stable</span>
+            </div>
+          </div>
+
+          <div class="network-wrapper" id="network-wrapper">
+            <div class="dampening-stats">
+              <div class="stat-box">
+                <h3>Current Penalty</h3>
+                <div class="penalty-value" id="current-penalty">0</div>
+              </div>
+
+              <div class="penalty-bar-container mt-3">
+                <div class="penalty-bar" id="penalty-bar" style="height: 0%"></div>
+
+                <div class="threshold-line suppress-line" id="line-suppress">
+                  <span>Suppress Threshold (<span id="lbl-suppress">2000</span>)</span>
+                </div>
+
+                <div class="threshold-line reuse-line" id="line-reuse">
+                  <span>Reuse Threshold (<span id="lbl-reuse">750</span>)</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="topology-display mt-4">
+              <div class="node as-100" id="node-100">AS 100<br />(Provider)</div>
+              <div class="link-state" id="link-state">
+                <div class="link-line" id="link-line"></div>
+                <span class="link-label" id="link-label">UP</span>
+              </div>
+              <div class="node as-200" id="node-200">AS 200<br />(Customer)</div>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+    <script src="bgp-route-dampening-sandbox.js"></script>
+    <script src="/modules/quick-notes/quick-notes.js"></script>
+  </body>
+</html>

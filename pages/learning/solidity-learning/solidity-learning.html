@@ -1,0 +1,972 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Learn Solidity – Smart Contract Fundamentals | Algo Infinity Verse</title>
+  <meta name="description" content="Free interactive Solidity tutorial covering data types, functions, modifiers, inheritance, events, error handling, and a complete smart contract walkthrough." />
+
+  <link rel="stylesheet" href="/styles.css" />
+  <link rel="stylesheet" href="solidity-learning.css" />
+
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+
+  <script>
+    (function() {
+      try {
+        var t = localStorage.getItem('theme');
+        var p = window.matchMedia('(prefers-color-scheme: light)').matches;
+        var theme = t || (p ? 'light' : 'dark');
+        if (theme === 'light') document.documentElement.classList.add('light-mode');
+      } catch (e) {}
+    })();
+  </script>
+</head>
+<body data-page="solidity-learning" data-no-loading>
+  <div id="loading-screen" class="hidden">
+    <div class="loader">
+      <div class="infinity-loader">∞</div>
+      <h2>Loading Solidity Learning...</h2>
+    </div>
+  </div>
+
+  <main>
+    <!-- ════════════════════════════════════════
+         HERO SECTION
+         ════════════════════════════════════════ -->
+    <section class="sl-hero">
+      <div class="sl-hero-bg">
+        <div class="sl-hero-glow"></div>
+      </div>
+
+      <a href="/pages/learning/languages.html" class="sl-back-btn" id="slBackBtn" aria-label="Go back to languages">
+        <i class="fas fa-arrow-left"></i>
+        <span>Languages</span>
+      </a>
+
+      <div class="sl-hero-content">
+        <!-- Chain-link signature motif -->
+        <div class="sl-chain" aria-hidden="true">
+          <span class="sl-chain-link"></span>
+          <span class="sl-chain-gap"></span>
+          <span class="sl-chain-link"></span>
+          <span class="sl-chain-gap"></span>
+          <span class="sl-chain-link"></span>
+          <span class="sl-chain-gap"></span>
+          <span class="sl-chain-link"></span>
+        </div>
+
+        <h1 class="sl-hero-title" id="slHeroTitle">
+          <span class="sl-title-line">Learn Solidity</span>
+          <span class="sl-title-line">Smart Contracts</span>
+        </h1>
+
+        <p class="sl-hero-subtitle">
+          Master the language of Ethereum smart contracts. From state variables to deployable contracts — <strong>6 interactive lessons</strong> to get you writing Solidity with confidence.
+        </p>
+
+        <!-- Stats -->
+        <div class="sl-hero-stats">
+          <div class="sl-stat">
+            <span class="sl-stat-value" id="topicCount">6</span>
+            <span class="sl-stat-label">Topics</span>
+          </div>
+          <div class="sl-stat">
+            <span class="sl-stat-value">20+</span>
+            <span class="sl-stat-label">Examples</span>
+          </div>
+          <div class="sl-stat">
+            <span class="sl-stat-value">6</span>
+            <span class="sl-stat-label">Exercises</span>
+          </div>
+        </div>
+
+        <!-- CTA -->
+        <div class="sl-hero-actions">
+          <a href="#topic-data-types" class="sl-btn sl-btn-primary">
+            <i class="fas fa-play"></i> Start Learning
+          </a>
+          <a href="/pages/editors/solidity-editor/solidity.html" class="sl-btn sl-btn-secondary">
+            <i class="fas fa-code"></i> Open Editor
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- ════════════════════════════════════════
+         TOPIC NAVIGATION PILLS
+         ════════════════════════════════════════ -->
+    <section class="sl-section">
+      <div class="sl-container">
+        <nav class="sl-topic-nav" id="slTopicNav" aria-label="Lesson topics">
+          <a href="#topic-data-types" class="sl-topic-pill active">Data Types &amp; State</a>
+          <a href="#topic-functions" class="sl-topic-pill">Functions &amp; Modifiers</a>
+          <a href="#topic-inheritance" class="sl-topic-pill">Inheritance</a>
+          <a href="#topic-events" class="sl-topic-pill">Events &amp; Logging</a>
+          <a href="#topic-errors" class="sl-topic-pill">Error Handling</a>
+          <a href="#topic-walkthrough" class="sl-topic-pill">Contract Walkthrough</a>
+        </nav>
+
+        <!-- Progress dots -->
+        <div class="sl-progress" id="slProgress" aria-hidden="true">
+          <span class="sl-progress-dot active" data-topic="0"></span>
+          <span class="sl-progress-line" data-topic="0"></span>
+          <span class="sl-progress-dot" data-topic="1"></span>
+          <span class="sl-progress-line" data-topic="1"></span>
+          <span class="sl-progress-dot" data-topic="2"></span>
+          <span class="sl-progress-line" data-topic="2"></span>
+          <span class="sl-progress-dot" data-topic="3"></span>
+          <span class="sl-progress-line" data-topic="3"></span>
+          <span class="sl-progress-dot" data-topic="4"></span>
+          <span class="sl-progress-line" data-topic="4"></span>
+          <span class="sl-progress-dot" data-topic="5"></span>
+        </div>
+
+        <!-- ════════════════════════════════════════
+             LESSON 1: DATA TYPES & STATE VARIABLES
+             ════════════════════════════════════════ -->
+        <article class="sl-lesson" id="topic-data-types" data-topic="0">
+          <div class="sl-lesson-header">
+            <span class="sl-lesson-number">01</span>
+            <h3>Data Types &amp; State Variables</h3>
+          </div>
+
+          <p>
+            Solidity is a <strong>statically typed</strong> language — every variable must declare its type at compile time. State variables are stored permanently on the blockchain (<em>in contract storage</em>), making them the backbone of any smart contract.
+          </p>
+
+          <div class="sl-concept">
+            <h4>Value Types</h4>
+            <ul>
+              <li><code>bool</code> — <code>true</code> or <code>false</code></li>
+              <li><code>uint</code> / <code>uint256</code> — unsigned integer (256-bit, default for gas efficiency)</li>
+              <li><code>int</code> / <code>int256</code> — signed integer</li>
+              <li><code>address</code> — 20-byte Ethereum address (<code>0x...</code>)</li>
+              <li><code>bytes32</code> — fixed-size byte array (32 bytes)</li>
+              <li><code>string</code> — dynamically-sized UTF-8 string</li>
+            </ul>
+          </div>
+
+          <p>State variables are declared at the contract level and written directly to the blockchain. Their <strong>visibility</strong> (<code>public</code>, <code>private</code>, <code>internal</code>) controls how they can be read.</p>
+
+          <div class="sl-code-block">
+            <div class="sl-code-header">
+              <span class="sl-code-lang">Solidity</span>
+              <button type="button" class="sl-code-copy" aria-label="Copy code" data-code='// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.20;
+
+contract DataTypes {
+    // ── State Variables ──
+    bool public isActive = true;
+    uint256 public counter = 42;
+    int256 public temperature = -5;
+    address public owner = 0x1234567890abcdef1234567890abcdef12345678;
+    string public name = "Solidity";
+    bytes32 public hash = keccak256(abi.encodePacked("data"));
+
+    // ── Enum ──
+    enum Status { Pending, Active, Completed }
+    Status public currentStatus = Status.Pending;
+
+    // ── Struct ──
+    struct Person {
+        string name;
+        uint256 age;
+    }
+    Person public alice = Person("Alice", 30);
+}'>Copy</button>
+            </div>
+            <pre><code><span class="cmt">// SPDX-License-Identifier: MIT</span>
+<span class="pragma">pragma solidity ^0.8.20;</span>
+
+<span class="kw">contract</span> <span class="fn">DataTypes</span> {
+    <span class="cmt">// ── State Variables ──</span>
+    <span class="type">bool</span> <span class="vis">public</span> isActive = <span class="kw">true</span>;
+    <span class="type">uint256</span> <span class="vis">public</span> counter = <span class="num">42</span>;
+    <span class="type">int256</span> <span class="vis">public</span> temperature = <span class="num">-5</span>;
+    <span class="type">address</span> <span class="vis">public</span> owner = <span class="num">0x1234</span>...;
+    <span class="type">string</span> <span class="vis">public</span> name = <span class="str">"Solidity"</span>;
+    <span class="type">bytes32</span> <span class="vis">public</span> hash;
+
+    <span class="cmt">// ── Enum ──</span>
+    <span class="kw">enum</span> <span class="fn">Status</span> { Pending, Active, Completed }
+    Status <span class="vis">public</span> currentStatus = Status.Pending;
+
+    <span class="cmt">// ── Struct ──</span>
+    <span class="kw">struct</span> <span class="fn">Person</span> {
+        <span class="type">string</span> name;
+        <span class="type">uint256</span> age;
+    }
+    Person <span class="vis">public</span> alice = Person(<span class="str">"Alice"</span>, <span class="num">30</span>);
+}</code></pre>
+          </div>
+
+          <div class="sl-callout">
+            <p>Prefixing a state variable with <code>public</code> automatically generates a <strong>getter function</strong>. Other contracts can read it, but it doesn't create a transaction — reads are free.</p>
+          </div>
+
+          <div class="sl-table-wrap">
+            <table class="sl-table" aria-label="Solidity data types">
+              <thead>
+                <tr>
+                  <th scope="col">Type</th>
+                  <th scope="col">Example</th>
+                  <th scope="col">Gas Cost</th>
+                  <th scope="col">Use Case</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><td><code>bool</code></td><td><code>true</code></td><td>Low</td><td>Flags, toggles</td></tr>
+                <tr><td><code>uint256</code></td><td><code>1000000</code></td><td>Medium</td><td>Counters, balances</td></tr>
+                <tr><td><code>address</code></td><td><code>0xabc...123</code></td><td>Low</td><td>Owners, senders</td></tr>
+                <tr><td><code>string</code></td><td><code>"hello"</code></td><td>High</td><td>Names, metadata</td></tr>
+                <tr><td><code>bytes32</code></td><td><code>0x0a1b...</code></td><td>Low</td><td>Hashes, fixed data</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Exercise -->
+          <div class="sl-exercise" id="exercise-data-types">
+            <div class="sl-exercise-title">
+              Practice: State Variables
+            </div>
+            <p>Declare a contract called <code>Wallet</code> with:</p>
+            <ol>
+              <li>An <code>address public owner</code> initialized to <code>msg.sender</code></li>
+              <li>A <code>uint256 public balance</code> set to <code>0</code></li>
+              <li>A <code>bool public isLocked</code> set to <code>false</code></li>
+              <li>A <code>string public currency</code> set to <code>"ETH"</code></li>
+            </ol>
+            <button type="button" class="sl-exercise-toggle" aria-expanded="false" aria-controls="solution-data-types">Show Solution</button>
+            <div class="sl-exercise-solution" id="solution-data-types">
+              <div class="sl-code-block">
+                <div class="sl-code-header">
+                  <span class="sl-code-lang">Solidity</span>
+                  <button type="button" class="sl-code-copy" aria-label="Copy code" data-code='// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.20;
+
+contract Wallet {
+    address public owner = msg.sender;
+    uint256 public balance = 0;
+    bool public isLocked = false;
+    string public currency = "ETH";
+}'>Copy</button>
+                </div>
+                <pre><code><span class="kw">contract</span> <span class="fn">Wallet</span> {
+    <span class="type">address</span> <span class="vis">public</span> owner = <span class="kw">msg</span>.<span class="fn">sender</span>;
+    <span class="type">uint256</span> <span class="vis">public</span> balance = <span class="num">0</span>;
+    <span class="type">bool</span> <span class="vis">public</span> isLocked = <span class="kw">false</span>;
+    <span class="type">string</span> <span class="vis">public</span> currency = <span class="str">"ETH"</span>;
+}</code></pre>
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <!-- ════════════════════════════════════════
+             LESSON 2: FUNCTIONS & MODIFIERS
+             ════════════════════════════════════════ -->
+        <article class="sl-lesson" id="topic-functions" data-topic="1">
+          <div class="sl-lesson-header">
+            <span class="sl-lesson-number">02</span>
+            <h3>Functions &amp; Modifiers</h3>
+          </div>
+
+          <p>
+            Functions are the executable units of a smart contract. They can read state, write state, receive Ether, and enforce access control through <strong>modifiers</strong> — reusable guard clauses.
+          </p>
+
+          <div class="sl-concept">
+            <h4>Function Visibility &amp; Mutability</h4>
+            <ul>
+              <li><code>public</code> — callable internally and externally</li>
+              <li><code>external</code> — callable only from outside the contract (cheaper for large data)</li>
+              <li><code>internal</code> — callable only from this contract and derived contracts</li>
+              <li><code>private</code> — callable only from this contract</li>
+              <li><code>view</code> — reads state but does not modify it (no gas for external calls)</li>
+              <li><code>pure</code> — neither reads nor modifies state</li>
+              <li><code>payable</code> — can receive Ether</li>
+            </ul>
+          </div>
+
+          <div class="sl-code-block">
+            <div class="sl-code-header">
+              <span class="sl-code-lang">Solidity</span>
+              <button type="button" class="sl-code-copy" aria-label="Copy code" data-code='// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.20;
+
+contract Functions {
+    uint256 public value;
+
+    // ── Modifier ──
+    address public owner;
+    modifier onlyOwner() {
+        require(msg.sender == owner, "Not owner");
+        _;
+    }
+
+    constructor() {
+        owner = msg.sender;
+    }
+
+    // ── State-changing function (costs gas) ──
+    function setValue(uint256 _newValue) public onlyOwner {
+        value = _newValue;
+    }
+
+    // ── View function (free) ──
+    function getValue() public view returns (uint256) {
+        return value;
+    }
+
+    // ── Pure function (free, no state access) ──
+    function multiply(uint256 a, uint256 b) public pure returns (uint256) {
+        return a * b;
+    }
+
+    // ── Payable function ──
+    function deposit() public payable {
+        // msg.value contains the Ether sent
+    }
+
+    // ── Multiple return values ──
+    function getDetails() public view returns (uint256, address) {
+        return (value, owner);
+    }
+}'>Copy</button>
+            </div>
+            <pre><code><span class="kw">contract</span> <span class="fn">Functions</span> {
+    <span class="type">uint256</span> <span class="vis">public</span> value;
+
+    <span class="cmt">// ── Modifier ──</span>
+    <span class="type">address</span> <span class="vis">public</span> owner;
+    <span class="kw">modifier</span> <span class="fn">onlyOwner</span>() {
+        <span class="kw">require</span>(msg.sender == owner, <span class="str">"Not owner"</span>);
+        _;
+    }
+
+    <span class="fn">constructor</span>() {
+        owner = msg.sender;
+    }
+
+    <span class="kw">function</span> <span class="fn">setValue</span>(<span class="type">uint256</span> _newValue) <span class="vis">public</span> <span class="vis">onlyOwner</span> {
+        value = _newValue;
+    }
+
+    <span class="kw">function</span> <span class="fn">getValue</span>() <span class="vis">public</span> <span class="vis">view</span> <span class="kw">returns</span> (<span class="type">uint256</span>) {
+        <span class="kw">return</span> value;
+    }
+
+    <span class="kw">function</span> <span class="fn">multiply</span>(<span class="type">uint256</span> a, <span class="type">uint256</span> b) <span class="vis">public</span> <span class="vis">pure</span> <span class="kw">returns</span> (<span class="type">uint256</span>) {
+        <span class="kw">return</span> a * b;
+    }
+
+    <span class="kw">function</span> <span class="fn">deposit</span>() <span class="vis">public</span> <span class="vis">payable</span> {
+        <span class="cmt">// msg.value contains the Ether sent</span>
+    }
+}</code></pre>
+          </div>
+
+          <div class="sl-concept">
+            <h4>How Modifiers Work</h4>
+            <p>A modifier is a wrapper around a function. The <code>_;</code> symbol marks where the function body is injected. If the modifier's code <code>require</code> or <code>revert</code> fails, the function never executes — saving gas.</p>
+          </div>
+
+          <!-- Exercise -->
+          <div class="sl-exercise" id="exercise-functions">
+            <div class="sl-exercise-title">
+              Practice: Functions &amp; Modifiers
+            </div>
+            <ol>
+              <li>Create a <code>uint256 public count</code> variable</li>
+              <li>Write a <code>increment()</code> public function that adds 1 to count</li>
+              <li>Write a <code>decrement()</code> public function that subtracts 1, but reverts if count is 0</li>
+              <li>Add an <code>onlyOwner</code> modifier to both functions</li>
+            </ol>
+            <button type="button" class="sl-exercise-toggle" aria-expanded="false" aria-controls="solution-functions">Show Solution</button>
+            <div class="sl-exercise-solution" id="solution-functions">
+              <div class="sl-code-block">
+                <div class="sl-code-header">
+                  <span class="sl-code-lang">Solidity</span>
+                  <button type="button" class="sl-code-copy" aria-label="Copy code" data-code='// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.20;
+
+contract Counter {
+    address public owner;
+    uint256 public count;
+
+    modifier onlyOwner() {
+        require(msg.sender == owner, "Not owner");
+        _;
+    }
+
+    constructor() {
+        owner = msg.sender;
+    }
+
+    function increment() public onlyOwner {
+        count += 1;
+    }
+
+    function decrement() public onlyOwner {
+        require(count > 0, "Count is zero");
+        count -= 1;
+    }
+}'>Copy</button>
+                </div>
+                <pre><code><span class="kw">contract</span> <span class="fn">Counter</span> {
+    <span class="type">address</span> <span class="vis">public</span> owner;
+    <span class="type">uint256</span> <span class="vis">public</span> count;
+
+    <span class="kw">modifier</span> <span class="fn">onlyOwner</span>() {
+        <span class="kw">require</span>(msg.sender == owner, <span class="str">"Not owner"</span>);
+        _;
+    }
+
+    <span class="fn">constructor</span>() { owner = msg.sender; }
+
+    <span class="kw">function</span> <span class="fn">increment</span>() <span class="vis">public</span> <span class="vis">onlyOwner</span> { count += <span class="num">1</span>; }
+
+    <span class="kw">function</span> <span class="fn">decrement</span>() <span class="vis">public</span> <span class="vis">onlyOwner</span> {
+        <span class="kw">require</span>(count > <span class="num">0</span>, <span class="str">"Count is zero"</span>);
+        count -= <span class="num">1</span>;
+    }
+}</code></pre>
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <!-- ════════════════════════════════════════
+             LESSON 3: INHERITANCE & CONTRACTS
+             ════════════════════════════════════════ -->
+        <div class="sl-divider">
+          <span class="sl-divider-inner">Next Topic</span>
+        </div>
+
+        <article class="sl-lesson" id="topic-inheritance" data-topic="2">
+          <div class="sl-lesson-header">
+            <span class="sl-lesson-number">03</span>
+            <h3>Inheritance &amp; Contracts</h3>
+          </div>
+
+          <p>
+            Solidity supports <strong>multiple inheritance</strong> — a contract can inherit from several parent contracts using the <code>is</code> keyword. This enables code reuse, modular design, and the popular "mix-in" pattern.
+          </p>
+
+          <div class="sl-concept">
+            <h4>Inheritance Rules</h4>
+            <ul>
+              <li>Use <code>contract B is A</code> to inherit from <code>A</code></li>
+              <li>Functions marked <code>virtual</code> can be overridden in child contracts</li>
+              <li>Overriding functions must use the <code>override</code> keyword</li>
+              <li>Multiple inheritance: <code>contract C is A, B</code></li>
+              <li><code>abstract</code> contracts have unimplemented functions and cannot be deployed</li>
+              <li><code>interface</code> contracts declare function signatures without implementation</li>
+            </ul>
+          </div>
+
+          <div class="sl-code-block">
+            <div class="sl-code-header">
+              <span class="sl-code-lang">Solidity</span>
+              <button type="button" class="sl-code-copy" aria-label="Copy code" data-code='// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.20;
+
+// ── Base Contract ──
+contract Ownable {
+    address public owner;
+
+    event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
+
+    constructor() {
+        owner = msg.sender;
+    }
+
+    modifier onlyOwner() {
+        require(msg.sender == owner, "Not owner");
+        _;
+    }
+
+    function transferOwnership(address _newOwner) public virtual onlyOwner {
+        require(_newOwner != address(0), "Zero address");
+        emit OwnershipTransferred(owner, _newOwner);
+        owner = _newOwner;
+    }
+}
+
+// ── Derived Contract ──
+contract MyToken is Ownable {
+    string public name;
+    uint256 public totalSupply;
+
+    constructor(string memory _name, uint256 _initialSupply) {
+        name = _name;
+        totalSupply = _initialSupply;
+    }
+
+    function mint(uint256 _amount) public onlyOwner {
+        totalSupply += _amount;
+    }
+
+    // Override with additional logic
+    function transferOwnership(address _newOwner) public override onlyOwner {
+        require(_newOwner != address(0), "Zero address");
+        emit OwnershipTransferred(owner, _newOwner);
+        owner = _newOwner;
+    }
+}'>Copy</button>
+            </div>
+            <pre><code><span class="kw">contract</span> <span class="fn">Ownable</span> {
+    <span class="type">address</span> <span class="vis">public</span> owner;
+    <span class="kw">event</span> <span class="fn">OwnershipTransferred</span>(...);
+
+    <span class="fn">constructor</span>() { owner = msg.sender; }
+
+    <span class="kw">modifier</span> <span class="fn">onlyOwner</span>() {
+        <span class="kw">require</span>(msg.sender == owner, <span class="str">"Not owner"</span>);
+        _;
+    }
+
+    <span class="kw">function</span> <span class="fn">transferOwnership</span>(<span class="type">address</span> _newOwner)
+        <span class="vis">public</span> <span class="vis">virtual</span> <span class="vis">onlyOwner</span> { ... }
+}
+
+<span class="kw">contract</span> <span class="fn">MyToken</span> <span class="kw">is</span> <span class="fn">Ownable</span> {
+    <span class="kw">function</span> <span class="fn">mint</span>(<span class="type">uint256</span> _amount) <span class="vis">public</span> <span class="vis">onlyOwner</span> {
+        totalSupply += _amount;
+    }
+
+    <span class="kw">function</span> <span class="fn">transferOwnership</span>(<span class="type">address</span> _newOwner)
+        <span class="vis">public</span> <span class="vis">override</span> <span class="vis">onlyOwner</span> { ... }
+}</code></pre>
+          </div>
+
+          <div class="sl-callout">
+            <p><strong>Composition over inheritance</strong> is common in Solidity. Many projects import reusable modules (libraries) rather than deep inheritance trees. Use inheritance when contracts share a genuine <em>is-a</em> relationship.</p>
+          </div>
+
+          <div class="sl-concept">
+            <h4>Interfaces vs Abstract Contracts</h4>
+            <ul>
+              <li><strong>Interface</strong>: Pure function signatures, no state, no constructor — for maximum interoperability (e.g., ERC-20, ERC-721)</li>
+              <li><strong>Abstract</strong>: Can have state and implemented functions, but at least one function is unimplemented — useful for base contracts that define a skeleton</li>
+            </ul>
+          </div>
+        </article>
+
+        <!-- ════════════════════════════════════════
+             LESSON 4: EVENTS & LOGGING
+             ════════════════════════════════════════ -->
+        <article class="sl-lesson" id="topic-events" data-topic="3">
+          <div class="sl-lesson-header">
+            <span class="sl-lesson-number">04</span>
+            <h3>Events &amp; Logging</h3>
+          </div>
+
+          <p>
+            Events are Solidity's primary mechanism for communicating with off-chain consumers (dApps, indexers, explorers). When emitted, events are stored in the <strong>transaction receipt logs</strong> — they don't cost storage gas, making them much cheaper than state variables for emitting data.
+          </p>
+
+          <div class="sl-concept">
+            <h4>Event Essentials</h4>
+            <ul>
+              <li>Declared with <code>event</code> keyword at the contract level</li>
+              <li>Emitted with <code>emit</code> inside functions</li>
+              <li>Parameters marked <code>indexed</code> (max 3) become searchable by off-chain tools</li>
+              <li>Indexed parameters are also called <strong>topics</strong></li>
+              <li>Non-indexed parameters are stored as <strong>data</strong> (cheaper to emit)</li>
+            </ul>
+          </div>
+
+          <div class="sl-code-block">
+            <div class="sl-code-header">
+              <span class="sl-code-lang">Solidity</span>
+              <button type="button" class="sl-code-copy" aria-label="Copy code" data-code='// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.20;
+
+contract EventDemo {
+    // ── Event Declarations ──
+    event Transfer(address indexed from, address indexed to, uint256 amount);
+    event Approval(address indexed owner, address indexed spender, uint256 amount);
+    event Log(string message, uint256 timestamp);
+
+    // ── Emitting Events ──
+    function send(address _to, uint256 _amount) public {
+        emit Transfer(msg.sender, _to, _amount);
+    }
+
+    function approve(address _spender, uint256 _amount) public {
+        emit Approval(msg.sender, _spender, _amount);
+    }
+
+    function logMessage(string memory _msg) public {
+        emit Log(_msg, block.timestamp);
+    }
+}'>Copy</button>
+            </div>
+            <pre><code><span class="kw">contract</span> <span class="fn">EventDemo</span> {
+    <span class="cmt">// ── Event Declarations ──</span>
+    <span class="kw">event</span> <span class="fn">Transfer</span>(<span class="type">address</span> <span class="kw">indexed</span> from,
+                   <span class="type">address</span> <span class="kw">indexed</span> to,
+                   <span class="type">uint256</span> amount);
+    <span class="kw">event</span> <span class="fn">Approval</span>(<span class="type">address</span> <span class="kw">indexed</span> owner,
+                   <span class="type">address</span> <span class="kw">indexed</span> spender,
+                   <span class="type">uint256</span> amount);
+    <span class="kw">event</span> <span class="fn">Log</span>(<span class="type">string</span> message, <span class="type">uint256</span> timestamp);
+
+    <span class="kw">function</span> <span class="fn">send</span>(<span class="type">address</span> _to, <span class="type">uint256</span> _amount) <span class="vis">public</span> {
+        <span class="kw">emit</span> <span class="fn">Transfer</span>(msg.sender, _to, _amount);
+    }
+}</code></pre>
+          </div>
+
+          <div class="sl-table-wrap">
+            <table class="sl-table" aria-label="Event parameter costs">
+              <thead>
+                <tr>
+                  <th scope="col">Parameter Type</th>
+                  <th scope="col">Keyword</th>
+                  <th scope="col">Gas Cost</th>
+                  <th scope="col">Searchable</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><td>Indexed (topic)</td><td><code>indexed</code></td><td>~375 gas</td><td>Yes — by event log filters</td></tr>
+                <tr><td>Non-indexed (data)</td><td>(none)</td><td>~8 gas per byte</td><td>No — must decode ABI</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="sl-callout">
+            <p>Events are <strong>not accessible from within the blockchain</strong> — other contracts cannot read events. Their purpose is off-chain consumption: wallets, block explorers (Etherscan), and indexers (The Graph) watch for events to update their UI.</p>
+          </div>
+        </article>
+
+        <!-- ════════════════════════════════════════
+             LESSON 5: ERROR HANDLING
+             ════════════════════════════════════════ -->
+        <div class="sl-divider">
+          <span class="sl-divider-inner">Next Topic</span>
+        </div>
+
+        <article class="sl-lesson" id="topic-errors" data-topic="4">
+          <div class="sl-lesson-header">
+            <span class="sl-lesson-number">05</span>
+            <h3>Error Handling — require, revert &amp; assert</h3>
+          </div>
+
+          <p>
+            Smart contracts must handle invalid inputs, unauthorized access, and logic violations gracefully. Solidity provides three ways to <strong>revert</strong> a transaction (undo all state changes and refund unused gas).
+          </p>
+
+          <div class="sl-concept">
+            <h4>The Three Tools</h4>
+            <ul>
+              <li><code>require(condition, "message")</code> — Use for input validation, access control, and external call checks. Refunds remaining gas. Most commonly used.</li>
+              <li><code>revert("message")</code> — Use in complex <code>if/else</code> flows. Functional equivalent of <code>require(false, msg)</code>.</li>
+              <li><code>assert(condition)</code> — Use to check for <strong>invariants</strong> that should never be false. Consumes all remaining gas. Reserved for critical internal bugs.</li>
+            </ul>
+          </div>
+
+          <div class="sl-code-block">
+            <div class="sl-code-header">
+              <span class="sl-code-lang">Solidity</span>
+              <button type="button" class="sl-code-copy" aria-label="Copy code" data-code='// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.20;
+
+contract ErrorHandling {
+    address public owner;
+    uint256 public totalDeposits;
+
+    constructor() {
+        owner = msg.sender;
+    }
+
+    // ── require: input validation ──
+    function withdraw(uint256 _amount) public {
+        require(_amount > 0, "Amount must be greater than zero");
+        require(address(this).balance >= _amount, "Insufficient balance");
+        payable(msg.sender).transfer(_amount);
+    }
+
+    // ── revert: conditional flow ──
+    function adminAction(bool _authorized) public {
+        if (!_authorized) {
+            revert("Not authorized");
+        }
+        // perform admin action...
+    }
+
+    // ── assert: internal invariant ──
+    function deposit() public payable {
+        totalDeposits += msg.value;
+    }
+
+    function checkInvariant() public view {
+        assert(address(this).balance >= totalDeposits);
+    }
+}'>Copy</button>
+            </div>
+            <pre><code><span class="kw">contract</span> <span class="fn">ErrorHandling</span> {
+    <span class="type">address</span> <span class="vis">public</span> owner;
+
+    <span class="cmt">// ── require: input validation ──</span>
+    <span class="kw">function</span> <span class="fn">withdraw</span>(<span class="type">uint256</span> _amount) <span class="vis">public</span> {
+        <span class="kw">require</span>(_amount > <span class="num">0</span>, <span class="str">"Amount must be greater than zero"</span>);
+        <span class="kw">require</span>(address(<span class="kw">this</span>).balance >= _amount, <span class="str">"Insufficient balance"</span>);
+        <span class="kw">payable</span>(msg.sender).<span class="fn">transfer</span>(_amount);
+    }
+
+    <span class="cmt">// ── revert: conditional flow ──</span>
+    <span class="kw">function</span> <span class="fn">adminAction</span>(<span class="type">bool</span> _authorized) <span class="vis">public</span> {
+        <span class="kw">if</span> (!_authorized) {
+            <span class="kw">revert</span>(<span class="str">"Not authorized"</span>);
+        }
+    }
+
+    <span class="cmt">// ── assert: internal invariant ──</span>
+    <span class="kw">function</span> <span class="fn">checkInvariant</span>() <span class="vis">public</span> <span class="vis">view</span> {
+        <span class="kw">assert</span>(address(<span class="kw">this</span>).balance >= totalDeposits);
+    }
+}</code></pre>
+          </div>
+
+          <div class="sl-table-wrap">
+            <table class="sl-table" aria-label="Error handling comparison">
+              <thead>
+                <tr>
+                  <th scope="col">Function</th>
+                  <th scope="col">Gas Refund</th>
+                  <th scope="col">When to Use</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><td><code>require()</code></td><td>Remaining gas refunded</td><td>Input validation, access control, external call checks</td></tr>
+                <tr><td><code>revert()</code></td><td>Remaining gas refunded</td><td>Complex conditional flows, custom error logic</td></tr>
+                <tr><td><code>assert()</code></td><td>All gas consumed</td><td>Invariant violations, should-never-happen bugs</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="sl-callout">
+            <p><strong>Gas warning:</strong> <code>assert()</code> consumes all remaining gas when it fails. Since Solidity 0.8.0, the compiler automatically inserts <code>assert</code> checks for arithmetic overflow/underflow, so manual <code>assert()</code> is rarely needed.</p>
+          </div>
+        </article>
+
+        <!-- ════════════════════════════════════════
+             LESSON 6: BASIC SMART CONTRACT WALKTHROUGH
+             ════════════════════════════════════════ -->
+        <article class="sl-lesson" id="topic-walkthrough" data-topic="5">
+          <div class="sl-lesson-header">
+            <span class="sl-lesson-number">06</span>
+            <h3>Basic Smart Contract Walkthrough</h3>
+          </div>
+
+          <p>
+            Let's bring everything together with a complete, deployable smart contract: a <strong>Simple Vault</strong> that lets users deposit and withdraw ETH, with an owner who can pause the contract in emergencies.
+          </p>
+
+          <div class="sl-concept">
+            <h4>Simple Vault — Full Contract</h4>
+            <p>This contract combines state variables, events, modifiers, error handling, and a practical use case. Read through each part carefully.</p>
+          </div>
+
+          <div class="sl-code-block">
+            <div class="sl-code-header">
+              <span class="sl-code-lang">Solidity</span>
+              <button type="button" class="sl-code-copy" aria-label="Copy code" data-code='// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.20;
+
+/**
+ * @title SimpleVault
+ * @notice A basic ETH vault — deposit, withdraw, with owner controls.
+ */
+contract SimpleVault {
+    // ── Types ──
+    address public owner;
+    bool public paused;
+    mapping(address => uint256) public balances;
+
+    // ── Events ──
+    event Deposited(address indexed user, uint256 amount);
+    event Withdrawn(address indexed user, uint256 amount);
+    event Paused(address indexed by);
+    event Unpaused(address indexed by);
+
+    // ── Modifiers ──
+    modifier onlyOwner() {
+        require(msg.sender == owner, "Not owner");
+        _;
+    }
+
+    modifier whenNotPaused() {
+        require(!paused, "Contract is paused");
+        _;
+    }
+
+    // ── Constructor ──
+    constructor() {
+        owner = msg.sender;
+    }
+
+    // ── Core Functions ──
+    function deposit() public payable whenNotPaused {
+        require(msg.value > 0, "Must send ETH");
+        balances[msg.sender] += msg.value;
+        emit Deposited(msg.sender, msg.value);
+    }
+
+    function withdraw(uint256 _amount) public whenNotPaused {
+        require(_amount > 0, "Amount must be > 0");
+        require(balances[msg.sender] >= _amount, "Insufficient balance");
+
+        balances[msg.sender] -= _amount;
+        payable(msg.sender).transfer(_amount);
+
+        emit Withdrawn(msg.sender, _amount);
+    }
+
+    // ── Owner Controls ──
+    function togglePause() public onlyOwner {
+        paused = !paused;
+        if (paused) {
+            emit Paused(msg.sender);
+        } else {
+            emit Unpaused(msg.sender);
+        }
+    }
+
+    function getContractBalance() public view returns (uint256) {
+        return address(this).balance;
+    }
+}'>Copy</button>
+            </div>
+            <pre><code><span class="cmt">// SPDX-License-Identifier: MIT</span>
+<span class="pragma">pragma solidity ^0.8.20;</span>
+
+<span class="kw">contract</span> <span class="fn">SimpleVault</span> {
+    <span class="cmt">// ── State ──</span>
+    <span class="type">address</span> <span class="vis">public</span> owner;
+    <span class="type">bool</span> <span class="vis">public</span> paused;
+    <span class="kw">mapping</span>(<span class="type">address</span> => <span class="type">uint256</span>) <span class="vis">public</span> balances;
+
+    <span class="cmt">// ── Events ──</span>
+    <span class="kw">event</span> <span class="fn">Deposited</span>(<span class="type">address</span> <span class="kw">indexed</span> user, <span class="type">uint256</span> amount);
+    <span class="kw">event</span> <span class="fn">Withdrawn</span>(<span class="type">address</span> <span class="kw">indexed</span> user, <span class="type">uint256</span> amount);
+    <span class="kw">event</span> <span class="fn">Paused</span>(<span class="type">address</span> <span class="kw">indexed</span> by);
+    <span class="kw">event</span> <span class="fn">Unpaused</span>(<span class="type">address</span> <span class="kw">indexed</span> by);
+
+    <span class="cmt">// ── Modifiers ──</span>
+    <span class="kw">modifier</span> <span class="fn">onlyOwner</span>() {
+        <span class="kw">require</span>(msg.sender == owner, <span class="str">"Not owner"</span>); _;
+    }
+
+    <span class="kw">modifier</span> <span class="fn">whenNotPaused</span>() {
+        <span class="kw">require</span>(!paused, <span class="str">"Paused"</span>); _;
+    }
+
+    <span class="fn">constructor</span>() { owner = msg.sender; }
+
+    <span class="kw">function</span> <span class="fn">deposit</span>() <span class="vis">public</span> <span class="vis">payable</span> <span class="vis">whenNotPaused</span> {
+        <span class="kw">require</span>(msg.value > <span class="num">0</span>, <span class="str">"Must send ETH"</span>);
+        balances[msg.sender] += msg.value;
+        <span class="kw">emit</span> <span class="fn">Deposited</span>(msg.sender, msg.value);
+    }
+
+    <span class="kw">function</span> <span class="fn">withdraw</span>(<span class="type">uint256</span> _amount) <span class="vis">public</span> <span class="vis">whenNotPaused</span> {
+        <span class="kw">require</span>(_amount > <span class="num">0</span>, <span class="str">"Amount must be > 0"</span>);
+        <span class="kw">require</span>(balances[msg.sender] >= _amount, <span class="str">"Insufficient balance"</span>);
+        balances[msg.sender] -= _amount;
+        <span class="kw">payable</span>(msg.sender).<span class="fn">transfer</span>(_amount);
+        <span class="kw">emit</span> <span class="fn">Withdrawn</span>(msg.sender, _amount);
+    }
+
+    <span class="kw">function</span> <span class="fn">togglePause</span>() <span class="vis">public</span> <span class="vis">onlyOwner</span> {
+        paused = !paused;
+    }
+
+    <span class="kw">function</span> <span class="fn">getContractBalance</span>() <span class="vis">public</span> <span class="vis">view</span>
+        <span class="kw">returns</span> (<span class="type">uint256</span>) {
+        <span class="kw">return</span> <span class="kw">address</span>(<span class="kw">this</span>).balance;
+    }
+}</code></pre>
+          </div>
+
+          <div class="sl-concept">
+            <h4>Key Takeaways</h4>
+            <ul>
+              <li><strong>Modifiers</strong> (<code>onlyOwner</code>, <code>whenNotPaused</code>) keep access control declarative and reusable</li>
+              <li><strong>Events</strong> enable off-chain apps to track deposits and withdrawals</li>
+              <li><strong>require()</strong> guards every function against invalid input</li>
+              <li><strong>mapping</strong> provides gas-efficient per-user storage</li>
+              <li><strong>payable</strong> allows the contract to receive ETH</li>
+              <li>The <strong>constructor</strong> runs once at deployment, setting the initial owner</li>
+            </ul>
+          </div>
+
+          <div class="sl-callout">
+            <p>Ready to try it? Head to the <a href="/pages/editors/solidity-editor/solidity.html" class="sl-inline-link">Solidity Editor</a> to compile and test this contract — or modify it and see how the EVM handles each opcode.</p>
+          </div>
+
+          <!-- Exercise -->
+          <div class="sl-exercise" id="exercise-walkthrough">
+            <div class="sl-exercise-title">
+              Practice: Extend the Vault
+            </div>
+            <p>Add these features to the SimpleVault contract:</p>
+            <ol>
+              <li>An <code>event MaxDepositReached(address indexed user, uint256 amount)</code></li>
+              <li>A state variable <code>uint256 public maxDeposit = 10 ether</code></li>
+              <li>In <code>deposit()</code>, add a <code>require</code> that <code>msg.value</code> does not exceed <code>maxDeposit</code></li>
+              <li>Emit <code>MaxDepositReached</code> when someone hits the limit</li>
+            </ol>
+            <button type="button" class="sl-exercise-toggle" aria-expanded="false" aria-controls="solution-walkthrough">Show Solution</button>
+            <div class="sl-exercise-solution" id="solution-walkthrough">
+              <div class="sl-code-block">
+                <div class="sl-code-header">
+                  <span class="sl-code-lang">Solidity</span>
+                  <button type="button" class="sl-code-copy" aria-label="Copy code" data-code='// Add to SimpleVault contract:
+
+event MaxDepositReached(address indexed user, uint256 amount);
+
+uint256 public maxDeposit = 10 ether;
+
+// Inside deposit(), after the first require:
+require(msg.value <= maxDeposit, "Exceeds max deposit");
+if (msg.value == maxDeposit) {
+    emit MaxDepositReached(msg.sender, msg.value);
+}'>Copy</button>
+                </div>
+                <pre><code><span class="kw">event</span> <span class="fn">MaxDepositReached</span>(<span class="type">address</span> <span class="kw">indexed</span> user, <span class="type">uint256</span> amount);
+
+<span class="type">uint256</span> <span class="vis">public</span> maxDeposit = <span class="num">10 ether</span>;
+
+<span class="cmt">// Inside deposit():</span>
+<span class="kw">require</span>(msg.value <= maxDeposit, <span class="str">"Exceeds max deposit"</span>);
+<span class="kw">if</span> (msg.value == maxDeposit) {
+    <span class="kw">emit</span> <span class="fn">MaxDepositReached</span>(msg.sender, msg.value);
+}</code></pre>
+              </div>
+            </div>
+          </div>
+        </article>
+
+      </div>
+    </section>
+
+    <!-- ════════════════════════════════════════
+         FOOTER
+         ════════════════════════════════════════ -->
+    <footer class="sl-footer">
+      <p>Practice your skills in the <a href="/pages/editors/solidity-editor/solidity.html">Solidity Editor →</a></p>
+      <p>Back to <a href="/pages/learning/languages.html">Programming Languages</a></p>
+    </footer>
+  </main>
+
+  <script src="/auth.js"></script>
+  <script src="/theme.js"></script>
+  <script src="/script.js"></script>
+  <script src="solidity-learning.js"></script>
+</body>
+</html>

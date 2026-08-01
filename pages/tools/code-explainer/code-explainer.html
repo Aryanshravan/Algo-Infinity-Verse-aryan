@@ -1,0 +1,256 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AI Code Explainer & Line-by-Line Mentor | Algo Infinity Verse</title>
+    <meta
+      name="description"
+      content="Paste any algorithm or solution code in JS, Python, Java, C++, Go, or Rust and receive detailed line-by-line natural language explanations, time/space complexity analysis, and interactive line highlighting."
+    />
+    <link rel="stylesheet" href="/styles.css" />
+    <link rel="stylesheet" href="code-explainer.css" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+    />
+
+    <!-- Theme Initialization Script -->
+    <script>
+      (function () {
+        try {
+          var storedTheme = localStorage.getItem('theme');
+          var prefersLight = window.matchMedia('(prefers-color-scheme: light)').matches;
+          var theme = storedTheme || (prefersLight ? 'light' : 'dark');
+          if (theme === 'light') {
+            document.documentElement.classList.add('light-mode');
+          } else {
+            document.documentElement.classList.remove('light-mode');
+          }
+        } catch (e) {}
+      })();
+    </script>
+  </head>
+  <body data-page="code-explainer">
+    <button type="button" id="scrollTopBtn" class="scroll-top-btn" aria-label="Scroll to top">
+      <i class="fas fa-circle-chevron-up"></i>
+    </button>
+
+    <div id="navbar-placeholder"></div>
+
+    <!-- Hero Section -->
+    <section class="hero explainer-hero">
+      <div class="hero-background">
+        <div class="stars"></div>
+        <div class="stars2"></div>
+        <div class="stars3"></div>
+      </div>
+      <div class="hero-content">
+        <h1 class="hero-title">
+          <span class="title-line">Understand Every Line of Your Solution</span>
+          <span class="main-title explainer-gradient">AI-Powered Code Explainer</span>
+          <span class="subtitle"
+            >Plain-English mentor explanations &amp; complexity breakdowns for any algorithm.</span
+          >
+        </h1>
+        <p class="section-subtitle">
+          Paste your code below to get a line-by-line breakdown of what each section does, why it
+          works, and its time/space complexity implications.
+        </p>
+
+        <!-- Supported Languages Badge Row -->
+        <div class="explainer-lang-pills">
+          <span class="lang-pill"><i class="fab fa-js"></i> JavaScript</span>
+          <span class="lang-pill"><i class="fab fa-python"></i> Python</span>
+          <span class="lang-pill"><i class="fab fa-java"></i> Java</span>
+          <span class="lang-pill"><i class="fas fa-code"></i> C++</span>
+          <span class="lang-pill"><i class="fab fa-golang"></i> Go</span>
+          <span class="lang-pill"><i class="fab fa-rust"></i> Rust</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Main Explainer App Container -->
+    <section class="section explainer-section">
+      <div class="container explainer-container">
+        <!-- Workspace Grid: Left Editor Pane | Right Explanation Pane -->
+        <div class="explainer-workspace">
+          <!-- LEFT PANE: Editor & Input Controls -->
+          <div class="explainer-card editor-pane">
+            <div class="explainer-card-header">
+              <div class="pane-title">
+                <i class="fas fa-code"></i>
+                <span>Source Code Editor</span>
+              </div>
+              <div class="pane-controls">
+                <div class="control-group">
+                  <label for="languageSelect" class="sr-only">Select Language</label>
+                  <select
+                    id="languageSelect"
+                    class="explainer-select"
+                    aria-label="Programming Language"
+                  >
+                    <option value="javascript">JavaScript</option>
+                    <option value="python">Python</option>
+                    <option value="java">Java</option>
+                    <option value="cpp">C++</option>
+                    <option value="go">Go</option>
+                    <option value="rust">Rust</option>
+                  </select>
+                </div>
+                <div class="control-group">
+                  <label for="sampleCodeSelect" class="sr-only">Load Sample Code</label>
+                  <select
+                    id="sampleCodeSelect"
+                    class="explainer-select"
+                    aria-label="Load Sample Algorithm"
+                  >
+                    <option value="">Load Sample Algorithm...</option>
+                    <option value="binary_search">Binary Search (JS)</option>
+                    <option value="quick_sort">QuickSort Partition (Python)</option>
+                    <option value="two_sum">Two Sum Hash Map (Java)</option>
+                    <option value="lru_cache">LRU Cache Node (C++)</option>
+                  </select>
+                </div>
+                <button
+                  type="button"
+                  id="clearEditorBtn"
+                  class="icon-action-btn"
+                  title="Clear Editor"
+                  aria-label="Clear Code Editor"
+                >
+                  <i class="fas fa-trash-alt"></i>
+                </button>
+              </div>
+            </div>
+
+            <!-- Editor Input Area with Line Numbers -->
+            <div class="editor-input-wrapper">
+              <div id="lineNumbersGutter" class="line-numbers-gutter" aria-hidden="true">1</div>
+              <textarea
+                id="codeEditorInput"
+                class="code-textarea"
+                placeholder="// Paste your algorithm or solution code here...&#10;function binarySearch(arr, target) {&#10;  let left = 0, right = arr.length - 1;&#10;  while (left <= right) {&#10;    const mid = Math.floor((left + right) / 2);&#10;    if (arr[mid] === target) return mid;&#10;    if (arr[mid] < target) left = mid + 1;&#10;    else right = mid - 1;&#10;  }&#10;  return -1;&#10;}"
+                spellcheck="false"
+                aria-label="Source Code Input Editor"
+              ></textarea>
+            </div>
+
+            <!-- Editor Action Bar Footer -->
+            <div class="editor-pane-footer">
+              <div class="editor-stats">
+                <span id="lineCountDisplay"><i class="fas fa-bars"></i> 0 Lines</span>
+                <span id="charCountDisplay"><i class="fas fa-font"></i> 0 Chars</span>
+              </div>
+              <button type="button" id="explainSubmitBtn" class="btn btn-primary explain-btn">
+                <i class="fas fa-wand-magic-sparkles"></i>
+                <span>Explain My Code</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- RIGHT PANE: Output & Interactive Explanations -->
+          <div class="explainer-card explanation-pane" id="explanationPane">
+            <!-- Empty State Placeholder -->
+            <div id="emptyExplanationState" class="explainer-empty-state">
+              <div class="empty-state-icon">
+                <i class="fas fa-laptop-code"></i>
+              </div>
+              <h3>Ready to Explain Your Code</h3>
+              <p>
+                Paste your algorithm code on the left and click <strong>Explain My Code</strong> to
+                generate a line-by-line breakdown.
+              </p>
+              <div class="empty-state-features">
+                <div class="feature-chip">
+                  <i class="fas fa-check-circle"></i> Line-by-line logic breakdown
+                </div>
+                <div class="feature-chip">
+                  <i class="fas fa-check-circle"></i> Interactive line highlighting
+                </div>
+                <div class="feature-chip">
+                  <i class="fas fa-check-circle"></i> Time &amp; Space Complexity Analysis
+                </div>
+              </div>
+            </div>
+
+            <!-- Loading Shimmer Skeleton State -->
+            <div id="loadingExplanationState" class="explainer-loading-state" style="display: none">
+              <div class="loading-spinner-box">
+                <div class="spinner-orbit"></div>
+                <span class="loading-text">Analyzing algorithm logic &amp; complexity...</span>
+              </div>
+              <div class="skeleton-card skeleton-summary"></div>
+              <div class="skeleton-card skeleton-block"></div>
+              <div class="skeleton-card skeleton-block"></div>
+              <div class="skeleton-card skeleton-block"></div>
+            </div>
+
+            <!-- Active Output Content Container -->
+            <div id="activeExplanationOutput" class="explanation-content" style="display: none">
+              <!-- Overview Summary Banner -->
+              <div class="summary-card" id="summaryCard">
+                <div class="summary-header">
+                  <h3><i class="fas fa-brain"></i> Algorithm Overview</h3>
+                  <span id="aiBadge" class="ai-badge"
+                    ><i class="fas fa-microchip"></i> AI Powered</span
+                  >
+                </div>
+                <p id="algorithmSummaryText" class="summary-text"></p>
+
+                <!-- Complexity Metrics Badges -->
+                <div class="complexity-metrics">
+                  <div class="complexity-card time-card">
+                    <div class="metric-header">
+                      <i class="fas fa-stopwatch"></i>
+                      <span>Time Complexity</span>
+                    </div>
+                    <div id="timeComplexityVal" class="metric-value">O(N)</div>
+                  </div>
+                  <div class="complexity-card space-card">
+                    <div class="metric-header">
+                      <i class="fas fa-memory"></i>
+                      <span>Space Complexity</span>
+                    </div>
+                    <div id="spaceComplexityVal" class="metric-value">O(1)</div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Filter & Search Toolbar for Explanations -->
+              <div class="explanation-filter-bar">
+                <span class="explanation-section-title">
+                  <i class="fas fa-list-ol"></i> Line-by-Line Explanation Breakdown
+                </span>
+                <span class="highlight-hint">
+                  <i class="fas fa-mouse-pointer"></i> Hover or click cards to highlight lines
+                </span>
+              </div>
+
+              <!-- Line Explanation Cards Container -->
+              <div id="lineExplanationList" class="explanation-blocks-list">
+                <!-- Dynamically populated cards -->
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div id="footer-placeholder"></div>
+
+    <script src="/auth.js"></script>
+    <script src="/theme.js"></script>
+    <script src="/script.js"></script>
+    <script src="./code-explainer.js"></script>
+
+    <script>
+      loadPartial('navbar-placeholder', '/partials/navbar.html');
+      loadPartial('footer-placeholder', '/partials/footer.html');
+    </script>
+  </body>
+</html>

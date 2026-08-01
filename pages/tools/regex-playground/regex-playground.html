@@ -1,0 +1,325 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Regex Playground — Algo Infinity Verse</title>
+  <meta name="description" content="Interactive regex playground with live matching, guided exercises, NFA visualization, and DSA pattern library." />
+  <link rel="stylesheet" href="/styles.css" />
+  <link rel="stylesheet" href="regex-playground.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Poppins:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/cytoscape/3.26.0/cytoscape.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/dagre/0.8.5/dagre.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/cytoscape-dagre@2.5.0/cytoscape-dagre.min.js"></script>
+  <script>
+    (function () {
+      try {
+        var storedTheme = localStorage.getItem('theme');
+        var prefersLight = window.matchMedia('(prefers-color-scheme: light)').matches;
+        var theme = storedTheme || (prefersLight ? 'light' : 'dark');
+        if (theme === 'light') {
+          document.documentElement.classList.add('light-mode');
+        } else {
+          document.documentElement.classList.remove('light-mode');
+        }
+      } catch (e) {}
+    })();
+  </script>
+</head>
+<body data-page="regex-playground">
+  <a href="#rg-main" class="rg-skip-link">Skip to main content</a>
+  <button type="button" id="scrollTopBtn" class="scroll-top-btn" aria-label="Scroll to top">
+    <i class="fas fa-arrow-up" aria-hidden="true"></i>
+  </button>
+
+  <div id="navbar-placeholder"></div>
+
+  <header class="rg-hero">
+    <div class="rg-hero-badge">
+      <i class="fas fa-code" aria-hidden="true"></i>
+      Interactive Learning Tool
+    </div>
+    <h1>
+      Regex
+      <span class="rg-hero-accent">Playground</span>
+    </h1>
+    <p>
+      Master regular expressions through live matching, guided exercises, auto-generated explanations,
+      and interactive NFA state machine diagrams.
+    </p>
+    <div class="rg-save-bar">
+      <button type="button" id="rgSaveBtn" class="rg-btn rg-btn-secondary" aria-label="Save current pattern">
+        <i class="fas fa-bookmark" aria-hidden="true"></i> Save
+      </button>
+      <button type="button" id="rgShareBtn" class="rg-btn rg-btn-secondary" aria-label="Share via URL">
+        <i class="fas fa-share-nodes" aria-hidden="true"></i> Share
+      </button>
+      <button type="button" id="rgSavedListBtn" class="rg-btn rg-btn-secondary" aria-label="View saved patterns">
+        <i class="fas fa-list" aria-hidden="true"></i> Saved
+      </button>
+    </div>
+  </header>
+
+  <main id="rg-main" class="rg-main">
+    <nav class="rg-tabs" role="tablist" aria-label="Regex Playground sections">
+      <button type="button" class="rg-tab active" role="tab" aria-selected="true" aria-controls="rg-playground-panel" id="rg-tab-playground">
+        <i class="fas fa-play" aria-hidden="true"></i> Playground
+      </button>
+      <button type="button" class="rg-tab" role="tab" aria-selected="false" aria-controls="rg-exercises-panel" id="rg-tab-exercises" tabindex="-1">
+        <i class="fas fa-graduation-cap" aria-hidden="true"></i> Exercises
+      </button>
+      <button type="button" class="rg-tab" role="tab" aria-selected="false" aria-controls="rg-patterns-panel" id="rg-tab-patterns" tabindex="-1">
+        <i class="fas fa-book" aria-hidden="true"></i> DSA Patterns
+      </button>
+      <button type="button" class="rg-tab" role="tab" aria-selected="false" aria-controls="rg-nfa-panel" id="rg-tab-nfa" tabindex="-1">
+        <i class="fas fa-project-diagram" aria-hidden="true"></i> NFA Diagram
+      </button>
+    </nav>
+
+    <div class="rg-tab-content">
+
+      <!-- ====== PLAYGROUND TAB ====== -->
+      <section id="rg-playground-panel" class="rg-panel rg-panel-active" role="tabpanel" aria-labelledby="rg-tab-playground">
+        <div class="rg-playground-layout">
+
+          <div class="rg-playground-left">
+
+            <div class="rg-card">
+              <div class="rg-card-header">
+                <i class="fas fa-sliders" aria-hidden="true"></i>
+                <span>Pattern</span>
+              </div>
+              <div class="rg-pattern-row">
+                <span class="rg-pat-delim">/</span>
+                <input type="text" id="rgPatternInput" class="rg-pattern-input" placeholder="e.g. \d{3}-\d{2}-\d{4}" autocomplete="off" spellcheck="false" />
+                <span class="rg-pat-delim">/</span>
+                <input type="text" id="rgFlagsInput" class="rg-flags-input" value="gm" maxlength="5" placeholder="gm" autocomplete="off" spellcheck="false" title="Regex flags: g, m, i, s, u, y" />
+                <button type="button" id="rgMatchBtn" class="rg-btn rg-btn-primary rg-btn-sm">
+                  <i class="fas fa-play" aria-hidden="true"></i> Match
+                </button>
+                <button type="button" id="rgClearBtn" class="rg-btn rg-btn-ghost rg-btn-sm" aria-label="Clear all">
+                  <i class="fas fa-eraser" aria-hidden="true"></i>
+                </button>
+              </div>
+            </div>
+
+            <div class="rg-card rg-card-grow">
+              <div class="rg-card-header">
+                <i class="fas fa-font" aria-hidden="true"></i>
+                <span>Test String</span>
+                <span class="rg-char-count" id="rgCharCount">0 chars</span>
+              </div>
+              <div class="rg-textarea-wrapper">
+                <div id="rgHighlightOverlay" class="rg-highlight-overlay" aria-hidden="true"></div>
+                <textarea id="rgTestInput" class="rg-test-input" placeholder="Enter your test string here..." spellcheck="false" rows="8"></textarea>
+              </div>
+            </div>
+
+            <div class="rg-card">
+              <div class="rg-card-header">
+                <i class="fas fa-chart-simple" aria-hidden="true"></i>
+                <span>Results</span>
+              </div>
+              <div class="rg-results-bar">
+                <span class="rg-result-item" id="rgMatchCount">
+                  <i class="fas fa-check-circle" aria-hidden="true"></i>
+                  Matches: <strong>0</strong>
+                </span>
+                <span class="rg-result-item" id="rgGroupCount">
+                  <i class="fas fa-layer-group" aria-hidden="true"></i>
+                  Groups: <strong>0</strong>
+                </span>
+                <span class="rg-result-item" id="rgStepEstimate">
+                  <i class="fas fa-gauge" aria-hidden="true"></i>
+                  Steps: <strong>0</strong>
+                </span>
+                <span class="rg-result-item" id="rgBacktrackWarn" style="display:none;">
+                  <i class="fas fa-triangle-exclamation" aria-hidden="true"></i>
+                  <span>Catastrophic backtracking risk</span>
+                </span>
+              </div>
+              <div id="rgMatchDetails" class="rg-match-details"></div>
+            </div>
+
+          </div>
+
+          <div class="rg-playground-right">
+
+            <div class="rg-card">
+              <div class="rg-card-header">
+                <i class="fas fa-lightbulb" aria-hidden="true"></i>
+                <span>Explanation</span>
+              </div>
+              <div id="rgExplanation" class="rg-explanation">
+                <p class="rg-placeholder-text">Enter a regex pattern and click Match to see an explanation.</p>
+              </div>
+            </div>
+
+            <div class="rg-card rg-card-grow">
+              <div class="rg-card-header">
+                <i class="fas fa-cubes" aria-hidden="true"></i>
+                <span>Group Captures</span>
+              </div>
+              <div id="rgGroupDetails" class="rg-group-details">
+                <p class="rg-placeholder-text">Matched groups will appear here.</p>
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+
+        <!-- Saved patterns modal -->
+        <div id="rgSavedModal" class="rg-modal" role="dialog" aria-modal="true" aria-labelledby="rg-saved-title" hidden>
+          <div class="rg-modal-backdrop"></div>
+          <div class="rg-modal-content">
+            <div class="rg-modal-header">
+              <h3 id="rg-saved-title">Saved Patterns</h3>
+              <button type="button" class="rg-modal-close" aria-label="Close">&times;</button>
+            </div>
+            <div class="rg-modal-body" id="rgSavedList">
+              <p class="rg-placeholder-text">No saved patterns yet.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Save pattern modal -->
+        <div id="rgSaveModal" class="rg-modal" role="dialog" aria-modal="true" aria-labelledby="rg-save-title" hidden>
+          <div class="rg-modal-backdrop"></div>
+          <div class="rg-modal-content rg-modal-sm">
+            <div class="rg-modal-header">
+              <h3 id="rg-save-title">Save Pattern</h3>
+              <button type="button" class="rg-modal-close" aria-label="Close">&times;</button>
+            </div>
+            <div class="rg-modal-body">
+              <label for="rgSaveName" class="rg-label">Pattern name</label>
+              <input type="text" id="rgSaveName" class="rg-input" placeholder="e.g. SSN Validator" autocomplete="off" />
+              <div class="rg-modal-actions">
+                <button type="button" id="rgSaveConfirmBtn" class="rg-btn rg-btn-primary">Save</button>
+                <button type="button" class="rg-btn rg-btn-secondary rg-modal-cancel">Cancel</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Share toast -->
+        <div id="rgShareToast" class="rg-toast" role="status" aria-live="polite" hidden>URL copied to clipboard!</div>
+      </section>
+
+      <!-- ====== EXERCISES TAB ====== -->
+      <section id="rg-exercises-panel" class="rg-panel" role="tabpanel" aria-labelledby="rg-tab-exercises" hidden>
+        <div class="rg-exercise-controls">
+          <div class="rg-ex-filter-group" role="tablist" aria-label="Exercise difficulty">
+            <button type="button" class="rg-ex-filter active" data-level="all" role="tab" aria-selected="true">All</button>
+            <button type="button" class="rg-ex-filter" data-level="beginner" role="tab" aria-selected="false">Beginner</button>
+            <button type="button" class="rg-ex-filter" data-level="intermediate" role="tab" aria-selected="false">Intermediate</button>
+            <button type="button" class="rg-ex-filter" data-level="advanced" role="tab" aria-selected="false">Advanced</button>
+          </div>
+          <span class="rg-ex-progress" id="rgExProgress">0 / 15 completed</span>
+        </div>
+        <div class="rg-ex-grid" id="rgExGrid"></div>
+      </section>
+
+      <!-- ====== PATTERNS TAB ====== -->
+      <section id="rg-patterns-panel" class="rg-panel" role="tabpanel" aria-labelledby="rg-tab-patterns" hidden>
+        <div class="rg-pat-controls">
+          <div class="rg-pat-filter-group" role="tablist" aria-label="Pattern category">
+            <button type="button" class="rg-pat-filter active" data-cat="all" role="tab" aria-selected="true">All</button>
+            <button type="button" class="rg-pat-filter" data-cat="validation" role="tab" aria-selected="false">Validation</button>
+            <button type="button" class="rg-pat-filter" data-cat="extraction" role="tab" aria-selected="false">Extraction</button>
+            <button type="button" class="rg-pat-filter" data-cat="formatting" role="tab" aria-selected="false">Formatting</button>
+          </div>
+        </div>
+        <div class="rg-pat-grid" id="rgPatGrid"></div>
+      </section>
+
+      <!-- ====== NFA TAB ====== -->
+      <section id="rg-nfa-panel" class="rg-panel" role="tabpanel" aria-labelledby="rg-tab-nfa" hidden>
+        <div class="rg-nfa-layout">
+          <div class="rg-nfa-left">
+            <div class="rg-card">
+              <div class="rg-card-header">
+                <i class="fas fa-microchip" aria-hidden="true"></i>
+                <span>NFA Compiler</span>
+              </div>
+              <div class="rg-nfa-controls">
+                <label for="rgNfaPattern" class="rg-label">Regex Pattern</label>
+                <div class="rg-nfa-input-row" style="gap:0.5rem;">
+                  <input type="text" id="rgNfaPattern" class="rg-input" value="(a|b)*abb" placeholder="e.g. (a|b)*abb" autocomplete="off" spellcheck="false" style="flex:1;" />
+                  <select id="rgNfaMode" class="rg-input" style="width:auto;padding:0.4rem;" title="Automaton Type">
+                    <option value="nfa">NFA</option>
+                    <option value="dfa">DFA</option>
+                  </select>
+                  <button type="button" id="rgNfaCompileBtn" class="rg-btn rg-btn-primary">Compile</button>
+                </div>
+                <small class="rg-help">Supported ops: <code>*</code>, <code>+</code>, <code>?</code>, <code>|</code>, <code>()</code></small>
+              </div>
+              <div class="rg-nfa-logs" id="rgNfaLogs">
+                <div class="rg-log-line sys">&gt; Awaiting compilation...</div>
+              </div>
+            </div>
+            <div class="rg-card">
+              <div class="rg-card-header">
+                <i class="fas fa-play-circle" aria-hidden="true"></i>
+                <span>Simulator</span>
+                <span class="rg-nfa-state-count" id="rgNfaStateCount" style="margin-left:auto;font-size:0.75rem;color:#a855f7;"></span>
+              </div>
+              <div class="rg-nfa-controls">
+                <label for="rgNfaString" class="rg-label">Test String</label>
+                <input type="text" id="rgNfaString" class="rg-input" placeholder="String to evaluate..." disabled />
+              </div>
+              <div class="rg-nfa-speed-row">
+                <label class="rg-label" style="font-size:0.75rem;">Speed</label>
+                <input type="range" id="rgNfaSpeed" min="100" max="1500" value="700" step="100" style="flex:1;" />
+                <span id="rgNfaSpeedVal" style="font-family:'Fira Code',monospace;font-size:0.72rem;color:#0ea5e9;min-width:45px;">700ms</span>
+              </div>
+              <div class="rg-nfa-btn-row">
+                <button type="button" id="rgNfaStepBtn" class="rg-btn rg-btn-secondary" disabled><i class="fas fa-step-forward"></i> Step</button>
+                <button type="button" id="rgNfaRunBtn" class="rg-btn rg-btn-primary" disabled><i class="fas fa-play"></i> Run All</button>
+                <button type="button" id="rgNfaResetBtn" class="rg-btn rg-btn-ghost" disabled><i class="fas fa-undo"></i> Reset</button>
+              </div>
+              <div class="rg-nfa-tracker" id="rgNfaTracker">
+                <div class="rg-nfa-chars" id="rgNfaChars"></div>
+              </div>
+              <div class="rg-nfa-epsilon-info" id="rgNfaEpsilonInfo" style="display:none;"></div>
+              <div class="rg-nfa-verdict" id="rgNfaVerdict">
+                <i class="fas fa-info-circle"></i> Simulation idle.
+              </div>
+            </div>
+          </div>
+          <div class="rg-nfa-right">
+            <div class="rg-nfa-canvas-header">
+              <span><i class="fas fa-project-diagram"></i> Non-deterministic Finite Automaton</span>
+              <div class="rg-nfa-legend">
+                <span class="rg-legend-item"><span class="rg-legend-swatch start"></span> Start</span>
+                <span class="rg-legend-item"><span class="rg-legend-swatch accept"></span> Accept</span>
+                <span class="rg-legend-item"><span class="rg-legend-swatch active"></span> Active</span>
+                <span class="rg-legend-item"><span class="rg-legend-swatch dead"></span> Dead</span>
+              </div>
+            </div>
+            <div class="rg-nfa-canvas">
+              <div id="rgCy" class="rg-cy-container"></div>
+              <div class="rg-nfa-empty" id="rgNfaEmpty">
+                <i class="fas fa-network-wired"></i>
+                <p>Compile a regex to see its NFA.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <script src="/auth.js"></script>
+  <script src="/script.js"></script>
+  <script src="/theme.js"></script>
+  <script src="regex-playground.js"></script>
+  <script>
+    if (typeof loadPartial === 'function') {
+      loadPartial('navbar-placeholder', '/partials/navbar.html');
+    }
+  </script>
+</body>
+</html>

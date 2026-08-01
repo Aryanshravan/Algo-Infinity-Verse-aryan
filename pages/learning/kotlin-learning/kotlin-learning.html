@@ -1,0 +1,1379 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Learn Kotlin – Modern JVM &amp; Android Language | Algo Infinity Verse</title>
+  <meta name="description" content="Free interactive Kotlin tutorial covering variables, null safety, extension functions, coroutines, Android patterns, and more. Write concise, safe, and expressive code." />
+
+  <link rel="stylesheet" href="/styles.css" />
+  <link rel="stylesheet" href="kotlin-learning.css" />
+
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+
+  <script>
+    (function() {
+      try {
+        var t = localStorage.getItem('theme');
+        var p = window.matchMedia('(prefers-color-scheme: light)').matches;
+        var theme = t || (p ? 'light' : 'dark');
+        if (theme === 'light') document.documentElement.classList.add('light-mode');
+      } catch (e) {}
+    })();
+  </script>
+</head>
+<body data-page="kotlin-learning" data-no-loading>
+  <div id="loading-screen" class="hidden">
+    <div class="loader">
+      <div class="infinity-loader">&#x221E;</div>
+      <h2>Loading Kotlin Learning...</h2>
+    </div>
+  </div>
+
+  <main>
+    <!-- ════════════════════════════════════════
+         HERO SECTION
+         ════════════════════════════════════════ -->
+    <section class="kl-hero">
+      <div class="kl-hero-bg">
+        <div class="kl-hero-glow"></div>
+      </div>
+
+      <a href="/pages/learning/languages.html" class="kl-back-btn" id="klBackBtn" aria-label="Go back to languages">
+        <i class="fas fa-arrow-left"></i>
+        <span>Languages</span>
+      </a>
+
+      <div class="kl-hero-content">
+        <!-- Kotlin fun keyword signature motif -->
+        <div class="kl-fun-tag" aria-hidden="true">
+          <span class="kl-fun-kw">fun</span>
+          <span class="kl-fun-name">main</span>
+          <span class="kl-fun-parens">()</span>
+        </div>
+
+        <h1 class="kl-hero-title" id="klHeroTitle">
+          <span class="kl-title-line">Learn Kotlin</span>
+          <span class="kl-title-line">Modern JVM &amp; Android</span>
+        </h1>
+
+        <p class="kl-hero-subtitle">
+          Master the expressive, concise language that powers modern Android development and beyond. From variables and null safety to coroutines and Jetpack — <strong>10 interactive lessons</strong> to build production-ready applications.
+        </p>
+
+        <!-- Stats -->
+        <div class="kl-hero-stats">
+          <div class="kl-stat">
+            <span class="kl-stat-value" id="topicCount">10</span>
+            <span class="kl-stat-label">Topics</span>
+          </div>
+          <div class="kl-stat">
+            <span class="kl-stat-value">35+</span>
+            <span class="kl-stat-label">Examples</span>
+          </div>
+          <div class="kl-stat">
+            <span class="kl-stat-value">10</span>
+            <span class="kl-stat-label">Exercises</span>
+          </div>
+        </div>
+
+        <!-- CTA -->
+        <div class="kl-hero-actions">
+          <a href="#topic-introduction" class="kl-btn kl-btn-primary">
+            <i class="fas fa-play"></i> Start Learning
+          </a>
+          <a href="/pages/learning/languages.html" class="kl-btn kl-btn-secondary">
+            <i class="fas fa-th"></i> Browse Languages
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- ════════════════════════════════════════
+         TOPIC NAVIGATION PILLS
+         ════════════════════════════════════════ -->
+    <section class="kl-section">
+      <nav class="kl-topic-nav" id="klTopicNav" aria-label="Lesson topics">
+        <a href="#topic-introduction" class="kl-topic-pill active">Introduction</a>
+        <a href="#topic-variables" class="kl-topic-pill">Variables &amp; Types</a>
+        <a href="#topic-control" class="kl-topic-pill">Control Flow</a>
+        <a href="#topic-functions" class="kl-topic-pill">Functions &amp; Lambdas</a>
+        <a href="#topic-null" class="kl-topic-pill">Null Safety</a>
+        <a href="#topic-extensions" class="kl-topic-pill">Extensions</a>
+        <a href="#topic-oop" class="kl-topic-pill">OOP</a>
+        <a href="#topic-collections" class="kl-topic-pill">Collections</a>
+        <a href="#topic-coroutines" class="kl-topic-pill">Coroutines</a>
+        <a href="#topic-android" class="kl-topic-pill">Android</a>
+      </nav>
+
+      <!-- Progress dots -->
+      <div class="kl-progress" id="klProgress" aria-hidden="true">
+        <span class="kl-progress-dot active" data-topic="0"></span>
+        <span class="kl-progress-line" data-topic="0"></span>
+        <span class="kl-progress-dot" data-topic="1"></span>
+        <span class="kl-progress-line" data-topic="1"></span>
+        <span class="kl-progress-dot" data-topic="2"></span>
+        <span class="kl-progress-line" data-topic="2"></span>
+        <span class="kl-progress-dot" data-topic="3"></span>
+        <span class="kl-progress-line" data-topic="3"></span>
+        <span class="kl-progress-dot" data-topic="4"></span>
+        <span class="kl-progress-line" data-topic="4"></span>
+        <span class="kl-progress-dot" data-topic="5"></span>
+        <span class="kl-progress-line" data-topic="5"></span>
+        <span class="kl-progress-dot" data-topic="6"></span>
+        <span class="kl-progress-line" data-topic="6"></span>
+        <span class="kl-progress-dot" data-topic="7"></span>
+        <span class="kl-progress-line" data-topic="7"></span>
+        <span class="kl-progress-dot" data-topic="8"></span>
+        <span class="kl-progress-line" data-topic="8"></span>
+        <span class="kl-progress-dot" data-topic="9"></span>
+      </div>
+
+      <!-- ════════════════════════════════════════
+           LESSON 1: INTRODUCTION TO KOTLIN
+           ════════════════════════════════════════ -->
+      <article class="kl-lesson" id="topic-introduction" data-topic="0">
+        <div class="kl-lesson-header">
+          <span class="kl-lesson-number">01</span>
+          <h3>Introduction to Kotlin</h3>
+        </div>
+
+        <p>
+          <strong>Kotlin</strong> is a modern, statically typed programming language that runs on the Java Virtual Machine (JVM). Developed by JetBrains and officially launched in 2016, it was designed to be fully interoperable with Java while being more concise, expressive, and safe.
+        </p>
+
+        <p>
+          In 2019, Google announced Kotlin as the <strong>preferred language for Android development</strong>, and it has since grown into a versatile language used for backend services (Ktor, Spring Boot), multiplatform mobile apps (KMP), and even web development (Kotlin/JS).
+        </p>
+
+        <div class="kl-concept">
+          <h4>Why Learn Kotlin?</h4>
+          <ul>
+            <li><strong>Concise &amp; Expressive:</strong> Eliminates boilerplate — Java's getters/setters, constructors, and equals/hashCode collapse into a single line.</li>
+            <li><strong>Null Safety Built-In:</strong> The type system distinguishes between nullable and non-nullable types, eliminating null pointer exceptions at compile time.</li>
+            <li><strong>Full Java Interop:</strong> Use any Java library directly from Kotlin and vice versa — no adapter layer needed.</li>
+            <li><strong>Coroutines:</strong> First-class structured concurrency for async, non-blocking code that's easy to read and reason about.</li>
+            <li><strong>Modern Ecosystem:</strong> Backed by JetBrains, adopted by Google, and powering major apps like Trello, Evernote, and Pinterest.</li>
+          </ul>
+        </div>
+
+        <div class="kl-code-block">
+          <div class="kl-code-header">
+            <span class="kl-code-lang">Kotlin</span>
+            <button type="button" class="kl-code-copy" aria-label="Copy code" data-code='// Hello, World!
+fun main() {
+    println("Hello, Kotlin!")
+    println("Concise. Safe. Modern.")
+}'>Copy</button>
+          </div>
+          <pre><code><span class="cmt">// Hello, World!</span>
+<span class="kw">fun</span> <span class="fn">main</span>() {
+    <span class="fn">println</span>(<span class="str">"Hello, Kotlin!"</span>)
+    <span class="fn">println</span>(<span class="str">"Concise. Safe. Modern."</span>)
+}</code></pre>
+        </div>
+
+        <!-- Exercise -->
+        <div class="kl-exercise" id="exercise-introduction">
+          <div class="kl-exercise-title">
+            Practice: Introduction to Kotlin
+          </div>
+          <p>Which organization originally developed Kotlin and in which year was it officially launched?</p>
+          <ol>
+            <li>A) Google, 2017</li>
+            <li>B) JetBrains, 2016</li>
+            <li>C) Oracle, 2014</li>
+            <li>D) Apache Software Foundation, 2018</li>
+          </ol>
+          <button type="button" class="kl-exercise-toggle" aria-expanded="false" aria-controls="solution-introduction">Show Solution</button>
+          <div class="kl-exercise-solution" id="solution-introduction">
+            <p><strong>Correct Answer: B</strong></p>
+            <p>Kotlin was created by JetBrains and officially released in February 2016. Google announced first-class support for Kotlin on Android in 2017.</p>
+          </div>
+        </div>
+      </article>
+
+      <!-- ════════════════════════════════════════
+           LESSON 2: VARIABLES & DATA TYPES
+           ════════════════════════════════════════ -->
+      <article class="kl-lesson" id="topic-variables" data-topic="1">
+        <div class="kl-lesson-header">
+          <span class="kl-lesson-number">02</span>
+          <h3>Variables &amp; Data Types</h3>
+        </div>
+
+        <p>
+          Kotlin offers two keywords for declaring variables: <code>val</code> (immutable / read-only) and <code>var</code> (mutable). The language features strong <strong>type inference</strong>, so you rarely need to declare types explicitly.
+        </p>
+
+        <div class="kl-concept">
+          <h4>val vs var</h4>
+          <ul>
+            <li><strong>val</strong> — A read-only reference. Once assigned, it cannot be reassigned (similar to <code>final</code> in Java). Prefer <code>val</code> by default.</li>
+            <li><strong>var</strong> — A mutable reference. Its value can be changed after assignment.</li>
+          </ul>
+        </div>
+
+        <div class="kl-code-block">
+          <div class="kl-code-header">
+            <span class="kl-code-lang">Kotlin</span>
+            <button type="button" class="kl-code-copy" aria-label="Copy code" data-code='// Immutable (read-only) reference
+val name: String = "Alice"
+val age = 30           // Type inferred as Int
+
+// Mutable reference
+var score = 95
+score = 100            // OK: var can be reassigned
+
+// Basic types
+val greeting: String = "Hello"
+val year: Int = 2026
+val pi: Double = 3.14159
+val isActive: Boolean = true
+val initial: Char = 'K'
+val bigNumber: Long = 9_000_000_000L
+val temperature: Float = 23.5F
+
+// String templates
+val message = "User: $name, Score: ${score + 5}"
+println(message)'>Copy</button>
+          </div>
+          <pre><code><span class="cmt">// Immutable (read-only) reference</span>
+<span class="kw">val</span> name: <span class="type">String</span> = <span class="str">"Alice"</span>
+<span class="kw">val</span> age = <span class="num">30</span>           <span class="cmt">// Type inferred as Int</span>
+
+<span class="cmt">// Mutable reference</span>
+<span class="kw">var</span> score = <span class="num">95</span>
+score = <span class="num">100</span>            <span class="cmt">// OK: var can be reassigned</span>
+
+<span class="cmt">// Basic types</span>
+<span class="kw">val</span> greeting: <span class="type">String</span> = <span class="str">"Hello"</span>
+<span class="kw">val</span> year: <span class="type">Int</span> = <span class="num">2026</span>
+<span class="kw">val</span> pi: <span class="type">Double</span> = <span class="num">3.14159</span>
+<span class="kw">val</span> isActive: <span class="type">Boolean</span> = <span class="kw">true</span>
+<span class="kw">val</span> initial: <span class="type">Char</span> = <span class="str">'K'</span>
+<span class="kw">val</span> bigNumber: <span class="type">Long</span> = <span class="num">9_000_000_000L</span>
+<span class="kw">val</span> temperature: <span class="type">Float</span> = <span class="num">23.5F</span>
+
+<span class="cmt">// String templates</span>
+<span class="kw">val</span> message = <span class="str">"User: $name, Score: ${score + 5}"</span>
+<span class="fn">println</span>(message)</code></pre>
+        </div>
+
+        <div class="kl-output">
+          <div class="kl-output-label">Output</div>
+          <pre>User: Alice, Score: 105</pre>
+        </div>
+
+        <div class="kl-callout">
+          <p>Use <code>val</code> by default and only switch to <code>var</code> when you have a compelling reason to mutate. This makes your code easier to reason about and thread-safe by design.</p>
+        </div>
+
+        <div class="kl-table-wrap">
+          <table class="kl-table" aria-label="Kotlin basic data types">
+            <thead>
+              <tr>
+                <th scope="col">Type</th>
+                <th scope="col">Size</th>
+                <th scope="col">Example</th>
+                <th scope="col">Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td><code>Byte</code></td><td>8-bit</td><td><code>127</code></td><td>Signed integer</td></tr>
+              <tr><td><code>Short</code></td><td>16-bit</td><td><code>32767</code></td><td>Signed integer</td></tr>
+              <tr><td><code>Int</code></td><td>32-bit</td><td><code>42</code></td><td>Default integer type</td></tr>
+              <tr><td><code>Long</code></td><td>64-bit</td><td><code>100L</code></td><td>L suffix required</td></tr>
+              <tr><td><code>Float</code></td><td>32-bit</td><td><code>3.14F</code></td><td>F suffix required</td></tr>
+              <tr><td><code>Double</code></td><td>64-bit</td><td><code>3.14159</code></td><td>Default decimal type</td></tr>
+              <tr><td><code>Boolean</code></td><td>1-bit</td><td><code>true</code></td><td>true or false</td></tr>
+              <tr><td><code>Char</code></td><td>16-bit</td><td><code>'K'</code></td><td>Single Unicode character</td></tr>
+              <tr><td><code>String</code></td><td>varies</td><td><code>"hello"</code></td><td>Immutable text</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Exercise -->
+        <div class="kl-exercise" id="exercise-variables">
+          <div class="kl-exercise-title">
+            Practice: Variables &amp; Types
+          </div>
+          <p>Which keyword should you use to declare an immutable (read-only) variable in Kotlin?</p>
+          <ol>
+            <li><code>var</code></li>
+            <li><code>val</code></li>
+            <li><code>const</code></li>
+            <li><code>let</code></li>
+          </ol>
+          <button type="button" class="kl-exercise-toggle" aria-expanded="false" aria-controls="solution-variables">Show Solution</button>
+          <div class="kl-exercise-solution" id="solution-variables">
+            <p><strong>Correct Answer: B</strong></p>
+            <p><code>val</code> declares an immutable reference in Kotlin. Once assigned, it cannot be reassigned, making it the preferred choice by default for safer, more predictable code.</p>
+          </div>
+        </div>
+      </article>
+
+      <!-- ════════════════════════════════════════
+           LESSON 3: CONTROL FLOW
+           ════════════════════════════════════════ -->
+      <article class="kl-lesson" id="topic-control" data-topic="2">
+        <div class="kl-lesson-header">
+          <span class="kl-lesson-number">03</span>
+          <h3>Control Flow</h3>
+        </div>
+
+        <p>
+          Kotlin provides familiar control flow constructs with a modern twist. The <code>if</code> expression returns a value, and <code>when</code> replaces Java's <code>switch</code> with far more expressive power.
+        </p>
+
+        <div class="kl-code-block">
+          <div class="kl-code-header">
+            <span class="kl-code-lang">Kotlin</span>
+            <button type="button" class="kl-code-copy" aria-label="Copy code" data-code='fun main() {
+    val score = 85
+
+    // if as an expression (returns a value)
+    val grade = if (score >= 90) {
+        "A"
+    } else if (score >= 80) {
+        "B"
+    } else {
+        "C"
+    }
+    println("Grade: $grade")
+
+    // when expression (replaces switch)
+    val status = when (grade) {
+        "A" -> "Excellent"
+        "B" -> "Good"
+        "C" -> "Average"
+        else -> "Unknown"
+    }
+    println("Status: $status")
+
+    // for loop with ranges
+    for (i in 1..3) {
+        print("$i ")
+    }
+    // Output: 1 2 3
+
+    // while loop
+    var x = 3
+    while (x > 0) {
+        print("$x ")
+        x--
+    }
+    // Output: 3 2 1
+}'>Copy</button>
+          </div>
+          <pre><code><span class="kw">fun</span> <span class="fn">main</span>() {
+    <span class="kw">val</span> score = <span class="num">85</span>
+
+    <span class="cmt">// if as an expression (returns a value)</span>
+    <span class="kw">val</span> grade = <span class="kw">if</span> (score >= <span class="num">90</span>) {
+        <span class="str">"A"</span>
+    } <span class="kw">else if</span> (score >= <span class="num">80</span>) {
+        <span class="str">"B"</span>
+    } <span class="kw">else</span> {
+        <span class="str">"C"</span>
+    }
+    <span class="fn">println</span>(<span class="str">"Grade: $grade"</span>)
+
+    <span class="cmt">// when expression (replaces switch)</span>
+    <span class="kw">val</span> status = <span class="kw">when</span> (grade) {
+        <span class="str">"A"</span> -> <span class="str">"Excellent"</span>
+        <span class="str">"B"</span> -> <span class="str">"Good"</span>
+        <span class="str">"C"</span> -> <span class="str">"Average"</span>
+        <span class="kw">else</span> -> <span class="str">"Unknown"</span>
+    }
+    <span class="fn">println</span>(<span class="str">"Status: $status"</span>)
+
+    <span class="cmt">// for loop with ranges</span>
+    <span class="kw">for</span> (i <span class="kw">in</span> <span class="num">1</span>..<span class="num">3</span>) {
+        <span class="fn">print</span>(<span class="str">"$i "</span>)
+    }
+
+    <span class="cmt">// while loop</span>
+    <span class="kw">var</span> x = <span class="num">3</span>
+    <span class="kw">while</span> (x > <span class="num">0</span>) {
+        <span class="fn">print</span>(<span class="str">"$x "</span>)
+        x--
+    }
+}</code></pre>
+        </div>
+
+        <div class="kl-output">
+          <div class="kl-output-label">Output</div>
+          <pre>Grade: B
+Status: Good
+1 2 3
+3 2 1</pre>
+        </div>
+
+        <div class="kl-concept">
+          <h4>Ranges</h4>
+          <ul>
+            <li><code>1..5</code> — closed range (includes 1, 2, 3, 4, 5)</li>
+            <li><code>1..&lt;5</code> — half-open range (includes 1, 2, 3, 4)</li>
+            <li><code>5 downTo 1</code> — reversed range</li>
+            <li><code>1..10 step 2</code> — range with step (1, 3, 5, 7, 9)</li>
+          </ul>
+        </div>
+
+        <!-- Exercise -->
+        <div class="kl-exercise" id="exercise-control">
+          <div class="kl-exercise-title">
+            Practice: Control Flow
+          </div>
+          <p>In Kotlin, what's the key difference between <code>if</code> and <code>when</code> compared to Java?</p>
+          <ol>
+            <li>Both are statements that cannot produce values</li>
+            <li>Both can be used as expressions that return a value</li>
+            <li><code>if</code> can return a value but <code>when</code> cannot</li>
+            <li>Kotlin uses <code>elif</code> instead of <code>else if</code></li>
+          </ol>
+          <button type="button" class="kl-exercise-toggle" aria-expanded="false" aria-controls="solution-control">Show Solution</button>
+          <div class="kl-exercise-solution" id="solution-control">
+            <p><strong>Correct Answer: B</strong></p>
+            <p>Both <code>if</code> and <code>when</code> can be used as expressions in Kotlin, meaning they return values that can be assigned to variables. This makes code more concise and functional.</p>
+          </div>
+        </div>
+      </article>
+
+      <!-- ════════════════════════════════════════
+           LESSON 4: FUNCTIONS & LAMBDAS
+           ════════════════════════════════════════ -->
+      <div class="kl-divider">
+        <span class="kl-divider-inner">Next Topic</span>
+      </div>
+
+      <article class="kl-lesson" id="topic-functions" data-topic="3">
+        <div class="kl-lesson-header">
+          <span class="kl-lesson-number">04</span>
+          <h3>Functions &amp; Lambdas</h3>
+        </div>
+
+        <p>
+          Functions are declared with the <code>fun</code> keyword. Kotlin supports default arguments, named parameters, single-expression functions, and first-class lambda expressions for functional programming.
+        </p>
+
+        <div class="kl-code-block">
+          <div class="kl-code-header">
+            <span class="kl-code-lang">Kotlin</span>
+            <button type="button" class="kl-code-copy" aria-label="Copy code" data-code='// Standard function with default argument
+fun greet(name: String = "Guest"): String {
+    return "Hello, $name!"
+}
+
+// Single-expression function (concise)
+fun double(x: Int): Int = x * 2
+
+// Named arguments
+fun createUser(name: String, age: Int, role: String = "user") {
+    println("$name is $age years old, role: $role")
+}
+
+// Lambda expression
+val sum: (Int, Int) -> Int = { a, b -> a + b }
+
+// Lambda with implicit 'it' parameter
+val numbers = listOf(1, 2, 3, 4, 5)
+val doubled = numbers.map { it * 2 }
+
+// Higher-order function (accepts a lambda)
+fun operateOnNumbers(a: Int, b: Int, operation: (Int, Int) -> Int): Int {
+    return operation(a, b)
+}
+
+fun main() {
+    println(greet("Alice"))
+    println(double(21))
+    createUser(age = 25, name = "Bob")  // Named arguments
+    println(sum(3, 4))
+
+    val result = operateOnNumbers(10, 5) { x, y -> x - y }
+    println("Subtraction: $result")
+}'>Copy</button>
+          </div>
+          <pre><code><span class="cmt">// Standard function with default argument</span>
+<span class="kw">fun</span> <span class="fn">greet</span>(name: <span class="type">String</span> = <span class="str">"Guest"</span>): <span class="type">String</span> {
+    <span class="kw">return</span> <span class="str">"Hello, $name!"</span>
+}
+
+<span class="cmt">// Single-expression function (concise)</span>
+<span class="kw">fun</span> <span class="fn">double</span>(x: <span class="type">Int</span>): <span class="type">Int</span> = x * <span class="num">2</span>
+
+<span class="cmt">// Named arguments</span>
+<span class="kw">fun</span> <span class="fn">createUser</span>(name: <span class="type">String</span>, age: <span class="type">Int</span>, role: <span class="type">String</span> = <span class="str">"user"</span>) {
+    <span class="fn">println</span>(<span class="str">"$name is $age years old, role: $role"</span>)
+}
+
+<span class="cmt">// Lambda expression</span>
+<span class="kw">val</span> sum: (<span class="type">Int</span>, <span class="type">Int</span>) -> <span class="type">Int</span> = { a, b -> a + b }
+
+<span class="cmt">// Higher-order function</span>
+<span class="kw">fun</span> <span class="fn">operateOnNumbers</span>(a: <span class="type">Int</span>, b: <span class="type">Int</span>, operation: (<span class="type">Int</span>, <span class="type">Int</span>) -> <span class="type">Int</span>): <span class="type">Int</span> {
+    <span class="kw">return</span> operation(a, b)
+}
+
+<span class="kw">fun</span> <span class="fn">main</span>() {
+    <span class="fn">println</span>(<span class="fn">greet</span>(<span class="str">"Alice"</span>))
+    <span class="fn">println</span>(<span class="fn">double</span>(<span class="num">21</span>))
+    <span class="fn">createUser</span>(age = <span class="num">25</span>, name = <span class="str">"Bob"</span>)
+    <span class="fn">println</span>(<span class="fn">sum</span>(<span class="num">3</span>, <span class="num">4</span>))
+
+    <span class="kw">val</span> result = <span class="fn">operateOnNumbers</span>(<span class="num">10</span>, <span class="num">5</span>) { x, y -> x - y }
+    <span class="fn">println</span>(<span class="str">"Subtraction: $result"</span>)
+}</code></pre>
+        </div>
+
+        <div class="kl-output">
+          <div class="kl-output-label">Output</div>
+          <pre>Hello, Alice!
+42
+Bob is 25 years old, role: user
+7
+Subtraction: 5</pre>
+        </div>
+
+        <div class="kl-callout">
+          <p><strong>Trailing lambda syntax:</strong> When the last parameter of a function is a lambda, you can move it outside the parentheses. This enables clean DSL-like APIs.</p>
+        </div>
+
+        <!-- Exercise -->
+        <div class="kl-exercise" id="exercise-functions">
+          <div class="kl-exercise-title">
+            Practice: Functions &amp; Lambdas
+          </div>
+          <p>What is the output of the following Kotlin code: <code>val nums = listOf(1, 2, 3); println(nums.map { it * 3 })</code>?</p>
+          <ol>
+            <li><code>[1, 2, 3]</code></li>
+            <li><code>[3, 6, 9]</code></li>
+            <li><code>[1, 4, 9]</code></li>
+            <li><code>[1, 8, 27]</code></li>
+          </ol>
+          <button type="button" class="kl-exercise-toggle" aria-expanded="false" aria-controls="solution-functions">Show Solution</button>
+          <div class="kl-exercise-solution" id="solution-functions">
+            <p><strong>Correct Answer: B</strong></p>
+            <p><code>map { it * 3 }</code> multiplies each element by 3. <code>it</code> is the implicit name for the single lambda parameter in Kotlin.</p>
+          </div>
+        </div>
+      </article>
+
+      <!-- ════════════════════════════════════════
+           LESSON 5: NULL SAFETY
+           ════════════════════════════════════════ -->
+      <article class="kl-lesson" id="topic-null" data-topic="4">
+        <div class="kl-lesson-header">
+          <span class="kl-lesson-number">05</span>
+          <h3>Null Safety</h3>
+        </div>
+
+        <p>
+          Kotlin's type system eliminates null pointer exceptions (NullPointerException) at compile time. The distinction between <strong>nullable</strong> and <strong>non-nullable</strong> types is baked into the language itself.
+        </p>
+
+        <div class="kl-concept">
+          <h4>Nullable vs Non-Nullable Types</h4>
+          <ul>
+            <li><strong>Non-nullable:</strong> <code>String name = "Alice"</code> — can never hold null. Safe to access without checks.</li>
+            <li><strong>Nullable:</strong> <code>String? name = null</code> — declared with <code>?</code> suffix. Must be handled safely before use.</li>
+          </ul>
+        </div>
+
+        <div class="kl-code-block">
+          <div class="kl-code-header">
+            <span class="kl-code-lang">Kotlin</span>
+            <button type="button" class="kl-code-copy" aria-label="Copy code" data-code='fun main() {
+    var nonNullable: String = "Hello"
+    // nonNullable = null  // Compile error!
+
+    var nullable: String? = "World"
+    nullable = null  // OK: nullable type
+
+    // 1. Safe call operator (?.)
+    val length: Int? = nullable?.length
+    // Returns null if nullable is null; otherwise returns the length
+
+    // 2. Elvis operator (?:)
+    val result = nullable ?: "Default value"
+    // Returns the left side if non-null, otherwise the right side
+
+    // 3. Not-null assertion (!!)
+    // val forced = nullable!!.length  // Throws NPE if null!
+
+    // 4. Safe cast (as?)
+    val obj: Any = "Kotlin"
+    val str: String? = obj as? String  // Returns null if cast fails
+
+    // 5. let + safe call pattern
+    nullable?.let {
+        println("Value is not null: $it")
+    }
+
+    // Practical example
+    fun getUserName(id: Int): String? {
+        return if (id == 1) "Alice" else null
+    }
+
+    val name = getUserName(5) ?: "Unknown"
+    println(name)  // Unknown
+}'>Copy</button>
+          </div>
+          <pre><code><span class="kw">var</span> nonNullable: <span class="type">String</span> = <span class="str">"Hello"</span>
+<span class="cmt">// nonNullable = null // Compile error!</span>
+
+<span class="kw">var</span> nullable: <span class="type">String</span>? = <span class="str">"World"</span>
+nullable = <span class="kw">null</span>  <span class="cmt">// OK: nullable type</span>
+
+<span class="cmt">// 1. Safe call operator (?.)</span>
+<span class="kw">val</span> length: <span class="type">Int</span>? = nullable?.length
+
+<span class="cmt">// 2. Elvis operator (?:)</span>
+<span class="kw">val</span> result = nullable ?: <span class="str">"Default value"</span>
+
+<span class="cmt">// 3. Safe cast (as?)</span>
+<span class="kw">val</span> obj: <span class="type">Any</span> = <span class="str">"Kotlin"</span>
+<span class="kw">val</span> str: <span class="type">String</span>? = obj <span class="kw">as?</span> <span class="type">String</span>
+
+<span class="cmt">// 4. let + safe call pattern</span>
+nullable?.<span class="fn">let</span> {
+    <span class="fn">println</span>(<span class="str">"Value is not null: $it"</span>)
+}
+
+<span class="cmt">// Practical example</span>
+<span class="kw">fun</span> <span class="fn">getUserName</span>(id: <span class="type">Int</span>): <span class="type">String</span>? {
+    <span class="kw">return</span> <span class="kw">if</span> (id == <span class="num">1</span>) <span class="str">"Alice"</span> <span class="kw">else</span> <span class="kw">null</span>
+}
+
+<span class="kw">val</span> name = <span class="fn">getUserName</span>(<span class="num">5</span>) ?: <span class="str">"Unknown"</span>
+<span class="fn">println</span>(name)  <span class="cmt">// Unknown</span></code></pre>
+        </div>
+
+        <div class="kl-callout">
+          <p><strong>Avoid the <code>!!</code> operator</strong> in production code. It re-introduces the risk of NullPointerException. Prefer <code>?.let</code>, <code>?:</code> (Elvis), and safe casts for idiomatic Kotlin.</p>
+        </div>
+
+        <!-- Exercise -->
+        <div class="kl-exercise" id="exercise-null">
+          <div class="kl-exercise-title">
+            Practice: Null Safety
+          </div>
+          <p>What does the Elvis operator (<code>?:</code>) do in Kotlin?</p>
+          <ol>
+            <li>Throws an exception if the left side is null</li>
+            <li>Returns the left side if non-null, otherwise returns the right side</li>
+            <li>Converts a nullable type to a non-nullable type</li>
+            <li>Performs a null-safe method call</li>
+          </ol>
+          <button type="button" class="kl-exercise-toggle" aria-expanded="false" aria-controls="solution-null">Show Solution</button>
+          <div class="kl-exercise-solution" id="solution-null">
+            <p><strong>Correct Answer: B</strong></p>
+            <p>The Elvis operator <code>?:</code> returns the left-hand expression if it's not null; otherwise it evaluates and returns the right-hand expression. It's named after Elvis Presley's hair — the <code>?:</code> resembles his pompadour hairstyle.</p>
+          </div>
+        </div>
+      </article>
+
+      <!-- ════════════════════════════════════════
+           LESSON 6: EXTENSION FUNCTIONS & PROPERTIES
+           ════════════════════════════════════════ -->
+      <div class="kl-divider">
+        <span class="kl-divider-inner">Next Topic</span>
+      </div>
+
+      <article class="kl-lesson" id="topic-extensions" data-topic="5">
+        <div class="kl-lesson-header">
+          <span class="kl-lesson-number">06</span>
+          <h3>Extension Functions &amp; Properties</h3>
+        </div>
+
+        <p>
+          Extension functions allow you to add new functionality to existing classes without inheriting from them or using design patterns like Decorator. This is one of Kotlin's most powerful features for writing clean, expressive code.
+        </p>
+
+        <div class="kl-code-block">
+          <div class="kl-code-header">
+            <span class="kl-code-lang">Kotlin</span>
+            <button type="button" class="kl-code-copy" aria-label="Copy code" data-code='// Extension function on String
+fun String.isEmail(): Boolean {
+    return this.contains("@") && this.contains(".")
+}
+
+// Extension property on String
+val String.isLong: Boolean
+    get() = this.length > 10
+
+// Extension on a generic List
+fun <T> List<T>.secondOrNull(): T? {
+    return if (this.size >= 2) this[1] else null
+}
+
+fun main() {
+    val email = "alice@example.com"
+    println(email.isEmail())     // true
+    println("short".isEmail())   // false
+
+    println("Hello World".isLong) // true
+
+    val list = listOf(1, 2, 3)
+    println(list.secondOrNull())  // 2
+
+    val single = listOf(42)
+    println(single.secondOrNull()) // null
+
+    // Extension on built-in types
+    fun Int.triple(): Int = this * 3
+    println(7.triple()) // 21
+}'>Copy</button>
+          </div>
+          <pre><code><span class="cmt">// Extension function on String</span>
+<span class="kw">fun</span> <span class="type">String</span>.<span class="fn">isEmail</span>(): <span class="type">Boolean</span> {
+    <span class="kw">return</span> <span class="kw">this</span>.<span class="fn">contains</span>(<span class="str">"@"</span>) && <span class="kw">this</span>.<span class="fn">contains</span>(<span class="str">"."</span>)
+}
+
+<span class="cmt">// Extension property on String</span>
+<span class="kw">val</span> <span class="type">String</span>.isLong: <span class="type">Boolean</span>
+    <span class="kw">get</span>() = <span class="kw">this</span>.length > <span class="num">10</span>
+
+<span class="cmt">// Extension on a generic List</span>
+<span class="kw">fun</span> <span class="type">List</span>&lt;<span class="type">T</span>&gt;.secondOrNull(): <span class="type">T</span>? {
+    <span class="kw">return</span> <span class="kw">if</span> (<span class="kw">this</span>.size >= <span class="num">2</span>) <span class="kw">this</span>[<span class="num">1</span>] <span class="kw">else</span> <span class="kw">null</span>
+}
+
+<span class="kw">fun</span> <span class="fn">main</span>() {
+    <span class="kw">val</span> email = <span class="str">"alice@example.com"</span>
+    <span class="fn">println</span>(email.<span class="fn">isEmail</span>())     <span class="cmt">// true</span>
+
+    <span class="fn">println</span>(<span class="str">"Hello World"</span>.isLong) <span class="cmt">// true</span>
+
+    <span class="kw">val</span> list = <span class="fn">listOf</span>(<span class="num">1</span>, <span class="num">2</span>, <span class="num">3</span>)
+    <span class="fn">println</span>(list.<span class="fn">secondOrNull</span>())  <span class="cmt">// 2</span>
+
+    <span class="kw">fun</span> <span class="type">Int</span>.triple(): <span class="type">Int</span> = <span class="kw">this</span> * <span class="num">3</span>
+    <span class="fn">println</span>(<span class="num">7</span>.<span class="fn">triple</span>()) <span class="cmt">// 21</span>
+}</code></pre>
+        </div>
+
+        <div class="kl-output">
+          <div class="kl-output-label">Output</div>
+          <pre>true
+false
+true
+2
+null
+21</pre>
+        </div>
+
+        <!-- Exercise -->
+        <div class="kl-exercise" id="exercise-extensions">
+          <div class="kl-exercise-title">
+            Practice: Extension Functions
+          </div>
+          <p>What does the following extension function do: <code>fun String.reverseCase(): String = this.map { if (it.isUpperCase()) it.lowercase() else it.uppercase() }.joinToString("")</code>?</p>
+          <ol>
+            <li>Reverses the string order</li>
+            <li>Toggles the case of each character</li>
+            <li>Converts the string to lowercase</li>
+            <li>Removes all uppercase characters</li>
+          </ol>
+          <button type="button" class="kl-exercise-toggle" aria-expanded="false" aria-controls="solution-extensions">Show Solution</button>
+          <div class="kl-exercise-solution" id="solution-extensions">
+            <p><strong>Correct Answer: B</strong></p>
+            <p>The extension toggles each character's case — uppercase becomes lowercase and vice versa. For <code>"Hello"</code> the result would be <code>"hELLO"</code>.</p>
+          </div>
+        </div>
+      </article>
+
+      <!-- ════════════════════════════════════════
+           LESSON 7: OBJECT-ORIENTED KOTLIN
+           ════════════════════════════════════════ -->
+      <article class="kl-lesson" id="topic-oop" data-topic="6">
+        <div class="kl-lesson-header">
+          <span class="kl-lesson-number">07</span>
+          <h3>Object-Oriented Kotlin</h3>
+        </div>
+
+        <p>
+          Kotlin is fully object-oriented with concise syntax for classes, inheritance, data classes, and singletons. It also introduces <strong>data classes</strong> and <strong>sealed classes</strong> that reduce boilerplate significantly compared to Java.
+        </p>
+
+        <div class="kl-code-block">
+          <div class="kl-code-header">
+            <span class="kl-code-lang">Kotlin</span>
+            <button type="button" class="kl-code-copy" aria-label="Copy code" data-code='// Data class: auto-generates equals/hashCode/toString/copy
+data class User(
+    val id: Int,
+    val name: String,
+    val email: String? = null
+)
+
+// Class with primary constructor, properties, and methods
+class Counter(private var count: Int = 0) {
+    fun increment() { count++ }
+    fun reset() { count = 0 }
+    fun value(): Int = count
+}
+
+// Inheritance: classes are final by default (open required)
+open class Animal(val name: String) {
+    open fun speak() = println("$name makes a sound")
+}
+
+class Dog(name: String) : Animal(name) {
+    override fun speak() = println("$name barks!")
+}
+
+// Singleton with object keyword
+object AppConfig {
+    const val VERSION = "1.0.0"
+    fun log(msg: String) = println("[App] $msg")
+}
+
+// Sealed class for restricted hierarchies
+sealed class Result {
+    data class Success(val data: String) : Result()
+    data class Error(val message: String) : Result()
+    object Loading : Result()
+}
+
+fun main() {
+    val user = User(1, "Alice", "alice@example.com")
+    println(user)  // User(id=1, name=Alice, ...)
+
+    val dog = Dog("Buddy")
+    dog.speak()  // Buddy barks!
+
+    AppConfig.log("App started")
+}'>Copy</button>
+          </div>
+          <pre><code><span class="cmt">// Data class</span>
+<span class="kw">data class</span> <span class="fn">User</span>(
+    <span class="kw">val</span> id: <span class="type">Int</span>,
+    <span class="kw">val</span> name: <span class="type">String</span>,
+    <span class="kw">val</span> email: <span class="type">String</span>? = <span class="kw">null</span>
+)
+
+<span class="cmt">// Class with constructor</span>
+<span class="kw">class</span> <span class="fn">Counter</span>(<span class="kw">private var</span> count: <span class="type">Int</span> = <span class="num">0</span>) {
+    <span class="kw">fun</span> <span class="fn">increment</span>() { count++ }
+    <span class="kw">fun</span> <span class="fn">value</span>(): <span class="type">Int</span> = count
+}
+
+<span class="cmt">// Inheritance</span>
+<span class="kw">open class</span> <span class="fn">Animal</span>(<span class="kw">val</span> name: <span class="type">String</span>) {
+    <span class="kw">open fun</span> <span class="fn">speak</span>() = <span class="fn">println</span>(<span class="str">"$name makes a sound"</span>)
+}
+
+<span class="kw">class</span> <span class="fn">Dog</span>(name: <span class="type">String</span>) : <span class="fn">Animal</span>(name) {
+    <span class="kw">override fun</span> <span class="fn">speak</span>() = <span class="fn">println</span>(<span class="str">"$name barks!"</span>)
+}
+
+<span class="cmt">// Singleton</span>
+<span class="kw">object</span> <span class="fn">AppConfig</span> {
+    <span class="kw">const val</span> VERSION = <span class="str">"1.0.0"</span>
+}
+
+<span class="cmt">// Sealed class</span>
+<span class="kw">sealed class</span> <span class="fn">Result</span> {
+    <span class="kw">data class</span> <span class="fn">Success</span>(<span class="kw">val</span> data: <span class="type">String</span>) : <span class="fn">Result</span>()
+    <span class="kw">data class</span> <span class="fn">Error</span>(<span class="kw">val</span> message: <span class="type">String</span>) : <span class="fn">Result</span>()
+    <span class="kw">object</span> <span class="fn">Loading</span> : <span class="fn">Result</span>()
+}</code></pre>
+        </div>
+
+        <div class="kl-output">
+          <div class="kl-output-label">Output</div>
+          <pre>User(id=1, name=Alice, email=alice@example.com)
+Buddy barks!
+[App] App started</pre>
+        </div>
+
+        <div class="kl-callout">
+          <p><strong>Data classes</strong> are one of Kotlin's most loved features — a single line gives you <code>toString()</code>, <code>equals()</code>, <code>hashCode()</code>, <code>copy()</code>, and <code>componentN()</code> (destructuring declaration) functions.</p>
+        </div>
+
+        <!-- Exercise -->
+        <div class="kl-exercise" id="exercise-oop">
+          <div class="kl-exercise-title">
+            Practice: OOP in Kotlin
+          </div>
+          <p>Which keyword must be added to a class declaration to allow it to be subclassed (extended)?</p>
+          <ol>
+            <li><code>abstract</code></li>
+            <li><code>open</code></li>
+            <li><code>public</code></li>
+            <li><code>sealed</code></li>
+          </ol>
+          <button type="button" class="kl-exercise-toggle" aria-expanded="false" aria-controls="solution-oop">Show Solution</button>
+          <div class="kl-exercise-solution" id="solution-oop">
+            <p><strong>Correct Answer: B</strong></p>
+            <p>Kotlin classes are <code>final</code> by default (opposite of Java). The <code>open</code> keyword explicitly marks a class as extensible, allowing other classes to inherit from it. Similarly, methods must be marked <code>open</code> to be overridable.</p>
+          </div>
+        </div>
+      </article>
+
+      <!-- ════════════════════════════════════════
+           LESSON 8: COLLECTIONS & SEQUENCES
+           ════════════════════════════════════════ -->
+      <div class="kl-divider">
+        <span class="kl-divider-inner">Next Topic</span>
+      </div>
+
+      <article class="kl-lesson" id="topic-collections" data-topic="7">
+        <div class="kl-lesson-header">
+          <span class="kl-lesson-number">08</span>
+          <h3>Collections &amp; Sequences</h3>
+        </div>
+
+        <p>
+          Kotlin's standard library offers rich collection types with a powerful functional API. Distinguish between <strong>eager</strong> (List, Set, Map) and <strong>lazy</strong> (Sequence) evaluation to write efficient data pipelines.
+        </p>
+
+        <div class="kl-concept">
+          <h4>Collection Types</h4>
+          <ul>
+            <li><strong>List&lt;T&gt;</strong> — Ordered collection with indexed access (mutable: <code>mutableListOf</code>)</li>
+            <li><strong>Set&lt;T&gt;</strong> — Unique elements with no defined order (mutable: <code>mutableSetOf</code>)</li>
+            <li><strong>Map&lt;K, V&gt;</strong> — Key-value pairs (mutable: <code>mutableMapOf</code>)</li>
+            <li><strong>Sequence&lt;T&gt;</strong> — Lazy evaluation for large data pipelines — elements are computed on demand</li>
+          </ul>
+        </div>
+
+        <div class="kl-code-block">
+          <div class="kl-code-header">
+            <span class="kl-code-lang">Kotlin</span>
+            <button type="button" class="kl-code-copy" aria-label="Copy code" data-code='fun main() {
+    // Immutable vs mutable
+    val fruits = listOf("Apple", "Banana", "Cherry")
+    val mutableFruits = mutableListOf("Apple", "Banana")
+    mutableFruits.add("Cherry")
+
+    // Functional operations
+    val numbers = listOf(1, 2, 3, 4, 5, 6)
+
+    val evenSquares = numbers
+        .filter { it % 2 == 0 }      // [2, 4, 6]
+        .map { it * it }              // [4, 16, 36]
+    println(evenSquares)
+
+    // Set operations
+    val setA = setOf(1, 2, 3, 4)
+    val setB = setOf(3, 4, 5, 6)
+    println(setA intersect setB)  // [3, 4]
+    println(setA union setB)      // [1, 2, 3, 4, 5, 6]
+
+    // Map operations
+    val userMap = mapOf(
+        1 to "Alice",
+        2 to "Bob",
+        3 to "Charlie"
+    )
+    userMap.forEach { (id, name) ->
+        println("User $id: $name")
+    }
+
+    // Sequence: lazy evaluation
+    val largeSequence = (1..1_000_000)
+        .asSequence()
+        .filter { it % 2 == 0 }
+        .map { it * 2 }
+        .take(5)
+        .toList()  // Terminal operation triggers computation
+    println(largeSequence)  // [4, 8, 12, 16, 20]
+}'>Copy</button>
+          </div>
+          <pre><code><span class="kw">fun</span> <span class="fn">main</span>() {
+    <span class="kw">val</span> fruits = <span class="fn">listOf</span>(<span class="str">"Apple"</span>, <span class="str">"Banana"</span>, <span class="str">"Cherry"</span>)
+    <span class="kw">val</span> mutableFruits = <span class="fn">mutableListOf</span>(<span class="str">"Apple"</span>, <span class="str">"Banana"</span>)
+    mutableFruits.<span class="fn">add</span>(<span class="str">"Cherry"</span>)
+
+    <span class="cmt">// Functional operations</span>
+    <span class="kw">val</span> numbers = <span class="fn">listOf</span>(<span class="num">1</span>, <span class="num">2</span>, <span class="num">3</span>, <span class="num">4</span>, <span class="num">5</span>, <span class="num">6</span>)
+
+    <span class="kw">val</span> evenSquares = numbers
+        .<span class="fn">filter</span> { it % <span class="num">2</span> == <span class="num">0</span> }
+        .<span class="fn">map</span> { it * it }
+    <span class="fn">println</span>(evenSquares)  <span class="cmt">// [4, 16, 36]</span>
+
+    <span class="cmt">// Sequence: lazy evaluation</span>
+    <span class="kw">val</span> largeSequence = (<span class="num">1</span>..<span class="num">1_000_000</span>)
+        .<span class="fn">asSequence</span>()
+        .<span class="fn">filter</span> { it % <span class="num">2</span> == <span class="num">0</span> }
+        .<span class="fn">map</span> { it * <span class="num">2</span> }
+        .<span class="fn">take</span>(<span class="num">5</span>)
+        .<span class="fn">toList</span>()
+    <span class="fn">println</span>(largeSequence)  <span class="cmt">// [4, 8, 12, 16, 20]</span>
+}</code></pre>
+        </div>
+
+        <div class="kl-output">
+          <div class="kl-output-label">Output</div>
+          <pre>[4, 16, 36]
+[3, 4]
+[1, 2, 3, 4, 5, 6]
+User 1: Alice
+User 2: Bob
+User 3: Charlie
+[4, 8, 12, 16, 20]</pre>
+        </div>
+
+        <!-- Exercise -->
+        <div class="kl-exercise" id="exercise-collections">
+          <div class="kl-exercise-title">
+            Practice: Collections &amp; Sequences
+          </div>
+          <p>What is the key difference between a <code>List</code> operation chain and a <code>Sequence</code> chain?</p>
+          <ol>
+            <li>Sequences are mutable; Lists are immutable</li>
+            <li>Sequences evaluate lazily — each element flows through the pipeline one at a time</li>
+            <li>Lists support <code>filter</code> and <code>map</code> but Sequences do not</li>
+            <li>Sequences always produce <code>null</code> values</li>
+          </ol>
+          <button type="button" class="kl-exercise-toggle" aria-expanded="false" aria-controls="solution-collections">Show Solution</button>
+          <div class="kl-exercise-solution" id="solution-collections">
+            <p><strong>Correct Answer: B</strong></p>
+            <p>Sequences use lazy evaluation — intermediate operations create a pipeline that processes elements one at a time only when a terminal operation (like <code>toList()</code>) is called. This avoids creating intermediate collections at each step, significantly reducing memory usage for large datasets.</p>
+          </div>
+        </div>
+      </article>
+
+      <!-- ════════════════════════════════════════
+           LESSON 9: COROUTINES & CONCURRENCY
+           ════════════════════════════════════════ -->
+      <article class="kl-lesson" id="topic-coroutines" data-topic="8">
+        <div class="kl-lesson-header">
+          <span class="kl-lesson-number">09</span>
+          <h3>Coroutines &amp; Concurrency</h3>
+        </div>
+
+        <p>
+          Coroutines are Kotlin's approach to asynchronous programming — lightweight threads that can be suspended and resumed without blocking the underlying thread. They enable writing async code that looks and behaves like sequential code.
+        </p>
+
+        <div class="kl-concept">
+          <h4>Key Concepts</h4>
+          <ul>
+            <li><strong>Suspend Function:</strong> A function marked with <code>suspend</code> that can be paused and resumed later without blocking the current thread.</li>
+            <li><strong>CoroutineScope:</strong> Defines the lifecycle of coroutines within it — all coroutines launched in a scope are cancelled when the scope is cancelled.</li>
+            <li><strong>Dispatchers:</strong> Control which thread pool the coroutine runs on (Main, IO, Default, Unconfined).</li>
+            <li><strong>Structured Concurrency:</strong> Coroutines are hierarchical — a parent coroutine is not completed until all its child coroutines complete.</li>
+          </ul>
+        </div>
+
+        <div class="kl-code-block">
+          <div class="kl-code-header">
+            <span class="kl-code-lang">Kotlin</span>
+            <button type="button" class="kl-code-copy" aria-label="Copy code" data-code='import kotlinx.coroutines.*
+
+// Suspend function: can be paused without blocking
+suspend fun fetchUserData(userId: Int): String {
+    delay(1000)  // Simulates network request (non-blocking)
+    return "User data for #$userId"
+}
+
+// Structured concurrency
+fun main() = runBlocking {
+    println("Starting...")
+
+    // Launch multiple coroutines concurrently
+    val result1 = async { fetchUserData(1) }
+    val result2 = async { fetchUserData(2) }
+
+    // Await both results (non-blocking)
+    println("Result 1: ${result1.await()}")
+    println("Result 2: ${result2.await()}")
+
+    // Launch fire-and-forget coroutine
+    launch {
+        repeat(3) { i ->
+            delay(200)
+            println("Tick $i")
+        }
+    }
+
+    // Coroutine with dispatcher
+    launch(Dispatchers.IO) {
+        // Suitable for I/O operations (network, file, database)
+        val data = fetchUserData(3)
+        println(data)
+    }
+
+    println("All results received!")
+}'>Copy</button>
+          </div>
+          <pre><code><span class="cmt">// Suspend function</span>
+<span class="kw">suspend fun</span> <span class="fn">fetchUserData</span>(userId: <span class="type">Int</span>): <span class="type">String</span> {
+    <span class="fn">delay</span>(<span class="num">1000</span>)  <span class="cmt">// Non-blocking sleep</span>
+    <span class="kw">return</span> <span class="str">"User data for #$userId"</span>
+}
+
+<span class="kw">fun</span> <span class="fn">main</span>() = <span class="fn">runBlocking</span> {
+    <span class="cmt">// Launch concurrent tasks</span>
+    <span class="kw">val</span> result1 = <span class="kw">async</span> { <span class="fn">fetchUserData</span>(<span class="num">1</span>) }
+    <span class="kw">val</span> result2 = <span class="kw">async</span> { <span class="fn">fetchUserData</span>(<span class="num">2</span>) }
+
+    <span class="fn">println</span>(result1.<span class="fn">await</span>())
+    <span class="fn">println</span>(result2.<span class="fn">await</span>())
+
+    <span class="cmt">// Fire-and-forget</span>
+    <span class="kw">launch</span> {
+        <span class="kw">repeat</span>(<span class="num">3</span>) { i ->
+            <span class="fn">delay</span>(<span class="num">200</span>)
+            <span class="fn">println</span>(<span class="str">"Tick $i"</span>)
+        }
+    }
+
+    <span class="cmt">// IO dispatcher</span>
+    <span class="kw">launch</span>(<span class="type">Dispatchers</span>.IO) {
+        <span class="fn">println</span>(<span class="fn">fetchUserData</span>(<span class="num">3</span>))
+    }
+
+    <span class="fn">println</span>(<span class="str">"All results received!"</span>)
+}</code></pre>
+        </div>
+
+        <div class="kl-output">
+          <div class="kl-output-label">Output (approximate)</div>
+          <pre>Starting...
+Tick 0
+Tick 1
+All results received!
+User data for #1
+User data for #2
+Tick 2
+User data for #3</pre>
+        </div>
+
+        <div class="kl-callout">
+          <p><strong>runBlocking</strong> bridges the synchronous world (main function) with the coroutine world. Use it only at the top level of your application. In production Android code, use <code>lifecycleScope</code> or <code>viewModelScope</code> instead.</p>
+        </div>
+
+        <!-- Exercise -->
+        <div class="kl-exercise" id="exercise-coroutines">
+          <div class="kl-exercise-title">
+            Practice: Coroutines
+          </div>
+          <p>What does the <code>suspend</code> keyword enable a function to do?</p>
+          <ol>
+            <li>Run on a separate thread automatically</li>
+            <li>Be paused and resumed without blocking the thread</li>
+            <li>Return multiple values</li>
+            <li>Access UI components from any thread</li>
+          </ol>
+          <button type="button" class="kl-exercise-toggle" aria-expanded="false" aria-controls="solution-coroutines">Show Solution</button>
+          <div class="kl-exercise-solution" id="solution-coroutines">
+            <p><strong>Correct Answer: B</strong></p>
+            <p>A <code>suspend</code> function can be paused at a suspension point (like <code>delay()</code> or <code>await()</code>) and resumed later, all without blocking the underlying thread. This allows efficient concurrency with a fraction of the threads needed for traditional approaches.</p>
+          </div>
+        </div>
+      </article>
+
+      <!-- ════════════════════════════════════════
+           LESSON 10: ANDROID-SPECIFIC PATTERNS
+           ════════════════════════════════════════ -->
+      <div class="kl-divider">
+        <span class="kl-divider-inner">Final Topic</span>
+      </div>
+
+      <article class="kl-lesson" id="topic-android" data-topic="9">
+        <div class="kl-lesson-header">
+          <span class="kl-lesson-number">10</span>
+          <h3>Android-Specific Patterns</h3>
+        </div>
+
+        <p>
+          Kotlin is the preferred language for Android development. Modern Android apps leverage Jetpack libraries with Kotlin-first APIs, ViewModel + StateFlow for state management, Room for local storage, and Jetpack Compose for declarative UI.
+        </p>
+
+        <div class="kl-concept">
+          <h4>Common Android Patterns with Kotlin</h4>
+          <ul>
+            <li><strong>ViewModel + StateFlow:</strong> Expose UI state as a <code>StateFlow</code> from the ViewModel for reactive, lifecycle-aware updates.</li>
+            <li><strong>Room Database:</strong> Use Kotlin coroutines and Flow for reactive database queries.</li>
+            <li><strong>Jetpack Compose:</strong> Build declarative UIs with composable functions — no XML layouts needed.</li>
+            <li><strong>Dependency Injection:</strong> Hilt/Dagger with Kotlin's annotation processing for constructor injection.</li>
+          </ul>
+        </div>
+
+        <div class="kl-code-block">
+          <div class="kl-code-header">
+            <span class="kl-code-lang">Kotlin — Android ViewModel</span>
+            <button type="button" class="kl-code-copy" aria-label="Copy code" data-code='// ViewModel with StateFlow
+class MainViewModel : ViewModel() {
+
+    // Mutable state (private) exposed as immutable StateFlow
+    private val _uiState = MutableStateFlow(UiState())
+    val uiState: StateFlow<UiState> = _uiState.asStateFlow()
+
+    data class UiState(
+        val isLoading: Boolean = false,
+        val username: String = "",
+        val error: String? = null
+    )
+
+    fun loadUser(userId: Int) {
+        _uiState.update { it.copy(isLoading = true) }
+
+        viewModelScope.launch {
+            try {
+                val user = repository.getUser(userId)
+                _uiState.update {
+                    it.copy(isLoading = false, username = user.name)
+                }
+            } catch (e: Exception) {
+                _uiState.update {
+                    it.copy(isLoading = false, error = e.message)
+                }
+            }
+        }
+    }
+}
+
+// Jetpack Compose UI
+@Composable
+fun UserScreen(viewModel: MainViewModel) {
+    val state by viewModel.uiState.collectAsState()
+
+    if (state.isLoading) {
+        CircularProgressIndicator()
+    } else {
+        Text("Hello, ${state.username}!")
+    }
+}'>Copy</button>
+          </div>
+          <pre><code><span class="cmt">// ViewModel with StateFlow</span>
+<span class="kw">class</span> <span class="fn">MainViewModel</span> : <span class="fn">ViewModel</span>() {
+
+    <span class="kw">private val</span> _uiState = <span class="type">MutableStateFlow</span>(<span class="fn">UiState</span>())
+    <span class="kw">val</span> uiState: <span class="type">StateFlow</span>&lt;<span class="type">UiState</span>&gt; = _uiState.<span class="fn">asStateFlow</span>()
+
+    <span class="kw">data class</span> <span class="fn">UiState</span>(
+        <span class="kw">val</span> isLoading: <span class="type">Boolean</span> = <span class="kw">false</span>,
+        <span class="kw">val</span> username: <span class="type">String</span> = <span class="str">""</span>,
+        <span class="kw">val</span> error: <span class="type">String</span>? = <span class="kw">null</span>
+    )
+
+    <span class="kw">fun</span> <span class="fn">loadUser</span>(userId: <span class="type">Int</span>) {
+        _uiState.<span class="fn">update</span> { it.<span class="fn">copy</span>(isLoading = <span class="kw">true</span>) }
+
+        <span class="fn">viewModelScope</span>.<span class="fn">launch</span> {
+            <span class="kw">try</span> {
+                <span class="kw">val</span> user = <span class="fn">repository</span>.<span class="fn">getUser</span>(userId)
+                _uiState.<span class="fn">update</span> {
+                    it.<span class="fn">copy</span>(isLoading = <span class="kw">false</span>, username = user.name)
+                }
+            } <span class="kw">catch</span> (e: <span class="type">Exception</span>) {
+                _uiState.<span class="fn">update</span> {
+                    it.<span class="fn">copy</span>(isLoading = <span class="kw">false</span>, error = e.message)
+                }
+            }
+        }
+    }
+}
+
+<span class="cmt">// Jetpack Compose UI</span>
+<span class="kw">@Composable</span>
+<span class="kw">fun</span> <span class="fn">UserScreen</span>(viewModel: <span class="type">MainViewModel</span>) {
+    <span class="kw">val</span> state <span class="kw">by</span> viewModel.uiState.<span class="fn">collectAsState</span>()
+
+    <span class="kw">if</span> (state.isLoading) {
+        <span class="fn">CircularProgressIndicator</span>()
+    } <span class="kw">else</span> {
+        <span class="fn">Text</span>(<span class="str">"Hello, ${state.username}!"</span>)
+    }
+}</code></pre>
+        </div>
+
+        <div class="kl-concept">
+          <h4>Room Database with Coroutines</h4>
+          <ul>
+            <li><strong>DAO methods</strong> can be <code>suspend</code> functions for one-shot queries</li>
+            <li><strong>Flow return types</strong> for reactive, observable queries that emit whenever the underlying table changes</li>
+            <li><strong>Auto-migration</strong> with Schema export for safe database version upgrades</li>
+          </ul>
+        </div>
+
+        <div class="kl-code-block">
+          <div class="kl-code-header">
+            <span class="kl-code-lang">Kotlin — Room + Flow</span>
+            <button type="button" class="kl-code-copy" aria-label="Copy code" data-code='// Room Entity
+@Entity(tableName = "users")
+data class UserEntity(
+    @PrimaryKey val id: Int,
+    val name: String,
+    val email: String?
+)
+
+// DAO with coroutines and Flow
+@Dao
+interface UserDao {
+    @Query("SELECT * FROM users WHERE id = :userId")
+    fun getUser(userId: Int): Flow<UserEntity?>
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertUser(user: UserEntity)
+
+    @Query("DELETE FROM users")
+    suspend fun deleteAll()
+}'>Copy</button>
+          </div>
+          <pre><code><span class="cmt">// Room Entity</span>
+<span class="kw">@Entity</span>(tableName = <span class="str">"users"</span>)
+<span class="kw">data class</span> <span class="fn">UserEntity</span>(
+    <span class="kw">@PrimaryKey val</span> id: <span class="type">Int</span>,
+    <span class="kw">val</span> name: <span class="type">String</span>,
+    <span class="kw">val</span> email: <span class="type">String</span>?
+)
+
+<span class="cmt">// DAO with coroutines and Flow</span>
+<span class="kw">@Dao</span>
+<span class="kw">interface</span> <span class="fn">UserDao</span> {
+    <span class="kw">@Query</span>(<span class="str">"SELECT * FROM users WHERE id = :userId"</span>)
+    <span class="kw">fun</span> <span class="fn">getUser</span>(userId: <span class="type">Int</span>): <span class="type">Flow</span>&lt;<span class="type">UserEntity</span>?&gt;
+
+    <span class="kw">@Insert</span>(onConflict = <span class="type">OnConflictStrategy</span>.REPLACE)
+    <span class="kw">suspend fun</span> <span class="fn">insertUser</span>(user: <span class="type">UserEntity</span>)
+
+    <span class="kw">@Query</span>(<span class="str">"DELETE FROM users"</span>)
+    <span class="kw">suspend fun</span> <span class="fn">deleteAll</span>()
+}</code></pre>
+        </div>
+
+        <!-- Exercise -->
+        <div class="kl-exercise" id="exercise-android">
+          <div class="kl-exercise-title">
+            Practice: Android Patterns
+          </div>
+          <p>What is the benefit of using <code>StateFlow</code> over <code>LiveData</code> in a ViewModel?</p>
+          <ol>
+            <li>StateFlow requires more boilerplate code</li>
+            <li>StateFlow works seamlessly with coroutines and has a Kotlin-first API</li>
+            <li>LiveData is faster than StateFlow</li>
+            <li>StateFlow does not support reactive updates</li>
+          </ol>
+          <button type="button" class="kl-exercise-toggle" aria-expanded="false" aria-controls="solution-android">Show Solution</button>
+          <div class="kl-exercise-solution" id="solution-android">
+            <p><strong>Correct Answer: B</strong></p>
+            <p>StateFlow is part of kotlinx.coroutines and integrates natively with coroutine-based code. It supports structured concurrency (automatically cancels when the ViewModel is cleared), offers powerful operators via the Flow API, and is the recommended state holder for Kotlin-based Android development.</p>
+          </div>
+        </div>
+      </article>
+
+    </section>
+
+    <!-- ════════════════════════════════════════
+         FOOTER
+         ════════════════════════════════════════ -->
+    <footer class="kl-footer">
+      <p>Practice your skills with the <a href="/pages/learning/languages.html">Kotlin Editor →</a></p>
+      <p>Back to <a href="/pages/learning/languages.html">Programming Languages</a></p>
+    </footer>
+  </main>
+
+  <script src="/auth.js"></script>
+  <script src="/theme.js"></script>
+  <script src="/script.js"></script>
+  <script src="kotlin-learning.js"></script>
+</body>
+</html>

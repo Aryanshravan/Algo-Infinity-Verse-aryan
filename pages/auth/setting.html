@@ -1,169 +1,457 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!-- Enforced server-side: unauthenticated requests are redirected to /login. -->
-    <meta name="auth-required" content="true">
-    <title>Account Settings</title>  
-    <link rel="stylesheet" href="/styles.css">
-    <link rel="stylesheet" href="setting.css" />
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="auth-required" content="true" />
+  <title>Profile Settings — Algo Infinity Verse</title>
+  <meta name="description" content="Manage your profile, account, and preferences." />
 
-    <!-- Theme Initialization Script -->
-    <script>
-      (function() {
-        try {
-          var storedTheme = localStorage.getItem('theme');
-          var prefersLight = window.matchMedia('(prefers-color-scheme: light)').matches;
-          var theme = storedTheme || (prefersLight ? 'light' : 'dark');
-          if (theme === 'light') {
-            document.documentElement.classList.add('light-mode');
-          } else {
-            document.documentElement.classList.remove('light-mode');
-          }
-        } catch (e) {}
-      })();
-    </script>
-  <script src="/theme.js"></script>
+  <link rel="stylesheet" href="/styles.css" />
+  <link rel="stylesheet" href="setting.css" />
+
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+
+  <script>
+    (function() {
+      try {
+        var t = localStorage.getItem('theme');
+        var p = window.matchMedia('(prefers-color-scheme: light)').matches;
+        var theme = t || (p ? 'light' : 'dark');
+        if (theme === 'light') document.documentElement.classList.add('light-mode');
+      } catch (e) {}
+    })();
+  </script>
 </head>
-<body>
-    <div id="navbar-placeholder"></div>
-    <div class="settings-container">
+<body data-page="settings" data-no-loading>
 
-    <div class="settings-icon">
-        ⚙
+  <div id="loading-screen" class="hidden">
+    <div class="loader">
+      <div class="infinity-loader">&infin;</div>
+      <h2>Loading Settings...</h2>
     </div>
+  </div>
 
-    <h1>Settings</h1>
+  <div id="navbar-placeholder"></div>
 
-    <p class="subtitle">
-        Manage your account preferences and security
-    </p>
+  <button type="button" class="stg-back-btn" id="stgBackBtn" aria-label="Go back">
+    <i class="fas fa-arrow-left"></i>
+    <span>Back</span>
+  </button>
 
-    <!-- Profile Information -->
-         <div class="section">
-        <h2>Profile Information</h2>
+  <main class="stg-page">
 
-        <input type="text" placeholder="Full Name">
+    <!-- ============= HEADER ============= -->
+    <header class="stg-header">
+      <div class="stg-header-bg">
+        <div class="stg-header-glow"></div>
+        <div class="stg-header-orb" aria-hidden="true"></div>
+      </div>
+      <div class="stg-header-content">
+        <h1 class="stg-title">Profile Settings</h1>
+        <p class="stg-subtitle">Manage your identity, security, and preferences — all in one place.</p>
+      </div>
+    </header>
 
-        <input type="email" placeholder="Email Address">
+    <!-- ============= TABS ============= -->
+    <nav class="stg-tabs" role="tablist" aria-label="Settings sections">
+      <button type="button" class="stg-tab active" role="tab" aria-selected="true" aria-controls="panel-profile" data-tab="profile">
+        <i class="fas fa-user"></i>
+        <span>Profile</span>
+      </button>
+      <button type="button" class="stg-tab" role="tab" aria-selected="false" aria-controls="panel-account" data-tab="account">
+        <i class="fas fa-shield-halved"></i>
+        <span>Account</span>
+      </button>
+      <button type="button" class="stg-tab" role="tab" aria-selected="false" aria-controls="panel-preferences" data-tab="preferences">
+        <i class="fas fa-sliders"></i>
+        <span>Preferences</span>
+      </button>
+      <button type="button" class="stg-tab stg-tab--danger" role="tab" aria-selected="false" aria-controls="panel-danger" data-tab="danger">
+        <i class="fas fa-triangle-exclamation"></i>
+        <span>Danger Zone</span>
+      </button>
+      <div class="stg-tab-indicator" aria-hidden="true"></div>
+    </nav>
 
-        <input type="text" placeholder="Phone Number">
+    <!-- ============= PANELS ============= -->
+    <div class="stg-panels">
 
-        <button type="button" class="btn">
-            Save Changes
-        </button>
-    </div>
-
-    <!-- Security -->
-    <div class="section">
-        <h2>Security</h2>
-
-        <div class="password-box">
-            <input type="password" id="currentPassword" placeholder="Current Password">
-            <span class="eye" data-target="currentPassword">👁</span>
+      <!-- ──── PROFILE PANEL ──── -->
+      <section class="stg-panel active" id="panel-profile" role="tabpanel" aria-label="Profile settings">
+        <div class="stg-card">
+          <div class="stg-card-header">
+            <h2><i class="fas fa-image"></i> Avatar</h2>
+            <p>Choose your profile picture and customize its appearance.</p>
+          </div>
+          <div class="stg-card-body">
+            <div class="stg-avatar-section">
+              <div class="stg-avatar-preview" id="stgAvatarPreview">
+                <div class="stg-avatar-frame" id="stgAvatarFrame">
+                  <span class="stg-avatar-inner" id="stgAvatarInner">L</span>
+                </div>
+                <button type="button" class="stg-avatar-upload-btn" id="stgAvatarUploadBtn" aria-label="Upload avatar">
+                  <i class="fas fa-camera"></i>
+                </button>
+                <input type="file" id="stgAvatarFileInput" accept="image/*" aria-label="Choose avatar image" hidden />
+              </div>
+              <div class="stg-avatar-options">
+                <div class="stg-option-group">
+                  <label class="stg-option-label">Border Style</label>
+                  <div class="stg-chip-group" id="stgBorderOptions">
+                    <button type="button" class="stg-chip active" data-border="none">None</button>
+                    <button type="button" class="stg-chip" data-border="gold">Gold</button>
+                    <button type="button" class="stg-chip stg-chip--premium" data-border="premium-glow" disabled>
+                      <i class="fas fa-crown"></i> Glow
+                    </button>
+                    <button type="button" class="stg-chip stg-chip--premium" data-border="rainbow" disabled>
+                      <span class="stg-chip-rainbow">Rainbow</span>
+                    </button>
+                    <button type="button" class="stg-chip stg-chip--premium" data-border="neon-cyan" disabled>
+                      Neon Cyan
+                    </button>
+                    <button type="button" class="stg-chip stg-chip--premium" data-border="neon-pink" disabled>
+                      Neon Pink
+                    </button>
+                  </div>
+                </div>
+                <div class="stg-option-group">
+                  <label class="stg-option-label">Color Theme</label>
+                  <div class="stg-chip-group" id="stgThemeOptions">
+                    <button type="button" class="stg-chip active" data-theme="default">Default</button>
+                    <button type="button" class="stg-chip stg-chip--premium" data-theme="ocean" disabled>
+                      <span style="color:#7ab8d4;">Ocean</span>
+                    </button>
+                    <button type="button" class="stg-chip stg-chip--premium" data-theme="sunset" disabled>
+                      <span style="color:#d4a878;">Sunset</span>
+                    </button>
+                    <button type="button" class="stg-chip stg-chip--premium" data-theme="midnight" disabled>
+                      Midnight
+                    </button>
+                    <button type="button" class="stg-chip stg-chip--premium" data-theme="forest" disabled>
+                      <span style="color:#78b898;">Forest</span>
+                    </button>
+                    <button type="button" class="stg-chip stg-chip--premium" data-theme="royal" disabled>
+                      <span style="color:#c898c8;">Royal</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
 
-        <div class="password-box">
-            <input type="password" id="newPassword" placeholder="New Password">
-            <span class="eye" data-target="newPassword">👁</span>
+        <div class="stg-card">
+          <div class="stg-card-header">
+            <h2><i class="fas fa-address-card"></i> Personal Info</h2>
+            <p>Your display name and bio appear on your public profile.</p>
+          </div>
+          <div class="stg-card-body stg-form">
+            <div class="stg-field">
+              <label for="stgNameInput">Display Name</label>
+              <input type="text" id="stgNameInput" placeholder="Enter your display name" maxlength="30" autocomplete="name" />
+              <span class="stg-field-hint" id="stgNameHint">Between 2 and 30 characters.</span>
+              <span class="stg-field-error" id="stgNameError" role="alert"></span>
+            </div>
+            <div class="stg-field">
+              <label for="stgBioInput">Bio / Tagline</label>
+              <textarea id="stgBioInput" placeholder="Tell others a bit about yourself…" maxlength="120" rows="3"></textarea>
+              <span class="stg-field-hint" id="stgBioHint">Max 120 characters. <span id="stgBioCount">0</span>/120</span>
+              <span class="stg-field-error" id="stgBioError" role="alert"></span>
+            </div>
+            <div class="stg-field">
+              <label>Programming Languages</label>
+              <div class="stg-lang-grid" id="stgLangGrid">
+                <label class="stg-lang-chip" data-lang="C++"><input type="checkbox" value="C++" /><span>C++</span></label>
+                <label class="stg-lang-chip" data-lang="Java"><input type="checkbox" value="Java" /><span>Java</span></label>
+                <label class="stg-lang-chip" data-lang="Python"><input type="checkbox" value="Python" /><span>Python</span></label>
+                <label class="stg-lang-chip" data-lang="JavaScript"><input type="checkbox" value="JavaScript" /><span>JavaScript</span></label>
+                <label class="stg-lang-chip" data-lang="Rust"><input type="checkbox" value="Rust" /><span>Rust</span></label>
+                <label class="stg-lang-chip" data-lang="TypeScript"><input type="checkbox" value="TypeScript" /><span>TypeScript</span></label>
+                <label class="stg-lang-chip" data-lang="Go"><input type="checkbox" value="Go" /><span>Go</span></label>
+                <label class="stg-lang-chip" data-lang="Kotlin"><input type="checkbox" value="Kotlin" /><span>Kotlin</span></label>
+                <label class="stg-lang-chip" data-lang="Swift"><input type="checkbox" value="Swift" /><span>Swift</span></label>
+                <label class="stg-lang-chip" data-lang="C#"><input type="checkbox" value="C#" /><span>C#</span></label>
+                <label class="stg-lang-chip" data-lang="Ruby"><input type="checkbox" value="Ruby" /><span>Ruby</span></label>
+                <label class="stg-lang-chip" data-lang="PHP"><input type="checkbox" value="PHP" /><span>PHP</span></label>
+                <label class="stg-lang-chip" data-lang="SQL"><input type="checkbox" value="SQL" /><span>SQL</span></label>
+              </div>
+            </div>
+            <div class="stg-form-actions">
+              <button type="button" class="stg-btn stg-btn--primary" id="stgProfileSaveBtn">
+                <i class="fas fa-save"></i> Save Profile
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ──── ACCOUNT PANEL ──── -->
+      <section class="stg-panel" id="panel-account" role="tabpanel" aria-label="Account settings" hidden>
+        <div class="stg-card">
+          <div class="stg-card-header">
+            <h2><i class="fas fa-envelope"></i> Email &amp; Login</h2>
+            <p>Your email address is used for login and notifications.</p>
+          </div>
+          <div class="stg-card-body stg-form">
+            <div class="stg-field">
+              <label for="stgEmailInput">Email Address</label>
+              <input type="email" id="stgEmailInput" placeholder="your@email.com" autocomplete="email" />
+              <span class="stg-field-hint">Used for login and account recovery.</span>
+            </div>
+          </div>
         </div>
 
-        <div class="password-box">
-            <input type="password" id="confirmPassword" placeholder="Confirm Password">
-            <span class="eye" data-target="confirmPassword">👁</span>
-        </div>
-
-        <button type="button" class="btn">
+        <div class="stg-card">
+          <div class="stg-card-header">
+            <h2><i class="fas fa-key"></i> Change Password</h2>
+            <p>Set a strong, unique password to secure your account.</p>
+          </div>
+          <div class="stg-card-body stg-form">
+            <div class="stg-guest-notice" id="stgGuestNotice" hidden>
+              <i class="fas fa-user-astronaut"></i>
+              <span>You are browsing as a guest. <a href="/login">Sign in</a> to manage your password.</span>
+            </div>
+            <div class="stg-field">
+              <label for="stgCurrentPassword">Current Password</label>
+              <div class="stg-input-wrap">
+                <input type="password" id="stgCurrentPassword" placeholder="Enter current password" autocomplete="current-password" />
+                <button type="button" class="stg-pw-toggle" data-target="stgCurrentPassword" aria-label="Toggle visibility">
+                  <i class="fas fa-eye"></i>
+                </button>
+              </div>
+            </div>
+            <div class="stg-field">
+              <label for="stgNewPassword">New Password</label>
+              <div class="stg-input-wrap">
+                <input type="password" id="stgNewPassword" placeholder="Create a strong password" autocomplete="new-password" />
+                <button type="button" class="stg-pw-toggle" data-target="stgNewPassword" aria-label="Toggle visibility">
+                  <i class="fas fa-eye"></i>
+                </button>
+              </div>
+              <div class="stg-strength-track"><div class="stg-strength-bar" id="stgStrengthBar"></div></div>
+              <span class="stg-strength-label" id="stgStrengthText">Password strength</span>
+              <ul class="stg-rules" id="stgPwRules">
+                <li class="stg-rule" data-rule="length"><span class="stg-rule-icon"><i class="fas fa-circle"></i></span> Minimum 8 characters</li>
+                <li class="stg-rule" data-rule="upper"><span class="stg-rule-icon"><i class="fas fa-circle"></i></span> One uppercase letter</li>
+                <li class="stg-rule" data-rule="lower"><span class="stg-rule-icon"><i class="fas fa-circle"></i></span> One lowercase letter</li>
+                <li class="stg-rule" data-rule="number"><span class="stg-rule-icon"><i class="fas fa-circle"></i></span> One number</li>
+                <li class="stg-rule" data-rule="special"><span class="stg-rule-icon"><i class="fas fa-circle"></i></span> One special character</li>
+              </ul>
+            </div>
+            <div class="stg-field">
+              <label for="stgConfirmPassword">Confirm New Password</label>
+              <div class="stg-input-wrap">
+                <input type="password" id="stgConfirmPassword" placeholder="Confirm new password" autocomplete="new-password" />
+                <button type="button" class="stg-pw-toggle" data-target="stgConfirmPassword" aria-label="Toggle visibility">
+                  <i class="fas fa-eye"></i>
+                </button>
+              </div>
+              <span class="stg-field-error" id="stgConfirmError" role="alert"></span>
+            </div>
+            <div class="stg-form-actions">
+              <button type="button" class="btn">
             Update Password
         </button>
+
+        <a href="/pages/auth/2FA-Security/2FA-Security.html" class="btn" style="display:inline-block;text-decoration:none;margin-top:12px;">
+            Manage Two-Factor Authentication
+        </a>
     </div>
-
-    <!-- Notifications -->
-    <div class="section">
-        <h2>Notification Preferences</h2>
-
-        <div class="setting-item">
-            <span>Email Notifications</span>
-            <label class="switch">
-                <input type="checkbox" checked>
-                <span class="slider"></span>
-            </label>
+          </div>
         </div>
 
-        <div class="setting-item">
-            <span>Practice Reminders</span>
-            <label class="switch">
-                <input type="checkbox" checked>
-                <span class="slider"></span>
-            </label>
+        <div class="stg-card">
+          <div class="stg-card-header">
+            <h2><i class="fas fa-bell"></i> Notification Preferences</h2>
+            <p>Choose which updates you'd like to receive.</p>
+          </div>
+          <div class="stg-card-body">
+            <div class="stg-toggle-group">
+              <div class="stg-toggle-row">
+                <div class="stg-toggle-info">
+                  <span class="stg-toggle-label">Email Notifications</span>
+                  <span class="stg-toggle-desc">Product updates and announcements</span>
+                </div>
+                <label class="stg-switch">
+                  <input type="checkbox" class="stg-notif-toggle" data-key="emailNotifications" checked />
+                  <span class="stg-slider"></span>
+                </label>
+              </div>
+              <div class="stg-toggle-row">
+                <div class="stg-toggle-info">
+                  <span class="stg-toggle-label">Practice Reminders</span>
+                  <span class="stg-toggle-desc">Daily nudges to keep your streak alive</span>
+                </div>
+                <label class="stg-switch">
+                  <input type="checkbox" class="stg-notif-toggle" data-key="practiceReminders" checked />
+                  <span class="stg-slider"></span>
+                </label>
+              </div>
+              <div class="stg-toggle-row">
+                <div class="stg-toggle-info">
+                  <span class="stg-toggle-label">Community Updates</span>
+                  <span class="stg-toggle-desc">New features, contests, and community events</span>
+                </div>
+                <label class="stg-switch">
+                  <input type="checkbox" class="stg-notif-toggle" data-key="communityUpdates" />
+                  <span class="stg-slider"></span>
+                </label>
+              </div>
+              <div class="stg-toggle-row">
+                <div class="stg-toggle-info">
+                  <span class="stg-toggle-label">Contest Alerts</span>
+                  <span class="stg-toggle-desc">Upcoming coding contests and leaderboards</span>
+                </div>
+                <label class="stg-switch">
+                  <input type="checkbox" class="stg-notif-toggle" data-key="contestAlerts" checked />
+                  <span class="stg-slider"></span>
+                </label>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ──── PREFERENCES PANEL ──── -->
+      <section class="stg-panel" id="panel-preferences" role="tabpanel" aria-label="Preferences" hidden>
+        <div class="stg-card">
+          <div class="stg-card-header">
+            <h2><i class="fas fa-palette"></i> Appearance</h2>
+            <p>Switch between light and dark themes.</p>
+          </div>
+          <div class="stg-card-body">
+            <div class="stg-theme-selector">
+              <button type="button" class="stg-theme-card" data-theme="dark">
+                <div class="stg-theme-preview stg-theme-preview--dark">
+                  <div class="stg-theme-bar"></div>
+                  <div class="stg-theme-content">
+                    <div class="stg-theme-line"></div>
+                    <div class="stg-theme-line stg-theme-line--short"></div>
+                    <div class="stg-theme-line stg-theme-line--dim"></div>
+                  </div>
+                </div>
+                <span>Dark</span>
+                <i class="fas fa-check stg-theme-check"></i>
+              </button>
+              <button type="button" class="stg-theme-card" data-theme="light">
+                <div class="stg-theme-preview stg-theme-preview--light">
+                  <div class="stg-theme-bar stg-theme-bar--light"></div>
+                  <div class="stg-theme-content">
+                    <div class="stg-theme-line stg-theme-line--dark"></div>
+                    <div class="stg-theme-line stg-theme-line--dark stg-theme-line--short"></div>
+                    <div class="stg-theme-line stg-theme-line--dimmer"></div>
+                  </div>
+                </div>
+                <span>Light</span>
+                <i class="fas fa-check stg-theme-check"></i>
+              </button>
+            </div>
+          </div>
         </div>
 
-        <div class="setting-item">
-            <span>Community Updates</span>
-            <label class="switch">
-                <input type="checkbox">
-                <span class="slider"></span>
-            </label>
+        <div class="stg-card">
+          <div class="stg-card-header">
+            <h2><i class="fas fa-database"></i> Progress Backup</h2>
+            <p>Export your progress to a JSON file, or restore it from a backup.</p>
+          </div>
+          <div class="stg-card-body">
+            <div class="stg-backup-row">
+              <button type="button" class="stg-btn stg-btn--outline" id="exportProgressBtn">
+                <i class="fas fa-download"></i> Export Progress
+              </button>
+              <div class="stg-backup-import">
+                <label for="importProgressStrategy" class="stg-backup-label">Import mode</label>
+                <select id="importProgressStrategy" class="stg-select">
+                  <option value="replace">Replace existing data</option>
+                  <option value="merge">Only fill in missing data</option>
+                </select>
+              </div>
+              <label class="stg-btn stg-btn--outline" id="stgImportLabel" tabindex="0">
+                <i class="fas fa-upload"></i> Import Progress
+                <input type="file" id="importProgressInput" accept="application/json" hidden />
+              </label>
+            </div>
+          </div>
         </div>
+      </section>
 
-        <div class="setting-item">
-            <span>Contest Alerts</span>
-            <label class="switch">
-                <input type="checkbox" checked>
-                <span class="slider"></span>
-            </label>
+      <!-- ──── DANGER ZONE PANEL ──── -->
+      <section class="stg-panel" id="panel-danger" role="tabpanel" aria-label="Danger zone" hidden>
+        <div class="stg-card stg-card--danger">
+          <div class="stg-card-header">
+            <h2><i class="fas fa-triangle-exclamation"></i> Danger Zone</h2>
+            <p>Irreversible actions that affect your account and data.</p>
+          </div>
+          <div class="stg-card-body">
+            <div class="stg-danger-row">
+              <div class="stg-danger-info">
+                <span class="stg-danger-title">Deactivate Account</span>
+                <span class="stg-danger-desc">Temporarily disable your account. You can reactivate anytime by logging back in.</span>
+              </div>
+              <button type="button" class="stg-btn stg-btn--danger" id="deactivateAccountBtn">
+                <i class="fas fa-user-slash"></i> Deactivate
+              </button>
+            </div>
+            <div class="stg-danger-divider"></div>
+            <div class="stg-danger-row">
+              <div class="stg-danger-info">
+                <span class="stg-danger-title">Delete Account</span>
+                <span class="stg-danger-desc">Permanently delete your account and all associated data. This cannot be undone.</span>
+              </div>
+              <button type="button" class="stg-btn stg-btn--danger-outline" id="deleteAccountBtn">
+                <i class="fas fa-trash"></i> Delete
+              </button>
+            </div>
+          </div>
         </div>
+      </section>
+
+    </div><!-- /stg-panels -->
+  </main>
+
+  <!-- ──── DELETE ACCOUNT MODAL ──── -->
+  <div class="modal" id="deleteAccountModal" role="dialog" aria-modal="true" aria-labelledby="deleteAccountTitle">
+    <div class="modal-content delete-account-modal-content">
+      <button type="button" class="modal-close" id="deleteAccountModalClose" aria-label="Close">&times;</button>
+      <div class="delete-account-icon">
+        <div class="delete-account-icon-ring">
+          <i class="fas fa-trash"></i>
+        </div>
+      </div>
+      <h2 class="delete-account-title" id="deleteAccountTitle">Delete Account</h2>
+      <p class="delete-account-message">
+        This will permanently delete your account and all associated data.
+        <strong>This action cannot be undone.</strong>
+      </p>
+      <div class="delete-account-form">
+        <div class="password-field">
+          <label for="deleteAccountPassword">Confirm your password</label>
+          <div class="password-input-wrapper">
+            <input type="password" id="deleteAccountPassword" placeholder="Enter your password" autocomplete="current-password" />
+            <button type="button" class="password-toggle" data-target="deleteAccountPassword" aria-label="Toggle password visibility">
+              <i class="fas fa-eye"></i>
+            </button>
+          </div>
+          <small id="deleteAccountPasswordError" class="field-error" role="alert"></small>
+        </div>
+      </div>
+      <div class="delete-account-actions">
+        <button type="button" class="delete-account-btn delete-account-btn--cancel" id="deleteAccountCancel">Cancel</button>
+        <button type="button" class="delete-account-btn delete-account-btn--danger" id="deleteAccountConfirm">Delete Account</button>
+      </div>
     </div>
+  </div>
 
-    <!-- Progress Backup -->
-    <div class="section">
-        <h2>Progress Backup</h2>
-        <p class="subtitle" style="margin-bottom: 1rem;">
-            Export your local progress (XP, streaks, badges, quiz scores, favorites) to a JSON file, or restore it on another browser/device.
-        </p>
-
-        <button type="button" class="btn" id="exportProgressBtn">
-            <i class="fas fa-download"></i> Export Progress
-        </button>
-
-        <div class="setting-item" style="margin-top: 1rem;">
-            <span>Import mode</span>
-            <select id="importProgressStrategy">
-                <option value="replace">Replace existing data</option>
-                <option value="merge">Only fill in missing data</option>
-            </select>
-        </div>
-
-        <label for="importProgressInput" class="btn" style="display: inline-block; margin-top: 0.75rem; cursor: pointer;">
-            <i class="fas fa-upload"></i> Import Progress
-        </label>
-        <input type="file" id="importProgressInput" accept="application/json" style="display: none;">
-    </div>
-
-    <!-- Delete-btn  -->
-        <button type="button" class="delete-btn" id="deleteAccountBtn">
-            Delete Account
-        </button>
-    </div>
-
-
-<script src="/interceptors.js"></script>    <script src="/bootstrap-legacy.js"></script>
-<script src="/auth.js"></script>
-<script src="/script.js"></script>
-    <script type="module" src="/dist/legacy-bundle.mjs"></script>
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    loadPartial('navbar-placeholder', '/partials/navbar.html');
-});
-</script>
-<script src="setting.js"></script>
-<script type="module">
+  <!-- Scripts -->
+  <script src="/auth.js"></script>
+  <script src="/theme.js"></script>
+  <script src="/script.js"></script>
+  <script type="module" src="setting.js"></script>
+  <script type="module">
     import { initProgressBackupControls } from '/modules/progressBackupUI.js';
     document.addEventListener('DOMContentLoaded', initProgressBackupControls);
-</script>
+  </script>
 </body>
 </html>
-

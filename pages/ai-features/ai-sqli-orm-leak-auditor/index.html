@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI SQLi &amp; ORM Leak Auditor | Algo Infinity Verse</title>
+  <meta name="description" content="Audit SQL and ORM query construction for classic and second-order SQLi, ORDER BY/LIMIT/LIKE injection, raw-query leaks, and parameterization rewrites." />
+  <link rel="stylesheet" href="/styles.css" />
+  <link rel="stylesheet" href="style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Poppins:wght@300;400;500;600;700&family=Fira+Code:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <script>
+    (function () {
+      try {
+        var storedTheme = localStorage.getItem('theme');
+        var prefersLight = window.matchMedia('(prefers-color-scheme: light)').matches;
+        var theme = storedTheme || (prefersLight ? 'light' : 'dark');
+        if (theme === 'light') {
+          document.documentElement.classList.add('light-mode');
+        } else {
+          document.documentElement.classList.remove('light-mode');
+        }
+      } catch (e) {}
+    })();
+  </script>
+</head>
+<body data-page="ai-sqli-orm-leak-auditor">
+  <a href="#sqli-main" class="sqli-skip-link">Skip to main content</a>
+  <button type="button" id="scrollTopBtn" class="scroll-top-btn" aria-label="Scroll to top">
+    <i class="fas fa-arrow-up" aria-hidden="true"></i>
+  </button>
+
+  <div id="navbar-placeholder"></div>
+
+  <header class="sqli-hero">
+    <div class="sqli-hero-badge">
+      <i class="fas fa-database" aria-hidden="true"></i>
+      Query Security Lab
+    </div>
+    <h1>
+      AI SQLi &amp; ORM
+      <span class="sqli-hero-accent">Leak Auditor</span>
+    </h1>
+    <p>
+      Paste SQL or ORM query construction code, detect classic and second-order injection,
+      ORDER BY / LIMIT / LIKE risks, raw-query leaks, and export a parameterization audit — client-side only.
+    </p>
+    <div class="sqli-hero-stats" aria-live="polite">
+      <div class="sqli-stat">
+        <span class="sqli-stat-val" id="statFindings">0</span>
+        <span class="sqli-stat-label">Findings</span>
+      </div>
+      <div class="sqli-stat">
+        <span class="sqli-stat-val" id="statSeverity">—</span>
+        <span class="sqli-stat-label">Top severity</span>
+      </div>
+      <div class="sqli-stat">
+        <span class="sqli-stat-val" id="statRawLeaks">0</span>
+        <span class="sqli-stat-label">ORM raw leaks</span>
+      </div>
+      <div class="sqli-stat">
+        <span class="sqli-stat-val" id="statRewrites">0</span>
+        <span class="sqli-stat-label">Rewrite tips</span>
+      </div>
+    </div>
+  </header>
+
+  <main id="sqli-main" class="sqli-main">
+    <div class="container">
+      <div class="sqli-workspace">
+        <section class="sqli-panel" aria-labelledby="sqli-input-title">
+          <div class="sqli-panel-header">
+            <div class="sqli-panel-title">
+              <i class="fas fa-code sqli-panel-icon" aria-hidden="true"></i>
+              <h2 id="sqli-input-title">SQL / ORM query code</h2>
+            </div>
+          </div>
+
+          <label class="sqli-label" for="sqliCodeInput">Query construction snippet</label>
+          <textarea
+            id="sqliCodeInput"
+            class="sqli-textarea"
+            rows="16"
+            spellcheck="false"
+            placeholder="// e.g. knex.raw, sequelize.query, string-built SELECT…"
+            aria-describedby="sqliCodeHint"
+          ></textarea>
+          <p id="sqliCodeHint" class="sqli-hint">
+            Supports string concatenation, template literals, ORM <code>.raw()</code> / <code>.query()</code>, and dynamic ORDER BY / LIMIT / LIKE.
+          </p>
+
+          <div class="sqli-controls">
+            <button type="button" id="sqliLoadDemoBtn" class="btn btn-secondary">
+              <i class="fas fa-flask" aria-hidden="true"></i> Load vulnerable demos
+            </button>
+            <button type="button" id="sqliAuditBtn" class="btn btn-primary">
+              <i class="fas fa-magnifying-glass" aria-hidden="true"></i> Audit for SQLi
+            </button>
+            <button type="button" id="sqliClearBtn" class="btn btn-outline">
+              <i class="fas fa-eraser" aria-hidden="true"></i> Clear
+            </button>
+            <button type="button" id="sqliExportBtn" class="btn btn-outline" disabled>
+              <i class="fas fa-download" aria-hidden="true"></i> Export audit report
+            </button>
+          </div>
+          <div id="sqliStatus" class="sqli-status" role="status" aria-live="polite"></div>
+        </section>
+
+        <section class="sqli-panel sqli-report-panel" aria-labelledby="sqli-report-title">
+          <div class="sqli-panel-header">
+            <div class="sqli-panel-title">
+              <i class="fas fa-clipboard-check sqli-panel-icon" aria-hidden="true"></i>
+              <h2 id="sqli-report-title">Audit results</h2>
+            </div>
+          </div>
+
+          <div id="sqliEmpty" class="sqli-empty">
+            <i class="fas fa-database" aria-hidden="true"></i>
+            <p>No audit yet. Load vulnerable demos or paste query code, then run the auditor.</p>
+          </div>
+
+          <div id="sqliResults" hidden>
+            <div class="sqli-score-card">
+              <div>
+                <h3 id="sqliRiskHeading">Injection risk score</h3>
+                <p id="sqliRiskBlurb" class="sqli-muted"></p>
+              </div>
+              <div class="sqli-score-ring" id="sqliScoreRing" aria-hidden="true">
+                <span id="sqliScoreVal">0</span>
+              </div>
+            </div>
+
+            <section class="sqli-section" aria-labelledby="sqliFindingsHeading">
+              <h3 id="sqliFindingsHeading"><i class="fas fa-bug" aria-hidden="true"></i> Detector findings</h3>
+              <ul id="sqliFindingList" class="sqli-findings"></ul>
+            </section>
+
+            <section class="sqli-section" aria-labelledby="sqliOrmHeading">
+              <h3 id="sqliOrmHeading"><i class="fas fa-triangle-exclamation" aria-hidden="true"></i> ORM raw-query leak warnings</h3>
+              <div id="sqliOrmOut" class="sqli-orm-out"></div>
+            </section>
+          </div>
+        </section>
+      </div>
+
+      <div class="sqli-diff-grid" id="sqliRewritePanel" hidden>
+        <section class="sqli-panel" aria-labelledby="sqli-before-title">
+          <div class="sqli-panel-header">
+            <div class="sqli-panel-title">
+              <i class="fas fa-file-code sqli-panel-icon" aria-hidden="true"></i>
+              <h2 id="sqli-before-title">Before (as pasted)</h2>
+            </div>
+          </div>
+          <pre id="sqliBefore" class="sqli-code-panel" tabindex="0"><code>Run an audit to capture the original snippet.</code></pre>
+        </section>
+        <section class="sqli-panel" aria-labelledby="sqli-after-title">
+          <div class="sqli-panel-header">
+            <div class="sqli-panel-title">
+              <i class="fas fa-wand-magic-sparkles sqli-panel-icon" aria-hidden="true"></i>
+              <h2 id="sqli-after-title">Parameterization rewrite suggestions</h2>
+            </div>
+          </div>
+          <pre id="sqliAfter" class="sqli-code-panel sqli-code-after" tabindex="0"><code>Safe rewrite patterns appear here.</code></pre>
+        </section>
+      </div>
+    </div>
+  </main>
+
+  <div id="footer-placeholder"></div>
+
+  <script src="/auth.js"></script>
+  <script src="/bootstrap-legacy.js"></script>
+  <script src="/script.js"></script>
+  <script type="module" src="/dist/legacy-bundle.mjs"></script>
+  <script src="/theme.js"></script>
+  <script src="script.js"></script>
+  <script>
+    if (typeof loadPartial === 'function') {
+      loadPartial('navbar-placeholder', '/partials/navbar.html');
+      loadPartial('footer-placeholder', '/partials/footer.html');
+    }
+  </script>
+</body>
+</html>

@@ -171,12 +171,6 @@ export const resumeAnalysisLimiter = new RateLimiter({
   cooldownMs: 15 * 60 * 1000,
 });
 
-export const repoAnalysisLimiter = new RateLimiter({
-  windowMs: 15 * 60 * 1000,
-  maxAttempts: 20,
-  cooldownMs: 15 * 60 * 1000,
-});
-
 export const sdlcAdvisorLimiter = new RateLimiter({
   windowMs: 15 * 60 * 1000,
   maxAttempts: 15,

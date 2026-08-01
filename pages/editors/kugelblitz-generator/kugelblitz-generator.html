@@ -1,0 +1,277 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Kugelblitz Generator | Algo Infinity Verse</title>
+    <link rel="stylesheet" href="/styles.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <!-- Monaco Editor -->
+    <script src="https://unpkg.com/monaco-editor@0.36.1/min/vs/loader.js"></script>
+    <style>
+      body { margin: 0; overflow: hidden; background: #000; font-family: 'Poppins', sans-serif; color: #fff; }
+      .app-container { display: flex; height: 100vh; }
+      
+      .sidebar { width: 450px; background: rgba(15, 23, 42, 0.95); border-right: 1px solid #f97316; display: flex; flex-direction: column; z-index: 10; }
+      .header { padding: 20px; border-bottom: 1px solid #334155; }
+      .header h2 { margin: 0; color: #f97316; font-family: 'Orbitron', sans-serif; font-size: 1.2rem; }
+      .header p { margin: 5px 0 0 0; font-size: 0.8rem; color: #94a3b8; }
+      
+      #editor-container { flex: 1; min-height: 300px; }
+      
+      .controls { padding: 20px; border-top: 1px solid #334155; background: rgba(0,0,0,0.5); }
+      .btn { background: linear-gradient(90deg, #ea580c, #c2410c); color: #fff; border: none; padding: 10px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; transition: 0.3s; }
+      .btn:hover { background: #f97316; transform: translateY(-2px); box-shadow: 0 0 15px rgba(249, 115, 22, 0.5); }
+      
+      .sim-container { flex: 1; position: relative; background: #000; overflow: hidden; }
+      
+      canvas { width: 100%; height: 100%; display: block; }
+      
+      .hud { position: absolute; top: 20px; right: 20px; background: rgba(0,0,0,0.8); padding: 15px; border-radius: 8px; border: 1px solid #f97316; width: 280px; z-index: 10; pointer-events: none; }
+      .hud h3 { margin: 0 0 10px 0; color: #f97316; font-size: 1rem; font-family: 'Orbitron', sans-serif; }
+      .metric { display: flex; justify-content: space-between; font-size: 0.8rem; color: #cbd5e1; margin-bottom: 5px; }
+      .val { font-weight: bold; font-family: monospace; }
+      .val-mass { color: #8b5cf6; }
+      .val-energy { color: #facc15; }
+    </style>
+  </head>
+  <body>
+    
+    <div class="app-container">
+      <div class="sidebar">
+        <div class="header">
+          <h2><i class="fas fa-compact-disc"></i> Kugelblitz Forge</h2>
+          <p>Create a black hole from pure light</p>
+        </div>
+        
+        <div id="editor-container"></div>
+        
+        <div class="controls">
+          <button class="btn" onclick="fireLasers()"><i class="fas fa-meteor"></i> Ignite Dyson Swarm Lasers</button>
+        </div>
+      </div>
+      
+      <div class="sim-container">
+        <!-- Grid -->
+        <div style="position: absolute; inset:0; background-image: radial-gradient(circle, rgba(249, 115, 22, 0.1) 1px, transparent 1px); background-size: 50px 50px; pointer-events: none; z-index: 0;"></div>
+        
+        <canvas id="forgeCanvas" style="position: relative; z-index: 1;"></canvas>
+        
+        <div class="hud">
+          <h3>Singularity Telemetry</h3>
+          <div class="metric"><span>Focal Energy Density:</span> <span class="val val-energy" id="energyVal">0 J/m³</span></div>
+          <div class="metric"><span>Event Horizon Mass:</span> <span class="val val-mass" id="massVal">0.0 kg</span></div>
+          <div class="metric"><span>Hawking Radiation:</span> <span class="val" id="radVal" style="color:#ef4444">0.0 W</span></div>
+          <div class="metric" style="margin-top: 10px; border-top: 1px solid #334155; padding-top: 5px;">
+            <span>Forge Status:</span> <span class="val" id="statusVal" style="color:#94a3b8">STANDBY</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      let editor;
+      require.config({ paths: { 'vs': 'https://unpkg.com/monaco-editor@0.36.1/min/vs' }});
+      require(['vs/editor/editor.main'], function() {
+        editor = monaco.editor.create(document.getElementById('editor-container'), {
+          value: `// Dyson Swarm Gamma-Ray Laser Focusing
+// You must perfectly align and phase-match 360 lasers to concentrate energy into a microscopic volume.
+// If phase alignment is poor, photons scatter. If energy input is too slow, Hawking radiation evaporates the singularity.
+
+function focusLasers(laserIndex, totalLasers, currentEnergyDensity) {
+    // Return { intensity: float (0-1), phase: float (0-2PI) }
+    
+    // Naive logic: Full intensity, zero phase offset!
+    // Result: The beams constructively and destructively interfere randomly at the focal point. Energy scatters.
+    
+    return {
+        intensity: 1.0,
+        phase: 0.0
+    };
+}`,
+          language: 'javascript',
+          theme: 'vs-dark',
+          minimap: { enabled: false },
+          automaticLayout: true
+        });
+      });
+
+      const canvas = document.getElementById('forgeCanvas');
+      const ctx = canvas.getContext('2d');
+      
+      let isSimulating = false;
+      let time = 0;
+      
+      let numLasers = 60; // 360 is too heavy to draw, 60 is a good visual rep
+      
+      let energyDensity = 0; // target 100M
+      let bhMass = 0;
+      let hawkingRad = 0;
+      
+      let cx = 0, cy = 0;
+      
+      function resize() { 
+          canvas.width = canvas.clientWidth; 
+          canvas.height = canvas.clientHeight;
+          cx = canvas.width / 2;
+          cy = canvas.height / 2;
+      }
+      
+      setTimeout(resize, 100);
+      window.addEventListener('resize', resize);
+
+      function animate() {
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+          
+          if (isSimulating) {
+              time += 0.05;
+              
+              let totalInput = 0;
+              let phaseAlignmentError = 0;
+              let firstPhase = null;
+              
+              // Run User Logic
+              for(let i=0; i<numLasers; i++) {
+                  let result = { intensity: 0, phase: 0 };
+                  try {
+                      eval(editor.getValue());
+                      result = focusLasers(i, numLasers, energyDensity);
+                  } catch(e) {}
+                  
+                  let intensity = Math.max(0, Math.min(1.0, result.intensity || 0));
+                  let phase = (result.phase || 0) % (Math.PI * 2);
+                  
+                  // Calculate phase alignment (they should ideally be perfectly out of phase radially, or perfectly in phase at the focal point)
+                  // For a Kugelblitz, we need perfect spherical constructive interference at the center.
+                  // This means all lasers arriving at the center must have the exact same phase.
+                  
+                  if(firstPhase === null) firstPhase = phase;
+                  else {
+                      // Error is difference from the first laser's phase
+                      let diff = Math.abs(phase - firstPhase);
+                      if (diff > Math.PI) diff = Math.PI*2 - diff;
+                      phaseAlignmentError += diff;
+                  }
+                  
+                  totalInput += intensity;
+                  
+                  // Draw Laser Beams
+                  if (intensity > 0) {
+                      let angle = (i / numLasers) * Math.PI * 2;
+                      
+                      // Radius of dyson swarm
+                      let r = Math.min(canvas.width, canvas.height) / 2 - 50;
+                      let startX = cx + Math.cos(angle) * r;
+                      let startY = cy + Math.sin(angle) * r;
+                      
+                      // If phase error is high, beam scatters before reaching center
+                      let scatterFactor = Math.random() * diff * 20; 
+                      let endX = cx + Math.cos(angle) * scatterFactor;
+                      let endY = cy + Math.sin(angle) * scatterFactor;
+                      
+                      ctx.strokeStyle = \`rgba(249, 115, 22, \${intensity * 0.5})\`;
+                      ctx.lineWidth = intensity * 2;
+                      ctx.beginPath();
+                      ctx.moveTo(startX, startY);
+                      ctx.lineTo(endX, endY);
+                      ctx.stroke();
+                  }
+              }
+              
+              // Physics Calculation
+              let avgPhaseError = phaseAlignmentError / numLasers; // 0 is perfect, PI is worst
+              let coherence = Math.max(0, 1.0 - (avgPhaseError / (Math.PI/2))); // 0 to 1
+              
+              let effectiveInput = totalInput * coherence * 1000;
+              energyDensity += effectiveInput;
+              
+              // Event horizon forms when energy density hits threshold
+              if (energyDensity > 100000) {
+                  // Mass-Energy Equivalence E=mc^2
+                  bhMass += (energyDensity - 100000) * 0.0001; 
+                  energyDensity = 100000; // Cap density, turns into mass
+              }
+              
+              // Hawking Radiation inversely proportional to mass squared (simplified)
+              if (bhMass > 0) {
+                  hawkingRad = 10000 / (bhMass * bhMass + 1);
+                  bhMass -= hawkingRad * 0.01;
+                  if (bhMass <= 0) {
+                      bhMass = 0;
+                      hawkingRad = 0;
+                  }
+              } else {
+                  // Dissipation of pure energy
+                  energyDensity *= 0.95;
+                  hawkingRad = 0;
+              }
+              
+              // Draw Focal Point / Singularity
+              if (bhMass > 0) {
+                  // Draw Black Hole
+                  let radius = Math.min(100, Math.max(5, bhMass * 0.5));
+                  
+                  // Accretion disk/glow
+                  let grad = ctx.createRadialGradient(cx, cy, radius, cx, cy, radius * 3);
+                  grad.addColorStop(0, '#000');
+                  grad.addColorStop(0.1, '#8b5cf6');
+                  grad.addColorStop(1, 'transparent');
+                  ctx.fillStyle = grad;
+                  ctx.beginPath(); ctx.arc(cx, cy, radius*3, 0, Math.PI*2); ctx.fill();
+                  
+                  // Event Horizon
+                  ctx.fillStyle = '#000';
+                  ctx.beginPath(); ctx.arc(cx, cy, radius, 0, Math.PI*2); ctx.fill();
+                  ctx.strokeStyle = '#c4b5fd';
+                  ctx.lineWidth = 2;
+                  ctx.stroke();
+                  
+                  document.getElementById('statusVal').innerText = "KUGELBLITZ STABLE";
+                  document.getElementById('statusVal').style.color = "#8b5cf6";
+                  
+              } else if (energyDensity > 1000) {
+                  // Draw intense energy focal point
+                  let radius = Math.min(50, energyDensity * 0.0005);
+                  let grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, radius);
+                  grad.addColorStop(0, '#fff');
+                  grad.addColorStop(0.5, '#f97316');
+                  grad.addColorStop(1, 'transparent');
+                  ctx.fillStyle = grad;
+                  ctx.beginPath(); ctx.arc(cx, cy, radius, 0, Math.PI*2); ctx.fill();
+                  
+                  document.getElementById('statusVal').innerText = "FOCUSING ENERGY...";
+                  document.getElementById('statusVal').style.color = "#f97316";
+              } else {
+                  document.getElementById('statusVal').innerText = "ENERGY SCATTERING";
+                  document.getElementById('statusVal').style.color = "#ef4444";
+              }
+              
+              // HUD Updates
+              document.getElementById('energyVal').innerText = (energyDensity / 1000).toFixed(1) + "k J/m³";
+              document.getElementById('massVal').innerText = bhMass.toFixed(2) + " kg";
+              document.getElementById('radVal').innerText = hawkingRad.toFixed(1) + " W";
+              
+              if(bhMass > 0 && hawkingRad > effectiveInput) {
+                  document.getElementById('statusVal').innerText = "EVAPORATING VIA HAWKING RADIATION";
+                  document.getElementById('statusVal').style.color = "#ef4444";
+              }
+          }
+          
+          requestAnimationFrame(animate);
+      }
+      
+      animate();
+
+      function fireLasers() {
+          if(isSimulating) return;
+          isSimulating = true;
+          time = 0;
+          energyDensity = 0;
+          bhMass = 0;
+          document.getElementById('statusVal').innerText = "LASERS FIRING";
+          document.getElementById('statusVal').style.color = "#f97316";
+      }
+    </script>
+  </body>
+</html>

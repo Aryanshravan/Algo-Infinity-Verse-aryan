@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>B+ Tree Disk Page Indexing & Node Debugger — Algo Infinity Verse</title>
+  <meta name="description" content="Simulate relational database B+ Tree indexing (MySQL InnoDB / PostgreSQL B-Tree), 16KB disk block page frames, node split/merge balance operations, and range query sequence set traversal." />
+  
+  <link rel="stylesheet" href="../../../styles.css" />
+  <link rel="stylesheet" href="style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+
+  <script>
+    (function() {
+      try {
+        var t = localStorage.getItem('theme');
+        var p = window.matchMedia('(prefers-color-scheme: light)').matches;
+        var theme = t || (p ? 'light' : 'dark');
+        if (theme === 'light') document.documentElement.classList.add('light-mode');
+      } catch (e) {}
+    })();
+  </script>
+</head>
+<body data-page="bplus-tree">
+
+  <header class="bpt-header">
+    <div class="bpt-header-container">
+      <a href="../tools.html" class="bpt-back-btn">
+        <i class="fas fa-arrow-left"></i>
+        <span>Tools Hub</span>
+      </a>
+      <div class="bpt-title-area">
+        <h1><i class="fas fa-database"></i> B+ Tree Disk Page Indexing &amp; Node Debugger</h1>
+        <p>InnoDB/PostgreSQL 16KB Page Frames, Node Split/Merge Operations, and Leaf Sequence Set Range Queries</p>
+      </div>
+      <div class="bpt-header-actions">
+        <button id="themeToggleBtn" class="bpt-icon-btn" title="Toggle Theme">
+          <i class="fas fa-moon"></i>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="bpt-main">
+    <!-- TOOLBAR & OPERATIONS -->
+    <div class="bpt-toolbar">
+      <div class="bpt-controls-group">
+        <label><i class="fas fa-sliders"></i> Order (m):</label>
+        <select id="treeOrderSelect" class="bpt-select">
+          <option value="3">Order 3 (Max 2 Keys / Node)</option>
+          <option value="4" selected>Order 4 (Max 3 Keys / Node)</option>
+          <option value="5">Order 5 (Max 4 Keys / Node)</option>
+        </select>
+      </div>
+
+      <div class="bpt-op-group">
+        <input type="number" id="keyInput" class="bpt-input" placeholder="Key value (e.g. 42)" />
+        <button id="btnInsertKey" class="bpt-btn bpt-btn-success"><i class="fas fa-plus"></i> Insert Key</button>
+        <button id="btnDeleteKey" class="bpt-btn bpt-btn-danger"><i class="fas fa-minus"></i> Delete Key</button>
+        <button id="btnSearchKey" class="bpt-btn bpt-btn-primary"><i class="fas fa-search"></i> Search Key</button>
+        <button id="btnBulkRandom" class="bpt-btn bpt-btn-secondary"><i class="fas fa-dice"></i> Bulk Random (+10)</button>
+        <button id="btnClearTree" class="bpt-btn bpt-btn-secondary"><i class="fas fa-trash"></i> Clear</button>
+      </div>
+    </div>
+
+    <!-- MAIN GRID LAYOUT -->
+    <div class="bpt-grid">
+      
+      <!-- LEFT: VISUAL B+ TREE & LEAF SEQUENCE SET -->
+      <div class="bpt-card bpt-tree-card">
+        <div class="bpt-card-header">
+          <h2><i class="fas fa-diagram-project"></i> B+ Tree Disk Node Topology &amp; Doubly-Linked Sequence Set</h2>
+          <div class="bpt-legend">
+            <span class="bpt-badge bpt-badge-internal"><i class="fas fa-folder"></i> Internal Node</span>
+            <span class="bpt-badge bpt-badge-leaf"><i class="fas fa-file-code"></i> Leaf Node Page</span>
+            <span class="bpt-badge bpt-badge-active"><i class="fas fa-crosshairs"></i> Inspected Node</span>
+          </div>
+        </div>
+
+        <div class="bpt-tree-viewport" id="treeViewport">
+          <!-- B+ Tree rendered by JS -->
+        </div>
+
+        <!-- LEAF SEQUENCE SET LINKED LIST -->
+        <div class="bpt-sequence-set-bar">
+          <h3><i class="fas fa-link"></i> Doubly-Linked Leaf Sequence Set Navigator (Range Query)</h3>
+          <div class="bpt-range-query-controls">
+            <input type="number" id="rangeMinInput" class="bpt-input bpt-input-sm" placeholder="Min Key" value="10" />
+            <span>to</span>
+            <input type="number" id="rangeMaxInput" class="bpt-input bpt-input-sm" placeholder="Max Key" value="50" />
+            <button id="btnExecuteRangeQuery" class="bpt-btn bpt-btn-sm bpt-btn-primary"><i class="fas fa-play"></i> Execute Range Scan</button>
+          </div>
+          <div id="sequenceSetContainer" class="bpt-sequence-set-container">
+            <!-- Leaf linked list rendered by JS -->
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT: DISK BLOCK PAGE INSPECTOR & BENCHMARKING -->
+      <div class="bpt-side-panel">
+        
+        <!-- TABS NAV -->
+        <div class="bpt-tabs">
+          <button class="bpt-tab-btn active" data-tab="inspector"><i class="fas fa-microscope"></i> Disk Page Inspector</button>
+          <button class="bpt-tab-btn" data-tab="benchmark"><i class="fas fa-gauge-high"></i> Performance Index</button>
+        </div>
+
+        <!-- TAB 1: DISK BLOCK PAGE INSPECTOR -->
+        <div class="bpt-tab-content active" id="tab-inspector">
+          <div class="bpt-card-body">
+            <h3><i class="fas fa-hard-drive"></i> 16KB InnoDB Disk Page Inspector</h3>
+            <p>Click any node in the B+ Tree above to inspect its 16KB page frame layout.</p>
+
+            <div id="pageInspectorContent" class="bpt-page-inspector">
+              <div class="bpt-callout bpt-callout-info">
+                <i class="fas fa-mouse-pointer"></i> Select a B+ Tree node to view page header stats, slot directory, and hex record offsets.
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB 2: INDEX BENCHMARKING -->
+        <div class="bpt-tab-content" id="tab-benchmark">
+          <div class="bpt-card-body">
+            <h3><i class="fas fa-chart-bar"></i> Index Performance Comparison</h3>
+            <p>Disk I/O read operations and search complexity across 10,000 database records.</p>
+
+            <table class="bpt-table">
+              <thead>
+                <tr>
+                  <th>Index Structure</th>
+                  <th>Point Search I/O</th>
+                  <th>Range Query I/O</th>
+                  <th>Time Complexity</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><strong>B+ Tree Index (Height 3)</strong></td>
+                  <td><code class="bpt-green">3 Page Reads</code></td>
+                  <td><code class="bpt-green">3 + k Page Reads</code></td>
+                  <td><code>O(log<sub>B</sub> N)</code></td>
+                </tr>
+                <tr>
+                  <td><strong>Binary Search Tree</strong></td>
+                  <td><code>14 Page Reads</code></td>
+                  <td><code>O(k · log N)</code></td>
+                  <td><code>O(log<sub>2</sub> N)</code></td>
+                </tr>
+                <tr>
+                  <td><strong>Hash Index (No Range)</strong></td>
+                  <td><code class="bpt-green">1 Page Read</code></td>
+                  <td><code class="bpt-danger">Full Table Scan</code></td>
+                  <td><code>O(1) Point / O(N) Range</code></td>
+                </tr>
+                <tr>
+                  <td><strong>Unindexed Table Scan</strong></td>
+                  <td><code class="bpt-danger">10,000 Reads</code></td>
+                  <td><code class="bpt-danger">10,000 Reads</code></td>
+                  <td><code>O(N)</code></td>
+                </tr>
+              </tbody>
+            </table>
+
+            <div class="bpt-callout bpt-callout-success">
+              <i class="fas fa-lightbulb"></i> <strong>Key Advantage of B+ Trees:</strong> High fanout (order $m \approx 100+$) keeps tree depth shallow ($\le 3-4$ levels for millions of rows), minimizing expensive disk seeks!
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- CONSOLE LOG -->
+    <div class="bpt-card bpt-console-card">
+      <div class="bpt-card-header">
+        <h2><i class="fas fa-terminal"></i> B+ Tree Node Split/Merge Execution Log</h2>
+        <button id="btnClearConsole" class="bpt-btn bpt-btn-sm"><i class="fas fa-trash"></i> Clear Log</button>
+      </div>
+      <div class="bpt-console-body" id="bptConsole">
+        <div class="bpt-log-entry info">[SYSTEM] B+ Tree Disk Page Indexing &amp; Node Debugger initialized. Order m=4.</div>
+      </div>
+    </div>
+  </main>
+
+  <script src="../../../auth.js"></script>
+  <script src="../../../theme.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>

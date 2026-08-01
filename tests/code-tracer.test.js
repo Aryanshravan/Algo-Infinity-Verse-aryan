@@ -59,4 +59,21 @@ describe('AST Code Tracer - Scope variable tracking and instrumenting', () => {
     expect(instrumented).toContain('__enter');
     expect(instrumented).toContain('__exit');
   });
+
+  it('should extract destructured parameter names and array pattern elements without errors', () => {
+    const code = `
+      function outer({ a, b }, [c, , d] = []) {
+        let sum = a + b + c + d;
+        return sum;
+      }
+      outer({ a: 1, b: 2 }, [3, 4, 5]);
+    `;
+    const { variableNames, error } = instrumentJS(code);
+    expect(error).toBeUndefined();
+    expect(variableNames).toContain('a');
+    expect(variableNames).toContain('b');
+    expect(variableNames).toContain('c');
+    expect(variableNames).toContain('d');
+    expect(variableNames).toContain('sum');
+  });
 });

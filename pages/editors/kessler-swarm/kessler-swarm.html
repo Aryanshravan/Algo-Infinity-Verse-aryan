@@ -1,0 +1,369 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Kessler Syndrome Scavenger Swarm | Algo Infinity Verse</title>
+    <link rel="stylesheet" href="/styles.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <!-- Monaco Editor -->
+    <script src="https://unpkg.com/monaco-editor@0.36.1/min/vs/loader.js"></script>
+    <style>
+      body { margin: 0; overflow: hidden; background: #000; font-family: 'Poppins', sans-serif; color: #fff; }
+      .app-container { display: flex; height: 100vh; }
+      
+      .sidebar { width: 450px; background: rgba(15, 23, 42, 0.95); border-right: 1px solid #eab308; display: flex; flex-direction: column; z-index: 10; }
+      .header { padding: 20px; border-bottom: 1px solid #334155; }
+      .header h2 { margin: 0; color: #eab308; font-family: 'Orbitron', sans-serif; font-size: 1.2rem; }
+      .header p { margin: 5px 0 0 0; font-size: 0.8rem; color: #94a3b8; }
+      
+      #editor-container { flex: 1; min-height: 300px; }
+      
+      .controls { padding: 20px; border-top: 1px solid #334155; background: rgba(0,0,0,0.5); }
+      .btn { background: linear-gradient(90deg, #ca8a04, #a16207); color: #fff; border: none; padding: 10px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; transition: 0.3s; }
+      .btn:hover { background: #eab308; transform: translateY(-2px); box-shadow: 0 0 15px rgba(234, 179, 8, 0.5); }
+      
+      .sim-container { flex: 1; position: relative; background: #020617; overflow: hidden; }
+      canvas { width: 100%; height: 100%; display: block; filter: contrast(1.1); }
+      
+      .hud { position: absolute; top: 20px; right: 20px; background: rgba(0,0,0,0.8); padding: 15px; border-radius: 8px; border: 1px solid #eab308; width: 280px; z-index: 10; pointer-events: none; }
+      .hud h3 { margin: 0 0 10px 0; color: #eab308; font-size: 1rem; font-family: 'Orbitron', sans-serif; }
+      .metric { display: flex; justify-content: space-between; font-size: 0.8rem; color: #cbd5e1; margin-bottom: 5px; }
+      .val { font-weight: bold; font-family: monospace; }
+      .val-debris { color: #ef4444; }
+      .val-drones { color: #38bdf8; }
+    </style>
+  </head>
+  <body>
+    
+    <div class="app-container">
+      <div class="sidebar">
+        <div class="header">
+          <h2><i class="fas fa-spider"></i> Scavenger Swarm</h2>
+          <p>Orbital Debris Mitigation</p>
+        </div>
+        
+        <div id="editor-container"></div>
+        
+        <div class="controls">
+          <button class="btn" onclick="deploySwarm()"><i class="fas fa-satellite-dish"></i> Deploy Scavenger Swarm</button>
+        </div>
+      </div>
+      
+      <div class="sim-container">
+        <!-- Earth Background -->
+        <div style="position: absolute; inset:0; background: radial-gradient(circle at center, #0284c7 0%, #000 70%); pointer-events: none; z-index: 0; opacity: 0.3;"></div>
+        
+        <canvas id="orbitCanvas" style="position: relative; z-index: 1;"></canvas>
+        
+        <div class="hud">
+          <h3>LEO Telemetry</h3>
+          <div class="metric"><span>Debris Count:</span> <span class="val val-debris" id="debrisVal">0</span></div>
+          <div class="metric"><span>Active Drones:</span> <span class="val val-drones" id="droneVal">0</span></div>
+          <div class="metric"><span>Collision Risk:</span> <span class="val" id="riskVal" style="color:#facc15">0%</span></div>
+          <div class="metric" style="margin-top: 10px; border-top: 1px solid #334155; padding-top: 5px;">
+            <span>Orbit State:</span> <span class="val" id="statusVal" style="color:#94a3b8">STANDBY</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      let editor;
+      require.config({ paths: { 'vs': 'https://unpkg.com/monaco-editor@0.36.1/min/vs' }});
+      require(['vs/editor/editor.main'], function() {
+        editor = monaco.editor.create(document.getElementById('editor-container'), {
+          value: `// Swarm Scavenger Targeting Algorithm
+// Low Earth Orbit is filled with hypersonic debris.
+// You control a swarm of drones that must intercept and deorbit the debris.
+// Warning: If drones crash into each other or miss the debris, 
+// they create MORE debris (Kessler Syndrome cascade!).
+
+function controlDrone(droneX, droneY, nearestDebrisX, nearestDebrisY, nearestDroneX, nearestDroneY) {
+    // Return { thrustX: float (-1 to 1), thrustY: float (-1 to 1) }
+    // You must intercept debris while avoiding other drones.
+    
+    // Naive logic: Full speed towards nearest debris!
+    // Result: All drones rush the same debris, crash into each other, and cause a cascade.
+    
+    let dx = nearestDebrisX - droneX;
+    let dy = nearestDebrisY - droneY;
+    
+    return {
+        thrustX: dx * 0.1,
+        thrustY: dy * 0.1
+    };
+}`,
+          language: 'javascript',
+          theme: 'vs-dark',
+          minimap: { enabled: false },
+          automaticLayout: true
+        });
+      });
+
+      const canvas = document.getElementById('orbitCanvas');
+      const ctx = canvas.getContext('2d');
+      
+      let isSimulating = false;
+      let time = 0;
+      
+      let drones = [];
+      let debris = [];
+      
+      function resize() { 
+          canvas.width = canvas.clientWidth; 
+          canvas.height = canvas.clientHeight;
+      }
+      window.addEventListener('resize', resize);
+      setTimeout(resize, 100);
+
+      function spawnDebris(x, y, count) {
+          for(let i=0; i<count; i++) {
+              debris.push({
+                  x: x,
+                  y: y,
+                  vx: (Math.random()-0.5)*10,
+                  vy: (Math.random()-0.5)*10
+              });
+          }
+      }
+
+      function animate() {
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+          let cx = canvas.width / 2;
+          let cy = canvas.height / 2;
+          let earthRadius = 100;
+          
+          // Draw Earth
+          ctx.beginPath();
+          ctx.arc(cx, cy, earthRadius, 0, Math.PI*2);
+          ctx.fillStyle = '#0284c7';
+          ctx.shadowBlur = 20;
+          ctx.shadowColor = '#0ea5e9';
+          ctx.fill();
+          ctx.shadowBlur = 0;
+
+          if (isSimulating) {
+              time++;
+              
+              // Move Debris (orbiting earth)
+              for(let i = debris.length - 1; i >= 0; i--) {
+                  let d = debris[i];
+                  // Simple gravity towards center
+                  let dx = cx - d.x;
+                  let dy = cy - d.y;
+                  let distSq = dx*dx + dy*dy;
+                  let dist = Math.sqrt(distSq);
+                  
+                  let force = 2000 / distSq;
+                  d.vx += (dx / dist) * force;
+                  d.vy += (dy / dist) * force;
+                  
+                  d.x += d.vx;
+                  d.y += d.vy;
+                  
+                  // Burn up if hits earth
+                  if (dist < earthRadius) {
+                      debris.splice(i, 1);
+                  }
+              }
+              
+              // Move Drones
+              for(let i = drones.length - 1; i >= 0; i--) {
+                  let d = drones[i];
+                  
+                  // Find nearest debris
+                  let nearestDebrisDist = Infinity;
+                  let targetDebris = null;
+                  debris.forEach(deb => {
+                      let dist = Math.pow(deb.x - d.x, 2) + Math.pow(deb.y - d.y, 2);
+                      if(dist < nearestDebrisDist) {
+                          nearestDebrisDist = dist;
+                          targetDebris = deb;
+                      }
+                  });
+                  
+                  // Find nearest drone
+                  let nearestDroneDist = Infinity;
+                  let targetDrone = null;
+                  drones.forEach(other => {
+                      if (other === d) return;
+                      let dist = Math.pow(other.x - d.x, 2) + Math.pow(other.y - d.y, 2);
+                      if(dist < nearestDroneDist) {
+                          nearestDroneDist = dist;
+                          targetDrone = other;
+                      }
+                  });
+                  
+                  let tx = 0, ty = 0;
+                  try {
+                      let dbX = targetDebris ? targetDebris.x : d.x;
+                      let dbY = targetDebris ? targetDebris.y : d.y;
+                      let drX = targetDrone ? targetDrone.x : d.x;
+                      let drY = targetDrone ? targetDrone.y : d.y;
+                      
+                      eval(editor.getValue());
+                      let res = controlDrone(d.x, d.y, dbX, dbY, drX, drY);
+                      
+                      if (res) {
+                          tx = Math.max(-1, Math.min(1, res.thrustX || 0));
+                          ty = Math.max(-1, Math.min(1, res.thrustY || 0));
+                      }
+                  } catch(e) {}
+                  
+                  d.vx += tx * 0.5;
+                  d.vy += ty * 0.5;
+                  
+                  // Speed limit
+                  let speed = Math.sqrt(d.vx*d.vx + d.vy*d.vy);
+                  if(speed > 5) {
+                      d.vx = (d.vx/speed) * 5;
+                      d.vy = (d.vy/speed) * 5;
+                  }
+                  
+                  d.x += d.vx;
+                  d.y += d.vy;
+              }
+              
+              // Collisions
+              // Drone vs Debris (Good: Drone captures debris and deorbits it)
+              for(let i = drones.length - 1; i >= 0; i--) {
+                  let dr = drones[i];
+                  let captured = false;
+                  for(let j = debris.length - 1; j >= 0; j--) {
+                      let deb = debris[j];
+                      let dist = Math.sqrt(Math.pow(dr.x - deb.x, 2) + Math.pow(dr.y - deb.y, 2));
+                      if (dist < 10) {
+                          // Caught!
+                          debris.splice(j, 1);
+                          captured = true;
+                          break;
+                      }
+                  }
+                  if (captured) {
+                      drones.splice(i, 1); // Drone used up its fuel deorbiting the debris
+                      continue;
+                  }
+              }
+              
+              // Drone vs Drone (Bad: Kessler Cascade)
+              let collisionOccurred = false;
+              for(let i = 0; i < drones.length; i++) {
+                  for(let j = i+1; j < drones.length; j++) {
+                      let d1 = drones[i];
+                      let d2 = drones[j];
+                      let dist = Math.sqrt(Math.pow(d1.x - d2.x, 2) + Math.pow(d1.y - d2.y, 2));
+                      if (dist < 8) {
+                          // CRASH! Spawns 10 new debris pieces
+                          spawnDebris((d1.x+d2.x)/2, (d1.y+d2.y)/2, 10);
+                          drones[i]._dead = true;
+                          drones[j]._dead = true;
+                          collisionOccurred = true;
+                      }
+                  }
+              }
+              drones = drones.filter(d => !d._dead);
+              
+              // Win/Loss
+              if (debris.length > 200) {
+                  isSimulating = false;
+                  document.getElementById('statusVal').innerText = "KESSLER CASCADE (ORBIT LOST)";
+                  document.getElementById('statusVal').style.color = "#ef4444";
+              } else if (debris.length === 0 && time > 10) {
+                  isSimulating = false;
+                  document.getElementById('statusVal').innerText = "ORBIT CLEARED SUCCESSFULLY";
+                  document.getElementById('statusVal').style.color = "#10b981";
+              } else if (drones.length === 0 && debris.length > 0) {
+                  isSimulating = false;
+                  document.getElementById('statusVal').innerText = "SWARM DEPLETED (MISSION FAILED)";
+                  document.getElementById('statusVal').style.color = "#ef4444";
+              } else {
+                  if (debris.length > 100) {
+                      document.getElementById('statusVal').innerText = "WARNING: HIGH DEBRIS DENSITY";
+                      document.getElementById('statusVal').style.color = "#f97316";
+                  } else {
+                      document.getElementById('statusVal').innerText = "SWARM ACTIVE...";
+                      document.getElementById('statusVal').style.color = "#eab308";
+                  }
+              }
+              
+              // HUD Updates
+              document.getElementById('debrisVal').innerText = debris.length;
+              if(debris.length > 100) document.getElementById('debrisVal').style.color = "#ef4444";
+              else document.getElementById('debrisVal').style.color = "#facc15";
+              
+              document.getElementById('droneVal').innerText = drones.length;
+              
+              // Rough risk metric based on density
+              let risk = Math.min(100, (debris.length / 200) * 100);
+              document.getElementById('riskVal').innerText = risk.toFixed(1) + "%";
+          }
+          
+          // Draw Debris
+          ctx.fillStyle = '#ef4444';
+          debris.forEach(d => {
+              ctx.beginPath();
+              ctx.arc(d.x, d.y, 2, 0, Math.PI*2);
+              ctx.fill();
+          });
+          
+          // Draw Drones
+          drones.forEach(d => {
+              ctx.fillStyle = '#38bdf8';
+              ctx.beginPath();
+              ctx.arc(d.x, d.y, 4, 0, Math.PI*2);
+              ctx.fill();
+              
+              // Draw thrust tail
+              ctx.strokeStyle = 'rgba(56, 189, 248, 0.5)';
+              ctx.beginPath();
+              ctx.moveTo(d.x, d.y);
+              ctx.lineTo(d.x - d.vx*2, d.y - d.vy*2);
+              ctx.stroke();
+          });
+
+          requestAnimationFrame(animate);
+      }
+      
+      animate();
+
+      function deploySwarm() {
+          if(isSimulating) return;
+          isSimulating = true;
+          time = 0;
+          drones = [];
+          debris = [];
+          
+          let cx = canvas.width / 2;
+          let cy = canvas.height / 2;
+          
+          // Spawn initial debris cloud
+          for(let i=0; i<30; i++) {
+              let angle = Math.random() * Math.PI*2;
+              let dist = 150 + Math.random()*200;
+              debris.push({
+                  x: cx + Math.cos(angle)*dist,
+                  y: cy + Math.sin(angle)*dist,
+                  vx: -Math.sin(angle)*3, // Orbiting velocity
+                  vy: Math.cos(angle)*3
+              });
+          }
+          
+          // Spawn drones
+          for(let i=0; i<40; i++) {
+              let angle = (i/40) * Math.PI*2;
+              drones.push({
+                  x: cx + Math.cos(angle)*120, // Low orbit insertion
+                  y: cy + Math.sin(angle)*120,
+                  vx: 0,
+                  vy: 0
+              });
+          }
+          
+          document.getElementById('statusVal').innerText = "SWARM DEPLOYED...";
+          document.getElementById('statusVal').style.color = "#eab308";
+      }
+    </script>
+  </body>
+</html>

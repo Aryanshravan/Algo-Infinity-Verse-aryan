@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Distributed Systems & High-Availability DB Academy — Algo Infinity Verse</title>
+  <meta name="description" content="Production-grade learning paths on distributed consensus, Raft, CAP/PACELC trade-offs, database replication models, and partition tolerance." />
+  
+  <link rel="stylesheet" href="../../../styles.css" />
+  <link rel="stylesheet" href="style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+
+  <script>
+    (function() {
+      try {
+        var t = localStorage.getItem('theme');
+        var p = window.matchMedia('(prefers-color-scheme: light)').matches;
+        var theme = t || (p ? 'light' : 'dark');
+        if (theme === 'light') document.documentElement.classList.add('light-mode');
+      } catch (e) {}
+    })();
+  </script>
+</head>
+<body data-page="ds-academy">
+
+  <header class="ds-header">
+    <div class="ds-header-container">
+      <a href="../academy.html" class="ds-back-btn">
+        <i class="fas fa-arrow-left"></i>
+        <span>Academies Hub</span>
+      </a>
+      <div class="ds-title-area">
+        <h1><i class="fas fa-network-wired"></i> Distributed Systems &amp; High-Availability DB Academy</h1>
+        <p>Master Consensus Algorithms (Raft/Paxos), CAP Theorem Trade-Offs, and Write-Ahead Logging</p>
+      </div>
+      <div class="ds-header-actions">
+        <button id="themeToggleBtn" class="ds-icon-btn" title="Toggle Theme">
+          <i class="fas fa-moon"></i>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="ds-main">
+    <!-- TOP MODULE GRID -->
+    <div class="ds-card">
+      <div class="ds-card-header">
+        <h2><i class="fas fa-book-open"></i> Academy Core Learning Modules</h2>
+        <span class="ds-badge ds-badge-success">10 Modules</span>
+      </div>
+      <div class="ds-modules-grid">
+        <div class="ds-module-card active" data-mod="cap">
+          <div class="ds-mod-num">01</div>
+          <div class="ds-mod-title">CAP &amp; PACELC Theorem</div>
+          <p>Consistency, Availability, and Partition Tolerance trade-offs.</p>
+        </div>
+        <div class="ds-module-card" data-mod="raft">
+          <div class="ds-mod-num">02</div>
+          <div class="ds-mod-title">Raft Consensus Algorithm</div>
+          <p>Leader Election, Log Replication, and Safety guarantees.</p>
+        </div>
+        <div class="ds-module-card" data-mod="2pc">
+          <div class="ds-mod-num">03</div>
+          <div class="ds-mod-title">Two-Phase Commit (2PC)</div>
+          <p>Distributed transaction protocol and coordinator safety.</p>
+        </div>
+        <div class="ds-module-card" data-mod="wal">
+          <div class="ds-mod-num">04</div>
+          <div class="ds-mod-title">Write-Ahead Logging (WAL)</div>
+          <p>Durability, Crash Recovery, and ARIES algorithm.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- MAIN INTERACTIVE PLAYGROUND -->
+    <div class="ds-grid">
+      
+      <!-- CAP & PACELC DECISION MATRIX -->
+      <div class="ds-card">
+        <div class="ds-card-header">
+          <h3><i class="fas fa-balance-scale"></i> CAP &amp; PACELC Interactive Trade-off Evaluator</h3>
+        </div>
+        <div class="ds-card-body">
+          <div class="ds-form-group">
+            <label>Select System Goal under Network Partition (P):</label>
+            <select id="capGoalSelect" class="ds-select">
+              <option value="CP">Consistency over Availability (CP - e.g. CockroachDB, Spanner)</option>
+              <option value="AP">Availability over Consistency (AP - e.g. Cassandra, DynamoDB)</option>
+            </select>
+          </div>
+
+          <div id="capEvaluationResult" class="ds-eval-box">
+            <!-- Evaluation rendered by JS -->
+          </div>
+        </div>
+      </div>
+
+      <!-- FAILURE SCENARIO SIMULATOR -->
+      <div class="ds-card">
+        <div class="ds-card-header">
+          <h3><i class="fas fa-plug-circle-bolt"></i> Failure Scenario Playground</h3>
+        </div>
+        <div class="ds-card-body">
+          <p>Test system behavior under real-world infrastructure failures.</p>
+          <div class="ds-scenario-buttons">
+            <button class="ds-btn ds-btn-warning" id="btnSimSplitBrain"><i class="fas fa-code-fork"></i> Simulate Split-Brain</button>
+            <button class="ds-btn ds-btn-danger" id="btnSimNetworkCut"><i class="fas fa-scissors"></i> Cut Leader Network</button>
+          </div>
+          <div id="scenarioOutput" class="ds-eval-box" style="margin-top:12px;">
+            <i class="fas fa-info-circle"></i> Click a scenario above to observe distributed consensus behavior.
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <script src="../../../auth.js"></script>
+  <script src="../../../theme.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>

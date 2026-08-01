@@ -7,7 +7,7 @@ export function initScrollEffects() {
   window.addEventListener("scroll", setVisibleState);
   setVisibleState();
   if (scrollTopBtn) {
-    scrollTopBtn.addEventListener("click", () => {
+    if (window.scrollY < 10) return;
       scrollTopBtn.style.pointerEvents = "none";
       window.scrollTo({ top: 0, behavior: "smooth" });
       const onScrollEnd = () => {

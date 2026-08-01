@@ -1,0 +1,132 @@
+/* ============================================================
+   Autonomous AI Code Reviewer & Security Linter CSS
+   ============================================================ */
+
+:root {
+  --air-bg-dark: #0b0f19;
+  --air-card-bg-dark: rgba(21, 29, 46, 0.85);
+  --air-border-dark: rgba(255, 255, 255, 0.1);
+  --air-text-dark: #f1f5f9;
+  --air-text-muted-dark: #94a3b8;
+
+  
+  --air-accent: #3b82f6;
+  --air-success: #10b981;
+  --air-danger: #ef4444;
+  --air-warning: #f59e0b;
+  --air-radius: 12px;
+}
+
+.light-mode {
+  --air-bg-dark: #f8fafc;
+  --air-card-bg-dark: #ffffff;
+  --air-border-dark: #e2e8f0;
+  --air-text-dark: #0f172a;
+  --air-text-muted-dark: #64748b;
+}
+
+body[data-page="ai-reviewer"] {
+  margin: 0; padding: 0;
+  background-color: var(--air-bg-dark);
+  color: var(--air-text-dark);
+  font-family: 'Inter', sans-serif;
+  min-height: 100vh;
+}
+
+.air-header {
+  background: var(--air-card-bg-dark);
+  border-bottom: 1px solid var(--air-border-dark);
+  padding: 16px 24px;
+}
+
+.air-header-container {
+  max-width: 1600px; margin: 0 auto;
+  display: flex; align-items: center; justify-content: space-between;
+}
+
+.air-back-btn {
+  display: flex; align-items: center; gap: 8px;
+  color: var(--air-text-muted-dark); text-decoration: none;
+  font-weight: 500; font-size: 0.9rem; padding: 8px 14px;
+  border-radius: 8px; background: rgba(255, 255, 255, 0.05);
+}
+
+.air-title-area h1 { margin: 0; font-size: 1.4rem; font-family: 'Space Grotesk', sans-serif; }
+.air-title-area p { margin: 4px 0 0 0; font-size: 0.85rem; color: var(--air-text-muted-dark); }
+
+.air-icon-btn {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--air-border-dark); color: var(--air-text-dark);
+  width: 40px; height: 40px; border-radius: 50%; cursor: pointer;
+}
+
+.air-toolbar {
+  max-width: 1600px; margin: 20px auto 0 auto; padding: 0 24px;
+  display: flex; justify-content: space-between; align-items: center;
+  flex-wrap: wrap; gap: 16px; box-sizing: border-box;
+}
+
+.air-preset-group, .air-action-group { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.air-preset-group label { font-weight: 600; font-size: 0.85rem; color: var(--air-text-muted-dark); }
+
+.air-btn {
+  padding: 8px 16px; border-radius: 8px; font-size: 0.85rem; font-weight: 600;
+  border: 1px solid var(--air-border-dark); background: var(--air-card-bg-dark);
+  color: var(--air-text-dark); cursor: pointer; display: inline-flex; align-items: center; gap: 8px;
+}
+
+.air-btn.active, .air-btn-primary { background: var(--air-accent); color: #fff; border-color: var(--air-accent); }
+.air-btn-success { background: var(--air-success); color: #fff; border-color: var(--air-success); }
+
+.air-select {
+  padding: 6px 10px; border-radius: 6px; border: 1px solid var(--air-border-dark);
+  background: rgba(0, 0, 0, 0.2); color: var(--air-text-dark); font-size: 0.8rem;
+}
+
+.air-main { max-width: 1600px; margin: 0 auto; padding: 20px 24px; display: flex; flex-direction: column; gap: 20px; }
+
+.air-grid { display: grid; grid-template-columns: 1fr 480px; gap: 20px; }
+@media (max-width: 1100px) { .air-grid { grid-template-columns: 1fr; } }
+
+.air-card {
+  background: var(--air-card-bg-dark); border: 1px solid var(--air-border-dark);
+  border-radius: var(--air-radius); display: flex; flex-direction: column; overflow: hidden;
+}
+
+.air-card-header {
+  padding: 16px 20px; border-bottom: 1px solid var(--air-border-dark);
+  display: flex; justify-content: space-between; align-items: center;
+}
+
+.air-card-header h2, .air-card-header h3 { margin: 0; font-size: 1.1rem; font-family: 'Space Grotesk', sans-serif; }
+
+.air-code-card { height: 560px; }
+.air-editor-wrapper { flex: 1; padding: 16px; display: flex; }
+
+.air-textarea {
+  width: 100%; height: 100%;
+  background: rgba(0, 0, 0, 0.3); border: 1px solid var(--air-border-dark);
+  border-radius: 8px; color: var(--air-text-dark); padding: 14px;
+  font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; resize: none; box-sizing: border-box;
+}
+
+.air-side-panel { display: flex; flex-direction: column; gap: 20px; }
+.air-card-body { padding: 16px; }
+
+.air-score-box {
+  background: rgba(239, 68, 68, 0.1); border: 1px solid var(--air-danger);
+  border-radius: 8px; padding: 16px; text-align: center; display: flex; flex-direction: column; gap: 4px;
+}
+
+.air-score-val { font-size: 2rem; font-weight: 700; font-family: 'JetBrains Mono', monospace; color: var(--air-danger); }
+.air-score-label { font-size: 0.8rem; font-weight: 700; color: var(--air-danger); }
+
+.air-scrollable { max-height: 320px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
+
+.air-finding-card {
+  background: rgba(0, 0, 0, 0.2); border: 1px solid var(--air-border-dark);
+  border-radius: 8px; padding: 12px; font-size: 0.8rem; display: flex; flex-direction: column; gap: 4px;
+}
+
+.air-finding-card.danger { border-color: var(--air-danger); }
+.air-finding-card.warning { border-color: var(--air-warning); }

@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>K8s & Service Mesh Security Masterclass — Algo Infinity Verse</title>
+  <meta name="description" content="Master Cloud-Native Kubernetes Security, Istio mTLS, RBAC, Pod Security Standards, Network Policies, and Container Hardening." />
+  
+  <link rel="stylesheet" href="../../../styles.css" />
+  <link rel="stylesheet" href="style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+
+  <script>
+    (function() {
+      try {
+        var t = localStorage.getItem('theme');
+        var p = window.matchMedia('(prefers-color-scheme: light)').matches;
+        var theme = t || (p ? 'light' : 'dark');
+        if (theme === 'light') document.documentElement.classList.add('light-mode');
+      } catch (e) {}
+    })();
+  </script>
+</head>
+<body data-page="k8s-security-academy">
+
+  <header class="ksm-header">
+    <div class="ksm-header-container">
+      <a href="../academy.html" class="ksm-back-btn">
+        <i class="fas fa-arrow-left"></i>
+        <span>Academies</span>
+      </a>
+      <div class="ksm-title-area">
+        <h1><i class="fab fa-docker"></i> Kubernetes &amp; Service Mesh Security Masterclass</h1>
+        <p>Zero-Trust Security, mTLS Traffic Encryption, RBAC Hardening, Pod Security Standards, and YAML Linter</p>
+      </div>
+      <div class="ksm-header-actions">
+        <button id="themeToggleBtn" class="ksm-icon-btn" title="Toggle Theme">
+          <i class="fas fa-moon"></i>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="ksm-main">
+    <!-- METRICS & HERO BANNER -->
+    <div class="ksm-hero-grid">
+      <div class="ksm-hero-card">
+        <div class="ksm-badge"><i class="fas fa-shield-halved"></i> Masterclass #3555</div>
+        <h2>Cloud-Native Security Architecture</h2>
+        <p>Explore 10 comprehensive modules, test live K8s manifests in the security checker, and visualize Istio/Envoy sidecar mTLS encryption in action.</p>
+        <div class="ksm-stats-row">
+          <div class="ksm-stat">
+            <span class="ksm-stat-number" id="completedModulesCount">0 / 10</span>
+            <span class="ksm-stat-label">Modules Completed</span>
+          </div>
+          <div class="ksm-stat">
+            <span class="ksm-stat-number" id="linterChecksCount">0</span>
+            <span class="ksm-stat-label">Manifests Audited</span>
+          </div>
+          <div class="ksm-stat">
+            <span class="ksm-stat-number" id="quizScoreCount">0%</span>
+            <span class="ksm-stat-label">Quiz Average</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MAIN NAVIGATION TABS -->
+    <div class="ksm-tabs-nav">
+      <button class="ksm-tab-btn active" data-tab="modules"><i class="fas fa-book-open"></i> Learning Modules (10)</button>
+      <button class="ksm-tab-btn" data-tab="linter"><i class="fas fa-file-shield"></i> YAML Manifest Security Linter</button>
+      <button class="ksm-tab-btn" data-tab="mtls"><i class="fas fa-network-wired"></i> mTLS Traffic Encryption Visualizer</button>
+      <button class="ksm-tab-btn" data-tab="quiz"><i class="fas fa-graduation-cap"></i> Certification Quiz</button>
+    </div>
+
+    <!-- TAB CONTENT: MODULES -->
+    <div id="tab-modules" class="ksm-tab-content active">
+      <div class="ksm-modules-layout">
+        <!-- SIDEBAR MODULE LIST -->
+        <div class="ksm-module-sidebar">
+          <h3><i class="fas fa-list-check"></i> Course Curriculum</h3>
+          <div class="ksm-module-list" id="moduleList">
+            <!-- Dynamically populated -->
+          </div>
+        </div>
+
+        <!-- MODULE VIEWER -->
+        <div class="ksm-module-viewer ksm-card">
+          <div id="moduleContent">
+            <!-- Dynamically populated -->
+          </div>
+          <div class="ksm-module-footer">
+            <button id="btnPrevModule" class="ksm-btn ksm-btn-secondary"><i class="fas fa-arrow-left"></i> Previous</button>
+            <button id="btnMarkComplete" class="ksm-btn ksm-btn-success"><i class="fas fa-check-circle"></i> Mark as Completed</button>
+            <button id="btnNextModule" class="ksm-btn ksm-btn-primary">Next Module <i class="fas fa-arrow-right"></i></button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB CONTENT: YAML SECURITY LINTER -->
+    <div id="tab-linter" class="ksm-tab-content">
+      <div class="ksm-linter-grid">
+        <!-- EDITOR CARD -->
+        <div class="ksm-card">
+          <div class="ksm-card-header">
+            <h3><i class="fas fa-code"></i> Kubernetes Manifest Editor (YAML)</h3>
+            <div class="ksm-preset-selector">
+              <label>Load Sample:</label>
+              <button class="ksm-btn-mini active" data-preset="vulnerable">Vulnerable Pod</button>
+              <button class="ksm-btn-mini" data-preset="secure">Hardened Deployment</button>
+              <button class="ksm-btn-mini" data-preset="rbac">Privileged RoleBinding</button>
+            </div>
+          </div>
+          <div class="ksm-card-body">
+            <textarea id="yamlInput" class="ksm-code-input" spellcheck="false" placeholder="Paste Kubernetes YAML manifest here..."></textarea>
+            <div class="ksm-action-bar">
+              <button id="btnAuditYaml" class="ksm-btn ksm-btn-primary"><i class="fas fa-magnifying-glass"></i> Audit Manifest</button>
+              <button id="btnAutoFixYaml" class="ksm-btn ksm-btn-success"><i class="fas fa-wand-magic-sparkles"></i> Apply Security Fixes</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- AUDIT REPORT CARD -->
+        <div class="ksm-card">
+          <div class="ksm-card-header">
+            <h3><i class="fas fa-clipboard-check"></i> Security Audit &amp; Risk Report</h3>
+          </div>
+          <div class="ksm-card-body">
+            <div class="ksm-score-badge" id="yamlScoreBadge">
+              <div class="ksm-score-val" id="yamlScoreVal">100</div>
+              <div class="ksm-score-text" id="yamlScoreText">SECURITY SCORE</div>
+            </div>
+            <div id="yamlViolationsList" class="ksm-violations-list">
+              <div class="ksm-empty-state">Click "Audit Manifest" to scan your Kubernetes YAML for security violations.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB CONTENT: MTLS VISUALIZER -->
+    <div id="tab-mtls" class="ksm-tab-content">
+      <div class="ksm-card">
+        <div class="ksm-card-header">
+          <h3><i class="fas fa-network-wired"></i> Pod-to-Pod Service Mesh Traffic Encryption (Istio / Envoy)</h3>
+          <div class="ksm-mode-toggle">
+            <button id="btnModePlain" class="ksm-btn-toggle active">Plain HTTP (Unencrypted)</button>
+            <button id="btnModeMtls" class="ksm-btn-toggle">Envoy Sidecar mTLS (Encrypted)</button>
+          </div>
+        </div>
+        <div class="ksm-card-body">
+          <div class="ksm-visualizer-canvas">
+            <!-- POD A -->
+            <div class="ksm-pod-node" id="podA">
+              <div class="ksm-pod-title"><i class="fas fa-cubes"></i> Pod A: Frontend</div>
+              <div class="ksm-pod-ip">IP: 10.244.1.42</div>
+              <div class="ksm-app-container">App Container (Port 8080)</div>
+              <div class="ksm-sidecar-container" id="sidecarA">
+                <i class="fas fa-shield-alt"></i> Envoy Sidecar Proxy
+                <div class="ksm-spiffe">spiffe://cluster.local/ns/default/sa/frontend</div>
+              </div>
+            </div>
+
+            <!-- ANIMATED NETWORK PIPE -->
+            <div class="ksm-network-pipe" id="networkPipe">
+              <div class="ksm-packet" id="trafficPacket"><i class="fas fa-lock"></i></div>
+              <div class="ksm-pipe-label" id="pipeLabel">UNENCRYPTED HTTP TRAFFIC</div>
+            </div>
+
+            <!-- POD B -->
+            <div class="ksm-pod-node" id="podB">
+              <div class="ksm-pod-title"><i class="fas fa-database"></i> Pod B: Payment Service</div>
+              <div class="ksm-pod-ip">IP: 10.244.2.89</div>
+              <div class="ksm-sidecar-container" id="sidecarB">
+                <i class="fas fa-shield-alt"></i> Envoy Sidecar Proxy
+                <div class="ksm-spiffe">spiffe://cluster.local/ns/default/sa/payment</div>
+              </div>
+              <div class="ksm-app-container">App Container (Port 5000)</div>
+            </div>
+          </div>
+
+          <!-- HANDSHAKE LOG & PACKET INSPECTOR -->
+          <div class="ksm-inspector-grid">
+            <div class="ksm-inspector-box">
+              <h4><i class="fas fa-terminal"></i> Envoy Proxy Handshake &amp; TLS Log</h4>
+              <pre id="handshakeLog" class="ksm-log-terminal"></pre>
+            </div>
+            <div class="ksm-inspector-box">
+              <h4><i class="fas fa-eye"></i> Wire Traffic Packet Payload Inspector</h4>
+              <pre id="packetPayload" class="ksm-packet-payload"></pre>
+            </div>
+          </div>
+
+          <div class="ksm-action-bar">
+            <button id="btnSimulatePacket" class="ksm-btn ksm-btn-primary"><i class="fas fa-play"></i> Send Traffic Packet</button>
+            <button id="btnRotateCerts" class="ksm-btn ksm-btn-secondary"><i class="fas fa-key"></i> Simulate SPIFFE Cert Rotation</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB CONTENT: CERTIFICATION QUIZ -->
+    <div id="tab-quiz" class="ksm-tab-content">
+      <div class="ksm-card ksm-quiz-card">
+        <div class="ksm-card-header">
+          <h3><i class="fas fa-graduation-cap"></i> Kubernetes Security &amp; Service Mesh Masterclass Quiz</h3>
+          <span class="ksm-quiz-counter" id="quizCounter">Question 1 of 5</span>
+        </div>
+        <div class="ksm-card-body">
+          <div id="quizContainer">
+            <!-- Dynamically populated -->
+          </div>
+          <div class="ksm-action-bar">
+            <button id="btnSubmitQuiz" class="ksm-btn ksm-btn-primary"><i class="fas fa-check"></i> Submit Quiz Answers</button>
+            <button id="btnResetQuiz" class="ksm-btn ksm-btn-secondary"><i class="fas fa-redo"></i> Reset Quiz</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script src="script.js" type="module"></script>
+</body>
+</html>

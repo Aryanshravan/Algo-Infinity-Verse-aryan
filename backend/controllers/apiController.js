@@ -86,6 +86,7 @@ const JUDGE0_LANGUAGE_IDS = {
   dart: 98,
   haskell: 89,
   kotlin: 78,
+  bash: 46,
 };
 
 export async function getCsrfToken(req, res) {
@@ -100,7 +101,9 @@ export async function getCsrfToken(req, res) {
 }
 
 export async function logError(req, res) {
-  if (!applyRateLimit(req, res, logErrorLimiter, 'Too many error reports. Please try again later.')) {
+  if (
+    !applyRateLimit(req, res, logErrorLimiter, 'Too many error reports. Please try again later.')
+  ) {
     return;
   }
   try {
@@ -279,7 +282,7 @@ export async function executeCode(req, res) {
 // immutable bindings captured at load time, so that specific import style can't be
 // intercepted this way -- this is defense in depth on top of the process isolation
 // and stripped env below, not a hard network boundary.
-const NETWORK_SANDBOX_PRELUDE = `
+const _NETWORK_SANDBOX_PRELUDE = `
 for (const __name of ['fetch', 'WebSocket']) {
   if (__name in globalThis) {
     try {
@@ -304,7 +307,7 @@ for (const __mod of ['http', 'https']) {
 
 // Node renamed --experimental-permission to the stable --permission in v23; support both
 // so the sandbox works regardless of which Node version this runs on.
-const PERMISSION_FLAG =
+const _PERMISSION_FLAG =
   Number(process.versions.node.split('.')[0]) >= 23 ? '--permission' : '--experimental-permission';
 
 export async function executeTracedCode(req, res) {
@@ -378,7 +381,7 @@ export async function executeTracedCode(req, res) {
       traceError = execError.message;
       userOutput = `Execution error: ${traceError}`;
     } finally {
-      await fs.unlink(tmpFile).catch(() => { });
+      await fs.unlink(tmpFile).catch(() => {});
     }
 
     const executionId = uuidv4();

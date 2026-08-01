@@ -1,595 +1,680 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Learn C – Beginner Guide | Algo Infinity Verse</title>
-    <meta name="description" content="Free beginner-friendly C tutorial covering variables, data types, operators, I/O, conditionals, loops, functions, arrays, strings, pointers, and structs with interactive exercises." />
-    <link rel="stylesheet" href="/styles.css" />
-    <link rel="stylesheet" href="c-learning.css" />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Poppins:wght@300;400;500;600;700&family=Fira+Code:wght@400;500;600&display=swap"
-      rel="stylesheet"
-    />
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
-    />
-  
-    <!-- Theme Initialization Script -->
-    <script>
-      (function() {
-        try {
-          var storedTheme = localStorage.getItem('theme');
-          var prefersLight = window.matchMedia('(prefers-color-scheme: light)').matches;
-          var theme = storedTheme || (prefersLight ? 'light' : 'dark');
-          if (theme === 'light') {
-            document.documentElement.classList.add('light-mode');
-          } else {
-            document.documentElement.classList.remove('light-mode');
-          }
-        } catch (e) {}
-      })();
-    </script>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Learn C – Systems Programming & Pointers | Algo Infinity Verse</title>
+  <meta name="description" content="Free interactive C tutorial covering pointers, memory management, data structures, variables, loops, functions, and systems programming fundamentals." />
+
+  <link rel="stylesheet" href="/styles.css" />
+  <link rel="stylesheet" href="c-learning.css" />
+
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+
+  <script>
+    (function() {
+      try {
+        var t = localStorage.getItem('theme');
+        var p = window.matchMedia('(prefers-color-scheme: light)').matches;
+        var theme = t || (p ? 'light' : 'dark');
+        if (theme === 'light') document.documentElement.classList.add('light-mode');
+      } catch (e) {}
+    })();
+  </script>
 </head>
-  <body data-page="c-learning">
-    <div id="loading-screen" class="hidden">
-      <div class="loader">
-        <div class="infinity-loader">∞</div>
-        <h2>Algo Infinity Verse</h2>
-        <div class="loading-bar">
-          <div class="loading-progress"></div>
-        </div>
-      </div>
+<body data-page="c-learning" data-no-loading>
+  <div id="loading-screen" class="hidden">
+    <div class="loader">
+      <div class="infinity-loader">&#x221E;</div>
+      <h2>Loading C Learning...</h2>
     </div>
+  </div>
 
-    <button type="button" id="scrollTopBtn" class="scroll-top-btn" aria-label="Scroll to top">
-      <i class="fas fa-arrow-up"></i>
-    </button>
-
-    <div id="navbar-placeholder"></div>
-
-    <section id="home" class="hero">
-      <div class="hero-background">
-        <div class="stars"></div>
-        <div class="stars2"></div>
-        <div class="stars3"></div>
+  <main>
+    <!-- ════════════════════════════════════════
+         HERO SECTION
+         ════════════════════════════════════════ -->
+    <section class="c-hero">
+      <div class="c-hero-bg">
+        <div class="c-hero-glow"></div>
       </div>
-      <div class="hero-content">
-        <h1 class="hero-title">
-          <span class="title-line">Start Your Journey With</span>
-          <span class="main-title gradient-text" style="background: linear-gradient(135deg, #5B9CF8 0%, #A8D0FF 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">C Programming</span>
-          <span class="subtitle">Beginner-Friendly Concepts, Code &amp; Practice</span>
-        </h1>
-        <div class="typing-container">
-          <span class="typing-text_c" id="typingTextC"></span>
-          <span class="typing-cursor">|</span>
+
+      <a href="/pages/learning/languages.html" class="c-back-btn" id="cBackBtn" aria-label="Go back to languages">
+        <i class="fas fa-arrow-left"></i>
+        <span>Languages</span>
+      </a>
+
+      <div class="c-hero-content">
+        <!-- Curly-brace signature motif - C's defining syntax -->
+        <div class="c-brace" aria-hidden="true">
+          <span class="c-brace-symbol">{</span>
+          <span class="c-brace-dot"></span>
+          <span class="c-brace-symbol">}</span>
+          <span class="c-brace-dot"></span>
+          <span class="c-brace-symbol">{</span>
+          <span class="c-brace-dot"></span>
+          <span class="c-brace-symbol">}</span>
         </div>
-        <div class="hero-buttons">
-          <a href="#introduction" class="btn btn-primary" style="background: linear-gradient(135deg, #5B9CF8 0%, #A8D0FF 100%); border: none; color: #fff; font-weight: 600;">
+
+        <h1 class="c-hero-title" id="cHeroTitle">
+          <span class="c-title-line">Learn C</span>
+          <span class="c-title-line">Pointers &amp; Systems</span>
+        </h1>
+
+        <p class="c-hero-subtitle">
+          Master C, the language that powers operating systems and embedded devices. From pointers to memory management — <strong>11 interactive lessons</strong> to build low-level programming skills.
+        </p>
+
+        <!-- Stats -->
+        <div class="c-hero-stats">
+          <div class="c-stat">
+            <span class="c-stat-value" id="topicCount">11</span>
+            <span class="c-stat-label">Topics</span>
+          </div>
+          <div class="c-stat">
+            <span class="c-stat-value">40+</span>
+            <span class="c-stat-label">Examples</span>
+          </div>
+          <div class="c-stat">
+            <span class="c-stat-value">11</span>
+            <span class="c-stat-label">Exercises</span>
+          </div>
+        </div>
+
+        <!-- CTA -->
+        <div class="c-hero-actions">
+          <a href="#topic-introduction" class="c-btn c-btn-primary">
             <i class="fas fa-play"></i> Start Learning
           </a>
-          <a href="/pages/editors/c-editor/c-editor.html" class="btn btn-secondary"><i class="fas fa-code"></i> C Editor</a>
-          <a href="#exercise-variables" class="btn btn-secondary">
-            <i class="fas fa-pen"></i> Practice Exercises
+          <a href="/pages/learning/languages.html" class="c-btn c-btn-secondary">
+            <i class="fas fa-th"></i> Browse Languages
           </a>
         </div>
-        <div class="hero-stats">
-          <div class="stat-box">
-            <span class="stat-number" data-target="11">0</span>
-            <span class="stat-label">Topics</span>
-          </div>
-          <div class="stat-box">
-            <span class="stat-number" data-target="40">0</span>
-            <span class="stat-label">Examples</span>
-          </div>
-          <div class="stat-box">
-            <span class="stat-number" data-target="11">0</span>
-            <span class="stat-label">Exercises</span>
-          </div>
-        </div>
-      </div>
-      <div class="scroll-indicator">
-        <i class="fas fa-chevron-down"></i>
       </div>
     </section>
 
-    <section id="c-learning" class="section">
-      <div class="container">
-        <h2 class="section-title">
-          <span class="title-icon">🔵</span>
-          Learn C
-        </h2>
-        <p class="section-subtitle">
-          Master the fundamentals of C with clear explanations and hands-on examples
-        </p>
+    <!-- ════════════════════════════════════════
+         TOPIC NAVIGATION PILLS
+         ════════════════════════════════════════ -->
+    <section class="c-section">
+      <nav class="c-topic-nav" id="cTopicNav" aria-label="Lesson topics">
+        <a href="#topic-introduction" class="c-topic-pill active">Introduction</a>
+        <a href="#topic-setup" class="c-topic-pill">Setup &amp; Compiler</a>
+        <a href="#topic-variables" class="c-topic-pill">Variables &amp; Types</a>
+        <a href="#topic-io" class="c-topic-pill">Input &amp; Output</a>
+        <a href="#topic-operators" class="c-topic-pill">Operators</a>
+        <a href="#topic-conditionals" class="c-topic-pill">Conditionals</a>
+        <a href="#topic-loops" class="c-topic-pill">Loops</a>
+        <a href="#topic-functions" class="c-topic-pill">Functions</a>
+        <a href="#topic-arrays" class="c-topic-pill">Arrays &amp; Strings</a>
+        <a href="#topic-pointers" class="c-topic-pill">Pointers</a>
+        <a href="#topic-structs" class="c-topic-pill">Structures</a>
+      </nav>
 
-        <div class="c-progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" aria-label="Learning progress">
-          <span class="c-progress-text"><span id="progressCount">0</span> / 11 topics completed</span>
-          <div class="c-progress-track">
-            <div class="c-progress-fill" id="progressFill"></div>
-          </div>
+      <!-- Progress dots -->
+      <div class="c-progress" id="cProgress" aria-hidden="true">
+        <span class="c-progress-dot active" data-topic="0"></span>
+        <span class="c-progress-line" data-topic="0"></span>
+        <span class="c-progress-dot" data-topic="1"></span>
+        <span class="c-progress-line" data-topic="1"></span>
+        <span class="c-progress-dot" data-topic="2"></span>
+        <span class="c-progress-line" data-topic="2"></span>
+        <span class="c-progress-dot" data-topic="3"></span>
+        <span class="c-progress-line" data-topic="3"></span>
+        <span class="c-progress-dot" data-topic="4"></span>
+        <span class="c-progress-line" data-topic="4"></span>
+        <span class="c-progress-dot" data-topic="5"></span>
+        <span class="c-progress-line" data-topic="5"></span>
+        <span class="c-progress-dot" data-topic="6"></span>
+        <span class="c-progress-line" data-topic="6"></span>
+        <span class="c-progress-dot" data-topic="7"></span>
+        <span class="c-progress-line" data-topic="7"></span>
+        <span class="c-progress-dot" data-topic="8"></span>
+        <span class="c-progress-line" data-topic="8"></span>
+        <span class="c-progress-dot" data-topic="9"></span>
+        <span class="c-progress-line" data-topic="9"></span>
+        <span class="c-progress-dot" data-topic="10"></span>
+      </div>
+
+      <!-- ════════════════════════════════════════
+           LESSON 1: INTRODUCTION TO C
+           ════════════════════════════════════════ -->
+      <article class="c-lesson" id="topic-introduction" data-topic="0">
+        <div class="c-lesson-header">
+          <span class="c-lesson-number">01</span>
+          <h3>Introduction to C</h3>
         </div>
 
-        <div class="c-layout">
-          <aside class="c-sidebar" aria-label="Topic navigation">
-            <div class="c-sidebar-title">Topics</div>
-            <ul class="c-sidebar-nav" id="topicNav">
-              <li><a href="#introduction"><span class="nav-icon">📖</span> Introduction</a></li>
-              <li><a href="#setup"><span class="nav-icon">⚙️</span> Installation &amp; Setup</a></li>
-              <li><a href="#variables"><span class="nav-icon">📦</span> Variables &amp; Types</a></li>
-              <li><a href="#io"><span class="nav-icon">⌨️</span> Input &amp; Output</a></li>
-              <li><a href="#operators"><span class="nav-icon">➕</span> Operators</a></li>
-              <li><a href="#conditionals"><span class="nav-icon">🔀</span> Conditionals</a></li>
-              <li><a href="#loops"><span class="nav-icon">🔄</span> Loops</a></li>
-              <li><a href="#functions"><span class="nav-icon">⚡</span> Functions</a></li>
-              <li><a href="#arrays-strings"><span class="nav-icon">📋</span> Arrays &amp; Strings</a></li>
-              <li><a href="#pointers"><span class="nav-icon">📍</span> Pointers</a></li>
-              <li><a href="#structs"><span class="nav-icon">🏗️</span> Structures</a></li>
-              <li><a href="/pages/editors/c-editor/c-editor.html" class="ce-nav-link" style="color: #5B9CF8; font-weight: 600;"><span class="nav-icon">💻</span> C Editor</a></li>
-            </ul>
-          </aside>
+        <p>
+          C is a powerful, general-purpose programming language developed by <strong>Dennis Ritchie</strong> at Bell Labs in 1972. It is one of the most influential languages ever created — the foundation for UNIX, Linux, Windows, and countless other systems. C combines the efficiency of assembly language with the readability of high-level languages.
+        </p>
 
-          <main class="c-main-content" id="mainContent">
+        <div class="c-concept">
+          <h4>Why Learn C?</h4>
+          <ul>
+            <li><strong>Foundation of Modern Computing</strong> — C influenced C++, Java, Python, and many other languages</li>
+            <li><strong>Systems Programming</strong> — Used for operating systems, embedded systems, and compilers</li>
+            <li><strong>High Performance</strong> — Minimal runtime overhead, direct memory access</li>
+            <li><strong>Portable</strong> — C compilers exist for virtually every platform</li>
+            <li><strong>Essential for DSA</strong> — The language of choice for understanding data structures at a low level</li>
+          </ul>
+        </div>
 
-            <article class="c-lesson" id="introduction" data-topic="1">
-              <div class="c-lesson-header">
-                <span class="c-lesson-number">01</span>
-                <h3>Introduction to C</h3>
-              </div>
-              <p>
-                C is a powerful, general-purpose programming language developed by <strong>Dennis Ritchie</strong> at Bell Labs in 1972.
-                It is one of the most influential languages ever created — the foundation for UNIX, Linux, Windows, and countless other systems.
-                C combines the efficiency of assembly language with the readability of high-level languages.
-              </p>
-              <div class="c-concept-card">
-                <h4>Why Learn C?</h4>
-                <ul>
-                  <li><strong>Foundation of Modern Computing</strong> – C influenced C++, Java, Python, and many other languages</li>
-                  <li><strong>Systems Programming</strong> – Used for operating systems, embedded systems, and compilers</li>
-                  <li><strong>High Performance</strong> – Minimal runtime overhead, direct memory access</li>
-                  <li><strong>Portable</strong> – C compilers exist for virtually every platform</li>
-                  <li><strong>Essential for DSA</strong> – The language of choice for understanding data structures at a low level</li>
-                </ul>
-              </div>
-              <p>Your first C program is the classic "Hello, World!":</p>
-              <div class="c-code-block">
-                <div class="c-code-header">
-                  <span class="c-code-lang">C</span>
-                  <button type="button" class="c-code-copy" aria-label="Copy code" data-code="#include &lt;stdio.h&gt;
+        <p>Your first C program is the classic <code>"Hello, World!"</code>:</p>
+
+        <div class="c-code-block">
+          <div class="c-code-header">
+            <span class="c-code-lang">C</span>
+            <button type="button" class="c-code-copy" aria-label="Copy code" data-code='#include <stdio.h>
 
 int main() {
-    printf(&quot;Hello, World!\n&quot;);
+    printf("Hello, World!\n");
     return 0;
-}">Copy</button>
-                </div>
-                <pre><code><span class="tok-pch">#include</span> <span class="tok-str">&lt;stdio.h&gt;</span>
+}'><i class="fas fa-copy"></i> Copy</button>
+          </div>
+          <pre><code><span class="kw">#include</span> <span class="str">&lt;stdio.h&gt;</span>
 
-<span class="tok-kw">int</span> <span class="tok-fn">main</span>() {
-    <span class="tok-fn">printf</span>(<span class="tok-str">"Hello, World!\n"</span>);
-    <span class="tok-kw">return</span> <span class="tok-num">0</span>;
+<span class="kw">int</span> <span class="fn">main</span>() {
+    <span class="fn">printf</span>(<span class="str">"Hello, World!\n"</span>);
+    <span class="kw">return</span> <span class="num">0</span>;
 }</code></pre>
-              </div>
-              <div class="c-output">
-                <div class="c-output-label">Output</div>
-                <pre>Hello, World!</pre>
-              </div>
-              <div class="c-callout">
-                <span class="c-callout-icon">💡</span>
-                <p>Every C program needs a <code>main()</code> function — it's the entry point. <code>#include &lt;stdio.h&gt;</code> gives access to input/output functions like <code>printf</code>. <code>return 0;</code> signals successful execution.</p>
-              </div>
-            </article>
+        </div>
 
-            <article class="c-lesson" id="setup" data-topic="2">
-              <div class="c-lesson-header">
-                <span class="c-lesson-number">02</span>
-                <h3>Installation &amp; Setup</h3>
-              </div>
-              <p>
-                To write and run C code, you need a <strong>C compiler</strong> and a text editor or IDE.
-                The most common compilers are <strong>GCC</strong> (GNU Compiler Collection) and <strong>Clang</strong>.
-              </p>
-              <div class="c-concept-card">
-                <h4><i class="fas fa-download"></i> Installing a Compiler</h4>
-                <ul>
-                  <li><strong>Linux</strong> – Install via package manager: <code>sudo apt install gcc</code></li>
-                  <li><strong>macOS</strong> – Install Xcode Command Line Tools: <code>xcode-select --install</code></li>
-                  <li><strong>Windows</strong> – Download MinGW-w64 or use Visual Studio with the "Desktop development with C++" workload</li>
-                </ul>
-              </div>
-              <div class="c-code-block">
-                <div class="c-code-header">
-                  <span class="c-code-lang">Bash</span>
-                  <button type="button" class="c-code-copy" aria-label="Copy code" data-code="# Verify your compiler installation
+        <div class="c-output">
+          <div class="c-output-label">Output</div>
+          <pre>Hello, World!</pre>
+        </div>
+
+        <div class="c-callout">
+          <p><strong>Every C program needs a <code>main()</code> function</strong> — it's the entry point. <code>#include &lt;stdio.h&gt;</code> gives access to input/output functions like <code>printf</code>. <code>return 0;</code> signals successful execution.</p>
+        </div>
+
+        <div class="c-concept">
+          <h4>C Standards Through the Years</h4>
+          <p>C has evolved through several standardized versions. <strong>C89/ANSI C</strong> was the first standardized version. <strong>C99</strong> added inline functions, variable-length arrays, and <code>//</code> comments. <strong>C11</strong> introduced atomic operations and threads. <strong>C17</strong> was a bug-fix release, and <strong>C23</strong> (the latest) added <code>bool</code>, <code>static_assert</code>, and <code>nullptr</code>. Most modern compilers support C17 and C23 features.</p>
+        </div>
+
+        <div class="c-concept">
+          <h4>Key Takeaways</h4>
+          <ul>
+            <li>C is a <strong>compiled, statically typed</strong> language — ideal for systems programming</li>
+            <li>Every program starts at <code>main()</code> and returns an exit status</li>
+            <li><code>#include</code> directives bring in functionality from header files</li>
+            <li>C gives you <strong>direct memory access</strong> — powerful but requires discipline</li>
+            <li>The language continues to evolve with new standards every few years</li>
+          </ul>
+        </div>
+      </article>
+
+      <!-- ════════════════════════════════════════
+           LESSON 2: INSTALLATION & SETUP
+           ════════════════════════════════════════ -->
+      <article class="c-lesson" id="topic-setup" data-topic="1">
+        <div class="c-lesson-header">
+          <span class="c-lesson-number">02</span>
+          <h3>Installation &amp; Setup</h3>
+        </div>
+
+        <p>
+          To write and run C code, you need a <strong>C compiler</strong> and a text editor or IDE. The most common compilers are <strong>GCC</strong> (GNU Compiler Collection) and <strong>Clang</strong>.
+        </p>
+
+        <div class="c-concept">
+          <h4>Installing a Compiler</h4>
+          <ul>
+            <li><strong>Linux</strong> — Install via package manager: <code>sudo apt install gcc</code></li>
+            <li><strong>macOS</strong> — Install Xcode Command Line Tools: <code>xcode-select --install</code></li>
+            <li><strong>Windows</strong> — Download MinGW-w64 or use Visual Studio with the "Desktop development with C++" workload</li>
+          </ul>
+        </div>
+
+        <div class="c-code-block">
+          <div class="c-code-header">
+            <span class="c-code-lang">Bash</span>
+            <button type="button" class="c-code-copy" aria-label="Copy code" data-code='# Verify your compiler installation
 gcc --version
-clang --version">Copy</button>
-                </div>
-                <pre><code><span class="tok-cmt"># Verify your compiler installation</span>
+clang --version'><i class="fas fa-copy"></i> Copy</button>
+          </div>
+          <pre><code><span class="cmt"># Verify your compiler installation</span>
 gcc --version
 clang --version</code></pre>
-              </div>
-              <div class="c-concept-card">
-                <h4><i class="fas fa-laptop-code"></i> Choosing an IDE</h4>
-                <ul>
-                  <li><strong>VS Code</strong> – Lightweight with C/C++ extension pack (recommended)</li>
-                  <li><strong>Code::Blocks</strong> – Free, beginner-friendly IDE</li>
-                  <li><strong>CLion</strong> – Full-featured C/C++ IDE by JetBrains</li>
-                </ul>
-              </div>
-              <div class="c-code-block">
-                <div class="c-code-header">
-                  <span class="c-code-lang">Bash</span>
-                  <button type="button" class="c-code-copy" aria-label="Copy code" data-code="# Compile and run a C program
-gcc hello.c -o hello    # compiles to executable
-./hello                 # runs the executable">Copy</button>
-                </div>
-                <pre><code><span class="tok-cmt"># Compile and run a C program</span>
-gcc hello.c -o hello    <span class="tok-cmt"># compiles to executable</span>
-./hello                 <span class="tok-cmt"># runs the executable</span></code></pre>
-              </div>
-              <div class="c-callout">
-                <span class="c-callout-icon">✅</span>
-                <p>C is a <strong>compiled</strong> language: you write <code>.c</code> source files, compile them to a machine-executable binary with <code>gcc</code>, and run the binary directly on your operating system.</p>
-              </div>
-            </article>
+        </div>
 
-            <article class="c-lesson" id="variables" data-topic="3">
-              <div class="c-lesson-header">
-                <span class="c-lesson-number">03</span>
-                <h3>Variables &amp; Data Types</h3>
-              </div>
-              <p>
-                In C, every variable must have a declared <strong>type</strong>. C is statically typed — once you declare a variable's type, it cannot hold a different type of value.
-              </p>
-              <div class="c-code-block">
-                <div class="c-code-header">
-                  <span class="c-code-lang">C</span>
-                  <button type="button" class="c-code-copy" aria-label="Copy code" data-code="#include &lt;stdio.h&gt;
+        <div class="c-concept">
+          <h4>Choosing an IDE</h4>
+          <ul>
+            <li><strong>VS Code</strong> — Lightweight with C/C++ extension pack (recommended)</li>
+            <li><strong>Code::Blocks</strong> — Free, beginner-friendly IDE</li>
+            <li><strong>CLion</strong> — Full-featured C/C++ IDE by JetBrains</li>
+          </ul>
+        </div>
+
+        <div class="c-code-block">
+          <div class="c-code-header">
+            <span class="c-code-lang">Bash</span>
+            <button type="button" class="c-code-copy" aria-label="Copy code" data-code='# Compile and run a C program
+gcc hello.c -o hello    # compiles to executable
+./hello                 # runs the executable'><i class="fas fa-copy"></i> Copy</button>
+          </div>
+          <pre><code><span class="cmt"># Compile and run a C program</span>
+gcc hello.c -o hello    <span class="cmt"># compiles to executable</span>
+./hello                 <span class="cmt"># runs the executable</span></code></pre>
+        </div>
+
+        <div class="c-callout">
+          <p>C is a <strong>compiled</strong> language: you write <code>.c</code> source files, compile them to a machine-executable binary with <code>gcc</code>, and run the binary directly on your operating system.</p>
+        </div>
+
+        <div class="c-concept">
+          <h4>The Compilation Pipeline</h4>
+          <p>C compilation happens in four stages:</p>
+          <ul>
+            <li><strong>Preprocessing</strong> (<code>gcc -E</code>) — handles <code>#include</code>, <code>#define</code>, and other directives beginning with <code>#</code></li>
+            <li><strong>Compilation</strong> (<code>gcc -S</code>) — translates C source to assembly language specific to your CPU</li>
+            <li><strong>Assembly</strong> (<code>gcc -c</code>) — converts assembly into machine code object files (<code>.o</code>)</li>
+            <li><strong>Linking</strong> — combines object files and libraries into a single executable</li>
+          </ul>
+          <p>You can stop at any stage with GCC flags to inspect the intermediate output — a great way to understand how your code becomes machine instructions.</p>
+        </div>
+
+        <div class="c-concept">
+          <h4>Useful GCC Flags</h4>
+          <ul>
+            <li><code>-Wall -Wextra</code> — enable all compiler warnings (always use these!)</li>
+            <li><code>-O2</code> — optimize for performance</li>
+            <li><code>-g</code> — include debugging symbols for GDB</li>
+            <li><code>-std=c17</code> — use a specific C standard version</li>
+          </ul>
+        </div>
+      </article>
+
+      <!-- ════════════════════════════════════════
+           LESSON 3: VARIABLES & DATA TYPES
+           ════════════════════════════════════════ -->
+      <div class="c-divider">
+        <span class="c-divider-inner">Core Data</span>
+      </div>
+
+      <article class="c-lesson" id="topic-variables" data-topic="2">
+        <div class="c-lesson-header">
+          <span class="c-lesson-number">03</span>
+          <h3>Variables &amp; Data Types</h3>
+        </div>
+
+        <p>
+          In C, every variable must have a declared <strong>type</strong>. C is statically typed — once you declare a variable's type, it cannot hold a different type of value.
+        </p>
+
+        <div class="c-code-block">
+          <div class="c-code-header">
+            <span class="c-code-lang">C</span>
+            <button type="button" class="c-code-copy" aria-label="Copy code" data-code='#include <stdio.h>
 
 int main() {
     int age = 25;               // Whole number
     float height = 5.7f;        // Decimal number (single precision)
     double pi = 3.14159;        // Decimal number (double precision)
     char grade = 'A';           // Single character
-    char name[] = &quot;Alice&quot;;     // String (character array)
+    char name[] = "Alice";      // String (character array)
 
-    printf(&quot;%d\n&quot;, age);
-    printf(&quot;%.1f\n&quot;, height);
-    printf(&quot;%c\n&quot;, grade);
-    printf(&quot;%s\n&quot;, name);
+    printf("%d\n", age);
+    printf("%.1f\n", height);
+    printf("%c\n", grade);
+    printf("%s\n", name);
     return 0;
-}">Copy</button>
-                </div>
-                <pre><code><span class="tok-pch">#include</span> <span class="tok-str">&lt;stdio.h&gt;</span>
+}'><i class="fas fa-copy"></i> Copy</button>
+          </div>
+          <pre><code><span class="kw">int</span> age = <span class="num">25</span>;               <span class="cmt">// Whole number</span>
+<span class="kw">float</span> height = <span class="num">5.7f</span>;        <span class="cmt">// Decimal (single precision)</span>
+<span class="kw">double</span> pi = <span class="num">3.14159</span>;        <span class="cmt">// Decimal (double precision)</span>
+<span class="kw">char</span> grade = <span class="str">'A'</span>;           <span class="cmt">// Single character</span>
+<span class="kw">char</span> name[] = <span class="str">"Alice"</span>;     <span class="cmt">// String (character array)</span>
 
-<span class="tok-kw">int</span> <span class="tok-fn">main</span>() {
-    <span class="tok-kw">int</span> age = <span class="tok-num">25</span>;               <span class="tok-cmt">// Whole number</span>
-    <span class="tok-kw">float</span> height = <span class="tok-num">5.7f</span>;        <span class="tok-cmt">// Decimal number (single precision)</span>
-    <span class="tok-kw">double</span> pi = <span class="tok-num">3.14159</span>;        <span class="tok-cmt">// Decimal number (double precision)</span>
-    <span class="tok-kw">char</span> grade = <span class="tok-str">'A'</span>;           <span class="tok-cmt">// Single character</span>
-    <span class="tok-kw">char</span> name[] = <span class="tok-str">"Alice"</span>;     <span class="tok-cmt">// String (character array)</span>
+<span class="fn">printf</span>(<span class="str">"%d\n"</span>, age);
+<span class="fn">printf</span>(<span class="str">"%.1f\n"</span>, height);
+<span class="fn">printf</span>(<span class="str">"%c\n"</span>, grade);
+<span class="fn">printf</span>(<span class="str">"%s\n"</span>, name);</code></pre>
+        </div>
 
-    <span class="tok-fn">printf</span>(<span class="tok-str">"%d\n"</span>, age);
-    <span class="tok-fn">printf</span>(<span class="tok-str">"%.1f\n"</span>, height);
-    <span class="tok-fn">printf</span>(<span class="tok-str">"%c\n"</span>, grade);
-    <span class="tok-fn">printf</span>(<span class="tok-str">"%s\n"</span>, name);
-    <span class="tok-kw">return</span> <span class="tok-num">0</span>;
-}</code></pre>
-              </div>
-              <div class="c-output">
-                <div class="c-output-label">Output</div>
-                <pre>25
+        <div class="c-output">
+          <div class="c-output-label">Output</div>
+          <pre>25
 5.7
 A
 Alice</pre>
-              </div>
-              <div class="c-table-wrap">
-                <table class="c-table" aria-label="C primitive data types">
-                  <thead>
-                    <tr>
-                      <th scope="col">Type</th>
-                      <th scope="col">Size</th>
-                      <th scope="col">Format Specifier</th>
-                      <th scope="col">Description</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr><td><code>int</code></td><td>4 bytes</td><td><code>%d</code></td><td>Whole number</td></tr>
-                    <tr><td><code>float</code></td><td>4 bytes</td><td><code>%f</code></td><td>Single precision decimal</td></tr>
-                    <tr><td><code>double</code></td><td>8 bytes</td><td><code>%lf</code></td><td>Double precision decimal</td></tr>
-                    <tr><td><code>char</code></td><td>1 byte</td><td><code>%c</code></td><td>Single ASCII character</td></tr>
-                    <tr><td><code>void</code></td><td>—</td><td>—</td><td>No type (for functions)</td></tr>
-                  </tbody>
-                </table>
-              </div>
-              <div class="c-callout">
-                <span class="c-callout-icon">💡</span>
-                <p>C does not have a built-in <code>string</code> type. Strings are represented as <strong>character arrays</strong> (<code>char name[]</code>) terminated by a null character <code>\0</code>. C also supports <code>unsigned</code> variants (<code>unsigned int</code>) and <code>short</code>/<code>long</code> modifiers.</p>
-              </div>
+        </div>
 
-              <div class="c-exercise" id="exercise-variables">
-                <div class="c-exercise-title">
-                  <i class="fas fa-dumbbell"></i> Practice: Variables &amp; Data Types
-                </div>
-                <p>Create variables of different types and print them:</p>
-                <ol>
-                  <li>Create an <code>int</code> variable <code>score</code> with value <code>95</code></li>
-                  <li>Create a <code>float</code> variable <code>gpa</code> with value <code>3.85</code></li>
-                  <li>Create a <code>char</code> array <code>city[]</code> with value <code>"New York"</code></li>
-                  <li>Print each variable using <code>printf</code> with the correct format specifier</li>
-                </ol>
-                <button type="button" class="c-exercise-toggle" aria-expanded="false" aria-controls="solution-variables">Show Solution</button>
-                <div class="c-exercise-solution" id="solution-variables">
-                  <div class="c-code-block">
-                    <div class="c-code-header">
-                      <span class="c-code-lang">C</span>
-                      <button type="button" class="c-code-copy" aria-label="Copy code" data-code="#include &lt;stdio.h&gt;
+        <div class="c-table-wrap">
+          <table class="c-table" aria-label="C primitive data types">
+            <thead>
+              <tr>
+                <th scope="col">Type</th>
+                <th scope="col">Size</th>
+                <th scope="col">Specifier</th>
+                <th scope="col">Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td><code>int</code></td><td>4 bytes</td><td><code>%d</code></td><td>Whole number</td></tr>
+              <tr><td><code>float</code></td><td>4 bytes</td><td><code>%f</code></td><td>Single precision decimal</td></tr>
+              <tr><td><code>double</code></td><td>8 bytes</td><td><code>%lf</code></td><td>Double precision decimal</td></tr>
+              <tr><td><code>char</code></td><td>1 byte</td><td><code>%c</code></td><td>Single ASCII character</td></tr>
+              <tr><td><code>void</code></td><td>—</td><td>—</td><td>No type (for functions)</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="c-callout">
+          <p>C does not have a built-in <code>string</code> type. Strings are represented as <strong>character arrays</strong> (<code>char name[]</code>) terminated by a null character <code>\0</code>. C also supports <code>unsigned</code> variants and <code>short</code>/<code>long</code> modifiers.</p>
+        </div>
+
+        <div class="c-concept">
+          <h4>Type Modifiers</h4>
+          <p>C lets you modify basic types with keywords that change their size and signedness:</p>
+          <ul>
+            <li><code>short int</code> — typically 2 bytes, uses <code>%hd</code> format specifier</li>
+            <li><code>long int</code> — typically 8 bytes on 64-bit systems, uses <code>%ld</code></li>
+            <li><code>long long int</code> — at least 8 bytes, uses <code>%lld</code></li>
+            <li><code>unsigned int</code> — non-negative only (0 to 4,294,967,295 for 32-bit)</li>
+            <li><code>unsigned char</code> — byte values 0&ndash;255 (useful for raw data)</li>
+          </ul>
+          <p>Use <code>sizeof(type)</code> to check the exact size on your system — it varies by platform!</p>
+        </div>
+
+        <div class="c-concept">
+          <h4>Key Takeaways</h4>
+          <ul>
+            <li>C is <strong>statically typed</strong> — every variable's type is fixed at compile time</li>
+            <li>Use format specifiers correctly in <code>printf</code> — mismatches cause undefined behavior</li>
+            <li>Always initialize variables before using them to avoid garbage values</li>
+            <li>Type sizes can vary between platforms — use <code>sizeof</code> for portable code</li>
+          </ul>
+        </div>
+
+        <!-- Exercise -->
+        <div class="c-exercise" id="exercise-variables">
+          <div class="c-exercise-title">
+            Practice: Variables &amp; Data Types
+          </div>
+          <p>Create variables of different types and print them:</p>
+          <ol>
+            <li>Create an <code>int</code> variable <code>score</code> with value <code>95</code></li>
+            <li>Create a <code>float</code> variable <code>gpa</code> with value <code>3.85</code></li>
+            <li>Create a <code>char</code> array <code>city[]</code> with value <code>"New York"</code></li>
+            <li>Print each variable using <code>printf</code> with the correct format specifier</li>
+          </ol>
+          <button type="button" class="c-exercise-toggle" aria-expanded="false" aria-controls="solution-variables">Show Solution</button>
+          <div class="c-exercise-solution" id="solution-variables">
+            <div class="c-code-block">
+              <div class="c-code-header">
+                <span class="c-code-lang">C</span>
+                <button type="button" class="c-code-copy" aria-label="Copy code" data-code='#include <stdio.h>
 
 int main() {
     int score = 95;
     float gpa = 3.85f;
-    char city[] = &quot;New York&quot;;
+    char city[] = "New York";
 
-    printf(&quot;Score: %d\n&quot;, score);
-    printf(&quot;GPA: %.2f\n&quot;, gpa);
-    printf(&quot;City: %s\n&quot;, city);
+    printf("Score: %d\n", score);
+    printf("GPA: %.2f\n", gpa);
+    printf("City: %s\n", city);
     return 0;
-}">Copy</button>
-                    </div>
-                    <pre><code><span class="tok-pch">#include</span> <span class="tok-str">&lt;stdio.h&gt;</span>
-
-<span class="tok-kw">int</span> <span class="tok-fn">main</span>() {
-    <span class="tok-kw">int</span> score = <span class="tok-num">95</span>;
-    <span class="tok-kw">float</span> gpa = <span class="tok-num">3.85f</span>;
-    <span class="tok-kw">char</span> city[] = <span class="tok-str">"New York"</span>;
-
-    <span class="tok-fn">printf</span>(<span class="tok-str">"Score: %d\n"</span>, score);
-    <span class="tok-fn">printf</span>(<span class="tok-str">"GPA: %.2f\n"</span>, gpa);
-    <span class="tok-fn">printf</span>(<span class="tok-str">"City: %s\n"</span>, city);
-    <span class="tok-kw">return</span> <span class="tok-num">0</span>;
-}</code></pre>
-                  </div>
-                </div>
+}'><i class="fas fa-copy"></i> Copy</button>
               </div>
-            </article>
+              <pre><code><span class="kw">int</span> score = <span class="num">95</span>;
+<span class="kw">float</span> gpa = <span class="num">3.85f</span>;
+<span class="kw">char</span> city[] = <span class="str">"New York"</span>;
 
-            <article class="c-lesson" id="io" data-topic="4">
-              <div class="c-lesson-header">
-                <span class="c-lesson-number">04</span>
-                <h3>Input &amp; Output (printf, scanf)</h3>
-              </div>
-              <p>
-                C uses <code>printf()</code> for output and <code>scanf()</code> for input. Both are defined in the <code>&lt;stdio.h&gt;</code> header and use <strong>format specifiers</strong> to handle different data types.
-              </p>
-              <div class="c-concept-card">
-                <h4>printf — Displaying Output</h4>
-                <p><code>printf("format string", variables)</code> prints formatted text. Common specifiers: <code>%d</code> (int), <code>%f</code> (float), <code>%c</code> (char), <code>%s</code> (string), <code>%lf</code> (double).</p>
-              </div>
-              <div class="c-code-block">
-                <div class="c-code-header">
-                  <span class="c-code-lang">C</span>
-                  <button type="button" class="c-code-copy" aria-label="Copy code" data-code="#include &lt;stdio.h&gt;
+<span class="fn">printf</span>(<span class="str">"Score: %d\n"</span>, score);
+<span class="fn">printf</span>(<span class="str">"GPA: %.2f\n"</span>, gpa);
+<span class="fn">printf</span>(<span class="str">"City: %s\n"</span>, city);</code></pre>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <!-- ════════════════════════════════════════
+           LESSON 4: INPUT & OUTPUT
+           ════════════════════════════════════════ -->
+      <article class="c-lesson" id="topic-io" data-topic="3">
+        <div class="c-lesson-header">
+          <span class="c-lesson-number">04</span>
+          <h3>Input &amp; Output (printf, scanf)</h3>
+        </div>
+
+        <p>
+          C uses <code>printf()</code> for output and <code>scanf()</code> for input. Both are defined in the <code>&lt;stdio.h&gt;</code> header and use <strong>format specifiers</strong> to handle different data types.
+        </p>
+
+        <div class="c-concept">
+          <h4>printf — Displaying Output</h4>
+          <p><code>printf("format string", variables)</code> prints formatted text. Common specifiers: <code>%d</code> (int), <code>%f</code> (float), <code>%c</code> (char), <code>%s</code> (string), <code>%lf</code> (double).</p>
+        </div>
+
+        <div class="c-code-block">
+          <div class="c-code-header">
+            <span class="c-code-lang">C</span>
+            <button type="button" class="c-code-copy" aria-label="Copy code" data-code='#include <stdio.h>
 
 int main() {
-    char name[] = &quot;Alice&quot;;
+    char name[] = "Alice";
     int age = 25;
 
-    printf(&quot;My name is %s and I am %d years old.\n&quot;, name, age);
-    printf(&quot;Name: %s | Age: %d\n&quot;, name, age);
+    printf("My name is %s and I am %d years old.\n", name, age);
+    printf("Name: %s | Age: %d\n", name, age);
     return 0;
-}">Copy</button>
-                </div>
-                <pre><code><span class="tok-pch">#include</span> <span class="tok-str">&lt;stdio.h&gt;</span>
+}'><i class="fas fa-copy"></i> Copy</button>
+          </div>
+          <pre><code><span class="kw">char</span> name[] = <span class="str">"Alice"</span>;
+<span class="kw">int</span> age = <span class="num">25</span>;
 
-<span class="tok-kw">int</span> <span class="tok-fn">main</span>() {
-    <span class="tok-kw">char</span> name[] = <span class="tok-str">"Alice"</span>;
-    <span class="tok-kw">int</span> age = <span class="tok-num">25</span>;
+<span class="fn">printf</span>(<span class="str">"My name is %s and I am %d years old.\n"</span>, name, age);</code></pre>
+        </div>
 
-    <span class="tok-fn">printf</span>(<span class="tok-str">"My name is %s and I am %d years old.\n"</span>, name, age);
-    <span class="tok-fn">printf</span>(<span class="tok-str">"Name: %s | Age: %d\n"</span>, name, age);
-    <span class="tok-kw">return</span> <span class="tok-num">0</span>;
-}</code></pre>
-              </div>
-              <div class="c-output">
-                <div class="c-output-label">Output</div>
-                <pre>My name is Alice and I am 25 years old.
-Name: Alice | Age: 25</pre>
-              </div>
-              <div class="c-concept-card">
-                <h4>scanf — Reading User Input</h4>
-                <p><code>scanf("format", &amp;variable)</code> reads input from the console. The <code>&amp;</code> operator gives the memory address of the variable (required for non-array types).</p>
-              </div>
-              <div class="c-code-block">
-                <div class="c-code-header">
-                  <span class="c-code-lang">C</span>
-                  <button type="button" class="c-code-copy" aria-label="Copy code" data-code="#include &lt;stdio.h&gt;
+        <div class="c-output">
+          <div class="c-output-label">Output</div>
+          <pre>My name is Alice and I am 25 years old.</pre>
+        </div>
+
+        <div class="c-concept">
+          <h4>scanf — Reading User Input</h4>
+          <p><code>scanf("format", &amp;variable)</code> reads input from the console. The <code>&amp;</code> operator gives the memory address of the variable (required for non-array types).</p>
+        </div>
+
+        <div class="c-code-block">
+          <div class="c-code-header">
+            <span class="c-code-lang">C</span>
+            <button type="button" class="c-code-copy" aria-label="Copy code" data-code='#include <stdio.h>
 
 int main() {
     char name[50];
     int age;
 
-    printf(&quot;What is your name? &quot;);
-    scanf(&quot;%s&quot;, name);
+    printf("What is your name? ");
+    scanf("%s", name);
 
-    printf(&quot;How old are you? &quot;);
-    scanf(&quot;%d&quot;, &amp;age);
+    printf("How old are you? ");
+    scanf("%d", &age);
 
-    printf(&quot;Hello, %s! In 10 years you will be %d.\n&quot;, name, age + 10);
+    printf("Hello, %s! In 10 years you will be %d.\n", name, age + 10);
     return 0;
-}">Copy</button>
-                </div>
-                <pre><code><span class="tok-pch">#include</span> <span class="tok-str">&lt;stdio.h&gt;</span>
+}'><i class="fas fa-copy"></i> Copy</button>
+          </div>
+          <pre><code><span class="kw">char</span> name[<span class="num">50</span>];
+<span class="kw">int</span> age;
 
-<span class="tok-kw">int</span> <span class="tok-fn">main</span>() {
-    <span class="tok-kw">char</span> name[<span class="tok-num">50</span>];
-    <span class="tok-kw">int</span> age;
+<span class="fn">printf</span>(<span class="str">"What is your name? "</span>);
+<span class="fn">scanf</span>(<span class="str">"%s"</span>, name);
 
-    <span class="tok-fn">printf</span>(<span class="tok-str">"What is your name? "</span>);
-    <span class="tok-fn">scanf</span>(<span class="tok-str">"%s"</span>, name);
+<span class="fn">printf</span>(<span class="str">"How old are you? "</span>);
+<span class="fn">scanf</span>(<span class="str">"%d"</span>, &age);
 
-    <span class="tok-fn">printf</span>(<span class="tok-str">"How old are you? "</span>);
-    <span class="tok-fn">scanf</span>(<span class="tok-str">"%d"</span>, &amp;age);
+<span class="fn">printf</span>(<span class="str">"Hello, %s! In 10 years you will be %d.\n"</span>, name, age + <span class="num">10</span>);</code></pre>
+        </div>
 
-    <span class="tok-fn">printf</span>(<span class="tok-str">"Hello, %s! In 10 years you will be %d.\n"</span>, name, age + <span class="tok-num">10</span>);
-    <span class="tok-kw">return</span> <span class="tok-num">0</span>;
-}</code></pre>
-              </div>
-              <div class="c-callout">
-                <span class="c-callout-icon">⚠️</span>
-                <p><code>scanf("%s", name)</code> reads only until the first whitespace — it won't read a full name like "John Doe". Use <code>fgets(name, sizeof(name), stdin)</code> to read an entire line including spaces. Always use <code>&amp;</code> before non-array variables in <code>scanf</code>.</p>
-              </div>
+        <div class="c-callout">
+          <p><code>scanf("%s", name)</code> reads only until the first whitespace — it won't read a full name like "John Doe". Use <code>fgets(name, sizeof(name), stdin)</code> to read an entire line including spaces. Always use <code>&amp;</code> before non-array variables in <code>scanf</code>.</p>
+        </div>
 
-              <div class="c-exercise" id="exercise-io">
-                <div class="c-exercise-title">
-                  <i class="fas fa-dumbbell"></i> Practice: Input &amp; Output
-                </div>
-                <p>Write a program that asks the user for their name and favorite color, then prints a greeting.</p>
-                <ol>
-                  <li>Include <code>&lt;stdio.h&gt;</code></li>
-                  <li>Ask for name and favorite color using <code>scanf</code></li>
-                  <li>Print: <code>"Hello {name}, your favorite color is {color}!"</code></li>
-                </ol>
-                <button type="button" class="c-exercise-toggle" aria-expanded="false" aria-controls="solution-io">Show Solution</button>
-                <div class="c-exercise-solution" id="solution-io">
-                  <div class="c-code-block">
-                    <div class="c-code-header">
-                      <span class="c-code-lang">C</span>
-                      <button type="button" class="c-code-copy" aria-label="Copy code" data-code="#include &lt;stdio.h&gt;
+        <div class="c-concept">
+          <h4>Format Specifier Tricks</h4>
+          <p><code>printf</code> and <code>scanf</code> support powerful formatting options beyond basic specifiers:</p>
+          <ul>
+            <li><code>%5d</code> — print an integer in a field of width 5 (right-aligned)</li>
+            <li><code>%-5d</code> — left-aligned version of the above</li>
+            <li><code>%.2f</code> — print a float with exactly 2 decimal places</li>
+            <li><code>%08d</code> — zero-pad to 8 digits (e.g., <code>00000042</code>)</li>
+            <li><code>%p</code> — print a pointer address in hexadecimal</li>
+            <li><code>%%</code> — print a literal percent sign</li>
+          </ul>
+        </div>
+
+        <div class="c-concept">
+          <h4>Character I/O</h4>
+          <p>For reading and writing individual characters, use <code>getchar()</code> and <code>putchar()</code>. These are simpler than <code>scanf</code>/<code>printf</code> for single-character input and consume fewer resources. Example: <code>int ch = getchar(); putchar(ch);</code>. Note that <code>getchar</code> returns an <code>int</code> to accommodate <code>EOF</code> (end-of-file) as a sentinel value.</p>
+        </div>
+
+        <!-- Exercise -->
+        <div class="c-exercise" id="exercise-io">
+          <div class="c-exercise-title">
+            Practice: Input &amp; Output
+          </div>
+          <p>Write a program that asks the user for their name and favorite color, then prints a greeting.</p>
+          <ol>
+            <li>Include <code>&lt;stdio.h&gt;</code></li>
+            <li>Ask for name and favorite color using <code>scanf</code></li>
+            <li>Print: <code>"Hello {name}, your favorite color is {color}!"</code></li>
+          </ol>
+          <button type="button" class="c-exercise-toggle" aria-expanded="false" aria-controls="solution-io">Show Solution</button>
+          <div class="c-exercise-solution" id="solution-io">
+            <div class="c-code-block">
+              <div class="c-code-header">
+                <span class="c-code-lang">C</span>
+                <button type="button" class="c-code-copy" aria-label="Copy code" data-code='#include <stdio.h>
 
 int main() {
     char name[50];
     char color[50];
 
-    printf(&quot;Enter your name: &quot;);
-    scanf(&quot;%s&quot;, name);
+    printf("Enter your name: ");
+    scanf("%s", name);
 
-    printf(&quot;Enter your favorite color: &quot;);
-    scanf(&quot;%s&quot;, color);
+    printf("Enter your favorite color: ");
+    scanf("%s", color);
 
-    printf(&quot;Hello %s, your favorite color is %s!\n&quot;, name, color);
+    printf("Hello %s, your favorite color is %s!\n", name, color);
     return 0;
-}">Copy</button>
-                    </div>
-                    <pre><code><span class="tok-pch">#include</span> <span class="tok-str">&lt;stdio.h&gt;</span>
-
-<span class="tok-kw">int</span> <span class="tok-fn">main</span>() {
-    <span class="tok-kw">char</span> name[<span class="tok-num">50</span>];
-    <span class="tok-kw">char</span> color[<span class="tok-num">50</span>];
-
-    <span class="tok-fn">printf</span>(<span class="tok-str">"Enter your name: "</span>);
-    <span class="tok-fn">scanf</span>(<span class="tok-str">"%s"</span>, name);
-
-    <span class="tok-fn">printf</span>(<span class="tok-str">"Enter your favorite color: "</span>);
-    <span class="tok-fn">scanf</span>(<span class="tok-str">"%s"</span>, color);
-
-    <span class="tok-fn">printf</span>(<span class="tok-str">"Hello %s, your favorite color is %s!\n"</span>, name, color);
-    <span class="tok-kw">return</span> <span class="tok-num">0</span>;
-}</code></pre>
-                  </div>
-                </div>
+}'><i class="fas fa-copy"></i> Copy</button>
               </div>
-            </article>
+              <pre><code><span class="fn">printf</span>(<span class="str">"Hello %s, your favorite color is %s!\n"</span>, name, color);</code></pre>
+            </div>
+          </div>
+        </div>
+      </article>
 
-            <article class="c-lesson" id="operators" data-topic="5">
-              <div class="c-lesson-header">
-                <span class="c-lesson-number">05</span>
-                <h3>Operators</h3>
-              </div>
-              <p>
-                Operators perform operations on variables and values. C supports arithmetic, assignment, comparison, logical, and bitwise operators.
-              </p>
-              <div class="c-table-wrap">
-                <table class="c-table" aria-label="C operators">
-                  <thead>
-                    <tr>
-                      <th scope="col">Category</th>
-                      <th scope="col">Operators</th>
-                      <th scope="col">Example</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr><td>Arithmetic</td><td><code>+ - * / %</code></td><td><code>10 + 5 &rarr; 15</code></td></tr>
-                    <tr><td>Assignment</td><td><code>= += -= *= /= %=</code></td><td><code>x += 5</code></td></tr>
-                    <tr><td>Comparison</td><td><code>== != &lt; &gt; &lt;= &gt;=</code></td><td><code>10 &gt; 5 &rarr; 1 (true)</code></td></tr>
-                    <tr><td>Logical</td><td><code>&& || !</code></td><td><code>1 && 0 &rarr; 0</code></td></tr>
-                    <tr><td>Increment/Decrement</td><td><code>++ --</code></td><td><code>i++</code></td></tr>
-                    <tr><td>Bitwise</td><td><code>&amp; | ^ ~ &lt;&lt; &gt;&gt;</code></td><td><code>5 &amp; 3 &rarr; 1</code></td></tr>
-                  </tbody>
-                </table>
-              </div>
-              <div class="c-code-block">
-                <div class="c-code-header">
-                  <span class="c-code-lang">C</span>
-                  <button type="button" class="c-code-copy" aria-label="Copy code" data-code="#include &lt;stdio.h&gt;
+      <!-- ════════════════════════════════════════
+           LESSON 5: OPERATORS
+           ════════════════════════════════════════ -->
+      <article class="c-lesson" id="topic-operators" data-topic="4">
+        <div class="c-lesson-header">
+          <span class="c-lesson-number">05</span>
+          <h3>Operators</h3>
+        </div>
+
+        <p>
+          Operators perform operations on variables and values. C supports arithmetic, assignment, comparison, logical, and bitwise operators.
+        </p>
+
+        <div class="c-table-wrap">
+          <table class="c-table" aria-label="C operators">
+            <thead>
+              <tr>
+                <th scope="col">Category</th>
+                <th scope="col">Operators</th>
+                <th scope="col">Example</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td>Arithmetic</td><td><code>+ - * / %</code></td><td><code>10 + 5 &rarr; 15</code></td></tr>
+              <tr><td>Assignment</td><td><code>= += -= *= /= %=</code></td><td><code>x += 5</code></td></tr>
+              <tr><td>Comparison</td><td><code>== != &lt; &gt; &lt;= &gt;=</code></td><td><code>10 &gt; 5 &rarr; 1</code></td></tr>
+              <tr><td>Logical</td><td><code>&& || !</code></td><td><code>1 && 0 &rarr; 0</code></td></tr>
+              <tr><td>Increment</td><td><code>++ --</code></td><td><code>i++</code></td></tr>
+              <tr><td>Bitwise</td><td><code>&amp; | ^ ~ &lt;&lt; &gt;&gt;</code></td><td><code>5 &amp; 3 &rarr; 1</code></td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="c-code-block">
+          <div class="c-code-header">
+            <span class="c-code-lang">C</span>
+            <button type="button" class="c-code-copy" aria-label="Copy code" data-code='#include <stdio.h>
 
 int main() {
     int a = 10, b = 5;
 
-    // Arithmetic
     int sum = a + b;
     int product = a * b;
     int remainder = a % b;
 
-    // Comparison &amp; Logical
     int isGreater = a > b;
     int bothPositive = (a > 0) && (b > 0);
 
-    printf(&quot;Sum: %d\n&quot;, sum);
-    printf(&quot;Product: %d\n&quot;, product);
-    printf(&quot;Remainder: %d\n&quot;, remainder);
-    printf(&quot;Is a &gt; b? %d\n&quot;, isGreater);
-    printf(&quot;Both positive? %d\n&quot;, bothPositive);
+    printf("Sum: %d\n", sum);
+    printf("Product: %d\n", product);
+    printf("Is a > b? %d\n", isGreater);
+    printf("Both positive? %d\n", bothPositive);
     return 0;
-}">Copy</button>
-                </div>
-                <pre><code><span class="tok-pch">#include</span> <span class="tok-str">&lt;stdio.h&gt;</span>
+}'><i class="fas fa-copy"></i> Copy</button>
+          </div>
+          <pre><code><span class="kw">int</span> a = <span class="num">10</span>, b = <span class="num">5</span>;
 
-<span class="tok-kw">int</span> <span class="tok-fn">main</span>() {
-    <span class="tok-kw">int</span> a = <span class="tok-num">10</span>, b = <span class="tok-num">5</span>;
+<span class="kw">int</span> sum = a + b;
+<span class="kw">int</span> product = a * b;
+<span class="kw">int</span> isGreater = a > b;
+<span class="kw">int</span> bothPositive = (a > <span class="num">0</span>) && (b > <span class="num">0</span>);
 
-    <span class="tok-cmt">// Arithmetic</span>
-    <span class="tok-kw">int</span> sum = a + b;
-    <span class="tok-kw">int</span> product = a * b;
-    <span class="tok-kw">int</span> remainder = a % b;
+<span class="fn">printf</span>(<span class="str">"Sum: %d\n"</span>, sum);
+<span class="fn">printf</span>(<span class="str">"Is a > b? %d\n"</span>, isGreater);</code></pre>
+        </div>
 
-    <span class="tok-cmt">// Comparison &amp; Logical</span>
-    <span class="tok-kw">int</span> isGreater = a > b;
-    <span class="tok-kw">int</span> bothPositive = (a > <span class="tok-num">0</span>) && (b > <span class="tok-num">0</span>);
-
-    <span class="tok-fn">printf</span>(<span class="tok-str">"Sum: %d\n"</span>, sum);
-    <span class="tok-fn">printf</span>(<span class="tok-str">"Product: %d\n"</span>, product);
-    <span class="tok-fn">printf</span>(<span class="tok-str">"Remainder: %d\n"</span>, remainder);
-    <span class="tok-fn">printf</span>(<span class="tok-str">"Is a > b? %d\n"</span>, isGreater);
-    <span class="tok-fn">printf</span>(<span class="tok-str">"Both positive? %d\n"</span>, bothPositive);
-    <span class="tok-kw">return</span> <span class="tok-num">0</span>;
-}</code></pre>
-              </div>
-              <div class="c-output">
-                <div class="c-output-label">Output</div>
-                <pre>Sum: 15
+        <div class="c-output">
+          <div class="c-output-label">Output</div>
+          <pre>Sum: 15
 Product: 50
-Remainder: 0
 Is a > b? 1
 Both positive? 1</pre>
-              </div>
+        </div>
 
-              <div class="c-exercise" id="exercise-operators">
-                <div class="c-exercise-title">
-                  <i class="fas fa-dumbbell"></i> Practice: Operators
-                </div>
-                <p>Calculate the area and perimeter of a rectangle with width <code>8</code> and length <code>12</code>.</p>
-                <ol>
-                  <li>Create <code>int</code> variables <code>width</code> and <code>length</code></li>
-                  <li>Calculate <code>area = width * length</code></li>
-                  <li>Calculate <code>perimeter = 2 * (width + length)</code></li>
-                  <li>Print both results using <code>printf</code></li>
-                </ol>
-                <button type="button" class="c-exercise-toggle" aria-expanded="false" aria-controls="solution-operators">Show Solution</button>
-                <div class="c-exercise-solution" id="solution-operators">
-                  <div class="c-code-block">
-                    <div class="c-code-header">
-                      <span class="c-code-lang">C</span>
-                      <button type="button" class="c-code-copy" aria-label="Copy code" data-code="#include &lt;stdio.h&gt;
+        <div class="c-concept">
+          <h4>Operator Precedence</h4>
+          <p>Operators in C follow a strict precedence hierarchy. <code>()</code> has highest precedence, followed by unary operators (<code>++</code>, <code>--</code>, <code>!</code>), then arithmetic (<code>* / %</code> before <code>+ -</code>), comparison, logical, and finally assignment. When in doubt, add parentheses! For example, <code>a + b * c</code> evaluates as <code>a + (b * c)</code>, not <code>(a + b) * c</code>.</p>
+        </div>
+
+        <div class="c-concept">
+          <h4>Short-Circuit Evaluation</h4>
+          <p>The logical operators <code>&&</code> and <code>||</code> use <strong>short-circuit evaluation</strong>: the second operand is evaluated only if necessary. In <code>if (ptr != NULL && *ptr == 5)</code>, <code>*ptr</code> is never dereferenced if <code>ptr</code> is <code>NULL</code> — this is a common and safe pattern for guard checks.</p>
+        </div>
+
+        <!-- Exercise -->
+        <div class="c-exercise" id="exercise-operators">
+          <div class="c-exercise-title">
+            Practice: Operators
+          </div>
+          <p>Calculate the area and perimeter of a rectangle with width <code>8</code> and length <code>12</code>.</p>
+          <ol>
+            <li>Create <code>int</code> variables <code>width</code> and <code>length</code></li>
+            <li>Calculate <code>area = width * length</code></li>
+            <li>Calculate <code>perimeter = 2 * (width + length)</code></li>
+            <li>Print both results using <code>printf</code></li>
+          </ol>
+          <button type="button" class="c-exercise-toggle" aria-expanded="false" aria-controls="solution-operators">Show Solution</button>
+          <div class="c-exercise-solution" id="solution-operators">
+            <div class="c-code-block">
+              <div class="c-code-header">
+                <span class="c-code-lang">C</span>
+                <button type="button" class="c-code-copy" aria-label="Copy code" data-code='#include <stdio.h>
 
 int main() {
     int width = 8;
@@ -597,41 +682,42 @@ int main() {
     int area = width * length;
     int perimeter = 2 * (width + length);
 
-    printf(&quot;Area: %d\n&quot;, area);
-    printf(&quot;Perimeter: %d\n&quot;, perimeter);
+    printf("Area: %d\n", area);
+    printf("Perimeter: %d\n", perimeter);
     return 0;
-}">Copy</button>
-                    </div>
-                    <pre><code><span class="tok-pch">#include</span> <span class="tok-str">&lt;stdio.h&gt;</span>
-
-<span class="tok-kw">int</span> <span class="tok-fn">main</span>() {
-    <span class="tok-kw">int</span> width = <span class="tok-num">8</span>;
-    <span class="tok-kw">int</span> length = <span class="tok-num">12</span>;
-    <span class="tok-kw">int</span> area = width * length;
-    <span class="tok-kw">int</span> perimeter = <span class="tok-num">2</span> * (width + length);
-
-    <span class="tok-fn">printf</span>(<span class="tok-str">"Area: %d\n"</span>, area);
-    <span class="tok-fn">printf</span>(<span class="tok-str">"Perimeter: %d\n"</span>, perimeter);
-    <span class="tok-kw">return</span> <span class="tok-num">0</span>;
-}</code></pre>
-                  </div>
-                </div>
+}'><i class="fas fa-copy"></i> Copy</button>
               </div>
-            </article>
+              <pre><code><span class="kw">int</span> area = width * length;
+<span class="kw">int</span> perimeter = <span class="num">2</span> * (width + length);
 
-            <article class="c-lesson" id="conditionals" data-topic="6">
-              <div class="c-lesson-header">
-                <span class="c-lesson-number">06</span>
-                <h3>Conditional Statements</h3>
-              </div>
-              <p>
-                Conditionals let your program make decisions. C supports <code>if</code>, <code>else if</code>, <code>else</code>, and <code>switch</code> statements.
-                In C, conditions evaluate to <code>0</code> (false) or non-zero (true).
-              </p>
-              <div class="c-code-block">
-                <div class="c-code-header">
-                  <span class="c-code-lang">C</span>
-                  <button type="button" class="c-code-copy" aria-label="Copy code" data-code="#include &lt;stdio.h&gt;
+<span class="fn">printf</span>(<span class="str">"Area: %d\n"</span>, area);
+<span class="fn">printf</span>(<span class="str">"Perimeter: %d\n"</span>, perimeter);</code></pre>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <!-- ════════════════════════════════════════
+           LESSON 6: CONDITIONALS
+           ════════════════════════════════════════ -->
+      <div class="c-divider">
+        <span class="c-divider-inner">Control Flow</span>
+      </div>
+
+      <article class="c-lesson" id="topic-conditionals" data-topic="5">
+        <div class="c-lesson-header">
+          <span class="c-lesson-number">06</span>
+          <h3>Conditional Statements</h3>
+        </div>
+
+        <p>
+          Conditionals let your program make decisions. C supports <code>if</code>, <code>else if</code>, <code>else</code>, and <code>switch</code> statements. In C, conditions evaluate to <code>0</code> (false) or non-zero (true).
+        </p>
+
+        <div class="c-code-block">
+          <div class="c-code-header">
+            <span class="c-code-lang">C</span>
+            <button type="button" class="c-code-copy" aria-label="Copy code" data-code='#include <stdio.h>
 
 int main() {
     int score = 85;
@@ -647,744 +733,802 @@ int main() {
         grade = 'F';
     }
 
-    printf(&quot;Score: %d &rarr; Grade: %c\n&quot;, score, grade);
+    printf("Score: %d → Grade: %c\n", score, grade);
     return 0;
-}">Copy</button>
-                </div>
-                <pre><code><span class="tok-pch">#include</span> <span class="tok-str">&lt;stdio.h&gt;</span>
-
-<span class="tok-kw">int</span> <span class="tok-fn">main</span>() {
-    <span class="tok-kw">int</span> score = <span class="tok-num">85</span>;
-    <span class="tok-kw">char</span> grade;
-
-    <span class="tok-kw">if</span> (score >= <span class="tok-num">90</span>) {
-        grade = <span class="tok-str">'A'</span>;
-    } <span class="tok-kw">else if</span> (score >= <span class="tok-num">80</span>) {
-        grade = <span class="tok-str">'B'</span>;
-    } <span class="tok-kw">else if</span> (score >= <span class="tok-num">70</span>) {
-        grade = <span class="tok-str">'C'</span>;
-    } <span class="tok-kw">else</span> {
-        grade = <span class="tok-str">'F'</span>;
-    }
-
-    <span class="tok-fn">printf</span>(<span class="tok-str">"Score: %d → Grade: %c\n"</span>, score, grade);
-    <span class="tok-kw">return</span> <span class="tok-num">0</span>;
+}'><i class="fas fa-copy"></i> Copy</button>
+          </div>
+          <pre><code><span class="kw">if</span> (score >= <span class="num">90</span>) {
+    grade = <span class="str">'A'</span>;
+} <span class="kw">else if</span> (score >= <span class="num">80</span>) {
+    grade = <span class="str">'B'</span>;
+} <span class="kw">else</span> {
+    grade = <span class="str">'F'</span>;
 }</code></pre>
-              </div>
-              <div class="c-output">
-                <div class="c-output-label">Output</div>
-                <pre>Score: 85 → Grade: B</pre>
-              </div>
-              <div class="c-concept-card">
-                <h4>switch Statement</h4>
-                <p>The <code>switch</code> statement is useful when checking a variable against many specific integer values.</p>
-              </div>
-              <div class="c-code-block">
-                <div class="c-code-header">
-                  <span class="c-code-lang">C</span>
-                  <button type="button" class="c-code-copy" aria-label="Copy code" data-code="#include &lt;stdio.h&gt;
+        </div>
 
-int main() {
-    int day = 3;
+        <div class="c-output">
+          <div class="c-output-label">Output</div>
+          <pre>Score: 85 → Grade: B</pre>
+        </div>
 
-    switch (day) {
-        case 1:  printf(&quot;Monday\n&quot;);    break;
-        case 2:  printf(&quot;Tuesday\n&quot;);   break;
-        case 3:  printf(&quot;Wednesday\n&quot;); break;
-        case 4:  printf(&quot;Thursday\n&quot;);  break;
-        case 5:  printf(&quot;Friday\n&quot;);    break;
-        default: printf(&quot;Weekend\n&quot;);
-    }
-    return 0;
-}">Copy</button>
-                </div>
-                <pre><code><span class="tok-pch">#include</span> <span class="tok-str">&lt;stdio.h&gt;</span>
+        <div class="c-concept">
+          <h4>switch Statement</h4>
+          <p>The <code>switch</code> statement is useful when checking a variable against many specific integer values.</p>
+        </div>
 
-<span class="tok-kw">int</span> <span class="tok-fn">main</span>() {
-    <span class="tok-kw">int</span> day = <span class="tok-num">3</span>;
-
-    <span class="tok-kw">switch</span> (day) {
-        <span class="tok-kw">case</span> <span class="tok-num">1</span>:  <span class="tok-fn">printf</span>(<span class="tok-str">"Monday\n"</span>);    <span class="tok-kw">break</span>;
-        <span class="tok-kw">case</span> <span class="tok-num">2</span>:  <span class="tok-fn">printf</span>(<span class="tok-str">"Tuesday\n"</span>);   <span class="tok-kw">break</span>;
-        <span class="tok-kw">case</span> <span class="tok-num">3</span>:  <span class="tok-fn">printf</span>(<span class="tok-str">"Wednesday\n"</span>); <span class="tok-kw">break</span>;
-        <span class="tok-kw">case</span> <span class="tok-num">4</span>:  <span class="tok-fn">printf</span>(<span class="tok-str">"Thursday\n"</span>);  <span class="tok-kw">break</span>;
-        <span class="tok-kw">case</span> <span class="tok-num">5</span>:  <span class="tok-fn">printf</span>(<span class="tok-str">"Friday\n"</span>);    <span class="tok-kw">break</span>;
-        <span class="tok-kw">default</span>: <span class="tok-fn">printf</span>(<span class="tok-str">"Weekend\n"</span>);
-    }
-    <span class="tok-kw">return</span> <span class="tok-num">0</span>;
+        <div class="c-code-block">
+          <div class="c-code-header">
+            <span class="c-code-lang">C</span>
+            <button type="button" class="c-code-copy" aria-label="Copy code" data-code='int day = 3;
+switch (day) {
+    case 1:  printf("Monday\n");    break;
+    case 2:  printf("Tuesday\n");   break;
+    case 3:  printf("Wednesday\n"); break;
+    default: printf("Weekend\n");
+}'><i class="fas fa-copy"></i> Copy</button>
+          </div>
+          <pre><code><span class="kw">switch</span> (day) {
+    <span class="kw">case</span> <span class="num">1</span>:  <span class="fn">printf</span>(<span class="str">"Monday\n"</span>);    <span class="kw">break</span>;
+    <span class="kw">case</span> <span class="num">2</span>:  <span class="fn">printf</span>(<span class="str">"Tuesday\n"</span>);   <span class="kw">break</span>;
+    <span class="kw">case</span> <span class="num">3</span>:  <span class="fn">printf</span>(<span class="str">"Wednesday\n"</span>); <span class="kw">break</span>;
+    <span class="kw">default</span>: <span class="fn">printf</span>(<span class="str">"Weekend\n"</span>);
 }</code></pre>
-              </div>
-              <div class="c-output">
-                <div class="c-output-label">Output</div>
-                <pre>Wednesday</pre>
-              </div>
+        </div>
 
-              <div class="c-exercise" id="exercise-conditionals">
-                <div class="c-exercise-title">
-                  <i class="fas fa-dumbbell"></i> Practice: Conditionals
-                </div>
-                <p>Write a program that reads a number and prints whether it is positive, negative, or zero.</p>
-                <ol>
-                  <li>Use <code>scanf</code> to read an integer</li>
-                  <li>Use <code>if</code>/<code>else if</code>/<code>else</code> to check the number</li>
-                  <li>Print the result using <code>printf</code></li>
-                </ol>
-                <button type="button" class="c-exercise-toggle" aria-expanded="false" aria-controls="solution-conditionals">Show Solution</button>
-                <div class="c-exercise-solution" id="solution-conditionals">
-                  <div class="c-code-block">
-                    <div class="c-code-header">
-                      <span class="c-code-lang">C</span>
-                      <button type="button" class="c-code-copy" aria-label="Copy code" data-code="#include &lt;stdio.h&gt;
+        <div class="c-concept">
+          <h4>Ternary Operator</h4>
+          <p>C's ternary operator <code>condition ? value_if_true : value_if_false</code> is a compact alternative to simple <code>if-else</code>. Example: <code>int max = (a > b) ? a : b;</code>. Use it for simple assignments — but avoid nesting ternaries, as they quickly become unreadable.</p>
+        </div>
+
+        <div class="c-callout">
+          <p><strong>Common pitfall:</strong> In C, <code>=</code> (assignment) and <code>==</code> (comparison) are different operators. Writing <code>if (x = 5)</code> assigns 5 to <em>x</em> and the condition is always true (since 5 is non-zero). Many compilers warn about this if you enable <code>-Wall</code>. A defensive pattern is to write <code>if (5 == x)</code> — if you accidentally write <code>=</code>, the compiler will catch it.</p>
+        </div>
+
+        <!-- Exercise -->
+        <div class="c-exercise" id="exercise-conditionals">
+          <div class="c-exercise-title">
+            Practice: Conditionals
+          </div>
+          <p>Write a program that reads a number and prints whether it is positive, negative, or zero.</p>
+          <ol>
+            <li>Use <code>scanf</code> to read an integer</li>
+            <li>Use <code>if</code>/<code>else if</code>/<code>else</code> to check the number</li>
+            <li>Print the result using <code>printf</code></li>
+          </ol>
+          <button type="button" class="c-exercise-toggle" aria-expanded="false" aria-controls="solution-conditionals">Show Solution</button>
+          <div class="c-exercise-solution" id="solution-conditionals">
+            <div class="c-code-block">
+              <div class="c-code-header">
+                <span class="c-code-lang">C</span>
+                <button type="button" class="c-code-copy" aria-label="Copy code" data-code='#include <stdio.h>
 
 int main() {
     int num;
-    printf(&quot;Enter a number: &quot;);
-    scanf(&quot;%d&quot;, &amp;num);
+    printf("Enter a number: ");
+    scanf("%d", &num);
 
-    if (num &gt; 0) {
-        printf(&quot;Positive\n&quot;);
-    } else if (num &lt; 0) {
-        printf(&quot;Negative\n&quot;);
+    if (num > 0) {
+        printf("Positive\n");
+    } else if (num < 0) {
+        printf("Negative\n");
     } else {
-        printf(&quot;Zero\n&quot;);
+        printf("Zero\n");
     }
     return 0;
-}">Copy</button>
-                    </div>
-                    <pre><code><span class="tok-pch">#include</span> <span class="tok-str">&lt;stdio.h&gt;</span>
-
-<span class="tok-kw">int</span> <span class="tok-fn">main</span>() {
-    <span class="tok-kw">int</span> num;
-    <span class="tok-fn">printf</span>(<span class="tok-str">"Enter a number: "</span>);
-    <span class="tok-fn">scanf</span>(<span class="tok-str">"%d"</span>, &amp;num);
-
-    <span class="tok-kw">if</span> (num > <span class="tok-num">0</span>) {
-        <span class="tok-fn">printf</span>(<span class="tok-str">"Positive\n"</span>);
-    } <span class="tok-kw">else if</span> (num < <span class="tok-num">0</span>) {
-        <span class="tok-fn">printf</span>(<span class="tok-str">"Negative\n"</span>);
-    } <span class="tok-kw">else</span> {
-        <span class="tok-fn">printf</span>(<span class="tok-str">"Zero\n"</span>);
-    }
-    <span class="tok-kw">return</span> <span class="tok-num">0</span>;
+}'><i class="fas fa-copy"></i> Copy</button>
+              </div>
+              <pre><code><span class="kw">if</span> (num > <span class="num">0</span>) {
+    <span class="fn">printf</span>(<span class="str">"Positive\n"</span>);
+} <span class="kw">else if</span> (num < <span class="num">0</span>) {
+    <span class="fn">printf</span>(<span class="str">"Negative\n"</span>);
+} <span class="kw">else</span> {
+    <span class="fn">printf</span>(<span class="str">"Zero\n"</span>);
 }</code></pre>
-                  </div>
-                </div>
-              </div>
-            </article>
+            </div>
+          </div>
+        </div>
+      </article>
 
-            <article class="c-lesson" id="loops" data-topic="7">
-              <div class="c-lesson-header">
-                <span class="c-lesson-number">07</span>
-                <h3>Loops (for, while, do-while)</h3>
-              </div>
-              <p>
-                Loops let you repeat a block of code. C has three loop types: <code>for</code>, <code>while</code>, and <code>do-while</code>.
-              </p>
-              <div class="c-concept-card">
-                <h4>for Loop</h4>
-                <p>Use <code>for</code> when you know how many times to iterate.</p>
-              </div>
-              <div class="c-code-block">
-                <div class="c-code-header">
-                  <span class="c-code-lang">C</span>
-                  <button type="button" class="c-code-copy" aria-label="Copy code" data-code="#include &lt;stdio.h&gt;
+      <!-- ════════════════════════════════════════
+           LESSON 7: LOOPS
+           ════════════════════════════════════════ -->
+      <article class="c-lesson" id="topic-loops" data-topic="6">
+        <div class="c-lesson-header">
+          <span class="c-lesson-number">07</span>
+          <h3>Loops (for, while, do-while)</h3>
+        </div>
+
+        <p>
+          Loops let you repeat a block of code. C has three loop types: <code>for</code>, <code>while</code>, and <code>do-while</code>.
+        </p>
+
+        <div class="c-concept">
+          <h4>for Loop</h4>
+          <p>Use <code>for</code> when you know how many times to iterate.</p>
+        </div>
+
+        <div class="c-code-block">
+          <div class="c-code-header">
+            <span class="c-code-lang">C</span>
+            <button type="button" class="c-code-copy" aria-label="Copy code" data-code='#include <stdio.h>
 
 int main() {
-    // Count from 0 to 4
-    for (int i = 0; i &lt; 5; i++) {
-        printf(&quot;Count: %d\n&quot;, i);
+    for (int i = 0; i < 5; i++) {
+        printf("Count: %d\n", i);
     }
 
-    // Iterate over an array
     int numbers[] = {10, 20, 30, 40, 50};
-    for (int i = 0; i &lt; 5; i++) {
-        printf(&quot;numbers[%d] = %d\n&quot;, i, numbers[i]);
+    for (int i = 0; i < 5; i++) {
+        printf("numbers[%d] = %d\n", i, numbers[i]);
     }
     return 0;
-}">Copy</button>
-                </div>
-                <pre><code><span class="tok-pch">#include</span> <span class="tok-str">&lt;stdio.h&gt;</span>
-
-<span class="tok-kw">int</span> <span class="tok-fn">main</span>() {
-    <span class="tok-cmt">// Count from 0 to 4</span>
-    <span class="tok-kw">for</span> (<span class="tok-kw">int</span> i = <span class="tok-num">0</span>; i &lt; <span class="tok-num">5</span>; i++) {
-        <span class="tok-fn">printf</span>(<span class="tok-str">"Count: %d\n"</span>, i);
-    }
-
-    <span class="tok-cmt">// Iterate over an array</span>
-    <span class="tok-kw">int</span> numbers[] = {<span class="tok-num">10</span>, <span class="tok-num">20</span>, <span class="tok-num">30</span>, <span class="tok-num">40</span>, <span class="tok-num">50</span>};
-    <span class="tok-kw">for</span> (<span class="tok-kw">int</span> i = <span class="tok-num">0</span>; i &lt; <span class="tok-num">5</span>; i++) {
-        <span class="tok-fn">printf</span>(<span class="tok-str">"numbers[%d] = %d\n"</span>, i, numbers[i]);
-    }
-    <span class="tok-kw">return</span> <span class="tok-num">0</span>;
+}'><i class="fas fa-copy"></i> Copy</button>
+          </div>
+          <pre><code><span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">0</span>; i &lt; <span class="num">5</span>; i++) {
+    <span class="fn">printf</span>(<span class="str">"Count: %d\n"</span>, i);
 }</code></pre>
-              </div>
-              <div class="c-output">
-                <div class="c-output-label">Output</div>
-                <pre>Count: 0
+        </div>
+
+        <div class="c-output">
+          <div class="c-output-label">Output</div>
+          <pre>Count: 0
 Count: 1
 Count: 2
 Count: 3
-Count: 4
-numbers[0] = 10
-numbers[1] = 20
-numbers[2] = 30
-numbers[3] = 40
-numbers[4] = 50</pre>
-              </div>
-              <div class="c-concept-card">
-                <h4>while &amp; do-while Loops</h4>
-                <p><code>while</code> checks the condition first; <code>do-while</code> runs the body at least once.</p>
-              </div>
-              <div class="c-code-block">
-                <div class="c-code-header">
-                  <span class="c-code-lang">C</span>
-                  <button type="button" class="c-code-copy" aria-label="Copy code" data-code="#include &lt;stdio.h&gt;
+Count: 4</pre>
+        </div>
 
-int main() {
-    // while loop
-    int count = 0;
-    while (count &lt; 5) {
-        printf(&quot;While: %d\n&quot;, count);
-        count++;
-    }
+        <div class="c-concept">
+          <h4>while &amp; do-while Loops</h4>
+          <p><code>while</code> checks the condition first; <code>do-while</code> runs the body at least once.</p>
+        </div>
 
-    // do-while loop
-    int num = 0;
-    do {
-        printf(&quot;Do-while: %d\n&quot;, num);
-        num++;
-    } while (num &lt; 5);
-    return 0;
-}">Copy</button>
-                </div>
-                <pre><code><span class="tok-pch">#include</span> <span class="tok-str">&lt;stdio.h&gt;</span>
+        <div class="c-code-block">
+          <div class="c-code-header">
+            <span class="c-code-lang">C</span>
+            <button type="button" class="c-code-copy" aria-label="Copy code" data-code='int count = 0;
+while (count < 5) {
+    printf("While: %d\n", count);
+    count++;
+}
 
-<span class="tok-kw">int</span> <span class="tok-fn">main</span>() {
-    <span class="tok-cmt">// while loop</span>
-    <span class="tok-kw">int</span> count = <span class="tok-num">0</span>;
-    <span class="tok-kw">while</span> (count &lt; <span class="tok-num">5</span>) {
-        <span class="tok-fn">printf</span>(<span class="tok-str">"While: %d\n"</span>, count);
-        count++;
-    }
+int num = 0;
+do {
+    printf("Do-while: %d\n", num);
+    num++;
+} while (num < 5);'><i class="fas fa-copy"></i> Copy</button>
+          </div>
+          <pre><code><span class="kw">while</span> (count &lt; <span class="num">5</span>) {
+    <span class="fn">printf</span>(<span class="str">"While: %d\n"</span>, count);
+    count++;
+}
 
-    <span class="tok-cmt">// do-while loop</span>
-    <span class="tok-kw">int</span> num = <span class="tok-num">0</span>;
-    <span class="tok-kw">do</span> {
-        <span class="tok-fn">printf</span>(<span class="tok-str">"Do-while: %d\n"</span>, num);
-        num++;
-    } <span class="tok-kw">while</span> (num &lt; <span class="tok-num">5</span>);
-    <span class="tok-kw">return</span> <span class="tok-num">0</span>;
-}</code></pre>
-              </div>
-              <div class="c-callout">
-                <span class="c-callout-icon">⚠️</span>
-                <p>Always ensure your loop condition eventually becomes <code>0</code> (false) to avoid <strong>infinite loops</strong>. Use <code>break</code> to exit early and <code>continue</code> to skip the current iteration.</p>
-              </div>
+<span class="kw">do</span> {
+    <span class="fn">printf</span>(<span class="str">"Do-while: %d\n"</span>, num);
+    num++;
+} <span class="kw">while</span> (num &lt; <span class="num">5</span>);</code></pre>
+        </div>
 
-              <div class="c-exercise" id="exercise-loops">
-                <div class="c-exercise-title">
-                  <i class="fas fa-dumbbell"></i> Practice: Loops
-                </div>
-                <p>Write two programs:</p>
-                <ol>
-                  <li>Use a <code>for</code> loop to print all even numbers from 2 to 20</li>
-                  <li>Use a <code>while</code> loop to calculate the sum of numbers from 1 to 100</li>
-                </ol>
-                <button type="button" class="c-exercise-toggle" aria-expanded="false" aria-controls="solution-loops">Show Solution</button>
-                <div class="c-exercise-solution" id="solution-loops">
-                  <div class="c-code-block">
-                    <div class="c-code-header">
-                      <span class="c-code-lang">C</span>
-                      <button type="button" class="c-code-copy" aria-label="Copy code" data-code="#include &lt;stdio.h&gt;
+        <div class="c-callout">
+          <p>Always ensure your loop condition eventually becomes <code>0</code> (false) to avoid <strong>infinite loops</strong>. Use <code>break</code> to exit early and <code>continue</code> to skip the current iteration.</p>
+        </div>
+
+        <div class="c-concept">
+          <h4>Nested Loops &amp; The Comma Operator</h4>
+          <p>C's <code>for</code> loop supports the <strong>comma operator</strong> for multiple initializations or updates. For example, this reverses an array in-place: <code>for (int i = 0, j = n-1; i &lt; j; i++, j--)</code>. Nested loops are essential for multidimensional array traversal and sorting algorithms like bubble sort and insertion sort.</p>
+        </div>
+
+        <div class="c-concept">
+          <h4>Loop Control Patterns</h4>
+          <ul>
+            <li><strong>Sentinel loop</strong> — reads input until a special value: <code>while ((ch = getchar()) != EOF)</code></li>
+            <li><strong>Counter loop</strong> — executes a fixed number of times: <code>for (int i = 0; i &lt; n; i++)</code></li>
+            <li><strong>Flag loop</strong> — runs while a condition holds: <code>while (!done)</code></li>
+            <li><strong>Infinite loop with break</strong> — <code>while (1) { if (condition) break; }</code></li>
+          </ul>
+        </div>
+
+        <!-- Exercise -->
+        <div class="c-exercise" id="exercise-loops">
+          <div class="c-exercise-title">
+            Practice: Loops
+          </div>
+          <p>Write two programs:</p>
+          <ol>
+            <li>Use a <code>for</code> loop to print all even numbers from 2 to 20</li>
+            <li>Use a <code>while</code> loop to calculate the sum of numbers from 1 to 100</li>
+          </ol>
+          <button type="button" class="c-exercise-toggle" aria-expanded="false" aria-controls="solution-loops">Show Solution</button>
+          <div class="c-exercise-solution" id="solution-loops">
+            <div class="c-code-block">
+              <div class="c-code-header">
+                <span class="c-code-lang">C</span>
+                <button type="button" class="c-code-copy" aria-label="Copy code" data-code='#include <stdio.h>
 
 int main() {
     // Even numbers 2-20
-    for (int i = 2; i &lt;= 20; i += 2) {
-        printf(&quot;%d\n&quot;, i);
+    for (int i = 2; i <= 20; i += 2) {
+        printf("%d\n", i);
     }
 
     // Sum of 1 to 100
-    int sum = 0;
-    int n = 1;
-    while (n &lt;= 100) {
+    int sum = 0, n = 1;
+    while (n <= 100) {
         sum += n;
         n++;
     }
-    printf(&quot;Sum: %d\n&quot;, sum);
+    printf("Sum: %d\n", sum);
     return 0;
-}">Copy</button>
-                    </div>
-                    <pre><code><span class="tok-pch">#include</span> <span class="tok-str">&lt;stdio.h&gt;</span>
+}'><i class="fas fa-copy"></i> Copy</button>
+              </div>
+              <pre><code><span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">2</span>; i &lt;= <span class="num">20</span>; i += <span class="num">2</span>) {
+    <span class="fn">printf</span>(<span class="str">"%d\n"</span>, i);
+}
 
-<span class="tok-kw">int</span> <span class="tok-fn">main</span>() {
-    <span class="tok-cmt">// Even numbers 2-20</span>
-    <span class="tok-kw">for</span> (<span class="tok-kw">int</span> i = <span class="tok-num">2</span>; i &lt;= <span class="tok-num">20</span>; i += <span class="tok-num">2</span>) {
-        <span class="tok-fn">printf</span>(<span class="tok-str">"%d\n"</span>, i);
-    }
-
-    <span class="tok-cmt">// Sum of 1 to 100</span>
-    <span class="tok-kw">int</span> sum = <span class="tok-num">0</span>;
-    <span class="tok-kw">int</span> n = <span class="tok-num">1</span>;
-    <span class="tok-kw">while</span> (n &lt;= <span class="tok-num">100</span>) {
-        sum += n;
-        n++;
-    }
-    <span class="tok-fn">printf</span>(<span class="tok-str">"Sum: %d\n"</span>, sum);
-    <span class="tok-kw">return</span> <span class="tok-num">0</span>;
+<span class="kw">int</span> sum = <span class="num">0</span>, n = <span class="num">1</span>;
+<span class="kw">while</span> (n &lt;= <span class="num">100</span>) {
+    sum += n;
+    n++;
 }</code></pre>
-                  </div>
-                </div>
-              </div>
-            </article>
+            </div>
+          </div>
+        </div>
+      </article>
 
-            <article class="c-lesson" id="functions" data-topic="8">
-              <div class="c-lesson-header">
-                <span class="c-lesson-number">08</span>
-                <h3>Functions</h3>
-              </div>
-              <p>
-                Functions (also called procedures) are reusable blocks of code. They help you avoid repetition and organize your program into logical pieces.
-                In C, every function has a <strong>return type</strong>, a <strong>name</strong>, and <strong>parameters</strong>.
-              </p>
-              <div class="c-code-block">
-                <div class="c-code-header">
-                  <span class="c-code-lang">C</span>
-                  <button type="button" class="c-code-copy" aria-label="Copy code" data-code="#include &lt;stdio.h&gt;
+      <!-- ════════════════════════════════════════
+           LESSON 8: FUNCTIONS
+           ════════════════════════════════════════ -->
+      <div class="c-divider">
+        <span class="c-divider-inner">Abstraction</span>
+      </div>
+
+      <article class="c-lesson" id="topic-functions" data-topic="7">
+        <div class="c-lesson-header">
+          <span class="c-lesson-number">08</span>
+          <h3>Functions</h3>
+        </div>
+
+        <p>
+          Functions (also called procedures) are reusable blocks of code. They help you avoid repetition and organize your program into logical pieces. In C, every function has a <strong>return type</strong>, a <strong>name</strong>, and <strong>parameters</strong>.
+        </p>
+
+        <div class="c-code-block">
+          <div class="c-code-header">
+            <span class="c-code-lang">C</span>
+            <button type="button" class="c-code-copy" aria-label="Copy code" data-code='#include <stdio.h>
 
 // Function declaration (prototype)
 int add(int a, int b);
 void greet(char name[]);
 
-// Function definitions
 int add(int a, int b) {
     return a + b;
 }
 
 void greet(char name[]) {
-    printf(&quot;Hello, %s!\n&quot;, name);
+    printf("Hello, %s!\n", name);
 }
 
 int main() {
     int sum = add(10, 5);
-    printf(&quot;Sum: %d\n&quot;, sum);
-
-    greet(&quot;Alice&quot;);
+    printf("Sum: %d\n", sum);
+    greet("Alice");
     return 0;
-}">Copy</button>
-                </div>
-                <pre><code><span class="tok-pch">#include</span> <span class="tok-str">&lt;stdio.h&gt;</span>
+}'><i class="fas fa-copy"></i> Copy</button>
+          </div>
+          <pre><code><span class="cmt">// Function declaration (prototype)</span>
+<span class="kw">int</span> <span class="fn">add</span>(<span class="kw">int</span> a, <span class="kw">int</span> b);
+<span class="kw">void</span> <span class="fn">greet</span>(<span class="kw">char</span> name[]);
 
-<span class="tok-cmt">// Function declaration (prototype)</span>
-<span class="tok-kw">int</span> <span class="tok-fn">add</span>(<span class="tok-kw">int</span> a, <span class="tok-kw">int</span> b);
-<span class="tok-kw">void</span> <span class="tok-fn">greet</span>(<span class="tok-kw">char</span> name[]);
-
-<span class="tok-cmt">// Function definitions</span>
-<span class="tok-kw">int</span> <span class="tok-fn">add</span>(<span class="tok-kw">int</span> a, <span class="tok-kw">int</span> b) {
-    <span class="tok-kw">return</span> a + b;
+<span class="kw">int</span> <span class="fn">add</span>(<span class="kw">int</span> a, <span class="kw">int</span> b) {
+    <span class="kw">return</span> a + b;
 }
 
-<span class="tok-kw">void</span> <span class="tok-fn">greet</span>(<span class="tok-kw">char</span> name[]) {
-    <span class="tok-fn">printf</span>(<span class="tok-str">"Hello, %s!\n"</span>, name);
-}
-
-<span class="tok-kw">int</span> <span class="tok-fn">main</span>() {
-    <span class="tok-kw">int</span> sum = <span class="tok-fn">add</span>(<span class="tok-num">10</span>, <span class="tok-num">5</span>);
-    <span class="tok-fn">printf</span>(<span class="tok-str">"Sum: %d\n"</span>, sum);
-
-    <span class="tok-fn">greet</span>(<span class="tok-str">"Alice"</span>);
-    <span class="tok-kw">return</span> <span class="tok-num">0</span>;
+<span class="kw">int</span> <span class="kw">main</span>() {
+    <span class="kw">int</span> sum = <span class="fn">add</span>(<span class="num">10</span>, <span class="num">5</span>);
+    <span class="fn">printf</span>(<span class="str">"Sum: %d\n"</span>, sum);
 }</code></pre>
-              </div>
-              <div class="c-output">
-                <div class="c-output-label">Output</div>
-                <pre>Sum: 15
-Hello, Alice!</pre>
-              </div>
-              <div class="c-concept-card">
-                <h4>Function Prototypes</h4>
-                <p>In C, you must declare a function before you call it. A <strong>prototype</strong> tells the compiler about the function's return type and parameters. You can then define the function later in the file (or in another file).</p>
-              </div>
+        </div>
 
-              <div class="c-exercise" id="exercise-functions">
-                <div class="c-exercise-title">
-                  <i class="fas fa-dumbbell"></i> Practice: Functions
-                </div>
-                <ol>
-                  <li>Write a function <code>int square(int n)</code> that returns n * n</li>
-                  <li>Write a function <code>int isEven(int n)</code> that returns 1 if n is even, 0 otherwise</li>
-                  <li>Call both functions from <code>main()</code> and print the results</li>
-                </ol>
-                <button type="button" class="c-exercise-toggle" aria-expanded="false" aria-controls="solution-functions">Show Solution</button>
-                <div class="c-exercise-solution" id="solution-functions">
-                  <div class="c-code-block">
-                    <div class="c-code-header">
-                      <span class="c-code-lang">C</span>
-                      <button type="button" class="c-code-copy" aria-label="Copy code" data-code="#include &lt;stdio.h&gt;
+        <div class="c-output">
+          <div class="c-output-label">Output</div>
+          <pre>Sum: 15
+Hello, Alice!</pre>
+        </div>
+
+        <div class="c-concept">
+          <h4>Function Prototypes</h4>
+          <p>In C, you must declare a function before you call it. A <strong>prototype</strong> tells the compiler about the function's return type and parameters. You can then define the function later in the file (or in another file).</p>
+        </div>
+
+        <div class="c-concept">
+          <h4>Recursion</h4>
+          <p>C supports <strong>recursive functions</strong> — functions that call themselves. Every recursive function needs a <strong>base case</strong> to terminate and a <strong>recursive case</strong> that moves toward the base case. Classic examples include factorial, Fibonacci, and tree traversal.</p>
+        </div>
+
+        <div class="c-code-block">
+          <div class="c-code-header">
+            <span class="c-code-lang">C</span>
+            <button type="button" class="c-code-copy" aria-label="Copy code" data-code='// Recursive factorial
+int factorial(int n) {
+    if (n <= 1) return 1;     // base case
+    return n * factorial(n - 1); // recursive case
+}
+
+int main() {
+    printf("5! = %d\n", factorial(5)); // 120
+    return 0;
+}'><i class="fas fa-copy"></i> Copy</button>
+          </div>
+          <pre><code><span class="cmt">// Recursive factorial</span>
+<span class="kw">int</span> <span class="fn">factorial</span>(<span class="kw">int</span> n) {
+    <span class="kw">if</span> (n <= <span class="num">1</span>) <span class="kw">return</span> <span class="num">1</span>;
+    <span class="kw">return</span> n * <span class="fn">factorial</span>(n - <span class="num">1</span>);
+}</code></pre>
+        </div>
+
+        <div class="c-callout">
+          <p><strong>Local variables are not preserved across recursive calls</strong> — each call creates a new stack frame with its own copies of local variables. Deep recursion can cause <strong>stack overflow</strong>. As a rule of thumb, prefer iteration over recursion when the depth could exceed a few thousand calls.</p>
+        </div>
+
+        <div class="c-concept">
+          <h4>Storage Classes</h4>
+          <ul>
+            <li><code>auto</code> (default) — local variable, destroyed when scope exits</li>
+            <li><code>static</code> — persists across function calls, initialized once</li>
+            <li><code>extern</code> — declares a variable defined in another file</li>
+            <li><code>register</code> — hints the compiler to store in a CPU register (rarely needed today)</li>
+          </ul>
+        </div>
+
+        <!-- Exercise -->
+        <div class="c-exercise" id="exercise-functions">
+          <div class="c-exercise-title">
+            Practice: Functions
+          </div>
+          <ol>
+            <li>Write a function <code>int square(int n)</code> that returns n * n</li>
+            <li>Write a function <code>int isEven(int n)</code> that returns 1 if n is even, 0 otherwise</li>
+            <li>Call both functions from <code>main()</code> and print the results</li>
+          </ol>
+          <button type="button" class="c-exercise-toggle" aria-expanded="false" aria-controls="solution-functions">Show Solution</button>
+          <div class="c-exercise-solution" id="solution-functions">
+            <div class="c-code-block">
+              <div class="c-code-header">
+                <span class="c-code-lang">C</span>
+                <button type="button" class="c-code-copy" aria-label="Copy code" data-code='#include <stdio.h>
 
 int square(int n);
 int isEven(int n);
 
-int square(int n) {
-    return n * n;
-}
-
-int isEven(int n) {
-    return n % 2 == 0;
-}
+int square(int n) { return n * n; }
+int isEven(int n) { return n % 2 == 0; }
 
 int main() {
-    printf(&quot;Square of 7: %d\n&quot;, square(7));
-    printf(&quot;Is 10 even? %d\n&quot;, isEven(10));
-    printf(&quot;Is 7 even? %d\n&quot;, isEven(7));
+    printf("Square of 7: %d\n", square(7));
+    printf("Is 10 even? %d\n", isEven(10));
+    printf("Is 7 even? %d\n", isEven(7));
     return 0;
-}">Copy</button>
-                    </div>
-                    <pre><code><span class="tok-pch">#include</span> <span class="tok-str">&lt;stdio.h&gt;</span>
-
-<span class="tok-kw">int</span> <span class="tok-fn">square</span>(<span class="tok-kw">int</span> n);
-<span class="tok-kw">int</span> <span class="tok-fn">isEven</span>(<span class="tok-kw">int</span> n);
-
-<span class="tok-kw">int</span> <span class="tok-fn">square</span>(<span class="tok-kw">int</span> n) {
-    <span class="tok-kw">return</span> n * n;
-}
-
-<span class="tok-kw">int</span> <span class="tok-fn">isEven</span>(<span class="tok-kw">int</span> n) {
-    <span class="tok-kw">return</span> n % <span class="tok-num">2</span> == <span class="tok-num">0</span>;
-}
-
-<span class="tok-kw">int</span> <span class="tok-fn">main</span>() {
-    <span class="tok-fn">printf</span>(<span class="tok-str">"Square of 7: %d\n"</span>, <span class="tok-fn">square</span>(<span class="tok-num">7</span>));
-    <span class="tok-fn">printf</span>(<span class="tok-str">"Is 10 even? %d\n"</span>, <span class="tok-fn">isEven</span>(<span class="tok-num">10</span>));
-    <span class="tok-fn">printf</span>(<span class="tok-str">"Is 7 even? %d\n"</span>, <span class="tok-fn">isEven</span>(<span class="tok-num">7</span>));
-    <span class="tok-kw">return</span> <span class="tok-num">0</span>;
-}</code></pre>
-                  </div>
-                </div>
+}'><i class="fas fa-copy"></i> Copy</button>
               </div>
-            </article>
+              <pre><code><span class="fn">printf</span>(<span class="str">"Square of 7: %d\n"</span>, <span class="fn">square</span>(<span class="num">7</span>));
+<span class="fn">printf</span>(<span class="str">"Is 10 even? %d\n"</span>, <span class="fn">isEven</span>(<span class="num">10</span>));</code></pre>
+            </div>
+          </div>
+        </div>
+      </article>
 
-            <article class="c-lesson" id="arrays-strings" data-topic="9">
-              <div class="c-lesson-header">
-                <span class="c-lesson-number">09</span>
-                <h3>Arrays &amp; Strings</h3>
-              </div>
-              <p>
-                Arrays store multiple values of the same type in contiguous memory. Strings in C are just character arrays terminated by a null character (<code>\0</code>).
-              </p>
-              <div class="c-concept-card">
-                <h4>Arrays — Fixed-Size Collections</h4>
-                <p>Arrays in C have a fixed length. Array indices start at <code>0</code>.</p>
-              </div>
-              <div class="c-code-block">
-                <div class="c-code-header">
-                  <span class="c-code-lang">C</span>
-                  <button type="button" class="c-code-copy" aria-label="Copy code" data-code="#include &lt;stdio.h&gt;
+      <!-- ════════════════════════════════════════
+           LESSON 9: ARRAYS & STRINGS
+           ════════════════════════════════════════ -->
+      <article class="c-lesson" id="topic-arrays" data-topic="8">
+        <div class="c-lesson-header">
+          <span class="c-lesson-number">09</span>
+          <h3>Arrays &amp; Strings</h3>
+        </div>
+
+        <p>
+          Arrays store multiple values of the same type in contiguous memory. In C, arrays are zero-indexed and have no built-in bounds checking — accessing an index beyond the array size leads to <strong>undefined behavior</strong>.
+        </p>
+
+        <div class="c-code-block">
+          <div class="c-code-header">
+            <span class="c-code-lang">C</span>
+            <button type="button" class="c-code-copy" aria-label="Copy code" data-code='#include <stdio.h>
 
 int main() {
-    // Creating arrays
+    // Fixed-size array
     int numbers[5] = {10, 20, 30, 40, 50};
-    char vowels[] = {'a', 'e', 'i', 'o', 'u'};
+    printf("Third element: %d\n", numbers[2]); // 30
 
-    // Access and modify
-    numbers[0] = 99;
-    printf(&quot;First element: %d\n&quot;, numbers[0]);
-    printf(&quot;Third vowel: %c\n&quot;, vowels[2]);
+    // Modify an element
+    numbers[2] = 99;
 
-    // Array length (sizeof trick)
-    int length = sizeof(numbers) / sizeof(numbers[0]);
-    printf(&quot;Array length: %d\n&quot;, length);
+    // Iterate
+    for (int i = 0; i < 5; i++) {
+        printf("numbers[%d] = %d\n", i, numbers[i]);
+    }
+
+    // Strings as char arrays
+    char greeting[] = "Hello";
+    printf("%s\n", greeting);  // Hello
+    printf("Length: %lu\n", sizeof(greeting)); // 6 (including '\0')
     return 0;
-}">Copy</button>
-                </div>
-                <pre><code><span class="tok-pch">#include</span> <span class="tok-str">&lt;stdio.h&gt;</span>
+}'><i class="fas fa-copy"></i> Copy</button>
+          </div>
+          <pre><code><span class="kw">int</span> numbers[<span class="num">5</span>] = {<span class="num">10</span>, <span class="num">20</span>, <span class="num">30</span>, <span class="num">40</span>, <span class="num">50</span>};
+numbers[<span class="num">2</span>] = <span class="num">99</span>;
 
-<span class="tok-kw">int</span> <span class="tok-fn">main</span>() {
-    <span class="tok-cmt">// Creating arrays</span>
-    <span class="tok-kw">int</span> numbers[<span class="tok-num">5</span>] = {<span class="tok-num">10</span>, <span class="tok-num">20</span>, <span class="tok-num">30</span>, <span class="tok-num">40</span>, <span class="tok-num">50</span>};
-    <span class="tok-kw">char</span> vowels[] = {<span class="tok-str">'a'</span>, <span class="tok-str">'e'</span>, <span class="tok-str">'i'</span>, <span class="tok-str">'o'</span>, <span class="tok-str">'u'</span>};
+<span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">0</span>; i &lt; <span class="num">5</span>; i++) {
+    <span class="fn">printf</span>(<span class="str">"numbers[%d] = %d\n"</span>, i, numbers[i]);
+}
 
-    <span class="tok-cmt">// Access and modify</span>
-    numbers[<span class="tok-num">0</span>] = <span class="tok-num">99</span>;
-    <span class="tok-fn">printf</span>(<span class="tok-str">"First element: %d\n"</span>, numbers[<span class="tok-num">0</span>]);
-    <span class="tok-fn">printf</span>(<span class="tok-str">"Third vowel: %c\n"</span>, vowels[<span class="tok-num">2</span>]);
+<span class="kw">char</span> greeting[] = <span class="str">"Hello"</span>;
+<span class="fn">printf</span>(<span class="str">"%s\n"</span>, greeting);</code></pre>
+        </div>
 
-    <span class="tok-cmt">// Array length (sizeof trick)</span>
-    <span class="tok-kw">int</span> length = <span class="tok-kw">sizeof</span>(numbers) / <span class="tok-kw">sizeof</span>(numbers[<span class="tok-num">0</span>]);
-    <span class="tok-fn">printf</span>(<span class="tok-str">"Array length: %d\n"</span>, length);
-    <span class="tok-kw">return</span> <span class="tok-num">0</span>;
+        <div class="c-output">
+          <div class="c-output-label">Output</div>
+          <pre>Third element: 30
+numbers[0] = 10
+numbers[1] = 20
+numbers[2] = 99
+numbers[3] = 40
+numbers[4] = 50
+Hello</pre>
+        </div>
+
+        <div class="c-callout">
+          <p>C does not perform <strong>bounds checking</strong> on arrays. Accessing <code>numbers[10]</code> in a 5-element array will read or write memory outside the array — this is a common source of <strong>buffer overflow</strong> vulnerabilities. Always validate array indices.</p>
+        </div>
+
+        <div class="c-concept">
+          <h4>Common String Functions</h4>
+          <p>String operations require <code>#include &lt;string.h&gt;</code>. Key functions: <code>strlen(s)</code> (length), <code>strcpy(dest, src)</code> (copy), <code>strcmp(a, b)</code> (compare), <code>strcat(dest, src)</code> (concatenate).</p>
+        </div>
+
+        <div class="c-table-wrap">
+          <table class="c-table" aria-label="String functions reference">
+            <thead>
+              <tr>
+                <th scope="col">Function</th>
+                <th scope="col">Signature</th>
+                <th scope="col">Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td><code>strlen</code></td><td><code>size_t strlen(const char *s)</code></td><td>Returns the length of the string (excluding null terminator)</td></tr>
+              <tr><td><code>strcpy</code></td><td><code>char *strcpy(char *dest, const char *src)</code></td><td>Copies <code>src</code> into <code>dest</code> (buffer overflow risk!)</td></tr>
+              <tr><td><code>strncpy</code></td><td><code>char *strncpy(char *dest, const char *src, size_t n)</code></td><td>Copies at most <code>n</code> characters — safer than <code>strcpy</code></td></tr>
+              <tr><td><code>strcmp</code></td><td><code>int strcmp(const char *a, const char *b)</code></td><td>Returns 0 if equal, negative if a &lt; b, positive if a &gt; b</td></tr>
+              <tr><td><code>strcat</code></td><td><code>char *strcat(char *dest, const char *src)</code></td><td>Appends <code>src</code> to the end of <code>dest</code></td></tr>
+              <tr><td><code>strstr</code></td><td><code>char *strstr(const char *haystack, const char *needle)</code></td><td>Finds the first occurrence of <code>needle</code> in <code>haystack</code></td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="c-concept">
+          <h4>Multidimensional Arrays</h4>
+          <p>Arrays can have multiple dimensions. A 2D array <code>int matrix[3][4]</code> represents 3 rows and 4 columns — stored in <strong>row-major order</strong> (all of row 0 in memory, then row 1, etc.). Access elements with <code>matrix[row][col]</code>. Multidimensional arrays are essential for image processing, matrix math, and game boards.</p>
+        </div>
+
+        <div class="c-code-block">
+          <div class="c-code-header">
+            <span class="c-code-lang">C</span>
+            <button type="button" class="c-code-copy" aria-label="Copy code" data-code='int matrix[2][3] = {
+    {1, 2, 3},
+    {4, 5, 6}
+};
+
+// Nested loops to access all elements
+for (int row = 0; row < 2; row++) {
+    for (int col = 0; col < 3; col++) {
+        printf("%d ", matrix[row][col]);
+    }
+    printf("\n");
+}'><i class="fas fa-copy"></i> Copy</button>
+          </div>
+          <pre><code><span class="kw">int</span> matrix[<span class="num">2</span>][<span class="num">3</span>] = {
+    {<span class="num">1</span>, <span class="num">2</span>, <span class="num">3</span>},
+    {<span class="num">4</span>, <span class="num">5</span>, <span class="num">6</span>}
+};
+
+<span class="kw">for</span> (<span class="kw">int</span> row = <span class="num">0</span>; row &lt; <span class="num">2</span>; row++) {
+    <span class="kw">for</span> (<span class="kw">int</span> col = <span class="num">0</span>; col &lt; <span class="num">3</span>; col++) {
+        <span class="fn">printf</span>(<span class="str">"%d "</span>, matrix[row][col]);
+    }
+    <span class="fn">printf</span>(<span class="str">"\n"</span>);
 }</code></pre>
-              </div>
-              <div class="c-concept-card">
-                <h4>Strings — Character Arrays</h4>
-                <p>Strings in C are null-terminated character arrays. The <code>&lt;string.h&gt;</code> header provides useful string functions.</p>
-              </div>
-              <div class="c-code-block">
-                <div class="c-code-header">
-                  <span class="c-code-lang">C</span>
-                  <button type="button" class="c-code-copy" aria-label="Copy code" data-code="#include &lt;stdio.h&gt;
-#include &lt;string.h&gt;
+        </div>
+
+        <!-- Exercise -->
+        <div class="c-exercise" id="exercise-arrays">
+          <div class="c-exercise-title">
+            Practice: Arrays
+          </div>
+          <p>Find the largest element in an array:</p>
+          <ol>
+            <li>Declare an <code>int</code> array <code>scores[] = {88, 92, 75, 100, 83}</code></li>
+            <li>Loop through the array to find the maximum value</li>
+            <li>Print the maximum using <code>printf</code></li>
+          </ol>
+          <button type="button" class="c-exercise-toggle" aria-expanded="false" aria-controls="solution-arrays">Show Solution</button>
+          <div class="c-exercise-solution" id="solution-arrays">
+            <div class="c-code-block">
+              <div class="c-code-header">
+                <span class="c-code-lang">C</span>
+                <button type="button" class="c-code-copy" aria-label="Copy code" data-code='#include <stdio.h>
 
 int main() {
-    char text[] = &quot;Hello, C!&quot;;
-    char copy[20];
+    int scores[] = {88, 92, 75, 100, 83};
+    int n = sizeof(scores) / sizeof(scores[0]);
+    int max = scores[0];
 
-    printf(&quot;Length: %lu\n&quot;, strlen(text));
-    printf(&quot;Uppercase: %s\n&quot;, strupr(text));  // Note: non-standard
-    strcpy(copy, text);
-    printf(&quot;Copied: %s\n&quot;, copy);
-    printf(&quot;First 5 chars: %.5s\n&quot;, text);
+    for (int i = 1; i < n; i++) {
+        if (scores[i] > max) max = scores[i];
+    }
+    printf("Max: %d\n", max);
     return 0;
-}">Copy</button>
-                </div>
-                <pre><code><span class="tok-pch">#include</span> <span class="tok-str">&lt;stdio.h&gt;</span>
-<span class="tok-pch">#include</span> <span class="tok-str">&lt;string.h&gt;</span>
-
-<span class="tok-kw">int</span> <span class="tok-fn">main</span>() {
-    <span class="tok-kw">char</span> text[] = <span class="tok-str">"Hello, C!"</span>;
-
-    <span class="tok-fn">printf</span>(<span class="tok-str">"Length: %lu\n"</span>, <span class="tok-fn">strlen</span>(text));
-    <span class="tok-fn">printf</span>(<span class="tok-str">"First 5 chars: %.5s\n"</span>, text);
-    <span class="tok-kw">return</span> <span class="tok-num">0</span>;
-}</code></pre>
+}'><i class="fas fa-copy"></i> Copy</button>
               </div>
+              <pre><code><span class="kw">int</span> scores[] = {<span class="num">88</span>, <span class="num">92</span>, <span class="num">75</span>, <span class="num">100</span>, <span class="num">83</span>};
+<span class="kw">int</span> n = <span class="kw">sizeof</span>(scores) / <span class="kw">sizeof</span>(scores[<span class="num">0</span>]);
+<span class="kw">int</span> max = scores[<span class="num">0</span>];
 
-              <div class="c-exercise" id="exercise-arrays-strings">
-                <div class="c-exercise-title">
-                  <i class="fas fa-dumbbell"></i> Practice: Arrays &amp; Strings
-                </div>
-                <ol>
-                  <li>Create an array of 5 integers and calculate their sum using a for loop</li>
-                  <li>Write code to count how many vowels are in a given string</li>
-                </ol>
-                <button type="button" class="c-exercise-toggle" aria-expanded="false" aria-controls="solution-arrays-strings">Show Solution</button>
-                <div class="c-exercise-solution" id="solution-arrays-strings">
-                  <div class="c-code-block">
-                    <div class="c-code-header">
-                      <span class="c-code-lang">C</span>
-                      <button type="button" class="c-code-copy" aria-label="Copy code" data-code="#include &lt;stdio.h&gt;
-#include &lt;string.h&gt;
+<span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">1</span>; i &lt; n; i++) {
+    <span class="kw">if</span> (scores[i] > max) max = scores[i];
+}
+<span class="fn">printf</span>(<span class="str">"Max: %d\n"</span>, max);</code></pre>
+            </div>
+          </div>
+        </div>
+      </article>
 
-int main() {
-    // Sum of array
-    int nums[] = {10, 20, 30, 40, 50};
-    int sum = 0;
-    int len = sizeof(nums) / sizeof(nums[0]);
-    for (int i = 0; i &lt; len; i++) {
-        sum += nums[i];
-    }
-    printf(&quot;Sum: %d\n&quot;, sum);
+      <!-- ════════════════════════════════════════
+           LESSON 10: POINTERS
+           ════════════════════════════════════════ -->
+      <article class="c-lesson" id="topic-pointers" data-topic="9">
+        <div class="c-lesson-header">
+          <span class="c-lesson-number">10</span>
+          <h3>Pointers — C's Most Powerful Feature</h3>
+        </div>
 
-    // Count vowels
-    char str[] = &quot;hello world&quot;;
-    int vowels = 0;
-    for (int i = 0; i &lt; strlen(str); i++) {
-        char c = str[i];
-        if (c == 'a' || c == 'e' || c == 'i' || c == 'o' || c == 'u') {
-            vowels++;
-        }
-    }
-    printf(&quot;Vowels: %d\n&quot;, vowels);
-    return 0;
-}">Copy</button>
-                    </div>
-                    <pre><code><span class="tok-pch">#include</span> <span class="tok-str">&lt;stdio.h&gt;</span>
-<span class="tok-pch">#include</span> <span class="tok-str">&lt;string.h&gt;</span>
+        <p>
+          Pointers are variables that store <strong>memory addresses</strong> rather than values. They are what gives C its power and its reputation — direct memory access enables systems programming, but also requires careful discipline.
+        </p>
 
-<span class="tok-kw">int</span> <span class="tok-fn">main</span>() {
-    <span class="tok-cmt">// Sum of array</span>
-    <span class="tok-kw">int</span> nums[] = {<span class="tok-num">10</span>, <span class="tok-num">20</span>, <span class="tok-num">30</span>, <span class="tok-num">40</span>, <span class="tok-num">50</span>};
-    <span class="tok-kw">int</span> sum = <span class="tok-num">0</span>;
-    <span class="tok-kw">int</span> len = <span class="tok-kw">sizeof</span>(nums) / <span class="tok-kw">sizeof</span>(nums[<span class="tok-num">0</span>]);
-    <span class="tok-kw">for</span> (<span class="tok-kw">int</span> i = <span class="tok-num">0</span>; i &lt; len; i++) {
-        sum += nums[i];
-    }
-    <span class="tok-fn">printf</span>(<span class="tok-str">"Sum: %d\n"</span>, sum);
+        <div class="c-concept">
+          <h4>Pointer Basics</h4>
+          <ul>
+            <li><code>&amp;variable</code> — gets the memory address of a variable</li>
+            <li><code>*pointer</code> — dereferences a pointer to access the value at the address</li>
+            <li><code>int *ptr;</code> — declares a pointer to an integer</li>
+            <li><code>NULL</code> — a pointer that points to nothing (safe to check)</li>
+          </ul>
+        </div>
 
-    <span class="tok-cmt">// Count vowels</span>
-    <span class="tok-kw">char</span> str[] = <span class="tok-str">"hello world"</span>;
-    <span class="tok-kw">int</span> vowels = <span class="tok-num">0</span>;
-    <span class="tok-kw">for</span> (<span class="tok-kw">int</span> i = <span class="tok-num">0</span>; i &lt; <span class="tok-fn">strlen</span>(str); i++) {
-        <span class="tok-kw">char</span> c = str[i];
-        <span class="tok-kw">if</span> (c == <span class="tok-str">'a'</span> || c == <span class="tok-str">'e'</span> || c == <span class="tok-str">'i'</span> || c == <span class="tok-str">'o'</span> || c == <span class="tok-str">'u'</span>) {
-            vowels++;
-        }
-    }
-    <span class="tok-fn">printf</span>(<span class="tok-str">"Vowels: %d\n"</span>, vowels);
-    <span class="tok-kw">return</span> <span class="tok-num">0</span>;
-}</code></pre>
-                  </div>
-                </div>
-              </div>
-            </article>
-
-            <article class="c-lesson" id="pointers" data-topic="10">
-              <div class="c-lesson-header">
-                <span class="c-lesson-number">10</span>
-                <h3>Pointers Basics</h3>
-              </div>
-              <p>
-                A <strong>pointer</strong> is a variable that stores the memory address of another variable. Pointers are one of C's most powerful features — they give you direct access to memory and enable dynamic memory allocation.
-              </p>
-              <div class="c-concept-card">
-                <h4>Pointer Syntax</h4>
-                <ul>
-                  <li><code>int *ptr;</code> — declares a pointer to an integer</li>
-                  <li><code>&amp;variable</code> — gets the memory address of a variable</li>
-                  <li><code>*ptr</code> — dereferences a pointer (accesses the value at the address)</li>
-                </ul>
-              </div>
-              <div class="c-code-block">
-                <div class="c-code-header">
-                  <span class="c-code-lang">C</span>
-                  <button type="button" class="c-code-copy" aria-label="Copy code" data-code="#include &lt;stdio.h&gt;
+        <div class="c-code-block">
+          <div class="c-code-header">
+            <span class="c-code-lang">C</span>
+            <button type="button" class="c-code-copy" aria-label="Copy code" data-code='#include <stdio.h>
 
 int main() {
     int x = 42;
-    int *ptr = &amp;x;  // ptr stores the address of x
+    int *ptr = &x;  // ptr holds the address of x
 
-    printf(&quot;Value of x: %d\n&quot;, x);
-    printf(&quot;Address of x: %p\n&quot;, &amp;x);
-    printf(&quot;Value of ptr: %p\n&quot;, ptr);
-    printf(&quot;Value at ptr: %d\n&quot;, *ptr);  // dereference
+    printf("Value of x: %d\n", x);       // 42
+    printf("Address of x: %p\n", &x);
+    printf("Value of ptr: %p\n", ptr);   // same address
+    printf("Dereference ptr: %d\n", *ptr); // 42
 
     // Modify x through the pointer
     *ptr = 100;
-    printf(&quot;New value of x: %d\n&quot;, x);
+    printf("New value of x: %d\n", x);   // 100
+
     return 0;
-}">Copy</button>
-                </div>
-                <pre><code><span class="tok-pch">#include</span> <span class="tok-str">&lt;stdio.h&gt;</span>
+}'><i class="fas fa-copy"></i> Copy</button>
+          </div>
+          <pre><code><span class="kw">int</span> x = <span class="num">42</span>;
+<span class="kw">int</span> *ptr = &x;
 
-<span class="tok-kw">int</span> <span class="tok-fn">main</span>() {
-    <span class="tok-kw">int</span> x = <span class="tok-num">42</span>;
-    <span class="tok-kw">int</span> *ptr = &amp;x;  <span class="tok-cmt">// ptr stores the address of x</span>
+<span class="fn">printf</span>(<span class="str">"Value: %d\n"</span>, x);       <span class="cmt">// 42</span>
+<span class="fn">printf</span>(<span class="str">"Address: %p\n"</span>, &x);
+<span class="fn">printf</span>(<span class="str">"Dereference: %d\n"</span>, *ptr); <span class="cmt">// 42</span>
 
-    <span class="tok-fn">printf</span>(<span class="tok-str">"Value of x: %d\n"</span>, x);
-    <span class="tok-fn">printf</span>(<span class="tok-str">"Address of x: %p\n"</span>, &amp;x);
-    <span class="tok-fn">printf</span>(<span class="tok-str">"Value of ptr: %p\n"</span>, ptr);
-    <span class="tok-fn">printf</span>(<span class="tok-str">"Value at ptr: %d\n"</span>, *ptr);  <span class="tok-cmt">// dereference</span>
+*ptr = <span class="num">100</span>;  <span class="cmt">// modify x through ptr</span>
+<span class="fn">printf</span>(<span class="str">"New value: %d\n"</span>, x);   <span class="cmt">// 100</span></code></pre>
+        </div>
 
-    <span class="tok-cmt">// Modify x through the pointer</span>
-    *ptr = <span class="tok-num">100</span>;
-    <span class="tok-fn">printf</span>(<span class="tok-str">"New value of x: %d\n"</span>, x);
-    <span class="tok-kw">return</span> <span class="tok-num">0</span>;
-}</code></pre>
-              </div>
-              <div class="c-output">
-                <div class="c-output-label">Output</div>
-                <pre>Value of x: 42
-Address of x: 0x16f0a3c1c
-Value of ptr: 0x16f0a3c1c
-Value at ptr: 42
+        <div class="c-output">
+          <div class="c-output-label">Output</div>
+          <pre>Value of x: 42
+Address of x: 0x7ffeea3b
+Value of ptr: 0x7ffeea3b
+Dereference ptr: 42
 New value of x: 100</pre>
-              </div>
-              <div class="c-concept-card">
-                <h4>Pointers and Arrays</h4>
-                <p>Array names are essentially pointers to the first element. <code>arr[i]</code> is equivalent to <code>*(arr + i)</code>.</p>
-              </div>
-              <div class="c-code-block">
-                <div class="c-code-header">
-                  <span class="c-code-lang">C</span>
-                  <button type="button" class="c-code-copy" aria-label="Copy code" data-code="#include &lt;stdio.h&gt;
+        </div>
+
+        <div class="c-concept">
+          <h4>Pointers and Arrays</h4>
+          <p>Array names act as pointers to the first element. <code>arr[i]</code> is equivalent to <code>*(arr + i)</code>. This is why arrays are zero-indexed — the index represents the offset from the base address.</p>
+        </div>
+
+        <div class="c-code-block">
+          <div class="c-code-header">
+            <span class="c-code-lang">C</span>
+            <button type="button" class="c-code-copy" aria-label="Copy code" data-code='int arr[] = {10, 20, 30};
+int *p = arr;  // points to arr[0]
+
+printf("%d\n", *p);       // 10  (arr[0])
+printf("%d\n", *(p + 1)); // 20  (arr[1])
+printf("%d\n", p[2]);     // 30  (same as arr[2])
+
+// Pointer arithmetic
+p++;  // now points to arr[1]
+printf("%d\n", *p); // 20'><i class="fas fa-copy"></i> Copy</button>
+          </div>
+          <pre><code><span class="kw">int</span> arr[] = {<span class="num">10</span>, <span class="num">20</span>, <span class="num">30</span>};
+<span class="kw">int</span> *p = arr;
+
+<span class="fn">printf</span>(<span class="str">"%d\n"</span>, *p);        <span class="cmt">// 10</span>
+<span class="fn">printf</span>(<span class="str">"%d\n"</span>, *(p + <span class="num">1</span>));  <span class="cmt">// 20</span>
+<span class="fn">printf</span>(<span class="str">"%d\n"</span>, p[<span class="num">2</span>]);      <span class="cmt">// 30</span>
+
+p++;   <span class="cmt">// points to arr[1]</span>
+<span class="fn">printf</span>(<span class="str">"%d\n"</span>, *p); <span class="cmt">// 20</span></code></pre>
+        </div>
+
+        <div class="c-callout">
+          <p><strong>Dereferencing a <code>NULL</code> or uninitialized pointer causes a segfault.</strong> Always initialize pointers to a valid address or <code>NULL</code>. Always check for <code>NULL</code> before dereferencing. These rules are the foundation of safe C programming.</p>
+        </div>
+
+        <div class="c-concept">
+          <h4>Dynamic Memory Allocation</h4>
+          <p>Use <code>malloc</code>, <code>calloc</code>, <code>realloc</code>, and <code>free</code> from <code>&lt;stdlib.h&gt;</code> to manage heap memory. Every <code>malloc</code> must have a matching <code>free</code>.</p>
+        </div>
+
+        <div class="c-code-block">
+          <div class="c-code-header">
+            <span class="c-code-lang">C</span>
+            <button type="button" class="c-code-copy" aria-label="Copy code" data-code='#include <stdlib.h>
+#include <stdio.h>
 
 int main() {
-    int arr[] = {10, 20, 30, 40, 50};
-    int *p = arr;  // p points to arr[0]
-
-    printf(&quot;First element: %d\n&quot;, *p);
-    printf(&quot;Second element: %d\n&quot;, *(p + 1));
-    printf(&quot;Third element: %d\n&quot;, *(p + 2));
-
-    // Loop using pointer arithmetic
-    for (int i = 0; i &lt; 5; i++) {
-        printf(&quot;arr[%d] = %d\n&quot;, i, *(p + i));
+    int *arr = malloc(5 * sizeof(int));
+    if (arr == NULL) {
+        printf("Memory allocation failed\n");
+        return 1;
     }
+
+    for (int i = 0; i < 5; i++) {
+        arr[i] = i * 10;
+    }
+
+    free(arr);  // always free!
     return 0;
-}">Copy</button>
-                </div>
-                <pre><code><span class="tok-pch">#include</span> <span class="tok-str">&lt;stdio.h&gt;</span>
+}'><i class="fas fa-copy"></i> Copy</button>
+          </div>
+          <pre><code><span class="kw">int</span> *arr = <span class="fn">malloc</span>(<span class="num">5</span> * <span class="kw">sizeof</span>(<span class="kw">int</span>));
+<span class="kw">if</span> (arr == <span class="kw">NULL</span>) {
+    <span class="fn">printf</span>(<span class="str">"Memory allocation failed\n"</span>);
+    <span class="kw">return</span> <span class="num">1</span>;
+}
 
-<span class="tok-kw">int</span> <span class="tok-fn">main</span>() {
-    <span class="tok-kw">int</span> arr[] = {<span class="tok-num">10</span>, <span class="tok-num">20</span>, <span class="tok-num">30</span>, <span class="tok-num">40</span>, <span class="tok-num">50</span>};
-    <span class="tok-kw">int</span> *p = arr;  <span class="tok-cmt">// p points to arr[0]</span>
+<span class="cmt">// use arr...</span>
+<span class="fn">free</span>(arr);  <span class="cmt">// always free!</span></code></pre>
+        </div>
 
-    <span class="tok-fn">printf</span>(<span class="tok-str">"First element: %d\n"</span>, *p);
-    <span class="tok-fn">printf</span>(<span class="tok-str">"Second element: %d\n"</span>, *(p + <span class="tok-num">1</span>));
-    <span class="tok-fn">printf</span>(<span class="tok-str">"Third element: %d\n"</span>, *(p + <span class="tok-num">2</span>));
+        <div class="c-callout">
+          <p><strong>Memory leaks</strong> occur when dynamically allocated memory is never freed. Use tools like <strong>Valgrind</strong> to detect leaks. A good rule: every <code>malloc</code>/<code>calloc</code>/<code>realloc</code> should have a corresponding <code>free</code> in the same scope or clearly documented ownership.</p>
+        </div>
 
-    <span class="tok-cmt">// Loop using pointer arithmetic</span>
-    <span class="tok-kw">for</span> (<span class="tok-kw">int</span> i = <span class="tok-num">0</span>; i &lt; <span class="tok-num">5</span>; i++) {
-        <span class="tok-fn">printf</span>(<span class="tok-str">"arr[%d] = %d\n"</span>, i, *(p + i));
-    }
-    <span class="tok-kw">return</span> <span class="tok-num">0</span>;
-}</code></pre>
-              </div>
-              <div class="c-callout">
-                <span class="c-callout-icon">⚠️</span>
-                <p>Always make sure a pointer points to a valid memory address before dereferencing it. <strong>Dangling pointers</strong> (pointers to freed or invalid memory) and <strong>NULL pointer dereferencing</strong> are common sources of bugs and crashes in C.</p>
-              </div>
+        <div class="c-concept">
+          <h4>Function Pointers</h4>
+          <p>Functions themselves have memory addresses. A <strong>function pointer</strong> stores this address, allowing you to pass functions as arguments or call them dynamically. Declared as <code>int (*op)(int, int)</code> — a pointer to a function that takes two ints and returns an int. This pattern powers callback mechanisms, event handlers, and generic algorithms like <code>qsort</code>.</p>
+        </div>
 
-              <div class="c-exercise" id="exercise-pointers">
-                <div class="c-exercise-title">
-                  <i class="fas fa-dumbbell"></i> Practice: Pointers
-                </div>
-                <ol>
-                  <li>Declare an <code>int</code> variable and a pointer to it</li>
-                  <li>Use the pointer to change the variable's value</li>
-                  <li>Print the variable's value before and after the change</li>
-                </ol>
-                <button type="button" class="c-exercise-toggle" aria-expanded="false" aria-controls="solution-pointers">Show Solution</button>
-                <div class="c-exercise-solution" id="solution-pointers">
-                  <div class="c-code-block">
-                    <div class="c-code-header">
-                      <span class="c-code-lang">C</span>
-                      <button type="button" class="c-code-copy" aria-label="Copy code" data-code="#include &lt;stdio.h&gt;
+        <div class="c-code-block">
+          <div class="c-code-header">
+            <span class="c-code-lang">C</span>
+            <button type="button" class="c-code-copy" aria-label="Copy code" data-code='int add(int a, int b) { return a + b; }
+int sub(int a, int b) { return a - b; }
 
 int main() {
-    int num = 50;
-    int *ptr = &amp;num;
+    int (*op)(int, int);  // function pointer
 
-    printf(&quot;Before: %d\n&quot;, num);
+    op = add;
+    printf("add: %d\n", op(10, 5));  // 15
 
-    *ptr = 500;
-    printf(&quot;After: %d\n&quot;, num);
-    printf(&quot;Via pointer: %d\n&quot;, *ptr);
+    op = sub;
+    printf("sub: %d\n", op(10, 5));  // 5
+
     return 0;
-}">Copy</button>
-                    </div>
-                    <pre><code><span class="tok-pch">#include</span> <span class="tok-str">&lt;stdio.h&gt;</span>
+}'><i class="fas fa-copy"></i> Copy</button>
+          </div>
+          <pre><code><span class="kw">int</span> (*op)(<span class="kw">int</span>, <span class="kw">int</span>);
+op = add;
+<span class="fn">printf</span>(<span class="str">"%d\n"</span>, op(<span class="num">10</span>, <span class="num">5</span>));</code></pre>
+        </div>
 
-<span class="tok-kw">int</span> <span class="tok-fn">main</span>() {
-    <span class="tok-kw">int</span> num = <span class="tok-num">50</span>;
-    <span class="tok-kw">int</span> *ptr = &amp;num;
+        <div class="c-concept">
+          <h4>Key Takeaways</h4>
+          <ul>
+            <li>Pointers store <strong>memory addresses</strong> — the &amp; operator gets an address, * dereferences it</li>
+            <li>Array names decay to pointers — <code>arr[i]</code> is syntactic sugar for <code>*(arr + i)</code></li>
+            <li>Always check <code>malloc</code> return for <code>NULL</code> and <code>free</code> every allocation</li>
+            <li>Function pointers enable <strong>callbacks</strong> and generic programming patterns</li>
+            <li>Use <strong>Valgrind</strong> or address sanitizers to detect memory errors</li>
+          </ul>
+        </div>
 
-    <span class="tok-fn">printf</span>(<span class="tok-str">"Before: %d\n"</span>, num);
+        <!-- Exercise -->
+        <div class="c-exercise" id="exercise-pointers">
+          <div class="c-exercise-title">
+            Practice: Pointers
+          </div>
+          <ol>
+            <li>Declare an <code>int x = 7</code> and an <code>int *ptr = &x</code></li>
+            <li>Use <code>printf</code> with <code>%p</code> to print the address in <code>ptr</code></li>
+            <li>Dereference <code>ptr</code> to multiply the value by 2 and store it back</li>
+            <li>Print the new value of <code>x</code></li>
+          </ol>
+          <button type="button" class="c-exercise-toggle" aria-expanded="false" aria-controls="solution-pointers">Show Solution</button>
+          <div class="c-exercise-solution" id="solution-pointers">
+            <div class="c-code-block">
+              <div class="c-code-header">
+                <span class="c-code-lang">C</span>
+                <button type="button" class="c-code-copy" aria-label="Copy code" data-code='#include <stdio.h>
 
-    *ptr = <span class="tok-num">500</span>;
-    <span class="tok-fn">printf</span>(<span class="tok-str">"After: %d\n"</span>, num);
-    <span class="tok-fn">printf</span>(<span class="tok-str">"Via pointer: %d\n"</span>, *ptr);
-    <span class="tok-kw">return</span> <span class="tok-num">0</span>;
-}</code></pre>
-                  </div>
-                </div>
+int main() {
+    int x = 7;
+    int *ptr = &x;
+
+    printf("Address: %p\n", ptr);
+    *ptr = *ptr * 2;
+    printf("New x: %d\n", x);
+    return 0;
+}'><i class="fas fa-copy"></i> Copy</button>
               </div>
-            </article>
+              <pre><code><span class="fn">printf</span>(<span class="str">"Address: %p\n"</span>, ptr);
+*ptr = *ptr * <span class="num">2</span>;
+<span class="fn">printf</span>(<span class="str">"New x: %d\n"</span>, x);</code></pre>
+            </div>
+          </div>
+        </div>
+      </article>
 
-            <article class="c-lesson" id="structs" data-topic="11">
-              <div class="c-lesson-header">
-                <span class="c-lesson-number">11</span>
-                <h3>Structures (struct)</h3>
-              </div>
-              <p>
-                A <strong>struct</strong> (short for structure) is a user-defined data type that groups related variables of different types together under one name.
-                Structures are C's way of creating custom data types before C++ introduced classes.
-              </p>
-              <div class="c-code-block">
-                <div class="c-code-header">
-                  <span class="c-code-lang">C</span>
-                  <button type="button" class="c-code-copy" aria-label="Copy code" data-code="#include &lt;stdio.h&gt;
-#include &lt;string.h&gt;
+      <!-- ════════════════════════════════════════
+           LESSON 11: STRUCTURES
+           ════════════════════════════════════════ -->
+      <div class="c-divider">
+        <span class="c-divider-inner">Data Modeling</span>
+      </div>
+
+      <article class="c-lesson" id="topic-structs" data-topic="10">
+        <div class="c-lesson-header">
+          <span class="c-lesson-number">11</span>
+          <h3>Structures</h3>
+        </div>
+
+        <p>
+          Structures (keyword <code>struct</code>) let you group related variables of different types into a single composite type. They are the foundation of data structures in C — linked lists, trees, and graphs all use structs.
+        </p>
+
+        <div class="c-concept">
+          <h4>Defining and Using Structs</h4>
+          <ul>
+            <li>Use <code>struct keyword { fields };</code> to define a structure type</li>
+            <li>Access members with <code>variable.member</code> (dot operator)</li>
+            <li>Access members through a pointer with <code>pointer->member</code> (arrow operator)</li>
+            <li>Structs can be passed to functions (pass by value) or via pointer (pass by reference)</li>
+          </ul>
+        </div>
+
+        <div class="c-code-block">
+          <div class="c-code-header">
+            <span class="c-code-lang">C</span>
+            <button type="button" class="c-code-copy" aria-label="Copy code" data-code='#include <stdio.h>
+#include <string.h>
 
 // Define a struct
 struct Student {
@@ -1394,187 +1538,174 @@ struct Student {
 };
 
 int main() {
-    // Create a struct variable
-    struct Student student1;
+    // Declare and initialize
+    struct Student alice;
+    strcpy(alice.name, "Alice");
+    alice.age = 20;
+    alice.gpa = 3.85;
 
-    // Assign values
-    strcpy(student1.name, &quot;Alice&quot;);
-    student1.age = 20;
-    student1.gpa = 3.85;
+    // Declare + initialize in one step
+    struct Student bob = {"Bob", 22, 3.4};
 
-    // Access members using dot operator
-    printf(&quot;Name: %s\n&quot;, student1.name);
-    printf(&quot;Age: %d\n&quot;, student1.age);
-    printf(&quot;GPA: %.2f\n&quot;, student1.gpa);
+    // Access using dot operator
+    printf("%s is %d years old, GPA: %.2f\n",
+           alice.name, alice.age, alice.gpa);
+
+    // Pointer to struct using arrow operator
+    struct Student *ptr = &alice;
+    printf("Via pointer: %s\n", ptr->name);
+
     return 0;
-}">Copy</button>
-                </div>
-                <pre><code><span class="tok-pch">#include</span> <span class="tok-str">&lt;stdio.h&gt;</span>
-<span class="tok-pch">#include</span> <span class="tok-str">&lt;string.h&gt;</span>
-
-<span class="tok-cmt">// Define a struct</span>
-<span class="tok-kw">struct</span> <span class="tok-bi">Student</span> {
-    <span class="tok-kw">char</span> name[<span class="tok-num">50</span>];
-    <span class="tok-kw">int</span> age;
-    <span class="tok-kw">float</span> gpa;
+}'><i class="fas fa-copy"></i> Copy</button>
+          </div>
+          <pre><code><span class="kw">struct</span> <span class="fn">Student</span> {
+    <span class="kw">char</span> name[<span class="num">50</span>];
+    <span class="kw">int</span> age;
+    <span class="kw">float</span> gpa;
 };
 
-<span class="tok-kw">int</span> <span class="tok-fn">main</span>() {
-    <span class="tok-cmt">// Create a struct variable</span>
-    <span class="tok-kw">struct</span> <span class="tok-bi">Student</span> student1;
+<span class="kw">struct</span> <span class="fn">Student</span> alice;
+<span class="fn">strcpy</span>(alice.name, <span class="str">"Alice"</span>);
+alice.age = <span class="num">20</span>;
+alice.gpa = <span class="num">3.85</span>;
 
-    <span class="tok-cmt">// Assign values</span>
-    <span class="tok-fn">strcpy</span>(student1.name, <span class="tok-str">"Alice"</span>);
-    student1.age = <span class="tok-num">20</span>;
-    student1.gpa = <span class="tok-num">3.85f</span>;
+<span class="fn">printf</span>(<span class="str">"%s, Age: %d, GPA: %.2f\n"</span>, alice.name, alice.age, alice.gpa);
 
-    <span class="tok-cmt">// Access members using dot operator</span>
-    <span class="tok-fn">printf</span>(<span class="tok-str">"Name: %s\n"</span>, student1.name);
-    <span class="tok-fn">printf</span>(<span class="tok-str">"Age: %d\n"</span>, student1.age);
-    <span class="tok-fn">printf</span>(<span class="tok-str">"GPA: %.2f\n"</span>, student1.gpa);
-    <span class="tok-kw">return</span> <span class="tok-num">0</span>;
-}</code></pre>
-              </div>
-              <div class="c-output">
-                <div class="c-output-label">Output</div>
-                <pre>Name: Alice
-Age: 20
-GPA: 3.85</pre>
-              </div>
-              <div class="c-concept-card">
-                <h4>typedef — Creating Type Aliases</h4>
-                <p>The <code>typedef</code> keyword lets you create an alias for a struct, so you don't have to type <code>struct</code> every time.</p>
-              </div>
-              <div class="c-code-block">
-                <div class="c-code-header">
-                  <span class="c-code-lang">C</span>
-                  <button type="button" class="c-code-copy" aria-label="Copy code" data-code="#include &lt;stdio.h&gt;
-#include &lt;string.h&gt;
+<span class="kw">struct</span> <span class="fn">Student</span> *ptr = &alice;
+<span class="fn">printf</span>(<span class="str">"%s\n"</span>, ptr->name);</code></pre>
+        </div>
 
-typedef struct {
-    char title[100];
-    char author[50];
-    int year;
-} Book;
+        <div class="c-output">
+          <div class="c-output-label">Output</div>
+          <pre>Alice is 20 years old, GPA: 3.85
+Via pointer: Alice</pre></div>
+        </div>
 
-int main() {
-    Book book1;
-    strcpy(book1.title, &quot;1984&quot;);
-    strcpy(book1.author, &quot;George Orwell&quot;);
-    book1.year = 1949;
+        <div class="c-concept">
+          <h4>Typedef — Simplify Struct Usage</h4>
+          <p><code>typedef</code> creates an alias for a type, so you don't need to write <code>struct</code> every time.</p>
+        </div>
 
-    printf(&quot;\&quot;%s\&quot; by %s (%d)\n&quot;, book1.title, book1.author, book1.year);
-    return 0;
-}">Copy</button>
-                </div>
-                <pre><code><span class="tok-pch">#include</span> <span class="tok-str">&lt;stdio.h&gt;</span>
-<span class="tok-pch">#include</span> <span class="tok-str">&lt;string.h&gt;</span>
+        <div class="c-code-block">
+          <div class="c-code-header">
+            <span class="c-code-lang">C</span>
+            <button type="button" class="c-code-copy" aria-label="Copy code" data-code='typedef struct {
+    char name[50];
+    int age;
+    float gpa;
+} Student;
 
-<span class="tok-kw">typedef struct</span> {
-    <span class="tok-kw">char</span> title[<span class="tok-num">100</span>];
-    <span class="tok-kw">char</span> author[<span class="tok-num">50</span>];
-    <span class="tok-kw">int</span> year;
-} <span class="tok-bi">Book</span>;
+Student alice = {"Alice", 20, 3.85};
+// No "struct" keyword needed'><i class="fas fa-copy"></i> Copy</button>
+          </div>
+          <pre><code><span class="kw">typedef</span> <span class="kw">struct</span> {
+    <span class="kw">char</span> name[<span class="num">50</span>];
+    <span class="kw">int</span> age;
+    <span class="kw">float</span> gpa;
+} <span class="fn">Student</span>;
 
-<span class="tok-kw">int</span> <span class="tok-fn">main</span>() {
-    <span class="tok-bi">Book</span> book1;
-    <span class="tok-fn">strcpy</span>(book1.title, <span class="tok-str">"1984"</span>);
-    <span class="tok-fn">strcpy</span>(book1.author, <span class="tok-str">"George Orwell"</span>);
-    book1.year = <span class="tok-num">1949</span>;
+<span class="fn">Student</span> alice = {<span class="str">"Alice"</span>, <span class="num">20</span>, <span class="num">3.85</span>};</code></pre>
+        </div>
 
-    <span class="tok-fn">printf</span>(<span class="tok-str">"\"%s\" by %s (%d)\n"</span>, book1.title, book1.author, book1.year);
-    <span class="tok-kw">return</span> <span class="tok-num">0</span>;
-}</code></pre>
-              </div>
-              <div class="c-callout">
-                <span class="c-callout-icon">💡</span>
-                <p>Use the <strong>dot operator</strong> (<code>.</code>) to access struct members. For pointers to structs, use the <strong>arrow operator</strong> (<code>&rarr;</code>): <code>ptr-&gt;name</code> is equivalent to <code>(*ptr).name</code>. Structs can also contain pointers as members — this is the foundation for linked lists and other dynamic data structures.</p>
-              </div>
+        <div class="c-callout">
+          <p><strong>Structs are passed by value</strong> to functions — the entire struct is copied. For large structs, pass a pointer to avoid overhead: <code>void printStudent(struct Student *s)</code>. Memory alignment and padding may make structs larger than the sum of their fields.</p>
+        </div>
 
-              <div class="c-exercise" id="exercise-structs">
-                <div class="c-exercise-title">
-                  <i class="fas fa-dumbbell"></i> Practice: Structures
-                </div>
-                <p>Define a <code>Rectangle</code> struct with <code>width</code> and <code>height</code> (both <code>int</code>). Write a function that takes a <code>Rectangle</code> and returns its area. Create a rectangle and print its area.</p>
-                <button type="button" class="c-exercise-toggle" aria-expanded="false" aria-controls="solution-structs">Show Solution</button>
-                <div class="c-exercise-solution" id="solution-structs">
-                  <div class="c-code-block">
-                    <div class="c-code-header">
-                      <span class="c-code-lang">C</span>
-                      <button type="button" class="c-code-copy" aria-label="Copy code" data-code="#include &lt;stdio.h&gt;
+        <div class="c-concept">
+          <h4>Nested Structures</h4>
+          <p>Structures can contain other structures as members, creating hierarchical data models. For example, a <code>struct Employee</code> might contain a <code>struct Address</code> inside it. Access nested members with chained dot or arrow operators: <code>emp.address.city</code> or <code>emp->address.city</code>.</p>
+        </div>
 
-typedef struct {
+        <div class="c-code-block">
+          <div class="c-code-header">
+            <span class="c-code-lang">C</span>
+            <button type="button" class="c-code-copy" aria-label="Copy code" data-code='struct Address {
+    char street[100];
+    char city[50];
+    int zip;
+};
+
+struct Employee {
+    char name[50];
+    struct Address addr;  // nested struct
+    double salary;
+};
+
+struct Employee emp = {
+    "Alice",
+    {"123 Main St", "Boston", 02108},
+    75000.0
+};
+
+printf("%s lives in %s\n", emp.name, emp.addr.city);'><i class="fas fa-copy"></i> Copy</button>
+          </div>
+          <pre><code><span class="fn">printf</span>(<span class="str">"%s lives in %s\n"</span>, emp.name, emp.addr.city);</code></pre>
+        </div>
+
+        <div class="c-callout">
+          <p><strong>Struct padding</strong> — the compiler may insert unused bytes between struct members to satisfy alignment requirements. For example, a struct with a <code>char</code> followed by an <code>int</code> may use 8 bytes, not 5. The <code>offsetof</code> macro (from <code>&lt;stddef.h&gt;</code>) tells you the byte offset of a member. You can minimize padding by ordering members from largest to smallest.</p>
+        </div>
+
+        <!-- Exercise -->
+        <div class="c-exercise" id="exercise-structs">
+          <div class="c-exercise-title">
+            Practice: Structures
+          </div>
+          <p>Define a <code>struct Rectangle</code> with <code>width</code> and <code>height</code>, then write a function that calculates the area:</p>
+          <ol>
+            <li>Define <code>struct Rectangle { int width; int height; }</code></li>
+            <li>Write a function <code>int area(struct Rectangle r)</code> that returns <code>r.width * r.height</code></li>
+            <li>Create a Rectangle, call area(), and print the result</li>
+          </ol>
+          <button type="button" class="c-exercise-toggle" aria-expanded="false" aria-controls="solution-structs">Show Solution</button>
+          <div class="c-exercise-solution" id="solution-structs">
+            <div class="c-code-block">
+              <div class="c-code-header">
+                <span class="c-code-lang">C</span>
+                <button type="button" class="c-code-copy" aria-label="Copy code" data-code='#include <stdio.h>
+
+struct Rectangle {
     int width;
     int height;
-} Rectangle;
+};
 
-int getArea(Rectangle r) {
+int area(struct Rectangle r) {
     return r.width * r.height;
 }
 
 int main() {
-    Rectangle rect = {10, 5};
-    printf(&quot;Area: %d\n&quot;, getArea(rect));
+    struct Rectangle rect = {10, 5};
+    printf("Area: %d\n", area(rect));
     return 0;
-}">Copy</button>
-                    </div>
-                    <pre><code><span class="tok-pch">#include</span> <span class="tok-str">&lt;stdio.h&gt;</span>
+}'><i class="fas fa-copy"></i> Copy</button>
+              </div>
+              <pre><code><span class="kw">struct</span> <span class="fn">Rectangle</span> {
+    <span class="kw">int</span> width;
+    <span class="kw">int</span> height;
+};
 
-<span class="tok-kw">typedef struct</span> {
-    <span class="tok-kw">int</span> width;
-    <span class="tok-kw">int</span> height;
-} <span class="tok-bi">Rectangle</span>;
-
-<span class="tok-kw">int</span> <span class="tok-fn">getArea</span>(<span class="tok-bi">Rectangle</span> r) {
-    <span class="tok-kw">return</span> r.width * r.height;
-}
-
-<span class="tok-kw">int</span> <span class="tok-fn">main</span>() {
-    <span class="tok-bi">Rectangle</span> rect = {<span class="tok-num">10</span>, <span class="tok-num">5</span>};
-    <span class="tok-fn">printf</span>(<span class="tok-str">"Area: %d\n"</span>, <span class="tok-fn">getArea</span>(rect));
-    <span class="tok-kw">return</span> <span class="tok-num">0</span>;
+<span class="kw">int</span> <span class="fn">area</span>(<span class="kw">struct</span> <span class="fn">Rectangle</span> r) {
+    <span class="kw">return</span> r.width * r.height;
 }</code></pre>
-                  </div>
-                </div>
-              </div>
-            </article>
-
-            <article class="c-lesson" id="playground">
-              <div class="c-lesson-header">
-                <span class="c-lesson-number">12</span>
-                <h3>C Learning Playground</h3>
-              </div>
-              <p>
-                Ready to practice what you've learned? Use our interactive C editor to write, compile, and run your code directly in the browser.
-              </p>
-              <div class="c-concept-card playground-card" style="border: 2px dashed #5B9CF8; background: rgba(91, 156, 248, 0.05); text-align: center; padding: 3rem 1rem;">
-                <i class="fas fa-terminal" style="font-size: 3rem; color: #5B9CF8; margin-bottom: 1.5rem;"></i>
-                <h4>Interactive C Editor</h4>
-                <p>Test pointers, structs, and loops with real-time output.</p>
-                <a href="/pages/editors/c-editor/c-editor.html" class="btn btn-primary" style="background: linear-gradient(135deg, #5B9CF8 0%, #A8D0FF 100%); border: none; margin-top: 1rem;">
-                  <i class="fas fa-play"></i> Launch Editor
-                </a>
-              </div>
-            </article>
-
-          </main>
+            </div>
+          </div>
         </div>
-      </div>
+      </article>
+
     </section>
 
-    <div id="footer-placeholder"></div>
+    <!-- ════════════════════════════════════════
+         FOOTER
+         ════════════════════════════════════════ -->
+    <footer class="c-footer">
+      <p>Practice your skills in the <a href="/pages/editors/c-editor/c-editor.html">C Editor →</a></p>
+      <p>Back to <a href="/pages/learning/languages.html">Programming Languages</a></p>
+    </footer>
+  </main>
 
-    <script src="/auth.js"></script>
-    <script src="/bootstrap-legacy.js"></script>
-
-    <script src="/script.js"></script>
-    <script type="module" src="/dist/legacy-bundle.mjs"></script>
-    <script src="/theme.js"></script>
-    <script src="./c-learning.js"></script>
-  
-  <script>
-    loadPartial('navbar-placeholder', '/partials/navbar.html');
-    loadPartial('footer-placeholder', '/partials/footer.html');
-  </script>
+  <script src="/auth.js"></script>
+  <script src="/theme.js"></script>
+  <script src="/script.js"></script>
+  <script src="c-learning.js"></script>
 </body>
 </html>

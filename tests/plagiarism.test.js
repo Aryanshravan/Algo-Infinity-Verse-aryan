@@ -119,10 +119,12 @@ describe('AST-Based Plagiarism & Similarity Detection Engine', () => {
     });
 
     it('should fallback to tokenizer on JS syntax error', () => {
+      const warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
       const malformedJs = 'function hello( { if(true) { return 1; } ';
       const seq = getJsStructuralSequence(malformedJs);
       expect(seq).toContain('IfStatement');
       expect(seq).toContain('ReturnStatement');
+      warnSpy.mockRestore();
     });
 
     it('should extract structural tokens from Python code', () => {

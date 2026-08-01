@@ -1,150 +1,205 @@
 <!doctype html>
 <html lang="en">
-<head>
+  <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>LSM-Tree Storage Engine | Algo Infinity Verse</title>
-    <meta name="description" content="Visualize Log-Structured Merge-Trees, SSTables, Bloom Filters, and Compaction." />
-    
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Poppins:wght@300;400;500;600;700&family=Fira+Code:wght@400;500;600&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
-    
-    <!-- External Stylesheets -->
-    <link rel="stylesheet" href="/styles.css" />
+    <title>LSM-Tree Engine Simulator | Algo Infinity Verse</title>
+    <meta
+      name="description"
+      content="Interactive visualizer for Log-Structured Merge-Trees (LSM Trees), Leveled Compaction, Bloom Filters, and WAL Crash Recovery."
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Poppins:wght@300;400;500;600;700&family=Fira+Code:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <link rel="stylesheet" href="../../../styles.css" />
     <link rel="stylesheet" href="lsm-tree.css" />
-  <script src="/theme.js"></script>
-</head>
-<body class="lsm-body">
+    <script src="../../../modules/toast.js"></script>
+  </head>
+  <body class="lsm-body">
+    <div id="navbar-placeholder"></div>
 
-    <nav class="navbar lsm-nav">
-        <div class="nav-logo">
-            <span class="logo-text">∞</span>
-            <span class="logo-title">Algo Infinity Verse</span>
-        </div>
-        <div class="engine-badge" id="engineBadge">
-            <i class="fas fa-database"></i> NoSQL Engine: Active
-        </div>
-    </nav>
+    <section class="lsm-hero">
+      <div class="lsm-hero-bg"></div>
+      <div class="lsm-hero-inner">
+        <div class="lsm-eyebrow">Production Database Engine</div>
+        <h1 class="lsm-title">LSM-Tree & Leveled Compaction</h1>
+        <p class="lsm-desc">
+          Dive into the core of RocksDB and Cassandra. Visualize sequential
+          <strong>Write-Ahead Logs</strong>, in-memory <strong>MemTables</strong>, and watch how
+          <strong>Bloom Filters</strong> mathematically rescue the engine from crippling disk I/O
+          during read queries.
+        </p>
+      </div>
+    </section>
 
-    <main class="lsm-workspace">
-        
-        <!-- Left Panel: Controls & Telemetry -->
-        <div class="panel-left">
-            <div class="panel-header">
-                <h3><i class="fas fa-cogs"></i> Database Client</h3>
-            </div>
-            
-            <div class="control-section">
-                <p class="desc-text">
-                    <strong>LSM-Trees</strong> optimize for heavy writes. Data is written to a volatile <strong>MemTable</strong> and sequentially flushed to immutable <strong>SSTables</strong> on disk. Background <strong>Compaction</strong> merges and deduplicates them.
-                </p>
+    <div class="lsm-dashboard container">
+      <!-- Top Controls -->
+      <div class="lsm-top-grid">
+        <!-- WRITE PATH -->
+        <div class="lsm-panel glass-panel">
+          <div class="lsm-panel-header">
+            <i class="fas fa-pen-nib"></i> The Write Path (PUT / DELETE)
+          </div>
 
-                <!-- Input Controls -->
-                <div class="input-grid">
-                    <div class="input-group">
-                        <label>Key (ID)</label>
-                        <input type="number" id="inputKey" placeholder="e.g. 42" />
-                    </div>
-                    <div class="input-group">
-                        <label>Value</label>
-                        <input type="text" id="inputValue" placeholder="e.g. Alice" />
-                    </div>
-                </div>
+          <div class="lsm-input-group">
+            <input type="text" id="inputKey" placeholder="Key (e.g., user123)" />
+            <input type="text" id="inputValue" placeholder="Value" />
+          </div>
 
-                <div class="action-grid mt-3">
-                    <button type="button" class="btn btn-primary" id="btnInsert">
-                        <i class="fas fa-pen"></i> Write (Put)
-                    </button>
-                    <button type="button" class="btn btn-danger" id="btnDelete">
-                        <i class="fas fa-trash"></i> Delete
-                    </button>
-                    <button type="button" class="btn btn-success" id="btnRead" style="grid-column: span 2;">
-                        <i class="fas fa-search"></i> Read (Get)
-                    </button>
-                </div>
+          <div class="lsm-btn-group mt-3">
+            <button class="btn btn-primary" id="btnPut"><i class="fas fa-save"></i> PUT</button>
+            <button class="btn btn-danger" id="btnDelete">
+              <i class="fas fa-trash"></i> DELETE (Tombstone)
+            </button>
+            <button class="btn btn-secondary" id="btnBulkLoad">
+              <i class="fas fa-bolt"></i> Bulk Insert (x10)
+            </button>
+          </div>
 
-                <!-- Simulation Controls -->
-                <div class="sim-controls mt-3">
-                    <button type="button" class="btn btn-outline w-100" id="btnSimulateLoad">
-                        <i class="fas fa-bolt"></i> Simulate Write-Heavy Workload
-                    </button>
-                </div>
-            </div>
-
-            <!-- Write-Ahead Log (WAL) Viewer -->
-            <div class="wal-section">
-                <div class="section-title">
-                    <h4><i class="fas fa-list-alt"></i> Write-Ahead Log (WAL)</h4>
-                </div>
-                <div class="wal-container" id="walLog">
-                    <div class="empty-state-text" id="walEmpty">WAL is empty.</div>
-                    <!-- Logs injected via JS -->
-                </div>
-            </div>
-
-            <!-- Telemetry & Search Logs -->
-            <div class="telemetry-section">
-                <h4><i class="fas fa-satellite-dish"></i> Query Router Logs</h4>
-                <div class="query-logs" id="queryLogs">
-                    <div class="log-entry sys">> Waiting for queries...</div>
-                </div>
-            </div>
-
+          <div class="lsm-control-group mt-4 border-top">
+            <label class="text-warning"><i class="fas fa-bolt"></i> Disaster Recovery</label>
+            <button class="btn btn-warning w-100 mb-2" id="btnCrash">
+              <i class="fas fa-power-off"></i> Simulate Power Outage
+            </button>
+            <p class="lsm-hint text-center">Wipes RAM. Rebuilds MemTable from disk WAL.</p>
+          </div>
         </div>
 
-        <!-- Right Panel: Architecture Visualization -->
-        <div class="panel-right">
-            
-            <!-- RAM Zone -->
-            <div class="arch-tier ram-tier">
-                <div class="tier-header">
-                    <span><i class="fas fa-memory"></i> RAM (Volatile)</span>
-                    <span class="tier-stats">Size: <span id="memSizeDisplay">0</span> / 4</span>
-                </div>
-                <div class="memtable-container" id="memTableContainer">
-                    <div class="empty-state-text" id="memTableEmpty">MemTable is empty. Waiting for writes.</div>
-                    <div class="key-value-list" id="memTableList"></div>
-                </div>
+        <!-- READ PATH -->
+        <div class="lsm-panel glass-panel">
+          <div class="lsm-panel-header text-success">
+            <i class="fas fa-search"></i> The Read Path (GET)
+          </div>
+
+          <div class="lsm-input-group">
+            <input type="text" id="readKey" placeholder="Search Key (e.g., user123)" />
+            <button class="btn btn-success" id="btnGet" style="flex: 0 0 100px">
+              <i class="fas fa-search"></i> GET
+            </button>
+          </div>
+
+          <div class="lsm-read-log mt-3" id="readPathLog">
+            <!-- Read path events inject here -->
+            <div class="lsm-hint text-center pt-2">
+              Enter a key to trace its query path through RAM, Bloom Filters, and Disk.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Engine Architecture Layout -->
+      <div class="lsm-architecture-grid mt-4">
+        <!-- RAM LAYER -->
+        <div class="lsm-layer-ram glass-panel">
+          <div class="lsm-layer-header"><i class="fas fa-memory"></i> RAM (Volatile Memory)</div>
+
+          <div class="lsm-ram-flex">
+            <!-- MemTable -->
+            <div class="lsm-memtable-wrap">
+              <div class="lsm-component-title">
+                MemTable
+                <span class="lsm-badge" id="memCapacity">0 / 5</span>
+              </div>
+              <div class="lsm-data-list" id="memTableList">
+                <!-- MemTable entries injected here -->
+              </div>
             </div>
 
-            <!-- Disk Level 0 -->
-            <div class="arch-tier disk-tier level-0">
-                <div class="tier-header">
-                    <span><i class="fas fa-hdd"></i> Disk: Level 0 (L0)</span>
-                    <span class="tier-stats">Compaction Trigger: 4 SSTables</span>
-                </div>
-                <div class="sstable-track" id="level0Track">
-                    <!-- SSTables injected here -->
-                </div>
-            </div>
-
-            <!-- Disk Level 1 -->
-            <div class="arch-tier disk-tier level-1">
-                <div class="tier-header">
-                    <span><i class="fas fa-server"></i> Disk: Level 1 (L1)</span>
-                    <span class="tier-stats">Capacity: 10 SSTables</span>
-                </div>
-                <div class="sstable-track" id="level1Track">
-                    <!-- SSTables injected here -->
-                </div>
-            </div>
-
-            <!-- Disk Level 2 -->
-            <div class="arch-tier disk-tier level-2">
-                <div class="tier-header">
-                    <span><i class="fas fa-archive"></i> Disk: Level 2 (L2)</span>
-                    <span class="tier-stats">Deep Archive</span>
-                </div>
-                <div class="sstable-track" id="level2Track">
-                    <!-- SSTables injected here -->
-                </div>
-            </div>
-
+            <!-- Compaction Status -->
+            <div class="lsm-status-board" id="statusBoard">System Idle...</div>
+          </div>
         </div>
 
-    </main>
+        <!-- DISK LAYER -->
+        <div class="lsm-layer-disk glass-panel">
+          <div class="lsm-layer-header disk-header">
+            <i class="fas fa-hdd"></i> DISK (Persistent Storage)
+          </div>
 
+          <!-- WAL -->
+          <div class="lsm-wal-wrap mb-4">
+            <div class="lsm-component-title">
+              Write-Ahead Log (WAL)
+              <span class="text-xs font-normal">Append-only sequential disk writes</span>
+            </div>
+            <div class="lsm-wal-track" id="walTrack">
+              <!-- WAL entries injected here -->
+            </div>
+          </div>
+
+          <!-- SSTables Hierarchy -->
+          <div class="lsm-levels-wrap">
+            <!-- LEVEL 0 -->
+            <div class="lsm-level" id="level-0">
+              <div class="lsm-level-header">
+                Level 0 (L0)
+                <span class="lsm-badge">Overlapping Ranges</span>
+              </div>
+              <div class="lsm-sstable-track" id="track-L0">
+                <!-- SSTables injected here -->
+              </div>
+            </div>
+
+            <!-- LEVEL 1 -->
+            <div class="lsm-level mt-3" id="level-1">
+              <div class="lsm-level-header">
+                Level 1 (L1)
+                <span class="lsm-badge badge-blue">Partitioned Ranges</span>
+              </div>
+              <div class="lsm-sstable-track" id="track-L1">
+                <!-- SSTables injected here -->
+              </div>
+            </div>
+
+            <!-- LEVEL 2 -->
+            <div class="lsm-level mt-3" id="level-2">
+              <div class="lsm-level-header">
+                Level 2 (L2)
+                <span class="lsm-badge badge-purple">Deep Storage</span>
+              </div>
+              <div class="lsm-sstable-track" id="track-L2">
+                <!-- SSTables injected here -->
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modals and Overlays -->
+    <div id="bloomOverlay" class="lsm-bloom-overlay">
+      <div class="lsm-bloom-modal">
+        <h3><i class="fas fa-filter"></i> Bloom Filter Check</h3>
+        <p>
+          Hashing key: <strong id="bloomTargetKey" class="text-primary">user123</strong> against
+          SSTable <span id="bloomTargetSST"></span>
+        </p>
+        <div class="lsm-bit-array" id="bloomBitArray">
+          <!-- Bits -->
+        </div>
+        <div class="lsm-bloom-result" id="bloomResult">...</div>
+      </div>
+    </div>
+
+    <div id="footer-placeholder"></div>
+
+    <script src="../../../auth.js"></script>
+    <script src="../../../script.js"></script>
+    <script src="../../../theme.js"></script>
+    <script src="../../../auth-gate.js"></script>
     <script src="lsm-tree.js"></script>
-</body>
+    <script>
+      if (typeof loadPartial === 'function') {
+        loadPartial('navbar-placeholder', '/partials/navbar.html').then(function () {
+          if (typeof initNavbar === 'function') initNavbar();
+        });
+        loadPartial('footer-placeholder', '/partials/footer.html');
+      }
+    </script>
+  </body>
 </html>
-

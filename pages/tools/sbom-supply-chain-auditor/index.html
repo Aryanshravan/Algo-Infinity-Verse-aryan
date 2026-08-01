@@ -1,0 +1,178 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SBOM Supply Chain Auditor | Algo Infinity Verse</title>
+  <meta name="description" content="Diff baseline vs candidate lockfile/SBOM JSON, flag major version jumps and duplicates, score transitive risk, and export a reviewer report." />
+  <link rel="stylesheet" href="/styles.css" />
+  <link rel="stylesheet" href="style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Poppins:wght@300;400;500;600;700&family=Fira+Code:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <script>
+    (function () {
+      try {
+        var storedTheme = localStorage.getItem('theme');
+        var prefersLight = window.matchMedia('(prefers-color-scheme: light)').matches;
+        var theme = storedTheme || (prefersLight ? 'light' : 'dark');
+        if (theme === 'light') {
+          document.documentElement.classList.add('light-mode');
+        } else {
+          document.documentElement.classList.remove('light-mode');
+        }
+      } catch (e) {}
+    })();
+  </script>
+</head>
+<body data-page="sbom-supply-chain-auditor">
+  <a href="#sbom-main" class="sbom-skip-link">Skip to main content</a>
+  <button type="button" id="scrollTopBtn" class="scroll-top-btn" aria-label="Scroll to top">
+    <i class="fas fa-arrow-up" aria-hidden="true"></i>
+  </button>
+
+  <div id="navbar-placeholder"></div>
+
+  <header class="sbom-hero">
+    <div class="sbom-hero-badge">
+      <i class="fas fa-boxes-stacked" aria-hidden="true"></i>
+      Supply Chain Lab
+    </div>
+    <h1>
+      SBOM Supply Chain
+      <span class="sbom-hero-accent">Auditor</span>
+    </h1>
+    <p>
+      Compare baseline vs candidate lock/SBOM JSON, surface added/removed/updated packages,
+      major jumps, duplicates, and a transitive risk score for reviewers.
+    </p>
+    <div class="sbom-hero-stats" aria-live="polite">
+      <div class="sbom-stat">
+        <span class="sbom-stat-val" id="statAdded">—</span>
+        <span class="sbom-stat-label">Added</span>
+      </div>
+      <div class="sbom-stat">
+        <span class="sbom-stat-val" id="statUpdated">—</span>
+        <span class="sbom-stat-label">Updated</span>
+      </div>
+      <div class="sbom-stat">
+        <span class="sbom-stat-val" id="statRisk">—</span>
+        <span class="sbom-stat-label">Risk score</span>
+      </div>
+    </div>
+  </header>
+
+  <main id="sbom-main" class="sbom-main">
+    <div class="container">
+      <div class="sbom-workspace">
+        <section class="sbom-panel" aria-labelledby="sbom-base-title">
+          <div class="sbom-panel-header">
+            <div class="sbom-panel-title">
+              <i class="fas fa-file-shield sbom-panel-icon" aria-hidden="true"></i>
+              <h2 id="sbom-base-title">Baseline lock / SBOM</h2>
+            </div>
+          </div>
+          <label class="sbom-label" for="sbomBaseline">Baseline JSON</label>
+          <textarea
+            id="sbomBaseline"
+            class="sbom-textarea"
+            rows="14"
+            spellcheck="false"
+            placeholder='{ "packages": { ... } }'
+            aria-describedby="sbomBaseHint"
+          ></textarea>
+          <p id="sbomBaseHint" class="sbom-hint">Accepts package-lock style maps, SBOM components[], or { name: version } objects.</p>
+        </section>
+
+        <section class="sbom-panel" aria-labelledby="sbom-cand-title">
+          <div class="sbom-panel-header">
+            <div class="sbom-panel-title">
+              <i class="fas fa-file-code sbom-panel-icon" aria-hidden="true"></i>
+              <h2 id="sbom-cand-title">Candidate lock / SBOM</h2>
+            </div>
+          </div>
+          <label class="sbom-label" for="sbomCandidate">Candidate JSON</label>
+          <textarea
+            id="sbomCandidate"
+            class="sbom-textarea"
+            rows="14"
+            spellcheck="false"
+            placeholder='{ "packages": { ... } }'
+            aria-describedby="sbomCandHint"
+          ></textarea>
+          <p id="sbomCandHint" class="sbom-hint">Diff runs entirely in the browser — nothing is uploaded.</p>
+        </section>
+      </div>
+
+      <div class="sbom-controls">
+        <button type="button" id="sbomDemoBtn" class="btn btn-secondary">
+          <i class="fas fa-flask" aria-hidden="true"></i> Load demo lockfiles
+        </button>
+        <button type="button" id="sbomAuditBtn" class="btn btn-primary">
+          <i class="fas fa-magnifying-glass" aria-hidden="true"></i> Diff &amp; audit
+        </button>
+        <button type="button" id="sbomClearBtn" class="btn btn-outline">
+          <i class="fas fa-eraser" aria-hidden="true"></i> Clear
+        </button>
+        <button type="button" id="sbomDownloadBtn" class="btn btn-outline" disabled>
+          <i class="fas fa-download" aria-hidden="true"></i> Download report
+        </button>
+      </div>
+      <div id="sbomStatus" class="sbom-status" role="status" aria-live="polite"></div>
+
+      <div class="sbom-results-grid">
+        <section class="sbom-panel" aria-labelledby="sbom-diff-title">
+          <div class="sbom-panel-header">
+            <div class="sbom-panel-title">
+              <i class="fas fa-code-compare sbom-panel-icon" aria-hidden="true"></i>
+              <h2 id="sbom-diff-title">Package diff</h2>
+            </div>
+          </div>
+          <div id="sbomDiff" class="sbom-diff" aria-live="polite">
+            <p class="sbom-empty">Added, removed, and updated packages appear here.</p>
+          </div>
+        </section>
+
+        <section class="sbom-panel" aria-labelledby="sbom-warn-title">
+          <div class="sbom-panel-header">
+            <div class="sbom-panel-title">
+              <i class="fas fa-triangle-exclamation sbom-panel-icon" aria-hidden="true"></i>
+              <h2 id="sbom-warn-title">Warnings</h2>
+            </div>
+          </div>
+          <div id="sbomWarnings" class="sbom-findings" aria-live="polite">
+            <p class="sbom-empty">Major version jumps and duplicate warnings appear here.</p>
+          </div>
+        </section>
+      </div>
+
+      <section class="sbom-panel" aria-labelledby="sbom-check-title">
+        <div class="sbom-panel-header">
+          <div class="sbom-panel-title">
+            <i class="fas fa-clipboard-check sbom-panel-icon" aria-hidden="true"></i>
+            <h2 id="sbom-check-title">Reviewer checklist</h2>
+          </div>
+          <span class="sbom-risk-pill" id="sbomRiskPill">Risk: —</span>
+        </div>
+        <ul id="sbomChecklist" class="sbom-checklist" aria-live="polite">
+          <li class="sbom-empty-li">Checklist items appear after a successful audit.</li>
+        </ul>
+      </section>
+    </div>
+  </main>
+
+  <div id="footer-placeholder"></div>
+
+  <script src="/auth.js"></script>
+  <script src="/bootstrap-legacy.js"></script>
+  <script src="/script.js"></script>
+  <script type="module" src="/dist/legacy-bundle.mjs"></script>
+  <script src="/theme.js"></script>
+  <script src="script.js"></script>
+  <script>
+    if (typeof loadPartial === 'function') {
+      loadPartial('navbar-placeholder', '/partials/navbar.html');
+      loadPartial('footer-placeholder', '/partials/footer.html');
+    }
+  </script>
+</body>
+</html>

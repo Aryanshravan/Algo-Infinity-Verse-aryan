@@ -1,0 +1,192 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Stoer-Wagner Minimum Cut Visualizer | Algo Infinity Verse</title>
+    <meta
+      name="description"
+      content="Explore the Stoer-Wagner global minimum cut algorithm on weighted undirected graphs with step-by-step vertex contraction animations."
+    />
+    <link rel="stylesheet" href="/styles.css" />
+    <link rel="stylesheet" href="stoer-wagner.css" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Poppins:wght@300;400;500;600;700&family=Fira+Code:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+
+    <!-- Theme Initialization Script -->
+    <script>
+      (function () {
+        try {
+          const storedTheme = localStorage.getItem('theme');
+          const prefersLight = window.matchMedia('(prefers-color-scheme: light)').matches;
+          const theme = storedTheme || (prefersLight ? 'light' : 'dark');
+          if (theme === 'light') {
+            document.documentElement.classList.add('light-mode');
+          } else {
+            document.documentElement.classList.remove('light-mode');
+          }
+        } catch (e) {}
+      })();
+    </script>
+  </head>
+  <body data-page="stoer-wagner" data-no-loading>
+    <div id="loading-screen" class="hidden">
+      <div class="loader">
+        <div class="infinity-loader">∞</div>
+        <h2>Algo Infinity Verse</h2>
+        <div class="loading-bar"><div class="loading-progress"></div></div>
+      </div>
+    </div>
+
+    <button type="button" id="scrollTopBtn" class="scroll-top-btn" aria-label="Scroll to top">
+      <i class="fas fa-arrow-up"></i>
+    </button>
+
+    <div id="navbar-placeholder"></div>
+
+    <section class="hero sw-hero">
+      <div class="hero-background">
+        <div class="stars"></div>
+        <div class="stars2"></div>
+        <div class="stars3"></div>
+      </div>
+      <div class="hero-content">
+        <h1 class="hero-title">
+          <span class="title-line">Stoer-Wagner.</span>
+          <span
+            class="main-title"
+            style="
+              background: linear-gradient(135deg, #a855f7 0%, #d8b4fe 100%);
+              -webkit-background-clip: text;
+              -webkit-text-fill-color: transparent;
+            "
+            >Global Min-Cut.</span
+          >
+          <span class="subtitle">Interactive Undirected Weighted Graph Min-Cut Partitioning</span>
+        </h1>
+      </div>
+    </section>
+
+    <main class="sw-container">
+      <div class="sw-panel control-panel">
+        <div class="panel-header">
+          <i class="fas fa-sliders-h" style="color: #a855f7"></i>
+          <span>Execution & Controls</span>
+        </div>
+        <div class="panel-body">
+          <div class="control-row">
+            <div class="button-group">
+              <button type="button" id="swStepBtn" class="sw-btn primary-btn">
+                <i class="fas fa-step-forward"></i> Next Step
+              </button>
+              <button type="button" id="swSolveBtn" class="sw-btn success-btn">
+                <i class="fas fa-play"></i> Run All
+              </button>
+              <button type="button" id="swResetBtn" class="sw-btn secondary-btn">
+                <i class="fas fa-undo"></i> Reset Alg
+              </button>
+            </div>
+
+            <div class="button-group">
+              <label for="swPresetSelect">Preset Graphs:</label>
+              <select id="swPresetSelect" class="sw-select" aria-label="Select preset graph">
+                <option value="simple" selected>Simple Weighted Graph</option>
+                <option value="k4">Complete Graph (K4)</option>
+                <option value="cycle">Ring Graph (C5)</option>
+              </select>
+              <button type="button" id="swClearBtn" class="sw-btn danger-btn">
+                <i class="fas fa-trash"></i> Clear Graph
+              </button>
+            </div>
+          </div>
+
+          <hr class="sw-divider" />
+
+          <div class="control-row secondary-controls">
+            <span class="instruction-text">
+              <i class="fas fa-info-circle"></i> Double-click on empty space to add a node. Click
+              two nodes to add/edit edge weights. Drag nodes to reposition.
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <div class="workspace-grid">
+        <!-- Interactive Graph Canvas -->
+        <div class="canvas-card">
+          <div class="card-header">
+            <i class="fas fa-network-wired" style="color: #a855f7"></i>
+            <span>Weighted Graph Construction & Contraction View</span>
+            <span class="canvas-phase-tag" id="swPhaseTag">Phase 0/0 (Idle)</span>
+          </div>
+          <div class="card-body">
+            <canvas
+              id="swCanvas"
+              class="sw-canvas"
+              role="img"
+              aria-label="Interactive graph canvas showing nodes, weighted edges, contraction sets, and the cut partitions."
+            ></canvas>
+          </div>
+        </div>
+
+        <div class="side-panels">
+          <!-- Telemetry -->
+          <div class="panel telemetry-panel">
+            <div class="panel-header">
+              <i class="fas fa-info-circle" style="color: #a855f7"></i>
+              <span>Algorithm Telemetry</span>
+            </div>
+            <div id="swStatusBody" class="panel-body" aria-live="polite">
+              <div class="telemetry-row">
+                <span class="label">Min-Cut Weight:</span>
+                <span id="telMinCutWeight" class="value">-</span>
+              </div>
+              <div class="telemetry-row">
+                <span class="label">Contraction Phase:</span>
+                <span id="telPhaseCount" class="value">0 / 0</span>
+              </div>
+              <div class="telemetry-row">
+                <span class="label">Current Vertices (V):</span>
+                <span id="telNodeCount" class="value">0</span>
+              </div>
+              <div class="telemetry-row">
+                <span class="label">Current Edges (E):</span>
+                <span id="telEdgeCount" class="value">0</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Trace Log -->
+          <div class="panel log-panel">
+            <div class="panel-header">
+              <i class="fas fa-list-ul" style="color: #a855f7"></i>
+              <span>Contraction Steps Trace</span>
+            </div>
+            <div id="swLogBody" class="panel-body" aria-live="polite">
+              <span class="sw-log-placeholder">Trigger operations to trace contractions...</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <div id="footer-placeholder"></div>
+
+    <script src="stoer-wagner.js"></script>
+    <script src="/auth.js"></script>
+    <script src="/bootstrap-legacy.js"></script>
+    <script src="/script.js"></script>
+    <script type="module" src="/dist/legacy-bundle.mjs"></script>
+    <script src="/theme.js"></script>
+    <script>
+      loadPartial('navbar-placeholder', '/partials/navbar.html');
+      loadPartial('footer-placeholder', '/partials/footer.html');
+    </script>
+  </body>
+</html>

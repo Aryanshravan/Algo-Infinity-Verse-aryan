@@ -225,7 +225,7 @@ function initComplexityCalculator() {
       chart.options.scales.y.max = maxY;
       
       chart.update();
-    } else {
+    } else if (typeof Chart !== 'undefined') {
       chart = new Chart(ctx, {
         type: 'line',
         data: { labels, datasets },
@@ -259,6 +259,10 @@ function initComplexityCalculator() {
           }
         }
       });
+    } else if (typeof lazyVisualizer !== 'undefined') {
+      // Chart.js not loaded yet - lazy load and retry
+      lazyVisualizer.lazyLoadChartJS(document.getElementById('complexityChart'), updateChart);
+      return;
     }
 
     updateStats(maxN, selA, selB);

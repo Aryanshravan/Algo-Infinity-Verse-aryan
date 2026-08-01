@@ -1,0 +1,219 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Nuclear Fusion Tokamak Simulator | Algo Infinity Verse</title>
+    <link rel="stylesheet" href="/styles.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <!-- Monaco Editor -->
+    <script src="https://unpkg.com/monaco-editor@0.36.1/min/vs/loader.js"></script>
+    <style>
+      body { margin: 0; overflow: hidden; background: #000; font-family: 'Poppins', sans-serif; color: #fff; }
+      .app-container { display: flex; height: 100vh; }
+      
+      .sidebar { width: 450px; background: rgba(15, 23, 42, 0.95); border-right: 1px solid #ef4444; display: flex; flex-direction: column; z-index: 10; }
+      .header { padding: 20px; border-bottom: 1px solid #334155; }
+      .header h2 { margin: 0; color: #ef4444; font-family: 'Orbitron', sans-serif; font-size: 1.2rem; }
+      .header p { margin: 5px 0 0 0; font-size: 0.8rem; color: #94a3b8; }
+      
+      #editor-container { flex: 1; min-height: 300px; }
+      
+      .controls { padding: 20px; border-top: 1px solid #334155; background: rgba(0,0,0,0.5); }
+      .btn { background: linear-gradient(90deg, #ef4444, #b91c1c); color: #fff; border: none; padding: 10px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; transition: 0.3s; }
+      .btn:hover { background: #dc2626; transform: translateY(-2px); box-shadow: 0 0 15px rgba(239, 68, 68, 0.5); }
+      
+      .sim-container { flex: 1; position: relative; background: radial-gradient(circle at center, #1e1b4b 0%, #000 100%); }
+      canvas { width: 100%; height: 100%; display: block; }
+      
+      .hud { position: absolute; top: 20px; right: 20px; background: rgba(0,0,0,0.8); padding: 15px; border-radius: 8px; border: 1px solid #ef4444; width: 250px; z-index: 10; }
+      .hud h3 { margin: 0 0 10px 0; color: #ef4444; font-size: 1rem; font-family: 'Orbitron', sans-serif; }
+      .metric { display: flex; justify-content: space-between; font-size: 0.8rem; color: #cbd5e1; margin-bottom: 5px; }
+      .val { font-weight: bold; font-family: monospace; }
+      .val-temp { color: #facc15; }
+      .val-q { color: #10b981; }
+      .val-status { color: #38bdf8; }
+    </style>
+  </head>
+  <body>
+    
+    <div class="app-container">
+      <div class="sidebar">
+        <div class="header">
+          <h2><i class="fas fa-radiation"></i> Tokamak Fusion Reactor</h2>
+          <p>Write a PID Controller to sustain 100M°K Plasma</p>
+        </div>
+        
+        <div id="editor-container"></div>
+        
+        <div class="controls">
+          <button class="btn" onclick="injectPlasma()"><i class="fas fa-bolt"></i> Ignite Plasma & Run Controller</button>
+        </div>
+      </div>
+      
+      <div class="sim-container">
+        <canvas id="tokamakCanvas"></canvas>
+        <div class="hud">
+          <h3>Reactor Telemetry</h3>
+          <div class="metric"><span>Plasma Core Temp:</span> <span class="val val-temp" id="tempVal">0 °K</span></div>
+          <div class="metric"><span>Magnetic Containment:</span> <span class="val val-status" id="magVal">0%</span></div>
+          <div class="metric"><span>Energy Output (Q):</span> <span class="val val-q" id="qVal">0.00</span></div>
+          <div class="metric" style="margin-top: 10px; border-top: 1px solid #334155; padding-top: 5px;">
+            <span>Reactor Status:</span> <span class="val" id="statusVal" style="color:#94a3b8">COLD</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      let editor;
+      require.config({ paths: { 'vs': 'https://unpkg.com/monaco-editor@0.36.1/min/vs' }});
+      require(['vs/editor/editor.main'], function() {
+        editor = monaco.editor.create(document.getElementById('editor-container'), {
+          value: `// PID Controller for Magnetic Confinement
+// Adjust P, I, D gains to keep plasma stable
+
+const PID = {
+    P: 0.1,  // Proportional
+    I: 0.01, // Integral
+    D: 0.05  // Derivative
+};
+
+// Target Temperature: 100,000,000 °K
+function computeMagneticField(currentTemp, errorSum, lastError) {
+    let error = 100000000 - currentTemp;
+    let correction = (error * PID.P) + (errorSum * PID.I) + ((error - lastError) * PID.D);
+    return Math.max(10, Math.min(100, correction / 1000000));
+}`,
+          language: 'javascript',
+          theme: 'vs-dark',
+          minimap: { enabled: false },
+          automaticLayout: true
+        });
+      });
+
+      const canvas = document.getElementById('tokamakCanvas');
+      const ctx = canvas.getContext('2d');
+      let particles = [];
+      let isRunning = false;
+      let temp = 0;
+      let magStr = 0;
+      
+      function resize() { canvas.width = canvas.clientWidth; canvas.height = canvas.clientHeight; }
+      window.addEventListener('resize', resize);
+      resize();
+
+      class PlasmaParticle {
+        constructor() {
+          this.angle = Math.random() * Math.PI * 2;
+          this.radius = Math.random() * 50 + 150; // Ring radius
+          this.speed = Math.random() * 0.05 + 0.02;
+          this.wobble = Math.random() * 20;
+          this.color = Math.random() > 0.5 ? '#facc15' : '#ef4444'; // Yellow/Red
+        }
+        update(instability) {
+          this.angle += this.speed;
+          // As instability rises, the ring breaks apart
+          this.radius += (Math.random() - 0.5) * instability;
+        }
+        draw(cx, cy) {
+          let x = cx + Math.cos(this.angle) * this.radius;
+          let y = cy + Math.sin(this.angle) * this.radius;
+          ctx.beginPath();
+          ctx.arc(x, y, 2, 0, Math.PI * 2);
+          ctx.fillStyle = this.color;
+          ctx.fill();
+        }
+      }
+
+      function initParticles() {
+        particles = [];
+        for(let i=0; i<3000; i++) particles.push(new PlasmaParticle());
+      }
+      initParticles();
+
+      function animate() {
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.2)'; // trailing effect
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        
+        let cx = canvas.width / 2;
+        let cy = canvas.height / 2;
+
+        // Draw Tokamak Walls
+        ctx.beginPath();
+        ctx.arc(cx, cy, 250, 0, Math.PI * 2);
+        ctx.strokeStyle = '#334155';
+        ctx.lineWidth = 4;
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.arc(cx, cy, 100, 0, Math.PI * 2);
+        ctx.stroke();
+
+        let instability = isRunning ? Math.max(1, (100 - magStr) / 5) : 0;
+
+        if (isRunning) {
+          particles.forEach(p => {
+            p.update(instability);
+            p.draw(cx, cy);
+          });
+        }
+
+        requestAnimationFrame(animate);
+      }
+      animate();
+
+      function injectPlasma() {
+        if(isRunning) return;
+        isRunning = true;
+        initParticles();
+        
+        let errorSum = 0;
+        let lastError = 0;
+        temp = 10000000; // Ignite at 10M
+        document.getElementById('statusVal').innerText = "IGNITED";
+        document.getElementById('statusVal').style.color = "#ef4444";
+
+        let simLoop = setInterval(() => {
+          if(!isRunning) { clearInterval(simLoop); return; }
+          
+          try {
+            // Unsafe eval to grab user PID
+            eval(editor.getValue()); 
+            
+            magStr = typeof computeMagneticField === 'function' ? computeMagneticField(temp, errorSum, lastError) : 50;
+            if(isNaN(magStr)) magStr = 10;
+            
+            // Physics simulation update
+            let error = 100000000 - temp;
+            errorSum += error;
+            lastError = error;
+            
+            // Temp randomly fluctuates, mag field tries to contain it
+            temp += (Math.random() - 0.5) * 5000000 + (magStr > 50 ? 2000000 : -2000000);
+            
+            if(temp > 150000000 || temp < 1000000) {
+              // Breach
+              document.getElementById('statusVal').innerText = "CONTAINMENT BREACH";
+              document.getElementById('statusVal').style.color = "#ef4444";
+              isRunning = false;
+            } else if (temp > 95000000 && temp < 105000000) {
+              document.getElementById('statusVal').innerText = "STABLE FUSION (Q > 1)";
+              document.getElementById('statusVal').style.color = "#10b981";
+            }
+            
+            document.getElementById('tempVal').innerText = Math.floor(temp).toLocaleString() + " °K";
+            document.getElementById('magVal').innerText = magStr.toFixed(1) + "%";
+            document.getElementById('qVal').innerText = (temp / 100000000).toFixed(2);
+            
+          } catch(e) {
+            console.error(e);
+            isRunning = false;
+            alert("PID Controller Error!");
+          }
+        }, 100);
+      }
+    </script>
+  </body>
+</html>

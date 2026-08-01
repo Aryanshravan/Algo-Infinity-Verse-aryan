@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Web3 & Smart Contract Security Masterclass — Algo Infinity Verse</title>
+  <meta name="description" content="Master EVM Smart Contract Vulnerabilities, Reentrancy Attacks, Flash Loan Exploits, ZK-SNARKs Proofs, and Formal Verification." />
+  
+  <link rel="stylesheet" href="../../../styles.css" />
+  <link rel="stylesheet" href="style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+
+  <script>
+    (function() {
+      try {
+        var t = localStorage.getItem('theme');
+        var p = window.matchMedia('(prefers-color-scheme: light)').matches;
+        var theme = t || (p ? 'light' : 'dark');
+        if (theme === 'light') document.documentElement.classList.add('light-mode');
+      } catch (e) {}
+    })();
+  </script>
+</head>
+<body data-page="smart-contract-academy">
+
+  <header class="scs-header">
+    <div class="scs-header-container">
+      <a href="../academy.html" class="scs-back-btn">
+        <i class="fas fa-arrow-left"></i>
+        <span>Academies</span>
+      </a>
+      <div class="scs-title-area">
+        <h1><i class="fab fa-ethereum"></i> Web3 &amp; ZK Smart Contract Security Masterclass</h1>
+        <p>Reentrancy Vulnerabilities, EVM Stack Execution Trace, Audit Checklists &amp; Solidity / Vyper Fixes</p>
+      </div>
+      <div class="scs-header-actions">
+        <button id="themeToggleBtn" class="scs-icon-btn" title="Toggle Theme">
+          <i class="fas fa-moon"></i>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="scs-main">
+    <!-- METRICS BANNER -->
+    <div class="scs-hero-card">
+      <div class="scs-badge"><i class="fas fa-cube"></i> Masterclass #3552</div>
+      <h2>Web3 &amp; Zero-Knowledge Security Auditing</h2>
+      <p>Analyze EVM reentrancy exploits, inspect step-by-step transaction call traces, verify storage slot mutations, and complete the security audit checklist.</p>
+    </div>
+
+    <!-- TABS NAV -->
+    <div class="scs-tabs-nav">
+      <button class="scs-tab-btn active" data-tab="teardowns"><i class="fas fa-bug"></i> Vulnerability Teardowns</button>
+      <button class="scs-tab-btn" data-tab="trace"><i class="fas fa-list-ol"></i> Attack Execution Trace Viewer</button>
+      <button class="scs-tab-btn" data-tab="checklist"><i class="fas fa-clipboard-check"></i> Smart Contract Audit Checklist</button>
+      <button class="scs-tab-btn" data-tab="quiz"><i class="fas fa-graduation-cap"></i> Certification Quiz</button>
+    </div>
+
+    <!-- TAB 1: TEARDOWNS -->
+    <div id="tab-teardowns" class="scs-tab-content active">
+      <div class="scs-teardown-grid">
+        <!-- VULNERABILITY SELECTOR -->
+        <div class="scs-card">
+          <div class="scs-card-header">
+            <h3><i class="fas fa-shield-cat"></i> Attack Vectors</h3>
+          </div>
+          <div class="scs-vector-list" id="vectorList"></div>
+        </div>
+
+        <!-- CODE COMPARISON & DETAILS -->
+        <div class="scs-card">
+          <div class="scs-card-header">
+            <h3 id="vectorTitle">Reentrancy Vulnerability (DAO Exploit)</h3>
+            <div class="scs-lang-toggle">
+              <button class="scs-btn-mini active" data-lang="sol">Solidity</button>
+              <button class="scs-btn-mini" data-lang="vyp">Vyper</button>
+            </div>
+          </div>
+          <div class="scs-card-body">
+            <div class="scs-code-grid">
+              <div>
+                <h4 style="color: #ef4444;"><i class="fas fa-triangle-exclamation"></i> Vulnerable Contract Code</h4>
+                <textarea id="vulnCodeArea" class="scs-code-box" readonly></textarea>
+              </div>
+              <div>
+                <h4 style="color: #10b981;"><i class="fas fa-circle-check"></i> Secured Patch (Checks-Effects-Interactions)</h4>
+                <textarea id="secureCodeArea" class="scs-code-box" readonly></textarea>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 2: ATTACK TRACE VIEWER -->
+    <div id="tab-trace" class="scs-tab-content">
+      <div class="scs-card">
+        <div class="scs-card-header">
+          <h3><i class="fas fa-terminal"></i> Step-by-Step EVM Attack Execution Trace</h3>
+          <div class="scs-trace-controls">
+            <button id="btnPrevStep" class="scs-btn-sm"><i class="fas fa-step-backward"></i> Step Back</button>
+            <button id="btnNextStep" class="scs-btn-sm primary"><i class="fas fa-step-forward"></i> Next EVM Step</button>
+          </div>
+        </div>
+        <div class="scs-card-body">
+          <div class="scs-trace-layout">
+            <div class="scs-trace-steps" id="traceStepsContainer"></div>
+            <div class="scs-evm-state">
+              <h4>EVM Storage Slot &amp; Gas State</h4>
+              <div id="evmStateBox" class="scs-state-box"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 3: CHECKLIST -->
+    <div id="tab-checklist" class="scs-tab-content">
+      <div class="scs-card">
+        <div class="scs-card-header">
+          <h3><i class="fas fa-list-check"></i> Solidity &amp; ZK Audit Readiness Checklist</h3>
+          <span id="checklistProgress" class="scs-badge">0 / 8 Completed</span>
+        </div>
+        <div class="scs-card-body">
+          <div id="checklistContainer" class="scs-checklist-list"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 4: QUIZ -->
+    <div id="tab-quiz" class="scs-tab-content">
+      <div class="scs-card scs-quiz-card">
+        <div class="scs-card-header">
+          <h3><i class="fas fa-graduation-cap"></i> Smart Contract Security Certification Quiz</h3>
+        </div>
+        <div class="scs-card-body">
+          <div id="scsQuizContainer"></div>
+          <button id="btnSubmitScsQuiz" class="scs-btn-main" style="margin-top: 20px;"><i class="fas fa-check"></i> Submit Audit Quiz</button>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script src="script.js" type="module"></script>
+</body>
+</html>

@@ -3,7 +3,7 @@
    ============================================ */
 
 const editors = [
-  // ── Mainstream Languages ──
+  // ── Mainstream Languages 
   {
     name: 'Python Editor',
     path: '/pages/editors/python-editor/python-editor.html',
@@ -86,6 +86,38 @@ const editors = [
     icon: 'fa-gem',
     desc: 'Write Ruby scripts and execute them via a real Ruby interpreter. Powered by the Piston sandboxed API.',
   },
+
+  {
+    name: 'Bash Shell Playground',
+    path: '/pages/editors/bash-playground/bash-playground.html',
+    category: 'Scripting Languages',
+    icon: 'fa-terminal',
+    desc: 'Write real Bash scripts across multiple files, set environment variables, and run them in a sandboxed terminal via Judge0 — sign-in required.',
+  },
+  {
+    name: 'R Editor',
+    path: '/pages/editors/r-editor/r-editor.html',
+    category: 'Scripting Languages',
+    icon: 'fa-r-project',
+    desc: 'Write R code and see variables, vectors, data frames, and plots evaluated in real time. Runs a defined subset of R entirely in your browser.',
+  },
+
+  {
+    name: 'Lua Editor',
+    path: '/pages/editors/lua-editor/lua-editor.html',
+    category: 'Scripting Languages',
+    icon: 'fa-moon',
+    desc: 'Write Lua and run it via a self-contained in-browser interpreter — no server, no API key.',
+  },
+
+  {
+    name: 'Julia Editor',
+    path: '/pages/editors/julia-editor/julia-editor.html',
+    category: 'Scripting Languages',
+    icon: 'fa-atom',
+    desc: 'Write Julia code with real control flow, functions, and closures, and see plots evaluated in real time. Runs a defined subset of Julia entirely in your browser.',
+  },
+
   {
     name: 'PHP Editor',
     path: '/pages/editors/php-editor/php-editor.html',
@@ -142,7 +174,21 @@ const editors = [
     path: '/pages/editors/fsharp-playground/fsharp-playground.html',
     category: 'JVM & Functional',
     icon: 'fa-code-branch',
-    desc: 'Write F# with live syntax highlighting, functional pipeline operators, pattern matching, discriminated unions, and execution.'
+    desc: 'Write F# with live syntax highlighting, functional pipeline operators, pattern matching, discriminated unions, and execution.',
+  },
+  {
+    name: 'OCaml Playground',
+    path: '/pages/editors/ocaml-editor/ocaml-editor.html',
+    category: 'JVM & Functional',
+    icon: 'fa-cube',
+    desc: 'Write OCaml with syntax highlighting, templates for pattern matching and functors, and real-time execution.',
+  },
+  {
+    name: 'Elixir Editor',
+    path: '/pages/editors/elixir-editor/elixir-editor.html',
+    category: 'JVM & Functional',
+    icon: 'fa-droplet',
+    desc: 'Write Elixir code with syntax highlighting, concurrent actors/processes templates, and real-time execution.',
   },
   {
     name: 'Prolog Playground',
@@ -159,23 +205,29 @@ const editors = [
     category: 'Systems & Special',
     icon: 'fa-shield-alt',
     desc: 'Write Ada programming language code with syntax highlighting, starter templates, and fast simulated execution.',
+  },
+  {
     name: 'Crystal Editor',
     path: '/pages/editors/crystal-editor/crystal-editor.html',
     category: 'Systems & Special',
     icon: 'fa-gem',
     desc: 'Write Crystal programming language code with syntax highlighting, starter templates, and fast simulated execution.',
+  },
+  {
     name: 'Nim Editor',
     path: '/pages/editors/nim-editor/nim-editor.html',
     category: 'Systems & Special',
     icon: 'fa-crown',
     desc: 'Write Nim programming language code with syntax highlighting, starter templates, and fast simulated execution.',
+  },
+  {
     name: 'Zig Editor',
     path: '/pages/editors/zig-editor/zig-editor.html',
     category: 'Systems & Special',
     icon: 'fa-bolt',
     desc: 'Write Zig programming language code with syntax highlighting, starter templates, and fast simulated execution.',
   },
-  
+
   {
     name: 'Go Editor',
     path: '/pages/editors/go-editor/go-editor.html',
@@ -190,7 +242,14 @@ const editors = [
     icon: 'fa-gem',
     desc: 'Write D language code with syntax highlighting, starter templates, and simulated execution.',
   },
-  
+
+  {
+    name: 'Move Editor',
+    path: '/pages/editors/move-editor/move-editor.html',
+    category: 'Systems & Special',
+    icon: 'fa-link',
+    desc: 'Write Move smart contracts with syntax highlighting, starter templates, and simulated blockchain execution.',
+  },
   {
     name: 'SQL Editor',
     path: '/pages/editors/sql-editor/sql-editor.html',
@@ -204,6 +263,76 @@ const editors = [
     category: 'Systems & Special',
     icon: 'fa-pencil',
     desc: 'Design algorithms with instant syntax highlighting, auto-indent, and real-time linting for pseudo-code.',
+  },
+  {
+    name: 'Assembly Editor',
+    path: '/pages/editors/assembly-editor/assembly.html',
+    category: 'Systems & Special',
+    icon: 'fa-microchip',
+    desc: 'Write low-level Assembly code with syntax highlighting, starter templates, and simulated execution.',
+  },
+  {
+    name: 'Fortran Editor',
+    path: '/pages/editors/fortran-editor/fortran.html',
+    category: 'Systems & Special',
+    icon: 'fa-square-root-variable',
+    desc: 'Write Fortran programming language code with syntax highlighting, starter templates, and fast simulated execution.',
+  },
+  {
+    name: 'COBOL Editor',
+    path: '/pages/editors/cobol/cobol.html',
+    category: 'Systems & Special',
+    icon: 'fa-building-columns',
+    desc: 'Write COBOL programming language code with syntax highlighting, starter templates, and fast simulated execution.',
+  },
+  {
+    name: 'MATLAB Editor',
+    path: '/pages/editors/MATLAB-editor/matlab.html',
+    category: 'Systems & Special',
+    icon: 'fa-chart-line',
+    desc: 'Write MATLAB code for numerical computing, matrix operations, and plotting with simulated execution.',
+  },
+  {
+    name: 'V Editor',
+    path: '/pages/editors/V-editor/v.html',
+    category: 'Systems & Special',
+    icon: 'fa-v',
+    desc: 'Write V programming language code with syntax highlighting, starter templates, and fast simulated execution.',
+  },
+  {
+    name: 'Erlang Editor',
+    path: '/pages/editors/erlang-editor/index.html',
+    category: 'Systems & Special',
+    icon: 'fa-diagram-project',
+    desc: 'Explore Erlang concurrency primitives, pattern matching, and recursion with a live simulated editor.',
+  },
+  {
+    name: 'ABAP Editor',
+    path: '/pages/editors/ABAP-editor/abap.html',
+    category: 'Systems & Special',
+    icon: 'fa-server',
+    desc: 'Write ABAP code for enterprise business logic with syntax highlighting and simulated execution.',
+  },
+  {
+    name: 'Apex Editor',
+    path: '/pages/editors/Apex-editor/apex.html',
+    category: 'Systems & Special',
+    icon: 'fa-cloud',
+    desc: 'Write Salesforce Apex code with syntax highlighting, starter templates, and simulated execution.',
+  },
+  {
+    name: 'Solidity Editor',
+    path: '/pages/editors/solidity-editor/solidity.html',
+    category: 'Systems & Special',
+    icon: 'fa-ethereum',
+    desc: 'Write Solidity smart contracts with syntax highlighting, starter templates, and simulated blockchain execution.',
+  },
+  {
+    name: 'Motoko Editor',
+    path: '/pages/editors/motoko-editor/motoko.html',
+    category: 'Systems & Special',
+    icon: 'fa-infinity',
+    desc: 'Write Motoko smart contracts for the Internet Computer with syntax highlighting and simulated execution.',
   },
 ];
 
@@ -234,10 +363,6 @@ const filterContainer = document.getElementById('edFilters');
 const emptyState = document.getElementById('edEmpty');
 const countDisplay = document.getElementById('edCountDisplay');
 
-let activeCategory =
-  new URLSearchParams(window.location.search).get('category') ||
-  localStorage.getItem('edFilterCategory') ||
-  'all';
 /* ─── Safe localStorage helper ─── */
 function lsGet(key) {
   try {
@@ -336,6 +461,7 @@ function render() {
         'fa-react',
         'fa-php',
         'fa-golang',
+        'fa-r-project',
       ]);
       const iconClass = brandIcons.has(v.icon) ? `fab ${v.icon}` : `fas ${v.icon}`;
       return `

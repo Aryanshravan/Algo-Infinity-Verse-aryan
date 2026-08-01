@@ -1,0 +1,622 @@
+:root {
+  --cqa-rose: #f43f5e;
+  --cqa-rose-soft: #fda4af;
+  --cqa-rose-bg: rgba(244, 63, 94, 0.08);
+  --cqa-rose-pastel: #fecdd3;
+
+  --cqa-amber: #d97706;
+  --cqa-amber-soft: #fbbf24;
+  --cqa-amber-bg: rgba(217, 119, 6, 0.08);
+  --cqa-amber-pastel: #fde68a;
+
+  --cqa-blue: #3b82f6;
+  --cqa-blue-soft: #93c5fd;
+  --cqa-blue-bg: rgba(59, 130, 246, 0.08);
+  --cqa-blue-pastel: #bfdbfe;
+
+  --cqa-emerald: #059669;
+  --cqa-emerald-soft: #6ee7b7;
+  --cqa-emerald-bg: rgba(5, 150, 105, 0.08);
+  --cqa-emerald-pastel: #a7f3d0;
+
+  --cqa-orange: #ea580c;
+  --cqa-orange-soft: #fdba74;
+  --cqa-orange-bg: rgba(234, 88, 12, 0.08);
+  --cqa-orange-pastel: #fed7aa;
+
+  --cqa-slate: #64748b;
+  --cqa-slate-soft: #94a3b8;
+  --cqa-slate-pastel: #e2e8f0;
+
+  --cqa-primary: #fb7185;
+  --cqa-primary-hover: #f43f5e;
+}
+
+.cqa-hero {
+  position: relative;
+  min-height: 45vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6rem 1.5rem 2.5rem;
+  overflow: hidden;
+}
+
+.cqa-hero .stars3 {
+  background-image:
+    radial-gradient(3px 3px at 300px 400px, rgba(251, 191, 36, 0.5), transparent),
+    radial-gradient(2px 2px at 200px 600px, rgba(251, 191, 36, 0.3), transparent);
+}
+
+.cqa-hero-inner {
+  position: relative;
+  z-index: 2;
+  text-align: center;
+  max-width: 640px;
+  margin: 0 auto;
+}
+
+.cqa-hero-badge {
+  display: inline-block;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  padding: 0.35rem 1.1rem;
+  border-radius: 999px;
+  background: rgba(253, 164, 175, 0.12);
+  border: 1px solid rgba(253, 164, 175, 0.25);
+  color: var(--cqa-rose-soft);
+  margin-bottom: 1.25rem;
+}
+
+.cqa-hero-title {
+  font-family: Orbitron, sans-serif;
+  font-size: clamp(1.6rem, 4.5vw, 2.6rem);
+  font-weight: 900;
+  color: var(--cqa-rose-soft);
+  line-height: 1.15;
+  margin-bottom: 0.5rem;
+}
+
+.cqa-hero-sub {
+  font-family: Fira Code, monospace;
+  font-size: 0.85rem;
+  color: var(--cqa-rose-soft);
+  font-style: italic;
+  margin-bottom: 0.75rem;
+}
+
+.cqa-hero-desc {
+  font-size: 0.88rem;
+  color: var(--text-secondary);
+  line-height: 1.7;
+  margin-bottom: 1.5rem;
+}
+
+.cqa-btn-primary {
+  background: var(--cqa-rose-soft);
+  border: none;
+  color: #fff;
+  font-weight: 700;
+  padding: 0.65rem 1.5rem;
+  border-radius: 10px;
+  font-size: 0.85rem;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: background 0.2s;
+  font-family: Poppins, sans-serif;
+  box-shadow: none !important;
+}
+
+.cqa-btn-primary:hover { background: #f43f5e; }
+
+.cqa-section { padding: 1.5rem 0 3rem; }
+
+.cqa-layout {
+  display: grid;
+  grid-template-columns: 1fr 400px;
+  gap: 1.25rem;
+  align-items: start;
+}
+
+.cqa-editor-col {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.cqa-preset-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+
+.cqa-preset-label {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.cqa-preset-btns { display: flex; gap: 0.35rem; flex-wrap: wrap; }
+
+.cqa-preset-btn {
+  font-size: 0.68rem;
+  font-weight: 700;
+  padding: 0.2rem 0.6rem;
+  border-radius: 6px;
+  border: 1px solid var(--glass-border);
+  background: var(--glass-bg);
+  color: var(--text-secondary);
+  cursor: pointer;
+  font-family: Poppins, sans-serif;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.cqa-preset-btn:hover { color: var(--text-primary); border-color: var(--cqa-rose); }
+.cqa-preset-btn.active { background: var(--cqa-rose-bg); border-color: rgba(244, 63, 94, 0.35); color: var(--cqa-rose); }
+
+.cqa-lang-selector {
+  display: flex;
+  gap: 0.35rem;
+  margin-top: 0.15rem;
+}
+
+.cqa-lang-btn {
+  font-size: 0.68rem;
+  font-weight: 600;
+  padding: 0.2rem 0.65rem;
+  border-radius: 5px;
+  border: 1px solid var(--glass-border);
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+  font-family: Fira Code, monospace;
+  transition: all 0.2s ease;
+}
+
+.cqa-lang-btn:hover { border-color: var(--cqa-blue); color: var(--cqa-blue-soft); }
+.cqa-lang-btn.active { background: var(--cqa-blue-bg); border-color: rgba(59, 130, 246, 0.35); color: var(--cqa-blue); }
+
+.cqa-editor-wrap {
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: 14px;
+  overflow: hidden;
+  backdrop-filter: blur(10px);
+}
+
+.cqa-editor-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.55rem 0.9rem;
+  border-bottom: 1px solid var(--glass-border);
+  background: rgba(255,255,255,0.02);
+}
+
+.cqa-editor-title {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.cqa-editor-actions { display: flex; gap: 0.35rem; }
+
+.cqa-action-btn {
+  font-size: 0.68rem;
+  font-weight: 600;
+  padding: 0.22rem 0.6rem;
+  border-radius: 5px;
+  border: 1px solid var(--glass-border);
+  background: rgba(255,255,255,0.04);
+  color: var(--text-secondary);
+  cursor: pointer;
+  font-family: Poppins, sans-serif;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  transition: all 0.2s ease;
+}
+
+.cqa-action-btn:hover { color: var(--text-primary); }
+.cqa-action-copy:hover { border-color: var(--cqa-amber); color: var(--cqa-amber); }
+
+.cqa-editor-body {
+  display: grid;
+  grid-template-columns: 32px 1fr;
+  position: relative;
+  min-height: 320px;
+  max-height: 600px;
+  overflow: hidden;
+}
+
+.cqa-line-nums {
+  padding: 0.85rem 0;
+  background: rgba(0,0,0,0.15);
+  border-right: 1px solid var(--glass-border);
+  user-select: none;
+  font-family: Fira Code, monospace;
+  font-size: 0.68rem;
+  color: rgba(148,163,184,0.3);
+  line-height: 1.55;
+  text-align: right;
+  overflow: hidden;
+}
+
+.cqa-line-num {
+  display: block;
+  padding: 0 5px 0 0;
+  height: 1.55em;
+  line-height: 1.55em;
+  transition: background 0.2s, color 0.2s;
+  cursor: default;
+}
+
+.cqa-line-num-highlight {
+  background: var(--cqa-amber-pastel) !important;
+  color: #1c1917 !important;
+  font-weight: 700;
+}
+
+.cqa-textarea {
+  padding: 0.85rem 0.65rem;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: var(--text-primary);
+  font-family: Fira Code, monospace;
+  font-size: 0.78rem;
+  line-height: 1.55;
+  resize: vertical;
+  min-height: 320px;
+  max-height: 600px;
+  width: 100%;
+  tab-size: 2;
+  white-space: pre;
+  overflow-x: auto;
+}
+
+.cqa-textarea:focus-visible {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+.cqa-textarea::placeholder { color: rgba(148,163,184,0.3); }
+
+.cqa-analyze-btn {
+  padding: 0.65rem 1.25rem;
+  font-size: 0.85rem;
+  font-weight: 700;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  width: 100%;
+}
+
+.cqa-results-col {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  position: sticky;
+  top: 1rem;
+}
+
+.cqa-card {
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: 14px;
+  padding: 1rem 1.1rem;
+  backdrop-filter: blur(10px);
+}
+
+.cqa-card-title {
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-secondary);
+  margin-bottom: 0.65rem;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.cqa-placeholder {
+  text-align: center;
+  padding: 1.25rem 0;
+  color: var(--text-secondary);
+  font-size: 0.78rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.cqa-placeholder i { font-size: 1.6rem; opacity: 0.3; }
+
+.cqa-summary-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr;
+  gap: 0.5rem;
+}
+
+.cqa-summary-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.2rem;
+  padding: 0.5rem 0.3rem;
+  border-radius: 8px;
+  background: rgba(255,255,255,0.03);
+}
+
+.cqa-summary-icon { font-size: 1rem; }
+.cqa-sev-error .cqa-summary-icon { color: var(--cqa-rose); }
+.cqa-sev-warning .cqa-summary-icon { color: var(--cqa-amber); }
+.cqa-sev-info .cqa-summary-icon { color: var(--cqa-blue); }
+
+.cqa-summary-count {
+  font-family: Orbitron, sans-serif;
+  font-size: 1.3rem;
+  font-weight: 900;
+}
+
+.cqa-sev-error .cqa-summary-count { color: var(--cqa-rose); }
+.cqa-sev-warning .cqa-summary-count { color: var(--cqa-amber); }
+.cqa-sev-info .cqa-summary-count { color: var(--cqa-blue); }
+
+.cqa-summary-label {
+  font-size: 0.6rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-secondary);
+}
+
+.cqa-summary-grade {
+  font-family: Orbitron, sans-serif;
+  font-size: 1.6rem;
+  font-weight: 900;
+}
+
+.cqa-grade-a .cqa-summary-grade { color: var(--cqa-emerald); }
+.cqa-grade-b .cqa-summary-grade { color: var(--cqa-blue); }
+.cqa-grade-c .cqa-summary-grade { color: var(--cqa-amber); }
+.cqa-grade-d .cqa-summary-grade { color: var(--cqa-orange); }
+.cqa-grade-f .cqa-summary-grade { color: var(--cqa-rose); }
+
+.cqa-issues-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  max-height: 380px;
+  overflow-y: auto;
+}
+
+.cqa-issue-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.45rem;
+  padding: 0.45rem 0.55rem;
+  border-radius: 7px;
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: all 0.15s;
+  border-left: 2px solid transparent;
+}
+
+.cqa-issue-item:hover { background: rgba(255,255,255,0.04); }
+.cqa-issue-item:focus-visible {
+  outline: 2px solid var(--cqa-rose);
+  outline-offset: 2px;
+}
+
+.cqa-issue-item.cqa-sev-error { border-left-color: var(--cqa-rose); }
+.cqa-issue-item.cqa-sev-warning { border-left-color: var(--cqa-amber); }
+.cqa-issue-item.cqa-sev-info { border-left-color: var(--cqa-blue); }
+
+.cqa-issue-line {
+  font-family: Fira Code, monospace;
+  font-size: 0.65rem;
+  color: var(--text-secondary);
+  min-width: 2rem;
+  text-align: right;
+  opacity: 0.6;
+  flex-shrink: 0;
+  padding-top: 0.05rem;
+}
+
+.cqa-issue-icon {
+  flex-shrink: 0;
+  font-size: 0.7rem;
+  padding-top: 0.1rem;
+}
+
+.cqa-sev-error .cqa-issue-icon { color: var(--cqa-rose); }
+.cqa-sev-warning .cqa-issue-icon { color: var(--cqa-amber); }
+.cqa-sev-info .cqa-issue-icon { color: var(--cqa-blue); }
+
+.cqa-issue-body { flex: 1; min-width: 0; }
+.cqa-issue-msg { display: block; line-height: 1.4; color: var(--text-primary); }
+.cqa-issue-meta {
+  display: flex;
+  gap: 0.3rem;
+  margin-top: 0.2rem;
+  flex-wrap: wrap;
+}
+
+.cqa-issue-tag {
+  font-size: 0.58rem;
+  font-weight: 600;
+  padding: 0.08rem 0.4rem;
+  border-radius: 3px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+}
+
+.cqa-issue-tag.cqa-sev-error { background: var(--cqa-rose-pastel); color: #881337; }
+.cqa-issue-tag.cqa-sev-warning { background: var(--cqa-amber-pastel); color: #78350f; }
+.cqa-issue-tag.cqa-sev-info { background: var(--cqa-blue-pastel); color: #1e3a5f; }
+.cqa-issue-tag.cqa-issue-cat { background: var(--cqa-slate-pastel); color: #334155; }
+
+.cqa-issue-line-ref {
+  font-family: Fira Code, monospace;
+  font-size: 0.6rem;
+  color: var(--text-secondary);
+  opacity: 0.5;
+}
+
+.cqa-issues-empty {
+  text-align: center;
+  padding: 1.25rem 0;
+  color: var(--cqa-emerald);
+  font-size: 0.82rem;
+}
+
+.cqa-issues-empty i { font-size: 1.5rem; margin-bottom: 0.4rem; display: block; }
+
+.cqa-readability-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.cqa-grade-badge {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.cqa-grade-a { background: var(--cqa-emerald-pastel); color: #064e3b; }
+.cqa-grade-b { background: var(--cqa-blue-pastel); color: #1e3a5f; }
+.cqa-grade-c { background: var(--cqa-amber-pastel); color: #713f12; }
+.cqa-grade-d { background: var(--cqa-orange-pastel); color: #7c2d12; }
+.cqa-grade-f { background: var(--cqa-rose-pastel); color: #881337; }
+
+.cqa-grade-letter {
+  font-family: Orbitron, sans-serif;
+  font-size: 1.2rem;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.cqa-grade-label {
+  font-size: 0.45rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  line-height: 1;
+  margin-top: 0.05rem;
+}
+
+.cqa-grade-icon { font-size: 1.8rem; }
+.cqa-grade-a .cqa-grade-icon { color: var(--cqa-emerald); }
+.cqa-grade-b .cqa-grade-icon { color: var(--cqa-blue); }
+.cqa-grade-c .cqa-grade-icon { color: var(--cqa-amber); }
+.cqa-grade-d .cqa-grade-icon { color: var(--cqa-orange); }
+.cqa-grade-f .cqa-grade-icon { color: var(--cqa-rose); }
+
+.cqa-grade-score {
+  font-family: Orbitron, sans-serif;
+  font-size: 1.4rem;
+  font-weight: 900;
+  color: var(--text-primary);
+  margin-left: auto;
+}
+
+.cqa-grade-total {
+  font-size: 0.65rem;
+  color: var(--text-secondary);
+  font-weight: 400;
+}
+
+.cqa-readability-metrics {
+  display: flex;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.75rem;
+  font-size: 0.68rem;
+  color: var(--text-secondary);
+}
+
+.cqa-readability-metrics span {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.2rem 0.5rem;
+  background: rgba(255,255,255,0.03);
+  border-radius: 5px;
+}
+
+.cqa-readability-details { display: flex; flex-direction: column; gap: 0.3rem; }
+
+.cqa-detail-row {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.68rem;
+}
+
+.cqa-detail-label {
+  color: var(--text-secondary);
+  min-width: 80px;
+  flex-shrink: 0;
+}
+
+.cqa-detail-bar-bg {
+  flex: 1;
+  height: 6px;
+  background: rgba(255,255,255,0.06);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.cqa-detail-bar {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 0.4s ease;
+}
+
+.cqa-bar-score { background: var(--cqa-emerald-soft); }
+.cqa-bar-mid { background: var(--cqa-amber-soft); }
+.cqa-bar-low { background: var(--cqa-rose-soft); }
+
+.cqa-detail-score {
+  font-family: Fira Code, monospace;
+  font-size: 0.65rem;
+  color: var(--text-secondary);
+  min-width: 22px;
+  text-align: right;
+}
+
+@media (max-width: 960px) {
+  .cqa-layout { grid-template-columns: 1fr; }
+  .cqa-results-col { position: static; }
+}
+
+@media (max-width: 600px) {
+  .cqa-editor-body { grid-template-columns: 26px 1fr; }
+  .cqa-summary-grid { grid-template-columns: 1fr 1fr; }
+}

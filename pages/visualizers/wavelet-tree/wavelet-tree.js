@@ -1,336 +1,366 @@
-// --- STATE MANAGEMENT ---
-let currentTreeRoot = null;
-let currentMode = 'rank'; // 'rank', 'kth', or 'freq'
+// Wavelet Tree Succinct Vector Simulator
 
-// --- DOM ELEMENTS ---
-const logConsole = document.getElementById('execution-log');
-const queryInputs = document.getElementById('query-inputs');
-const querySelector = document.querySelector('.query-selector');
-
-// Inject the Range Frequency button dynamically if it doesn't exist
-if (!document.getElementById('btn-mode-freq')) {
-    const freqBtn = document.createElement('button');
-    freqBtn.id = 'btn-mode-freq';
-    freqBtn.className = 'mode-btn';
-    freqBtn.innerText = 'Range Freq(L, R, X, Y)';
-    querySelector.appendChild(freqBtn);
-}
-
-// --- TELEMETRY HELPER ---
-const log = (msg, type = 'system') => {
-    const div = document.createElement('div');
-    div.className = `log-entry ${type}`;
-    div.innerHTML = `> ${msg}`;
-    logConsole.appendChild(div);
-    logConsole.scrollTop = logConsole.scrollHeight;
-};
-
-// --- WAVELET TREE DATA STRUCTURE ---
 class WaveletNode {
-    /**
-     * @param {number[]} arr - The sequence of integers at this node
-     * @param {number} low - Minimum possible value in the alphabet range
-     * @param {number} high - Maximum possible value in the alphabet range
-     */
-    constructor(arr, low, high) {
-        this.arr = arr;
-        this.low = low;
-        this.high = high;
-        this.left = null;
-        this.right = null;
-        this.bitVector = [];
-        this.prefixSums = [0]; // Prefix sum of 0s (for rank/select routing)
-        this.mid = Math.floor((low + high) / 2);
+  constructor(chars, lowChar, highChar) {
+    this.lowChar = lowChar;
+    this.highChar = highChar;
+    this.chars = chars;
+    this.bitvector = [];
+    this.left = null;
+    this.right = null;
+    this.highlightBit = -1;
+    this.x = 0;
+    this.y = 0;
 
-        // Base case: range has collapsed or array is empty
-        if (arr.length === 0 || low === high) return;
+    if (lowChar === highChar || chars.length === 0) return;
 
-        const leftArr = [];
-        const rightArr = [];
+    const mid = Math.floor((lowChar + highChar) / 2);
+    const leftChars = [];
+    const rightChars = [];
 
-        // Partitioning Phase: Construct bit vector and route elements
-        for (let num of arr) {
-            if (num <= this.mid) {
-                this.bitVector.push(0);
-                leftArr.push(num);
-                this.prefixSums.push(this.prefixSums[this.prefixSums.length - 1] + 1);
-            } else {
-                this.bitVector.push(1);
-                rightArr.push(num);
-                this.prefixSums.push(this.prefixSums[this.prefixSums.length - 1]);
-            }
-        }
-
-        // Recursive Construction
-        if (leftArr.length > 0) this.left = new WaveletNode(leftArr, low, this.mid);
-        if (rightArr.length > 0) this.right = new WaveletNode(rightArr, this.mid + 1, high);
+    for (let c of chars) {
+      const code = c.charCodeAt(0);
+      if (code <= mid) {
+        this.bitvector.push(0);
+        leftChars.push(c);
+      } else {
+        this.bitvector.push(1);
+        rightChars.push(c);
+      }
     }
+
+    if (leftChars.length > 0) {
+      this.left = new WaveletNode(leftChars, lowChar, mid);
+    }
+    if (rightChars.length > 0) {
+      this.right = new WaveletNode(rightChars, mid + 1, highChar);
+    }
+  }
+
+  rankBit(bit, idx) {
+    let count = 0;
+    for (let i = 0; i <= idx && i < this.bitvector.length; i++) {
+      if (this.bitvector[i] === bit) count++;
+    }
+    return count;
+  }
 }
 
-// --- D3.js VISUALIZATION ENGINE ---
-const svg = d3.select("#tree-canvas");
-const margin = {top: 40, right: 90, bottom: 50, left: 90};
-let width, height;
+class WaveletTreeVisualizer {
+  constructor() {
+    this.text = "";
+    this.root = null;
+    this.activePath = []; // list of nodes in current query path
 
-function updateDimensions() {
-    const container = document.querySelector('.visualization-stage');
-    width = container.clientWidth - margin.left - margin.right;
-    height = container.clientHeight - margin.top - margin.bottom;
-}
+    this.canvas = document.getElementById("wt-canvas");
+    this.ctx = this.canvas.getContext("2d");
 
-function renderTree(rootData) {
-    svg.selectAll("*").remove(); // Clear stage
-    updateDimensions();
+    this.resizeCanvas();
+    window.addEventListener("resize", () => this.resizeCanvas());
 
-    const g = svg.append("g")
-        .attr("transform", `translate(${margin.left},${margin.top})`);
+    this.initEvents();
+    this.buildTree("wavelettree");
+  }
 
-    // Map custom Wavelet structure to D3 Hierarchy
-    const hierarchyData = d3.hierarchy(rootData, d => {
-        const children = [];
-        if (d.left) children.push(d.left);
-        if (d.right) children.push(d.right);
-        return children;
+  resizeCanvas() {
+    const rect = this.canvas.parentElement.getBoundingClientRect();
+    this.canvas.width = rect.width;
+    this.canvas.height = rect.height;
+    this.draw();
+  }
+
+  initEvents() {
+    document.getElementById("btn-build-wt").addEventListener("click", () => {
+      const str = document.getElementById("input-text").value.trim() || "wavelettree";
+      this.buildTree(str);
     });
 
-    const tree = d3.tree().size([width, height - 100]);
-    const nodes = tree(hierarchyData);
+    document.getElementById("btn-sample-dna").addEventListener("click", () => {
+      const dna = "GATTACAGATTACA";
+      document.getElementById("input-text").value = dna;
+      this.buildTree(dna);
+    });
 
-    // Links (Edges)
-    g.selectAll(".link")
-        .data(nodes.descendants().slice(1))
-        .enter().append("path")
-        .attr("class", d => `link id-${d.data.low}-${d.data.high}`)
-        .attr("d", d => {
-            return `M${d.x},${d.y} C${d.x},${(d.y + d.parent.y) / 2} ${d.parent.x},${(d.y + d.parent.y) / 2} ${d.parent.x},${d.parent.y}`;
-        });
+    document.getElementById("btn-access").addEventListener("click", () => this.runAccess());
+    document.getElementById("btn-rank").addEventListener("click", () => this.runRank());
+    document.getElementById("btn-select").addEventListener("click", () => this.runSelect());
+  }
 
-    // Nodes (Rectangles)
-    const node = g.selectAll(".node")
-        .data(nodes.descendants())
-        .enter().append("g")
-        .attr("class", d => `node id-node-${d.data.low}-${d.data.high}`)
-        .attr("transform", d => `translate(${d.x},${d.y})`);
+  buildTree(str) {
+    this.text = str;
+    if (str.length === 0) return;
 
-    // Node Panel
-    node.append("rect")
-        .attr("x", -60)
-        .attr("y", -20)
-        .attr("width", 120)
-        .attr("height", 50);
+    const codes = [...str].map((c) => c.charCodeAt(0));
+    const minC = Math.min(...codes);
+    const maxC = Math.max(...codes);
 
-    // Array Data Text
-    node.append("text")
-        .attr("dy", "-2")
-        .attr("text-anchor", "middle")
-        .text(d => `[${d.data.arr.join(',')}]`);
+    this.root = new WaveletNode([...str], minC, maxC);
+    this.activePath = [];
 
-    // Bit Vector Text
-    node.append("text")
-        .attr("class", "bit-vector")
-        .attr("dy", "15")
-        .attr("text-anchor", "middle")
-        .text(d => d.data.bitVector.length ? d.data.bitVector.join('') : 'LEAF');
-}
+    this.updateStats();
+    this.calculatePositions();
+    this.log(`Built Wavelet Tree for "${str}" (Length: ${str.length}, Σ: ${new Set(str).size})`);
+    this.draw();
+  }
 
-// --- QUERY ALGORITHMS & ANIMATION ---
+  updateStats() {
+    const sigma = new Set(this.text).size;
+    const n = this.text.length;
 
-const sleep = ms => new Promise(res => setTimeout(res, ms));
+    document.getElementById("stat-sigma").textContent = sigma;
+    document.getElementById("stat-length").textContent = n;
 
-/**
- * Rank Query: Count of 'val' in range [L, R]
- */
-async function simulateRank(node, l, r, val) {
-    if (!node) return 0;
-    
-    d3.select(`.id-node-${node.low}-${node.high}`).classed('active', true);
-    await sleep(800);
+    // Bit calculations
+    const rawBits = n * 8; // 8-bit ASCII
+    const bitvectorBits = n * Math.ceil(Math.log2(Math.max(2, sigma)));
+    const savedPct = rawBits > 0 ? Math.round(((rawBits - bitvectorBits) / rawBits) * 100) : 0;
 
-    if (node.low === node.high) {
-        const count = r - l + 1;
-        log(`Leaf reached. Found ${count} instance(s) of ${val}.`, 'success');
-        return count;
+    document.getElementById("stat-compression").textContent = `${savedPct}%`;
+    document.getElementById("metric-raw-bits").textContent = `${rawBits} bits`;
+    document.getElementById("metric-succinct-bits").textContent = `${bitvectorBits} bits`;
+    document.getElementById("metric-saved-bits").textContent = `${savedPct}%`;
+  }
+
+  log(msg) {
+    const logBox = document.getElementById("query-log");
+    const div = document.createElement("div");
+    div.className = "log-entry";
+    div.textContent = msg;
+    logBox.prepend(div);
+  }
+
+  clearHighlights(node = this.root) {
+    if (!node) return;
+    node.highlightBit = -1;
+    this.clearHighlights(node.left);
+    this.clearHighlights(node.right);
+  }
+
+  // Succinct Queries
+  runAccess() {
+    const idx = parseInt(document.getElementById("access-idx").value);
+    if (isNaN(idx) || idx < 0 || idx >= this.text.length) {
+      this.log(`Error: Index ${idx} out of bounds [0 .. ${this.text.length - 1}]`);
+      return;
     }
 
-    log(`Range [${l}, ${r}] at Alphabet [${node.low}, ${node.high}]. Mid: ${node.mid}`, 'process');
+    this.clearHighlights();
+    this.activePath = [];
 
-    if (val <= node.mid) {
-        const newL = l === 0 ? 0 : node.prefixSums[l];
-        const newR = node.prefixSums[r + 1] - 1;
-        log(`Value ${val} <= Mid (${node.mid}). Routing LEFT with new L=${newL}, R=${newR}`, 'highlight');
-        return await simulateRank(node.left, newL, newR, val);
-    } else {
-        const newL = l - (l === 0 ? 0 : node.prefixSums[l]);
-        const newR = r - node.prefixSums[r + 1];
-        log(`Value ${val} > Mid (${node.mid}). Routing RIGHT with new L=${newL}, R=${newR}`, 'highlight');
-        return await simulateRank(node.right, newL, newR, val);
+    let curr = this.root;
+    let currIdx = idx;
+
+    while (curr) {
+      this.activePath.push(curr);
+      if (curr.lowChar === curr.highChar || curr.bitvector.length === 0) {
+        const resultChar = String.fromCharCode(curr.lowChar);
+        this.log(`access(${idx}) => '${resultChar}' (Resolved at leaf)`);
+        break;
+      }
+
+      const bit = curr.bitvector[currIdx];
+      curr.highlightBit = currIdx;
+
+      if (bit === 0) {
+        currIdx = curr.rankBit(0, currIdx) - 1;
+        curr = curr.left;
+      } else {
+        currIdx = curr.rankBit(1, currIdx) - 1;
+        curr = curr.right;
+      }
     }
-}
+    this.draw();
+  }
 
-/**
- * K-th Smallest Element in Range [L, R]
- */
-async function simulateKth(node, l, r, k) {
-    if (!node) return null;
-    
-    d3.select(`.id-node-${node.low}-${node.high}`).classed('active', true);
-    await sleep(800);
+  runRank() {
+    const charStr = document.getElementById("rank-char").value.trim();
+    const idx = parseInt(document.getElementById("rank-idx").value);
 
-    if (node.low === node.high) {
-        log(`Leaf reached. The target element is ${node.low}.`, 'success');
-        return node.low;
-    }
-
-    log(`Range [${l}, ${r}] | Looking for K: ${k} | Mid: ${node.mid}`, 'process');
-
-    const zeroesBeforeL = l === 0 ? 0 : node.prefixSums[l];
-    const zeroesUpToR = node.prefixSums[r + 1];
-    const countLeft = zeroesUpToR - zeroesBeforeL;
-
-    if (k <= countLeft) {
-        const newL = zeroesBeforeL;
-        const newR = zeroesUpToR - 1;
-        log(`${k} <= ${countLeft} (elements routed left). Routing LEFT with L=${newL}, R=${newR}`, 'highlight');
-        return await simulateKth(node.left, newL, newR, k);
-    } else {
-        const newL = l - zeroesBeforeL;
-        const newR = r - zeroesUpToR;
-        log(`${k} > ${countLeft}. Routing RIGHT looking for K=${k - countLeft} with L=${newL}, R=${newR}`, 'highlight');
-        return await simulateKth(node.right, newL, newR, k - countLeft);
-    }
-}
-
-/**
- * Range Frequency: Count of elements in index [L, R] that fall within value range [X, Y]
- */
-async function simulateRangeFrequency(node, l, r, x, y) {
-    if (!node || l > r || x > node.high || y < node.low) return 0;
-    
-    d3.select(`.id-node-${node.low}-${node.high}`).classed('active', true);
-    await sleep(500);
-
-    if (x <= node.low && y >= node.high) {
-        const count = r - l + 1;
-        log(`Interval [${node.low}, ${node.high}] is fully within [${x}, ${y}]. Found ${count} elements.`, 'success');
-        return count;
+    if (!charStr || isNaN(idx) || idx < 0 || idx >= this.text.length) {
+      this.log(`Error: Invalid rank input parameters`);
+      return;
     }
 
-    const zeroesBeforeL = l === 0 ? 0 : node.prefixSums[l];
-    const zeroesUpToR = node.prefixSums[r + 1];
-    
-    const leftL = zeroesBeforeL;
-    const leftR = zeroesUpToR - 1;
-    const rightL = l - zeroesBeforeL;
-    const rightR = r - zeroesUpToR;
+    const targetCode = charStr.charCodeAt(0);
+    this.clearHighlights();
+    this.activePath = [];
 
-    log(`Splitting query for Range [${x}, ${y}] at Mid: ${node.mid}`, 'process');
+    let curr = this.root;
+    let currIdx = idx;
 
-    const leftCount = await simulateRangeFrequency(node.left, leftL, leftR, x, y);
-    const rightCount = await simulateRangeFrequency(node.right, rightL, rightR, x, y);
+    while (curr) {
+      this.activePath.push(curr);
+      if (curr.lowChar === curr.highChar) break;
 
-    return leftCount + rightCount;
-}
+      const mid = Math.floor((curr.lowChar + curr.highChar) / 2);
+      curr.highlightBit = currIdx;
 
-// --- EVENT LISTENERS ---
-
-document.getElementById('btn-build').addEventListener('click', () => {
-    const inputStr = document.getElementById('arr-input').value;
-    const arr = inputStr.split(',').map(n => parseInt(n.trim())).filter(n => !isNaN(n));
-    
-    if (arr.length === 0) return log('Error: Invalid array input.', 'system');
-
-    const min = Math.min(...arr);
-    const max = Math.max(...arr);
-    
-    logConsole.innerHTML = '';
-    log(`Building Wavelet Tree for Alphabet Range: [${min}, ${max}]...`, 'process');
-    
-    currentTreeRoot = new WaveletNode(arr, min, max);
-    renderTree(currentTreeRoot);
-    
-    log(`Tree construction complete. Ready for queries.`, 'success');
-});
-
-// Setup Query Inputs based on Mode
-const setupInputs = () => {
-    if (currentMode === 'rank') {
-        queryInputs.innerHTML = `
-            <input type="number" id="q-l" placeholder="L Index" class="cyber-input" style="width:30%">
-            <input type="number" id="q-r" placeholder="R Index" class="cyber-input" style="width:30%">
-            <input type="number" id="q-val" placeholder="Value (x)" class="cyber-input" style="width:30%">
-        `;
-    } else if (currentMode === 'kth') {
-        queryInputs.innerHTML = `
-            <input type="number" id="q-l" placeholder="L Index" class="cyber-input" style="width:30%">
-            <input type="number" id="q-r" placeholder="R Index" class="cyber-input" style="width:30%">
-            <input type="number" id="q-val" placeholder="K-th" class="cyber-input" style="width:30%">
-        `;
-    } else if (currentMode === 'freq') {
-        queryInputs.innerHTML = `
-            <input type="number" id="q-l" placeholder="L Index" class="cyber-input" style="width:23%">
-            <input type="number" id="q-r" placeholder="R Index" class="cyber-input" style="width:23%">
-            <input type="number" id="q-val" placeholder="Min (X)" class="cyber-input" style="width:23%">
-            <input type="number" id="q-y" placeholder="Max (Y)" class="cyber-input" style="width:23%">
-        `;
-    }
-};
-
-const handleModeSwitch = (e, mode) => {
-    currentMode = mode;
-    document.querySelectorAll('.mode-btn').forEach(btn => btn.classList.remove('active'));
-    e.target.classList.add('active');
-    setupInputs();
-};
-
-document.getElementById('btn-mode-rank').addEventListener('click', (e) => handleModeSwitch(e, 'rank'));
-document.getElementById('btn-mode-kth').addEventListener('click', (e) => handleModeSwitch(e, 'kth'));
-document.getElementById('btn-mode-freq').addEventListener('click', (e) => handleModeSwitch(e, 'freq'));
-
-document.getElementById('btn-query').addEventListener('click', async () => {
-    if (!currentTreeRoot) return log('Error: Build tree first.', 'system');
-
-    const l = parseInt(document.getElementById('q-l').value);
-    const r = parseInt(document.getElementById('q-r').value);
-    const val = parseInt(document.getElementById('q-val').value);
-    let y = null;
-
-    if (currentMode === 'freq') {
-        y = parseInt(document.getElementById('q-y').value);
-        if (isNaN(y)) return log('Error: Provide valid Maximum (Y) integer.', 'system');
+      if (targetCode <= mid) {
+        currIdx = curr.rankBit(0, currIdx) - 1;
+        curr = curr.left;
+      } else {
+        currIdx = curr.rankBit(1, currIdx) - 1;
+        curr = curr.right;
+      }
     }
 
-    if (isNaN(l) || isNaN(r) || isNaN(val)) return log('Error: Provide valid query integers.', 'system');
+    const rankVal = currIdx + 1;
+    this.log(`rank_${charStr}(${idx}) => ${rankVal} (Occurrences of '${charStr}' in prefix [0..${idx}])`);
+    this.draw();
+  }
 
-    // Reset Visuals
-    d3.selectAll('.node').classed('active', false);
+  runSelect() {
+    const charStr = document.getElementById("select-char").value.trim();
+    const k = parseInt(document.getElementById("select-k").value);
 
-    log(`--- Executing ${currentMode.toUpperCase()} Query ---`, 'process');
-    
-    // Lock UI during animation
-    const queryBtn = document.getElementById('btn-query');
-    queryBtn.disabled = true;
-    queryBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
-    
-    try {
-        if (currentMode === 'rank') {
-            const result = await simulateRank(currentTreeRoot, l, r, val);
-            log(`FINAL RESULT: Rank of ${val} in [${l}, ${r}] is ${result}`, 'success');
-        } else if (currentMode === 'kth') {
-            const result = await simulateKth(currentTreeRoot, l, r, val);
-            log(`FINAL RESULT: The ${val}-th smallest element in [${l}, ${r}] is ${result}`, 'success');
-        } else if (currentMode === 'freq') {
-            const result = await simulateRangeFrequency(currentTreeRoot, l, r, val, y);
-            log(`FINAL RESULT: Found ${result} element(s) between [${val}, ${y}] in index range [${l}, ${r}]`, 'success');
+    if (!charStr || isNaN(k) || k < 1) {
+      this.log(`Error: Invalid select input parameters`);
+      return;
+    }
+
+    // Direct search for verification & trace
+    let count = 0;
+    let foundIdx = -1;
+    for (let i = 0; i < this.text.length; i++) {
+      if (this.text[i] === charStr) {
+        count++;
+        if (count === k) {
+          foundIdx = i;
+          break;
         }
-    } catch (err) {
-        log(`Execution failed: ${err.message}`, 'system');
-    } finally {
-        // Unlock UI
-        queryBtn.disabled = false;
-        queryBtn.innerHTML = '<i class="fas fa-bolt"></i> Run Query';
+      }
     }
-});
 
-// Init
-setupInputs();
-window.addEventListener('resize', () => { if(currentTreeRoot) renderTree(currentTreeRoot); });
+    if (foundIdx !== -1) {
+      this.log(`select_${charStr}(${k}) => Index ${foundIdx} (${k}-th occurrence of '${charStr}')`);
+    } else {
+      this.log(`select_${charStr}(${k}) => Not found (${count} total occurrences)`);
+    }
+  }
+
+  calculatePositions() {
+    if (!this.root) return;
+    const width = this.canvas.width;
+    const startY = 40;
+
+    const setPos = (node, x, y, dx) => {
+      if (!node) return;
+      node.x = x;
+      node.y = y;
+      if (node.left) setPos(node.left, x - dx, y + 90, dx / 1.9);
+      if (node.right) setPos(node.right, x + dx, y + 90, dx / 1.9);
+    };
+
+    setPos(this.root, width / 2, startY, width / 4);
+  }
+
+  draw() {
+    this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    if (!this.root) return;
+
+    // Draw Edges
+    const drawEdges = (node) => {
+      if (!node) return;
+      if (node.left) {
+        this.drawLine(node.x, node.y, node.left.x, node.left.y, this.activePath.includes(node.left));
+        drawEdges(node.left);
+      }
+      if (node.right) {
+        this.drawLine(node.x, node.y, node.right.x, node.right.y, this.activePath.includes(node.right));
+        drawEdges(node.right);
+      }
+    };
+    drawEdges(this.root);
+
+    // Draw Nodes
+    const drawNodes = (node) => {
+      if (!node) return;
+      this.drawWaveletNode(node);
+      drawNodes(node.left);
+      drawNodes(node.right);
+    };
+    drawNodes(this.root);
+  }
+
+  drawLine(x1, y1, x2, y2, isActive) {
+    this.ctx.save();
+    this.ctx.strokeStyle = isActive ? "#10b981" : "rgba(255, 255, 255, 0.15)";
+    this.ctx.lineWidth = isActive ? 3 : 1.5;
+    this.ctx.beginPath();
+    this.ctx.moveTo(x1, y1 + 20);
+    this.ctx.lineTo(x2, y2 - 15);
+    this.ctx.stroke();
+    this.ctx.restore();
+  }
+
+  drawWaveletNode(node) {
+    const isLeaf = node.lowChar === node.highChar;
+    const isHighlighted = this.activePath.includes(node);
+
+    this.ctx.save();
+
+    if (isLeaf) {
+      // Leaf Node (Character label)
+      this.ctx.fillStyle = isHighlighted ? "rgba(16, 185, 129, 0.3)" : "rgba(56, 189, 248, 0.2)";
+      this.ctx.strokeStyle = isHighlighted ? "#10b981" : "#38bdf8";
+      this.ctx.lineWidth = 2;
+
+      this.ctx.beginPath();
+      this.ctx.arc(node.x, node.y, 18, 0, 2 * Math.PI);
+      this.ctx.fill();
+      this.ctx.stroke();
+
+      this.ctx.fillStyle = "#ffffff";
+      this.ctx.font = "bold 14px Fira Code";
+      this.ctx.textAlign = "center";
+      this.ctx.textBaseline = "middle";
+      this.ctx.fillText(String.fromCharCode(node.lowChar), node.x, node.y);
+    } else {
+      // Internal Node (Bitvector box)
+      const bvStr = node.bitvector.join(" ");
+      this.ctx.font = "12px Fira Code";
+      const textWidth = Math.max(80, this.ctx.measureText(bvStr).width + 20);
+      const boxHeight = 28;
+
+      this.ctx.fillStyle = isHighlighted ? "rgba(16, 185, 129, 0.2)" : "rgba(15, 23, 42, 0.85)";
+      this.ctx.strokeStyle = isHighlighted ? "#10b981" : "rgba(255, 255, 255, 0.2)";
+      this.ctx.lineWidth = isHighlighted ? 2 : 1;
+
+      this.ctx.beginPath();
+      this.ctx.roundRect(node.x - textWidth / 2, node.y - boxHeight / 2, textWidth, boxHeight, 6);
+      this.ctx.fill();
+      this.ctx.stroke();
+
+      // Draw bitvector text with bit highlights
+      this.ctx.textAlign = "center";
+      this.ctx.textBaseline = "middle";
+
+      const startX = node.x - textWidth / 2 + 10;
+      let xOffset = startX;
+
+      node.bitvector.forEach((bit, idx) => {
+        if (idx === node.highlightBit) {
+          this.ctx.fillStyle = "#fbbf24";
+          this.ctx.font = "bold 13px Fira Code";
+        } else {
+          this.ctx.fillStyle = "#ffffff";
+          this.ctx.font = "12px Fira Code";
+        }
+        this.ctx.fillText(bit, xOffset, node.y);
+        xOffset += 12;
+      });
+
+      // Range Label above
+      const rangeText = `[${String.fromCharCode(node.lowChar)}-${String.fromCharCode(node.highChar)}]`;
+      this.ctx.fillStyle = "#94a3b8";
+      this.ctx.font = "10px Inter";
+      this.ctx.fillText(rangeText, node.x, node.y - 20);
+    }
+
+    this.ctx.restore();
+  }
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  window.wtViz = new WaveletTreeVisualizer();
+});

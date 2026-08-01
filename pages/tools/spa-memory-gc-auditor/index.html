@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Memory Leak & Event Listener GC Auditor — Algo Infinity Verse</title>
+  <meta name="description" content="Detect uncleaned event listeners, detached DOM nodes, uncleared timers, and memory heap leaks in single-page applications." />
+  
+  <link rel="stylesheet" href="../../../styles.css" />
+  <link rel="stylesheet" href="style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+
+  <script>
+    (function() {
+      try {
+        var t = localStorage.getItem('theme');
+        var p = window.matchMedia('(prefers-color-scheme: light)').matches;
+        var theme = t || (p ? 'light' : 'dark');
+        if (theme === 'light') document.documentElement.classList.add('light-mode');
+      } catch (e) {}
+    })();
+  </script>
+</head>
+<body data-page="gc-auditor">
+
+  <header class="gc-header">
+    <div class="gc-header-container">
+      <a href="../tools.html" class="gc-back-btn">
+        <i class="fas fa-arrow-left"></i>
+        <span>Tools Hub</span>
+      </a>
+      <div class="gc-title-area">
+        <h1><i class="fas fa-microscope"></i> SPA Memory Leak &amp; Event Listener GC Auditor</h1>
+        <p>Detect Detached DOM Nodes, Uncleared Timers, and Event Listener Memory Leaks in JavaScript Apps</p>
+      </div>
+      <div class="gc-header-actions">
+        <button id="themeToggleBtn" class="gc-icon-btn" title="Toggle Theme">
+          <i class="fas fa-moon"></i>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="gc-main">
+    <!-- TOOLBAR -->
+    <div class="gc-toolbar">
+      <div class="gc-preset-group">
+        <label><i class="fas fa-vial"></i> Load Sample Snippets:</label>
+        <button class="gc-btn gc-btn-preset active" data-preset="listener-leak">EventListener Leak</button>
+        <button class="gc-btn gc-btn-preset" data-preset="timer-leak">Dangling Timer Leak</button>
+        <button class="gc-btn gc-btn-preset" data-preset="detached-dom">Detached DOM Nodes</button>
+        <button class="gc-btn gc-btn-preset" data-preset="clean-code">Clean Disposal Pattern</button>
+      </div>
+      <div class="gc-action-group">
+        <button id="btnRunAudit" class="gc-btn gc-btn-primary"><i class="fas fa-play"></i> Run Memory Audit</button>
+        <button id="btnTriggerGC" class="gc-btn gc-btn-success"><i class="fas fa-broom"></i> Simulate Browser GC</button>
+      </div>
+    </div>
+
+    <!-- MAIN GRID -->
+    <div class="gc-grid">
+      <!-- CODE EDITOR / PASTE AREA -->
+      <div class="gc-card gc-code-card">
+        <div class="gc-card-header">
+          <h2><i class="fas fa-code"></i> Source Code Auditor Window</h2>
+          <span class="gc-badge gc-badge-info">JS / SPA Component</span>
+        </div>
+        <div class="gc-editor-wrapper">
+          <textarea id="gcCodeInput" class="gc-textarea" placeholder="Paste JavaScript application component code here..."></textarea>
+        </div>
+      </div>
+
+      <!-- AUDIT RESULTS & METRICS PANEL -->
+      <div class="gc-side-panel">
+        
+        <!-- MEMORY HEAP STATS -->
+        <div class="gc-card">
+          <div class="gc-card-header">
+            <h3><i class="fas fa-chart-pie"></i> Simulated Memory Heap Metrics</h3>
+          </div>
+          <div class="gc-card-body">
+            <div class="gc-stats-grid">
+              <div class="gc-stat-box">
+                <span class="gc-stat-label">Heap Memory</span>
+                <span class="gc-stat-value" id="heapMemVal">14.2 MB</span>
+              </div>
+              <div class="gc-stat-box">
+                <span class="gc-stat-label">Active Listeners</span>
+                <span class="gc-stat-value gc-danger" id="listenersVal">12 Leaked</span>
+              </div>
+              <div class="gc-stat-box">
+                <span class="gc-stat-label">Detached Nodes</span>
+                <span class="gc-stat-value gc-warning" id="detachedVal">45 Nodes</span>
+              </div>
+              <div class="gc-stat-box">
+                <span class="gc-stat-label">Dangling Timers</span>
+                <span class="gc-stat-value gc-danger" id="timersVal">3 Active</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- DETECTED LEAKS & FIX RECOMMENDATIONS -->
+        <div class="gc-card gc-flex-card">
+          <div class="gc-card-header">
+            <h3><i class="fas fa-shield-virus"></i> Audit Findings &amp; Cleanup Fixes</h3>
+          </div>
+          <div class="gc-card-body gc-scrollable" id="findingsContainer">
+            <!-- Leak findings rendered by JS -->
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- CONSOLE LOG -->
+    <div class="gc-card gc-console-card">
+      <div class="gc-card-header">
+        <h2><i class="fas fa-terminal"></i> Memory Heap Diagnostic Console</h2>
+        <button id="btnClearConsole" class="gc-btn gc-btn-sm"><i class="fas fa-trash"></i> Clear</button>
+      </div>
+      <div class="gc-console-body" id="gcConsole">
+        <div class="gc-log-entry info">[SYSTEM] SPA Memory &amp; Event Listener GC Auditor initialized.</div>
+      </div>
+    </div>
+  </main>
+
+  <script src="../../../auth.js"></script>
+  <script src="../../../theme.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>

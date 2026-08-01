@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Eventual Consistency Anti-Entropy Gossip Visualizer · Algo Infinity Verse</title>
+    <meta
+      name="description"
+      content="Simulate how databases use Gossip Protocol and Merkle Trees to achieve eventual consistency and repair stale nodes."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Poppins:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="eventual-consistency-gossip.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+    <link rel="stylesheet" href="/modules/quick-notes/quick-notes.css" />
+  </head>
+  <body>
+    <div class="starfield" id="starfield"></div>
+
+    <header class="topbar">
+      <div class="brand">
+        <span class="brand-icon">∞</span>
+        <div class="brand-text">
+          <span class="brand-name">Algo</span>
+          <span class="brand-sub">INFINITY VERSE</span>
+        </div>
+      </div>
+      <nav class="topnav">
+        <span>Learn</span><span>Practice</span><span class="active">Interview</span
+        ><span>Discussions</span>
+      </nav>
+    </header>
+
+    <main class="page">
+      <section class="hero">
+        <p class="eyebrow">DISTRIBUTED SYSTEMS · EVENTUAL CONSISTENCY</p>
+        <h1>Anti-Entropy <span class="accent">Gossip</span></h1>
+        <p class="subhead">
+          How systems like Cassandra and Dynamo repair stale data using Merkle Trees.
+        </p>
+        <p class="lede">
+          In an AP (Available/Partition tolerant) database, nodes accept writes even when other
+          nodes are down. When a stale node comes back online, the cluster uses
+          <strong>Gossip Protocol</strong> and exchanges <strong>Merkle Trees</strong> in the
+          background to detect inconsistencies and silently repair the stale node (Anti-entropy).
+        </p>
+      </section>
+
+      <section class="panel controls-panel">
+        <div class="controls-row">
+          <button class="btn btn-secondary" id="btnInject">➕ Write Data (to online nodes)</button>
+          <button class="btn btn-primary" id="btnGossip">▶ Start Gossip (Anti-Entropy)</button>
+          <div class="control-group">
+            <label for="speedSlider">Round speed <span id="speedVal">800ms</span></label>
+            <input type="range" id="speedSlider" min="200" max="2000" step="100" value="800" />
+          </div>
+          <button class="btn btn-ghost" id="btnReset">🔄 Reset Cluster</button>
+        </div>
+        <div class="status-line" id="statusLine">
+          Click a node to pause/unpause it. Then write data, unpause the node, and start gossip to
+          watch it heal.
+        </div>
+      </section>
+
+      <section class="panel mesh-panel">
+        <div class="view-header">
+          <h2>Cluster State <span class="view-tag">D3-Force Mesh</span></h2>
+        </div>
+        <div class="legend-row">
+          <span class="legend-item"><span class="dot online"></span> Online (Up-to-date)</span>
+          <span class="legend-item"><span class="dot offline"></span> Paused/Offline</span>
+          <span class="legend-item"><span class="dot stale"></span> Stale (Needs Repair)</span>
+          <span class="legend-item"><span class="dot merging"></span> Exchanging Merkle Trees</span>
+        </div>
+        <svg id="meshSvg" viewBox="0 0 900 480" preserveAspectRatio="xMidYMid meet"></svg>
+      </section>
+
+      <footer class="foot-note">
+        Built as an Eventual Consistency Engine · Algo Infinity Verse
+      </footer>
+    </main>
+
+    <script src="eventual-consistency-gossip.js"></script>
+    <script src="/modules/quick-notes/quick-notes.js"></script>
+  </body>
+</html>

@@ -1,0 +1,205 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>DNA Data Storage Encoder | Algo Infinity Verse</title>
+    <link rel="stylesheet" href="/styles.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <!-- Monaco Editor -->
+    <script src="https://unpkg.com/monaco-editor@0.36.1/min/vs/loader.js"></script>
+    <style>
+      body { margin: 0; overflow: hidden; background: #020617; font-family: 'Poppins', sans-serif; color: #fff; }
+      .app-container { display: flex; height: 100vh; }
+      
+      .sidebar { width: 450px; background: rgba(15, 23, 42, 0.95); border-right: 1px solid #10b981; display: flex; flex-direction: column; z-index: 10; }
+      .header { padding: 20px; border-bottom: 1px solid #334155; }
+      .header h2 { margin: 0; color: #10b981; font-family: 'Orbitron', sans-serif; font-size: 1.2rem; }
+      .header p { margin: 5px 0 0 0; font-size: 0.8rem; color: #94a3b8; }
+      
+      #editor-container { flex: 1; min-height: 300px; }
+      
+      .controls { padding: 20px; border-top: 1px solid #334155; background: rgba(0,0,0,0.5); }
+      .btn { background: linear-gradient(90deg, #10b981, #059669); color: #fff; border: none; padding: 10px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; transition: 0.3s; }
+      .btn:hover { background: #34d399; transform: translateY(-2px); box-shadow: 0 0 15px rgba(16, 185, 129, 0.5); }
+      
+      .sim-container { flex: 1; position: relative; background: #000; display: flex; flex-direction: column; padding: 20px; overflow-y: auto; }
+      
+      .panel { background: rgba(15, 23, 42, 0.8); border: 1px solid #334155; border-radius: 12px; padding: 20px; margin-bottom: 20px; }
+      .panel h3 { color: #38bdf8; margin-top: 0; font-family: 'Orbitron', sans-serif; font-size: 1rem; border-bottom: 1px solid #1e293b; padding-bottom: 10px; }
+      
+      .data-display { font-family: monospace; font-size: 0.9rem; background: #0f172a; padding: 15px; border-radius: 8px; color: #cbd5e1; word-break: break-all; margin-top: 10px; }
+      .dna-display { font-family: monospace; font-size: 1.1rem; letter-spacing: 2px; background: #0f172a; padding: 15px; border-radius: 8px; color: #34d399; word-break: break-all; margin-top: 10px; }
+      
+      .mutation { color: #ef4444; font-weight: bold; text-shadow: 0 0 5px #ef4444; }
+      
+      .metric-row { display: flex; gap: 20px; margin-top: 15px; }
+      .metric-box { flex: 1; background: #020617; border: 1px solid #1e293b; border-radius: 8px; padding: 10px; text-align: center; }
+      .metric-val { font-size: 1.5rem; font-weight: bold; font-family: monospace; color: #facc15; }
+      .metric-label { font-size: 0.75rem; color: #94a3b8; text-transform: uppercase; }
+    </style>
+  </head>
+  <body>
+    
+    <div class="app-container">
+      <div class="sidebar">
+        <div class="header">
+          <h2><i class="fas fa-dna"></i> DNA Archival Storage</h2>
+          <p>Write Forward Error Correction (FEC) algorithms</p>
+        </div>
+        
+        <div id="editor-container"></div>
+        
+        <div class="controls">
+          <button class="btn" onclick="runSim()"><i class="fas fa-flask"></i> Simulate 1,000 Years of Mutation</button>
+        </div>
+      </div>
+      
+      <div class="sim-container">
+        <div class="panel">
+            <h3>1. Original Digital Data</h3>
+            <div style="display: flex; gap: 10px;">
+                <input type="text" id="rawInput" value="ALGO_INFINITY_VERSE_2026" style="flex: 1; padding: 10px; background: #020617; color: #fff; border: 1px solid #334155; border-radius: 4px; font-family: monospace;" readonly>
+            </div>
+            <div class="data-display" id="hexDisplay">41 4C 47 4F 5F 49 4E 46 49 4E 49 54 59 5F 56 45 52 53 45 5F 32 30 32 36</div>
+        </div>
+
+        <div class="panel" style="border-color: #10b981;">
+            <h3><i class="fas fa-vial" style="color:#10b981;"></i> 2. Synthesized DNA (Encoded + Parity)</h3>
+            <div class="dna-display" id="dnaDisplay">ATCG...</div>
+        </div>
+
+        <div class="panel" style="border-color: #ef4444;">
+            <h3><i class="fas fa-biohazard" style="color:#ef4444;"></i> 3. Recovered DNA (After 1,000 yrs Radiation)</h3>
+            <div class="dna-display" id="mutatedDisplay" style="color: #94a3b8;">Awaiting Simulation...</div>
+            <div class="metric-row">
+                <div class="metric-box">
+                    <div class="metric-val" id="mutCount" style="color: #ef4444;">0</div>
+                    <div class="metric-label">Base Pair Mutations</div>
+                </div>
+                <div class="metric-box">
+                    <div class="metric-val" id="integrityVal">100%</div>
+                    <div class="metric-label">Data Integrity</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="panel">
+            <h3>4. Decoded Digital Data (FEC Applied)</h3>
+            <div class="data-display" id="decodedDisplay" style="color: #38bdf8;">Awaiting...</div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      let editor;
+      require.config({ paths: { 'vs': 'https://unpkg.com/monaco-editor@0.36.1/min/vs' }});
+      require(['vs/editor/editor.main'], function() {
+        editor = monaco.editor.create(document.getElementById('editor-container'), {
+          value: `// DNA Forward Error Correction (FEC)
+// You have access to raw hex bytes.
+// Encode them to ATCG, and add parity checks!
+
+// 00 -> A, 01 -> T, 10 -> C, 11 -> G
+function encodeData(hexString) {
+    let dna = "";
+    // Basic naive encoding (No Error Correction):
+    // Real algorithm needs Reed-Solomon or Hamming!
+    for(let i=0; i<hexString.length; i++) {
+        let charCode = hexString.charCodeAt(i);
+        dna += ["A","T","C","G"][charCode % 4];
+        dna += ["A","T","C","G"][Math.floor(charCode / 4) % 4];
+    }
+    // Add naive parity
+    dna += "AAAA"; 
+    return dna;
+}
+
+function decodeData(mutatedDna) {
+    // Write logic to recover the original hex
+    // using the parity bits you added!
+    return "DECODED_DATA_HERE";
+}`,
+          language: 'javascript',
+          theme: 'vs-dark',
+          minimap: { enabled: false },
+          automaticLayout: true
+        });
+      });
+
+      function stringToHex(str) {
+         let hex = "";
+         for(let i=0; i<str.length; i++) {
+            hex += str.charCodeAt(i).toString(16).toUpperCase() + " ";
+         }
+         return hex.trim();
+      }
+      
+      document.getElementById('hexDisplay').innerText = stringToHex(document.getElementById('rawInput').value);
+
+      function runSim() {
+          const raw = document.getElementById('hexDisplay').innerText.replace(/ /g, '');
+          
+          let encodedDNA = "";
+          try {
+             eval(editor.getValue());
+             encodedDNA = encodeData(raw);
+          } catch(e) {
+             alert("Encoding Error: " + e.message);
+             return;
+          }
+          
+          document.getElementById('dnaDisplay').innerText = encodedDNA;
+          
+          // Simulate 1000 years of cosmic radiation
+          let mutated = "";
+          let mutations = 0;
+          let htmlDna = "";
+          const bases = ["A","T","C","G"];
+          
+          for(let i=0; i<encodedDNA.length; i++) {
+             if (Math.random() < 0.15) { // 15% mutation rate
+                 let newBase = bases[Math.floor(Math.random() * 4)];
+                 mutated += newBase;
+                 htmlDna += \`<span class="mutation">\${newBase}</span>\`;
+                 mutations++;
+             } else {
+                 mutated += encodedDNA[i];
+                 htmlDna += encodedDNA[i];
+             }
+          }
+          
+          document.getElementById('mutatedDisplay').innerHTML = htmlDna;
+          document.getElementById('mutCount').innerText = mutations;
+          
+          let integrity = 100 - ((mutations / encodedDNA.length) * 100);
+          document.getElementById('integrityVal').innerText = integrity.toFixed(1) + "%";
+          
+          // Try to decode
+          let decoded = "";
+          try {
+             decoded = decodeData(mutated);
+          } catch (e) {
+             decoded = "FEC ALGORITHM FAILED TO DECODE.";
+          }
+          
+          document.getElementById('decodedDisplay').innerText = decoded;
+          
+          if (decoded === raw) {
+              document.getElementById('decodedDisplay').style.color = "#10b981";
+              document.getElementById('decodedDisplay').innerText += " (PERFECT RECOVERY!)";
+          } else {
+              document.getElementById('decodedDisplay').style.color = "#ef4444";
+          }
+      }
+      
+      setTimeout(() => {
+         try {
+             eval(editor.getValue());
+             document.getElementById('dnaDisplay').innerText = encodeData(document.getElementById('hexDisplay').innerText.replace(/ /g, ''));
+         } catch(e){}
+      }, 1500);
+    </script>
+  </body>
+</html>

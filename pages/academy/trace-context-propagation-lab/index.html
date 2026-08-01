@@ -1,0 +1,294 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Trace Context Propagation Lab | Algo Infinity Verse</title>
+  <meta name="description" content="Learn W3C Trace Context, baggage, async pitfalls, queues, browser→API hops, broken causality, and fixes — with a multi-hop simulator, quiz, and localStorage progress." />
+  <link rel="stylesheet" href="/styles.css" />
+  <link rel="stylesheet" href="style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Poppins:wght@300;400;500;600;700&family=Fira+Code:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <script>
+    (function () {
+      try {
+        var storedTheme = localStorage.getItem('theme');
+        var prefersLight = window.matchMedia('(prefers-color-scheme: light)').matches;
+        var theme = storedTheme || (prefersLight ? 'light' : 'dark');
+        if (theme === 'light') {
+          document.documentElement.classList.add('light-mode');
+        } else {
+          document.documentElement.classList.remove('light-mode');
+        }
+      } catch (e) {}
+    })();
+  </script>
+  
+</head>
+<body data-page="trace-context-propagation-lab">
+  <a href="#tctx-main" class="tctx-skip-link">Skip to main content</a>
+  <button type="button" id="scrollTopBtn" class="scroll-top-btn" aria-label="Scroll to top">
+    <i class="fas fa-arrow-up" aria-hidden="true"></i>
+  </button>
+
+  <div id="navbar-placeholder"></div>
+
+  <header class="tctx-hero">
+    <div class="tctx-hero-badge">
+      <i class="fas fa-project-diagram" aria-hidden="true"></i>
+      Observability Academy
+    </div>
+    <h1>
+      Trace Context
+      <span class="tctx-hero-accent">Propagation Lab</span>
+    </h1>
+    <p>
+      Master W3C Trace Context, baggage, async and queue hops, browser→API causality,
+      and repair broken traces — with a multi-hop simulator and quiz.
+    </p>
+    <div class="tctx-hero-stats" aria-live="polite">
+      <div class="tctx-stat">
+        <span class="tctx-stat-val" id="tctx-statModulesDone">0</span>
+        <span class="tctx-stat-label">Modules done</span>
+      </div>
+      <div class="tctx-stat">
+        <span class="tctx-stat-val" id="tctx-statModulesTotal">8</span>
+        <span class="tctx-stat-label">Total modules</span>
+      </div>
+      <div class="tctx-stat">
+        <span class="tctx-stat-val" id="tctx-statProgressPct">0%</span>
+        <span class="tctx-stat-label">Progress</span>
+      </div>
+      <div class="tctx-stat">
+        <span class="tctx-stat-val" id="tctx-statQuizBest">—</span>
+        <span class="tctx-stat-label">Quiz best</span>
+      </div>
+    </div>
+    <div class="tctx-progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-label="Course progress" id="tctx-heroProgressBar">
+      <div class="tctx-progress-fill" id="tctx-heroProgressFill"></div>
+    </div>
+  </header>
+
+  <main id="tctx-main" class="tctx-main">
+    <div class="tctx-container">
+
+      <section class="tctx-section" aria-labelledby="tctx-modules-title">
+        <div class="tctx-section-head">
+          <h2 id="tctx-modules-title">
+            <i class="fas fa-book-open" aria-hidden="true"></i>
+            Learning modules
+          </h2>
+          <p>Eight lessons on Trace Context, baggage, async pitfalls, queues, browser hops, broken causality, fixes, and recommendations.</p>
+        </div>
+
+        <div class="tctx-modules-layout">
+          <nav class="tctx-module-nav" aria-label="Module list">
+            <ul class="tctx-module-list" id="tctx-moduleList" role="list"></ul>
+          </nav>
+
+          <article class="tctx-lesson-panel" id="tctx-lessonPanel" aria-labelledby="tctx-lessonTitle">
+            <div class="tctx-lesson-header">
+              <h3 id="tctx-lessonTitle">Select a module</h3>
+              <span class="tctx-lesson-badge" id="tctx-lessonBadge" hidden>Completed</span>
+            </div>
+            <div class="tctx-lesson-body" id="tctx-lessonBody">
+              <p class="tctx-muted">Choose a module from the sidebar to begin.</p>
+            </div>
+            <div class="tctx-lesson-actions">
+              <button type="button" class="tctx-btn tctx-btn-primary" id="tctx-markCompleteBtn" disabled>
+                <i class="fas fa-check" aria-hidden="true"></i>
+                Mark complete
+              </button>
+              <button type="button" class="tctx-btn tctx-btn-ghost" id="tctx-prevModuleBtn" disabled>
+                <i class="fas fa-chevron-left" aria-hidden="true"></i>
+                Previous
+              </button>
+              <button type="button" class="tctx-btn tctx-btn-ghost" id="tctx-nextModuleBtn" disabled>
+                Next
+                <i class="fas fa-chevron-right" aria-hidden="true"></i>
+              </button>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section class="tctx-section" aria-labelledby="tctx-sim-title">
+        <div class="tctx-section-head">
+          <h2 id="tctx-sim-title">
+            <i class="fas fa-route" aria-hidden="true"></i>
+            Multi-hop propagation failure simulator
+          </h2>
+          <p>Walk browser → API → worker → queue → consumer. Inject drop scenarios and watch causality break.</p>
+        </div>
+
+        <div class="tctx-lab-grid">
+          <div class="tctx-panel">
+            <fieldset class="tctx-fieldset">
+              <legend class="tctx-label">Failure scenario</legend>
+              <label class="tctx-check">
+                <input type="radio" name="tctx-scenario" value="none" checked />
+                Healthy end-to-end
+              </label>
+              <label class="tctx-check">
+                <input type="radio" name="tctx-scenario" value="browser-drop" />
+                Browser → API header stripped (CORS / proxy)
+              </label>
+              <label class="tctx-check">
+                <input type="radio" name="tctx-scenario" value="queue-drop" />
+                Queue hop drops traceparent
+              </label>
+              <label class="tctx-check">
+                <input type="radio" name="tctx-scenario" value="async-lost" />
+                Async task loses context (no ALS/otel)
+              </label>
+              <label class="tctx-check">
+                <input type="radio" name="tctx-scenario" value="baggage-leak" />
+                Baggage over-propagated / PII risk
+              </label>
+            </fieldset>
+
+            <label class="tctx-check">
+              <input type="checkbox" id="tctx-injectW3c" checked />
+              Services emit W3C <code>traceparent</code>
+            </label>
+            <label class="tctx-check">
+              <input type="checkbox" id="tctx-injectBaggage" />
+              Propagate baggage on every hop
+            </label>
+
+            <div class="tctx-btn-row">
+              <button type="button" class="tctx-btn tctx-btn-primary" id="tctx-runSimBtn">
+                <i class="fas fa-bolt" aria-hidden="true"></i>
+                Run hop simulation
+              </button>
+              <button type="button" class="tctx-btn tctx-btn-ghost" id="tctx-resetSimBtn">
+                <i class="fas fa-rotate-left" aria-hidden="true"></i>
+                Reset
+              </button>
+            </div>
+          </div>
+
+          <div class="tctx-panel">
+            <h3 class="tctx-panel-subtitle">Hop rail &amp; causality</h3>
+            <ol class="tctx-hop-rail" id="tctx-hopRail" aria-label="Propagation hops"></ol>
+            <div id="tctx-simOut" class="tctx-outcome-box" role="status" aria-live="assertive">
+              <p class="tctx-muted">Pick a scenario and run the simulator.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="tctx-section" aria-labelledby="tctx-rec-title">
+        <div class="tctx-section-head">
+          <h2 id="tctx-rec-title">
+            <i class="fas fa-wand-magic-sparkles" aria-hidden="true"></i>
+            Fix recommendation engine
+          </h2>
+          <p>Describe where context dies. Get concrete instrumentation and header-policy fixes.</p>
+        </div>
+
+        <div class="tctx-lab-grid">
+          <div class="tctx-panel">
+            <fieldset class="tctx-fieldset">
+              <legend class="tctx-label">Where does context break?</legend>
+              <label class="tctx-check">
+                <input type="radio" name="tctx-break" value="browser" checked />
+                Browser / SPA → API
+              </label>
+              <label class="tctx-check">
+                <input type="radio" name="tctx-break" value="async" />
+                Thread pool / promise / fire-and-forget
+              </label>
+              <label class="tctx-check">
+                <input type="radio" name="tctx-break" value="queue" />
+                Message queue / pub-sub
+              </label>
+              <label class="tctx-check">
+                <input type="radio" name="tctx-break" value="mesh" />
+                Service mesh / ingress strips headers
+              </label>
+            </fieldset>
+
+            <fieldset class="tctx-fieldset">
+              <legend class="tctx-label">Constraints</legend>
+              <label class="tctx-check">
+                <input type="checkbox" id="tctx-reqCors" checked />
+                Must respect CORS allowlist
+              </label>
+              <label class="tctx-check">
+                <input type="checkbox" id="tctx-reqPii" checked />
+                No PII in baggage
+              </label>
+              <label class="tctx-check">
+                <input type="checkbox" id="tctx-reqSample" />
+                Aggressive head sampling at edge
+              </label>
+            </fieldset>
+
+            <div class="tctx-btn-row">
+              <button type="button" class="tctx-btn tctx-btn-primary" id="tctx-recommendBtn">
+                <i class="fas fa-lightbulb" aria-hidden="true"></i>
+                Recommend fixes
+              </button>
+              <button type="button" class="tctx-btn tctx-btn-ghost" id="tctx-resetRecBtn">
+                <i class="fas fa-rotate-left" aria-hidden="true"></i>
+                Reset
+              </button>
+            </div>
+          </div>
+
+          <div class="tctx-panel">
+            <h3 class="tctx-panel-subtitle">Recommendations</h3>
+            <div id="tctx-recResults" class="tctx-results" role="status" aria-live="polite">
+              <p class="tctx-muted">Select a break point and click Recommend.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="tctx-section" aria-labelledby="tctx-quiz-title">
+        <div class="tctx-section-head">
+          <h2 id="tctx-quiz-title">
+            <i class="fas fa-clipboard-question" aria-hidden="true"></i>
+            Self-assessment quiz
+          </h2>
+          <p>Seven questions on Trace Context and propagation. Best score is saved in localStorage.</p>
+        </div>
+
+        <div class="tctx-panel">
+          <form id="tctx-quizForm" class="tctx-quiz" novalidate>
+            <div id="tctx-quizQuestions"></div>
+            <div class="tctx-btn-row">
+              <button type="submit" class="tctx-btn tctx-btn-primary" id="tctx-submitQuizBtn">
+                <i class="fas fa-paper-plane" aria-hidden="true"></i>
+                Submit quiz
+              </button>
+              <button type="button" class="tctx-btn tctx-btn-ghost" id="tctx-resetQuizBtn">
+                <i class="fas fa-rotate-left" aria-hidden="true"></i>
+                Reset
+              </button>
+            </div>
+          </form>
+          <div id="tctx-quizResult" class="tctx-quiz-result" role="status" aria-live="polite" hidden></div>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <div id="footer-placeholder"></div>
+
+  <script src="/auth.js"></script>
+  <script src="/bootstrap-legacy.js"></script>
+  <script src="/script.js"></script>
+  <script type="module" src="/dist/legacy-bundle.mjs"></script>
+  <script src="/theme.js"></script>
+  <script src="script.js"></script>
+  <script>
+    if (typeof loadPartial === 'function') {
+      loadPartial('navbar-placeholder', '/partials/navbar.html');
+      loadPartial('footer-placeholder', '/partials/footer.html');
+    }
+  </script>
+</body>
+</html>

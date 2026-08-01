@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Decorator Pattern — Advanced Design Patterns</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <link rel="stylesheet" href="pattern-detail.css" />
+  </head>
+  <body>
+    <nav>
+      <div class="nav-left">
+        <a href="design-patterns.html"><i class="fas fa-arrow-left"></i></a>
+        <span class="nav-title">Algo Infinity Verse</span>
+      </div>
+      <button id="theme-toggle" aria-label="Toggle dark mode">
+        <i class="fas fa-moon"></i>
+      </button>
+    </nav>
+
+    <div class="pattern-hero structural">
+      <span class="pattern-category structural">Structural</span>
+      <h1>Decorator</h1>
+      <p class="pattern-subtitle">
+        Attach new behaviors to objects dynamically by placing them inside wrapper objects that contain the behaviors.
+      </p>
+    </div>
+
+    <main class="pattern-content">
+      <section class="info-card intent">
+        <h2><i class="fas fa-bullseye"></i> Intent</h2>
+        <p>
+          The Decorator pattern lets you attach new responsibilities to an object without altering
+          its class. It provides a flexible alternative to subclassing for extending functionality.
+          Decorators wrap an object and can add behavior before, after, or entirely around the
+          wrapped object's methods.
+        </p>
+      </section>
+
+      <section class="info-card problem">
+        <h2><i class="fas fa-exclamation-triangle"></i> Problem</h2>
+        <p>
+          Using inheritance to add features leads to class explosion — every combination of
+          features becomes a new subclass. A <code>Notifier</code> class that needs to support
+          email, SMS, Slack, and any combination of these would require 2<sup>n</sup> subclasses.
+          This is not scalable. You need a way to compose behaviors at runtime without touching
+          existing code.
+        </p>
+      </section>
+
+      <section class="info-card solution">
+        <h2><i class="fas fa-lightbulb"></i> Solution</h2>
+        <p>
+          Define a common interface for both the core object and all decorators. Each decorator
+          holds a reference to the wrapped object and implements the same interface. The decorator
+          delegates the core work to the wrapped object but may perform additional actions before
+          or after the delegation. Decorators can be stacked to combine behaviors.
+        </p>
+      </section>
+
+      <section class="info-card structure">
+        <h2><i class="fas fa-diagram-project"></i> Structure</h2>
+        <div class="structure-diagram">
+┌──────────────┐
+│  Component   │
+├──────────────┤
+│ + operation()│
+└──────┬───────┘
+       │
+┌──────┴───────┐     ┌──────────────┐
+│ ConcreteComp │     │  Decorator   │
+├──────────────┤     ├──────────────┤
+│ + operation()│────>│ - component  │
+└──────────────┘     │ + operation()│
+                     └──────┬───────┘
+                     ┌──────┴───────┐
+                     │ ConcreteDec  │
+                     ├──────────────┤
+                     │ + operation()│
+                     └──────────────┘</div>
+      </section>
+
+      <section class="info-card code">
+        <h2><i class="fas fa-code"></i> Code Example — JavaScript</h2>
+        <pre><code>class Coffee {
+  getCost() { return 5; }
+  getDescription() { return 'Coffee'; }
+}
+
+class MilkDecorator {
+  constructor(coffee) { this.coffee = coffee; }
+  getCost() { return this.coffee.getCost() + 2; }
+  getDescription() { return `${this.coffee.getDescription()}, Milk`; }
+}
+
+class SugarDecorator {
+  constructor(coffee) { this.coffee = coffee; }
+  getCost() { return this.coffee.getCost() + 1; }
+  getDescription() { return `${this.coffee.getDescription()}, Sugar`; }
+}
+
+let beverage = new Coffee();
+beverage = new MilkDecorator(beverage);
+beverage = new SugarDecorator(beverage);
+
+console.log(beverage.getDescription()); // "Coffee, Milk, Sugar"
+console.log(beverage.getCost());        // 8</code></pre>
+      </section>
+
+      <section class="info-card use-cases">
+        <h2><i class="fas fa-globe"></i> Real-World Use Cases</h2>
+        <ul>
+          <li><strong>Stream Wrappers</strong> — Add buffering, compression, or encryption to I/O streams.</li>
+          <li><strong>Middleware Pipelines</strong> — Express.js/Koa middleware that layers auth, logging, and rate-limiting.</li>
+          <li><strong>UI Component Enhancements</strong> — Add scrollbars, borders, or shadows to widgets dynamically.</li>
+          <li><strong>Data Validation Pipelines</strong> — Stack validators that each check one rule on an input.</li>
+          <li><strong>Caching Layers</strong> — Wrap a data fetcher with an in-memory cache decorator.</li>
+        </ul>
+      </section>
+
+      <div class="back-link">
+        <a href="design-patterns.html"><i class="fas fa-arrow-left"></i> Back to All Patterns</a>
+      </div>
+    </main>
+
+    <script>
+      const toggle = document.getElementById('theme-toggle');
+      const stored = localStorage.getItem('theme');
+      if (stored === 'dark') {
+        document.body.classList.add('dark-mode');
+        toggle.innerHTML = '<i class="fas fa-sun"></i>';
+      }
+      toggle.addEventListener('click', () => {
+        document.body.classList.toggle('dark-mode');
+        const isDark = document.body.classList.contains('dark-mode');
+        toggle.innerHTML = isDark ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
+        localStorage.setItem('theme', isDark ? 'dark' : 'light');
+      });
+    </script>
+  </body>
+</html>

@@ -36,12 +36,7 @@ function getDefaultCode(lang, problem) {
       }).join(', ')
     : 'params';
 
-  let docComment = '';
-  if (problem.guide) {
-    const lines = problem.guide.split('\n');
-    const prefix = lang === 'python' ? '# ' : '// ';
-    docComment = lines.map(l => prefix + l).join('\n') + '\n';
-  }
+  const docComment = '';
 
   const templates = {
     javascript: docComment + "function " + fnName + "(" + (params.join(', ') || 'params') + ") {\n    \n}",
@@ -54,16 +49,24 @@ function getDefaultCode(lang, problem) {
   return templates[lang] || templates.javascript;
 }
 
+function extractMethods(problem) {
+  const map = new Map();
+  for (const tc of (problem.testCases || [])) {
+    if (tc.methods && Array.isArray(tc.methods)) {
+      for (const m of tc.methods) {
+        const name = m[0];
+        const argc = Math.max(0, m.length - 1);
+        if (!map.has(name) || map.get(name) < argc) map.set(name, argc);
+      }
+    }
+  }
+  return map;
+}
+
 function getClassTemplate(lang, problem) {
   const fnName = problem.functionName || "LRUCache";
   const params = problem.params || [];
-
-  let docComment = '';
-  if (problem.guide) {
-    const lines = problem.guide.split('\n');
-    const prefix = lang === 'python' ? '# ' : '// ';
-    docComment = lines.map(l => prefix + l).join('\n') + '\n';
-  }
+  const docComment = '';
 
   const paramStr = params.map((p, i) => {
     const t = mapType('int', lang);
@@ -73,28 +76,70 @@ function getClassTemplate(lang, problem) {
     return p;
   }).join(', ');
 
+  const methods = extractMethods(problem);
+  const pn = (n) => n === 0 ? '' : n === 1 ? 'val' : n === 2 ? 'key, value' : Array.from({length: n}, (_, i) => `val${i + 1}`).join(', ');
+  const getterSet = new Set(['get', 'getMin', 'getMax', 'top', 'peek', 'peekMin', 'peekMax']);
+  for (const tc of (problem.testCases || [])) {
+    if (tc.methods && tc.methods.length > 0 && tc.expected !== undefined && tc.expected !== null) {
+      getterSet.add(tc.methods[tc.methods.length - 1][0]);
+    }
+  }
+  const getter = (n) => getterSet.has(n);
+
+  const has = methods.size > 0;
+  const js = has ? [...methods].map(([n, a]) => `\n\n    ${n}(${pn(a)}) {\n        \n    }`).join('') : '\n\n    get(key) {\n        \n    }\n\n    put(key, value) {\n        \n    }';
+  const py = has ? [...methods].map(([n, a]) => {
+    const p = a === 0 ? 'self' : a === 1 ? 'self, val' : a === 2 ? 'self, key: int, value: int' : `self, ${Array.from({length: a}, (_, i) => `param${i + 1}: int`).join(', ')}`;
+    return `\n\n    def ${n}(${p})${getter(n) ? ' -> int' : ' -> None'}:\n        pass`;
+  }).join('') : '\n\n    def get(self, key: int) -> int:\n        pass\n\n    def put(self, key: int, value: int) -> None:\n        pass';
+  const java = has ? [...methods].map(([n, a]) => {
+    const rt = getter(n) ? 'int' : 'void';
+    const p = a === 0 ? '' : a === 1 ? 'int val' : a === 2 ? 'int key, int value' : Array.from({length: a}, (_, i) => `int val${i + 1}`).join(', ');
+    return `\n\n    public ${rt} ${n}(${p})${rt === 'void' ? ' {\n        \n    }' : ' {\n        return 0;\n    }'}`;
+  }).join('') : '\n\n    public int get(int key) {\n        return 0;\n    }\n\n    public void put(int key, int value) {\n        \n    }';
+  const cpp = has ? [...methods].map(([n, a]) => {
+    const rt = getter(n) ? 'int' : 'void';
+    const p = a === 0 ? '' : a === 1 ? 'int val' : a === 2 ? 'int key, int value' : Array.from({length: a}, (_, i) => `int val${i + 1}`).join(', ');
+    return `\n\n    ${rt} ${n}(${p})${rt === 'void' ? ' {\n        \n    }' : ' {\n        return 0;\n    }'}`;
+  }).join('') : '\n\n    int get(int key) {\n        return 0;\n    }\n\n    void put(int key, int value) {\n        \n    }';
+  const swift = has ? [...methods].map(([n, a]) => {
+    const p = a === 0 ? '' : a === 1 ? '_ val: Int' : a === 2 ? '_ key: Int, _ value: Int' : Array.from({length: a}, (_, i) => `_ val${i + 1}: Int`).join(', ');
+    const rt = getter(n) ? ' -> Int' : '';
+    return `\n\n    func ${n}(${p})${rt}${rt ? ' {\n        return 0\n    }' : ' {\n        \n    }'}`;
+  }).join('') : '\n\n    func get(_ key: Int) -> Int {\n        return 0\n    }\n\n    func put(_ key: Int, _ value: Int) {\n        \n    }';
+
   const templates = {
-    javascript: docComment + `class ${fnName} {\n    constructor(${paramStr}) {\n        \n    }\n\n    get(key) {\n        \n    }\n\n    put(key, value) {\n        \n    }\n}`,
-    python: docComment + `class ${fnName}:\n    def __init__(self, ${params.join(', ')}):\n        pass\n\n    def get(self, key: int) -> int:\n        pass\n\n    def put(self, key: int, value: int) -> None:\n        pass\n`,
-    java: `class ${fnName} {\n${docComment.replace(/^(.)/gm, '    $1')}    public ${fnName}(${paramStr}) {\n        \n    }\n\n    public int get(int key) {\n        return 0;\n    }\n\n    public void put(int key, int value) {\n        \n    }\n}`,
-    cpp: `#include <unordered_map>\nusing namespace std;\n\n${docComment}class ${fnName} {\npublic:\n    ${fnName}(${paramStr}) {\n        \n    }\n\n    int get(int key) {\n        return 0;\n    }\n\n    void put(int key, int value) {\n        \n    }\n};`,
+    javascript: docComment + `class ${fnName} {\n    constructor(${paramStr}) {\n        \n    }` + js + '\n}',
+    python: docComment + `class ${fnName}:\n    def __init__(self, ${params.join(', ')}):\n        pass` + py + '\n',
+    java: `class ${fnName} {\n${docComment.replace(/^(.)/gm, '    $1')}    public ${fnName}(${paramStr}) {\n        \n    }` + java + '\n}',
+    cpp: `#include <unordered_map>\nusing namespace std;\n\n${docComment}class ${fnName} {\npublic:\n    ${fnName}(${paramStr}) {\n        \n    }` + cpp + '\n};',
     c: `${docComment}// Use a struct with function pointers:\ntypedef struct {\n    int capacity;\n} LRUCache;\n\nLRUCache* createLRUCache(int capacity) {\n    return NULL;\n}\n\nint get(LRUCache* cache, int key) {\n    return 0;\n}\n\nvoid put(LRUCache* cache, int key, int value) {\n    \n}`,
-    swift: docComment + `class ${fnName} {\n    init(${paramStr}) {\n        \n    }\n\n    func get(_ key: Int) -> Int {\n        return 0\n    }\n\n    func put(_ key: Int, _ value: Int) {\n        \n    }\n}`
+    swift: docComment + `class ${fnName} {\n    init(${paramStr}) {` + swift + '\n}'
   };
   return templates[lang] || templates.javascript;
 }
 
 function buildHarnessCode(code, lang, functionName, testCases, problem) {
   const isClass = problem ? /^[A-Z]/.test(problem.functionName || "") : /^[A-Z]/.test(functionName);
+  const isTreeClass = isClass && problem?.category === 'trees';
   const tcJson = JSON.stringify(testCases);
   if (lang === "javascript") {
     const clsCheck = isClass ? 'true' : 'false';
-    return code + `\n\nconst __TC__ = ${tcJson};\nconst __RES__ = [];\nfor (let i = 0; i < __TC__.length; i++) {\n  const tc = __TC__[i];\n  try {\n    let result;\n    if (${clsCheck}) {\n      const instance = new ${functionName}(...tc.input);\n      if (tc.methods && Array.isArray(tc.methods)) {\n        result = instance;\n        for (const m of tc.methods) {\n          result = instance[m[0]](...m.slice(1));\n        }\n      } else {\n        result = instance;\n      }\n    } else {\n      result = ${functionName}(...tc.input);\n    }\n    const passed = ${clsCheck} ? (tc.methods ? JSON.stringify(result) === JSON.stringify(tc.expected) : true) : JSON.stringify(result) === JSON.stringify(tc.expected);\n    __RES__.push({ index: i, ran: true, passed, actual: ${clsCheck} ? (tc.methods ? result : "instance") : result, expected: tc.expected, input: tc.input, error: null });\n  } catch (e) {\n    __RES__.push({ index: i, ran: true, passed: false, actual: null, expected: tc.expected, input: tc.input, error: e.message });\n  }\n}\nconsole.log("__RESULT__:" + JSON.stringify(__RES__));`;
+    let preamble = '';
+    let methodLoop = '';
+    if (isTreeClass) {
+      preamble = `\n\nfunction __arrayToTree(arr) {\n  if (!arr || arr.length === 0) return null;\n  const __c = (v) => ({ val: v, left: null, right: null });\n  const root = __c(arr[0]);\n  const q = [root];\n  let i = 1;\n  while (q.length > 0 && i < arr.length) {\n    const n = q.shift();\n    if (i < arr.length && arr[i] !== null && arr[i] !== undefined && arr[i] !== 'null') { n.left = __c(arr[i]); q.push(n.left); }\n    i++;\n    if (i < arr.length && arr[i] !== null && arr[i] !== undefined && arr[i] !== 'null') { n.right = __c(arr[i]); q.push(n.right); }\n    i++;\n  }\n  return root;\n}\nfunction __treeToArray(root) {\n  if (!root) return [];\n  const res = [];\n  const q = [root];\n  while (q.length > 0) {\n    const n = q.shift();\n    if (n !== null && n !== undefined) {\n      res.push(n.val);\n      q.push(n.left !== null && n.left !== undefined ? n.left : null);\n      q.push(n.right !== null && n.right !== undefined ? n.right : null);\n    } else {\n      res.push(null);\n    }\n  }\n  while (res.length > 0 && res[res.length - 1] === null) res.pop();\n  return res;\n}`;
+      methodLoop = `\n        if (tc.methods && Array.isArray(tc.methods)) {\n          result = instance;\n          for (const m of tc.methods) {\n            if (m[0] === "serialize") {\n              result = instance[m[0]](__arrayToTree(m[1]));\n            } else if (m[0] === "deserialize") {\n              result = __treeToArray(instance[m[0]](m[1]));\n            } else {\n              result = instance[m[0]](...m.slice(1));\n            }\n          }\n        } else {\n          result = instance;\n        }`;
+    }
+    const clsBody = isTreeClass
+      ? methodLoop
+      : `\n      if (tc.methods && Array.isArray(tc.methods)) {\n        result = instance;\n        for (const m of tc.methods) {\n          result = instance[m[0]](...m.slice(1));\n        }\n      } else {\n        result = instance;\n      }`;
+    return code + preamble + `\n\nconst __TC__ = ${tcJson};\nconst __RES__ = [];\nfor (let i = 0; i < __TC__.length; i++) {\n  const tc = __TC__[i];\n  try {\n    let result;\n    if (${clsCheck}) {\n      const instance = new ${functionName}(...tc.input);${clsBody}\n    } else {\n      result = ${functionName}(...tc.input);\n    }\n    const passed = ${clsCheck} ? (tc.methods ? JSON.stringify(result) === JSON.stringify(tc.expected) : true) : JSON.stringify(result) === JSON.stringify(tc.expected);\n    __RES__.push({ index: i, ran: true, passed, actual: ${clsCheck} ? (tc.methods ? result : "instance") : result, expected: tc.expected, input: tc.input, error: null });\n  } catch (e) {\n    __RES__.push({ index: i, ran: true, passed: false, actual: null, expected: tc.expected, input: tc.input, error: e.message });\n  }\n}\nconsole.log("__RESULT__:" + JSON.stringify(__RES__));`;
   }
   if (lang === "python") {
     const esc = tcJson.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
     const clsCheck = isClass ? 'True' : 'False';
-    return `${code}\n\nimport json\n__TC__ = json.loads('${esc}')\n__RES__ = []\nfor i, tc in enumerate(__TC__):\n    try:\n        instance = ${functionName}(*tc["input"])\n        if ${clsCheck} and tc.get("methods"):\n            result = instance\n            for m in tc["methods"]:\n                result = getattr(instance, m[0])(*m[1:])\n        elif ${clsCheck}:\n            result = instance\n        else:\n            result = ${functionName}(*tc["input"])\n        passed = True if ${clsCheck} and not tc.get("methods") else json.dumps(result, default=str) == json.dumps(tc["expected"], default=str)\n        __RES__.append({"index": i, "ran": True, "passed": passed, "actual": str(result) if ${clsCheck} and not tc.get("methods") else result, "expected": tc["expected"], "input": tc["input"], "error": None})\n    except Exception as e:\n        __RES__.append({"index": i, "ran": True, "passed": False, "actual": None, "expected": tc["expected"], "input": tc["input"], "error": str(e)})\nprint("__RESULT__:" + json.dumps(__RES__, default=str))`;
+    return `${code}\n\nimport json\n__TC__ = json.loads('${esc}')\n__RES__ = []\ndef __eq(a, b):\n    if type(a) is bool or type(b) is bool:\n        return json.dumps(a, default=str) == json.dumps(b, default=str)\n    if isinstance(a, (int, float)) and isinstance(b, (int, float)):\n        return float(a) == float(b)\n    return json.dumps(a, default=str) == json.dumps(b, default=str)\nfor i, tc in enumerate(__TC__):\n    try:\n        instance = ${functionName}(*tc["input"])\n        if ${clsCheck} and tc.get("methods"):\n            result = instance\n            for m in tc["methods"]:\n                result = getattr(instance, m[0])(*m[1:])\n        elif ${clsCheck}:\n            result = instance\n        else:\n            result = ${functionName}(*tc["input"])\n        passed = True if ${clsCheck} and not tc.get("methods") else __eq(result, tc["expected"])\n        __RES__.append({"index": i, "ran": True, "passed": passed, "actual": str(result) if ${clsCheck} and not tc.get("methods") else result, "expected": tc["expected"], "input": tc["input"], "error": None})\n    except Exception as e:\n        __RES__.append({"index": i, "ran": True, "passed": False, "actual": None, "expected": tc["expected"], "input": tc["input"], "error": str(e)})\nprint("__RESULT__:" + json.dumps(__RES__, default=str))`;
   }
   if (lang === "cpp") {
     return genCppHarness(code, functionName, testCases, isClass);
@@ -687,14 +732,15 @@ function openQuizEditor(problem) {
 }
 
 function closeQuizEditor() {
+  if (currentProblem) {
+    clearEditorDraft(currentProblem.id);
+  }
   const el = document.getElementById("quizEditorModal");
   if (el) {
     el.classList.remove("active");
-    // Clean up hidden class added by initModalManager's closeModal overlay handler
     el.classList.remove("hidden");
   }
   currentProblem = null;
-  // Ensure body scroll is always restored, regardless of MutationObserver timing
   document.body.classList.remove("modal-open");
 }
 
@@ -732,7 +778,10 @@ async function runQuizCode() {
   } catch (e) {
     renderTestCases(testCases);
     setOutput(e.message || "Execution failed", "error");
-  } finally { _running = false; }
+  } finally {
+    if (typeof recordDailyActivity === 'function') recordDailyActivity(1);
+    _running = false;
+  }
 }
 
 async function submitQuizCode() {
@@ -764,7 +813,6 @@ async function submitQuizCode() {
       const difficulty = problem.difficulty;
       if (typeof addXP === 'function') addXP(getXPForDifficulty(difficulty));
       if (typeof updateStreak === 'function') updateStreak();
-      if (typeof recordDailyActivity === 'function') recordDailyActivity(1);
       if (typeof saveUserData === 'function') saveUserData();
       if (typeof updateDashboard === 'function') updateDashboard();
       if (typeof updateGamification === 'function') updateGamification();
@@ -781,6 +829,7 @@ async function submitQuizCode() {
       setOutput(failures.length + " / " + result.testResults.length + " tests failed. Fix the issues and try again.", "error");
       if (typeof showNotification === 'function') showNotification(failures.length + " test(s) failed. Keep trying!", "error");
     }
+    if (typeof recordDailyActivity === 'function') recordDailyActivity(1);
   } catch (e) {
     renderTestCases(testCases);
     setOutput(e.message || "Execution failed", "error");
@@ -832,7 +881,7 @@ function initializeQuizEditor() {
     }
   });
   wireQuizButtons();
-  if (languageSelect) languageSelect.addEventListener('change', () => { const editor = document.getElementById('codeEditor'); if (editor && currentProblem) { editor.value = getDefaultCode(languageSelect.value, currentProblem); editor.scrollTop = 0; editor.scrollLeft = 0; } syncEditorState(); updateEditorDisplayMode(); });
+  if (languageSelect) languageSelect.addEventListener('change', () => { const editor = document.getElementById('codeEditor'); if (editor && currentProblem) { editor.value = getDefaultCode(languageSelect.value, currentProblem); clearEditorDraft(currentProblem.id); editor.scrollTop = 0; editor.scrollLeft = 0; } syncEditorState(); updateEditorDisplayMode(); });
   syncEditorState();
   initEditorZoom(editor);
 }

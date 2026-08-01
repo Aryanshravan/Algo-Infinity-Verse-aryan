@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Suffix Automaton (SAM) String Graph Visualizer - Algo-Infinity-Verse</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="app-container">
+    <header class="header">
+      <div class="brand">
+        <a href="../../../index.html" class="back-btn"><i class="fas fa-arrow-left"></i> Home</a>
+        <h1><i class="fas fa-project-diagram icon-glow"></i> Suffix Automaton (SAM) Visualizer</h1>
+      </div>
+      <div class="stats-pills">
+        <div class="pill"><span class="label">States:</span> <span id="stat-states">1</span></div>
+        <div class="pill"><span class="label">Distinct Substrings:</span> <span id="stat-substrings">0</span></div>
+        <div class="pill"><span class="label">Alphabet Size:</span> <span id="stat-alphabet">0</span></div>
+      </div>
+    </header>
+
+    <main class="main-content">
+      <!-- Control Panel -->
+      <section class="control-panel glass-card">
+        <div class="input-group">
+          <label for="string-input">Input String:</label>
+          <input type="text" id="string-input" value="abacaba" placeholder="Type a string e.g. abacaba..." maxlength="30">
+          <button id="btn-build" class="btn btn-primary"><i class="fas fa-play"></i> Build SAM</button>
+          <button id="btn-step" class="btn btn-secondary"><i class="fas fa-step-forward"></i> Step Insert</button>
+          <button id="btn-reset" class="btn btn-outline"><i class="fas fa-redo"></i> Reset</button>
+        </div>
+        <div class="speed-group">
+          <label for="speed-range">Animation Speed:</label>
+          <input type="range" id="speed-range" min="100" max="1500" value="600">
+        </div>
+        <div class="legend">
+          <span class="legend-item"><span class="color-box trans-link"></span> Transition Link (Solid)</span>
+          <span class="legend-item"><span class="color-box suffix-link"></span> Suffix Link (Dashed)</span>
+          <span class="legend-item"><span class="color-box clone-state"></span> Clone State</span>
+          <span class="legend-item"><span class="color-box active-state"></span> Active State</span>
+        </div>
+      </section>
+
+      <!-- Visualization Canvas -->
+      <section class="visualizer-area glass-card">
+        <div class="canvas-header">
+          <h3><i class="fas fa-network-wired"></i> State DAG & Suffix Link Graph</h3>
+          <span class="hint"><i class="fas fa-info-circle"></i> Click any state node to inspect its properties</span>
+        </div>
+        <div class="canvas-container">
+          <canvas id="sam-canvas"></canvas>
+        </div>
+      </section>
+
+      <!-- Bottom Info Panels -->
+      <div class="info-grid">
+        <!-- LCP Array & Topological Info -->
+        <section class="info-card glass-card">
+          <h3><i class="fas fa-table"></i> Substring Analytics & LCP Array</h3>
+          <div class="lcp-display">
+            <p><strong>LCP Array Construction:</strong></p>
+            <div id="lcp-container" class="array-flex"></div>
+          </div>
+          <div class="topological-info">
+            <p><strong>Topological Order:</strong> <span id="topological-order">-</span></p>
+            <p><strong>Formula:</strong> Distinct Substrings = &sum; (len(u) - len(link(u)))</p>
+          </div>
+        </section>
+
+        <!-- Substring Search Engine -->
+        <section class="info-card glass-card">
+          <h3><i class="fas fa-search"></i> Substring Query Engine</h3>
+          <div class="query-group">
+            <input type="text" id="query-input" placeholder="Test substring existence e.g. 'aba'">
+            <button id="btn-query" class="btn btn-accent"><i class="fas fa-search"></i> Search SAM</button>
+          </div>
+          <div id="query-result" class="query-result-box">Result will appear here...</div>
+        </section>
+      </div>
+    </main>
+
+    <!-- State Inspector Modal -->
+    <div id="inspector-modal" class="modal">
+      <div class="modal-content glass-card">
+        <span class="close-modal" id="modal-close">&times;</span>
+        <h2><i class="fas fa-microscope"></i> State Inspection: <span id="modal-state-id">State 0</span></h2>
+        <div class="modal-body">
+          <div class="prop-row"><span class="prop-name">Length (len):</span> <span id="modal-len" class="prop-val">0</span></div>
+          <div class="prop-row"><span class="prop-name">Suffix Link (link):</span> <span id="modal-link" class="prop-val">-1</span></div>
+          <div class="prop-row"><span class="prop-name">Is Clone State:</span> <span id="modal-clone" class="prop-val">false</span></div>
+          <div class="prop-row"><span class="prop-name">Transitions (next):</span></div>
+          <div id="modal-transitions" class="transitions-box"></div>
+          <div class="prop-row"><span class="prop-name">Accepted Substrings (Endpos Class):</span></div>
+          <div id="modal-substrings" class="substrings-box"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="sam.js"></script>
+</body>
+</html>

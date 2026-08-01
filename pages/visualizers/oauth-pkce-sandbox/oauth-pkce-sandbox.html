@@ -19,7 +19,8 @@
     />
 
     <link rel="stylesheet" href="oauth-pkce-sandbox.css" />
-    <script src="/theme.js"></script>
+    <script src="../../../theme.js"></script>
+    <link rel="stylesheet" href="../../../modules/quick-notes/quick-notes.css" />
   </head>
   <body class="oauth-body">
     <nav class="navbar oauth-nav">
@@ -28,6 +29,14 @@
         <span class="logo-title">Algo Infinity Verse</span>
       </div>
       <div class="engine-badge"><i class="fas fa-lock"></i> OAuth 2.0 Protocol Analyzer</div>
+
+      <div class="pkce-toggle-wrapper">
+        <span id="pkceStatusLabel" class="pkce-label secure">PKCE: ON (Secure)</span>
+        <label class="switch">
+          <input type="checkbox" id="pkceToggle" checked />
+          <span class="slider round"></span>
+        </label>
+      </div>
     </nav>
 
     <main class="oauth-workspace">
@@ -82,7 +91,39 @@
           </div>
         </section>
 
-        <!-- Column 2: Authorization Server (Auth0) -->
+        <!-- Column 2: Malicious App (Attacker) -->
+        <section class="actor-col malicious-col">
+          <div class="col-header">
+            <h2><i class="fas fa-user-secret"></i> Malicious App</h2>
+            <span class="badge badge-danger">Attacker</span>
+          </div>
+
+          <div class="action-card disabled" id="malicious-intercept-card">
+            <h3>Intercept Redirect</h3>
+            <p>
+              Simulates a hijacked custom URI scheme (e.g. <code>myapp://</code>). Attacker steals
+              the Auth Code.
+            </p>
+            <button class="btn btn-danger" id="btnMaliciousIntercept" disabled>
+              <i class="fas fa-mask"></i> Steal Authorization Code
+            </button>
+          </div>
+
+          <div class="action-card disabled" id="malicious-exchange-card">
+            <h3>Exchange Code</h3>
+            <p>Attacker sends the stolen code to the Auth Server to get an Access Token.</p>
+            <button class="btn btn-danger" id="btnMaliciousExchange" disabled>
+              <i class="fas fa-exchange-alt"></i> POST /oauth/token (Stolen)
+            </button>
+          </div>
+
+          <div class="server-log malicious-log" id="maliciousLog">
+            <div class="log-title"><i class="fas fa-terminal"></i> Hacker Terminal</div>
+            <div class="log-content" id="maliciousLogContent">Awaiting interception...</div>
+          </div>
+        </section>
+
+        <!-- Column 3: Authorization Server (Auth0) -->
         <section class="actor-col auth-col">
           <div class="col-header">
             <h2><i class="fas fa-server"></i> Auth Server</h2>
@@ -109,7 +150,7 @@
           </div>
         </section>
 
-        <!-- Column 3: Resource Server (API) -->
+        <!-- Column 4: Resource Server (API) -->
         <section class="actor-col resource-col">
           <div class="col-header">
             <h2><i class="fas fa-database"></i> Resource Server</h2>
@@ -125,5 +166,6 @@
     </main>
 
     <script src="oauth-pkce-sandbox.js"></script>
+    <script src="../../../modules/quick-notes/quick-notes.js"></script>
   </body>
 </html>

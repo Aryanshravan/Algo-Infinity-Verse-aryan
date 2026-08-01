@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>LLM KV-Cache & PagedAttention Simulator | Algo Infinity Verse</title>
+    <meta
+      name="description"
+      content="Interactive LLM Key-Value (KV) Cache and vLLM PagedAttention Memory Management Simulator showing page allocation, memory fragmentation, and logical-to-physical block tables."
+    />
+
+    <link
+      href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Fira+Code:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+
+    <!-- External Stylesheets -->
+    <link rel="stylesheet" href="/styles.css" />
+    <link rel="stylesheet" href="llm-kv-cache.css" />
+    <link rel="stylesheet" href="/modules/quick-notes/quick-notes.css" />
+  </head>
+  <body class="kv-body">
+    <!-- Navbar Placeholder -->
+    <div id="navbar-placeholder"></div>
+
+    <main class="workspace">
+      <!-- Left Panel: Controls -->
+      <div class="panel-left">
+        <div class="panel-header">
+          <h3><i class="fas fa-microchip"></i> KV-Cache & PagedAttention</h3>
+        </div>
+
+        <div class="control-section">
+          <p class="desc-text">
+            Observe how modern LLM inference systems allocate VRAM for Key-Value caches. Compare
+            traditional Contiguous allocation vs vLLM PagedAttention.
+          </p>
+
+          <!-- Prompt Input -->
+          <div class="input-group">
+            <label for="promptInput">Enter Prompt</label>
+            <input
+              type="text"
+              id="promptInput"
+              class="styled-input"
+              value="Deep learning is the future of intelligence."
+            />
+          </div>
+
+          <!-- Parameters -->
+          <div class="sliders-container">
+            <div class="slider-group">
+              <div class="slider-header">
+                <label for="allocationMode">Allocation Strategy</label>
+              </div>
+              <select id="allocationMode" class="styled-select">
+                <option value="paged">PagedAttention (vLLM style)</option>
+                <option value="contiguous">Traditional Contiguous</option>
+              </select>
+            </div>
+
+            <div class="slider-group">
+              <div class="slider-header">
+                <label for="blockSizeSlider">Block Size (Tokens per Block)</label>
+                <span id="blockSizeVal" class="val-badge">4</span>
+              </div>
+              <input type="range" id="blockSizeSlider" min="2" max="8" step="2" value="4" />
+            </div>
+
+            <div class="slider-group">
+              <div class="slider-header">
+                <label for="vramLimitSlider">Total Physical Blocks in VRAM</label>
+                <span id="vramLimitVal" class="val-badge">16</span>
+              </div>
+              <input type="range" id="vramLimitSlider" min="8" max="32" step="4" value="16" />
+            </div>
+          </div>
+
+          <!-- Action Buttons -->
+          <div class="action-buttons">
+            <button type="button" id="nextBtn" class="btn btn-primary">
+              <i class="fas fa-step-forward"></i> Gen Token
+            </button>
+            <button type="button" id="autoBtn" class="btn btn-secondary">
+              <i class="fas fa-play"></i> Auto Run
+            </button>
+            <button type="button" id="resetBtn" class="btn btn-outline">
+              <i class="fas fa-undo"></i> Reset
+            </button>
+          </div>
+
+          <!-- Live Telemetry -->
+          <div class="stats-panel">
+            <div class="stat-row">
+              <span>Tokens Generated:</span>
+              <strong id="tokensStat">0</strong>
+            </div>
+            <div class="stat-row">
+              <span>VRAM Utilization:</span>
+              <strong id="vramStat">0%</strong>
+            </div>
+            <div class="stat-row">
+              <span>Internal Fragmentation:</span>
+              <strong id="fragStat">0%</strong>
+            </div>
+            <div class="stat-row">
+              <span>Active Blocks:</span>
+              <strong id="blocksStat">0 / 16</strong>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Panel: Visual Mapping & VRAM Grids -->
+      <div class="panel-right">
+        <div class="visualization-layout">
+          <!-- Virtual/Logical Layout -->
+          <div class="viz-half" id="logicalSection">
+            <h4>Logical Block Tables & Generation Trace</h4>
+            <div id="generationContainer">
+              <!-- Shows generated text and logical tokens mapping -->
+            </div>
+            <div id="mappingTable">
+              <!-- Displays logical page index -> physical block index -->
+            </div>
+          </div>
+
+          <!-- Physical GPU VRAM Layout -->
+          <div class="viz-half" id="physicalSection">
+            <h4>Physical GPU VRAM Page Allocation Grid</h4>
+            <div class="vram-grid" id="vramGrid">
+              <!-- Dynamic VRAM Blocks mapped physically -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- Footer Placeholder -->
+    <div id="footer-placeholder"></div>
+
+    <script src="/auth.js"></script>
+    <script src="/bootstrap-legacy.js"></script>
+    <script src="/script.js"></script>
+    <script type="module" src="/dist/legacy-bundle.mjs"></script>
+    <script src="/theme.js"></script>
+    <script src="llm-kv-cache.js"></script>
+    <script>
+      loadPartial('navbar-placeholder', '/partials/navbar.html');
+      loadPartial('footer-placeholder', '/partials/footer.html');
+    </script>
+    <script src="/modules/quick-notes/quick-notes.js"></script>
+  </body>
+</html>

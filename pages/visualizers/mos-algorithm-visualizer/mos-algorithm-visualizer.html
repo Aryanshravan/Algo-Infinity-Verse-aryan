@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Mo's Algorithm Visualizer | Algo Infinity Verse</title>
+    <meta name="description" content="Answer thousands of offline range queries via sqrt-decomposition block sort and a two-pointer sweep — O((n+Q)sqrt(n)) instead of O(n) per query." />
+    <link rel="stylesheet" href="../../../styles.css" />
+    <link rel="stylesheet" href="mos-algorithm-visualizer.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Poppins:wght@300;400;500;600;700&family=Fira+Code:wght@400;500;600&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <link rel="stylesheet" href="/modules/quick-notes/quick-notes.css" />
+  </head>
+  <body data-page="mos-algorithm-visualizer">
+
+    <div id="navbar-placeholder"></div>
+
+    <button id="scrollTopBtn" aria-label="Scroll to top" class="scroll-top-btn">
+      <i class="fas fa-circle-chevron-up"></i>
+    </button>
+
+    <section class="mo-hero">
+      <div class="mo-hero-bg"><canvas id="moHeroCanvas" class="mo-hero-canvas"></canvas></div>
+      <div class="mo-hero-inner">
+        <div class="mo-hero-eyebrow">🐜 Sqrt Decomposition · Offline Query Batching</div>
+        <h1 class="mo-hero-title">Mo's Algorithm</h1>
+        <p class="mo-hero-sub">Sort the queries. Crawl the array once. Never recompute from scratch.</p>
+        <p class="mo-hero-desc">Given all your range queries upfront, reorder them by √n-sized blocks so a single two-pointer crawl — extending and shrinking the window by one element at a time — answers every single one. Total pointer movement stays bounded at O((n+Q)√n), often far cheaper than a segment tree per query.</p>
+        <a href="#lab" class="btn btn-primary mo-btn-primary"><i class="fas fa-arrows-left-right"></i> Watch the Crawl</a>
+      </div>
+    </section>
+
+    <section id="lab" class="section mo-section">
+      <div class="container">
+
+        <div class="mo-control-card">
+          <div class="mo-row">
+            <span class="mo-row-label">Array</span>
+            <button class="btn btn-secondary mo-randomize-btn" id="moRandomizeBtn"><i class="fas fa-shuffle"></i> Randomize (18 elements)</button>
+            <span class="mo-row-label" style="margin-left:0.5rem">Queries</span>
+            <button class="btn btn-secondary mo-genqueries-btn" id="moGenQueriesBtn"><i class="fas fa-shuffle"></i> Generate 7 Random Ranges</button>
+          </div>
+          <div class="mo-row">
+            <button class="btn mo-btn-primary mo-run-btn" id="moRunBtn"><i class="fas fa-play"></i> Run Mo's Algorithm</button>
+            <button class="btn btn-secondary mo-step-btn" id="moStepBtn"><i class="fas fa-step-forward"></i> Step</button>
+            <button class="btn btn-secondary mo-compare-btn" id="moCompareBtn"><i class="fas fa-scale-balanced"></i> Compare vs Original Order</button>
+          </div>
+        </div>
+
+        <div class="mo-status" id="moStatus" role="status" aria-live="polite">Answering "count distinct values in [l, r]" — a query type where segment trees don't easily help. Randomize, then run.</div>
+
+        <div class="mo-array-section">
+          <div class="mo-panel-title"><i class="fas fa-grip-lines"></i> Array — Sliding Window [curL, curR]</div>
+          <div class="mo-array-track" id="moArrayTrack"></div>
+          <div class="mo-window-info" id="moWindowInfo">Window: [—, —] · Distinct count: —</div>
+        </div>
+
+        <div class="mo-main-layout">
+
+          <div class="mo-queries-section">
+            <div class="mo-panel-title"><i class="fas fa-list-ol"></i> Queries — Original Order → Sorted (Block, then R) Order</div>
+            <div class="mo-queries-columns">
+              <div class="mo-query-col">
+                <div class="mo-qcol-title">Original arrival order</div>
+                <div class="mo-query-list" id="moOriginalList"></div>
+              </div>
+              <div class="mo-qcol-arrow">→</div>
+              <div class="mo-query-col">
+                <div class="mo-qcol-title">Mo's sorted order (executed)</div>
+                <div class="mo-query-list" id="moSortedList"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="mo-right-panel">
+
+            <div class="mo-panel-card">
+              <div class="mo-panel-title"><i class="fas fa-gauge-high"></i> Pointer Movement Cost</div>
+              <div class="mo-stat-rows">
+                <div class="mo-stat-row"><span>Total pointer moves</span><span id="moMoveCount">0</span></div>
+                <div class="mo-stat-row"><span>Theoretical bound O((n+Q)√n)</span><span id="moBound">—</span></div>
+                <div class="mo-stat-row"><span>Naive O(n) per query total</span><span id="moNaiveCost">—</span></div>
+              </div>
+            </div>
+
+            <div class="mo-panel-card">
+              <div class="mo-panel-title"><i class="fas fa-list-check"></i> Query Answers</div>
+              <div class="mo-answers-grid" id="moAnswersGrid"></div>
+            </div>
+
+          </div>
+
+        </div>
+
+        <div class="mo-compare-card hidden" id="moCompareCard">
+          <div class="mo-panel-title"><i class="fas fa-scale-balanced"></i> Reordered vs Original — Same Queries, Different Order</div>
+          <canvas id="moCompareCanvas" class="mo-compare-canvas"></canvas>
+        </div>
+
+      </div>
+    </section>
+
+    <section id="learn" class="section">
+      <div class="container">
+        <h2 class="section-title"><span class="title-icon">🐜</span> Why the Block-Sort Order Matters</h2>
+        <div class="mo-learn-grid">
+          <div class="mo-learn-card" style="--lc:#06b6d4">
+            <div class="mo-learn-icon">🧱</div>
+            <h3>Sqrt-Sized Blocks</h3>
+            <p>Divide the array's indices into blocks of size ≈√n. Sort queries first by which block their left endpoint falls in, then by right endpoint. This groups queries with nearby left bounds together, bounding how far the left pointer ever has to travel.</p>
+          </div>
+          <div class="mo-learn-card" style="--lc:#a855f7">
+            <div class="mo-learn-icon">🐌</div>
+            <h3>Incremental, Never From Scratch</h3>
+            <p>The current window's answer updates by adding or removing exactly ONE element as a pointer moves one step — never recomputed from zero. This is what makes the total cost proportional to total pointer distance traveled, not to query count times array size.</p>
+          </div>
+          <div class="mo-learn-card" style="--lc:#22c55e">
+            <div class="mo-learn-icon">📐</div>
+            <h3>The O((n+Q)√n) Proof</h3>
+            <p>Within a block, right-pointer movement is bounded by O(n) total across all queries in that block (queries sorted by r). Left-pointer movement is bounded by O(√n) per query since it can't leave its own block's neighborhood. Sum both bounds across all √n blocks and all Q queries.</p>
+          </div>
+          <div class="mo-learn-card" style="--lc:#f59e0b">
+            <div class="mo-learn-icon">🏆</div>
+            <h3>Where This Wins</h3>
+            <p>Mo's Algorithm shines for range queries that are easy to update incrementally (distinct count, mode, sum of squares) but hard to maintain in a segment tree. It requires knowing all queries upfront (offline) — the fundamental tradeoff versus online structures.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div id="footer-placeholder"></div>
+
+    <script src="../../../auth.js"></script>
+    <script src="../../../script.js"></script>
+    <script src="../../../theme.js"></script>
+    <script src="../../../auth-gate.js"></script>
+    <script src="mos-algorithm-visualizer.js"></script>
+    <script>
+      if (typeof loadPartial === 'function') {
+        loadPartial('navbar-placeholder', '/partials/navbar.html').then(function() {
+          if (typeof initNavbar === 'function') initNavbar();
+        });
+        loadPartial('footer-placeholder', '/partials/footer.html');
+      }
+    </script>
+    <script src="/modules/quick-notes/quick-notes.js"></script>
+  </body>
+</html>

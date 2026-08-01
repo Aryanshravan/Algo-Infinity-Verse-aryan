@@ -84,7 +84,11 @@
               <option value="lists">Lists & Dictionaries</option>
             </select>
           </div>
-          <div class="py-toolbar-right">
+          <div class="py-toolbar-right" style="display:flex; align-items:center; gap: 10px;">
+            <label class="checkbox" style="color:#10b981; font-weight:bold; font-size:0.8rem; margin:0;">
+              <input id="enableWebGazer" type="checkbox" />
+              <i class="fas fa-eye"></i> Biometric Navigation
+            </label>
             <button type="button" id="pyRunBtn" class="btn btn-primary py-run-btn"><i class="fas fa-play"></i> Run</button>
             <button type="button" id="pyResetBtn" class="py-icon-btn" title="Reset to example" aria-label="Reset to example"><i class="fas fa-undo"></i></button>
             <button type="button" id="pyCopyBtn" class="py-icon-btn" title="Copy code" aria-label="Copy code to clipboard"><i class="fas fa-copy"></i></button>
@@ -135,6 +139,8 @@
         <script src="/script.js"></script>
     <script type="module" src="/dist/legacy-bundle.mjs"></script>
        <script src="/pages/ai-features/intent-detector.js"></script>
+       <script src="https://cdn.jsdelivr.net/pyodide/v0.25.0/full/pyodide.js"></script>
+       <script src="https://webgazer.cs.brown.edu/webgazer.js"></script>
        <script src="./python-editor.js"></script>
   
   <script>

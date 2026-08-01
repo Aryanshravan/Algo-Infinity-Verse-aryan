@@ -1,0 +1,332 @@
+@import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@400;500;600&display=swap');
+
+:root {
+  --bg-dark: #0f172a;
+  --panel-bg: rgba(30, 41, 59, 0.7);
+  --border-color: rgba(255, 255, 255, 0.1);
+  --text-main: #f8fafc;
+  --text-muted: #94a3b8;
+  --accent-blue: #3b82f6;
+  --accent-red: #ef4444;
+  --accent-green: #22c55e;
+  --accent-warning: #f59e0b;
+  --highlight-color: #8b5cf6;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Inter', sans-serif;
+  background-color: var(--bg-dark);
+  color: var(--text-main);
+  line-height: 1.5;
+}
+
+.app-container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+.glass-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 2rem;
+  background: rgba(15, 23, 42, 0.8);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.logo {
+  font-size: 1.2rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.logo-icon {
+  color: var(--highlight-color);
+}
+
+.highlight {
+  color: var(--highlight-color);
+}
+
+.title-section h1 {
+  font-size: 1.4rem;
+  font-weight: 600;
+}
+
+.title-section p {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+.badge-algo {
+  background: rgba(139, 92, 246, 0.2);
+  color: #c4b5fd;
+  font-size: 0.75rem;
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+  vertical-align: middle;
+  margin-left: 0.5rem;
+}
+
+.github-link {
+  color: var(--text-main);
+  font-size: 1.5rem;
+  transition: color 0.2s;
+}
+
+.github-link:hover {
+  color: var(--highlight-color);
+}
+
+.workspace {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+  padding: 1rem;
+  gap: 1rem;
+}
+
+.sidebar {
+  width: 350px;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  overflow-y: auto;
+}
+
+.glass-panel {
+  background: var(--panel-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 1.5rem;
+  backdrop-filter: blur(10px);
+}
+
+.glass-panel h2 {
+  font-size: 1.2rem;
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.mt-2 {
+  margin-top: 0.5rem;
+}
+.mt-3 {
+  margin-top: 1rem;
+}
+.mt-4 {
+  margin-top: 1.5rem;
+}
+.mb-2 {
+  margin-bottom: 0.5rem;
+}
+.w-100 {
+  width: 100%;
+}
+
+.btn {
+  padding: 0.6rem 1rem;
+  border: none;
+  border-radius: 4px;
+  font-weight: 500;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  transition: opacity 0.2s;
+}
+
+.btn:hover {
+  opacity: 0.9;
+}
+
+.btn-primary {
+  background: var(--accent-blue);
+  color: #fff;
+}
+.btn-danger {
+  background: var(--accent-red);
+  color: #fff;
+}
+.btn-warning {
+  background: var(--accent-warning);
+  color: #fff;
+}
+
+.text-success {
+  color: var(--accent-green);
+}
+.text-danger {
+  color: var(--accent-red);
+}
+.text-warning {
+  color: var(--accent-warning);
+}
+
+.visualizer-stage {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.stage-header {
+  margin-bottom: 1rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.status-display {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 500;
+}
+
+.network-wrapper {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.dampening-stats {
+  display: flex;
+  align-items: center;
+  gap: 3rem;
+  width: 100%;
+  max-width: 600px;
+}
+
+.stat-box {
+  text-align: center;
+}
+
+.stat-box h3 {
+  font-size: 1rem;
+  color: var(--text-muted);
+}
+
+.penalty-value {
+  font-family: 'Fira Code', monospace;
+  font-size: 3rem;
+  font-weight: 700;
+  color: var(--text-main);
+  transition: color 0.3s ease;
+}
+
+.penalty-bar-container {
+  flex: 1;
+  height: 200px;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: flex-end;
+}
+
+.penalty-bar {
+  width: 100%;
+  background: var(--accent-blue);
+  transition:
+    height 0.5s ease,
+    background-color 0.5s ease;
+}
+
+.threshold-line {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 2px;
+  z-index: 10;
+}
+
+.threshold-line span {
+  position: absolute;
+  top: -20px;
+  left: 10px;
+  font-size: 0.8rem;
+  color: var(--text-main);
+}
+
+.suppress-line {
+  background: var(--accent-red);
+}
+
+.reuse-line {
+  background: var(--accent-green);
+}
+
+.topology-display {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 4rem;
+}
+
+.node {
+  background: var(--panel-bg);
+  border: 2px solid var(--border-color);
+  border-radius: 8px;
+  padding: 1.5rem 2rem;
+  text-align: center;
+  font-weight: 600;
+}
+
+.node.as-100 {
+  border-color: var(--accent-blue);
+}
+.node.as-200 {
+  border-color: var(--accent-blue);
+}
+
+.link-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  width: 200px;
+}
+
+.link-line {
+  width: 100%;
+  height: 4px;
+  background: var(--accent-green);
+  transition: background-color 0.3s ease;
+}
+
+.link-label {
+  position: absolute;
+  top: -25px;
+  font-weight: 600;
+  color: var(--accent-green);
+}
+
+.link-down .link-line {
+  background: var(--accent-red);
+}
+.link-down .link-label {
+  color: var(--accent-red);
+}
+
+.suppressed-state .penalty-bar {
+  background: var(--accent-red);
+}
+.suppressed-state .penalty-value {
+  color: var(--accent-red);
+}

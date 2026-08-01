@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Complexity Diff Studio</title>
+    <link rel="stylesheet" href="complexity-diff-studio.css" />
+    <!-- Acorn for AST parsing -->
+    <script src="https://cdn.jsdelivr.net/npm/acorn@8.11.3/dist/acorn.min.js"></script>
+</head>
+<body>
+    <div class="app" id="app">
+        <!-- Header -->
+        <header class="app-header">
+            <div>
+                <h1>⚡ Complexity Diff Studio</h1>
+                <p class="subtitle">AST‑based side‑by‑side complexity comparison</p>
+            </div>
+            <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
+                <span id="themeIcon">🌙</span> <span id="themeLabel">Dark</span>
+            </button>
+        </header>
+
+        <!-- Editor Grid: Before / After -->
+        <section class="editor-grid">
+            <!-- Before -->
+            <div class="editor-card">
+                <div class="card-header">
+                    <span>📄 Before</span>
+                    <span class="badge" id="beforeBadge">pending</span>
+                </div>
+                <textarea id="beforeEditor" spellcheck="false" placeholder="// Paste your original JS solution here...">function sumArray(arr) {
+            let total = 0;
+            for (let i = 0; i < arr.length; i++) {
+                total += arr[i];
+            }
+            return total;
+        }</textarea>
+                <div class="error-msg" id="beforeError"></div>
+            </div>
+
+            <!-- After -->
+            <div class="editor-card">
+                <div class="card-header">
+                    <span>📄 After</span>
+                    <span class="badge" id="afterBadge">pending</span>
+                </div>
+                <textarea id="afterEditor" spellcheck="false" placeholder="// Paste your improved JS solution here...">function sumArray(arr) {
+            return arr.reduce((acc, val) => acc + val, 0);
+        }</textarea>
+                <div class="error-msg" id="afterError"></div>
+            </div>
+        </section>
+
+        <!-- Complexity results side‑by‑side -->
+        <section class="complexity-panel">
+            <div class="complexity-card" id="beforeComplexity">
+                <div class="cx-header">⏱ Before Complexity</div>
+                <div class="cx-body" id="beforeCxBody">
+                    <div class="cx-row"><span class="cx-label">Time</span> <span class="cx-value" id="beforeTime">—</span></div>
+                    <div class="cx-row"><span class="cx-label">Space</span> <span class="cx-value" id="beforeSpace">—</span></div>
+                    <div class="cx-row"><span class="cx-label">Nested depth</span> <span class="cx-value" id="beforeDepth">—</span></div>
+                    <div class="cx-row"><span class="cx-label">Recursion</span> <span class="cx-value" id="beforeRecursion">—</span></div>
+                    <div class="cx-bottleneck" id="beforeBottleneck">⬡ no bottlenecks detected</div>
+                </div>
+            </div>
+
+            <div class="complexity-card" id="afterComplexity">
+                <div class="cx-header">🚀 After Complexity</div>
+                <div class="cx-body" id="afterCxBody">
+                    <div class="cx-row"><span class="cx-label">Time</span> <span class="cx-value" id="afterTime">—</span></div>
+                    <div class="cx-row"><span class="cx-label">Space</span> <span class="cx-value" id="afterSpace">—</span></div>
+                    <div class="cx-row"><span class="cx-label">Nested depth</span> <span class="cx-value" id="afterDepth">—</span></div>
+                    <div class="cx-row"><span class="cx-label">Recursion</span> <span class="cx-value" id="afterRecursion">—</span></div>
+                    <div class="cx-bottleneck" id="afterBottleneck">⬡ no bottlenecks detected</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Diff highlights + suggestions -->
+        <section class="diff-section">
+            <div class="diff-card">
+                <div class="diff-header">🔍 Diff Highlights &amp; Rewrite Suggestions</div>
+                <div class="diff-body" id="diffBody">
+                    <div class="diff-placeholder">Edit code to see comparison insights appear here.</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- footer -->
+        <footer class="app-footer">
+            <span>AST Complexity Diff Studio · powered by Acorn</span>
+        </footer>
+    </div>
+
+    <script src="complexity-diff-studio.js"></script>
+</body>
+</html>

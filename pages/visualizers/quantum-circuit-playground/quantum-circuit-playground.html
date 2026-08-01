@@ -4,151 +4,231 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Quantum Circuit Playground | Algo Infinity Verse</title>
-    <meta name="description" content="Build quantum circuits gate by gate. Watch superposition, entanglement, and Grover's algorithm play out on a live probability histogram." />
+    <meta
+      name="description"
+      content="Interactive Drag-and-Drop Quantum Circuit Simulator. Visually map abstract quantum math onto 3D Bloch Spheres to master Superposition and Entanglement."
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Poppins:wght@300;400;500;600;700&family=Fira+Code:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
     <link rel="stylesheet" href="../../../styles.css" />
     <link rel="stylesheet" href="quantum-circuit-playground.css" />
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Poppins:wght@300;400;500;600;700&family=Fira+Code:wght@400;500;600&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <script src="../../../modules/toast.js"></script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script
+      id="MathJax-script"
+      async
+      src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"
+    ></script>
   </head>
-  <body data-page="quantum-circuit-playground">
-
+  <body class="qc-body">
     <div id="navbar-placeholder"></div>
 
-    <button id="scrollTopBtn" aria-label="Scroll to top" class="scroll-top-btn">
-      <i class="fas fa-circle-chevron-up"></i>
-    </button>
-
     <section class="qc-hero">
-      <div class="hero-background">
-        <div class="stars"></div><div class="stars2"></div><div class="stars3"></div>
-      </div>
+      <div class="qc-hero-bg"></div>
       <div class="qc-hero-inner">
-        <div class="qc-hero-eyebrow">⚛️ Quantum Computing · Grover's Algorithm</div>
-        <h1 class="qc-hero-title">Quantum Circuit Playground</h1>
-        <p class="qc-hero-sub">Build gates. Watch superposition collapse. Search quadratically faster.</p>
-        <p class="qc-hero-desc">Drag gates onto qubit wires and watch the state vector evolve in real time. Hadamard gates create superposition, CNOT creates entanglement, and Grover's algorithm demonstrates the quadratic speedup that makes quantum search genuinely different from anything classical.</p>
-        <a href="#lab" class="btn btn-primary qc-btn-primary"><i class="fas fa-atom"></i> Open Circuit Builder</a>
+        <div class="qc-eyebrow">Quantum Mechanics Engine</div>
+        <h1 class="qc-title">Quantum Circuit Simulator</h1>
+        <p class="qc-desc">
+          Drag and drop quantum gates onto the timeline. Watch the matrix math physically manipulate
+          the <strong>3D Bloch Spheres</strong> to instantly grasp
+          <strong>Superposition</strong> and the spooky action of <strong>Entanglement</strong>!
+        </p>
       </div>
     </section>
 
-    <section id="lab" class="section qc-section">
-      <div class="container">
+    <div class="qc-dashboard container">
+      <div class="qc-layout">
+        <!-- Toolbox & Instructions -->
+        <div class="qc-sidebar">
+          <div class="glass-panel mb-3">
+            <div class="panel-header text-cyan"><i class="fas fa-toolbox"></i> Gate Toolbox</div>
+            <p class="text-xs text-gray mb-3">Drag gates onto the circuit wires.</p>
 
-        <div class="qc-control-card">
-          <div class="qc-row">
-            <span class="qc-row-label">Qubits</span>
-            <div class="qc-qubit-btns">
-              <button class="qc-qubit-btn active" data-qubits="2">2 qubits</button>
-              <button class="qc-qubit-btn" data-qubits="3">3 qubits</button>
+            <div class="gate-toolbox" id="gateToolbox">
+              <div
+                class="q-gate gate-h"
+                draggable="true"
+                data-type="H"
+                title="Hadamard: Creates Superposition"
+              >
+                H
+              </div>
+              <div
+                class="q-gate gate-x"
+                draggable="true"
+                data-type="X"
+                title="Pauli-X: Quantum NOT gate (Flips 0 to 1)"
+              >
+                X
+              </div>
+              <div
+                class="q-gate gate-cnot"
+                draggable="true"
+                data-type="CNOT"
+                title="CNOT: Controlled-NOT. Entangles Qubits"
+              >
+                CX
+              </div>
+              <div
+                class="q-gate gate-m"
+                draggable="true"
+                data-type="M"
+                title="Measure: Collapses superposition to 0 or 1"
+              >
+                M
+              </div>
             </div>
-            <span class="qc-row-label" style="margin-left:0.75rem">Presets</span>
-            <div class="qc-preset-btns">
-              <button class="qc-preset-btn" data-preset="bell">Bell State</button>
-              <button class="qc-preset-btn" data-preset="grover">Grover's (2q)</button>
-              <button class="qc-preset-btn" data-preset="uniform">Uniform Superposition</button>
-            </div>
+
+            <button class="btn btn-secondary w-100 mt-3" id="btnClear">
+              <i class="fas fa-trash"></i> Reset Circuit
+            </button>
           </div>
-          <div class="qc-row">
-            <button class="btn qc-btn-primary qc-run-btn" id="qcRunBtn"><i class="fas fa-play"></i> Run Circuit</button>
-            <button class="btn btn-secondary qc-step-btn" id="qcStepBtn"><i class="fas fa-step-forward"></i> Step Column</button>
-            <button class="btn btn-secondary qc-reset-btn" id="qcResetBtn"><i class="fas fa-undo"></i> Reset Circuit</button>
-            <div class="qc-step-ctr">Column <span id="qcColNum">0</span>/<span id="qcColTotal">0</span></div>
+
+          <div class="glass-panel">
+            <div class="panel-header text-magenta">
+              <i class="fas fa-book"></i> Interactive Tutorials
+            </div>
+
+            <button class="btn btn-tutorial w-100 mb-2" id="btnTutSuper">
+              <i class="fas fa-magic"></i> Prove Superposition
+            </button>
+            <button class="btn btn-tutorial w-100 mb-2" id="btnTutBell">
+              <i class="fas fa-link"></i> The Bell State (Entanglement)
+            </button>
+
+            <div class="tut-desc text-xs mt-3 text-gray" id="tutDesc">
+              Welcome to the Quantum Lab. Start dragging gates or click a tutorial to learn.
+            </div>
           </div>
         </div>
 
-        <div class="qc-status" id="qcStatus">Drag a gate from the palette onto a qubit wire, or load a preset above.</div>
-
-        <div class="qc-main-layout">
-
-          <div class="qc-builder-col">
-
-            <div class="qc-gate-palette" id="qcGatePalette">
-              <div class="qc-gate-tile" draggable="true" data-gate="H" title="Hadamard — creates superposition">H</div>
-              <div class="qc-gate-tile" draggable="true" data-gate="X" title="Pauli-X — bit flip">X</div>
-              <div class="qc-gate-tile" draggable="true" data-gate="Y" title="Pauli-Y">Y</div>
-              <div class="qc-gate-tile" draggable="true" data-gate="Z" title="Pauli-Z — phase flip">Z</div>
-              <div class="qc-gate-tile qc-gate-cnot" draggable="true" data-gate="CNOT" title="CNOT — click control then target">CNOT</div>
-              <div class="qc-gate-tile qc-gate-cz" draggable="true" data-gate="CZ" title="Controlled-Z">CZ</div>
-              <div class="qc-gate-tile qc-gate-erase" data-gate="ERASE" title="Click a placed gate to remove it">Erase Mode</div>
+        <!-- Main Circuit Board -->
+        <div class="qc-main glass-panel">
+          <div class="circuit-board">
+            <!-- Qubit 0 -->
+            <div class="qubit-row">
+              <div class="qubit-label">
+                <span class="q-name">|q₀⟩</span>
+                <div class="bloch-sphere-container">
+                  <div class="bloch-sphere" id="bs0">
+                    <div class="bs-axis bs-x"></div>
+                    <div class="bs-axis bs-y"></div>
+                    <div class="bs-axis bs-z"></div>
+                    <div class="bs-vector" id="vec0"><div class="bs-arrowhead"></div></div>
+                  </div>
+                </div>
+              </div>
+              <div class="wire-container" id="wire0">
+                <div class="wire-line"></div>
+                <!-- 5 slots per wire -->
+                <div class="gate-slot" data-wire="0" data-col="0"></div>
+                <div class="gate-slot" data-wire="0" data-col="1"></div>
+                <div class="gate-slot" data-wire="0" data-col="2"></div>
+                <div class="gate-slot" data-wire="0" data-col="3"></div>
+                <div class="gate-slot" data-wire="0" data-col="4"></div>
+              </div>
             </div>
 
-            <div class="qc-circuit-wrap">
-              <div class="qc-circuit-grid" id="qcCircuitGrid"></div>
+            <!-- Entanglement Link Overlay (drawn dynamically via JS/CSS) -->
+            <div id="entanglementLink" class="entanglement-tether"></div>
+
+            <!-- Qubit 1 -->
+            <div class="qubit-row">
+              <div class="qubit-label">
+                <span class="q-name">|q₁⟩</span>
+                <div class="bloch-sphere-container">
+                  <div class="bloch-sphere" id="bs1">
+                    <div class="bs-axis bs-x"></div>
+                    <div class="bs-axis bs-y"></div>
+                    <div class="bs-axis bs-z"></div>
+                    <div class="bs-vector" id="vec1"><div class="bs-arrowhead"></div></div>
+                  </div>
+                </div>
+              </div>
+              <div class="wire-container" id="wire1">
+                <div class="wire-line"></div>
+                <div class="gate-slot" data-wire="1" data-col="0"></div>
+                <div class="gate-slot" data-wire="1" data-col="1"></div>
+                <div class="gate-slot" data-wire="1" data-col="2"></div>
+                <div class="gate-slot" data-wire="1" data-col="3"></div>
+                <div class="gate-slot" data-wire="1" data-col="4"></div>
+              </div>
             </div>
-
-            <div class="qc-multi-hint" id="qcMultiHint">For CNOT/CZ: click the tile, then click control qubit cell, then target qubit cell in the same column.</div>
-
           </div>
-
-          <div class="qc-state-col">
-
-            <div class="qc-panel-card">
-              <div class="qc-panel-title"><i class="fas fa-chart-bar"></i> Probability Histogram</div>
-              <canvas id="qcHistCanvas" class="qc-hist-canvas"></canvas>
-            </div>
-
-            <div class="qc-panel-card">
-              <div class="qc-panel-title"><i class="fas fa-list"></i> Amplitudes</div>
-              <div class="qc-amp-table" id="qcAmpTable"></div>
-            </div>
-
-            <div class="qc-panel-card">
-              <div class="qc-panel-title"><i class="fas fa-link"></i> Entanglement</div>
-              <div class="qc-entangle-indicator" id="qcEntangleIndicator">Run circuit to check</div>
-            </div>
-
-            <div class="qc-panel-card">
-              <div class="qc-panel-title"><i class="fas fa-dice"></i> Measure</div>
-              <button class="btn btn-secondary qc-measure-btn" id="qcMeasureBtn"><i class="fas fa-bolt"></i> Measure All Qubits</button>
-              <div class="qc-measure-result" id="qcMeasureResult"></div>
-            </div>
-
-          </div>
-
         </div>
 
-        <div class="qc-puzzle-card">
-          <div class="qc-puzzle-header"><i class="fas fa-puzzle-piece"></i> Circuit Puzzles</div>
-          <div class="qc-puzzle-btns">
-            <button class="qc-puzzle-btn active" data-puzzle="0">Bell State (2 gates)</button>
-            <button class="qc-puzzle-btn" data-puzzle="1">Controlled Flip (1 gate)</button>
-            <button class="qc-puzzle-btn" data-puzzle="2">Uniform Superposition (1 gate/qubit)</button>
-          </div>
-          <div class="qc-puzzle-desc" id="qcPuzzleDesc"></div>
-          <button class="btn qc-btn-primary qc-check-puzzle-btn" id="qcCheckPuzzleBtn"><i class="fas fa-check"></i> Check My Circuit</button>
-          <div class="qc-puzzle-result hidden" id="qcPuzzleResult"></div>
-        </div>
+        <!-- Right Panel: Global State Inspector -->
+        <div class="qc-sidebar">
+          <div class="glass-panel mb-3">
+            <div class="panel-header text-warning">
+              <i class="fas fa-chart-bar"></i> Measurement Probability
+            </div>
 
+            <div class="prob-charts">
+              <div class="prob-row">
+                <span class="prob-label">|00⟩</span>
+                <div class="prob-bar-container">
+                  <div class="prob-fill bg-cyan" id="prob00"></div>
+                </div>
+                <span class="prob-val" id="val00">100%</span>
+              </div>
+              <div class="prob-row">
+                <span class="prob-label">|01⟩</span>
+                <div class="prob-bar-container">
+                  <div class="prob-fill bg-magenta" id="prob01"></div>
+                </div>
+                <span class="prob-val" id="val01">0%</span>
+              </div>
+              <div class="prob-row">
+                <span class="prob-label">|10⟩</span>
+                <div class="prob-bar-container">
+                  <div class="prob-fill bg-warning" id="prob10"></div>
+                </div>
+                <span class="prob-val" id="val10">0%</span>
+              </div>
+              <div class="prob-row">
+                <span class="prob-label">|11⟩</span>
+                <div class="prob-bar-container">
+                  <div class="prob-fill bg-lime" id="prob11"></div>
+                </div>
+                <span class="prob-val" id="val11">0%</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="glass-panel">
+            <div class="panel-header text-lime">
+              <i class="fas fa-square-root-alt"></i> Global State Vector
+            </div>
+            <p class="text-xs text-gray mb-2">
+              The exact quantum state combining both qubits (4x1 Tensor).
+            </p>
+
+            <div class="math-vector" id="mathVector">
+              <!-- JS Injects State Array -->
+              |ψ⟩ = <br />
+              [ 1.00 ] |00⟩<br />
+              [ 0.00 ] |01⟩<br />
+              [ 0.00 ] |10⟩<br />
+              [ 0.00 ] |11⟩
+            </div>
+
+            <div class="entanglement-alert mt-3" id="entAlert" style="display: none">
+              <i class="fas fa-exclamation-triangle"></i> Qubits are ENTANGLED!<br />
+              <span class="text-xs"
+                >Bloch spheres cannot accurately represent entangled states independently.</span
+              >
+            </div>
+          </div>
+        </div>
       </div>
-    </section>
-
-    <section id="learn" class="section">
-      <div class="container">
-        <h2 class="section-title"><span class="title-icon">⚛️</span> Understanding Grover's Speedup</h2>
-        <div class="qc-learn-grid">
-          <div class="qc-learn-card" style="--lc:#a855f7">
-            <div class="qc-learn-icon">🔍</div>
-            <h3>Classical Search: O(N)</h3>
-            <p>Searching an unsorted list of N items classically requires checking up to N items in the worst case — no way around it without extra structure.</p>
-          </div>
-          <div class="qc-learn-card" style="--lc:#06b6d4">
-            <div class="qc-learn-icon">⚡</div>
-            <h3>Grover's Search: O(√N)</h3>
-            <p>Grover's algorithm finds the marked item in roughly √N oracle calls by amplifying the marked state's amplitude each iteration via the diffusion operator — a quadratic, not exponential, speedup, but the best possible for unstructured search.</p>
-          </div>
-          <div class="qc-learn-card" style="--lc:#22c55e">
-            <div class="qc-learn-icon">🎯</div>
-            <h3>The Oracle + Diffusion Cycle</h3>
-            <p>Each Grover iteration: the oracle flips the phase of the target state, then the diffusion operator reflects all amplitudes about their average — geometrically rotating the state vector toward the target.</p>
-          </div>
-          <div class="qc-learn-card" style="--lc:#f59e0b">
-            <div class="qc-learn-icon">🔗</div>
-            <h3>Entanglement</h3>
-            <p>A CNOT gate applied to a qubit in superposition creates entanglement — a state that cannot be described as independent qubits. Measuring one instantly determines the other, regardless of distance.</p>
-          </div>
-        </div>
-      </div>
-    </section>
+    </div>
 
     <div id="footer-placeholder"></div>
 
@@ -159,7 +239,7 @@
     <script src="quantum-circuit-playground.js"></script>
     <script>
       if (typeof loadPartial === 'function') {
-        loadPartial('navbar-placeholder', '/partials/navbar.html').then(function() {
+        loadPartial('navbar-placeholder', '/partials/navbar.html').then(function () {
           if (typeof initNavbar === 'function') initNavbar();
         });
         loadPartial('footer-placeholder', '/partials/footer.html');

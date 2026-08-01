@@ -1,0 +1,260 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Rate Limit Fairness Auditor | Algo Infinity Verse</title>
+  <meta name="description" content="Audit fixed-window, sliding-window, and token-bucket rate limiters for fairness, false-allow/false-block risk, burst bypass, and IP-rotation attacks — then export a report." />
+  <link rel="stylesheet" href="/styles.css" />
+  <link rel="stylesheet" href="style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Poppins:wght@300;400;500;600;700&family=Fira+Code:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <script>
+    (function () {
+      try {
+        var storedTheme = localStorage.getItem('theme');
+        var prefersLight = window.matchMedia('(prefers-color-scheme: light)').matches;
+        var theme = storedTheme || (prefersLight ? 'light' : 'dark');
+        if (theme === 'light') {
+          document.documentElement.classList.add('light-mode');
+        } else {
+          document.documentElement.classList.remove('light-mode');
+        }
+      } catch (e) {}
+    })();
+  </script>
+</head>
+<body data-page="rate-limit-fairness-auditor">
+  <a href="#rlim-main" class="rlim-skip-link">Skip to main content</a>
+  <button type="button" id="scrollTopBtn" class="scroll-top-btn" aria-label="Scroll to top">
+    <i class="fas fa-arrow-up" aria-hidden="true"></i>
+  </button>
+
+  <div id="navbar-placeholder"></div>
+
+  <header class="rlim-hero">
+    <div class="rlim-hero-badge">
+      <i class="fas fa-gauge-high" aria-hidden="true"></i>
+      API Protection Lab
+    </div>
+    <h1>
+      Rate Limit
+      <span class="rlim-hero-accent">Fairness Auditor</span>
+    </h1>
+    <p>
+      Compare fixed-window, sliding-window, and token-bucket algorithms under burst and
+      multi-key bypass traffic — score fairness, false-allows, and false-blocks, then export an audit.
+    </p>
+    <div class="rlim-hero-stats" aria-live="polite">
+      <div class="rlim-stat">
+        <span class="rlim-stat-val" id="statFairness">—</span>
+        <span class="rlim-stat-label">Fairness</span>
+      </div>
+      <div class="rlim-stat">
+        <span class="rlim-stat-val" id="statFalseAllow">—</span>
+        <span class="rlim-stat-label">False allow</span>
+      </div>
+      <div class="rlim-stat">
+        <span class="rlim-stat-val" id="statFalseBlock">—</span>
+        <span class="rlim-stat-label">False block</span>
+      </div>
+      <div class="rlim-stat">
+        <span class="rlim-stat-val" id="statBypass">—</span>
+        <span class="rlim-stat-label">Bypass risk</span>
+      </div>
+    </div>
+  </header>
+
+  <main id="rlim-main" class="rlim-main">
+    <div class="container">
+      <div class="rlim-workspace">
+        <section class="rlim-panel" aria-labelledby="rlim-config-title">
+          <div class="rlim-panel-header">
+            <div class="rlim-panel-title">
+              <i class="fas fa-sliders rlim-panel-icon" aria-hidden="true"></i>
+              <h2 id="rlim-config-title">Limiter configuration</h2>
+            </div>
+          </div>
+
+          <fieldset class="rlim-fieldset">
+            <legend class="rlim-label">Algorithm</legend>
+            <div class="rlim-radio-row" role="radiogroup" aria-label="Rate limit algorithm">
+              <label class="rlim-radio">
+                <input type="radio" name="rlimAlgo" value="fixed-window" checked />
+                Fixed window
+              </label>
+              <label class="rlim-radio">
+                <input type="radio" name="rlimAlgo" value="sliding-window" />
+                Sliding window
+              </label>
+              <label class="rlim-radio">
+                <input type="radio" name="rlimAlgo" value="token-bucket" />
+                Token bucket
+              </label>
+            </div>
+            <p class="rlim-hint" id="algoHint">Fixed windows are cheap but allow boundary bursts near window edges.</p>
+          </fieldset>
+
+          <fieldset class="rlim-fieldset">
+            <legend class="rlim-label">Keying strategy</legend>
+            <div class="rlim-radio-row" role="radiogroup" aria-label="Keying strategy">
+              <label class="rlim-radio">
+                <input type="radio" name="rlimKeying" value="ip" checked />
+                IP only
+              </label>
+              <label class="rlim-radio">
+                <input type="radio" name="rlimKeying" value="user-route-ip" />
+                User + route + IP
+              </label>
+            </div>
+            <p class="rlim-hint">Composite keys reduce shared-IP false blocks but raise key cardinality.</p>
+          </fieldset>
+
+          <div class="rlim-field-grid">
+            <div class="rlim-field">
+              <label class="rlim-label" for="limitRps">Limit (req / window)</label>
+              <input type="number" id="limitRps" class="rlim-input" min="1" max="10000" value="100" />
+            </div>
+            <div class="rlim-field">
+              <label class="rlim-label" for="windowSec">Window (seconds)</label>
+              <input type="number" id="windowSec" class="rlim-input" min="1" max="3600" value="60" />
+            </div>
+            <div class="rlim-field">
+              <label class="rlim-label" for="burstAllow">Burst allowance</label>
+              <input type="number" id="burstAllow" class="rlim-input" min="0" max="5000" value="20" />
+            </div>
+            <div class="rlim-field">
+              <label class="rlim-label" for="refillRate">Bucket refill / sec</label>
+              <input type="number" id="refillRate" class="rlim-input" min="0.1" max="1000" step="0.1" value="1.5" />
+            </div>
+          </div>
+        </section>
+
+        <section class="rlim-panel" aria-labelledby="rlim-sim-title">
+          <div class="rlim-panel-header">
+            <div class="rlim-panel-title">
+              <i class="fas fa-flask rlim-panel-icon" aria-hidden="true"></i>
+              <h2 id="rlim-sim-title">Traffic simulations</h2>
+            </div>
+          </div>
+
+          <div class="rlim-sim-grid" role="group" aria-label="Simulation modes">
+            <button type="button" class="rlim-sim-btn" data-sim="burst" aria-pressed="false">
+              <i class="fas fa-bolt" aria-hidden="true"></i>
+              <span>Burst traffic</span>
+            </button>
+            <button type="button" class="rlim-sim-btn" data-sim="multikey" aria-pressed="false">
+              <i class="fas fa-key" aria-hidden="true"></i>
+              <span>Multi-key bypass</span>
+            </button>
+            <button type="button" class="rlim-sim-btn" data-sim="rotate" aria-pressed="false">
+              <i class="fas fa-shuffle" aria-hidden="true"></i>
+              <span>IP rotation</span>
+            </button>
+            <button type="button" class="rlim-sim-btn" data-sim="legit" aria-pressed="false">
+              <i class="fas fa-users" aria-hidden="true"></i>
+              <span>Shared NAT load</span>
+            </button>
+          </div>
+          <p class="rlim-hint" id="simHint">Select one or more attack/load profiles, then run the audit.</p>
+
+          <div class="rlim-field-grid">
+            <div class="rlim-field">
+              <label class="rlim-label" for="clientCount">Simulated clients</label>
+              <input type="number" id="clientCount" class="rlim-input" min="1" max="500" value="40" />
+            </div>
+            <div class="rlim-field">
+              <label class="rlim-label" for="reqPerClient">Requests / client</label>
+              <input type="number" id="reqPerClient" class="rlim-input" min="1" max="500" value="30" />
+            </div>
+          </div>
+
+          <div class="rlim-controls">
+            <button type="button" id="runAuditBtn" class="btn btn-primary">
+              <i class="fas fa-play" aria-hidden="true"></i> Run fairness audit
+            </button>
+            <button type="button" id="clearSimsBtn" class="btn btn-secondary">
+              <i class="fas fa-eraser" aria-hidden="true"></i> Clear sims
+            </button>
+            <button type="button" id="exportBtn" class="btn btn-outline" disabled>
+              <i class="fas fa-download" aria-hidden="true"></i> Export report
+            </button>
+          </div>
+          <p class="rlim-status" id="auditStatus" role="status" aria-live="polite">Idle — configure and run an audit.</p>
+        </section>
+      </div>
+
+      <div class="rlim-results-grid">
+        <section class="rlim-panel" aria-labelledby="rlim-scores-title">
+          <div class="rlim-panel-header">
+            <div class="rlim-panel-title">
+              <i class="fas fa-chart-bar rlim-panel-icon" aria-hidden="true"></i>
+              <h2 id="rlim-scores-title">Fairness &amp; error scores</h2>
+            </div>
+          </div>
+          <div id="scoreCards" class="rlim-score-cards">
+            <p class="rlim-empty">Run an audit to see fairness and false-positive/negative scores.</p>
+          </div>
+          <div class="rlim-meter-block">
+            <label class="rlim-label" for="fairnessMeter">Fairness meter</label>
+            <div class="rlim-meter" role="meter" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="fairnessMeter" aria-label="Fairness score">
+              <div class="rlim-meter-fill" id="fairnessFill" style="width: 0%"></div>
+            </div>
+          </div>
+        </section>
+
+        <section class="rlim-panel" aria-labelledby="rlim-timeline-title">
+          <div class="rlim-panel-header">
+            <div class="rlim-panel-title">
+              <i class="fas fa-timeline rlim-panel-icon" aria-hidden="true"></i>
+              <h2 id="rlim-timeline-title">Decision timeline</h2>
+            </div>
+          </div>
+          <pre class="rlim-log" id="decisionLog" aria-live="polite">Awaiting simulation…</pre>
+        </section>
+      </div>
+
+      <div class="rlim-results-grid">
+        <section class="rlim-panel" aria-labelledby="rlim-tips-title">
+          <div class="rlim-panel-header">
+            <div class="rlim-panel-title">
+              <i class="fas fa-sliders rlim-panel-icon" aria-hidden="true"></i>
+              <h2 id="rlim-tips-title">Burst allowance tuning</h2>
+            </div>
+          </div>
+          <ul id="tuningTips" class="rlim-recs" aria-live="polite">
+            <li class="rlim-empty-li">Tuning tips appear after an audit.</li>
+          </ul>
+        </section>
+
+        <section class="rlim-panel" aria-labelledby="rlim-recs-title">
+          <div class="rlim-panel-header">
+            <div class="rlim-panel-title">
+              <i class="fas fa-lightbulb rlim-panel-icon" aria-hidden="true"></i>
+              <h2 id="rlim-recs-title">Recommendations</h2>
+            </div>
+          </div>
+          <ul id="recommendationsList" class="rlim-recs" aria-live="polite">
+            <li class="rlim-empty-li">Recommendations appear after an audit.</li>
+          </ul>
+        </section>
+      </div>
+    </div>
+  </main>
+
+  <div id="footer-placeholder"></div>
+
+  <script src="/auth.js"></script>
+  <script src="/bootstrap-legacy.js"></script>
+  <script src="/script.js"></script>
+  <script type="module" src="/dist/legacy-bundle.mjs"></script>
+  <script src="/theme.js"></script>
+  <script src="script.js"></script>
+  <script>
+    if (typeof loadPartial === 'function') {
+      loadPartial('navbar-placeholder', '/partials/navbar.html');
+      loadPartial('footer-placeholder', '/partials/footer.html');
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,247 @@
+.custom-scrollbar::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+    background: #1f2937;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+    background: #4b5563;
+    border-radius: 4px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: #6b7280;
+}
+
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(5px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.fade-in {
+    animation: fadeIn 0.3s ease-out forwards;
+}
+
+.sidebar-module {
+    margin-bottom: 1rem;
+}
+
+.sidebar-module-title {
+    font-weight: 600;
+    color: #1e3a8a;
+    text-transform: uppercase;
+    font-size: 0.7rem;
+    letter-spacing: 0.05em;
+    margin-bottom: 0.5rem;
+    padding-left: 0.5rem;
+}
+
+.sidebar-lesson {
+    display: block;
+    padding: 0.5rem 0.5rem 0.5rem 1rem;
+    color: #4b5563;
+    border-radius: 0.375rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 0.85rem;
+    margin-bottom: 0.25rem;
+}
+
+.sidebar-lesson:hover {
+    background-color: #eff6ff;
+    color: #2563eb;
+}
+
+.sidebar-lesson.active {
+    background-color: #eff6ff;
+    color: #2563eb;
+    font-weight: 500;
+    border-left: 3px solid #2563eb;
+}
+
+.lesson-prose h2 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #111827;
+    margin-bottom: 1rem;
+}
+
+.lesson-prose h3 {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: #374151;
+    margin-top: 1.5rem;
+    margin-bottom: 0.75rem;
+}
+
+.lesson-prose h4 {
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: #4b5563;
+    margin-top: 1.25rem;
+    margin-bottom: 0.5rem;
+}
+
+.lesson-prose p {
+    margin-bottom: 1rem;
+    line-height: 1.65;
+    color: #4b5563;
+}
+
+.lesson-prose ul,
+.lesson-prose ol {
+    margin-bottom: 1rem;
+    padding-left: 1.5rem;
+    color: #4b5563;
+    line-height: 1.65;
+}
+
+.lesson-prose li {
+    margin-bottom: 0.4rem;
+}
+
+.lesson-prose code {
+    background-color: #f3f4f6;
+    padding: 0.125rem 0.375rem;
+    border-radius: 0.25rem;
+    font-family: monospace;
+    font-size: 0.875em;
+    color: #be185d;
+}
+
+.lesson-prose pre {
+    background-color: #1f2937;
+    color: #f9fafb;
+    padding: 1rem;
+    border-radius: 0.5rem;
+    overflow-x: auto;
+    margin-bottom: 1rem;
+    font-size: 0.85rem;
+    line-height: 1.5;
+}
+
+.lesson-prose pre code {
+    background-color: transparent;
+    color: inherit;
+    padding: 0;
+}
+
+.lesson-objectives ul {
+    margin-bottom: 0;
+}
+
+.canvas-embed {
+    width: 100%;
+    height: 100%;
+    border: none;
+    border-radius: 0.5rem;
+}
+
+.canvas-placeholder {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    min-height: 400px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 0.75rem;
+    color: white;
+    text-align: center;
+    padding: 2rem;
+}
+
+.canvas-placeholder > i {
+    font-size: 4rem;
+    margin-bottom: 1rem;
+    opacity: 0.9;
+}
+
+.canvas-placeholder h3 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 0.75rem;
+    color: white;
+}
+
+.canvas-placeholder p {
+    color: rgba(255, 255, 255, 0.85);
+    max-width: 400px;
+    margin-bottom: 1.5rem;
+    line-height: 1.5;
+}
+
+.quiz-question {
+    transition: background-color 0.3s, border-color 0.3s;
+}
+
+.summary-box {
+    background-color: #f0fdf4;
+    border: 1px solid #bbf7d0;
+    border-radius: 0.75rem;
+    padding: 1.25rem;
+    margin-top: 1.5rem;
+}
+
+.summary-box h4 {
+    color: #166534;
+    font-weight: 700;
+    margin-bottom: 0.75rem;
+    margin-top: 0;
+    font-size: 1rem;
+}
+
+.summary-box ul {
+    margin-bottom: 0.5rem;
+    padding-left: 1.25rem;
+}
+
+.summary-box li {
+    color: #166534;
+    margin-bottom: 0.3rem;
+    line-height: 1.5;
+}
+
+.summary-box p {
+    color: #14532d;
+    font-size: 0.9rem;
+    margin-bottom: 0;
+}
+
+.architecture-diagram {
+    background: #f8fafc;
+    border: 2px dashed #cbd5e1;
+    border-radius: 0.75rem;
+    padding: 1.5rem;
+    margin: 1rem 0;
+    text-align: center;
+    min-height: 100px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: monospace;
+    font-size: 0.8rem;
+    color: #64748b;
+    white-space: pre;
+    line-height: 1.6;
+    overflow-x: auto;
+}
+
+.eli5-toggle-inline {
+    margin-bottom: 1rem;
+}

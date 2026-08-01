@@ -1,0 +1,888 @@
+/* ================================================
+   RUBY LEARNING PAGE — Design System
+   ================================================
+   Design direction:
+   - Ruby coral/red (#CC342D brand) as primary accent
+   - Soft gold as secondary accent (ruby-in-gold)
+   - Soft rose for highlights
+   - JetBrains Mono (display/code) + Inter (body)
+   - No purple, no cyan, no lime
+   - Clean, minimal — like the landing pages
+   - Signature: irb REPL prompt (>>) motif in hero
+   ================================================ */
+
+/* ─── CSS Variables (scoped) ─── */
+[data-page='ruby-learning'] {
+  --rb-bg: #0d0b0d;
+  --rb-surface: #141114;
+  --rb-elevated: #1e161a;
+  --rb-primary: #f5a9a4;
+  --rb-primary-rgb: 245, 169, 164;
+  --rb-secondary: #f0dca8;
+  --rb-secondary-rgb: 240, 220, 168;
+  --rb-accent: #b8d4d0;
+  --rb-accent-rgb: 184, 212, 208;
+  --rb-red-deep: #d96a63;
+  --rb-text: #faf3f2;
+  --rb-text-muted: #a99a9d;
+  --rb-text-faint: #6a5a5e;
+  --rb-border: rgba(169, 154, 157, 0.10);
+  --rb-border-hover: rgba(245, 169, 164, 0.20);
+  --rb-radius: 12px;
+  --rb-radius-sm: 8px;
+  --rb-radius-pill: 100px;
+  --rb-success: #86efac;
+  --rb-warn: #f0dca8;
+  --rb-error: #fca5a5;
+  --rb-code-bg: #120e11;
+  --rb-mono: 'JetBrains Mono', 'Fira Code', monospace;
+  --rb-body: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+/* ─── Override global cyan focus ring — use warm coral instead ─── */
+[data-page='ruby-learning'] :focus-visible {
+  outline: 2px solid #f5a9a4 !important;
+  outline-offset: 2px !important;
+  box-shadow: 0 0 0 4px rgba(245, 169, 164, 0.18) !important;
+}
+
+/* ─── Hide the global Report Issue button on this page ─── */
+[data-page='ruby-learning'] #reportIssueBtn,
+[data-page='ruby-learning'] .report-issue-btn {
+  display: none !important;
+}
+
+/* ─── Hero Section ─── */
+[data-page='ruby-learning'] .rb-hero {
+  position: relative;
+  padding: 6rem 1rem 2rem;
+  text-align: center;
+  overflow: hidden;
+  background: var(--rb-bg);
+  min-height: 30vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.rb-hero-bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+}
+
+.rb-hero-glow {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 45% 30% at 60% 50%, rgba(245, 169, 164, 0.03) 0%, transparent 50%),
+    radial-gradient(ellipse 35% 25% at 30% 40%, rgba(240, 220, 168, 0.02) 0%, transparent 50%);
+  pointer-events: none;
+}
+
+/* ─── irb REPL Prompt Signature ─── */
+.rb-repl {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-bottom: 1.25rem;
+  font-family: var(--rb-mono);
+  font-size: 0.9rem;
+  opacity: 0.45;
+}
+
+.rb-repl-prompt {
+  color: var(--rb-primary);
+  font-weight: 700;
+  animation: rbReplBlink 2s ease-in-out infinite;
+}
+
+.rb-repl-code {
+  color: var(--rb-text-muted);
+}
+
+.rb-repl-result {
+  color: var(--rb-secondary);
+  font-style: italic;
+}
+
+@keyframes rbReplBlink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rb-repl-prompt {
+    animation: none;
+  }
+}
+
+.rb-hero-content {
+  position: relative;
+  z-index: 1;
+  max-width: 900px;
+  width: 100%;
+}
+
+/* ─── Static Title (warm coral) ─── */
+.rb-hero-title {
+  font-family: var(--rb-mono);
+  font-size: clamp(2rem, 5.5vw, 4rem);
+  font-weight: 700;
+  line-height: 1.2;
+  margin-bottom: 1rem;
+  letter-spacing: -0.5px;
+  cursor: default;
+  color: var(--rb-primary);
+}
+
+.rb-title-line {
+  display: block;
+  color: var(--rb-primary);
+}
+
+.rb-hero-subtitle {
+  font-family: var(--rb-body);
+  font-size: 1.05rem;
+  color: var(--rb-text-muted);
+  line-height: 1.6;
+  max-width: 540px;
+  margin: 0 auto 2rem;
+}
+
+.rb-hero-subtitle strong {
+  color: var(--rb-primary);
+  font-weight: 600;
+}
+
+.rb-hero-subtitle code {
+  font-family: var(--rb-mono);
+  font-size: 0.85em;
+  background: rgba(255, 255, 255, 0.04);
+  padding: 0.1em 0.35em;
+  border-radius: 4px;
+  color: var(--rb-secondary);
+}
+
+/* ─── Hero Stats ─── */
+.rb-hero-stats {
+  display: flex;
+  justify-content: center;
+  gap: 2rem;
+  margin-top: 1.5rem;
+}
+
+.rb-stat {
+  text-align: center;
+}
+
+.rb-stat-value {
+  display: block;
+  font-family: var(--rb-mono);
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: var(--rb-text);
+  line-height: 1.2;
+}
+
+.rb-stat-label {
+  font-family: var(--rb-body);
+  font-size: 0.75rem;
+  color: var(--rb-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* ─── Hero Actions ─── */
+.rb-hero-actions {
+  display: flex;
+  justify-content: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  margin-top: 1.5rem;
+}
+
+.rb-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.7rem 1.5rem;
+  border-radius: var(--rb-radius-pill);
+  font-family: var(--rb-body);
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: 1px solid transparent;
+}
+
+.rb-btn-primary {
+  background: var(--rb-primary);
+  color: #1a1214;
+  border-color: var(--rb-primary);
+}
+
+.rb-btn-primary:hover {
+  background: var(--rb-red-deep);
+  border-color: var(--rb-red-deep);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(245, 169, 164, 0.15);
+}
+
+.rb-btn-secondary {
+  background: transparent;
+  color: var(--rb-text);
+  border-color: var(--rb-border);
+}
+
+.rb-btn-secondary:hover {
+  border-color: var(--rb-secondary);
+  color: var(--rb-secondary);
+  background: rgba(var(--rb-secondary-rgb), 0.06);
+  transform: translateY(-1px);
+}
+
+/* ─── Section ─── */
+[data-page='ruby-learning'] .rb-section {
+  padding: 1rem 0 4rem;
+  background: var(--rb-bg);
+}
+
+.rb-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+/* ─── Topic Pills ─── */
+.rb-topic-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 2.5rem;
+  justify-content: center;
+}
+
+.rb-topic-pill {
+  font-family: var(--rb-mono);
+  font-size: 0.72rem;
+  font-weight: 500;
+  padding: 0.4rem 1rem;
+  border-radius: var(--rb-radius-pill);
+  background: transparent;
+  border: 1px solid var(--rb-border);
+  color: var(--rb-text-muted);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  text-decoration: none;
+  display: inline-block;
+}
+
+.rb-topic-pill:hover {
+  border-color: var(--rb-primary);
+  color: var(--rb-primary);
+  background: rgba(var(--rb-primary-rgb), 0.06);
+}
+
+.rb-topic-pill.active {
+  background: rgba(var(--rb-primary-rgb), 0.10);
+  border-color: var(--rb-primary);
+  color: var(--rb-primary);
+}
+
+/* ─── Lesson Card ─── */
+.rb-lesson {
+  background: var(--rb-surface);
+  border: 1px solid var(--rb-border);
+  border-radius: var(--rb-radius);
+  padding: 1.75rem;
+  margin-bottom: 1.5rem;
+  transition: border-color 0.25s ease, box-shadow 0.25s ease;
+  scroll-margin-top: 5rem;
+}
+
+.rb-lesson:hover {
+  border-color: var(--rb-border-hover);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+}
+
+.rb-lesson-header {
+  display: flex;
+  align-items: baseline;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.rb-lesson-number {
+  font-family: var(--rb-mono);
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--rb-primary);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  flex-shrink: 0;
+}
+
+.rb-lesson-header h3 {
+  font-family: var(--rb-mono);
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--rb-text);
+  margin: 0;
+  line-height: 1.3;
+}
+
+.rb-lesson p {
+  font-family: var(--rb-body);
+  font-size: 0.92rem;
+  color: var(--rb-text-muted);
+  line-height: 1.65;
+  margin: 0 0 1rem;
+}
+
+.rb-lesson p:last-child {
+  margin-bottom: 0;
+}
+
+.rb-lesson p strong,
+.rb-lesson p code {
+  color: var(--rb-text);
+}
+
+.rb-lesson p code {
+  font-family: var(--rb-mono);
+  font-size: 0.85em;
+  background: rgba(255, 255, 255, 0.04);
+  padding: 0.1em 0.4em;
+  border-radius: 4px;
+}
+
+/* ─── Concept Card ─── */
+.rb-concept {
+  background: rgba(var(--rb-primary-rgb), 0.03);
+  border: 1px solid rgba(var(--rb-primary-rgb), 0.08);
+  border-radius: var(--rb-radius-sm);
+  padding: 1rem 1.25rem;
+  margin-bottom: 1rem;
+}
+
+.rb-concept h4 {
+  font-family: var(--rb-mono);
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--rb-primary);
+  margin: 0 0 0.4rem;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.rb-concept p {
+  font-size: 0.88rem !important;
+  margin: 0 !important;
+}
+
+.rb-concept ul {
+  margin: 0.35rem 0 0;
+  padding-left: 1.25rem;
+}
+
+.rb-concept ul li {
+  font-family: var(--rb-body);
+  font-size: 0.88rem;
+  color: var(--rb-text-muted);
+  line-height: 1.6;
+  margin-bottom: 0.15rem;
+}
+
+.rb-concept ul li strong {
+  color: var(--rb-text);
+}
+
+.rb-concept ul li code {
+  font-family: var(--rb-mono);
+  font-size: 0.85em;
+  background: rgba(255, 255, 255, 0.04);
+  padding: 0.1em 0.35em;
+  border-radius: 3px;
+  color: var(--rb-text);
+}
+
+/* ─── Code Block ─── */
+.rb-code-block {
+  background: var(--rb-code-bg);
+  border: 1px solid var(--rb-border);
+  border-radius: var(--rb-radius-sm);
+  margin-bottom: 1rem;
+  overflow: hidden;
+}
+
+.rb-code-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.5rem 1rem;
+  border-bottom: 1px solid var(--rb-border);
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.rb-code-lang {
+  font-family: var(--rb-mono);
+  font-size: 0.65rem;
+  color: var(--rb-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-weight: 600;
+}
+
+.rb-code-copy {
+  background: none;
+  border: 1px solid var(--rb-border);
+  border-radius: 6px;
+  color: var(--rb-text-muted);
+  font-family: var(--rb-body);
+  font-size: 0.7rem;
+  padding: 0.2rem 0.6rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.rb-code-copy i {
+  margin-right: 0.25rem;
+  font-size: 0.65rem;
+}
+
+.rb-code-copy:hover {
+  border-color: var(--rb-primary);
+  color: var(--rb-primary);
+  background: rgba(var(--rb-primary-rgb), 0.06);
+}
+
+.rb-code-copy.copied {
+  border-color: var(--rb-success);
+  color: var(--rb-success);
+  background: rgba(134, 239, 172, 0.06);
+}
+
+.rb-code-block pre {
+  margin: 0;
+  padding: 1rem 1.25rem;
+  overflow-x: auto;
+  font-family: var(--rb-mono);
+  font-size: 0.82rem;
+  line-height: 1.6;
+  color: var(--rb-text);
+  white-space: pre;
+  tab-size: 4;
+}
+
+.rb-code-block pre::-webkit-scrollbar {
+  height: 4px;
+}
+
+.rb-code-block pre::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.rb-code-block pre::-webkit-scrollbar-thumb {
+  background: var(--rb-border);
+  border-radius: 2px;
+}
+
+/* ─── Ruby Syntax Colors (pastel, no purple/cyan/lime) ─── */
+.rb-code-block .kw { color: #f0dca8; font-weight: 600; }       /* keywords: soft gold */
+.rb-code-block .fn { color: #f5a9a4; font-weight: 500; }       /* methods: ruby coral */
+.rb-code-block .type { color: #fdba74; font-weight: 600; }     /* classes/modules: soft orange */
+.rb-code-block .str { color: #86efac; }                        /* strings: soft green */
+.rb-code-block .num { color: #f5a9a4; }                        /* numbers: ruby coral */
+.rb-code-block .cmt { color: var(--rb-text-faint); font-style: italic; } /* comments */
+.rb-code-block .param { color: var(--rb-text); }                /* params: body text */
+.rb-code-block .bool { color: #f0dca8; font-weight: 600; }     /* booleans: soft gold */
+.rb-code-block .op { color: var(--rb-text); }                  /* operators: body text */
+.rb-code-block .sym { color: #b0cce8; }                        /* symbols: pastel blue */
+.rb-code-block .ivar { color: #f0dca8; }                       /* interpolation/instance: soft gold */
+
+/* ─── Output Block ─── */
+.rb-output {
+  background: var(--rb-code-bg);
+  border: 1px dashed var(--rb-border);
+  border-radius: var(--rb-radius-sm);
+  padding: 0.75rem 1rem;
+  margin-bottom: 1rem;
+}
+
+.rb-output-label {
+  font-family: var(--rb-mono);
+  font-size: 0.65rem;
+  color: var(--rb-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 0.3rem;
+}
+
+.rb-output pre {
+  margin: 0;
+  font-family: var(--rb-mono);
+  font-size: 0.8rem;
+  color: var(--rb-text-muted);
+  line-height: 1.5;
+}
+
+/* ─── Callout ─── */
+.rb-callout {
+  background: rgba(var(--rb-secondary-rgb), 0.04);
+  border: 1px solid rgba(var(--rb-secondary-rgb), 0.1);
+  border-radius: var(--rb-radius-sm);
+  padding: 0.85rem 1rem;
+  margin-bottom: 1rem;
+}
+
+.rb-callout p {
+  font-size: 0.85rem !important;
+  margin: 0 !important;
+}
+
+.rb-callout p code {
+  font-family: var(--rb-mono);
+  font-size: 0.85em;
+  background: rgba(255, 255, 255, 0.04);
+  padding: 0.1em 0.35em;
+  border-radius: 3px;
+  color: var(--rb-text);
+}
+
+/* ─── Table ─── */
+.rb-table-wrap {
+  overflow-x: auto;
+  margin-bottom: 1rem;
+}
+
+.rb-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: var(--rb-body);
+  font-size: 0.85rem;
+}
+
+.rb-table thead th {
+  font-family: var(--rb-mono);
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--rb-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  text-align: left;
+  padding: 0.6rem 0.75rem;
+  border-bottom: 1px solid var(--rb-border);
+}
+
+.rb-table tbody td {
+  padding: 0.55rem 0.75rem;
+  color: var(--rb-text-muted);
+  border-bottom: 1px solid rgba(169, 154, 157, 0.05);
+}
+
+.rb-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.rb-table tbody td code {
+  font-family: var(--rb-mono);
+  font-size: 0.85em;
+  color: var(--rb-text);
+  background: rgba(255, 255, 255, 0.03);
+  padding: 0.1em 0.35em;
+  border-radius: 3px;
+}
+
+/* ─── Exercise ─── */
+.rb-exercise {
+  background: rgba(var(--rb-accent-rgb), 0.03);
+  border: 1px solid rgba(var(--rb-accent-rgb), 0.12);
+  border-radius: var(--rb-radius-sm);
+  padding: 1.1rem 1.25rem;
+  margin-top: 1rem;
+}
+
+.rb-exercise-title {
+  font-family: var(--rb-mono);
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--rb-accent);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.rb-exercise p {
+  font-size: 0.85rem !important;
+  margin: 0 0 0.5rem !important;
+}
+
+.rb-exercise ol {
+  margin: 0.3rem 0 0.75rem;
+  padding-left: 1.25rem;
+}
+
+.rb-exercise ol li {
+  font-family: var(--rb-body);
+  font-size: 0.85rem;
+  color: var(--rb-text-muted);
+  line-height: 1.6;
+  margin-bottom: 0.15rem;
+}
+
+.rb-exercise-toggle {
+  background: transparent;
+  border: 1px solid var(--rb-border);
+  border-radius: 6px;
+  color: var(--rb-text-muted);
+  font-family: var(--rb-body);
+  font-size: 0.78rem;
+  padding: 0.35rem 0.85rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.rb-exercise-toggle:hover {
+  border-color: var(--rb-accent);
+  color: var(--rb-accent);
+  background: rgba(var(--rb-accent-rgb), 0.06);
+}
+
+.rb-exercise-solution {
+  display: none;
+  margin-top: 0.75rem;
+}
+
+.rb-exercise-solution.open {
+  display: block;
+}
+
+.rb-exercise-solution .rb-code-block {
+  margin-bottom: 0;
+}
+
+.rb-exercise-solution .rb-code-block + .rb-code-block {
+  margin-top: 1rem;
+}
+
+/* ─── Section Divider ─── */
+.rb-divider {
+  text-align: center;
+  margin: 2.5rem 0 1.5rem;
+}
+
+.rb-divider-inner {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-family: var(--rb-mono);
+  font-size: 0.65rem;
+  color: var(--rb-text-faint);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.rb-divider-inner::before,
+.rb-divider-inner::after {
+  content: '';
+  display: block;
+  width: 40px;
+  height: 1px;
+  background: var(--rb-border);
+}
+
+/* ─── Back Button ─── */
+.rb-back-btn {
+  position: absolute;
+  top: 1.5rem;
+  left: 1.5rem;
+  z-index: 10;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem 0.5rem 0.85rem;
+  background: var(--rb-surface);
+  border: 1px solid var(--rb-border);
+  border-radius: var(--rb-radius-pill);
+  color: var(--rb-text-muted);
+  font-family: var(--rb-body);
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  text-decoration: none;
+}
+
+.rb-back-btn i {
+  font-size: 0.85rem;
+  transition: transform 0.2s ease;
+}
+
+.rb-back-btn span {
+  font-weight: 500;
+}
+
+.rb-back-btn:hover {
+  border-color: var(--rb-primary);
+  color: var(--rb-primary);
+  background: rgba(var(--rb-primary-rgb), 0.08);
+}
+
+.rb-back-btn:hover i {
+  transform: translateX(-3px);
+}
+
+/* ─── Progress Indicator ─── */
+.rb-progress {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-bottom: 2rem;
+}
+
+.rb-progress-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--rb-border);
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.rb-progress-dot.completed {
+  background: var(--rb-primary);
+  box-shadow: 0 0 6px rgba(var(--rb-primary-rgb), 0.3);
+}
+
+.rb-progress-dot.active {
+  background: var(--rb-secondary);
+  box-shadow: 0 0 6px rgba(var(--rb-secondary-rgb), 0.3);
+}
+
+.rb-progress-dot:hover {
+  transform: scale(1.3);
+}
+
+.rb-progress-line {
+  width: 20px;
+  height: 1px;
+  background: var(--rb-border);
+}
+
+.rb-progress-line.completed {
+  background: var(--rb-primary);
+}
+
+/* ─── Footer ─── */
+.rb-footer {
+  text-align: center;
+  padding: 2rem 1.5rem;
+  border-top: 1px solid var(--rb-border);
+}
+
+.rb-footer p {
+  font-family: var(--rb-body);
+  font-size: 0.8rem;
+  color: var(--rb-text-faint);
+  margin: 0 0 0.5rem;
+}
+
+.rb-inline-link,
+.rb-footer a {
+  color: var(--rb-secondary);
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.2s ease;
+}
+
+.rb-inline-link:hover,
+.rb-footer a:hover {
+  color: var(--rb-text);
+}
+
+/* ─── Responsive ─── */
+@media (max-width: 768px) {
+  [data-page='ruby-learning'] .rb-hero {
+    padding: 4rem 0.75rem 1.5rem;
+    min-height: auto;
+  }
+
+  .rb-hero-title {
+    font-size: 1.6rem;
+  }
+
+  .rb-hero-subtitle {
+    font-size: 0.9rem;
+  }
+
+  .rb-hero-stats {
+    gap: 1rem;
+  }
+
+  .rb-stat-value {
+    font-size: 1.2rem;
+  }
+
+  .rb-lesson {
+    padding: 1.25rem;
+  }
+
+  .rb-lesson-header h3 {
+    font-size: 0.95rem;
+  }
+
+  .rb-code-block pre {
+    font-size: 0.75rem;
+    padding: 0.75rem 1rem;
+  }
+
+  .rb-topic-nav {
+    gap: 0.35rem;
+  }
+
+  .rb-topic-pill {
+    font-size: 0.65rem;
+    padding: 0.3rem 0.75rem;
+  }
+
+  .rb-back-btn {
+    top: 0.75rem;
+    left: 0.75rem;
+    padding: 0.4rem 0.7rem 0.4rem 0.6rem;
+    font-size: 0.8rem;
+  }
+  .rb-back-btn span {
+    display: none;
+  }
+
+  .rb-section {
+    padding: 0.5rem 0 3rem;
+  }
+
+  .rb-repl {
+    font-size: 0.75rem;
+    margin-bottom: 0.75rem;
+  }
+}
+
+/* ─── Reduced Motion ─── */
+@media (prefers-reduced-motion: reduce) {
+  .rb-back-btn { transition: none; }
+  .rb-back-btn i { transition: none; }
+  .rb-back-btn:hover i { transform: none; }
+  .rb-lesson { transition: none; }
+  .rb-lesson:hover { transform: none; }
+  .rb-btn { transition: none; }
+  .rb-topic-pill { transition: none; }
+  .rb-code-copy { transition: none; }
+  .rb-repl-prompt { animation: none; }
+}

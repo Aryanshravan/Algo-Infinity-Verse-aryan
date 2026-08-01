@@ -1,0 +1,292 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DB Isolation Anomaly Lab | Algo Infinity Verse</title>
+  <meta name="description" content="Learn dirty reads, non-repeatable reads, phantoms, lost updates, isolation levels, locking, and MVCC with an interactive two-transaction schedule simulator." />
+  <link rel="stylesheet" href="/styles.css" />
+  <link rel="stylesheet" href="style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Poppins:wght@300;400;500;600;700&family=Fira+Code:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <script>
+    (function () {
+      try {
+        var storedTheme = localStorage.getItem('theme');
+        var prefersLight = window.matchMedia('(prefers-color-scheme: light)').matches;
+        var theme = storedTheme || (prefersLight ? 'light' : 'dark');
+        if (theme === 'light') {
+          document.documentElement.classList.add('light-mode');
+        } else {
+          document.documentElement.classList.remove('light-mode');
+        }
+      } catch (e) {}
+    })();
+  </script>
+</head>
+<body data-page="db-isolation-anomaly-lab">
+  <a href="#dbi-main" class="dbi-skip-link">Skip to main content</a>
+  <button type="button" id="scrollTopBtn" class="scroll-top-btn" aria-label="Scroll to top">
+    <i class="fas fa-arrow-up" aria-hidden="true"></i>
+  </button>
+
+  <div id="navbar-placeholder"></div>
+
+  <header class="dbi-hero">
+    <div class="dbi-hero-badge">
+      <i class="fas fa-database" aria-hidden="true"></i>
+      Concurrency Academy
+    </div>
+    <h1>
+      DB Isolation
+      <span class="dbi-hero-accent">Anomaly Lab</span>
+    </h1>
+    <p>
+      Master dirty reads, non-repeatable reads, phantoms, and lost updates —
+      then step through interleaved schedules under every SQL isolation level.
+    </p>
+    <div class="dbi-hero-stats" aria-live="polite">
+      <div class="dbi-stat">
+        <span class="dbi-stat-val" id="statModulesDone">0</span>
+        <span class="dbi-stat-label">Modules done</span>
+      </div>
+      <div class="dbi-stat">
+        <span class="dbi-stat-val" id="statModulesTotal">8</span>
+        <span class="dbi-stat-label">Total modules</span>
+      </div>
+      <div class="dbi-stat">
+        <span class="dbi-stat-val" id="statProgressPct">0%</span>
+        <span class="dbi-stat-label">Progress</span>
+      </div>
+      <div class="dbi-stat">
+        <span class="dbi-stat-val" id="statQuizBest">—</span>
+        <span class="dbi-stat-label">Quiz best</span>
+      </div>
+    </div>
+    <div class="dbi-progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-label="Course progress" id="heroProgressBar">
+      <div class="dbi-progress-fill" id="heroProgressFill"></div>
+    </div>
+  </header>
+
+  <main id="dbi-main" class="dbi-main">
+    <div class="dbi-container">
+
+      <section class="dbi-section" aria-labelledby="modules-title">
+        <div class="dbi-section-head">
+          <h2 id="modules-title">
+            <i class="fas fa-book-open" aria-hidden="true"></i>
+            Learning modules
+          </h2>
+          <p>Eight lessons on isolation anomalies, SQL levels, locking, and MVCC. Mark each complete to track progress.</p>
+        </div>
+
+        <div class="dbi-modules-layout">
+          <nav class="dbi-module-nav" aria-label="Module list">
+            <ul class="dbi-module-list" id="moduleList" role="list"></ul>
+          </nav>
+
+          <article class="dbi-lesson-panel" id="lessonPanel" aria-labelledby="lessonTitle">
+            <div class="dbi-lesson-header">
+              <h3 id="lessonTitle">Select a module</h3>
+              <span class="dbi-lesson-badge" id="lessonBadge" hidden>Completed</span>
+            </div>
+            <div class="dbi-lesson-body" id="lessonBody">
+              <p class="dbi-muted">Choose a module from the sidebar to begin.</p>
+            </div>
+            <div class="dbi-lesson-actions">
+              <button type="button" class="dbi-btn dbi-btn-primary" id="markCompleteBtn" disabled>
+                <i class="fas fa-check" aria-hidden="true"></i>
+                Mark complete
+              </button>
+              <button type="button" class="dbi-btn dbi-btn-ghost" id="prevModuleBtn" disabled>
+                <i class="fas fa-chevron-left" aria-hidden="true"></i>
+                Previous
+              </button>
+              <button type="button" class="dbi-btn dbi-btn-ghost" id="nextModuleBtn" disabled>
+                Next
+                <i class="fas fa-chevron-right" aria-hidden="true"></i>
+              </button>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section class="dbi-section" aria-labelledby="sim-title">
+        <div class="dbi-section-head">
+          <h2 id="sim-title">
+            <i class="fas fa-timeline" aria-hidden="true"></i>
+            Two-transaction schedule simulator
+          </h2>
+          <p>Pick an isolation level and scenario, then step through interleaved ops. Anomalies are detected as they become visible.</p>
+        </div>
+
+        <div class="dbi-lab-grid">
+          <div class="dbi-panel">
+            <label class="dbi-label" for="isolationLevel">Isolation level</label>
+            <select id="isolationLevel" class="dbi-select" aria-describedby="isolationHint">
+              <option value="READ_UNCOMMITTED">READ UNCOMMITTED</option>
+              <option value="READ_COMMITTED" selected>READ COMMITTED</option>
+              <option value="REPEATABLE_READ">REPEATABLE READ</option>
+              <option value="SERIALIZABLE">SERIALIZABLE</option>
+            </select>
+            <p id="isolationHint" class="dbi-hint">ANSI SQL levels — engine locking/MVCC details vary (Postgres, MySQL, SQL Server).</p>
+
+            <label class="dbi-label" for="scenarioSelect">Scenario</label>
+            <select id="scenarioSelect" class="dbi-select"></select>
+
+            <div class="dbi-btn-row">
+              <button type="button" class="dbi-btn dbi-btn-primary" id="startSimBtn">
+                <i class="fas fa-play" aria-hidden="true"></i>
+                Start / restart
+              </button>
+              <button type="button" class="dbi-btn dbi-btn-secondary" id="stepSimBtn" disabled>
+                <i class="fas fa-forward-step" aria-hidden="true"></i>
+                Step
+              </button>
+              <button type="button" class="dbi-btn dbi-btn-ghost" id="autoSimBtn" disabled>
+                <i class="fas fa-bolt" aria-hidden="true"></i>
+                Auto-play
+              </button>
+            </div>
+          </div>
+
+          <div class="dbi-panel">
+            <h3 class="dbi-panel-subtitle">Live state</h3>
+            <div class="dbi-state-grid" aria-live="polite">
+              <div class="dbi-state-card">
+                <span class="dbi-state-label">Shared row X</span>
+                <span class="dbi-state-val" id="simRowX">100</span>
+              </div>
+              <div class="dbi-state-card">
+                <span class="dbi-state-label">T1 view</span>
+                <span class="dbi-state-val" id="simT1View">—</span>
+              </div>
+              <div class="dbi-state-card">
+                <span class="dbi-state-label">T2 view</span>
+                <span class="dbi-state-val" id="simT2View">—</span>
+              </div>
+              <div class="dbi-state-card">
+                <span class="dbi-state-label">Step</span>
+                <span class="dbi-state-val" id="simStepLabel">0 / 0</span>
+              </div>
+            </div>
+            <div id="simAnomaly" class="dbi-anomaly-box" role="status" aria-live="assertive">
+              <p class="dbi-muted">No anomaly detected yet. Step through the schedule.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="dbi-panel dbi-schedule-panel">
+          <h3 class="dbi-panel-subtitle">Schedule timeline</h3>
+          <ol class="dbi-schedule" id="simSchedule" aria-label="Transaction schedule steps"></ol>
+          <div id="simDetail" class="dbi-sim-detail" role="status" aria-live="polite">
+            <p class="dbi-muted">Press Start to begin the interleaved schedule.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="dbi-section" aria-labelledby="rec-title">
+        <div class="dbi-section-head">
+          <h2 id="rec-title">
+            <i class="fas fa-compass" aria-hidden="true"></i>
+            Isolation recommendation engine
+          </h2>
+          <p>Describe your workload. Get a practical isolation suggestion with trade-offs.</p>
+        </div>
+
+        <div class="dbi-lab-grid">
+          <div class="dbi-panel">
+            <fieldset class="dbi-fieldset">
+              <legend class="dbi-label">Workload profile</legend>
+              <label class="dbi-check">
+                <input type="checkbox" id="recDirtyRisk" />
+                Uncommitted data must never be visible (no dirty reads)
+              </label>
+              <label class="dbi-check">
+                <input type="checkbox" id="recStableReads" checked />
+                Same row must return the same value within a transaction
+              </label>
+              <label class="dbi-check">
+                <input type="checkbox" id="recNoPhantoms" />
+                Range queries must not see new matching rows mid-transaction
+              </label>
+              <label class="dbi-check">
+                <input type="checkbox" id="recLostUpdate" checked />
+                Protect against lost updates on concurrent writes
+              </label>
+              <label class="dbi-check">
+                <input type="checkbox" id="recHighThroughput" />
+                Prefer maximum throughput / minimal locking
+              </label>
+              <label class="dbi-check">
+                <input type="checkbox" id="recReporting" />
+                Long-running analytical / reporting queries
+              </label>
+            </fieldset>
+            <div class="dbi-btn-row">
+              <button type="button" class="dbi-btn dbi-btn-primary" id="recommendBtn">
+                <i class="fas fa-wand-magic-sparkles" aria-hidden="true"></i>
+                Recommend isolation
+              </button>
+              <button type="button" class="dbi-btn dbi-btn-ghost" id="resetRecBtn">
+                <i class="fas fa-rotate-left" aria-hidden="true"></i>
+                Reset
+              </button>
+            </div>
+          </div>
+
+          <div class="dbi-panel">
+            <h3 class="dbi-panel-subtitle">Recommendation</h3>
+            <div id="recResults" class="dbi-results" role="status" aria-live="polite">
+              <p class="dbi-muted">Select workload constraints and click Recommend.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="dbi-section" aria-labelledby="quiz-title">
+        <div class="dbi-section-head">
+          <h2 id="quiz-title">
+            <i class="fas fa-clipboard-question" aria-hidden="true"></i>
+            Self-assessment quiz
+          </h2>
+          <p>Seven questions on anomalies and isolation. Best score is saved in localStorage.</p>
+        </div>
+
+        <div class="dbi-panel">
+          <form id="quizForm" class="dbi-quiz" novalidate>
+            <div id="quizQuestions"></div>
+            <div class="dbi-btn-row">
+              <button type="submit" class="dbi-btn dbi-btn-primary" id="submitQuizBtn">
+                <i class="fas fa-paper-plane" aria-hidden="true"></i>
+                Submit quiz
+              </button>
+              <button type="button" class="dbi-btn dbi-btn-ghost" id="resetQuizBtn">
+                <i class="fas fa-rotate-left" aria-hidden="true"></i>
+                Reset
+              </button>
+            </div>
+          </form>
+          <div id="quizResult" class="dbi-quiz-result" role="status" aria-live="polite" hidden></div>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <div id="footer-placeholder"></div>
+
+  <script src="/auth.js"></script>
+  <script src="/bootstrap-legacy.js"></script>
+  <script src="/script.js"></script>
+  <script type="module" src="/dist/legacy-bundle.mjs"></script>
+  <script src="/theme.js"></script>
+  <script src="script.js"></script>
+  <script>
+    if (typeof loadPartial === 'function') {
+      loadPartial('navbar-placeholder', '/partials/navbar.html');
+      loadPartial('footer-placeholder', '/partials/footer.html');
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,239 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>WebSocket Backpressure Lab | Algo Infinity Verse</title>
+  <meta name="description" content="Simulate WebSocket heartbeat timeouts, buffer backpressure, stall/flood/half-open scenarios, and reconnect storms — then export a reliability report with close-code and backoff guidance." />
+  <link rel="stylesheet" href="/styles.css" />
+  <link rel="stylesheet" href="style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Poppins:wght@300;400;500;600;700&family=Fira+Code:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <script>
+    (function () {
+      try {
+        var storedTheme = localStorage.getItem('theme');
+        var prefersLight = window.matchMedia('(prefers-color-scheme: light)').matches;
+        var theme = storedTheme || (prefersLight ? 'light' : 'dark');
+        if (theme === 'light') {
+          document.documentElement.classList.add('light-mode');
+        } else {
+          document.documentElement.classList.remove('light-mode');
+        }
+      } catch (e) {}
+    })();
+  </script>
+</head>
+<body data-page="websocket-backpressure-lab">
+  <a href="#wsbp-main" class="wsbp-skip-link">Skip to main content</a>
+  <button type="button" id="scrollTopBtn" class="scroll-top-btn" aria-label="Scroll to top">
+    <i class="fas fa-arrow-up" aria-hidden="true"></i>
+  </button>
+
+  <div id="navbar-placeholder"></div>
+
+  <header class="wsbp-hero">
+    <div class="wsbp-hero-badge">
+      <i class="fas fa-plug" aria-hidden="true"></i>
+      Realtime Reliability Lab
+    </div>
+    <h1>
+      WebSocket
+      <span class="wsbp-hero-accent">Backpressure Lab</span>
+    </h1>
+    <p>
+      Tune heartbeats and buffer limits, run stall / flood / half-open scenarios, watch
+      backpressure gauges and reconnect storms, then export a reliability report.
+    </p>
+    <div class="wsbp-hero-stats" aria-live="polite">
+      <div class="wsbp-stat">
+        <span class="wsbp-stat-val" id="statHealth">—</span>
+        <span class="wsbp-stat-label">Health</span>
+      </div>
+      <div class="wsbp-stat">
+        <span class="wsbp-stat-val" id="statBuffer">—</span>
+        <span class="wsbp-stat-label">Buffer fill</span>
+      </div>
+      <div class="wsbp-stat">
+        <span class="wsbp-stat-val" id="statStorm">—</span>
+        <span class="wsbp-stat-label">Reconnect storm</span>
+      </div>
+      <div class="wsbp-stat">
+        <span class="wsbp-stat-val" id="statClose">—</span>
+        <span class="wsbp-stat-label">Close code</span>
+      </div>
+    </div>
+  </header>
+
+  <main id="wsbp-main" class="wsbp-main">
+    <div class="container">
+      <div class="wsbp-workspace">
+        <section class="wsbp-panel" aria-labelledby="wsbp-config-title">
+          <div class="wsbp-panel-header">
+            <div class="wsbp-panel-title">
+              <i class="fas fa-sliders wsbp-panel-icon" aria-hidden="true"></i>
+              <h2 id="wsbp-config-title">Connection configuration</h2>
+            </div>
+          </div>
+
+          <div class="wsbp-field-grid">
+            <div class="wsbp-field">
+              <label class="wsbp-label" for="heartbeatMs">Heartbeat interval (ms)</label>
+              <input type="number" id="heartbeatMs" class="wsbp-input" min="500" max="120000" step="100" value="15000" />
+            </div>
+            <div class="wsbp-field">
+              <label class="wsbp-label" for="heartbeatTimeoutMs">Heartbeat timeout (ms)</label>
+              <input type="number" id="heartbeatTimeoutMs" class="wsbp-input" min="1000" max="180000" step="100" value="45000" />
+            </div>
+            <div class="wsbp-field">
+              <label class="wsbp-label" for="bufferLimitKb">Client buffer limit (KB)</label>
+              <input type="number" id="bufferLimitKb" class="wsbp-input" min="8" max="65536" value="512" />
+            </div>
+            <div class="wsbp-field">
+              <label class="wsbp-label" for="serverBufKb">Server send buffer (KB)</label>
+              <input type="number" id="serverBufKb" class="wsbp-input" min="8" max="65536" value="1024" />
+            </div>
+            <div class="wsbp-field">
+              <label class="wsbp-label" for="maxMsgKb">Max message size (KB)</label>
+              <input type="number" id="maxMsgKb" class="wsbp-input" min="1" max="8192" value="64" />
+            </div>
+            <div class="wsbp-field">
+              <label class="wsbp-label" for="reconnectBaseMs">Reconnect base backoff (ms)</label>
+              <input type="number" id="reconnectBaseMs" class="wsbp-input" min="50" max="30000" value="500" />
+            </div>
+          </div>
+          <p class="wsbp-hint">Timeout should be ≥ 2–3× heartbeat interval to absorb jitter without flapping.</p>
+        </section>
+
+        <section class="wsbp-panel" aria-labelledby="wsbp-scenario-title">
+          <div class="wsbp-panel-header">
+            <div class="wsbp-panel-title">
+              <i class="fas fa-vial wsbp-panel-icon" aria-hidden="true"></i>
+              <h2 id="wsbp-scenario-title">Scenario presets</h2>
+            </div>
+          </div>
+
+          <div class="wsbp-preset-grid" role="group" aria-label="Scenario presets">
+            <button type="button" class="wsbp-preset-btn" data-scenario="stall" aria-pressed="false">
+              <i class="fas fa-pause" aria-hidden="true"></i>
+              <span>Stall</span>
+              <small>Peer stops ACKing / reading</small>
+            </button>
+            <button type="button" class="wsbp-preset-btn" data-scenario="flood" aria-pressed="false">
+              <i class="fas fa-water" aria-hidden="true"></i>
+              <span>Flood</span>
+              <small>Outbound message storm</small>
+            </button>
+            <button type="button" class="wsbp-preset-btn" data-scenario="half-open" aria-pressed="false">
+              <i class="fas fa-circle-half-stroke" aria-hidden="true"></i>
+              <span>Half-open</span>
+              <small>Dead TCP, no FIN/RST</small>
+            </button>
+          </div>
+          <p class="wsbp-hint" id="scenarioHint">Pick a preset (or leave unset for baseline heartbeat), then run the lab.</p>
+
+          <div class="wsbp-controls">
+            <button type="button" id="runLabBtn" class="btn btn-primary">
+              <i class="fas fa-play" aria-hidden="true"></i> Run simulator
+            </button>
+            <button type="button" id="clearScenarioBtn" class="btn btn-secondary">
+              <i class="fas fa-eraser" aria-hidden="true"></i> Clear scenario
+            </button>
+            <button type="button" id="exportBtn" class="btn btn-outline" disabled>
+              <i class="fas fa-download" aria-hidden="true"></i> Export report
+            </button>
+          </div>
+          <p class="wsbp-status" id="labStatus" role="status" aria-live="polite">Idle — configure and run a scenario.</p>
+        </section>
+      </div>
+
+      <div class="wsbp-results-grid">
+        <section class="wsbp-panel" aria-labelledby="wsbp-gauge-title">
+          <div class="wsbp-panel-header">
+            <div class="wsbp-panel-title">
+              <i class="fas fa-tachometer-alt wsbp-panel-icon" aria-hidden="true"></i>
+              <h2 id="wsbp-gauge-title">Client buffer / backpressure</h2>
+            </div>
+            <span class="wsbp-live" id="pressureLabel">0%</span>
+          </div>
+          <div class="wsbp-gauge-wrap">
+            <div
+              class="wsbp-gauge"
+              id="backpressureGauge"
+              role="meter"
+              aria-valuemin="0"
+              aria-valuemax="100"
+              aria-valuenow="0"
+              aria-label="Client buffer fill percent"
+            >
+              <div class="wsbp-gauge-fill" id="gaugeFill" style="width: 0%"></div>
+            </div>
+            <div class="wsbp-gauge-meta">
+              <span>Empty</span>
+              <span>High water</span>
+              <span>Limit</span>
+            </div>
+          </div>
+          <div id="heartbeatPanel" class="wsbp-heartbeat">
+            <p class="wsbp-empty">Run the simulator to see heartbeat timeout outcomes.</p>
+          </div>
+        </section>
+
+        <section class="wsbp-panel" aria-labelledby="wsbp-storm-title">
+          <div class="wsbp-panel-header">
+            <div class="wsbp-panel-title">
+              <i class="fas fa-cloud-bolt wsbp-panel-icon" aria-hidden="true"></i>
+              <h2 id="wsbp-storm-title">Reconnect storm detector</h2>
+            </div>
+          </div>
+          <div id="stormPanel" class="wsbp-storm">
+            <p class="wsbp-empty">Storm metrics appear after a run.</p>
+          </div>
+          <pre class="wsbp-log" id="eventLog" aria-live="polite">Awaiting simulation…</pre>
+        </section>
+      </div>
+
+      <div class="wsbp-results-grid">
+        <section class="wsbp-panel" aria-labelledby="wsbp-close-title">
+          <div class="wsbp-panel-header">
+            <div class="wsbp-panel-title">
+              <i class="fas fa-door-closed wsbp-panel-icon" aria-hidden="true"></i>
+              <h2 id="wsbp-close-title">Safe close codes &amp; backoff</h2>
+            </div>
+          </div>
+          <div id="closeCodes" class="wsbp-close-list">
+            <p class="wsbp-empty">Close-code and backoff guidance appear after a run.</p>
+          </div>
+        </section>
+
+        <section class="wsbp-panel" aria-labelledby="wsbp-recs-title">
+          <div class="wsbp-panel-header">
+            <div class="wsbp-panel-title">
+              <i class="fas fa-lightbulb wsbp-panel-icon" aria-hidden="true"></i>
+              <h2 id="wsbp-recs-title">Recommendations</h2>
+            </div>
+          </div>
+          <ul id="recommendationsList" class="wsbp-recs" aria-live="polite">
+            <li class="wsbp-empty-li">Recommendations appear after a simulation.</li>
+          </ul>
+        </section>
+      </div>
+    </div>
+  </main>
+
+  <div id="footer-placeholder"></div>
+
+  <script src="/auth.js"></script>
+  <script src="/bootstrap-legacy.js"></script>
+  <script src="/script.js"></script>
+  <script type="module" src="/dist/legacy-bundle.mjs"></script>
+  <script src="/theme.js"></script>
+  <script src="script.js"></script>
+  <script>
+    if (typeof loadPartial === 'function') {
+      loadPartial('navbar-placeholder', '/partials/navbar.html');
+      loadPartial('footer-placeholder', '/partials/footer.html');
+    }
+  </script>
+</body>
+</html>

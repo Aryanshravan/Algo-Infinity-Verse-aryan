@@ -1,0 +1,396 @@
+.lu-lua-icon {
+  color: #6b7fff;
+  font-size: 1rem;
+}
+.lu-hero {
+  min-height: 50vh;
+  padding-bottom: 2rem;
+}
+.lu-hero-desc {
+  color: var(--text-secondary);
+  font-size: 1.1rem;
+  margin: 1rem auto 1.5rem;
+  max-width: 600px;
+}
+
+.lu-gradient-text {
+  background: linear-gradient(135deg, #6b7fff 0%, #000080 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.lu-cta-btn {
+  background: linear-gradient(135deg, #6b7fff 0%, #000080 100%);
+  border: none;
+  color: #fff;
+  font-weight: 600;
+}
+
+.lu-note {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: rgba(107, 127, 255, 0.08);
+  border: 1px solid rgba(107, 127, 255, 0.3);
+  border-radius: 8px;
+  padding: 0.5rem 1rem;
+  font-size: 0.82rem;
+  color: #9aa8ff;
+  margin-top: 1rem;
+}
+
+.lu-link-btn {
+  background: none;
+  border: none;
+  padding: 0;
+  color: #9aa8ff;
+  text-decoration: underline;
+  cursor: pointer;
+  font: inherit;
+}
+
+.lu-section {
+  padding: 2rem 1rem 4rem;
+}
+.lu-container {
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+/* Toolbar */
+.lu-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 1.25rem;
+  background: var(--dark-surface);
+  border: 1px solid var(--glass-border);
+  border-radius: 12px 12px 0 0;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+.lu-toolbar-left,
+.lu-toolbar-right {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.lu-label {
+  font-family: Orbitron, sans-serif;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #9aa8ff;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  white-space: nowrap;
+}
+
+.lu-select {
+  background: var(--dark-card);
+  border: 1px solid var(--glass-border);
+  border-radius: 8px;
+  color: var(--text-primary);
+  font-family: Poppins, sans-serif;
+  font-size: 0.85rem;
+  padding: 0.4rem 0.75rem;
+  cursor: pointer;
+  outline: none;
+}
+.lu-select:focus {
+  border-color: #9aa8ff;
+}
+
+.lu-run-btn {
+  background: linear-gradient(135deg, #6b7fff 0%, #000080 100%);
+  color: #fff;
+  font-weight: 700;
+  padding: 0.45rem 1.25rem;
+  font-size: 0.85rem;
+  border-radius: 8px;
+}
+
+.lu-icon-btn {
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  color: var(--text-secondary);
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  font-size: 0.85rem;
+}
+.lu-icon-btn:hover {
+  color: #9aa8ff;
+  border-color: #9aa8ff;
+}
+
+/* Split */
+.lu-split {
+  display: flex;
+  height: 500px;
+  border: 1px solid var(--glass-border);
+  border-top: none;
+  overflow: hidden;
+}
+.lu-editor-pane,
+.lu-output-pane {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+}
+.lu-output-pane {
+  border-left: 1px solid var(--glass-border);
+}
+
+.lu-pane-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 1rem;
+  background: var(--dark-surface);
+  border-bottom: 1px solid var(--glass-border);
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  flex-shrink: 0;
+}
+
+.lu-lang-badge {
+  font-family: 'Fira Code', monospace;
+  font-size: 0.7rem;
+  color: #9aa8ff;
+  background: rgba(107, 127, 255, 0.1);
+  border: 1px solid rgba(107, 127, 255, 0.3);
+  padding: 0.15rem 0.5rem;
+  border-radius: 4px;
+}
+
+.lu-status-badge {
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 0.15rem 0.5rem;
+  border-radius: 4px;
+}
+.lu-status-ready {
+  color: #22c55e;
+  background: rgba(34, 197, 94, 0.1);
+  border: 1px solid rgba(34, 197, 94, 0.3);
+}
+.lu-status-running {
+  color: #f59e0b;
+  background: rgba(245, 158, 11, 0.1);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+}
+.lu-status-error {
+  color: #ef4444;
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+/* Editor — R uses a plain textarea here (.re-editor, real visible
+   text, no overlay). We need highlighting, so .lu-editor-wrap holds
+   the line-number gutter plus .lu-code-editor: a positioned wrapper
+   stacking a transparent-text textarea over a colored highlight div. */
+.lu-editor-wrap {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+  background: #0d1117;
+}
+.lu-line-numbers {
+  width: 44px;
+  background: var(--dark-surface);
+  border-right: 1px solid var(--glass-border);
+  padding: 1rem 0.5rem;
+  text-align: right;
+  font-family: 'Fira Code', monospace;
+  font-size: 0.85rem;
+  line-height: 1.6;
+  color: var(--text-secondary);
+  user-select: none;
+  pointer-events: none;
+  overflow: hidden;
+  white-space: pre;
+  flex-shrink: 0;
+}
+
+.lu-code-editor {
+  position: relative;
+  flex: 1;
+  overflow: hidden;
+}
+.lu-editor-textarea,
+.lu-syntax-highlight {
+  position: absolute;
+  inset: 0;
+  margin: 0;
+  padding: 1rem 1.25rem;
+  font-family: 'Fira Code', Consolas, Monaco, monospace;
+  font-size: 0.85rem;
+  line-height: 1.6;
+  white-space: pre !important;
+  overflow-wrap: normal !important;
+  word-break: normal !important;
+  overflow: auto;
+  box-sizing: border-box;
+}
+.lu-editor-textarea {
+  z-index: 2;
+  background: transparent;
+  color: transparent;
+  caret-color: #9aa8ff;
+  border: none;
+  outline: none;
+  resize: none;
+  tab-size: 2;
+}
+.lu-editor-textarea::selection {
+  background: rgba(107, 127, 255, 0.25);
+  color: transparent;
+}
+.lu-syntax-highlight {
+  z-index: 1;
+  color: #e6edf3;
+  pointer-events: none;
+}
+
+/* Token colors for the highlight overlay */
+.lu-syntax-highlight .token.keyword {
+  color: #9aa8ff;
+  font-weight: 600;
+}
+.lu-syntax-highlight .token.string {
+  color: #a5d6a7;
+}
+.lu-syntax-highlight .token.comment {
+  color: #6b7280;
+  font-style: italic;
+}
+.lu-syntax-highlight .token.number {
+  color: #f0b429;
+}
+.lu-syntax-highlight .token.function {
+  color: #79c0ff;
+}
+
+/* Output — one ordered stream (matches R's approach exactly): print()
+   lines and any runtime error both land here, in order, distinguished
+   only by the .error modifier — no separate console panel. */
+.lu-output-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 1rem 1.25rem;
+  font-family: 'Fira Code', monospace;
+  font-size: 0.85rem;
+  line-height: 1.7;
+  background: #0d1117;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+.lu-output-placeholder {
+  color: var(--text-secondary);
+  font-style: italic;
+}
+.lu-out-line {
+  display: block;
+  white-space: pre-wrap;
+  word-break: break-word;
+  color: #e6edf3;
+}
+.lu-out-line.error {
+  color: #ef4444;
+}
+.lu-out-line.error::before {
+  content: '✖ ';
+}
+
+/* "What's supported" modal — matches r-editor.css's re-modal exactly */
+.lu-modal[hidden] {
+  display: none;
+}
+.lu-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.lu-modal-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+}
+.lu-modal-panel {
+  position: relative;
+  background: var(--dark-surface);
+  border: 1px solid var(--glass-border);
+  border-radius: 12px;
+  width: min(560px, 92vw);
+  max-height: 80vh;
+  overflow-y: auto;
+}
+.lu-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid var(--glass-border);
+}
+.lu-modal-header h2 {
+  font-family: Orbitron, sans-serif;
+  font-size: 1.1rem;
+  margin: 0;
+  color: var(--text-primary);
+}
+.lu-modal-body {
+  padding: 1rem 1.25rem 1.25rem;
+  font-size: 0.9rem;
+  line-height: 1.6;
+  color: var(--text-secondary);
+}
+.lu-modal-body code {
+  color: #9aa8ff;
+  background: rgba(255, 255, 255, 0.06);
+  padding: 0.1rem 0.35rem;
+  border-radius: 4px;
+}
+.lu-modal-body a {
+  color: #9aa8ff;
+}
+.lu-modal-note {
+  margin-top: 0.75rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--glass-border);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .lu-split {
+    flex-direction: column;
+    height: auto;
+  }
+  .lu-editor-pane {
+    height: 320px;
+  }
+  .lu-output-pane {
+    height: 320px;
+    border-left: none;
+    border-top: 1px solid var(--glass-border);
+  }
+  .lu-toolbar {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

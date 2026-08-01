@@ -4,7 +4,10 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Virtual Memory & Paging Visualizer</title>
+  <meta name="description" content="Visualize virtual memory paging, showing address translation, page tables, and page fault handling." />
   <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="/modules/quick-notes/quick-notes.css" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
   <div class="container">
@@ -23,6 +26,10 @@
         </select>
       </div>
       <div class="control-group">
+        <label for="refString">Reference String (CSV):</label>
+        <input type="text" id="refString" value="3, 2, 1, 0, 3, 2, 4, 3, 2, 1, 0, 4" />
+      </div>
+      <div class="control-group">
         <label>Algorithm:</label>
         <select id="algorithm">
           <option value="fifo">FIFO</option>
@@ -37,6 +44,7 @@
       <button id="runBtn">▶️ Run Simulation</button>
       <button id="stepBtn">⏭️ Step</button>
       <button id="resetBtn">🔄 Reset</button>
+      <button id="anomalyBtn" style="background-color: #f59e0b; color: #fff;">📈 Plot Belady's Anomaly</button>
     </div>
 
     <div class="stats">
@@ -74,8 +82,16 @@
         <div id="log" class="log"></div>
       </div>
     </div>
+    <div class="anomaly-layout" style="margin-top: 2rem; background: var(--panel-bg, rgba(255,255,255,0.05)); padding: 1.5rem; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1);">
+      <h3>📈 Belady's Anomaly Plotter (Page Faults vs Frames)</h3>
+      <p style="font-size: 0.9rem; color: `#9ca3af`; margin-bottom: 1rem;">Simulates the current reference string across 1 to 10 frames instantly. Look for upward spikes where increasing frames causes more faults!</p>
+      <div class="chart-container" style="height: 300px; width: 100%;">
+        <canvas id="anomalyChart" role="img" aria-label="Page faults versus number of frames; red points/segments mark Belady's anomaly"></canvas>
+      </div>
+    </div>
   </div>
 
   <script src="script.js"></script>
+    <script src="/modules/quick-notes/quick-notes.js"></script>
 </body>
 </html>

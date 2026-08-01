@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LALR(1) / SLR(1) Parser Generator & Conflict Studio — Algo Infinity Verse</title>
+  <meta name="description" content="Generate LR(0)/LALR(1) item set automaton graphs, calculate FIRST & FOLLOW sets, construct parsing tables, and resolve Shift-Reduce conflicts." />
+  <link rel="stylesheet" href="/styles.css" />
+  <link rel="stylesheet" href="style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Poppins:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <script>
+    (function () {
+      try {
+        var storedTheme = localStorage.getItem('theme');
+        var prefersLight = window.matchMedia('(prefers-color-scheme: light)').matches;
+        var theme = storedTheme || (prefersLight ? 'light' : 'dark');
+        if (theme === 'light') {
+          document.documentElement.classList.add('light-mode');
+        } else {
+          document.documentElement.classList.remove('light-mode');
+        }
+      } catch (e) {}
+    })();
+  </script>
+</head>
+<body data-page="lalr-parser-studio">
+  <div id="navbar-placeholder"></div>
+
+  <header class="tool-hero">
+    <div class="tool-hero-badge">
+      <i class="fas fa-sitemap" aria-hidden="true"></i> Compiler Construction & Parsing
+    </div>
+    <h1>LALR(1) / SLR(1) Parser Generator <span class="accent-text">& Conflict Studio</span></h1>
+    <p>
+      Build LR(0) and LALR(1) item set closures ($\text{CLOSURE}(I)$), calculate FIRST & FOLLOW set tables, visualize Shift-Reduce & Reduce-Reduce conflicts, and trace input token reductions live.
+    </p>
+  </header>
+
+  <main class="tool-container">
+    <!-- Toolbar -->
+    <section class="toolbar-card">
+      <div class="toolbar-group">
+        <label for="grammarPresetSelect"><i class="fas fa-book"></i> Grammar Preset:</label>
+        <select id="grammarPresetSelect" class="tool-select">
+          <option value="arithmetic">Arithmetic Expressions (E -> E + T | T)</option>
+          <option value="dangling_else">Dangling Else Ambiguity (Shift-Reduce Conflict)</option>
+          <option value="boolean">Boolean Logic (S -> S AND S | NOT S)</option>
+        </select>
+      </div>
+      <div class="toolbar-actions">
+        <button id="btnBuildAutomaton" class="tool-btn primary-btn"><i class="fas fa-gears"></i> Build LALR(1) Automaton</button>
+        <button id="btnParseTokenInput" class="tool-btn accent-btn"><i class="fas fa-play"></i> Step Parse Input</button>
+      </div>
+    </section>
+
+    <!-- Main 2-Column Grid -->
+    <div class="workspace-grid">
+      <!-- Grammar Editor & Sets -->
+      <section class="panel-card grammar-panel">
+        <div class="panel-header">
+          <h3><i class="fas fa-code"></i> Context-Free Grammar (BNF)</h3>
+          <span class="badge" id="productionCountBadge">0 Rules</span>
+        </div>
+        <textarea id="cfgEditor" spellcheck="false" placeholder="E -> E + T&#10;E -> T&#10;T -> id"></textarea>
+
+        <div class="sets-container">
+          <h4><i class="fas fa-table"></i> FIRST & FOLLOW Sets</h4>
+          <table class="sets-table">
+            <thead>
+              <tr>
+                <th>Non-Terminal</th>
+                <th>FIRST(A)</th>
+                <th>FOLLOW(A)</th>
+              </tr>
+            </thead>
+            <tbody id="firstFollowTableBody"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- Automaton & Conflict Panel -->
+      <section class="panel-card automaton-panel">
+        <div class="panel-header">
+          <h3><i class="fas fa-network-wired"></i> Item Set Automaton States</h3>
+          <span class="conflict-badge" id="conflictAlertBadge">0 CONFLICTS</span>
+        </div>
+        
+        <div class="automaton-graph-box" id="automatonGraphBox">
+          <!-- Item set closure cards rendered dynamically -->
+        </div>
+      </section>
+    </div>
+
+    <!-- Action & Goto Table Section -->
+    <section class="panel-card table-panel">
+      <div class="panel-header">
+        <h3><i class="fas fa-table-cells"></i> LALR(1) Action & Goto Parsing Table</h3>
+      </div>
+      <div class="parsing-table-wrapper">
+        <table class="parsing-table" id="parsingTable">
+          <thead id="parsingTableHead"></thead>
+          <tbody id="parsingTableBody"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Interactive Parse Execution & AST Section -->
+    <div class="secondary-grid">
+      <section class="panel-card stack-panel">
+        <div class="panel-header">
+          <h3><i class="fas fa-layer-group"></i> Parser Stack & Input Token Stream</h3>
+        </div>
+        <div class="input-stream-box">
+          <label>Input Tokens: <input type="text" id="tokenStreamInput" value="id + id * id" class="tool-input" /></label>
+        </div>
+        <div class="parse-step-log" id="parseStepLog"></div>
+      </section>
+
+      <section class="panel-card ast-panel">
+        <div class="panel-header">
+          <h3><i class="fas fa-tree"></i> Dynamic Parse Tree (AST)</h3>
+        </div>
+        <div class="ast-canvas-container" id="astCanvasContainer">
+          <!-- Visual parse tree dynamically rendered -->
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <script src="/modules/navbar.js" type="module"></script>
+  <script src="script.js"></script>
+</body>
+</html>
