@@ -1,0 +1,321 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Galactic Network Router | Algo Infinity Verse</title>
+    <link rel="stylesheet" href="/styles.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <!-- Monaco Editor -->
+    <script src="https://unpkg.com/monaco-editor@0.36.1/min/vs/loader.js"></script>
+    <style>
+      body { margin: 0; overflow: hidden; background: #000; font-family: 'Poppins', sans-serif; color: #fff; }
+      .app-container { display: flex; height: 100vh; }
+      
+      .sidebar { width: 450px; background: rgba(15, 23, 42, 0.95); border-right: 1px solid #10b981; display: flex; flex-direction: column; z-index: 10; }
+      .header { padding: 20px; border-bottom: 1px solid #334155; }
+      .header h2 { margin: 0; color: #10b981; font-family: 'Orbitron', sans-serif; font-size: 1.2rem; }
+      .header p { margin: 5px 0 0 0; font-size: 0.8rem; color: #94a3b8; }
+      
+      #editor-container { flex: 1; min-height: 300px; }
+      
+      .controls { padding: 20px; border-top: 1px solid #334155; background: rgba(0,0,0,0.5); }
+      .btn { background: linear-gradient(90deg, #059669, #047857); color: #fff; border: none; padding: 10px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; transition: 0.3s; }
+      .btn:hover { background: #10b981; transform: translateY(-2px); box-shadow: 0 0 15px rgba(16, 185, 129, 0.5); }
+      
+      .sim-container { flex: 1; position: relative; background: #020617; overflow: hidden; }
+      canvas { width: 100%; height: 100%; display: block; filter: contrast(1.1); }
+      
+      .hud { position: absolute; top: 20px; right: 20px; background: rgba(0,0,0,0.8); padding: 15px; border-radius: 8px; border: 1px solid #10b981; width: 260px; z-index: 10; pointer-events: none; }
+      .hud h3 { margin: 0 0 10px 0; color: #10b981; font-size: 1rem; font-family: 'Orbitron', sans-serif; }
+      .metric { display: flex; justify-content: space-between; font-size: 0.8rem; color: #cbd5e1; margin-bottom: 5px; }
+      .val { font-weight: bold; font-family: monospace; }
+      .val-packets { color: #facc15; }
+      .val-loss { color: #ef4444; }
+    </style>
+  </head>
+  <body>
+    
+    <div class="app-container">
+      <div class="sidebar">
+        <div class="header">
+          <h2><i class="fas fa-project-diagram"></i> Type III Galactic Router</h2>
+          <p>Zero-latency routing via Quantum Wormholes</p>
+        </div>
+        
+        <div id="editor-container"></div>
+        
+        <div class="controls">
+          <button class="btn" onclick="startRouting()"><i class="fas fa-broadcast-tower"></i> Broadcast Galactic Packets</button>
+        </div>
+      </div>
+      
+      <div class="sim-container">
+        <!-- Galaxy Background -->
+        <div style="position: absolute; inset:0; background: url('https://images.unsplash.com/photo-1462331940025-496dfbfc7564?q=80&w=2000&auto=format&fit=crop') center/cover; opacity: 0.2; pointer-events: none; mix-blend-mode: screen;"></div>
+        
+        <canvas id="galaxyCanvas" style="position: relative; z-index: 1;"></canvas>
+        
+        <div class="hud">
+          <h3>Network Telemetry</h3>
+          <div class="metric"><span>Packets Sent:</span> <span class="val val-packets" id="sentVal">0</span></div>
+          <div class="metric"><span>Packets Delivered:</span> <span class="val" id="delVal" style="color:#10b981">0</span></div>
+          <div class="metric"><span>Lost in Black Holes:</span> <span class="val val-loss" id="lossVal">0</span></div>
+          <div class="metric" style="margin-top: 10px; border-top: 1px solid #334155; padding-top: 5px;">
+            <span>Router Status:</span> <span class="val" id="statusVal" style="color:#94a3b8">IDLE</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      let editor;
+      require.config({ paths: { 'vs': 'https://unpkg.com/monaco-editor@0.36.1/min/vs' }});
+      require(['vs/editor/editor.main'], function() {
+        editor = monaco.editor.create(document.getElementById('editor-container'), {
+          value: `// Quantum Entangled Routing Protocol (Q-BGP)
+// Calculate the optimal next-hop node to reach the destination
+// while avoiding moving black hole event horizons.
+
+function getNextHop(currentNode, targetNode, allNodes, blackHoles) {
+    // Return the ID of the optimal next node.
+    // If you route a packet too close to a black hole, it will be lost forever.
+    
+    // Naive greedy routing:
+    let bestNode = currentNode;
+    let minDiff = Infinity;
+    
+    for (let n of allNodes) {
+        if (n.id === currentNode.id) continue;
+        // Check distance to target
+        let dTarget = Math.hypot(n.x - targetNode.x, n.y - targetNode.y);
+        
+        // DANGER: We are NOT checking for black holes in this naive logic!
+        if (dTarget < minDiff) {
+            minDiff = dTarget;
+            bestNode = n;
+        }
+    }
+    
+    return bestNode.id;
+}`,
+          language: 'javascript',
+          theme: 'vs-dark',
+          minimap: { enabled: false },
+          automaticLayout: true
+        });
+      });
+
+      const canvas = document.getElementById('galaxyCanvas');
+      const ctx = canvas.getContext('2d');
+      
+      function resize() { canvas.width = canvas.clientWidth; canvas.height = canvas.clientHeight; }
+      window.addEventListener('resize', resize);
+      resize();
+
+      let isSimulating = false;
+      let nodes = [];
+      let blackHoles = [];
+      let packets = [];
+      
+      let sentCount = 0;
+      let delCount = 0;
+      let lossCount = 0;
+      
+      function initGalaxy() {
+          nodes = [];
+          blackHoles = [];
+          
+          // Create star system nodes
+          for(let i=0; i<40; i++) {
+              nodes.push({
+                  id: i,
+                  x: Math.random() * (canvas.width - 100) + 50,
+                  y: Math.random() * (canvas.height - 100) + 50
+              });
+          }
+          
+          // Create moving black holes
+          for(let i=0; i<5; i++) {
+              blackHoles.push({
+                  x: Math.random() * canvas.width,
+                  y: Math.random() * canvas.height,
+                  vx: (Math.random() - 0.5) * 1,
+                  vy: (Math.random() - 0.5) * 1,
+                  radius: 40 + Math.random() * 20
+              });
+          }
+      }
+      
+      // Delay initialization so canvas is sized
+      setTimeout(initGalaxy, 100);
+
+      function animate() {
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+          
+          // Draw Edges (Quantum entanglement links)
+          ctx.strokeStyle = 'rgba(16, 185, 129, 0.1)';
+          ctx.lineWidth = 1;
+          for(let i=0; i<nodes.length; i++) {
+              for(let j=i+1; j<nodes.length; j++) {
+                  if (Math.hypot(nodes[i].x - nodes[j].x, nodes[i].y - nodes[j].y) < 200) {
+                      ctx.beginPath();
+                      ctx.moveTo(nodes[i].x, nodes[i].y);
+                      ctx.lineTo(nodes[j].x, nodes[j].y);
+                      ctx.stroke();
+                  }
+              }
+          }
+
+          // Update and Draw Black Holes
+          for(let bh of blackHoles) {
+              bh.x += bh.vx;
+              bh.y += bh.vy;
+              if (bh.x < 0 || bh.x > canvas.width) bh.vx *= -1;
+              if (bh.y < 0 || bh.y > canvas.height) bh.vy *= -1;
+              
+              // Accretion disk
+              let grad = ctx.createRadialGradient(bh.x, bh.y, bh.radius*0.8, bh.x, bh.y, bh.radius*2);
+              grad.addColorStop(0, 'rgba(0,0,0,1)');
+              grad.addColorStop(0.3, 'rgba(249, 115, 22, 0.8)');
+              grad.addColorStop(1, 'transparent');
+              
+              ctx.beginPath();
+              ctx.arc(bh.x, bh.y, bh.radius*2, 0, Math.PI*2);
+              ctx.fillStyle = grad;
+              ctx.fill();
+              
+              // Event Horizon
+              ctx.beginPath();
+              ctx.arc(bh.x, bh.y, bh.radius*0.8, 0, Math.PI*2);
+              ctx.fillStyle = '#000';
+              ctx.fill();
+          }
+          
+          // Draw Nodes
+          for(let n of nodes) {
+              ctx.beginPath();
+              ctx.arc(n.x, n.y, 4, 0, Math.PI*2);
+              ctx.fillStyle = '#38bdf8';
+              ctx.fill();
+          }
+
+          // Update and Draw Packets
+          if(isSimulating) {
+              // Spawn packets
+              if(Math.random() < 0.1) {
+                  let start = nodes[Math.floor(Math.random() * nodes.length)];
+                  let end = nodes[Math.floor(Math.random() * nodes.length)];
+                  if(start !== end) {
+                      packets.push({
+                          x: start.x,
+                          y: start.y,
+                          targetId: end.id,
+                          currentNode: start,
+                          progress: 0,
+                          nextNode: null
+                      });
+                      sentCount++;
+                  }
+              }
+
+              for(let i = packets.length - 1; i >= 0; i--) {
+                  let p = packets[i];
+                  
+                  // Need to decide next hop
+                  if (!p.nextNode) {
+                      try {
+                          eval(editor.getValue());
+                          let targetNodeObj = nodes.find(n => n.id === p.targetId);
+                          let nextId = getNextHop(p.currentNode, targetNodeObj, nodes, blackHoles);
+                          p.nextNode = nodes.find(n => n.id === nextId);
+                      } catch(e) {}
+                  }
+                  
+                  if (p.nextNode) {
+                      // Move towards next node
+                      let dx = p.nextNode.x - p.x;
+                      let dy = p.nextNode.y - p.y;
+                      let dist = Math.hypot(dx, dy);
+                      
+                      if (dist < 5) {
+                          // Reached hop
+                          p.currentNode = p.nextNode;
+                          p.x = p.currentNode.x;
+                          p.y = p.currentNode.y;
+                          p.nextNode = null;
+                          
+                          if (p.currentNode.id === p.targetId) {
+                              // Arrived!
+                              delCount++;
+                              packets.splice(i, 1);
+                              
+                              // Flash target node
+                              ctx.beginPath();
+                              ctx.arc(p.currentNode.x, p.currentNode.y, 15, 0, Math.PI*2);
+                              ctx.fillStyle = 'rgba(16, 185, 129, 0.8)';
+                              ctx.fill();
+                              continue;
+                          }
+                      } else {
+                          // Travel
+                          p.x += (dx / dist) * 8;
+                          p.y += (dy / dist) * 8;
+                      }
+                      
+                      // Check Black Hole Collision (packet loss)
+                      let lost = false;
+                      for(let bh of blackHoles) {
+                          if (Math.hypot(p.x - bh.x, p.y - bh.y) < bh.radius * 1.2) {
+                              lossCount++;
+                              packets.splice(i, 1);
+                              lost = true;
+                              break;
+                          }
+                      }
+                      if(lost) continue;
+                      
+                      // Draw packet
+                      ctx.beginPath();
+                      ctx.arc(p.x, p.y, 3, 0, Math.PI*2);
+                      ctx.fillStyle = '#facc15';
+                      ctx.shadowBlur = 8;
+                      ctx.shadowColor = '#facc15';
+                      ctx.fill();
+                      ctx.shadowBlur = 0;
+                  }
+              }
+              
+              if(lossCount > 20) {
+                  document.getElementById('statusVal').innerText = "NETWORK CONGESTION COLLAPSE";
+                  document.getElementById('statusVal').style.color = "#ef4444";
+                  isSimulating = false;
+              } else if (delCount > 50) {
+                  document.getElementById('statusVal').innerText = "ZERO-LATENCY ROUTING STABLE";
+                  document.getElementById('statusVal').style.color = "#10b981";
+              }
+          }
+
+          // HUD Updates
+          document.getElementById('sentVal').innerText = sentCount;
+          document.getElementById('delVal').innerText = delCount;
+          document.getElementById('lossVal').innerText = lossCount;
+
+          requestAnimationFrame(animate);
+      }
+      animate();
+
+      function startRouting() {
+          if(isSimulating) return;
+          sentCount = 0;
+          delCount = 0;
+          lossCount = 0;
+          packets = [];
+          isSimulating = true;
+          document.getElementById('statusVal').innerText = "TRANSMITTING DATAGRAMS...";
+          document.getElementById('statusVal').style.color = "#facc15";
+      }
+    </script>
+  </body>
+</html>

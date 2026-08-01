@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Terraform &amp; IaC Academy — Infrastructure as Code</title>
+    <meta name="description" content="Master Terraform and Infrastructure as Code from the ground up — IaC fundamentals, HCL syntax, providers & resources, state & backends, modules, workspaces, and Terraform Cloud CI/CD.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=Inter:wght@300;400;500;600;700&family=Fira+Code:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/pages/terraform-academy/terraform-academy.css">
+    <link rel="stylesheet" href="/styles/copy-code.css">
+    <link rel="stylesheet" href="/styles/eli5-toggle.css">
+</head>
+<body>
+    <!-- Mobile sidebar overlay -->
+    <div id="sidebar-overlay" class="sidebar-overlay"></div>
+
+    <!-- Sidebar -->
+    <aside id="sidebar" class="sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-logo">
+                <span class="terraform-logo">
+                    <svg viewBox="0 0 24 24" width="26" height="26" aria-hidden="true">
+                        <path fill="currentColor" d="M1.44 0v7.575l6.561 3.79V3.787zm21.12 4.227l-6.561 3.791v7.574l6.56-3.787zM8.72 4.23v7.575l6.561 3.787V8.018zm0 8.405v7.575L15.28 24v-7.578z"/>
+                    </svg>
+                </span>
+                <span>Terraform &amp; IaC Academy</span>
+            </div>
+            <button id="close-sidebar-btn" class="sidebar-close-btn" aria-label="Close sidebar">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="sidebar-progress">
+            <div class="progress-label">
+                <span>Progress</span>
+                <span id="progress-text">0%</span>
+            </div>
+            <div class="progress-bar">
+                <div id="progress-bar" class="progress-fill" style="width: 0%"></div>
+            </div>
+        </div>
+        <ul id="module-list" class="module-list"></ul>
+    </aside>
+
+    <!-- Main content -->
+    <main class="main-content">
+        <header class="header">
+            <button id="open-sidebar-btn" class="sidebar-open-btn" aria-label="Open sidebar">
+                <i class="fas fa-bars"></i>
+            </button>
+            <h1 id="active-module-title" class="active-module-title"></h1>
+            <nav class="tab-nav" role="tablist">
+                <button data-tab="lesson" class="tab-btn active" role="tab" aria-selected="true">
+                    <i class="fa-solid fa-book-open mr-1"></i> Lesson Viewer
+                </button>
+                <button data-tab="simulator" class="tab-btn" role="tab" aria-selected="false">
+                    <i class="fa-solid fa-cubes mr-1"></i> HCL Plan Simulator
+                </button>
+                <button data-tab="quiz" class="tab-btn" role="tab" aria-selected="false">
+                    <i class="fa-solid fa-list-check mr-1"></i> Quiz
+                </button>
+            </nav>
+        </header>
+
+        <div class="content-area">
+            <!-- Lesson Tab -->
+            <div id="tab-lesson" class="tab-content active">
+                <div class="lesson-container">
+                    <div id="lesson-content" class="lesson-content"></div>
+                    <div class="lesson-footer">
+                        <button id="mark-complete-btn" class="mark-complete-btn">
+                            <i class="fas fa-check-circle mr-2"></i> Mark as Complete
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Simulator Tab -->
+            <div id="tab-simulator" class="tab-content">
+                <div class="simulator-split">
+                    <!-- Left: HCL editor -->
+                    <div class="simulator-editor">
+                        <div class="editor-header">
+                            <span class="editor-title"><i class="fa-solid fa-code mr-1"></i> main.tf — HCL Editor</span>
+                            <div class="editor-actions">
+                                <button id="plan-btn" class="connect-btn" title="Run terraform plan">
+                                    <i class="fas fa-eye"></i> terraform plan
+                                </button>
+                                <button id="clear-pg-btn" class="disconnect-btn" title="Reset to lesson example">
+                                    <i class="fas fa-times"></i> Reset
+                                </button>
+                            </div>
+                        </div>
+                        <textarea id="hcl-editor" class="hcl-editor" spellcheck="false" aria-label="HCL editor"></textarea>
+                        <div class="connection-settings">
+                            <span class="setting-hint"><i class="fa-solid fa-circle-info"></i> Write HCL resource blocks, then press <strong>terraform plan</strong> to preview the changes.</span>
+                            <label class="setting-label">
+                                <input type="checkbox" id="show-expressions" checked>
+                                <span>Show expression values</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Right: terminal -->
+                    <div class="simulator-output">
+                        <div class="terminal-panel">
+                            <div class="panel-header">
+                                <span class="panel-title"><i class="fa-solid fa-terminal mr-1"></i> $ terraform plan</span>
+                                <span id="boot-status" class="boot-status">Ready</span>
+                            </div>
+                            <div id="plan-terminal" class="terminal-window">
+                                <p class="term-placeholder">// Write HCL on the left, then press "terraform plan" to preview your infrastructure.</p>
+                            </div>
+                        </div>
+                        <div class="plan-summary-panel">
+                            <div class="plan-summary-row">
+                                <span class="plan-summary-title"><i class="fa-solid fa-gauge-high mr-1"></i> Plan Summary</span>
+                            </div>
+                            <div id="plan-summary" class="plan-summary-content">
+                                <div class="plan-summary-empty">No plan run yet.</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quiz Tab -->
+            <div id="tab-quiz" class="tab-content">
+                <div id="quiz-container" class="quiz-container"></div>
+            </div>
+        </div>
+    </main>
+
+    <script src="/modules/eli5-toggle.js"></script>
+    <script src="/modules/eli5-terraform-data.js"></script>
+    <script src="/pages/terraform-academy/terraform-academy.js"></script>
+    <script src="/modules/copy-code.js"></script>
+</body>
+</html>

@@ -1,0 +1,231 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Tenant Isolation Test Planner | Algo Infinity Verse</title>
+  <meta name="description" content="Plan multi-tenant isolation tests — map route ownership, generate IDOR matrices, negative cases, and risk-ranked downloadable test plans." />
+  <link rel="stylesheet" href="/styles.css" />
+  <link rel="stylesheet" href="style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Poppins:wght@300;400;500;600;700&family=Fira+Code:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <script>
+    (function () {
+      try {
+        var storedTheme = localStorage.getItem('theme');
+        var prefersLight = window.matchMedia('(prefers-color-scheme: light)').matches;
+        var theme = storedTheme || (prefersLight ? 'light' : 'dark');
+        if (theme === 'light') {
+          document.documentElement.classList.add('light-mode');
+        } else {
+          document.documentElement.classList.remove('light-mode');
+        }
+      } catch (e) {}
+    })();
+  </script>
+</head>
+<body data-page="ai-tenant-isolation-test-planner">
+  <a href="#tenant-main" class="tenant-skip-link">Skip to main content</a>
+  <button type="button" id="scrollTopBtn" class="scroll-top-btn" aria-label="Scroll to top">
+    <i class="fas fa-arrow-up" aria-hidden="true"></i>
+  </button>
+
+  <div id="navbar-placeholder"></div>
+
+  <header class="tenant-hero">
+    <div class="tenant-hero-badge">
+      <i class="fas fa-building-lock" aria-hidden="true"></i>
+      Multi-Tenant Security Lab
+    </div>
+    <h1>
+      AI Tenant Isolation
+      <span class="tenant-hero-accent">Test Planner</span>
+    </h1>
+    <p>
+      Paste API routes and ownership fields, map resource tenancy, generate IDOR / cross-tenant
+      matrices and negative tests, then download a risk-ranked isolation plan — fully client-side.
+    </p>
+    <div class="tenant-hero-stats" aria-live="polite">
+      <div class="tenant-stat">
+        <span class="tenant-stat-val" id="statRoutes">0</span>
+        <span class="tenant-stat-label">Routes mapped</span>
+      </div>
+      <div class="tenant-stat">
+        <span class="tenant-stat-val" id="statIdor">0</span>
+        <span class="tenant-stat-label">IDOR cases</span>
+      </div>
+      <div class="tenant-stat">
+        <span class="tenant-stat-val" id="statNegatives">0</span>
+        <span class="tenant-stat-label">Negative tests</span>
+      </div>
+      <div class="tenant-stat">
+        <span class="tenant-stat-val" id="statHighRisk">0</span>
+        <span class="tenant-stat-label">High blast radius</span>
+      </div>
+    </div>
+  </header>
+
+  <main id="tenant-main" class="tenant-main">
+    <div class="container">
+      <div class="tenant-workspace">
+        <section class="tenant-panel" aria-labelledby="tenant-input-title">
+          <div class="tenant-panel-header">
+            <div class="tenant-panel-title">
+              <i class="fas fa-route tenant-panel-icon" aria-hidden="true"></i>
+              <h2 id="tenant-input-title">Routes &amp; ownership fields</h2>
+            </div>
+          </div>
+
+          <label class="tenant-label" for="tenantRoutesInput">API routes (one per line: METHOD path)</label>
+          <textarea
+            id="tenantRoutesInput"
+            class="tenant-textarea"
+            rows="10"
+            spellcheck="false"
+            placeholder="GET /api/orders/:orderId&#10;POST /api/invoices&#10;GET /api/admin/tenants/:tenantId/users"
+            aria-describedby="tenantRoutesHint"
+          ></textarea>
+          <p id="tenantRoutesHint" class="tenant-hint">
+            Include path params that may leak across tenants (<code>:id</code>, <code>:orderId</code>, etc.).
+          </p>
+
+          <label class="tenant-label" for="tenantOwnershipInput">Ownership / tenancy fields</label>
+          <textarea
+            id="tenantOwnershipInput"
+            class="tenant-textarea"
+            rows="5"
+            spellcheck="false"
+            placeholder="tenantId, orgId, accountId, ownerUserId"
+            aria-describedby="tenantOwnHint"
+          ></textarea>
+          <p id="tenantOwnHint" class="tenant-hint">
+            Comma or newline separated. Used to flag missing filters and scope checks.
+          </p>
+
+          <div class="tenant-controls">
+            <button type="button" id="tenantLoadDemoBtn" class="btn btn-secondary">
+              <i class="fas fa-flask" aria-hidden="true"></i> Load multi-tenant API demo
+            </button>
+            <button type="button" id="tenantAnalyzeBtn" class="btn btn-primary">
+              <i class="fas fa-shield-halved" aria-hidden="true"></i> Build isolation plan
+            </button>
+            <button type="button" id="tenantClearBtn" class="btn btn-outline">
+              <i class="fas fa-eraser" aria-hidden="true"></i> Clear
+            </button>
+            <button type="button" id="tenantExportBtn" class="btn btn-outline" disabled>
+              <i class="fas fa-download" aria-hidden="true"></i> Download test plan
+            </button>
+          </div>
+          <div id="tenantStatus" class="tenant-status" role="status" aria-live="polite"></div>
+        </section>
+
+        <section class="tenant-panel tenant-report-panel" aria-labelledby="tenant-map-title">
+          <div class="tenant-panel-header">
+            <div class="tenant-panel-title">
+              <i class="fas fa-sitemap tenant-panel-icon" aria-hidden="true"></i>
+              <h2 id="tenant-map-title">Route / resource ownership map</h2>
+            </div>
+          </div>
+
+          <div id="tenantEmpty" class="tenant-empty">
+            <i class="fas fa-building-lock" aria-hidden="true"></i>
+            <p>No plan yet. Load the multi-tenant demo or paste routes and ownership fields, then build the plan.</p>
+          </div>
+
+          <div id="tenantResults" hidden>
+            <div class="tenant-score-card">
+              <div>
+                <h3 id="tenantRiskHeading">Isolation risk posture</h3>
+                <p id="tenantRiskBlurb" class="tenant-muted"></p>
+              </div>
+              <div class="tenant-score-ring" id="tenantScoreRing" aria-hidden="true">
+                <span id="tenantScoreVal">0</span>
+              </div>
+            </div>
+
+            <section class="tenant-section" aria-labelledby="tenantMapHeading">
+              <h3 id="tenantMapHeading"><i class="fas fa-table" aria-hidden="true"></i> Ownership mapper</h3>
+              <div class="tenant-table-wrap">
+                <table class="tenant-table" id="tenantMapTable">
+                  <thead>
+                    <tr>
+                      <th scope="col">Method</th>
+                      <th scope="col">Path</th>
+                      <th scope="col">Resource</th>
+                      <th scope="col">Expected scope</th>
+                      <th scope="col">Gap risk</th>
+                    </tr>
+                  </thead>
+                  <tbody id="tenantMapBody"></tbody>
+                </table>
+              </div>
+            </section>
+          </div>
+        </section>
+      </div>
+
+      <div id="tenantDetailPanels" hidden>
+        <div class="tenant-grid-2">
+          <section class="tenant-panel" aria-labelledby="tenant-idor-title">
+            <div class="tenant-panel-header">
+              <div class="tenant-panel-title">
+                <i class="fas fa-user-secret tenant-panel-icon" aria-hidden="true"></i>
+                <h2 id="tenant-idor-title">IDOR / cross-tenant matrix</h2>
+              </div>
+            </div>
+            <div class="tenant-table-wrap">
+              <table class="tenant-table" id="tenantIdorTable">
+                <thead>
+                  <tr>
+                    <th scope="col">Actor tenant</th>
+                    <th scope="col">Target resource</th>
+                    <th scope="col">Action</th>
+                    <th scope="col">Expect</th>
+                    <th scope="col">Blast</th>
+                  </tr>
+                </thead>
+                <tbody id="tenantIdorBody"></tbody>
+              </table>
+            </div>
+          </section>
+
+          <section class="tenant-panel" aria-labelledby="tenant-neg-title">
+            <div class="tenant-panel-header">
+              <div class="tenant-panel-title">
+                <i class="fas fa-vial tenant-panel-icon" aria-hidden="true"></i>
+                <h2 id="tenant-neg-title">Negative tests (AAA)</h2>
+              </div>
+            </div>
+            <ul id="tenantNegList" class="tenant-neg-list"></ul>
+          </section>
+        </div>
+
+        <section class="tenant-panel" aria-labelledby="tenant-risk-title">
+          <div class="tenant-panel-header">
+            <div class="tenant-panel-title">
+              <i class="fas fa-bomb tenant-panel-icon" aria-hidden="true"></i>
+              <h2 id="tenant-risk-title">Risk prioritization by blast radius</h2>
+            </div>
+          </div>
+          <ol id="tenantRiskList" class="tenant-risk-list"></ol>
+        </section>
+      </div>
+    </div>
+  </main>
+
+  <div id="footer-placeholder"></div>
+
+  <script src="/auth.js"></script>
+  <script src="/bootstrap-legacy.js"></script>
+  <script src="/script.js"></script>
+  <script type="module" src="/dist/legacy-bundle.mjs"></script>
+  <script src="/theme.js"></script>
+  <script src="script.js"></script>
+  <script>
+    if (typeof loadPartial === 'function') {
+      loadPartial('navbar-placeholder', '/partials/navbar.html');
+      loadPartial('footer-placeholder', '/partials/footer.html');
+    }
+  </script>
+</body>
+</html>

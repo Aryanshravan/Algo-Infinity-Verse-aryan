@@ -14,6 +14,7 @@ import {
   seedExampleBookmarkCollections,
 } from './bookmarkCollections.js';
 import { filterCollectionsByQuery, filterCollections } from './bookmarkFilters.js';
+import { areKeyboardShortcutsEnabled } from './shortcut-guard.js';
 
 // ============================================
 // CONSTANTS
@@ -194,6 +195,9 @@ function initBookmarkCollections() {
     attachBookmarkCollectionEvents();
 
     document.addEventListener('keydown', (event) => {
+      // Undo via Ctrl/Cmd+Z is a desktop shortcut; skip it on mobile
+      // viewports where a physical keyboard isn't available.
+      if (!areKeyboardShortcutsEnabled()) return;
       if ((event.ctrlKey || event.metaKey) && event.key === 'z') {
         const activeElement = document.activeElement;
         if (

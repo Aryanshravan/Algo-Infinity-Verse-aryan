@@ -1,0 +1,228 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dyson Swarm Simulator | Algo Infinity Verse</title>
+    <link rel="stylesheet" href="/styles.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <!-- Monaco Editor -->
+    <script src="https://unpkg.com/monaco-editor@0.36.1/min/vs/loader.js"></script>
+    <style>
+      body { margin: 0; overflow: hidden; background: #000; font-family: 'Poppins', sans-serif; color: #fff; }
+      .app-container { display: flex; height: 100vh; }
+      
+      .sidebar { width: 450px; background: rgba(15, 23, 42, 0.95); border-right: 1px solid #eab308; display: flex; flex-direction: column; z-index: 10; }
+      .header { padding: 20px; border-bottom: 1px solid #334155; }
+      .header h2 { margin: 0; color: #eab308; font-family: 'Orbitron', sans-serif; font-size: 1.2rem; }
+      .header p { margin: 5px 0 0 0; font-size: 0.8rem; color: #94a3b8; }
+      
+      #editor-container { flex: 1; min-height: 300px; }
+      
+      .controls { padding: 20px; border-top: 1px solid #334155; background: rgba(0,0,0,0.5); }
+      .btn { background: linear-gradient(90deg, #ca8a04, #a16207); color: #fff; border: none; padding: 10px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; transition: 0.3s; }
+      .btn:hover { background: #eab308; transform: translateY(-2px); box-shadow: 0 0 15px rgba(234, 179, 8, 0.5); }
+      
+      .sim-container { flex: 1; position: relative; background: #020617; overflow: hidden; }
+      canvas { width: 100%; height: 100%; display: block; }
+      
+      .hud { position: absolute; top: 20px; right: 20px; background: rgba(0,0,0,0.8); padding: 15px; border-radius: 8px; border: 1px solid #eab308; width: 250px; z-index: 10; }
+      .hud h3 { margin: 0 0 10px 0; color: #eab308; font-size: 1rem; font-family: 'Orbitron', sans-serif; }
+      .metric { display: flex; justify-content: space-between; font-size: 0.8rem; color: #cbd5e1; margin-bottom: 5px; }
+      .val { font-weight: bold; font-family: monospace; }
+      .val-energy { color: #facc15; }
+      .val-loss { color: #ef4444; }
+    </style>
+  </head>
+  <body>
+    
+    <div class="app-container">
+      <div class="sidebar">
+        <div class="header">
+          <h2><i class="fas fa-sun"></i> Dyson Swarm Optimizer</h2>
+          <p>Route orbital microwave lasers to Earth dynamically</p>
+        </div>
+        
+        <div id="editor-container"></div>
+        
+        <div class="controls">
+          <button class="btn" onclick="executeRouting()"><i class="fas fa-satellite"></i> Execute Routing Algorithm</button>
+        </div>
+      </div>
+      
+      <div class="sim-container">
+        <canvas id="dysonCanvas"></canvas>
+        <div class="hud">
+          <h3>Telemetry Feed</h3>
+          <div class="metric"><span>Mirrors Online:</span> <span class="val" id="mirrorCount">2,000</span></div>
+          <div class="metric"><span>Energy Captured:</span> <span class="val val-energy" id="energyVal">0.00 PW</span></div>
+          <div class="metric"><span>Transmission Loss:</span> <span class="val val-loss" id="lossVal">100%</span></div>
+          <div class="metric" style="margin-top: 10px; border-top: 1px solid #334155; padding-top: 5px;">
+            <span>Grid Status:</span> <span class="val" id="statusVal" style="color:#ef4444">OFFLINE</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      let editor;
+      require.config({ paths: { 'vs': 'https://unpkg.com/monaco-editor@0.36.1/min/vs' }});
+      require(['vs/editor/editor.main'], function() {
+        editor = monaco.editor.create(document.getElementById('editor-container'), {
+          value: `// Dyson Swarm Laser Routing Algorithm
+// Write logic to target Earth as it orbits
+
+function calculateLaserAngle(mirrorPos, earthPos) {
+    // Basic Trigonometry to point laser from Mirror to Earth
+    // deltaY / deltaX
+    let dx = earthPos.x - mirrorPos.x;
+    let dy = earthPos.y - mirrorPos.y;
+    
+    // Add predictive leading based on Earth's orbital velocity
+    // (Hint: dx += earthVelocityX * time)
+    
+    return Math.atan2(dy, dx);
+}`,
+          language: 'javascript',
+          theme: 'vs-dark',
+          minimap: { enabled: false },
+          automaticLayout: true
+        });
+      });
+
+      const canvas = document.getElementById('dysonCanvas');
+      const ctx = canvas.getContext('2d');
+      let mirrors = [];
+      let isRouting = false;
+      let earthAngle = 0;
+      
+      function resize() { canvas.width = canvas.clientWidth; canvas.height = canvas.clientHeight; }
+      window.addEventListener('resize', resize);
+      resize();
+
+      class Mirror {
+        constructor() {
+          this.angle = Math.random() * Math.PI * 2;
+          this.radius = Math.random() * 60 + 120; // Orbit around sun
+          this.speed = Math.random() * 0.005 + 0.002;
+          this.laserAngle = 0;
+          this.isTransmitting = false;
+        }
+        update() {
+          this.angle += this.speed;
+        }
+        draw(cx, cy) {
+          let x = cx + Math.cos(this.angle) * this.radius;
+          let y = cy + Math.sin(this.angle) * this.radius;
+          
+          // Draw Mirror
+          ctx.beginPath();
+          ctx.arc(x, y, 2, 0, Math.PI * 2);
+          ctx.fillStyle = '#94a3b8';
+          ctx.fill();
+
+          // Draw Laser
+          if(this.isTransmitting) {
+            ctx.beginPath();
+            ctx.moveTo(x, y);
+            ctx.lineTo(x + Math.cos(this.laserAngle) * 500, y + Math.sin(this.laserAngle) * 500);
+            ctx.strokeStyle = 'rgba(250, 204, 21, 0.3)'; // Yellow laser
+            ctx.lineWidth = 1;
+            ctx.stroke();
+          }
+        }
+      }
+
+      function initMirrors() {
+        mirrors = [];
+        for(let i=0; i<2000; i++) mirrors.push(new Mirror());
+      }
+      initMirrors();
+
+      function animate() {
+        // Starfield trail effect
+        ctx.fillStyle = 'rgba(2, 6, 23, 0.3)';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        
+        let cx = canvas.width / 2;
+        let cy = canvas.height / 2;
+
+        // Draw Sun
+        ctx.beginPath();
+        ctx.arc(cx, cy, 60, 0, Math.PI * 2);
+        let sunGrad = ctx.createRadialGradient(cx, cy, 10, cx, cy, 60);
+        sunGrad.addColorStop(0, '#fff');
+        sunGrad.addColorStop(0.5, '#facc15');
+        sunGrad.addColorStop(1, '#ca8a04');
+        ctx.fillStyle = sunGrad;
+        ctx.fill();
+        // Sun glow
+        ctx.shadowBlur = 50;
+        ctx.shadowColor = '#facc15';
+        ctx.fill();
+        ctx.shadowBlur = 0;
+
+        // Earth Orbit
+        earthAngle += 0.005;
+        let earthX = cx + Math.cos(earthAngle) * 400;
+        let earthY = cy + Math.sin(earthAngle) * 400;
+        
+        ctx.beginPath();
+        ctx.arc(earthX, earthY, 15, 0, Math.PI * 2);
+        ctx.fillStyle = '#3b82f6';
+        ctx.fill();
+
+        // Update Mirrors
+        let hitCount = 0;
+        mirrors.forEach(m => {
+          m.update();
+          
+          let mx = cx + Math.cos(m.angle) * m.radius;
+          let my = cy + Math.sin(m.angle) * m.radius;
+
+          if(isRouting) {
+            m.isTransmitting = true;
+            try {
+              eval(editor.getValue());
+              if(typeof calculateLaserAngle === 'function') {
+                m.laserAngle = calculateLaserAngle({x: mx, y: my}, {x: earthX, y: earthY});
+                
+                // Extremely basic collision logic for the simulation
+                let idealAngle = Math.atan2(earthY - my, earthX - mx);
+                let diff = Math.abs(m.laserAngle - idealAngle);
+                if (diff < 0.05) hitCount++;
+              }
+            } catch(e) {
+              m.isTransmitting = false;
+            }
+          }
+          
+          m.draw(cx, cy);
+        });
+
+        if (isRouting) {
+          let energy = (hitCount / 2000) * 1.5;
+          let loss = 100 - ((hitCount / 2000) * 100);
+          document.getElementById('energyVal').innerText = energy.toFixed(2) + " PW";
+          document.getElementById('lossVal').innerText = loss.toFixed(1) + "%";
+          
+          if(loss < 20) {
+            document.getElementById('statusVal').innerText = "OPTIMAL TRANSMISSION";
+            document.getElementById('statusVal').style.color = "#10b981";
+          } else {
+            document.getElementById('statusVal').innerText = "CALCULATING...";
+            document.getElementById('statusVal').style.color = "#eab308";
+          }
+        }
+
+        requestAnimationFrame(animate);
+      }
+      animate();
+
+      function executeRouting() {
+        isRouting = true;
+      }
+    </script>
+  </body>
+</html>

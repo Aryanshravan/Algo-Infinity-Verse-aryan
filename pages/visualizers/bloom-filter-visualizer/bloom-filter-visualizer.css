@@ -27,10 +27,18 @@ body.bf-body {
   -webkit-text-fill-color: transparent;
 }
 
-.bf-cyan { color: var(--bf-cyan) !important; }
-.bf-purple { color: var(--bf-purple) !important; }
-.bf-green { color: var(--bf-green) !important; }
-.bf-danger { color: var(--bf-danger) !important; }
+.bf-cyan {
+  color: var(--bf-cyan) !important;
+}
+.bf-purple {
+  color: var(--bf-purple) !important;
+}
+.bf-green {
+  color: var(--bf-green) !important;
+}
+.bf-danger {
+  color: var(--bf-danger) !important;
+}
 
 /* Hero section adjustment */
 .bf-hero .section-subtitle {
@@ -138,7 +146,8 @@ body.bf-body {
 
 .bf-range::-webkit-slider-thumb {
   -webkit-appearance: none;
-  width: 16px; height: 16px;
+  width: 16px;
+  height: 16px;
   border-radius: 50%;
   background: var(--bf-cyan);
   cursor: pointer;
@@ -337,9 +346,17 @@ body.bf-body {
   color: #cbd5e1;
 }
 
-.bf-solver-step span.lbl { color: var(--bf-cyan); }
-.bf-solver-step span.val { color: var(--bf-purple); font-weight: 600; }
-.bf-solver-step span.res { color: var(--bf-green); font-weight: 700; }
+.bf-solver-step span.lbl {
+  color: var(--bf-cyan);
+}
+.bf-solver-step span.val {
+  color: var(--bf-purple);
+  font-weight: 600;
+}
+.bf-solver-step span.res {
+  color: var(--bf-green);
+  font-weight: 700;
+}
 
 /* Log Container */
 .bf-log-container {
@@ -361,16 +378,31 @@ body.bf-body {
   color: #94a3b8;
 }
 
-.bf-log-entry.sys { color: #64748b; }
-.bf-log-entry.add { color: var(--bf-green); }
-.bf-log-entry.query { color: var(--bf-cyan); }
-.bf-log-entry.fp { color: var(--bf-purple); }
+.bf-log-entry.sys {
+  color: #64748b;
+}
+.bf-log-entry.add {
+  color: var(--bf-green);
+}
+.bf-log-entry.query {
+  color: var(--bf-cyan);
+}
+.bf-log-entry.fp {
+  color: var(--bf-purple);
+}
 
 /* Animation Keyframes */
 @keyframes bfCellPulse {
-  0% { transform: scale(1); }
-  50% { transform: scale(1.12); box-shadow: 0 0 20px rgba(16, 185, 129, 0.6); }
-  100% { transform: scale(1); }
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.12);
+    box-shadow: 0 0 20px rgba(16, 185, 129, 0.6);
+  }
+  100% {
+    transform: scale(1);
+  }
 }
 
 /* Responsive */

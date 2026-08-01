@@ -64,6 +64,41 @@ body {
 .github-link { color: var(--text-secondary); font-size: 1.3rem; transition: color 0.2s; }
 .github-link:hover { color: var(--text-primary); }
 
+/* Header Actions */
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* Theme Toggle Button (self-contained, isolated from global theme.js) */
+.theme-toggle-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.4rem 0.7rem;
+  border-radius: 8px;
+  border: 1px solid var(--border-glass);
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--text-secondary);
+  font-family: var(--font-main);
+  font-size: 0.75rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+.theme-toggle-btn:hover {
+  background: rgba(255, 255, 255, 0.12);
+  color: var(--text-primary);
+}
+.theme-toggle-btn:active {
+  transform: scale(0.95);
+}
+.theme-toggle-btn i {
+  font-size: 0.85rem;
+}
+
 /* Utilities */
 .mt-2 { margin-top: 0.5rem; }
 .mt-3 { margin-top: 1rem; }
@@ -341,6 +376,171 @@ body {
 }
 .quiz-submit:hover { background: #b91c1c; }
 .quiz-submit:disabled { opacity: 0.4; cursor: not-allowed; }
+
+/* ── Scoped Light Mode (isolated from global theme.js) ──
+   Uses .redis-light-mode on <html> — does NOT touch html.light-mode.
+   No localStorage('theme') interference with other pages.
+*/
+
+.redis-light-mode {
+  --bg-dark: #f8fafc;
+  --bg-card: rgba(255, 255, 255, 0.85);
+  --border-glass: rgba(0, 0, 0, 0.06);
+  --text-primary: #0f172a;
+  --text-secondary: #64748b;
+}
+
+.redis-light-mode body {
+  background-image:
+    radial-gradient(circle at 10% 20%, rgba(220, 56, 45, 0.03) 0%, transparent 40%),
+    radial-gradient(circle at 90% 80%, rgba(124, 58, 237, 0.03) 0%, transparent 40%);
+}
+
+.redis-light-mode .glass-header,
+.redis-light-mode .glass-panel {
+  background: var(--bg-card);
+  box-shadow: 0 4px 16px 0 rgba(0, 0, 0, 0.06);
+}
+
+.redis-light-mode .back-btn:hover {
+  background: rgba(0, 0, 0, 0.04);
+}
+
+.redis-light-mode .github-link {
+  color: var(--text-secondary);
+}
+.redis-light-mode .github-link:hover {
+  color: var(--text-primary);
+}
+
+/* Theme toggle */
+.redis-light-mode .theme-toggle-btn {
+  background: rgba(0, 0, 0, 0.04);
+  border-color: rgba(0, 0, 0, 0.08);
+  color: var(--text-secondary);
+}
+.redis-light-mode .theme-toggle-btn:hover {
+  background: rgba(0, 0, 0, 0.08);
+  color: var(--text-primary);
+}
+
+/* Main stage */
+.redis-light-mode .main-stage {
+  background: var(--bg-card);
+}
+
+/* Tab bar */
+.redis-light-mode .tab-bar {
+  background: rgba(0, 0, 0, 0.02);
+  border-bottom-color: var(--border-glass);
+}
+
+/* Sidebar module items */
+.redis-light-mode .module-item {
+  background: rgba(0, 0, 0, 0.02);
+}
+.redis-light-mode .module-item:hover {
+  background: rgba(0, 0, 0, 0.04);
+}
+.redis-light-mode .module-item.active {
+  background: rgba(220, 56, 45, 0.08);
+  border-color: rgba(220, 56, 45, 0.25);
+}
+
+/* Progress */
+.redis-light-mode .progress-bar-container {
+  background: rgba(0, 0, 0, 0.08);
+}
+
+/* Buttons */
+.redis-light-mode .btn-secondary {
+  background: rgba(0, 0, 0, 0.04);
+  border-color: var(--border-glass);
+  color: var(--text-primary);
+}
+.redis-light-mode .btn-secondary:hover:not(:disabled) {
+  background: rgba(0, 0, 0, 0.08);
+}
+
+/* Lesson content */
+.redis-light-mode .lesson-body h3 {
+  color: var(--text-primary);
+}
+.redis-light-mode .lesson-body code {
+  background: rgba(0, 0, 0, 0.06);
+  color: #b91c1c;
+}
+.redis-light-mode .lesson-body pre {
+  background: rgba(0, 0, 0, 0.03);
+  border-color: var(--border-glass);
+}
+.redis-light-mode .lesson-body pre code {
+  background: transparent;
+  color: var(--text-primary);
+}
+.redis-light-mode .lesson-body strong {
+  color: var(--text-primary);
+}
+.redis-light-mode .lesson-body .tip-box {
+  background: rgba(16, 185, 129, 0.06);
+  border-color: rgba(16, 185, 129, 0.2);
+}
+
+/* Terminal panel — stays dark in light mode so it looks like a real terminal */
+.redis-light-mode .terminal-panel {
+  background: var(--bg-card);
+}
+.redis-light-mode .terminal-header {
+  background: rgba(0, 0, 0, 0.2);
+  border-bottom-color: rgba(255, 255, 255, 0.08);
+}
+.redis-light-mode .terminal-header h3 {
+  color: var(--text-secondary);
+}
+.redis-light-mode .terminal-window {
+  background: #0f172a;
+}
+.redis-light-mode .terminal-input-line input {
+  color: white;
+}
+
+/* Inspector panel */
+.redis-light-mode .inspector-panel h3 {
+  background: rgba(0, 0, 0, 0.03);
+  border-bottom-color: var(--border-glass);
+}
+.redis-light-mode .inspector-row {
+  background: rgba(0, 0, 0, 0.02);
+}
+
+/* Quiz panel */
+.redis-light-mode .quiz-question {
+  background: rgba(0, 0, 0, 0.02);
+  border-color: var(--border-glass);
+}
+.redis-light-mode .quiz-question.correct {
+  border-color: rgba(16, 185, 129, 0.3);
+  background: rgba(16, 185, 129, 0.04);
+}
+.redis-light-mode .quiz-question.incorrect {
+  border-color: rgba(220, 56, 45, 0.3);
+  background: rgba(220, 56, 45, 0.04);
+}
+.redis-light-mode .quiz-question p {
+  color: var(--text-primary);
+}
+.redis-light-mode .quiz-option {
+  background: rgba(0, 0, 0, 0.02);
+  border-color: var(--border-glass);
+  color: var(--text-primary);
+}
+.redis-light-mode .quiz-option:hover {
+  background: rgba(0, 0, 0, 0.04);
+}
+
+.redis-light-mode .quiz-panel h2 {
+  color: var(--text-primary);
+}
 
 @media (max-width: 1024px) {
   .workspace { grid-template-columns: 1fr; }

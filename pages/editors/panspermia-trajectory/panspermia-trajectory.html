@@ -1,0 +1,312 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Panspermia Seeding Trajectory | Algo Infinity Verse</title>
+    <link rel="stylesheet" href="/styles.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <!-- Monaco Editor -->
+    <script src="https://unpkg.com/monaco-editor@0.36.1/min/vs/loader.js"></script>
+    <style>
+      body { margin: 0; overflow: hidden; background: #000; font-family: 'Poppins', sans-serif; color: #fff; }
+      .app-container { display: flex; height: 100vh; }
+      
+      .sidebar { width: 450px; background: rgba(15, 23, 42, 0.95); border-right: 1px solid #14b8a6; display: flex; flex-direction: column; z-index: 10; }
+      .header { padding: 20px; border-bottom: 1px solid #334155; }
+      .header h2 { margin: 0; color: #14b8a6; font-family: 'Orbitron', sans-serif; font-size: 1.2rem; }
+      .header p { margin: 5px 0 0 0; font-size: 0.8rem; color: #94a3b8; }
+      
+      #editor-container { flex: 1; min-height: 300px; }
+      
+      .controls { padding: 20px; border-top: 1px solid #334155; background: rgba(0,0,0,0.5); }
+      .btn { background: linear-gradient(90deg, #0d9488, #0f766e); color: #fff; border: none; padding: 10px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; transition: 0.3s; }
+      .btn:hover { background: #14b8a6; transform: translateY(-2px); box-shadow: 0 0 15px rgba(20, 184, 166, 0.5); }
+      
+      .sim-container { flex: 1; position: relative; background: radial-gradient(circle, #020617 0%, #000 100%); overflow: hidden; }
+      
+      canvas { width: 100%; height: 100%; display: block; }
+      
+      .hud { position: absolute; top: 20px; left: 20px; background: rgba(0,0,0,0.8); padding: 15px; border-radius: 8px; border: 1px solid #14b8a6; width: 280px; z-index: 10; pointer-events: none; }
+      .hud h3 { margin: 0 0 10px 0; color: #14b8a6; font-size: 1rem; font-family: 'Orbitron', sans-serif; }
+      .metric { display: flex; justify-content: space-between; font-size: 0.8rem; color: #cbd5e1; margin-bottom: 5px; }
+      .val { font-weight: bold; font-family: monospace; }
+      .val-time { color: #facc15; }
+      .val-health { color: #10b981; }
+    </style>
+  </head>
+  <body>
+    
+    <div class="app-container">
+      <div class="sidebar">
+        <div class="header">
+          <h2><i class="fas fa-seedling"></i> Panspermia Trajectory</h2>
+          <p>Seed life across the cosmos</p>
+        </div>
+        
+        <div id="editor-container"></div>
+        
+        <div class="controls">
+          <button class="btn" onclick="launchPayload()"><i class="fas fa-rocket"></i> Launch Seed Payload</button>
+        </div>
+      </div>
+      
+      <div class="sim-container">
+        <!-- Starfield -->
+        <div style="position: absolute; inset:0; background-image: url('data:image/svg+xml,%3Csvg width=\"100%\" height=\"100%\" xmlns=\"http://www.w3.org/2000/svg\"%3E%3Cfilter id=\"n\"%3E%3CfeTurbulence type=\"fractalNoise\" baseFrequency=\"0.8\" numOctaves=\"2\" stitchTiles=\"stitch\"/%3E%3C/filter%3E%3Crect width=\"100%\" height=\"100%\" filter=\"url(%23n)\" opacity=\"0.1\"/%3E%3C/svg%3E'); pointer-events: none; z-index: 0;"></div>
+        
+        <canvas id="spaceCanvas" style="position: relative; z-index: 1;"></canvas>
+        
+        <div class="hud">
+          <h3>Mission Telemetry</h3>
+          <div class="metric"><span>Flight Time:</span> <span class="val val-time" id="timeVal">0 yrs</span></div>
+          <div class="metric"><span>Microbe Viability:</span> <span class="val val-health" id="healthVal">100%</span></div>
+          <div class="metric"><span>Velocity:</span> <span class="val" id="velVal">0.0 km/s</span></div>
+          <div class="metric" style="margin-top: 10px; border-top: 1px solid #334155; padding-top: 5px;">
+            <span>Mission Status:</span> <span class="val" id="statusVal" style="color:#94a3b8">ON LAUNCHPAD</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      let editor;
+      require.config({ paths: { 'vs': 'https://unpkg.com/monaco-editor@0.36.1/min/vs' }});
+      require(['vs/editor/editor.main'], function() {
+        editor = monaco.editor.create(document.getElementById('editor-container'), {
+          value: `// Panspermia N-Body Trajectory Calculation
+// You must calculate the exact initial launch velocity (vx, vy) to navigate the payload.
+// Use gravitational slingshots around massive bodies to reach the Target Exoplanet.
+// Avoid passing too close to stars, or the cosmic radiation will sterilize the payload!
+
+function calculateLaunchVector(celestialBodies) {
+    // celestialBodies is an array of objects: {x, y, mass, isStar, isTarget}
+    // Return { vx: float, vy: float }
+    
+    // Naive logic: Aim straight for the target!
+    // Result: The payload crashes into a star or gets flung out of the galaxy by gravity.
+    
+    return {
+        vx: 1.0,
+        vy: 0.0
+    };
+}`,
+          language: 'javascript',
+          theme: 'vs-dark',
+          minimap: { enabled: false },
+          automaticLayout: true
+        });
+      });
+
+      const canvas = document.getElementById('spaceCanvas');
+      const ctx = canvas.getContext('2d');
+      
+      let isSimulating = false;
+      let flightTime = 0;
+      
+      let payload = null;
+      let bodies = [];
+      let trail = [];
+      
+      function resize() { 
+          canvas.width = canvas.clientWidth; 
+          canvas.height = canvas.clientHeight;
+          initSystem();
+      }
+      
+      function initSystem() {
+          bodies = [
+              // Starting planet (left side)
+              { x: 100, y: canvas.height/2, mass: 100, isStar: false, isTarget: false, radius: 10, color: '#64748b', name: 'Origin' },
+              // Target Exoplanet (right side)
+              { x: canvas.width - 100, y: canvas.height/2, mass: 100, isStar: false, isTarget: true, radius: 15, color: '#14b8a6', name: 'Eden' },
+              
+              // Obstacles (Stars and Gas Giants)
+              { x: canvas.width/2, y: canvas.height/2, mass: 2000, isStar: true, isTarget: false, radius: 40, color: '#facc15', name: 'Sol' },
+              { x: canvas.width*0.3, y: canvas.height*0.2, mass: 800, isStar: false, isTarget: false, radius: 25, color: '#c084fc', name: 'Jovian A' },
+              { x: canvas.width*0.7, y: canvas.height*0.8, mass: 1500, isStar: true, isTarget: false, radius: 30, color: '#f87171', name: 'Red Dwarf' },
+              { x: canvas.width*0.4, y: canvas.height*0.8, mass: 500, isStar: false, isTarget: false, radius: 20, color: '#38bdf8', name: 'Rogue Ice' }
+          ];
+      }
+      
+      setTimeout(resize, 100);
+      window.addEventListener('resize', resize);
+
+      function animate() {
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+          // Draw Bodies
+          for(let b of bodies) {
+              // Gravity well visual
+              let grad = ctx.createRadialGradient(b.x, b.y, b.radius, b.x, b.y, b.radius + b.mass*0.1);
+              grad.addColorStop(0, \`rgba(\${hexToRgb(b.color)}, 0.2)\`);
+              grad.addColorStop(1, 'transparent');
+              ctx.fillStyle = grad;
+              ctx.beginPath(); ctx.arc(b.x, b.y, b.radius + b.mass*0.1, 0, Math.PI*2); ctx.fill();
+              
+              // Body
+              ctx.fillStyle = b.color;
+              ctx.beginPath(); ctx.arc(b.x, b.y, b.radius, 0, Math.PI*2); ctx.fill();
+              
+              // Label
+              ctx.fillStyle = '#cbd5e1';
+              ctx.font = '10px monospace';
+              ctx.textAlign = 'center';
+              ctx.fillText(b.name, b.x, b.y + b.radius + 15);
+              
+              if (b.isStar) {
+                  ctx.shadowBlur = 30;
+                  ctx.shadowColor = b.color;
+                  ctx.fill();
+                  ctx.shadowBlur = 0;
+              }
+              if (b.isTarget) {
+                  ctx.strokeStyle = '#fff';
+                  ctx.lineWidth = 1;
+                  ctx.setLineDash([2, 4]);
+                  ctx.beginPath(); ctx.arc(b.x, b.y, b.radius + 5 + Math.sin(Date.now()*0.005)*5, 0, Math.PI*2); ctx.stroke();
+                  ctx.setLineDash([]);
+              }
+          }
+
+          if (isSimulating && payload) {
+              flightTime += 100; // Fast time
+              
+              // N-Body Gravity Calculation
+              let ax = 0, ay = 0;
+              let radiationDose = 0;
+              let hitTarget = false;
+              let crashed = false;
+              
+              for(let b of bodies) {
+                  let dx = b.x - payload.x;
+                  let dy = b.y - payload.y;
+                  let distSq = dx*dx + dy*dy;
+                  let dist = Math.sqrt(distSq);
+                  
+                  // Gravity force (G * m1 * m2 / r^2) - arbitrary G
+                  if (dist > b.radius) {
+                      let f = (0.5 * b.mass) / distSq;
+                      ax += f * (dx/dist);
+                      ay += f * (dy/dist);
+                  }
+                  
+                  // Radiation from stars
+                  if (b.isStar) {
+                      radiationDose += (b.mass * 10) / distSq; 
+                  }
+                  
+                  // Collisions
+                  if (dist < b.radius + 2) {
+                      if (b.isTarget) hitTarget = true;
+                      else crashed = true;
+                  }
+              }
+              
+              payload.vx += ax;
+              payload.vy += ay;
+              
+              payload.x += payload.vx;
+              payload.y += payload.vy;
+              
+              payload.health -= radiationDose;
+              if (payload.health < 0) payload.health = 0;
+              
+              // Trail
+              if(flightTime % 500 === 0) {
+                  trail.push({x: payload.x, y: payload.y});
+                  if(trail.length > 200) trail.shift();
+              }
+              
+              let speed = Math.hypot(payload.vx, payload.vy);
+              
+              // HUD
+              document.getElementById('timeVal').innerText = (flightTime / 1000).toFixed(0) + "k yrs";
+              document.getElementById('healthVal').innerText = payload.health.toFixed(1) + "%";
+              if(payload.health < 50) document.getElementById('healthVal').style.color = "#ef4444";
+              document.getElementById('velVal').innerText = (speed * 10).toFixed(1) + " km/s";
+              
+              // End conditions
+              if (hitTarget) {
+                  isSimulating = false;
+                  if (payload.health > 10) {
+                      document.getElementById('statusVal').innerText = "EXOPLANET SEEDED. LIFE FINDS A WAY.";
+                      document.getElementById('statusVal').style.color = "#14b8a6";
+                  } else {
+                      document.getElementById('statusVal').innerText = "IMPACT DETECTED, BUT PAYLOAD STERILIZED.";
+                      document.getElementById('statusVal').style.color = "#ef4444";
+                  }
+              } else if (crashed) {
+                  isSimulating = false;
+                  document.getElementById('statusVal').innerText = "FATAL COLLISION.";
+                  document.getElementById('statusVal').style.color = "#ef4444";
+              } else if (payload.x < -100 || payload.x > canvas.width+100 || payload.y < -100 || payload.y > canvas.height+100) {
+                  isSimulating = false;
+                  document.getElementById('statusVal').innerText = "LOST IN DEEP SPACE.";
+                  document.getElementById('statusVal').style.color = "#94a3b8";
+              } else if (payload.health <= 0) {
+                   isSimulating = false;
+                   document.getElementById('statusVal').innerText = "PAYLOAD STERILIZED BY RADIATION.";
+                   document.getElementById('statusVal').style.color = "#ef4444";
+              }
+          }
+          
+          // Draw Trail
+          if (trail.length > 0) {
+              ctx.strokeStyle = 'rgba(20, 184, 166, 0.3)';
+              ctx.lineWidth = 2;
+              ctx.beginPath();
+              ctx.moveTo(trail[0].x, trail[0].y);
+              for(let i=1; i<trail.length; i++) ctx.lineTo(trail[i].x, trail[i].y);
+              if(payload && isSimulating) ctx.lineTo(payload.x, payload.y);
+              ctx.stroke();
+          }
+          
+          // Draw Payload
+          if (payload) {
+              ctx.fillStyle = '#fff';
+              ctx.beginPath(); ctx.arc(payload.x, payload.y, 3, 0, Math.PI*2); ctx.fill();
+              ctx.strokeStyle = '#14b8a6';
+              ctx.beginPath(); ctx.arc(payload.x, payload.y, 6, 0, Math.PI*2); ctx.stroke();
+          }
+
+          requestAnimationFrame(animate);
+      }
+      
+      function hexToRgb(hex) {
+          let r = parseInt(hex.slice(1,3), 16);
+          let g = parseInt(hex.slice(3,5), 16);
+          let b = parseInt(hex.slice(5,7), 16);
+          return \`\${r},\${g},\${b}\`;
+      }
+      
+      animate();
+
+      function launchPayload() {
+          if(isSimulating) return;
+          
+          let initVx = 0; let initVy = 0;
+          try {
+              eval(editor.getValue());
+              let result = calculateLaunchVector(JSON.parse(JSON.stringify(bodies)));
+              initVx = result.vx || 0;
+              initVy = result.vy || 0;
+          } catch(e) {}
+          
+          payload = {
+              x: 100, y: canvas.height/2,
+              vx: initVx, vy: initVy,
+              health: 100
+          };
+          
+          trail = [];
+          flightTime = 0;
+          isSimulating = true;
+          document.getElementById('statusVal').innerText = "TRAJECTORY ENGAGED...";
+          document.getElementById('statusVal').style.color = "#14b8a6";
+          document.getElementById('healthVal').style.color = "#10b981";
+      }
+    </script>
+  </body>
+</html>

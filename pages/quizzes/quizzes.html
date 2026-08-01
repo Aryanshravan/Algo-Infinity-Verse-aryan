@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>All Quizzes — Algo Infinity Verse</title>
+  <meta name="description" content="Browse all DSA and algorithm quizzes. Test your knowledge with categorized quizzes — from data structures to advanced algorithms and interview prep." />
+
+  <link rel="stylesheet" href="/styles.css" />
+  <link rel="stylesheet" href="quizzes.css" />
+
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+
+  <script>
+    (function() {
+      try {
+        var t = localStorage.getItem('theme');
+        var p = window.matchMedia('(prefers-color-scheme: light)').matches;
+        var theme = t || (p ? 'light' : 'dark');
+        if (theme === 'light') document.documentElement.classList.add('light-mode');
+      } catch (e) {}
+    })();
+  </script>
+</head>
+<body data-page="quizzes" data-no-loading>
+  <div id="loading-screen" class="hidden">
+    <div class="loader">
+      <div class="infinity-loader">∞</div>
+      <h2>Loading Quizzes...</h2>
+    </div>
+  </div>
+
+  <main>
+    <!-- HERO -->
+    <section class="qz-hero">
+      <div class="qz-hero-bg">
+        <div class="qz-hero-grid"></div>
+        <div class="qz-bg-questions" aria-hidden="true"></div>
+      </div>
+      <button type="button" class="qz-back-btn" id="qzBackBtn" aria-label="Go back to previous page">
+        <i class="fas fa-arrow-left"></i>
+        <span>Back</span>
+      </button>
+      <div class="qz-hero-content">
+        <h1 class="qz-hero-title">All Quizzes</h1>
+        <p class="qz-hero-subtitle">
+          Test your knowledge with <strong><span id="qzTotalCount">0</span></strong> curated quizzes —<br />
+          from arrays and sorting to DP and interview prep.
+        </p>
+
+        <!-- SEARCH -->
+        <div class="qz-search-wrapper">
+          <div class="qz-search">
+            <i class="fas fa-search qz-search-icon"></i>
+            <input
+              type="text"
+              id="qzSearchInput"
+              class="qz-search-input"
+              placeholder="Search quizzes..."
+              aria-label="Search quizzes"
+              autocomplete="off"
+            />
+            <button type="button" id="qzClearBtn" class="qz-clear-btn" aria-label="Clear search">
+              <i class="fas fa-times"></i>
+            </button>
+            <span class="qz-search-hint">⌘K</span>
+          </div>
+        </div>
+
+        <!-- CATEGORY FILTERS -->
+        <div class="qz-filters" id="qzFilters" role="tablist" aria-label="Quiz categories">
+          <span class="qz-filter-label">Category</span>
+          <div class="qz-filter-chips" id="qzCategoryChips"></div>
+        </div>
+
+        <!-- DIFFICULTY FILTERS -->
+        <div class="qz-filters" id="qzDifficultyFilters" role="tablist" aria-label="Quiz level">
+          <span class="qz-filter-label">Level</span>
+          <div class="qz-filter-chips" id="qzDifficultyChips"></div>
+        </div>
+
+        <p class="qz-result-count" id="qzResultCount">Showing <span id="qzCountDisplay">0</span> quizzes</p>
+      </div>
+    </section>
+
+    <!-- CARD GRID -->
+    <section class="qz-section">
+      <div class="qz-container">
+        <div class="qz-grid" id="qzGrid" role="list">
+          <!-- Cards rendered by JS -->
+        </div>
+        <div class="qz-empty" id="qzEmpty" style="display:none;">
+          <i class="fas fa-search-minus"></i>
+          <h3>No quizzes found</h3>
+          <p>Try adjusting your search or filter.</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script src="/auth.js"></script>
+  <script src="/theme.js"></script>
+  <script src="/script.js"></script>
+  <script src="quizzes.js"></script>
+</body>
+</html>

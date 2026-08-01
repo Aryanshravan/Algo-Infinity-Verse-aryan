@@ -3,6 +3,11 @@
   "devCommand": "npm run dev",
   "installCommand": "npm install",
   "framework": null,
+  "functions": {
+    "api/execute/problem.js": {
+      "maxDuration": 30
+    }
+  },
   "rewrites": [
     {
       "source": "/login",
@@ -48,6 +53,10 @@
     {
       "source": "/practice",
       "destination": "/pages/practice/problems.html"
+    },
+    {
+      "source": "/practice/editor",
+      "destination": "/pages/practice/editor.html"
     },
     {
       "source": "/cplusplus-learning",
@@ -102,17 +111,29 @@
       "destination": "/pages/leaderboard/preview.html"
     },
     {
+      "source": "/code-explainer",
+      "destination": "/pages/tools/code-explainer/code-explainer.html"
+    },
+    {
+      "source": "/streaks",
+      "destination": "/pages/streaks/streak-dashboard.html"
+    },
+    {
       "source": "/api/battles/:path*",
       "destination": "/api/battles"
     }
   ],
   "headers": [
-    {
+  {
       "source": "/(.*)",
       "headers": [
         {
           "key": "X-Content-Type-Options",
           "value": "nosniff"
+        },
+        {
+          "key": "X-Frame-Options",
+          "value": "SAMEORIGIN"
         }
       ]
     },

@@ -1,0 +1,104 @@
+/* 
+  Bitmask DP Visualizer CSS 
+  Strictly adapting to global variables for consistent Light/Dark mode themes.
+*/
+
+.bdp-hero {
+  position: relative; min-height: 56vh;
+  display: flex; align-items: center; justify-content: center;
+  padding: 7rem 1.5rem 3rem; overflow: hidden;
+  background: radial-gradient(ellipse at 50% 0%, rgba(168,85,247,0.07) 0%, rgba(6,182,212,0.05) 55%, transparent 80%);
+}
+.bdp-hero-bg { position: absolute; inset: 0; z-index: 0; opacity: 0.5; }
+.bdp-hero-canvas { display: block; width: 100%; height: 100%; }
+.bdp-hero-inner { position: relative; z-index: 2; text-align: center; max-width: 780px; margin: 0 auto; }
+.bdp-hero-eyebrow {
+  display: inline-block; font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em;
+  padding: 0.35rem 1.1rem; border-radius: 999px;
+  background: rgba(168,85,247,0.1); border: 1px solid rgba(168,85,247,0.3); color: #a855f7;
+  margin-bottom: 1.25rem;
+}
+.bdp-hero-title {
+  font-family: Orbitron, sans-serif;
+  font-size: clamp(1.7rem, 5.5vw, 3.2rem); font-weight: 900;
+  background: linear-gradient(135deg, #a855f7 0%, #06b6d4 55%, #22c55e 100%);
+  background-clip: text; -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  line-height: 1.12; margin-bottom: 0.6rem;
+}
+.bdp-hero-sub  { font-family: Fira Code, monospace; font-size: 0.85rem; color: #a855f7; font-style: italic; margin-bottom: 0.9rem; }
+.bdp-hero-desc { font-size: 0.9rem; color: var(--text-secondary); line-height: 1.8; margin-bottom: 1.85rem; }
+.bdp-btn-primary { background: linear-gradient(135deg, #a855f7 0%, #06b6d4 100%); border: none; color: #fff; font-weight: 700; display: inline-flex; align-items: center; gap: 0.5rem; box-shadow: 0 4px 20px rgba(168,85,247,0.25); cursor:pointer; padding: 0.5rem 1rem; border-radius: 6px;}
+
+.bdp-section { padding: 1.5rem 0 4rem; }
+
+.bdp-control-card { background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 18px; padding: 1.1rem 1.25rem; backdrop-filter: blur(10px); margin-bottom: 0.85rem; display: flex; flex-direction: column; gap: 0.65rem; }
+.bdp-row { display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap; }
+.bdp-row-label { font-size: 0.74rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-secondary); white-space: nowrap; }
+.bdp-btn { padding: 0.42rem 0.85rem; font-size: 0.78rem; font-weight: 600; display: flex; align-items: center; gap: 0.32rem; cursor: pointer; border-radius: 6px; }
+.bdp-btn:disabled { opacity: 0.5; filter: grayscale(100%); cursor: not-allowed; transform: none !important; box-shadow: none !important; }
+
+.bdp-select, .bdp-input {
+  background: var(--glass-bg); border: 1px solid var(--glass-border); color: var(--text-primary); 
+  padding: 0.4rem 0.6rem; border-radius: 6px; font-family: Fira Code, monospace; font-size: 0.75rem; outline: none;
+}
+
+.bdp-status { padding: 0.65rem 1rem; border-radius: 10px; font-size: 0.84rem; color: var(--text-secondary); margin-bottom: 0.85rem; min-height: 2.4rem; background: rgba(168,85,247,0.05); border: 1px solid rgba(168,85,247,0.18); transition: all 0.3s ease; line-height: 1.5; display: flex; align-items: center;}
+.bdp-status.good { border-color: rgba(34,197,94,0.4); background: rgba(34,197,94,0.09); color: #22c55e; }
+.bdp-status.error { border-color: rgba(239,68,68,0.4); background: rgba(239,68,68,0.09); color: #ef4444; }
+
+.bdp-main-layout { display: grid; grid-template-columns: 1fr 450px; gap: 0.85rem; margin-bottom: 0.85rem; }
+@media (max-width: 1024px) { .bdp-main-layout { grid-template-columns: 1fr; } }
+
+.bdp-panel-card { background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 16px; padding: 0.9rem 1.05rem; backdrop-filter: blur(10px); display: flex; flex-direction: column; position: relative;}
+.bdp-panel-title { font-size: 0.85rem; font-weight: 700; letter-spacing: 0.04em; color: var(--text-primary); margin-bottom: 0.85rem; display: flex; align-items: center; justify-content: space-between; gap: 0.4rem; }
+
+.bdp-canvas-wrapper { width: 100%; height: 350px; border-radius: 12px; overflow: hidden; background: #0f172a; border: 1px solid rgba(255,255,255,0.05); position: relative; margin-bottom: 0.85rem;}
+.bdp-canvas-wrapper canvas { width: 100%; height: 100%; display: block; }
+
+/* Bitmask Live Visualizer */
+.bdp-bitmask-display { background: rgba(128,128,128,0.05); border: 1px solid var(--glass-border); border-radius: 12px; padding: 1rem; text-align: center; }
+.bdp-bm-title { font-size: 0.65rem; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.6rem; font-weight: 700; }
+.bdp-bm-strip { display: flex; justify-content: center; gap: 8px; margin-bottom: 0.8rem; }
+.bdp-bit { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.bit-val { 
+    width: 40px; height: 45px; border-radius: 6px; 
+    background: rgba(128,128,128,0.1); border: 1px solid var(--glass-border); 
+    display: flex; align-items: center; justify-content: center; 
+    font-family: 'Fira Code', monospace; font-size: 1.2rem; font-weight: 700; color: var(--text-secondary);
+    transition: all 0.3s ease;
+}
+.bit-lbl { font-size: 0.6rem; color: var(--text-secondary); font-family: 'Fira Code', monospace; }
+.bdp-bit.active .bit-val { background: rgba(168,85,247,0.2); border-color: #a855f7; color: #a855f7; text-shadow: 0 0 8px rgba(168,85,247,0.5); }
+.bdp-bit.highlight .bit-val { background: rgba(34,197,94,0.3); border-color: #22c55e; color: #22c55e; transform: scale(1.1); }
+.bdp-bm-math { font-family: 'Fira Code', monospace; font-size: 0.85rem; color: var(--text-primary); }
+.bdp-bm-math .highlight { color: #06b6d4; font-weight: 700; font-size: 1.1rem; }
+.bdp-bm-transition { font-size: 0.75rem; color: var(--text-secondary); font-family: 'Fira Code', monospace; margin-top: 0.4rem; height: 1.2em;}
+
+/* DP Table */
+.bdp-table-container { flex: 1; overflow-y: auto; overflow-x: auto; max-height: 480px; border: 1px solid var(--glass-border); border-radius: 10px; background: rgba(128,128,128,0.02); margin-bottom: 0.5rem; }
+.bdp-table { width: 100%; border-collapse: collapse; font-family: 'Fira Code', monospace; font-size: 0.75rem; text-align: center; }
+.bdp-table th { background: rgba(128,128,128,0.05); color: var(--text-secondary); padding: 0.5rem; position: sticky; top: 0; z-index: 10; border-bottom: 1px solid var(--glass-border); font-weight: 600; }
+.bdp-table td { padding: 0.4rem; border-bottom: 1px solid rgba(128,128,128,0.1); border-right: 1px solid rgba(128,128,128,0.1); color: var(--text-secondary); transition: all 0.3s ease; }
+.bdp-table td:last-child { border-right: none; }
+.bdp-table tr.group-border td { border-top: 2px solid rgba(6,182,212,0.3); }
+
+/* Table Cell States */
+.bdp-table td.inf { color: rgba(128,128,128,0.3); }
+.bdp-table td.val { color: var(--text-primary); font-weight: 600; }
+.bdp-table td.src-cell { background: rgba(168,85,247,0.2) !important; color: #a855f7 !important; border: 1px solid #a855f7 !important; }
+.bdp-table td.dst-cell { background: rgba(6,182,212,0.2) !important; color: #06b6d4 !important; border: 1px solid #06b6d4 !important; transform: scale(1.05); font-weight: 700 !important; }
+.bdp-table td.optimal { background: rgba(34,197,94,0.2) !important; color: #22c55e !important; border: 1px solid #22c55e !important; font-weight: 700 !important; }
+.bdp-table tr.active-row td { background: rgba(255,255,255,0.03); }
+
+/* Legend */
+.bdp-table-legend { display: flex; gap: 1rem; justify-content: center; padding: 0.5rem; font-size: 0.65rem; color: var(--text-secondary); }
+.legend-item { display: flex; align-items: center; gap: 4px; }
+.legend-box { width: 12px; height: 12px; border-radius: 3px; display: inline-block; }
+
+.bdp-learn-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 1.25rem; }
+.bdp-learn-card { background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 16px; padding: 1.5rem; backdrop-filter: blur(10px); position: relative; overflow: hidden; transition: transform 0.2s ease; }
+.bdp-learn-card:hover { transform: translateY(-3px); }
+.bdp-learn-card::before { content:""; position:absolute; top:0;left:0;width:100%;height:3px; background:var(--lc,#06b6d4); }
+.bdp-learn-icon { font-size: 1.75rem; margin-bottom: 0.5rem; }
+.bdp-learn-card h3 { font-size: 0.9rem; font-weight: 700; margin-bottom: 0.5rem; color: var(--text-primary); }
+.bdp-learn-card p  { font-size: 0.8rem; color: var(--text-secondary); line-height: 1.65; }

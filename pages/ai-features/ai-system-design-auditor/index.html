@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI System Design Evaluator & Scalability Auditor — Algo Infinity Verse</title>
+  <meta name="description" content="AI-driven evaluation of system architecture diagrams, calculating throughput (RPS), database bottlenecks, SLA latency, and SPOF risks." />
+  
+  
+  <link rel="stylesheet" href="../../../styles.css" />
+  <link rel="stylesheet" href="style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+
+  <script>
+    (function() {
+      try {
+        var t = localStorage.getItem('theme');
+        var p = window.matchMedia('(prefers-color-scheme: light)').matches;
+        var theme = t || (p ? 'light' : 'dark');
+        if (theme === 'light') document.documentElement.classList.add('light-mode');
+      } catch (e) {}
+    })();
+  </script>
+</head>
+<body data-page="sys-auditor">
+
+  <header class="sda-header">
+    <div class="sda-header-container">
+      <a href="../ai-features.html" class="sda-back-btn">
+        <i class="fas fa-arrow-left"></i>
+        <span>AI Tools</span>
+      </a>
+      <div class="sda-title-area">
+        <h1><i class="fas fa-sitemap"></i> AI System Design Evaluator &amp; Scalability Auditor</h1>
+        <p>Calculate Throughput (RPS), Database Bottlenecks, Latency SLA, and Single Point of Failure (SPOF) Risks</p>
+      </div>
+      <div class="sda-header-actions">
+        <button id="themeToggleBtn" class="sda-icon-btn" title="Toggle Theme">
+          <i class="fas fa-moon"></i>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="sda-main">
+    <!-- TRAFFIC INPUT TOOLBAR -->
+    <div class="sda-toolbar">
+      <div class="sda-input-group">
+        <label><i class="fas fa-users"></i> Daily Active Users (DAU):</label>
+        <input type="number" id="dauInput" class="sda-input" value="1000000" />
+      </div>
+      <div class="sda-input-group">
+        <label>Read / Write Ratio:</label>
+        <select id="rwRatioSelect" class="sda-select">
+          <option value="90">90% Read / 10% Write (Social Feed)</option>
+          <option value="50">50% Read / 50% Write (Chat / IoT)</option>
+        </select>
+      </div>
+      <button id="btnRunAiAudit" class="sda-btn sda-btn-primary"><i class="fas fa-brain"></i> Run AI Scalability Audit</button>
+    </div>
+
+    <!-- MAIN GRID -->
+    <div class="sda-grid">
+      <!-- SYSTEM COMPONENT BUILDER -->
+      <div class="sda-card">
+        <div class="sda-card-header">
+          <h2><i class="fas fa-cubes"></i> Architecture Topology Components</h2>
+          <span class="sda-badge sda-badge-accent">5 Active Nodes</span>
+        </div>
+        <div class="sda-card-body">
+          <div class="sda-components-list">
+            <div class="sda-comp-item">
+              <i class="fas fa-globe sda-comp-icon"></i>
+              <div>
+                <strong>Client Web / Mobile</strong>
+                <div>HTTPS REST &amp; WebSocket Clients</div>
+              </div>
+            </div>
+            <div class="sda-comp-item">
+              <i class="fas fa-network-wired sda-comp-icon"></i>
+              <div>
+                <strong>Nginx Load Balancer</strong>
+                <div>Round-Robin Algorithm</div>
+              </div>
+            </div>
+            <div class="sda-comp-item">
+              <i class="fas fa-server sda-comp-icon"></i>
+              <div>
+                <strong>Node.js API Microservice Cluster</strong>
+                <div>Stateless Container Instances (4 Nodes)</div>
+              </div>
+            </div>
+            <div class="sda-comp-item">
+              <i class="fas fa-database sda-comp-icon"></i>
+              <div>
+                <strong>Redis Cache Cluster</strong>
+                <div>LRU Eviction (92% Cache Hit Ratio)</div>
+              </div>
+            </div>
+            <div class="sda-comp-item warning-node">
+              <i class="fas fa-database sda-comp-icon"></i>
+              <div>
+                <strong>Single PostgreSQL Primary DB (SPOF)</strong>
+                <div>Write Bottleneck Target (No Sharding / No Replica)</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- AI AUDIT METRICS & FINDINGS -->
+      <div class="sda-side-panel">
+        
+        <!-- CALCULATED METRICS -->
+        <div class="sda-card">
+          <div class="sda-card-header">
+            <h3><i class="fas fa-calculator"></i> Estimated System Throughput</h3>
+          </div>
+          <div class="sda-card-body">
+            <div class="sda-metrics-grid">
+              <div class="sda-metric-box">
+                <span class="sda-label">Average RPS</span>
+                <span class="sda-val" id="avgRpsVal">11,574 RPS</span>
+              </div>
+              <div class="sda-metric-box">
+                <span class="sda-label">Peak RPS (3x)</span>
+                <span class="sda-val sda-accent" id="peakRpsVal">34,722 RPS</span>
+              </div>
+              <div class="sda-metric-box">
+                <span class="sda-label">DB Write IOPS</span>
+                <span class="sda-val sda-warning" id="writeIopsVal">3,472 IOPS</span>
+              </div>
+              <div class="sda-metric-box">
+                <span class="sda-label">SLA p99 Latency</span>
+                <span class="sda-val sda-danger" id="p99Val">420 ms</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- AI AUDIT REPORT FINDINGS -->
+        <div class="sda-card sda-flex-card">
+          <div class="sda-card-header">
+            <h3><i class="fas fa-file-contract"></i> AI Bottleneck &amp; SPOF Report</h3>
+          </div>
+          <div class="sda-card-body sda-scrollable" id="auditReportContainer">
+            <!-- Rendered by JS -->
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </main>
+
+  <script src="../../../auth.js"></script>
+  <script src="../../../theme.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>

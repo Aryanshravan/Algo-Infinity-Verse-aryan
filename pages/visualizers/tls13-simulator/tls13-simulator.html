@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>TLS 1.3 Handshake Simulator | Algo Infinity Verse</title>
+    <meta
+      name="description"
+      content="Interactive visualizer for the TLS 1.3 cryptographic handshake protocol (1-RTT and 0-RTT)."
+    />
+
+    <link
+      href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Poppins:wght@300;400;500;600;700&family=Fira+Code:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+
+    <link rel="stylesheet" href="tls13-simulator.css" />
+    <script src="/theme.js"></script>
+    <link rel="stylesheet" href="/modules/quick-notes/quick-notes.css" />
+  </head>
+  <body class="tls-body">
+    <nav class="navbar tls-nav">
+      <div class="nav-logo">
+        <span class="logo-text">∞</span>
+        <span class="logo-title">Algo Infinity Verse</span>
+      </div>
+      <div class="engine-badge"><i class="fas fa-lock"></i> Security Protocol Engine</div>
+    </nav>
+
+    <main class="tls-workspace">
+      <header class="workspace-header">
+        <h1>TLS 1.3 Handshake Simulator</h1>
+        <p class="subtitle">Visualize the modern 1-RTT and 0-RTT secure connection setup.</p>
+
+        <div class="control-panel">
+          <button id="btnNextStep" class="btn btn-primary">
+            Start TLS Race <i class="fas fa-flag-checkered"></i>
+          </button>
+          <button id="btnReset" class="btn btn-secondary"><i class="fas fa-redo"></i> Reset</button>
+        </div>
+      </header>
+
+      <div class="visualizer-content split-screen">
+        <!-- 1-RTT Track -->
+        <div class="race-track" id="track1RTT">
+          <div class="track-header">
+            1-RTT (New Connection) <span class="time-badge" id="time1RTT">0ms</span>
+          </div>
+          <div class="track-body">
+            <section class="actor-panel client-panel">
+              <div class="actor-header">
+                <h2><i class="fas fa-laptop"></i> Client</h2>
+              </div>
+              <div class="actor-body">
+                <div class="crypto-state">
+                  <div class="state-label">Key Share (a)</div>
+                  <div class="state-val hidden" id="clientKeyShare1RTT"></div>
+                  <div class="state-label">Master Secret</div>
+                  <div class="state-val hidden" id="clientMasterSecret1RTT">
+                    <i class="fas fa-key"></i>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <section class="network-panel">
+              <div class="timeline-container">
+                <div class="timeline-line client-line"></div>
+                <div class="timeline-line server-line"></div>
+                <div class="messages-area" id="messagesArea1RTT"></div>
+              </div>
+            </section>
+
+            <section class="actor-panel server-panel">
+              <div class="actor-header">
+                <h2><i class="fas fa-server"></i> Server</h2>
+              </div>
+              <div class="actor-body">
+                <div class="crypto-state">
+                  <div class="state-label">Key Share (b)</div>
+                  <div class="state-val hidden" id="serverKeyShare1RTT"></div>
+                  <div class="state-label">Master Secret</div>
+                  <div class="state-val hidden" id="serverMasterSecret1RTT">
+                    <i class="fas fa-key"></i>
+                  </div>
+                </div>
+              </div>
+            </section>
+          </div>
+        </div>
+
+        <!-- 0-RTT Track -->
+        <div class="race-track" id="track0RTT">
+          <div class="track-header">
+            0-RTT (Session Resumption) <span class="time-badge early" id="time0RTT">0ms</span>
+          </div>
+          <div class="track-body">
+            <section class="actor-panel client-panel">
+              <div class="actor-header">
+                <h2><i class="fas fa-laptop"></i> Client</h2>
+              </div>
+              <div class="actor-body">
+                <div class="crypto-state">
+                  <div class="state-label">Pre-Shared Key</div>
+                  <div class="state-val hidden" id="clientMasterSecret0RTT">
+                    <i class="fas fa-key"></i>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <section class="network-panel">
+              <div class="timeline-container">
+                <div class="timeline-line client-line"></div>
+                <div class="timeline-line server-line"></div>
+                <div class="messages-area" id="messagesArea0RTT"></div>
+              </div>
+            </section>
+
+            <section class="actor-panel server-panel">
+              <div class="actor-header">
+                <h2><i class="fas fa-server"></i> Server</h2>
+              </div>
+              <div class="actor-body">
+                <div class="crypto-state">
+                  <div class="state-label">Pre-Shared Key</div>
+                  <div class="state-val hidden" id="serverMasterSecret0RTT">
+                    <i class="fas fa-key"></i>
+                  </div>
+                </div>
+              </div>
+            </section>
+          </div>
+        </div>
+      </div>
+
+      <!-- Latency Chart -->
+      <div class="latency-chart-container">
+        <h3>Live Latency Comparison</h3>
+        <div class="chart-track">
+          <div class="chart-label">1-RTT</div>
+          <div class="chart-bar-container"><div class="chart-bar bar-1rtt" id="bar1RTT"></div></div>
+          <div class="chart-value" id="val1RTT">0ms</div>
+        </div>
+        <div class="chart-track">
+          <div class="chart-label">0-RTT</div>
+          <div class="chart-bar-container"><div class="chart-bar bar-0rtt" id="bar0RTT"></div></div>
+          <div class="chart-value" id="val0RTT">0ms</div>
+        </div>
+        <div class="latency-diff" id="latencyDiff"></div>
+      </div>
+
+      <!-- Explanation Panel -->
+      <div class="explanation-panel">
+        <h3><i class="fas fa-info-circle"></i> Protocol Insights</h3>
+        <p id="explanationText">
+          Click "Start TLS Race" to begin. The visualizer will concurrently run both protocols and
+          measure the precise latency difference.
+        </p>
+      </div>
+    </main>
+
+    <script src="tls13-simulator.js"></script>
+    <script src="/modules/quick-notes/quick-notes.js"></script>
+  </body>
+</html>

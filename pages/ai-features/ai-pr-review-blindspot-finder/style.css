@@ -1,0 +1,512 @@
+/* ===== AI PR Review Blindspot Finder ===== */
+:root {
+  --blind-glass: rgba(255, 255, 255, 0.04);
+  --blind-border: rgba(255, 255, 255, 0.1);
+  --blind-muted: rgba(255, 255, 255, 0.62);
+  --blind-accent: #a78bfa;
+  --blind-accent-dim: rgba(167, 139, 250, 0.15);
+  --blind-error: #f87171;
+  --blind-warn: #fbbf24;
+  --blind-info: #60a5fa;
+  --blind-ok: #4ade80;
+  --blind-auth: #f472b6;
+  --blind-crypto: #fbbf24;
+  --blind-mig: #34d399;
+  --blind-ci: #38bdf8;
+}
+
+html.light-mode {
+  --blind-glass: rgba(15, 23, 42, 0.04);
+  --blind-border: rgba(15, 23, 42, 0.12);
+  --blind-muted: rgba(15, 23, 42, 0.65);
+  --blind-accent-dim: rgba(124, 58, 237, 0.12);
+}
+
+.blind-skip-link {
+  position: absolute;
+  left: 1rem;
+  top: -100px;
+  z-index: 10000;
+  padding: 0.6rem 1rem;
+  background: var(--blind-accent);
+  color: #0a0a14;
+  font-weight: 700;
+  border-radius: 8px;
+  text-decoration: none;
+}
+
+.blind-skip-link:focus {
+  top: 1rem;
+  outline: 3px solid #fff;
+  outline-offset: 2px;
+}
+
+.blind-hero {
+  position: relative;
+  overflow: hidden;
+  padding: 7.5rem 1.5rem 4rem;
+  text-align: center;
+  border-bottom: 1px solid var(--blind-border);
+  background:
+    radial-gradient(ellipse at top right, rgba(167, 139, 250, 0.16), transparent 55%),
+    radial-gradient(ellipse at bottom left, rgba(244, 114, 182, 0.1), transparent 50%);
+}
+
+.blind-hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1.1rem;
+  padding: 0.35rem 0.9rem;
+  border-radius: 999px;
+  border: 1px solid rgba(167, 139, 250, 0.35);
+  background: var(--blind-accent-dim);
+  color: var(--blind-accent);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.blind-hero h1 {
+  margin: 0 0 1rem;
+  font-family: 'Orbitron', sans-serif;
+  font-size: clamp(1.9rem, 5vw, 3rem);
+  font-weight: 900;
+  line-height: 1.15;
+}
+
+.blind-hero-accent {
+  display: inline-block;
+  background: linear-gradient(135deg, #a78bfa, #f472b6);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.blind-hero p {
+  max-width: 740px;
+  margin: 0 auto 2rem;
+  color: var(--blind-muted);
+  font-size: 1.05rem;
+  line-height: 1.65;
+  font-family: 'Poppins', sans-serif;
+}
+
+.blind-hero-stats {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1rem;
+}
+
+.blind-stat {
+  min-width: 120px;
+  padding: 0.85rem 1.1rem;
+  border: 1px solid var(--blind-border);
+  border-radius: 14px;
+  background: var(--blind-glass);
+}
+
+.blind-stat-val {
+  display: block;
+  font-family: 'Orbitron', sans-serif;
+  font-size: 1.45rem;
+  font-weight: 700;
+}
+
+.blind-stat-label {
+  font-size: 0.75rem;
+  color: var(--blind-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+#statFiles { color: var(--blind-info); }
+#statBlindspots { color: var(--blind-warn); }
+#statRisk { color: var(--blind-error); }
+
+.blind-main {
+  padding: 2rem 0 4rem;
+  font-family: 'Poppins', sans-serif;
+}
+
+.blind-workspace {
+  display: grid;
+  grid-template-columns: minmax(300px, 1fr) minmax(320px, 1.05fr);
+  gap: 1.5rem;
+  align-items: start;
+}
+
+@media (max-width: 980px) {
+  .blind-workspace {
+    grid-template-columns: 1fr;
+  }
+}
+
+.blind-panel {
+  padding: 1.4rem;
+  border: 1px solid var(--blind-border);
+  border-radius: 18px;
+  background: var(--blind-glass);
+  backdrop-filter: blur(12px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
+}
+
+.blind-panel-header {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1.2rem;
+  padding-bottom: 0.9rem;
+  border-bottom: 1px solid var(--blind-border);
+}
+
+.blind-panel-title {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.blind-panel-title h2 {
+  margin: 0;
+  font-size: 1.15rem;
+  font-weight: 700;
+}
+
+.blind-panel-icon {
+  color: var(--blind-accent);
+}
+
+.blind-label {
+  display: block;
+  margin-bottom: 0.4rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.blind-editors {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.blind-textarea {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0.85rem 1rem;
+  border: 1px solid var(--blind-border);
+  border-radius: 12px;
+  background: rgba(0, 0, 0, 0.25);
+  color: inherit;
+  font-family: 'Fira Code', monospace;
+  font-size: 0.78rem;
+  line-height: 1.5;
+  resize: vertical;
+  min-height: 140px;
+}
+
+html.light-mode .blind-textarea {
+  background: rgba(255, 255, 255, 0.85);
+}
+
+.blind-textarea:focus,
+.blind-preset-btn:focus-visible {
+  outline: 2px solid var(--blind-accent);
+  outline-offset: 2px;
+  border-color: var(--blind-accent);
+}
+
+.blind-hint {
+  margin: 0.5rem 0 0;
+  font-size: 0.8rem;
+  color: var(--blind-muted);
+  line-height: 1.5;
+}
+
+.blind-hint code {
+  font-family: 'Fira Code', monospace;
+  font-size: 0.75rem;
+}
+
+.blind-presets {
+  margin: 1.1rem 0;
+  padding: 0.9rem 1rem;
+  border: 1px solid var(--blind-border);
+  border-radius: 12px;
+}
+
+.blind-preset-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.55rem;
+}
+
+@media (max-width: 560px) {
+  .blind-preset-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.blind-preset-btn {
+  justify-content: flex-start;
+  font-size: 0.82rem;
+}
+
+.blind-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  align-items: center;
+}
+
+.blind-status {
+  margin-top: 0.85rem;
+  min-height: 1.25rem;
+  font-size: 0.85rem;
+  color: var(--blind-muted);
+}
+
+.blind-status.is-error { color: var(--blind-error); }
+.blind-status.is-ok { color: var(--blind-ok); }
+
+.blind-empty {
+  text-align: center;
+  padding: 2.5rem 1rem;
+  color: var(--blind-muted);
+}
+
+.blind-empty i {
+  font-size: 2rem;
+  margin-bottom: 0.75rem;
+  color: var(--blind-accent);
+  opacity: 0.85;
+}
+
+.blind-section {
+  margin-bottom: 1.5rem;
+}
+
+.blind-section h3 {
+  margin: 0 0 0.85rem;
+  font-size: 0.95rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--blind-accent);
+}
+
+.blind-muted {
+  margin: 0.25rem 0 0;
+  font-size: 0.82rem;
+  color: var(--blind-muted);
+  line-height: 1.5;
+}
+
+.blind-score-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.4rem;
+  padding: 1rem 1.1rem;
+  border: 1px solid var(--blind-border);
+  border-radius: 14px;
+  background: rgba(0, 0, 0, 0.15);
+}
+
+html.light-mode .blind-score-card {
+  background: rgba(255, 255, 255, 0.55);
+}
+
+.blind-score-card h3 {
+  margin: 0;
+  font-size: 0.95rem;
+  color: inherit;
+}
+
+.blind-score-ring {
+  flex-shrink: 0;
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  border: 3px solid var(--blind-warn);
+  background: var(--blind-accent-dim);
+  font-family: 'Orbitron', sans-serif;
+  font-size: 1.35rem;
+  font-weight: 700;
+}
+
+.blind-score-ring.is-low { border-color: var(--blind-ok); color: var(--blind-ok); }
+.blind-score-ring.is-mid { border-color: var(--blind-warn); color: var(--blind-warn); }
+.blind-score-ring.is-high { border-color: var(--blind-error); color: var(--blind-error); }
+
+.blind-taxonomy {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.65rem;
+}
+
+@media (max-width: 560px) {
+  .blind-taxonomy {
+    grid-template-columns: 1fr;
+  }
+}
+
+.blind-tax-card {
+  padding: 0.85rem 1rem;
+  border: 1px solid var(--blind-border);
+  border-radius: 12px;
+  background: rgba(0, 0, 0, 0.12);
+}
+
+html.light-mode .blind-tax-card {
+  background: rgba(255, 255, 255, 0.55);
+}
+
+.blind-tax-card h4 {
+  margin: 0 0 0.35rem;
+  font-size: 0.88rem;
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.blind-tax-card p {
+  margin: 0;
+  font-size: 0.78rem;
+  color: var(--blind-muted);
+  line-height: 1.45;
+}
+
+.blind-tax-score {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 0.85rem;
+}
+
+.blind-tax-card.is-auth .blind-tax-score { color: var(--blind-auth); }
+.blind-tax-card.is-crypto .blind-tax-score { color: var(--blind-crypto); }
+.blind-tax-card.is-migration .blind-tax-score { color: var(--blind-mig); }
+.blind-tax-card.is-ci .blind-tax-score { color: var(--blind-ci); }
+.blind-tax-card.is-other .blind-tax-score { color: var(--blind-info); }
+
+.blind-findings {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.blind-finding {
+  padding: 0.85rem 1rem;
+  border: 1px solid var(--blind-border);
+  border-left: 4px solid var(--blind-warn);
+  border-radius: 12px;
+  background: rgba(0, 0, 0, 0.15);
+}
+
+html.light-mode .blind-finding {
+  background: rgba(255, 255, 255, 0.55);
+}
+
+.blind-finding.is-high { border-left-color: var(--blind-error); }
+.blind-finding.is-mid { border-left-color: var(--blind-warn); }
+.blind-finding.is-low { border-left-color: var(--blind-info); }
+.blind-finding.is-ok { border-left-color: var(--blind-ok); }
+.blind-finding.is-test { border-left-color: var(--blind-accent); }
+
+.blind-finding-title {
+  margin: 0 0 0.3rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.blind-finding-body {
+  margin: 0;
+  font-size: 0.82rem;
+  color: var(--blind-muted);
+  line-height: 1.5;
+  white-space: pre-wrap;
+}
+
+.blind-badge {
+  display: inline-block;
+  margin-bottom: 0.35rem;
+  padding: 0.12rem 0.45rem;
+  border-radius: 6px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.blind-badge-high {
+  background: rgba(248, 113, 113, 0.18);
+  color: var(--blind-error);
+}
+
+.blind-badge-mid {
+  background: rgba(251, 191, 36, 0.18);
+  color: var(--blind-warn);
+}
+
+.blind-badge-low {
+  background: rgba(96, 165, 250, 0.18);
+  color: var(--blind-info);
+}
+
+.blind-order {
+  margin: 0 0 1rem;
+  padding-left: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+}
+
+.blind-order li {
+  padding: 0.65rem 0.85rem;
+  border: 1px solid var(--blind-border);
+  border-radius: 10px;
+  background: rgba(0, 0, 0, 0.12);
+  font-size: 0.85rem;
+  line-height: 1.45;
+}
+
+html.light-mode .blind-order li {
+  background: rgba(255, 255, 255, 0.55);
+}
+
+.blind-order code {
+  font-family: 'Fira Code', monospace;
+  font-size: 0.78rem;
+}
+
+.blind-order-meta {
+  display: block;
+  margin-top: 0.25rem;
+  font-size: 0.75rem;
+  color: var(--blind-muted);
+}
+
+.blind-empty[hidden],
+#blindResults[hidden] {
+  display: none !important;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .blind-finding,
+  .blind-order li {
+    animation: blind-fade 0.35s ease both;
+  }
+
+  @keyframes blind-fade {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: none; }
+  }
+}

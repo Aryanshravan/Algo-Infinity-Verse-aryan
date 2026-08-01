@@ -769,6 +769,61 @@
   text-decoration: underline;
 }
 
+/* ─── AI Recommendation Controls ─── */
+.pp-ai-recommend-row {
+  margin-top: 1rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+  justify-content: space-between;
+}
+
+.pp-ai-recommend-controls,
+.pp-ai-recommend-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.pp-ai-recommend-toggle-label,
+.pp-ai-recommend-debounce-label {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  color: var(--text-secondary);
+  font-size: 0.8rem;
+}
+
+.pp-ai-recommend-toggle {
+  cursor: pointer;
+  accent-color: var(--primary);
+}
+
+.pp-ai-recommend-debounce-input {
+  width: 60px;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid var(--glass-border);
+  border-radius: 4px;
+  color: var(--text-primary);
+  padding: 2px 4px;
+  font-size: 0.8rem;
+  text-align: center;
+}
+
+.pp-ai-recommend-status-msg {
+  font-size: 0.85rem;
+  font-weight: 500;
+  opacity: 0;
+  transition: opacity 0.2s ease, color 0.2s ease;
+  color: var(--text-secondary);
+}
+
+.pp-ai-recommend-btn {
+  padding: 0.6rem 1rem;
+  margin-top: 0;
+}
 /* ─── Surprise Me Button ─── */
 .pp-surprise-row {
   display: flex;

@@ -1,25 +1,24 @@
-    <section id="topic-of-the-day" class="section totd-section">
-      <div class="container">
-        <div class="totd-card glass-card big-box">
-          <div class="totd-badge">
-            <i class="fas fa-calendar-day"></i>
-            Topic of the Day
-          </div>
-          <div class="totd-content">
-            <div class="totd-icon" id="totdIcon"></div>
-            <div class="totd-info">
-              <h2 class="totd-title" id="totdTitle"></h2>
-              <p class="totd-desc" id="totdDesc"></p>
-              <div class="totd-meta">
-                <span class="totd-difficulty" id="totdDifficulty"></span>
-                <span class="totd-problems" id="totdProblems"></span>
-              </div>
-            </div>
-          </div>
-          <button type="button" class="btn btn-primary totd-btn" id="totdBtn">
-            <i class="fas fa-book-open"></i> Learn Now
-          </button>
+<section id="topic-of-the-day" class="hp-section">
+  <div class="hp-facts-card" style="background: var(--hp-card); border: 1px solid var(--hp-card-border);">
+    <div class="hp-facts-header">
+      <div class="hp-facts-title">
+        <span class="hp-facts-icon"><i class="fas fa-calendar-day"></i></span>
+        <h3>Topic of the Day</h3>
+      </div>
+    </div>
+    <div class="hp-facts-content" style="display: flex; align-items: center; gap: 24px; flex-wrap: wrap;">
+      <div class="hp-topic-icon" id="totdIcon" style="font-size: 2.5rem; margin: 0; color: var(--hp-lavender);"></div>
+      <div style="flex: 1; min-width: 200px;">
+        <h2 class="hp-visualizer-info-title" id="totdTitle" style="font-size: 1.4rem; margin: 0 0 8px;"></h2>
+        <p class="hp-visualizer-info-desc" id="totdDesc" style="margin: 0 0 12px;"></p>
+        <div style="display: flex; gap: 16px; font-family: 'Inter', sans-serif; font-size: 0.82rem; color: var(--hp-text-tertiary);">
+          <span class="totd-difficulty" id="totdDifficulty"></span>
+          <span class="totd-problems" id="totdProblems"></span>
         </div>
       </div>
-    </section>
-
+      <button type="button" class="hp-btn hp-btn-primary totd-btn" id="totdBtn" style="flex-shrink: 0;">
+        <i class="fas fa-book-open"></i> Learn Now
+      </button>
+    </div>
+  </div>
+</section>

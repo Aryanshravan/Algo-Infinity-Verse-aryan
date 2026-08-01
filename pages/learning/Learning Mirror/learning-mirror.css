@@ -20,7 +20,8 @@
 
 html {
   scroll-behavior: smooth;
-`@media` (prefers-reduced-motion: no-preference) {
+}
+@media(prefers-reduced-motion: no-preference) {
   html {
     scroll-behavior: smooth;
   }
@@ -520,24 +521,14 @@ button {
     font-size:1.8rem;
     font-weight:700;
 }
-
 #selectedPeriod{
     color:var(--accent);
     background:linear-gradient(
         135deg,
         #7c83ff,
         #36d1dc
-`#selectedPeriod`{
-    color:var(--accent);
-    background:linear-gradient(
-        135deg,
-        `#7c83ff`,
-        `#36d1dc`
     );
     background-clip:text;
     -webkit-background-clip:text;
     -webkit-text-fill-color:transparent;
-}
-#selectedPeriod{
-    color:#7c83ff;
 }

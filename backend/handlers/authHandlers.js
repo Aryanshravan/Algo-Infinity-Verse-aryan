@@ -14,12 +14,7 @@ import {
   normalizeAuthDelay,
   createUserAtomic,
 } from '../utils/helpers.js';
-import {
-  getClientIdentifier,
-  isLoginRateLimited,
-  recordLoginAttempt,
-  LOGIN_WINDOW_MS,
-} from '../services/auth.service.js';
+import { getClientIdentifier } from '../services/auth.service.js';
 import { applyRateLimit, signupLimiter, loginLimiter } from '../utils/rateLimiter.js';
 import { initializeFirebase, COLLECTIONS } from '../../firebase.js';
 import { validateAndNormalizeEmail } from '../utils/emailValidation.js';
@@ -122,20 +117,8 @@ export async function handleSignup(req, res) {
 }
 
 export async function handleLogin(req, res) {
-  const clientId = getClientIdentifier(req);
-
-  if (isLoginRateLimited(clientId)) {
-    void 0;
-    await normalizeAuthDelay();
-    return sendJson(
-      res,
-      429,
-      {
-        error: 'Too many failed login attempts. Please wait 15 minutes before trying again.',
-        retryAfterSeconds: Math.ceil(LOGIN_WINDOW_MS / 1000),
-      },
-      { 'Retry-After': String(Math.ceil(LOGIN_WINDOW_MS / 1000)) }
-    );
+  if (!applyRateLimit(req, res, loginLimiter, 'Too many login attempts. Please try again later.')) {
+    return;
   }
 
   const payload = await readJsonBody(req);
@@ -150,7 +133,6 @@ export async function handleLogin(req, res) {
   const user = await getUserByEmail(email, useFirestore, db);
 
   if (!user || !passwordMatches(password, user.password)) {
-    recordLoginAttempt(clientId);
     await normalizeAuthDelay();
     return sendJson(res, 401, { error: 'Invalid email or password.' });
   }

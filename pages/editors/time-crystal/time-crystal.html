@@ -1,0 +1,294 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Time Crystal Thermodynamics | Algo Infinity Verse</title>
+    <link rel="stylesheet" href="/styles.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <!-- Monaco Editor -->
+    <script src="https://unpkg.com/monaco-editor@0.36.1/min/vs/loader.js"></script>
+    <style>
+      body { margin: 0; overflow: hidden; background: #000; font-family: 'Poppins', sans-serif; color: #fff; }
+      .app-container { display: flex; height: 100vh; }
+      
+      .sidebar { width: 450px; background: rgba(15, 23, 42, 0.95); border-right: 1px solid #d946ef; display: flex; flex-direction: column; z-index: 10; }
+      .header { padding: 20px; border-bottom: 1px solid #334155; }
+      .header h2 { margin: 0; color: #d946ef; font-family: 'Orbitron', sans-serif; font-size: 1.2rem; }
+      .header p { margin: 5px 0 0 0; font-size: 0.8rem; color: #94a3b8; }
+      
+      #editor-container { flex: 1; min-height: 300px; }
+      
+      .controls { padding: 20px; border-top: 1px solid #334155; background: rgba(0,0,0,0.5); }
+      .btn { background: linear-gradient(90deg, #c026d3, #a21caf); color: #fff; border: none; padding: 10px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; transition: 0.3s; }
+      .btn:hover { background: #d946ef; transform: translateY(-2px); box-shadow: 0 0 15px rgba(217, 70, 239, 0.5); }
+      
+      .sim-container { flex: 1; position: relative; background: #020617; overflow: hidden; }
+      
+      canvas { width: 100%; height: 100%; display: block; }
+      
+      .hud { position: absolute; top: 20px; left: 20px; background: rgba(0,0,0,0.8); padding: 15px; border-radius: 8px; border: 1px solid #d946ef; width: 280px; z-index: 10; pointer-events: none; }
+      .hud h3 { margin: 0 0 10px 0; color: #d946ef; font-size: 1rem; font-family: 'Orbitron', sans-serif; }
+      .metric { display: flex; justify-content: space-between; font-size: 0.8rem; color: #cbd5e1; margin-bottom: 5px; }
+      .val { font-weight: bold; font-family: monospace; }
+      .val-entropy { color: #facc15; }
+      .val-period { color: #38bdf8; }
+    </style>
+  </head>
+  <body>
+    
+    <div class="app-container">
+      <div class="sidebar">
+        <div class="header">
+          <h2><i class="fas fa-gem"></i> Time Crystal Sandbox</h2>
+          <p>Break time-translation symmetry</p>
+        </div>
+        
+        <div id="editor-container"></div>
+        
+        <div class="controls">
+          <button class="btn" onclick="initiateDrive()"><i class="fas fa-wave-square"></i> Initiate Laser Drive</button>
+        </div>
+      </div>
+      
+      <div class="sim-container">
+        <!-- Quantum noise background -->
+        <div style="position: absolute; inset:0; background-image: radial-gradient(circle, rgba(217, 70, 239, 0.05) 1px, transparent 1px); background-size: 20px 20px; pointer-events: none; z-index: 0;"></div>
+        
+        <canvas id="latticeCanvas" style="position: relative; z-index: 1;"></canvas>
+        
+        <div class="hud">
+          <h3>Thermodynamic Telemetry</h3>
+          <div class="metric"><span>Lattice Entropy:</span> <span class="val val-entropy" id="entVal">0.0 J/K</span></div>
+          <div class="metric"><span>Oscillation Period:</span> <span class="val val-period" id="perVal">0.0 ms</span></div>
+          <div class="metric" style="margin-top: 10px; border-top: 1px solid #334155; padding-top: 5px;">
+            <span>State:</span> <span class="val" id="statusVal" style="color:#94a3b8">STATIC LATTICE</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      let editor;
+      require.config({ paths: { 'vs': 'https://unpkg.com/monaco-editor@0.36.1/min/vs' }});
+      require(['vs/editor/editor.main'], function() {
+        editor = monaco.editor.create(document.getElementById('editor-container'), {
+          value: `// Time Crystal Drive Algorithm
+// Time crystals oscillate continuously without energy loss, BUT only if driven out of equilibrium correctly.
+// You must apply a laser pulse exactly out of phase with the crystal's natural period (T).
+
+function calculateLaserPulse(crystalPhase, naturalPeriodT) {
+    // Return true to fire laser, false to hold.
+    // crystalPhase goes from 0 to 1.
+    // Time crystals exhibit discrete time-translation symmetry breaking,
+    // meaning they oscillate at a multiple of the driving period (e.g., 2T).
+    
+    // Naive logic: Fire randomly!
+    // Result: The crystal absorbs energy, entropy spikes, and it melts into a standard thermal state.
+    
+    if (Math.random() > 0.5) return true;
+    return false;
+}`,
+          language: 'javascript',
+          theme: 'vs-dark',
+          minimap: { enabled: false },
+          automaticLayout: true
+        });
+      });
+
+      const canvas = document.getElementById('latticeCanvas');
+      const ctx = canvas.getContext('2d');
+      
+      let isSimulating = false;
+      let time = 0;
+      let ions = [];
+      
+      let entropy = 0;
+      let crystalPhase = 0;
+      let naturalPeriod = 1.0;
+      let laserFired = false;
+      
+      function resize() { 
+          canvas.width = canvas.clientWidth; 
+          canvas.height = canvas.clientHeight;
+          initLattice();
+      }
+      
+      function initLattice() {
+          ions = [];
+          let cx = canvas.width/2;
+          let cy = canvas.height/2;
+          
+          let rows = 10;
+          let cols = 10;
+          let spacing = 40;
+          
+          let startX = cx - ((cols-1) * spacing)/2;
+          let startY = cy - ((rows-1) * spacing)/2;
+          
+          for(let r=0; r<rows; r++) {
+              for(let c=0; c<cols; c++) {
+                  ions.push({
+                      basex: startX + c * spacing,
+                      basey: startY + r * spacing,
+                      x: startX + c * spacing,
+                      y: startY + r * spacing,
+                      spin: (r+c)%2 === 0 ? 1 : -1, // Alternating spin state
+                      thermalNoiseX: 0,
+                      thermalNoiseY: 0
+                  });
+              }
+          }
+      }
+      
+      setTimeout(resize, 100);
+      window.addEventListener('resize', resize);
+
+      function animate() {
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+          
+          if (isSimulating) {
+              time += 0.05;
+              
+              // Natural evolution of phase
+              crystalPhase += 0.02;
+              if (crystalPhase >= 1.0) crystalPhase = 0;
+              
+              // User logic
+              laserFired = false;
+              try {
+                  eval(editor.getValue());
+                  laserFired = !!calculateLaserPulse(crystalPhase, naturalPeriod);
+              } catch(e) {}
+              
+              // Physics Evaluation
+              // A perfect time crystal requires a pi-pulse exactly at T=1.0 (phase ~ 0 or 1).
+              // If laser fires out of rhythm, it adds thermal energy (entropy).
+              // If it fires perfectly in rhythm, it flips the spins without adding heat.
+              
+              if (laserFired) {
+                  // Check timing accuracy
+                  let error = Math.min(crystalPhase, 1.0 - crystalPhase); // Distance from 0/1 edge
+                  if (error < 0.1) {
+                      // Perfect pulse! Flip all spins
+                      for(let ion of ions) ion.spin *= -1;
+                      
+                      // Slight entropy reduction (cooling)
+                      entropy = Math.max(0, entropy - 0.5);
+                  } else {
+                      // Bad pulse! Adds massive heat
+                      entropy += error * 5;
+                  }
+                  
+                  // Visual flash
+                  ctx.fillStyle = 'rgba(217, 70, 239, 0.1)';
+                  ctx.fillRect(0,0, canvas.width, canvas.height);
+              }
+              
+              // Natural entropy decay if not driven? No, closed quantum system thermalizes.
+              entropy += 0.01; 
+              
+              // Update ions
+              for(let ion of ions) {
+                  // Calculate position based on spin and phase
+                  let flipAnim = Math.sin(crystalPhase * Math.PI); // 0 to 1 back to 0
+                  
+                  // Add thermal noise based on entropy
+                  ion.thermalNoiseX = (Math.random()-0.5) * entropy * 0.2;
+                  ion.thermalNoiseY = (Math.random()-0.5) * entropy * 0.2;
+                  
+                  ion.x = ion.basex + ion.thermalNoiseX;
+                  ion.y = ion.basey + ion.thermalNoiseY + (ion.spin * 10 * Math.cos(crystalPhase * Math.PI * 2));
+              }
+              
+              // HUD Updates
+              document.getElementById('entVal').innerText = entropy.toFixed(2) + " J/K";
+              document.getElementById('perVal').innerText = (naturalPeriod * 2).toFixed(1) + " ms (2T)";
+              
+              if (entropy > 50) {
+                  // Thermal Equilibrium (Death of the time crystal)
+                  isSimulating = false;
+                  document.getElementById('statusVal').innerText = "THERMAL EQUILIBRIUM. MELTDOWN.";
+                  document.getElementById('statusVal').style.color = "#ef4444";
+              } else if (time > 10 && entropy < 10) {
+                  document.getElementById('statusVal').innerText = "STABLE TIME-TRANSLATION SYMMETRY BREAK";
+                  document.getElementById('statusVal').style.color = "#10b981";
+              } else {
+                  document.getElementById('statusVal').innerText = "DRIVING LATTICE...";
+                  document.getElementById('statusVal').style.color = "#38bdf8";
+              }
+          }
+
+          // Draw connections (Lattice bonds)
+          ctx.strokeStyle = \`rgba(148, 163, 184, \${Math.max(0, 0.5 - entropy/100)})\`;
+          ctx.lineWidth = 1;
+          for(let i=0; i<ions.length; i++) {
+              let current = ions[i];
+              // Right neighbor
+              if (i % 10 !== 9) {
+                  let right = ions[i+1];
+                  ctx.beginPath(); ctx.moveTo(current.x, current.y); ctx.lineTo(right.x, right.y); ctx.stroke();
+              }
+              // Bottom neighbor
+              if (i < 90) {
+                  let bottom = ions[i+10];
+                  ctx.beginPath(); ctx.moveTo(current.x, current.y); ctx.lineTo(bottom.x, bottom.y); ctx.stroke();
+              }
+          }
+
+          // Draw ions
+          for(let ion of ions) {
+              ctx.beginPath();
+              ctx.arc(ion.x, ion.y, 6, 0, Math.PI*2);
+              
+              if (entropy > 50) {
+                  // Melted state
+                  ctx.fillStyle = '#f97316';
+              } else if (ion.spin === 1) {
+                  // Spin Up
+                  ctx.fillStyle = '#38bdf8';
+              } else {
+                  // Spin Down
+                  ctx.fillStyle = '#d946ef';
+              }
+              
+              ctx.fill();
+              
+              // Draw spin arrow
+              if(entropy <= 50) {
+                  ctx.strokeStyle = '#fff';
+                  ctx.beginPath();
+                  ctx.moveTo(ion.x, ion.y + (ion.spin * 3));
+                  ctx.lineTo(ion.x, ion.y - (ion.spin * 3));
+                  ctx.stroke();
+              }
+          }
+
+          // Draw laser
+          if(laserFired) {
+              let cx = canvas.width/2;
+              let cy = canvas.height/2;
+              let grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, 300);
+              grad.addColorStop(0, 'rgba(217, 70, 239, 0.4)');
+              grad.addColorStop(1, 'rgba(217, 70, 239, 0)');
+              ctx.fillStyle = grad;
+              ctx.fillRect(0,0, canvas.width, canvas.height);
+          }
+
+          requestAnimationFrame(animate);
+      }
+      animate();
+
+      function initiateDrive() {
+          if(isSimulating) return;
+          isSimulating = true;
+          time = 0;
+          entropy = 0;
+          crystalPhase = 0;
+          laserFired = false;
+          initLattice();
+      }
+    </script>
+  </body>
+</html>

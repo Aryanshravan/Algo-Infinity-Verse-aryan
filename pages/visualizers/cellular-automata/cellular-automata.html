@@ -1,0 +1,314 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Cellular Automata Sandbox | Algo Infinity Verse</title>
+    <meta
+      name="description"
+      content="Interactive Multi-Ruleset Cellular Automata Sandbox supporting Conway's Game of Life, Wireworld, and Brian's Brain."
+    />
+    <link rel="stylesheet" href="/styles.css" />
+    <link rel="stylesheet" href="style.css" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&amp;family=Poppins:wght@300;400;500;600;700&amp;family=Fira+Code:wght@400;500;600&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+
+    <!-- Theme Initialization Script -->
+    <script>
+      (function () {
+        try {
+          var storedTheme = localStorage.getItem('theme');
+          var prefersLight = window.matchMedia('(prefers-color-scheme: light)').matches;
+          var theme = storedTheme || (prefersLight ? 'light' : 'dark');
+          if (theme === 'light') {
+            document.documentElement.classList.add('light-mode');
+          } else {
+            document.documentElement.classList.remove('light-mode');
+          }
+        } catch (e) {}
+      })();
+    </script>
+  </head>
+  <body data-page="cellular-automata">
+    <!-- Loading Screen -->
+    <div id="loading-screen" class="hidden">
+      <div class="loader">
+        <div class="infinity-loader">∞</div>
+        <h2>Algo Infinity Verse</h2>
+        <div class="loading-bar">
+          <div class="loading-progress"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Scroll to Top Button -->
+    <button type="button" id="scrollTopBtn" class="scroll-top-btn" aria-label="Scroll to top">
+      <i class="fas fa-arrow-up"></i>
+    </button>
+
+    <!-- Navigation Bar -->
+    <div id="navbar-placeholder"></div>
+
+    <!-- Hero Section -->
+    <section id="home" class="hero visualizer-hero">
+      <div class="hero-background">
+        <div class="stars"></div>
+        <div class="stars2"></div>
+        <div class="stars3"></div>
+      </div>
+      <div class="hero-content">
+        <h1 class="hero-title">
+          <span class="title-line">Interactive</span>
+          <span class="main-title gradient-text">Cellular Automata Sandbox</span>
+          <span class="subtitle">Explore Conway's Life, Wireworld, and Brian's Brain</span>
+        </h1>
+        <div class="typing-container">
+          <span class="typing-text_visualizer" id="typingTextVisualizer"></span>
+          <span class="typing-cursor">|</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Main Visualizer Dashboard -->
+    <section class="section" id="visualizer-section">
+      <div class="container">
+        <div class="visualizer-container">
+          <!-- LEFT / MAIN CONTENT: Visualizer canvas -->
+          <div class="visualizer-main-panel">
+            <div class="visualizer-card" style="position: relative; padding: 0">
+              <div
+                class="canvas-wrapper"
+                id="canvasWrapper"
+                style="
+                  display: flex;
+                  justify-content: center;
+                  align-items: center;
+                  background: #0b0c10;
+                  border-radius: 12px;
+                  overflow: hidden;
+                  height: 600px;
+                  width: 100%;
+                "
+              >
+                <canvas
+                  id="caCanvas"
+                  tabindex="0"
+                  aria-label="Interactive Cellular Automata Canvas"
+                  style="width: 100%; height: 100%; cursor: crosshair"
+                ></canvas>
+              </div>
+            </div>
+          </div>
+
+          <!-- RIGHT / SIDEBAR CONTENT: Controls -->
+          <div class="visualizer-sidebar">
+            <!-- Controls Card -->
+            <div class="visualizer-card" style="position: relative">
+              <h3 style="margin-bottom: 1rem">
+                <i class="fas fa-sliders-h" style="color: var(--accent); margin-right: 0.5rem"></i
+                >Controls
+              </h3>
+
+              <!-- Ruleset Select -->
+              <div class="control-group">
+                <label for="rulesetSelect">Ruleset</label>
+                <select id="rulesetSelect" class="control-input">
+                  <option value="conway">Conway's Game of Life</option>
+                  <option value="wireworld">Wireworld</option>
+                  <option value="briansBrain">Brian's Brain</option>
+                </select>
+              </div>
+
+              <!-- Speed/Delay -->
+              <div class="control-group">
+                <label for="speedRange"
+                  >Simulation FPS <span class="val-display" id="speedDisplay">15</span></label
+                >
+                <input
+                  type="range"
+                  id="speedRange"
+                  min="1"
+                  max="60"
+                  value="15"
+                  class="slider-custom"
+                />
+              </div>
+
+              <!-- Brush Size -->
+              <div class="control-group">
+                <label for="brushSizeRange"
+                  >Brush Size <span class="val-display" id="brushDisplay">1</span></label
+                >
+                <input
+                  type="range"
+                  id="brushSizeRange"
+                  min="1"
+                  max="5"
+                  value="1"
+                  class="slider-custom"
+                />
+              </div>
+
+              <!-- Draw State Selector -->
+              <div class="control-group">
+                <label for="drawStateSelect">Draw State</label>
+                <select id="drawStateSelect" class="control-input">
+                  <option value="1">Alive</option>
+                  <option value="0">Dead</option>
+                </select>
+              </div>
+
+              <!-- Presets -->
+              <div class="control-group">
+                <label for="presetSelect">Load Preset</label>
+                <select id="presetSelect" class="control-input">
+                  <option value="">-- Select Preset --</option>
+                  <option value="random">Random Noise</option>
+                  <option value="glider">Glider (Conway)</option>
+                  <option value="gosper">Gosper Gun (Conway)</option>
+                  <option value="wireworldClock">Clock (Wireworld)</option>
+                </select>
+              </div>
+
+              <div class="btn-control-row" style="margin-top: 1.5rem">
+                <button type="button" id="startBtn" class="btn btn-primary btn-control">
+                  <i class="fas fa-play"></i> Play
+                </button>
+                <button
+                  type="button"
+                  id="pauseBtn"
+                  class="btn btn-secondary btn-control"
+                  style="display: none"
+                >
+                  <i class="fas fa-pause"></i> Pause
+                </button>
+                <button type="button" id="stepBtn" class="btn btn-secondary btn-control">
+                  <i class="fas fa-step-forward"></i> Step
+                </button>
+                <button
+                  type="button"
+                  id="clearBtn"
+                  class="btn btn-secondary btn-control"
+                  style="background-color: rgba(255, 0, 0, 0.2)"
+                >
+                  <i class="fas fa-trash"></i> Clear
+                </button>
+              </div>
+            </div>
+
+            <!-- Telemetry & Stats Card -->
+            <div class="visualizer-card" style="position: relative">
+              <h3 style="margin-bottom: 1rem">
+                <i class="fas fa-chart-line" style="color: var(--accent); margin-right: 0.5rem"></i
+                >Telemetry
+              </h3>
+              <div
+                style="
+                  display: grid;
+                  grid-template-columns: repeat(2, 1fr);
+                  gap: 10px;
+                  margin-bottom: 10px;
+                "
+              >
+                <div
+                  style="
+                    background: var(--bg-tertiary);
+                    padding: 8px;
+                    border-radius: 6px;
+                    text-align: center;
+                  "
+                >
+                  <div style="font-size: 0.75rem; color: var(--text-secondary)">Generation</div>
+                  <div
+                    id="genCount"
+                    style="font-size: 1.2rem; font-weight: bold; color: var(--accent)"
+                  >
+                    0
+                  </div>
+                </div>
+                <div
+                  style="
+                    background: var(--bg-tertiary);
+                    padding: 8px;
+                    border-radius: 6px;
+                    text-align: center;
+                  "
+                >
+                  <div style="font-size: 0.75rem; color: var(--text-secondary)">Active Cells</div>
+                  <div
+                    id="activeCount"
+                    style="font-size: 1.2rem; font-weight: bold; color: var(--accent)"
+                  >
+                    0
+                  </div>
+                </div>
+              </div>
+              <div
+                id="stateFrequencies"
+                style="
+                  font-size: 0.8rem;
+                  color: var(--text-secondary);
+                  margin-bottom: 10px;
+                  display: flex;
+                  flex-direction: column;
+                  gap: 4px;
+                "
+              >
+                <!-- Dynamically populated state frequencies -->
+              </div>
+              <canvas
+                id="telemetryCanvas"
+                style="
+                  width: 100%;
+                  height: 120px;
+                  background: #050608;
+                  border-radius: 6px;
+                  display: block;
+                  border: 1px solid var(--border-color);
+                "
+              ></canvas>
+            </div>
+
+            <!-- Rules Info Panel -->
+            <div class="visualizer-card" style="position: relative">
+              <h3 id="rulesInfoTitle">Conway's Game of Life</h3>
+              <div class="complexity-grid" style="display: block">
+                <p
+                  id="rulesDescription"
+                  style="font-size: 0.9rem; line-height: 1.5; color: var(--text-secondary)"
+                >
+                  - Any live cell with 2 or 3 live neighbours survives.<br />
+                  - Any dead cell with exactly 3 live neighbours becomes a live cell.<br />
+                  - All other live cells die in the next generation.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- FOOTER -->
+    <div id="footer-placeholder"></div>
+
+    <!-- Scripts -->
+    <script src="/auth.js"></script>
+    <script src="/bootstrap-legacy.js"></script>
+
+    <script src="/script.js"></script>
+    <script type="module" src="/dist/legacy-bundle.mjs"></script>
+    <script src="/theme.js"></script>
+    <script type="module" src="script.js"></script>
+
+    <script>
+      loadPartial('navbar-placeholder', '/partials/navbar.html');
+      loadPartial('footer-placeholder', '/partials/footer.html');
+    </script>
+  </body>
+</html>

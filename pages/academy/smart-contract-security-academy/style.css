@@ -1,0 +1,304 @@
+:root {
+  --scs-bg: #0a0e1a;
+  --scs-card-bg: rgba(15, 23, 42, 0.85);
+  --scs-card-border: rgba(99, 102, 241, 0.25);
+  --scs-text: #f8fafc;
+  --scs-text-muted: #94a3b8;
+  --scs-primary: #818cf8;
+  --scs-primary-glow: rgba(129, 140, 248, 0.35);
+  --scs-secondary: #38bdf8;
+  --scs-success: #10b981;
+  --scs-warning: #f59e0b;
+  --scs-danger: #ef4444;
+  --scs-code-bg: #030712;
+  --scs-radius: 14px;
+}
+
+html.light-mode {
+  --scs-bg: #f8fafc;
+  --scs-card-bg: rgba(255, 255, 255, 0.9);
+  --scs-card-border: rgba(99, 102, 241, 0.3);
+  --scs-text: #0f172a;
+  --scs-text-muted: #64748b;
+  --scs-primary: #4f46e5;
+  --scs-primary-glow: rgba(79, 70, 229, 0.2);
+  --scs-secondary: #0284c7;
+  --scs-success: #059669;
+  --scs-warning: #d97706;
+  --scs-danger: #dc2626;
+  --scs-code-bg: #f1f5f9;
+}
+
+body[data-page="smart-contract-academy"] {
+  background-color: var(--scs-bg);
+  color: var(--scs-text);
+  font-family: 'Inter', sans-serif;
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+}
+
+.scs-header {
+  background: rgba(15, 23, 42, 0.85);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--scs-card-border);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  padding: 12px 24px;
+}
+
+.scs-header-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.scs-back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--scs-primary);
+  text-decoration: none;
+  font-weight: 600;
+  padding: 8px 14px;
+  background: rgba(129, 140, 248, 0.1);
+  border-radius: 8px;
+}
+
+.scs-back-btn:hover {
+  background: var(--scs-primary);
+  color: #fff;
+}
+
+.scs-title-area h1 {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 1.4rem;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.scs-title-area p {
+  margin: 4px 0 0 0;
+  font-size: 0.85rem;
+  color: var(--scs-text-muted);
+}
+
+.scs-icon-btn {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--scs-card-border);
+  color: var(--scs-text);
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.scs-main {
+  max-width: 1400px;
+  margin: 24px auto;
+  padding: 0 24px;
+}
+
+.scs-hero-card {
+  background: linear-gradient(135deg, rgba(129, 140, 248, 0.12), rgba(56, 189, 248, 0.08));
+  border: 1px solid var(--scs-card-border);
+  border-radius: var(--scs-radius);
+  padding: 24px;
+  margin-bottom: 24px;
+}
+
+.scs-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(129, 140, 248, 0.2);
+  color: var(--scs-primary);
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+
+.scs-tabs-nav {
+  display: flex;
+  gap: 12px;
+  border-bottom: 1px solid var(--scs-card-border);
+  margin-bottom: 24px;
+}
+
+.scs-tab-btn {
+  background: transparent;
+  border: none;
+  color: var(--scs-text-muted);
+  font-weight: 600;
+  padding: 10px 18px;
+  border-radius: 10px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.scs-tab-btn.active {
+  color: var(--scs-primary);
+  background: rgba(129, 140, 248, 0.15);
+  border: 1px solid var(--scs-card-border);
+}
+
+.scs-tab-content {
+  display: none;
+}
+
+.scs-tab-content.active {
+  display: block;
+}
+
+.scs-card {
+  background: var(--scs-card-bg);
+  border: 1px solid var(--scs-card-border);
+  border-radius: var(--scs-radius);
+  padding: 20px;
+}
+
+.scs-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--scs-card-border);
+}
+
+.scs-teardown-grid {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  gap: 24px;
+}
+
+.scs-vector-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.scs-vector-item {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--scs-card-border);
+  border-radius: 8px;
+  padding: 12px;
+  cursor: pointer;
+  font-size: 0.88rem;
+  font-weight: 600;
+}
+
+.scs-vector-item.active {
+  background: rgba(129, 140, 248, 0.18);
+  border-color: var(--scs-primary);
+  color: var(--scs-primary);
+}
+
+.scs-code-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.scs-code-box {
+  width: 100%;
+  height: 320px;
+  background: var(--scs-code-bg);
+  border: 1px solid var(--scs-card-border);
+  border-radius: 8px;
+  color: #38bdf8;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.82rem;
+  padding: 12px;
+  box-sizing: border-box;
+  resize: none;
+}
+
+.scs-trace-layout {
+  display: grid;
+  grid-template-columns: 1fr 340px;
+  gap: 20px;
+}
+
+.scs-trace-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.scs-step-item {
+  background: rgba(255, 255, 255, 0.03);
+  border-left: 4px solid var(--scs-card-border);
+  padding: 12px;
+  border-radius: 8px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.85rem;
+}
+
+.scs-step-item.active {
+  border-left-color: var(--scs-danger);
+  background: rgba(239, 68, 68, 0.1);
+}
+
+.scs-state-box {
+  background: var(--scs-code-bg);
+  border: 1px solid var(--scs-card-border);
+  border-radius: 8px;
+  padding: 12px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.8rem;
+  color: #10b981;
+  height: 220px;
+}
+
+.scs-checklist-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.scs-check-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.scs-btn-main {
+  background: var(--scs-primary);
+  color: #fff;
+  border: none;
+  font-weight: 700;
+  padding: 12px 24px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.scs-btn-sm {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--scs-card-border);
+  color: var(--scs-text);
+  padding: 6px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.85rem;
+}
+
+.scs-btn-sm.primary {
+  background: var(--scs-primary);
+  color: #fff;
+}

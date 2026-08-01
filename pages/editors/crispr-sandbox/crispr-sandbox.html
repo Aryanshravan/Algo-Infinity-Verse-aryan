@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CRISPR-Cas9 Genetic Sandbox | Algo Infinity Verse</title>
+    <link rel="stylesheet" href="/styles.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+      .crispr-container { padding: 40px 20px; max-width: 1200px; margin: 0 auto; color: #e2e8f0; }
+      .crispr-panel { background: rgba(15, 23, 42, 0.8); border: 1px solid #8b5cf6; padding: 20px; border-radius: 12px; margin-bottom: 20px; }
+      .dna-sequence { font-family: monospace; font-size: 1.2rem; letter-spacing: 2px; color: #cbd5e1; word-break: break-all; margin: 10px 0; background: rgba(0,0,0,0.5); padding: 10px; border-radius: 8px; }
+      .target-highlight { color: #facc15; font-weight: bold; background: rgba(250, 204, 21, 0.2); padding: 0 2px; border-radius: 2px; }
+      .btn-crispr { background: linear-gradient(90deg, #8b5cf6, #3b82f6); color: white; border: none; padding: 10px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.3s; margin-top: 10px; }
+      .btn-crispr:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(139,92,246,0.4); }
+      .metric-box { display: flex; gap: 20px; margin-bottom: 20px; }
+      .metric { background: #1e293b; padding: 15px; border-radius: 8px; flex: 1; text-align: center; border: 1px solid #334155; }
+      .metric-val { font-size: 1.8rem; font-weight: bold; color: #8b5cf6; margin-top: 5px; }
+      .console { background: #000; color: #a5f3fc; font-family: monospace; font-size: 0.8rem; padding: 10px; height: 150px; overflow-y: auto; border-radius: 8px; border: 1px solid #3b82f6; }
+    </style>
+  </head>
+  <body class="dark-mode" style="background: #020617;">
+    <div id="navbar-placeholder"></div>
+
+    <div class="crispr-container">
+      <h1 style="color: #8b5cf6; font-family: 'Orbitron', sans-serif;"><i class="fas fa-cut"></i> CRISPR-Cas9 Evolutionary Simulator</h1>
+      <p style="color: #94a3b8; margin-bottom: 30px;">Deploy guide RNA (gRNA) targeting algorithms to simulate generational gene editing across a biological population.</p>
+      
+      <div style="display: flex; gap: 20px;">
+        <div style="flex: 1;">
+          <div class="crispr-panel">
+            <h3><i class="fas fa-dna"></i> Target Allele Generation</h3>
+            <p style="font-size: 0.85rem; color: #94a3b8;">Original Genome (Patient Zero):</p>
+            <div id="genome" class="dna-sequence">ATGCGATAGCTAGCTAGCTGATCGATCGATCGATCGATCG</div>
+            
+            <p style="font-size: 0.85rem; color: #94a3b8; margin-top: 15px;">Target Allele (Disease Marker):</p>
+            <input type="text" id="targetAllele" value="GCTAG" style="width: 100%; padding: 10px; background: #000; color: #facc15; border: 1px solid #334155; font-family: monospace; border-radius: 4px;">
+            
+            <button class="btn-crispr" onclick="runSimulation()"><i class="fas fa-play"></i> Run Generational Editing</button>
+          </div>
+
+          <div class="crispr-panel">
+            <h3><i class="fas fa-terminal"></i> Laboratory Console</h3>
+            <div id="labConsole" class="console">
+              > Lab initialized.<br>
+              > Awaiting CRISPR payload injection...
+            </div>
+          </div>
+        </div>
+
+        <div style="flex: 1;">
+          <div class="crispr-panel">
+            <h3><i class="fas fa-chart-line"></i> Evolutionary Viability</h3>
+            <div class="metric-box">
+              <div class="metric">
+                <div style="font-size: 0.8rem; color: #94a3b8;">Generation</div>
+                <div id="genCount" class="metric-val">0</div>
+              </div>
+              <div class="metric">
+                <div style="font-size: 0.8rem; color: #94a3b8;">Fitness Score</div>
+                <div id="fitnessScore" class="metric-val" style="color: #10b981;">0.0%</div>
+              </div>
+            </div>
+            <canvas id="fitnessChart"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="/script.js"></script>
+    <script type="module" src="/dist/legacy-bundle.mjs"></script>
+    <script>
+      fetch('/partials/navbar.html').then(r=>r.text()).then(html => document.getElementById('navbar-placeholder').innerHTML = html).catch(e => console.log('Navbar load failed.'));
+
+      const genomeEl = document.getElementById("genome");
+      const consoleEl = document.getElementById("labConsole");
+      const baseGenome = "ATGCGATAGCTAGCTAGCTGATCGATCGATCGATCGATCG";
+      
+      function log(msg, color="#a5f3fc") {
+        consoleEl.innerHTML += `<span style="color:${color}">> ${msg}</span><br>`;
+        consoleEl.scrollTop = consoleEl.scrollHeight;
+      }
+
+      let chart;
+      function initChart() {
+        const ctx = document.getElementById('fitnessChart');
+        chart = new Chart(ctx, {
+          type: 'line',
+          data: {
+            labels: [],
+            datasets: [{
+              label: 'Population Fitness (%)',
+              data: [],
+              borderColor: '#8b5cf6',
+              tension: 0.4,
+              fill: true,
+              backgroundColor: 'rgba(139, 92, 246, 0.1)'
+            }]
+          },
+          options: { scales: { y: { min: 0, max: 100 } } }
+        });
+      }
+      initChart();
+
+      async function runSimulation() {
+        const target = document.getElementById("targetAllele").value.toUpperCase();
+        if(!target) return;
+        
+        // Highlight target in genome visually
+        genomeEl.innerHTML = baseGenome.replace(new RegExp(target, 'g'), `<span class="target-highlight">${target}</span>`);
+        
+        log(`Injecting Cas9 targeting sequence: ${target}...`, "#facc15");
+        
+        chart.data.labels = [];
+        chart.data.datasets[0].data = [];
+        
+        let fitness = 20; // Starting fitness
+        for(let gen = 1; gen <= 10; gen++) {
+          await new Promise(r => setTimeout(r, 600));
+          
+          document.getElementById("genCount").innerText = gen;
+          
+          // Simulate genetic algorithm progression
+          fitness += Math.random() * 15;
+          if (fitness > 99) fitness = 99.9;
+          
+          document.getElementById("fitnessScore").innerText = fitness.toFixed(1) + "%";
+          
+          chart.data.labels.push(`Gen ${gen}`);
+          chart.data.datasets[0].data.push(fitness);
+          chart.update();
+          
+          log(`Generation ${gen} complete. Off-target mutations: ${Math.floor(Math.random() * 3)}`);
+        }
+        
+        log(`CRISPR Editing Complete. Stable phenotype achieved.`, "#10b981");
+      }
+    </script>
+  </body>
+</html>

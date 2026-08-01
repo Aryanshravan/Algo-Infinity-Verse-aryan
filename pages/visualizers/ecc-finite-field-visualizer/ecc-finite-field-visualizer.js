@@ -1,937 +1,665 @@
-/**
- * Algo-Infinity-Verse | ECC Finite Field Visualizer
- * Mathematically rigorously calculates and animates Point Addition over a Galois Field (modulo prime p).
- */
+document.addEventListener('DOMContentLoaded', () => {
+  initECC();
+});
 
-class ECCVisualizer {
-  constructor() {
-    // UI Inputs
-    this.inputA = document.getElementById('input-a');
-    this.inputB = document.getElementById('input-b');
-    this.inputP = document.getElementById('input-p');
-    this.btnUpdate = document.getElementById('btn-update-curve');
-    this.curveStatus = document.getElementById('curve-status');
+// ==========================================
+// 1. STATE & CONSTANTS
+// ==========================================
+let state = {
+  a: -1,
+  b: 1,
+  p: 17,
+  isModulo: false,
 
-    this.selectP = document.getElementById('select-p');
-    this.selectQ = document.getElementById('select-q');
+  points: {
+    P: { x: 0, y: 1 },
+    Q: { x: 2, y: -2 }, // In modulo, this might be adjusted
+    R: null, // Result of P+Q
+  },
 
-    this.btnPlay = document.getElementById('btn-play');
-    this.btnStep = document.getElementById('btn-step');
-    this.btnReset = document.getElementById('btn-reset');
+  dragTarget: null, // 'P' or 'Q'
 
-    this.statusText = document.getElementById('status-text');
-    this.mathStream = document.getElementById('math-stream');
+  // Canvas mapping
+  scale: 40, // pixels per unit
+  offsetX: 400, // center
+  offsetY: 300,
 
-    this.valP = document.getElementById('val-p');
-    this.valQ = document.getElementById('val-q');
-    this.valR = document.getElementById('val-r');
+  // Hacking state
+  hackInterval: null,
+  isHacking: false,
+};
 
-    // Tabs Controls
-    this.tabArithmetic = document.getElementById('tab-btn-arithmetic');
-    this.tabECDH = document.getElementById('tab-btn-ecdh');
-    this.tabECDSA = document.getElementById('tab-btn-ecdsa');
+// DOM
+const els = {
+  cvs: document.getElementById('eccCanvas'),
+  valA: document.getElementById('valA'),
+  valB: document.getElementById('valB'),
+  valP: document.getElementById('valP'),
+  sliderA: document.getElementById('sliderA'),
+  sliderB: document.getElementById('sliderB'),
+  sliderP: document.getElementById('sliderP'),
 
-    this.panelArithmetic = document.getElementById('panel-arithmetic');
-    this.panelECDH = document.getElementById('panel-ecdh');
-    this.panelECDSA = document.getElementById('panel-ecdsa');
+  tglMod: document.getElementById('toggleModulo'),
+  primeGrp: document.getElementById('primeGroup'),
 
-    this.inputK = document.getElementById('input-k');
-    this.btnScalarMult = document.getElementById('btn-scalar-mult');
+  eqSlope: document.getElementById('eqSlope'),
+  eqX3: document.getElementById('eqX3'),
+  eqY3: document.getElementById('eqY3'),
+  eqRes: document.getElementById('eqResult'),
 
-    this.selectGEcdh = document.getElementById('select-g-ecdh');
-    this.inputDA = document.getElementById('input-da');
-    this.inputDB = document.getElementById('input-db');
-    this.btnEcdhRun = document.getElementById('btn-ecdh-run');
-    this.resEcdhQa = document.getElementById('ecdh-qa');
-    this.resEcdhQb = document.getElementById('ecdh-qb');
-    this.resEcdhSecret = document.getElementById('ecdh-secret');
+  modInvBox: document.getElementById('modInvInspector'),
+  modInvMath: document.getElementById('modInvMath'),
 
-    this.selectGEcdsa = document.getElementById('select-g-ecdsa');
-    this.inputEcdsaD = document.getElementById('input-ecdsa-d');
-    this.inputEcdsaE = document.getElementById('input-ecdsa-e');
-    this.inputEcdsaK = document.getElementById('input-ecdsa-k');
-    this.btnEcdsaSign = document.getElementById('btn-ecdsa-sign');
-    this.btnEcdsaVerify = document.getElementById('btn-ecdsa-verify');
-    this.resEcdsaQ = document.getElementById('ecdsa-q');
-    this.resEcdsaSig = document.getElementById('ecdsa-sig');
-    this.resEcdsaVerifyRes = document.getElementById('ecdsa-verify-res');
+  tooltip: document.getElementById('coordTooltip'),
 
-    this.activeTab = 'arithmetic';
-    this.ecdhState = null;
-    this.ecdsaState = null;
+  btnReset: document.getElementById('btnReset'),
+  btnDouble: document.getElementById('btnDouble'),
+  btnHack: document.getElementById('btnHack'),
 
-    // Canvas setup
-    this.canvas = document.getElementById('ecc-canvas');
-    this.ctx = this.canvas.getContext('2d');
+  tdP: document.getElementById('tdP'),
+  tdQ: document.getElementById('tdQ'),
+  hackStat: document.getElementById('hackStatus'),
+  hackN: document.getElementById('hackN'),
+  hackFill: document.getElementById('hackFill'),
+  hackRes: document.getElementById('hackResult'),
+};
 
-    // Curve State
-    this.a = 2;
-    this.b = 2;
-    this.p = 17;
-    this.validPoints = [];
+let ctx;
 
-    // Operation State
-    this.ptP = null;
-    this.ptQ = null;
-    this.ptR = null;
-    this.ptNegR = null;
-    this.slopeM = null;
+// Primes for slider snapping
+const PRIMES = [
+  7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97,
+];
 
-    // Generator & Rendering State
-    this.generator = null;
-    this.isPlaying = false;
-    this.animationPhase = 'IDLE'; // IDLE, DRAW_LINE, REFLECT, DONE
-    this.animFrame = null;
-    this.lineProgress = 0; // 0 to 1 for drawing line
-    this.animSpeed = 1;
+// ==========================================
+// 2. INITIALIZATION
+// ==========================================
+function initECC() {
+  ctx = els.cvs.getContext('2d');
 
-    this.init();
-  }
+  // Bind controls
+  els.sliderA.addEventListener('input', (e) => {
+    state.a = parseInt(e.target.value);
+    els.valA.textContent = state.a;
+    validateAndRender();
+  });
 
-  init() {
-    this.bindEvents();
-    this.resizeCanvas();
-    window.addEventListener('resize', () => this.resizeCanvas());
-    this.updateCurveParameters();
-  }
+  els.sliderB.addEventListener('input', (e) => {
+    state.b = parseInt(e.target.value);
+    els.valB.textContent = state.b;
+    validateAndRender();
+  });
 
-  bindEvents() {
-    this.btnUpdate.addEventListener('click', () => this.updateCurveParameters());
-
-    this.selectP.addEventListener('change', () => this.updateSelectedPoints());
-    this.selectQ.addEventListener('change', () => this.updateSelectedPoints());
-
-    this.btnPlay.addEventListener('click', () => {
-      if (this.isPlaying) this.pauseAutoPlay();
-      else this.startAutoPlay();
-    });
-
-    this.btnStep.addEventListener('click', () => {
-      this.pauseAutoPlay();
-      this.stepForward();
-    });
-
-    this.btnReset.addEventListener('click', () => {
-      this.pauseAutoPlay();
-      this.resetAnimation();
-    });
-
-    // Tab switches
-    this.tabArithmetic.addEventListener('click', () => this.switchTab('arithmetic'));
-    this.tabECDH.addEventListener('click', () => this.switchTab('ecdh'));
-    this.tabECDSA.addEventListener('click', () => this.switchTab('ecdsa'));
-
-    // Operation bindings
-    this.btnScalarMult.addEventListener('click', () => {
-      this.pauseAutoPlay();
-      this.startScalarMult();
-    });
-    this.btnEcdhRun.addEventListener('click', () => {
-      this.pauseAutoPlay();
-      this.runEcdh();
-    });
-    this.btnEcdsaSign.addEventListener('click', () => {
-      this.pauseAutoPlay();
-      this.runEcdsaSign();
-    });
-    this.btnEcdsaVerify.addEventListener('click', () => {
-      this.pauseAutoPlay();
-      this.runEcdsaVerify();
-    });
-
-    this.selectGEcdh.addEventListener('change', () => this.resetAnimation());
-    this.selectGEcdsa.addEventListener('change', () => this.resetAnimation());
-  }
-
-  resizeCanvas() {
-    const wrapper = this.canvas.parentElement;
-    const dpr = window.devicePixelRatio || 1;
-    this.canvas.width = wrapper.clientWidth * dpr;
-    this.canvas.height = wrapper.clientHeight * dpr;
-    this.ctx.scale(dpr, dpr);
-    this.renderCanvas(); // Redraw immediately
-  }
-
-  /* --- Core ECC Mathematics --- */
-
-  // True mathematical modulo (handles negatives)
-  mod(n, m) {
-    return ((n % m) + m) % m;
-  }
-
-  // Extended Euclidean Algorithm for Modular Inverse
-  modInverse(a, m) {
-    let [m0, x0, x1] = [m, 0, 1];
-    if (m === 1) return 0;
-    a = this.mod(a, m);
-    while (a > 1) {
-      if (m === 0) return null; // No inverse
-      let q = Math.floor(a / m);
-      [m, a] = [a % m, m];
-      [x0, x1] = [x1 - q * x0, x0];
-    }
-    return x1 < 0 ? x1 + m0 : x1;
-  }
-
-  addPoints(P, Q) {
-    if (!P) return Q;
-    if (!Q) return P;
-    if (P.x === Q.x && P.y === this.mod(-Q.y, this.p)) {
-      return null; // Point at infinity
-    }
-    let num, den;
-    if (P.x === Q.x && P.y === Q.y) {
-      num = this.mod(3 * Math.pow(P.x, 2) + this.a, this.p);
-      den = this.mod(2 * P.y, this.p);
-    } else {
-      num = this.mod(Q.y - P.y, this.p);
-      den = this.mod(Q.x - P.x, this.p);
-    }
-    let invDen = this.modInverse(den, this.p);
-    if (invDen === null) return null;
-    let m = this.mod(num * invDen, this.p);
-    let rx = this.mod(m * m - P.x - Q.x, this.p);
-    let ry = this.mod(m * (P.x - rx) - P.y, this.p);
-    return { x: rx, y: ry };
-  }
-
-  multiplyPoint(k, P) {
-    if (!P || k <= 0) return null;
-    let R = null;
-    let A = { x: P.x, y: P.y };
-    let remainingK = k;
-    while (remainingK > 0) {
-      if (remainingK % 2 === 1) {
-        R = this.addPoints(R, A);
-      }
-      A = this.addPoints(A, A);
-      remainingK = Math.floor(remainingK / 2);
-    }
-    return R;
-  }
-
-  getPointOrder(G) {
-    if (!G) return 0;
-    let R = G;
-    let count = 1;
-    while (R !== null && count < 1000) {
-      R = this.addPoints(R, G);
-      count++;
-    }
-    return count;
-  }
-
-  updateCurveParameters() {
-    this.a = parseInt(this.inputA.value);
-    this.b = parseInt(this.inputB.value);
-    this.p = parseInt(this.inputP.value);
-
-    this.statusText.textContent = `y² ≡ x³ + ${this.a}x + ${this.b} (mod ${this.p})`;
-
-    // Verify non-singular curve: 4a^3 + 27b^2 != 0 (mod p)
-    let det = this.mod(4 * Math.pow(this.a, 3) + 27 * Math.pow(this.b, 2), this.p);
-    if (det === 0) {
-      this.curveStatus.textContent = 'Singular Curve (Invalid)';
-      this.curveStatus.className = 'status-text mt-2 text-error';
-      this.validPoints = [];
-      this.populateSelects();
-      return;
-    }
-    this.curveStatus.textContent = 'Curve is Valid';
-    this.curveStatus.className = 'status-text mt-2 text-success';
-
-    // Brute force all valid points for visualizer
-    this.validPoints = [];
-    for (let x = 0; x < this.p; x++) {
-      let rhs = this.mod(Math.pow(x, 3) + this.a * x + this.b, this.p);
-      for (let y = 0; y < this.p; y++) {
-        let lhs = this.mod(y * y, this.p);
-        if (lhs === rhs) {
-          this.validPoints.push({ x, y });
-        }
-      }
-    }
-
-    this.populateSelects();
-    this.resetAnimation();
-  }
-
-  populateSelects() {
-    this.selectP.innerHTML = '';
-    this.selectQ.innerHTML = '';
-    this.selectGEcdh.innerHTML = '';
-    this.selectGEcdsa.innerHTML = '';
-
-    if (this.validPoints.length === 0) {
-      this.selectP.innerHTML = '<option>None</option>';
-      this.selectQ.innerHTML = '<option>None</option>';
-      this.selectGEcdh.innerHTML = '<option>None</option>';
-      this.selectGEcdsa.innerHTML = '<option>None</option>';
-      return;
-    }
-
-    this.validPoints.forEach((pt, i) => {
-      let str = `(${pt.x}, ${pt.y})`;
-      this.selectP.add(new Option(str, i));
-      // Select a different point for Q by default if possible
-      this.selectQ.add(new Option(str, i, false, i === Math.min(1, this.validPoints.length - 1)));
-      this.selectGEcdh.add(
-        new Option(str, i, false, i === Math.min(1, this.validPoints.length - 1))
-      );
-      this.selectGEcdsa.add(
-        new Option(str, i, false, i === Math.min(1, this.validPoints.length - 1))
-      );
-    });
-
-    this.updateSelectedPoints();
-  }
-
-  updateSelectedPoints() {
-    if (this.validPoints.length === 0) return;
-
-    this.ptP = this.validPoints[this.selectP.value];
-    this.ptQ = this.validPoints[this.selectQ.value];
-
-    this.valP.textContent = `(${this.ptP.x}, ${this.ptP.y})`;
-    this.valQ.textContent = `(${this.ptQ.x}, ${this.ptQ.y})`;
-
-    this.resetAnimation();
-  }
-
-  switchTab(tab) {
-    this.activeTab = tab;
-    this.pauseAutoPlay();
-
-    this.tabArithmetic.classList.toggle('active', tab === 'arithmetic');
-    this.tabECDH.classList.toggle('active', tab === 'ecdh');
-    this.tabECDSA.classList.toggle('active', tab === 'ecdsa');
-
-    this.panelArithmetic.style.display = tab === 'arithmetic' ? 'block' : 'none';
-    this.panelECDH.style.display = tab === 'ecdh' ? 'block' : 'none';
-    this.panelECDSA.style.display = tab === 'ecdsa' ? 'block' : 'none';
-
-    this.resetAnimation();
-  }
-
-  resetAnimation() {
-    this.ptR = null;
-    this.ptNegR = null;
-    this.slopeM = null;
-    this.animationPhase = 'IDLE';
-    this.lineProgress = 0;
-    this.valR.textContent = 'null';
-    this.mathStream.innerHTML =
-      '<div class="empty-stream">Press Animate to view point addition steps...</div>';
-
-    this.generator = this.eccAdditionGenerator();
-    this.btnStep.disabled = false;
-    this.btnPlay.disabled = false;
-
-    this.ecdhState = null;
-    this.ecdsaState = null;
-
-    if (this.resEcdhQa) {
-      this.resEcdhQa.textContent = 'null';
-      this.resEcdhQb.textContent = 'null';
-      this.resEcdhSecret.textContent = 'null';
-    }
-
-    if (this.resEcdsaQ) {
-      this.resEcdsaQ.textContent = 'null';
-      this.resEcdsaSig.textContent = 'null';
-      this.resEcdsaVerifyRes.textContent = 'null';
-      this.resEcdsaVerifyRes.className = '';
-    }
-
-    this.renderCanvas();
-  }
-
-  /* --- Generator for Animation Steps --- */
-
-  *eccAdditionGenerator() {
-    this.mathStream.innerHTML = ''; // Clear stream
-    this.logMath(
-      `Start addition: P(${this.ptP.x}, ${this.ptP.y}) + Q(${this.ptQ.x}, ${this.ptQ.y})`
+  els.sliderP.addEventListener('input', (e) => {
+    // Snap to nearest prime
+    const val = parseInt(e.target.value);
+    let closest = PRIMES.reduce((prev, curr) =>
+      Math.abs(curr - val) < Math.abs(prev - val) ? curr : prev
     );
+    state.p = closest;
+    els.sliderP.value = closest;
+    els.valP.textContent = state.p;
 
-    // Check for Point at Infinity (P = -Q)
-    if (this.ptP.x === this.ptQ.x && this.ptP.y === this.mod(-this.ptQ.y, this.p)) {
-      this.valR.textContent = 'O (Infinity)';
-      this.logMath(`P and Q are inverses. Result is Point at Infinity O.`, 'hl-emerald');
-      this.animationPhase = 'DONE';
-      this.renderCanvas();
-      return;
-    }
+    // Adjust scale so the grid fits
+    state.scale = Math.min(30, 800 / (state.p + 2));
+    // Offset to bottom left corner for modulo
+    state.offsetX = 50;
+    state.offsetY = 550;
 
-    // Calculate Slope (m)
-    let num, den;
-    if (this.ptP.x === this.ptQ.x && this.ptP.y === this.ptQ.y) {
-      // Point Doubling
-      this.logMath(`P = Q. Calculating Tangent Line (Point Doubling).`);
-      num = this.mod(3 * Math.pow(this.ptP.x, 2) + this.a, this.p);
-      den = this.mod(2 * this.ptP.y, this.p);
-      this.logMath(`m = (3x₁² + a) / (2y₁) mod p`);
+    validateAndRender();
+  });
+
+  els.tglMod.addEventListener('change', (e) => {
+    state.isModulo = e.target.checked;
+    els.primeGrp.style.opacity = state.isModulo ? '1' : '0.3';
+    els.primeGrp.style.pointerEvents = state.isModulo ? 'auto' : 'none';
+
+    if (state.isModulo) {
+      state.scale = Math.min(30, 800 / (state.p + 2));
+      state.offsetX = 50;
+      state.offsetY = 550;
+      els.modInvBox.style.display = 'block';
     } else {
-      // Point Addition
-      this.logMath(`P ≠ Q. Calculating Secant Line (Point Addition).`);
-      num = this.mod(this.ptQ.y - this.ptP.y, this.p);
-      den = this.mod(this.ptQ.x - this.ptP.x, this.p);
-      this.logMath(`m = (y₂ - y₁) / (x₂ - x₁) mod p`);
+      state.scale = 40;
+      state.offsetX = 400;
+      state.offsetY = 300;
+      els.modInvBox.style.display = 'none';
     }
 
-    let invDen = this.modInverse(den, this.p);
-    this.slopeM = this.mod(num * invDen, this.p);
+    // Find valid points for the new mode
+    resetPoints();
+  });
 
-    this.logMath(`Numerator: ${num}, Denominator: ${den}`);
-    this.logMath(`Modular Inverse of ${den} mod ${this.p} is ${invDen}`, 'hl-cyan');
-    this.logMath(`Slope (m) = ${num} * ${invDen} ≡ ${this.slopeM} (mod ${this.p})`);
+  els.btnReset.addEventListener('click', resetPoints);
 
-    yield; // Pause
+  els.btnDouble.addEventListener('click', () => {
+    state.points.Q = { x: state.points.P.x, y: state.points.P.y };
+    validateAndRender();
+  });
 
-    // Calculate Intersection -R
-    let rx = this.mod(Math.pow(this.slopeM, 2) - this.ptP.x - this.ptQ.x, this.p);
-    let ry = this.mod(this.slopeM * (this.ptP.x - rx) - this.ptP.y, this.p);
-    this.ptNegR = { x: rx, y: this.mod(-ry, this.p) }; // Internal math gives -R directly, but we need standard coordinates for rendering line intersection.
+  els.btnHack.addEventListener('click', startTrapdoorRace);
 
-    // Wait, standard line eq: y - y1 = m(x - x1)
-    let negRy = this.mod(this.slopeM * (rx - this.ptP.x) + this.ptP.y, this.p);
-    this.ptNegR = { x: rx, y: negRy };
+  // Canvas interactions
+  els.cvs.addEventListener('mousedown', handleMouseDown);
+  els.cvs.addEventListener('mousemove', handleMouseMove);
+  window.addEventListener('mouseup', handleMouseUp);
 
-    this.animationPhase = 'DRAW_LINE';
+  resetPoints();
+}
 
-    // Animate line drawing
-    for (let i = 0; i <= 20; i++) {
-      this.lineProgress = i / 20;
-      this.renderCanvas();
-      yield;
+function resetPoints() {
+  if (state.isModulo) {
+    // Find two distinct valid points on the modulo curve
+    const valid = getFiniteFieldPoints();
+    if (valid.length >= 2) {
+      state.points.P = valid[0];
+      state.points.Q = valid[1];
     }
-
-    this.logMath(`Line intersects curve at -R(x₃, -y₃)`);
-    this.logMath(`x₃ = m² - x₁ - x₂ ≡ ${rx} (mod ${this.p})`);
-    this.logMath(`Intersection -R found at (${rx}, ${negRy})`);
-
-    yield; // Pause at intersection
-
-    // Reflect to R
-    this.ptR = { x: rx, y: this.mod(-negRy, this.p) };
-    this.valR.textContent = `(${this.ptR.x}, ${this.ptR.y})`;
-
-    this.animationPhase = 'REFLECT';
-    this.renderCanvas();
-    this.logMath(`Reflect across x-axis: y₃ = -(-y₃) mod p`);
-
-    yield;
-
-    this.animationPhase = 'DONE';
-    this.renderCanvas();
-    this.logMath(`Result R = (${this.ptR.x}, ${this.ptR.y})`, 'hl-emerald');
+  } else {
+    // Find point around x=0
+    const y0 = Math.sqrt(0 + state.a * 0 + state.b);
+    if (!isNaN(y0)) {
+      state.points.P = { x: 0, y: y0 };
+    } else {
+      state.points.P = { x: 2, y: Math.sqrt(8 + 2 * state.a + state.b) }; // Fallback
+    }
+    state.points.Q = { x: 3, y: Math.sqrt(27 + 3 * state.a + state.b) };
   }
+  validateAndRender();
+}
 
-  logMath(text, className = '') {
-    const div = document.createElement('div');
-    div.className = `math-line ${className}`;
-    div.textContent = text;
-    this.mathStream.appendChild(div);
-    this.mathStream.scrollTop = this.mathStream.scrollHeight;
-  }
+// ==========================================
+// 3. MATH ENGINE (CONTINUOUS & MODULO)
+// ==========================================
 
-  startScalarMult() {
-    this.ptR = null;
-    this.ptNegR = null;
-    this.slopeM = null;
-    this.animationPhase = 'IDLE';
-    this.lineProgress = 0;
-
-    let k = parseInt(this.inputK.value);
-    if (isNaN(k) || k < 1) {
-      this.logMath('Error: Invalid scalar k.');
-      return;
-    }
-
-    this.generator = this.eccScalarMultGenerator(k, this.ptP);
-    this.btnStep.disabled = false;
-    this.btnPlay.disabled = false;
-
-    this.startAutoPlay();
-  }
-
-  *eccScalarMultGenerator(k, P) {
-    this.mathStream.innerHTML = '';
-    this.logMath(`Start Scalar Multiplication: ${k} * P(${P.x}, ${P.y})`);
-
-    if (k === 1) {
-      this.ptR = P;
-      this.valR.textContent = `(${P.x}, ${P.y})`;
-      this.animationPhase = 'DONE';
-      this.renderCanvas();
-      this.logMath(`Result is P itself: (${P.x}, ${P.y})`, 'hl-emerald');
-      return;
-    }
-
-    let currPt = P;
-    this.ptR = P;
-
-    for (let i = 2; i <= k; i++) {
-      this.logMath(
-        `Step ${i - 1}: Add P(${P.x}, ${P.y}) to current sum (${currPt.x}, ${currPt.y})`
-      );
-
-      if (currPt.x === P.x && currPt.y === this.mod(-P.y, this.p)) {
-        this.ptNegR = null;
-        this.ptR = null;
-        this.valR.textContent = 'O (Infinity)';
-        this.logMath(`Sum is Point at Infinity O. Further multiplication remains O.`, 'hl-emerald');
-        this.animationPhase = 'DONE';
-        this.renderCanvas();
-        return;
+function getFiniteFieldPoints() {
+  const points = [];
+  for (let x = 0; x < state.p; x++) {
+    const rhs = mod(Math.pow(x, 3) + state.a * x + state.b, state.p);
+    // Check for quadratic residue
+    for (let y = 0; y < state.p; y++) {
+      if (mod(y * y, state.p) === rhs) {
+        points.push({ x, y });
       }
+    }
+  }
+  return points;
+}
 
-      let num, den;
-      if (currPt.x === P.x && currPt.y === P.y) {
-        num = this.mod(3 * Math.pow(currPt.x, 2) + this.a, this.p);
-        den = this.mod(2 * currPt.y, this.p);
+// True mathematical modulo (handles negative numbers)
+function mod(n, p) {
+  return ((n % p) + p) % p;
+}
+
+// Extended Euclidean Algorithm to find modular multiplicative inverse
+function modInverse(a, m) {
+  a = mod(a, m);
+  for (let x = 1; x < m; x++) {
+    if (mod(a * x, m) === 1) return x;
+  }
+  return null; // Should not happen for prime fields unless a=0
+}
+
+function calculateAddition() {
+  const P = state.points.P;
+  const Q = state.points.Q;
+  let R = null;
+  let mStr = '',
+    x3Str = '',
+    y3Str = '',
+    invStr = '';
+
+  // Check if points are valid on curve (approx for continuous, exact for mod)
+
+  if (state.isModulo) {
+    // Modulo Arithmetic
+    if (P.x === Q.x && mod(P.y + Q.y, state.p) === 0) {
+      // Point at infinity
+      R = null; // Infinity
+      mStr = 'm = ∞ (Vertical Line)';
+      x3Str = 'x₃ = ∞';
+      y3Str = 'y₃ = ∞';
+    } else {
+      let m;
+      let dy, dx, invDx;
+      if (P.x === Q.x && P.y === Q.y) {
+        // Tangent (Point Doubling)
+        dy = mod(3 * Math.pow(P.x, 2) + state.a, state.p);
+        dx = mod(2 * P.y, state.p);
+        invDx = modInverse(dx, state.p);
+        m = mod(dy * invDx, state.p);
+        mStr = `m = (3(${P.x})² + ${state.a}) / (2(${P.y})) mod ${state.p} = ${dy} * ${invDx} = ${m}`;
+        invStr = `Inverse of ${dx} mod ${state.p} is ${invDx} (since ${dx}*${invDx} ≡ 1 mod ${state.p})`;
       } else {
-        num = this.mod(P.y - currPt.y, this.p);
-        den = this.mod(P.x - currPt.x, this.p);
+        // Secant
+        dy = mod(Q.y - P.y, state.p);
+        dx = mod(Q.x - P.x, state.p);
+        invDx = modInverse(dx, state.p);
+        m = mod(dy * invDx, state.p);
+        mStr = `m = (${Q.y} - ${P.y}) / (${Q.x} - ${P.x}) mod ${state.p} = ${dy} * ${invDx} = ${m}`;
+        invStr = `Inverse of ${dx} mod ${state.p} is ${invDx} (since ${dx}*${invDx} ≡ 1 mod ${state.p})`;
       }
 
-      let invDen = this.modInverse(den, this.p);
-      if (invDen === null) {
-        this.ptR = null;
-        this.animationPhase = 'DONE';
-        this.renderCanvas();
-        this.logMath(
-          `Denominator ${den} has no inverse. Result is Point at Infinity.`,
-          'hl-emerald'
-        );
-        return;
-      }
-      this.slopeM = this.mod(num * invDen, this.p);
+      const x3 = mod(Math.pow(m, 2) - P.x - Q.x, state.p);
+      const y3 = mod(m * (P.x - x3) - P.y, state.p);
 
-      let rx = this.mod(Math.pow(this.slopeM, 2) - currPt.x - P.x, this.p);
-      let ry = this.mod(this.slopeM * (currPt.x - rx) - currPt.y, this.p);
-      this.ptNegR = { x: rx, y: this.mod(this.slopeM * (rx - currPt.x) + currPt.y, this.p) };
+      x3Str = `x₃ = ${m}² - ${P.x} - ${Q.x} mod ${state.p} = ${x3}`;
+      y3Str = `y₃ = ${m}(${P.x} - ${x3}) - ${P.y} mod ${state.p} = ${y3}`;
 
-      this.animationPhase = 'DRAW_LINE';
-      for (let step = 0; step <= 10; step++) {
-        this.lineProgress = step / 10;
-        this.renderCanvas();
-        yield;
-      }
-
-      this.animationPhase = 'REFLECT';
-      this.ptR = { x: rx, y: ry };
-      this.renderCanvas();
-      yield;
-
-      currPt = this.ptR;
-      this.logMath(`Result after adding ${i} points: (${currPt.x}, ${currPt.y})`, 'hl-cyan');
+      R = { x: x3, y: y3 };
+    }
+  } else {
+    // Continuous Arithmetic
+    // In continuous mode, if P is close to Q, we snap them to simulate doubling
+    let isDoubling = false;
+    if (Math.abs(P.x - Q.x) < 0.2 && Math.abs(P.y - Q.y) < 0.2) {
+      isDoubling = true;
+      Q.x = P.x;
+      Q.y = P.y;
     }
 
-    this.valR.textContent = `(${currPt.x}, ${currPt.y})`;
-    this.animationPhase = 'DONE';
-    this.renderCanvas();
-    this.logMath(`Final Result: ${k} * P = (${currPt.x}, ${currPt.y})`, 'hl-emerald');
-  }
-
-  runEcdh() {
-    this.mathStream.innerHTML = '';
-    let idx = this.selectGEcdh.value;
-    let G = this.validPoints[idx];
-    if (!G) {
-      this.logMath('Error: Select a valid Generator point.');
-      return;
-    }
-
-    let dA = parseInt(this.inputDA.value);
-    let dB = parseInt(this.inputDB.value);
-    if (isNaN(dA) || dA < 1 || isNaN(dB) || dB < 1) {
-      this.logMath('Error: Private keys must be positive integers.');
-      return;
-    }
-
-    this.logMath(`ECDH Key Exchange Init`);
-    this.logMath(`Generator Point G = (${G.x}, ${G.y})`);
-
-    let n = this.getPointOrder(G);
-    this.logMath(`Order of G is n = ${n} (where n · G = O)`);
-
-    this.logMath(`Alice Private Key dA = ${dA}`);
-    this.logMath(`Bob Private Key dB = ${dB}`);
-
-    let QA = this.multiplyPoint(dA, G);
-    let QB = this.multiplyPoint(dB, G);
-
-    let qaStr = QA ? `(${QA.x}, ${QA.y})` : 'O (Infinity)';
-    let qbStr = QB ? `(${QB.x}, ${QB.y})` : 'O (Infinity)';
-
-    this.resEcdhQa.textContent = qaStr;
-    this.resEcdhQb.textContent = qbStr;
-
-    this.logMath(`Alice calculates Public Key QA = dA · G = ${qaStr}`, 'hl-cyan');
-    this.logMath(`Bob calculates Public Key QB = dB · G = ${qbStr}`, 'hl-cyan');
-
-    let SA = this.multiplyPoint(dA, QB);
-    let SB = this.multiplyPoint(dB, QA);
-
-    let saStr = SA ? `(${SA.x}, ${SA.y})` : 'O (Infinity)';
-    let sbStr = SB ? `(${SB.x}, ${SB.y})` : 'O (Infinity)';
-
-    this.resEcdhSecret.textContent = saStr;
-
-    this.logMath(`Alice computes Shared Secret SA = dA · QB = ${saStr}`);
-    this.logMath(`Bob computes Shared Secret SB = dB · QA = ${sbStr}`);
-
-    if (saStr === sbStr) {
-      this.logMath(`Success! Both derive identical Shared Secret: ${saStr}`, 'hl-emerald');
+    if (Math.abs(P.x - Q.x) < 0.01 && !isDoubling) {
+      R = null; // Vertical line
+      mStr = 'm = ∞ (Vertical Line)';
+      x3Str = 'x₃ = ∞';
+      y3Str = 'y₃ = ∞';
     } else {
-      this.logMath(`Error: Shared secrets do not match.`, 'hl-cyan');
-    }
+      let m;
+      if (isDoubling) {
+        m = (3 * Math.pow(P.x, 2) + state.a) / (2 * P.y);
+        mStr = `m = (3(${P.x.toFixed(2)})² + ${state.a}) / (2(${P.y.toFixed(2)})) = ${m.toFixed(2)}`;
+      } else {
+        m = (Q.y - P.y) / (Q.x - P.x);
+        mStr = `m = (${Q.y.toFixed(2)} - ${P.y.toFixed(2)}) / (${Q.x.toFixed(2)} - ${P.x.toFixed(2)}) = ${m.toFixed(2)}`;
+      }
 
-    this.ecdhState = { G, QA, QB, Secret: SA };
-    this.renderCanvas();
-  }
+      const x3 = Math.pow(m, 2) - P.x - Q.x;
+      const y3 = m * (P.x - x3) - P.y;
 
-  runEcdsaSign() {
-    this.mathStream.innerHTML = '';
-    this.resEcdsaVerifyRes.textContent = 'null';
-    this.resEcdsaVerifyRes.className = '';
+      x3Str = `x₃ = ${m.toFixed(2)}² - ${P.x.toFixed(2)} - ${Q.x.toFixed(2)} = ${x3.toFixed(2)}`;
+      y3Str = `y₃ = ${m.toFixed(2)}(${P.x.toFixed(2)} - ${x3.toFixed(2)}) - ${P.y.toFixed(2)} = ${y3.toFixed(2)}`;
 
-    let idx = this.selectGEcdsa.value;
-    let G = this.validPoints[idx];
-    if (!G) {
-      this.logMath('Error: Select a valid Generator point.');
-      return;
-    }
-
-    let d = parseInt(this.inputEcdsaD.value);
-    let e = parseInt(this.inputEcdsaE.value);
-    let k = parseInt(this.inputEcdsaK.value);
-
-    if (isNaN(d) || d < 1 || isNaN(e) || e < 1 || isNaN(k) || k < 1) {
-      this.logMath('Error: All input parameters must be positive integers.');
-      return;
-    }
-
-    this.logMath(`ECDSA Signature Generation`);
-    this.logMath(`Generator Point G = (${G.x}, ${G.y})`);
-
-    let n = this.getPointOrder(G);
-    this.logMath(`Order of G is n = ${n}`);
-
-    if (d >= n) {
-      this.logMath(`Warning: Private Key d >= n. Reducing d mod n.`);
-      d = d % n;
-      if (d === 0) d = 1;
-    }
-
-    let Q = this.multiplyPoint(d, G);
-    let qStr = Q ? `(${Q.x}, ${Q.y})` : 'O (Infinity)';
-    this.resEcdsaQ.textContent = qStr;
-    this.logMath(`Public Key Q = d · G = ${qStr}`, 'hl-cyan');
-
-    if (k >= n) {
-      this.logMath(`Warning: Nonce k >= n. Reducing k mod n.`);
-      k = k % n;
-      if (k === 0) k = 1;
-    }
-
-    let gcdK = (a, b) => (b === 0 ? a : gcdK(b, a % b));
-    if (gcdK(k, n) !== 1) {
-      this.logMath(
-        `Error: Nonce k = ${k} is not coprime to order n = ${n}. gcd(k, n) = ${gcdK(k, n)}. Please choose a different nonce k.`,
-        'hl-cyan'
-      );
-      this.resEcdsaSig.textContent = 'Error: gcd(k, n) != 1';
-      return;
-    }
-
-    let R = this.multiplyPoint(k, G);
-    if (!R) {
-      this.logMath(`Error: k · G is Point at Infinity. Choose a different nonce k.`);
-      return;
-    }
-    this.logMath(`1. Compute ephemeral point R = k · G = (${R.x}, ${R.y})`);
-
-    let r = R.x % n;
-    if (r === 0) {
-      this.logMath(`Error: r = 0 mod n. Choose a different nonce k.`);
-      return;
-    }
-    this.logMath(`2. Compute r = x_R mod n = ${R.x} mod ${n} = ${r}`);
-
-    let invK = this.modInverse(k, n);
-    if (invK === null) {
-      this.logMath(`Error: k has no modular inverse modulo n.`);
-      return;
-    }
-    let s = this.mod(invK * (e + r * d), n);
-    if (s === 0) {
-      this.logMath(`Error: s = 0. Choose a different message or nonce.`);
-      return;
-    }
-
-    this.resEcdsaSig.textContent = `(r: ${r}, s: ${s})`;
-    this.logMath(`3. Compute s = k⁻¹ · (e + r · d) mod n`);
-    this.logMath(`   invK = ${invK}, Message Hash e = ${e}`);
-    this.logMath(`   s = ${invK} · (${e} + ${r} · ${d}) mod ${n} = ${s}`, 'hl-emerald');
-
-    this.ecdsaState = { G, Q, R, r, s, e, n };
-    this.renderCanvas();
-  }
-
-  runEcdsaVerify() {
-    if (!this.ecdsaState) {
-      this.logMath('Error: Generate a signature first before verifying.');
-      return;
-    }
-
-    this.logMath(`\nECDSA Signature Verification`);
-    let { G, Q, r, s, e, n } = this.ecdsaState;
-
-    if (r <= 0 || r >= n || s <= 0 || s >= n) {
-      this.resEcdsaVerifyRes.textContent = 'Rejected (Out of range)';
-      this.resEcdsaVerifyRes.className = 'text-error';
-      this.logMath(
-        'Verification Failed: Signature parameters r or s are out of valid range [1, n-1].'
-      );
-      return;
-    }
-
-    let w = this.modInverse(s, n);
-    if (w === null) {
-      this.resEcdsaVerifyRes.textContent = 'Rejected (No inverse of s)';
-      this.resEcdsaVerifyRes.className = 'text-error';
-      this.logMath('Verification Failed: s has no modular inverse mod n.');
-      return;
-    }
-    this.logMath(`1. Compute w = s⁻¹ mod n = ${s}⁻¹ mod ${n} = ${w}`);
-
-    let u1 = this.mod(e * w, n);
-    let u2 = this.mod(r * w, n);
-    this.logMath(`2. Compute u₁ = e · w mod n = ${e} · ${w} mod ${n} = ${u1}`);
-    this.logMath(`   Compute u₂ = r · w mod n = ${r} · ${w} mod ${n} = ${u2}`);
-
-    let u1G = this.multiplyPoint(u1, G);
-    let u2Q = this.multiplyPoint(u2, Q);
-    let P = this.addPoints(u1G, u2Q);
-
-    let pStr = P ? `(${P.x}, ${P.y})` : 'O (Infinity)';
-    this.logMath(`3. Compute Point P = u₁ · G + u₂ · Q = ${pStr}`);
-    if (u1G) this.logMath(`   u₁ · G = (${u1G.x}, ${u1G.y})`);
-    if (u2Q) this.logMath(`   u₂ · Q = (${u2Q.x}, ${u2Q.y})`);
-
-    if (!P) {
-      this.resEcdsaVerifyRes.textContent = 'Rejected (P is Infinity)';
-      this.resEcdsaVerifyRes.className = 'text-error';
-      this.logMath('Verification Failed: Derived point P is the Point at Infinity.');
-      return;
-    }
-
-    let xP_mod_n = P.x % n;
-    this.logMath(`4. Verify: x_P mod n == r`);
-    this.logMath(`   ${P.x} mod ${n} = ${xP_mod_n} vs r = ${r}`);
-
-    if (xP_mod_n === r) {
-      this.resEcdsaVerifyRes.textContent = 'Accepted (Valid Signature)';
-      this.resEcdsaVerifyRes.className = 'text-success';
-      this.logMath('Success! Signature is VALID.', 'hl-emerald');
-      this.ecdsaState.VerifiedPoint = P;
-    } else {
-      this.resEcdsaVerifyRes.textContent = 'Rejected (Invalid Signature)';
-      this.resEcdsaVerifyRes.className = 'text-error';
-      this.logMath('Verification Failed: Signature is INVALID.', 'hl-cyan');
-    }
-    this.renderCanvas();
-  }
-
-  /* --- Frame Applier --- */
-
-  stepForward() {
-    if (!this.generator) return;
-    const { done } = this.generator.next();
-    if (done) {
-      this.pauseAutoPlay();
-      this.btnStep.disabled = true;
-      this.btnPlay.disabled = true;
+      R = { x: x3, y: y3 };
     }
   }
 
-  startAutoPlay() {
-    this.isPlaying = true;
-    this.btnPlay.innerHTML = '<i class="fa-solid fa-pause"></i> Pause';
-    this.btnPlay.classList.replace('btn-primary', 'btn-accent');
+  state.points.R = R;
 
-    const tick = () => {
-      if (!this.isPlaying) return;
-      this.stepForward();
-      if (this.btnStep.disabled) {
-        this.pauseAutoPlay();
-        return;
-      }
-      // Dynamic speed: Faster during line drawing phase
-      let delay = this.animationPhase === 'DRAW_LINE' ? 40 : 1000;
-      setTimeout(tick, delay / this.animSpeed);
-    };
-    tick();
+  // Update UI
+  els.eqSlope.textContent = mStr;
+  els.eqX3.textContent = x3Str;
+  els.eqY3.textContent = y3Str;
+
+  if (R) {
+    els.eqRes.textContent = `R = (${R.x.toFixed(state.isModulo ? 0 : 2)}, ${R.y.toFixed(state.isModulo ? 0 : 2)})`;
+  } else {
+    els.eqRes.textContent = `R = Point at Infinity (O)`;
   }
 
-  pauseAutoPlay() {
-    this.isPlaying = false;
-    clearTimeout(this.autoPlayTimeout);
-    this.btnPlay.innerHTML = '<i class="fa-solid fa-play"></i> Animate';
-    this.btnPlay.classList.replace('btn-accent', 'btn-primary');
-  }
+  els.modInvMath.textContent = invStr;
+}
 
-  /* --- Canvas Rendering Engine --- */
+// ==========================================
+// 4. RENDERING ENGINE
+// ==========================================
+function toScr(x, y) {
+  return {
+    sx: state.offsetX + x * state.scale,
+    sy: state.offsetY - y * state.scale,
+  };
+}
 
-  renderCanvas() {
-    const w = this.canvas.width / (window.devicePixelRatio || 1);
-    const h = this.canvas.height / (window.devicePixelRatio || 1);
+function fromScr(sx, sy) {
+  return {
+    x: (sx - state.offsetX) / state.scale,
+    y: (state.offsetY - sy) / state.scale,
+  };
+}
 
-    this.ctx.clearRect(0, 0, w, h);
+function drawGrid() {
+  ctx.strokeStyle = 'rgba(255,255,255,0.1)';
+  ctx.lineWidth = 1;
+  ctx.beginPath();
 
-    const padding = 40;
-    const gridW = w - padding * 2;
-    const gridH = h - padding * 2;
+  if (state.isModulo) {
+    // Draw grid bounding box for Prime
+    for (let i = 0; i <= state.p; i++) {
+      const p1 = toScr(i, 0);
+      const p2 = toScr(i, state.p);
+      ctx.moveTo(p1.sx, p1.sy);
+      ctx.lineTo(p2.sx, p2.sy);
 
-    // Coordinate mapping functions
-    // Math coordinates: (0,0) bottom-left, (p, p) top-right
-    const getX = (mathX) => padding + (mathX / (this.p - 1 || 1)) * gridW;
-    const getY = (mathY) => padding + gridH - (mathY / (this.p - 1 || 1)) * gridH;
-
-    // 1. Draw Grid
-    this.ctx.strokeStyle = 'rgba(255, 255, 255, 0.05)';
-    this.ctx.lineWidth = 1;
-    this.ctx.beginPath();
-    for (let i = 0; i < this.p; i++) {
-      let x = getX(i);
-      let y = getY(i);
-      this.ctx.moveTo(x, padding);
-      this.ctx.lineTo(x, h - padding);
-      this.ctx.moveTo(padding, y);
-      this.ctx.lineTo(w - padding, y);
+      const p3 = toScr(0, i);
+      const p4 = toScr(state.p, i);
+      ctx.moveTo(p3.sx, p3.sy);
+      ctx.lineTo(p4.sx, p4.sy);
     }
-    this.ctx.stroke();
+    ctx.stroke();
 
-    // Axes labels
-    this.ctx.fillStyle = '#94a3b8';
-    this.ctx.font = '10px "Fira Code"';
-    this.ctx.textAlign = 'center';
-    this.ctx.fillText('0', getX(0), h - padding + 15);
-    this.ctx.fillText((this.p - 1).toString(), getX(this.p - 1), h - padding + 15);
-    this.ctx.textAlign = 'right';
-    this.ctx.fillText((this.p - 1).toString(), padding - 10, getY(this.p - 1) + 4);
-
-    // 2. Draw Wrapping Line (if active)
-    if (
-      this.animationPhase === 'DRAW_LINE' ||
-      this.animationPhase === 'REFLECT' ||
-      this.animationPhase === 'DONE'
-    ) {
-      this.ctx.save();
-      this.ctx.rect(padding, padding, gridW, gridH);
-      this.ctx.clip(); // Restrict line to bounding box
-
-      this.ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
-      this.ctx.lineWidth = 2;
-
-      // To simulate "wrapping", we draw multiple continuous line segments shifted by p
-      // Equation: y = m(x - P.x) + P.y + k*p
-      for (let k = -this.p; k <= this.p; k++) {
-        this.ctx.beginPath();
-        // Draw from x=0 to x=p
-        let yStart = this.slopeM * (0 - this.ptP.x) + this.ptP.y + k * this.p;
-
-        // Apply animation progress
-        let currentX = this.p * this.lineProgress;
-        let currentY = this.slopeM * (currentX - this.ptP.x) + this.ptP.y + k * this.p;
-
-        this.ctx.moveTo(getX(0), getY(yStart));
-        this.ctx.lineTo(getX(currentX), getY(currentY));
-        this.ctx.stroke();
-      }
-      this.ctx.restore();
-    }
-
-    // 3. Draw Reflection Line
-    if (this.animationPhase === 'REFLECT' || this.animationPhase === 'DONE') {
-      this.ctx.strokeStyle = 'rgba(249, 115, 22, 0.5)'; // Orange dashed
-      this.ctx.setLineDash([5, 5]);
-      this.ctx.lineWidth = 2;
-      this.ctx.beginPath();
-      this.ctx.moveTo(getX(this.ptNegR.x), getY(this.ptNegR.y));
-      this.ctx.lineTo(getX(this.ptR.x), getY(this.ptR.y));
-      this.ctx.stroke();
-      this.ctx.setLineDash([]);
-    }
-
-    // 4. Draw All Valid Points
-    this.ctx.fillStyle = '#475569';
-    this.validPoints.forEach((pt) => {
-      this.ctx.beginPath();
-      this.ctx.arc(getX(pt.x), getY(pt.y), 4, 0, Math.PI * 2);
-      this.ctx.fill();
-    });
-
-    // 5. Draw Highlighted Points
-    const drawPoint = (pt, color, label, size = 7) => {
-      if (!pt) return;
-      const px = getX(pt.x);
-      const py = getY(pt.y);
-      this.ctx.beginPath();
-      this.ctx.arc(px, py, size, 0, Math.PI * 2);
-      this.ctx.fillStyle = color;
-      this.ctx.shadowBlur = 10;
-      this.ctx.shadowColor = color;
-      this.ctx.fill();
-      this.ctx.shadowBlur = 0;
-
-      this.ctx.fillStyle = '#fff';
-      this.ctx.font = 'bold 12px "Inter"';
-      this.ctx.textAlign = 'left';
-      this.ctx.fillText(label, px + 10, py - 10);
-    };
-
-    if (this.activeTab === 'arithmetic') {
-      if (this.ptP) drawPoint(this.ptP, '#06b6d4', 'P'); // Cyan
-
-      // If point doubling, shift label slightly to avoid overlap
-      if (this.ptQ) {
-        if (this.ptP.x === this.ptQ.x && this.ptP.y === this.ptQ.y) {
-          drawPoint(this.ptQ, '#7c3aed', 'P=Q', 9);
-        } else {
-          drawPoint(this.ptQ, '#7c3aed', 'Q');
-        }
-      }
-
-      if (this.ptNegR && (this.animationPhase === 'REFLECT' || this.animationPhase === 'DONE')) {
-        drawPoint(this.ptNegR, '#f97316', '-R'); // Orange
-      }
-
-      if (this.ptR && this.animationPhase === 'DONE') {
-        drawPoint(this.ptR, '#10b981', 'R', 9); // Emerald
-      }
-    } else if (this.activeTab === 'ecdh') {
-      if (this.ecdhState) {
-        const { G, QA, QB, Secret } = this.ecdhState;
-        if (G) drawPoint(G, '#f59e0b', 'G', 8);
-        if (QA) drawPoint(QA, '#06b6d4', 'QA', 8);
-        if (QB) drawPoint(QB, '#7c3aed', 'QB', 8);
-        if (Secret) drawPoint(Secret, '#10b981', 'Secret', 10);
-      }
-    } else if (this.activeTab === 'ecdsa') {
-      if (this.ecdsaState) {
-        const { G, Q, R, VerifiedPoint } = this.ecdsaState;
-        if (G) drawPoint(G, '#f59e0b', 'G', 8);
-        if (Q) drawPoint(Q, '#06b6d4', 'Q', 8);
-        if (R) drawPoint(R, '#7c3aed', 'R', 8);
-        if (VerifiedPoint) drawPoint(VerifiedPoint, '#10b981', 'P (Verified)', 10);
-      }
-    }
+    // Axes
+    ctx.strokeStyle = 'rgba(255,255,255,0.3)';
+    const o = toScr(0, 0);
+    const pMax = toScr(state.p, state.p);
+    ctx.beginPath();
+    ctx.moveTo(o.sx, o.sy);
+    ctx.lineTo(pMax.sx, o.sy); // X
+    ctx.moveTo(o.sx, o.sy);
+    ctx.lineTo(o.sx, pMax.sy); // Y
+    ctx.stroke();
+  } else {
+    // Cartesian grid
+    const w = els.cvs.width;
+    const h = els.cvs.height;
+    ctx.moveTo(0, state.offsetY);
+    ctx.lineTo(w, state.offsetY); // X axis
+    ctx.moveTo(state.offsetX, 0);
+    ctx.lineTo(state.offsetX, h); // Y axis
+    ctx.stroke();
   }
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-  new ECCVisualizer();
+function drawContinuousCurve() {
+  ctx.strokeStyle = 'var(--ecc-curve)';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+
+  // Draw upper and lower halves
+  const steps = 400;
+  const startX = -10;
+  const endX = 15;
+
+  let startedUpper = false;
+  let startedLower = false;
+
+  for (let i = 0; i <= steps; i++) {
+    const x = startX + (endX - startX) * (i / steps);
+    const rhs = Math.pow(x, 3) + state.a * x + state.b;
+
+    if (rhs >= 0) {
+      const y = Math.sqrt(rhs);
+      const pUp = toScr(x, y);
+      if (!startedUpper) {
+        ctx.moveTo(pUp.sx, pUp.sy);
+        startedUpper = true;
+      } else {
+        ctx.lineTo(pUp.sx, pUp.sy);
+      }
+    } else {
+      startedUpper = false;
+    }
+  }
+  ctx.stroke();
+
+  ctx.beginPath();
+  for (let i = 0; i <= steps; i++) {
+    const x = startX + (endX - startX) * (i / steps);
+    const rhs = Math.pow(x, 3) + state.a * x + state.b;
+
+    if (rhs >= 0) {
+      const y = -Math.sqrt(rhs);
+      const pDn = toScr(x, y);
+      if (!startedLower) {
+        ctx.moveTo(pDn.sx, pDn.sy);
+        startedLower = true;
+      } else {
+        ctx.lineTo(pDn.sx, pDn.sy);
+      }
+    } else {
+      startedLower = false;
+    }
+  }
+  ctx.stroke();
+}
+
+function drawFiniteFieldPoints() {
+  const points = getFiniteFieldPoints();
+
+  ctx.fillStyle = 'var(--ecc-curve)';
+  points.forEach((pt) => {
+    const p = toScr(pt.x, pt.y);
+    ctx.beginPath();
+    ctx.arc(p.sx, p.sy, 3, 0, Math.PI * 2);
+    ctx.fill();
+  });
+}
+
+function drawAdditionGeom() {
+  const P = state.points.P;
+  const Q = state.points.Q;
+  const R = state.points.R;
+
+  // Draw Secant Line
+  if (R) {
+    ctx.strokeStyle = 'var(--ecc-danger)';
+    ctx.lineWidth = 2;
+    ctx.setLineDash([5, 5]);
+
+    if (state.isModulo) {
+      // Draw wrap-around line? Very hard to draw exact toroidal wrap.
+      // We'll just draw a line connecting P, Q, and the "unwrapped" R, or just highlight R
+      const pS = toScr(P.x, P.y);
+      const qS = toScr(Q.x, Q.y);
+      ctx.beginPath();
+      ctx.moveTo(pS.sx, pS.sy);
+      ctx.lineTo(qS.sx, qS.sy);
+      ctx.stroke();
+
+      // Draw vertical reflection line
+      ctx.strokeStyle = 'var(--ecc-success)';
+      const rS = toScr(R.x, R.y);
+      const negRS = toScr(R.x, mod(-R.y, state.p));
+      ctx.beginPath();
+      ctx.moveTo(rS.sx, rS.sy);
+      ctx.lineTo(negRS.sx, negRS.sy);
+      ctx.stroke();
+    } else {
+      // Continuous straight line passing through P and Q extended
+      const m = Q.x === P.x ? (3 * P.x * P.x + state.a) / (2 * P.y) : (Q.y - P.y) / (Q.x - P.x);
+      // Draw line across screen
+      const xLeft = -10;
+      const yLeft = P.y + m * (xLeft - P.x);
+      const xRight = 15;
+      const yRight = P.y + m * (xRight - P.x);
+
+      const pL = toScr(xLeft, yLeft);
+      const pR = toScr(xRight, yRight);
+
+      ctx.beginPath();
+      ctx.moveTo(pL.sx, pL.sy);
+      ctx.lineTo(pR.sx, pR.sy);
+      ctx.stroke();
+
+      // Draw reflection vertical line
+      ctx.strokeStyle = 'var(--ecc-success)';
+      const rS = toScr(R.x, R.y);
+      const negRS = toScr(R.x, -R.y);
+      ctx.beginPath();
+      ctx.moveTo(rS.sx, rS.sy);
+      ctx.lineTo(negRS.sx, negRS.sy);
+      ctx.stroke();
+    }
+    ctx.setLineDash([]);
+  }
+
+  // Draw Points
+  drawPoint(P, 'var(--ecc-primary)', 'P');
+  if (P.x !== Q.x || P.y !== Q.y) drawPoint(Q, 'var(--ecc-warning)', 'Q');
+  if (R) {
+    // Draw -R
+    if (state.isModulo) {
+      drawPoint({ x: R.x, y: mod(-R.y, state.p) }, 'rgba(16, 185, 129, 0.4)', '-R');
+    } else {
+      drawPoint({ x: R.x, y: -R.y }, 'rgba(16, 185, 129, 0.4)', '-R');
+    }
+    // Draw R
+    drawPoint(R, 'var(--ecc-success)', 'R = P+Q');
+  }
+}
+
+function drawPoint(pt, color, label) {
+  const s = toScr(pt.x, pt.y);
+  ctx.fillStyle = color;
+  ctx.beginPath();
+  ctx.arc(s.sx, s.sy, 6, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.strokeStyle = '#fff';
+  ctx.lineWidth = 1;
+  ctx.stroke();
+
+  ctx.fillStyle = '#fff';
+  ctx.font = '12px Orbitron';
+  ctx.fillText(label, s.sx + 10, s.sy - 10);
+}
+
+function validateAndRender() {
+  calculateAddition();
+
+  ctx.clearRect(0, 0, els.cvs.width, els.cvs.height);
+  drawGrid();
+
+  if (state.isModulo) {
+    drawFiniteFieldPoints();
+  } else {
+    drawContinuousCurve();
+  }
+
+  drawAdditionGeom();
+}
+
+// ==========================================
+// 5. INTERACTION LOGIC
+// ==========================================
+function getDist(pt1, pt2) {
+  return Math.sqrt(Math.pow(pt1.sx - pt2.sx, 2) + Math.pow(pt1.sy - pt2.sy, 2));
+}
+
+function handleMouseDown(e) {
+  const rect = els.cvs.getBoundingClientRect();
+  const mouse = { sx: e.clientX - rect.left, sy: e.clientY - rect.top };
+
+  const pS = toScr(state.points.P.x, state.points.P.y);
+  const qS = toScr(state.points.Q.x, state.points.Q.y);
+
+  if (getDist(mouse, pS) < 15) state.dragTarget = 'P';
+  else if (getDist(mouse, qS) < 15) state.dragTarget = 'Q';
+}
+
+function handleMouseMove(e) {
+  const rect = els.cvs.getBoundingClientRect();
+  const sx = e.clientX - rect.left;
+  const sy = e.clientY - rect.top;
+
+  // Tooltip
+  const pos = fromScr(sx, sy);
+  els.tooltip.textContent = `(${pos.x.toFixed(1)}, ${pos.y.toFixed(1)})`;
+  els.tooltip.style.left = `${e.clientX + 10}px`;
+  els.tooltip.style.top = `${e.clientY + 10}px`;
+  els.tooltip.classList.add('visible');
+
+  if (!state.dragTarget) return;
+
+  if (state.isModulo) {
+    // Snap to nearest valid finite field point
+    const valid = getFiniteFieldPoints();
+    let closest = valid[0];
+    let minDist = Infinity;
+    valid.forEach((pt) => {
+      const ptS = toScr(pt.x, pt.y);
+      const dist = Math.sqrt(Math.pow(ptS.sx - sx, 2) + Math.pow(ptS.sy - sy, 2));
+      if (dist < minDist) {
+        minDist = dist;
+        closest = pt;
+      }
+    });
+    state.points[state.dragTarget] = closest;
+  } else {
+    // Continuous: snap to curve. For a given X, calculate Y
+    let newX = pos.x;
+    const rhs = Math.pow(newX, 3) + state.a * newX + state.b;
+    if (rhs >= 0) {
+      let newY = Math.sqrt(rhs);
+      if (pos.y < 0) newY = -newY;
+      state.points[state.dragTarget] = { x: newX, y: newY };
+    }
+  }
+
+  validateAndRender();
+}
+
+function handleMouseUp() {
+  state.dragTarget = null;
+}
+
+els.cvs.addEventListener('mouseout', () => {
+  state.dragTarget = null;
+  els.tooltip.classList.remove('visible');
 });
+
+// ==========================================
+// 6. TRAPDOOR RACE SIMULATOR
+// ==========================================
+// Q = n * P. Hacker tries to find n.
+
+async function startTrapdoorRace() {
+  if (state.isHacking) return;
+  state.isHacking = true;
+
+  // Setup a small prime for demo, e.g. p=97
+  els.sliderP.value = 97;
+  els.sliderP.dispatchEvent(new Event('input'));
+  if (!state.isModulo) els.tglMod.click();
+
+  await sleep(500); // let UI update
+
+  const P = getFiniteFieldPoints()[0];
+  els.tdP.textContent = `(${P.x}, ${P.y})`;
+
+  // Pick a secret n
+  const secretN = Math.floor(Math.random() * 50) + 20;
+
+  // Instantly calculate Q = nP using double-and-add (we'll just use our addition logic iteratively for simplicity here since n is small)
+  let Q = { x: P.x, y: P.y };
+  for (let i = 2; i <= secretN; i++) {
+    state.points.P = Q;
+    state.points.Q = P;
+    calculateAddition(); // sets R
+    Q = state.points.R;
+    if (!Q) break; // hit infinity
+  }
+
+  els.tdQ.textContent = `(${Q.x}, ${Q.y})`;
+
+  els.hackStat.style.display = 'block';
+  els.hackRes.textContent = 'Brute Forcing...';
+  els.hackRes.className = 'text-xs mt-1 text-center font-fira text-warning';
+
+  let currentN = 1;
+  let testQ = { x: P.x, y: P.y };
+
+  // Visual hacking loop
+  state.hackInterval = setInterval(() => {
+    els.hackN.textContent = currentN;
+    els.hackFill.style.width = `${(currentN / 97) * 100}%`;
+
+    // Add P to testQ
+    state.points.P = testQ;
+    state.points.Q = P;
+    calculateAddition();
+    testQ = state.points.R;
+
+    validateAndRender(); // physically animate the point jumping!
+
+    if (!testQ || (testQ.x === Q.x && testQ.y === Q.y) || currentN > 97) {
+      clearInterval(state.hackInterval);
+      els.hackRes.textContent = `Hacked! Secret n = ${currentN + 1}`;
+      els.hackRes.className = 'text-xs mt-1 text-center font-fira text-success';
+      state.isHacking = false;
+    }
+
+    currentN++;
+  }, 100);
+}
+
+function sleep(ms) {
+  return new Promise((r) => setTimeout(r, ms));
+}

@@ -1,0 +1,210 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>IndexedDB Quota Abort Lab | Algo Infinity Verse</title>
+  <meta name="description" content="Configure IndexedDB store budgets and write bursts, inject quota/abort/versionchange races, measure data-loss risk, and export a reliability report." />
+  <link rel="stylesheet" href="/styles.css" />
+  <link rel="stylesheet" href="style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Poppins:wght@300;400;500;600;700&family=Fira+Code:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <script>
+    (function () {
+      try {
+        var storedTheme = localStorage.getItem('theme');
+        var prefersLight = window.matchMedia('(prefers-color-scheme: light)').matches;
+        var theme = storedTheme || (prefersLight ? 'light' : 'dark');
+        if (theme === 'light') {
+          document.documentElement.classList.add('light-mode');
+        } else {
+          document.documentElement.classList.remove('light-mode');
+        }
+      } catch (e) {}
+    })();
+  </script>
+</head>
+<body data-page="indexeddb-quota-abort-lab">
+  <a href="#idb-main" class="idb-skip-link">Skip to main content</a>
+  <button type="button" id="scrollTopBtn" class="scroll-top-btn" aria-label="Scroll to top">
+    <i class="fas fa-arrow-up" aria-hidden="true"></i>
+  </button>
+
+  <div id="navbar-placeholder"></div>
+
+  <header class="idb-hero">
+    <div class="idb-hero-badge">
+      <i class="fas fa-database" aria-hidden="true"></i>
+      Storage Reliability Lab
+    </div>
+    <h1>
+      IndexedDB Quota
+      <span class="idb-hero-accent">Abort Lab</span>
+    </h1>
+    <p>
+      Simulate store budgets, write bursts, QuotaExceededError, AbortError, and versionchange races —
+      then measure data-loss risk and export a reliability report.
+    </p>
+    <div class="idb-hero-stats" aria-live="polite">
+      <div class="idb-stat">
+        <span class="idb-stat-val" id="statRisk">—</span>
+        <span class="idb-stat-label">Loss risk</span>
+      </div>
+      <div class="idb-stat">
+        <span class="idb-stat-val" id="statQuota">—</span>
+        <span class="idb-stat-label">Quota hits</span>
+      </div>
+      <div class="idb-stat">
+        <span class="idb-stat-val" id="statAborts">—</span>
+        <span class="idb-stat-label">Aborts</span>
+      </div>
+      <div class="idb-stat">
+        <span class="idb-stat-val" id="statRecovery">—</span>
+        <span class="idb-stat-label">Recovery</span>
+      </div>
+    </div>
+  </header>
+
+  <main id="idb-main" class="idb-main">
+    <div class="container">
+      <div class="idb-workspace">
+        <section class="idb-panel" aria-labelledby="idb-budget-title">
+          <div class="idb-panel-header">
+            <div class="idb-panel-title">
+              <i class="fas fa-sliders idb-panel-icon" aria-hidden="true"></i>
+              <h2 id="idb-budget-title">Store budgets &amp; write bursts</h2>
+            </div>
+          </div>
+
+          <label class="idb-label" for="storeBudget">Object-store budget (MB)</label>
+          <input type="number" id="storeBudget" class="idb-input" min="1" max="500" value="50" />
+
+          <label class="idb-label" for="usedMb">Current usage (MB)</label>
+          <input type="number" id="usedMb" class="idb-input" min="0" max="500" value="38" />
+
+          <label class="idb-label" for="burstCount">Write burst size (ops)</label>
+          <input type="number" id="burstCount" class="idb-input" min="1" max="10000" value="200" />
+
+          <label class="idb-label" for="avgPayload">Avg payload per write (KB)</label>
+          <input type="number" id="avgPayload" class="idb-input" min="1" max="1024" value="64" />
+
+          <label class="idb-label" for="writePreset">Progress-store write preset</label>
+          <select id="writePreset" class="idb-select">
+            <option value="custom">Custom (manual above)</option>
+            <option value="lesson">Lesson progress checkpoints</option>
+            <option value="quiz">Quiz attempt batches</option>
+            <option value="offline">Offline sync queue flush</option>
+            <option value="media">Media blob cache warm</option>
+          </select>
+
+          <div class="idb-controls">
+            <button type="button" id="applyPresetBtn" class="btn btn-secondary">
+              <i class="fas fa-wand-magic-sparkles" aria-hidden="true"></i> Apply preset
+            </button>
+            <button type="button" id="runBurstBtn" class="btn btn-primary">
+              <i class="fas fa-bolt" aria-hidden="true"></i> Simulate burst
+            </button>
+          </div>
+        </section>
+
+        <section class="idb-panel" aria-labelledby="idb-inject-title">
+          <div class="idb-panel-header">
+            <div class="idb-panel-title">
+              <i class="fas fa-virus idb-panel-icon" aria-hidden="true"></i>
+              <h2 id="idb-inject-title">Inject failure scenarios</h2>
+            </div>
+          </div>
+
+          <fieldset class="idb-fieldset">
+            <legend class="idb-label">Race / error injection</legend>
+            <label class="idb-check">
+              <input type="checkbox" id="injQuota" checked />
+              QuotaExceededError mid-transaction
+            </label>
+            <label class="idb-check">
+              <input type="checkbox" id="injAbort" />
+              AbortError (tx aborted / blocked)
+            </label>
+            <label class="idb-check">
+              <input type="checkbox" id="injVersion" />
+              versionchange race (upgrade while open)
+            </label>
+            <label class="idb-check">
+              <input type="checkbox" id="injPartial" checked />
+              Partial commit before failure (stale cursor)
+            </label>
+          </fieldset>
+
+          <label class="idb-label" for="failAtPct">Fail after % of burst</label>
+          <input type="range" id="failAtPct" class="idb-range" min="5" max="95" value="60" />
+          <span class="idb-hint" id="failAtLabel">60%</span>
+
+          <div class="idb-controls">
+            <button type="button" id="runScenarioBtn" class="btn btn-primary">
+              <i class="fas fa-flask" aria-hidden="true"></i> Run scenario
+            </button>
+            <button type="button" id="clearBtn" class="btn btn-outline">
+              <i class="fas fa-eraser" aria-hidden="true"></i> Clear
+            </button>
+            <button type="button" id="exportBtn" class="btn btn-outline" disabled>
+              <i class="fas fa-download" aria-hidden="true"></i> Export report
+            </button>
+          </div>
+          <div id="idbStatus" class="idb-status" role="status" aria-live="polite"></div>
+        </section>
+      </div>
+
+      <div class="idb-workspace">
+        <section class="idb-panel" aria-labelledby="idb-risk-title">
+          <div class="idb-panel-header">
+            <div class="idb-panel-title">
+              <i class="fas fa-triangle-exclamation idb-panel-icon" aria-hidden="true"></i>
+              <h2 id="idb-risk-title">Data-loss risk &amp; timeline</h2>
+            </div>
+            <span class="idb-status-live" id="analysisStatus" role="status" aria-live="polite">Ready</span>
+          </div>
+          <div class="idb-score-card">
+            <div>
+              <h3 id="riskHeading">Risk score</h3>
+              <p id="riskBlurb" class="idb-muted">Run a scenario to estimate loss probability.</p>
+            </div>
+            <div class="idb-score-ring" id="riskRing" aria-hidden="true">
+              <span id="riskScoreVal">—</span>
+            </div>
+          </div>
+          <ol id="timelineOut" class="idb-timeline" aria-live="polite">
+            <li class="idb-empty-li">Scenario timeline appears here.</li>
+          </ol>
+        </section>
+
+        <section class="idb-panel" aria-labelledby="idb-rec-title">
+          <div class="idb-panel-header">
+            <div class="idb-panel-title">
+              <i class="fas fa-shield-halved idb-panel-icon" aria-hidden="true"></i>
+              <h2 id="idb-rec-title">Recovery strategy recommendations</h2>
+            </div>
+          </div>
+          <div id="recoveryOut" class="idb-recovery" aria-live="polite">
+            <p class="idb-empty">Recovery guidance appears after a scenario run.</p>
+          </div>
+        </section>
+      </div>
+    </div>
+  </main>
+
+  <div id="footer-placeholder"></div>
+
+  <script src="/auth.js"></script>
+  <script src="/bootstrap-legacy.js"></script>
+  <script src="/script.js"></script>
+  <script type="module" src="/dist/legacy-bundle.mjs"></script>
+  <script src="/theme.js"></script>
+  <script src="script.js"></script>
+  <script>
+    if (typeof loadPartial === 'function') {
+      loadPartial('navbar-placeholder', '/partials/navbar.html');
+      loadPartial('footer-placeholder', '/partials/footer.html');
+    }
+  </script>
+</body>
+</html>

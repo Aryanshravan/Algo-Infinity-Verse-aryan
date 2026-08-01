@@ -1,0 +1,265 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Bose-Einstein Condensate Logic Gate | Algo Infinity Verse</title>
+    <link rel="stylesheet" href="/styles.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <!-- Monaco Editor -->
+    <script src="https://unpkg.com/monaco-editor@0.36.1/min/vs/loader.js"></script>
+    <style>
+      body { margin: 0; overflow: hidden; background: #000; font-family: 'Poppins', sans-serif; color: #fff; }
+      .app-container { display: flex; height: 100vh; }
+      
+      .sidebar { width: 450px; background: rgba(15, 23, 42, 0.95); border-right: 1px solid #8b5cf6; display: flex; flex-direction: column; z-index: 10; }
+      .header { padding: 20px; border-bottom: 1px solid #334155; }
+      .header h2 { margin: 0; color: #8b5cf6; font-family: 'Orbitron', sans-serif; font-size: 1.2rem; }
+      .header p { margin: 5px 0 0 0; font-size: 0.8rem; color: #94a3b8; }
+      
+      #editor-container { flex: 1; min-height: 300px; }
+      
+      .controls { padding: 20px; border-top: 1px solid #334155; background: rgba(0,0,0,0.5); }
+      .btn { background: linear-gradient(90deg, #7c3aed, #5b21b6); color: #fff; border: none; padding: 10px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; transition: 0.3s; }
+      .btn:hover { background: #8b5cf6; transform: translateY(-2px); box-shadow: 0 0 15px rgba(139, 92, 246, 0.5); }
+      
+      .sim-container { flex: 1; position: relative; background: radial-gradient(circle at center, #1e1b4b 0%, #000 100%); overflow: hidden; }
+      canvas { width: 100%; height: 100%; display: block; filter: contrast(1.5) brightness(1.2); }
+      
+      .hud { position: absolute; top: 20px; left: 20px; background: rgba(0,0,0,0.8); padding: 15px; border-radius: 8px; border: 1px solid #8b5cf6; width: 260px; z-index: 10; pointer-events: none; }
+      .hud h3 { margin: 0 0 10px 0; color: #8b5cf6; font-size: 1rem; font-family: 'Orbitron', sans-serif; }
+      .metric { display: flex; justify-content: space-between; font-size: 0.8rem; color: #cbd5e1; margin-bottom: 5px; }
+      .val { font-weight: bold; font-family: monospace; }
+      .val-temp { color: #38bdf8; }
+      .val-phase { color: #f472b6; }
+    </style>
+  </head>
+  <body>
+    
+    <div class="app-container">
+      <div class="sidebar">
+        <div class="header">
+          <h2><i class="fas fa-atom"></i> BEC Logic Gate Simulator</h2>
+          <p>Execute quantum gates using macroscopic wave functions</p>
+        </div>
+        
+        <div id="editor-container"></div>
+        
+        <div class="controls">
+          <button class="btn" onclick="executeGate()"><i class="fas fa-bolt"></i> Apply Doppler Laser Cooling</button>
+        </div>
+      </div>
+      
+      <div class="sim-container">
+        <!-- Laser cooling beams -->
+        <div style="position: absolute; inset:0; background: 
+            linear-gradient(90deg, transparent 49.5%, rgba(56, 189, 248, 0.2) 49.5%, rgba(56, 189, 248, 0.2) 50.5%, transparent 50.5%),
+            linear-gradient(0deg, transparent 49.5%, rgba(56, 189, 248, 0.2) 49.5%, rgba(56, 189, 248, 0.2) 50.5%, transparent 50.5%);
+            pointer-events: none; z-index: 0;"></div>
+            
+        <canvas id="becCanvas" style="position: relative; z-index: 1;"></canvas>
+        <div class="hud">
+          <h3>Thermodynamic State</h3>
+          <div class="metric"><span>Temperature:</span> <span class="val val-temp" id="tempVal">300.00 K</span></div>
+          <div class="metric"><span>Kinetic Energy:</span> <span class="val" id="keVal" style="color:#ef4444">High</span></div>
+          <div class="metric"><span>Wave Coherence:</span> <span class="val val-phase" id="coherenceVal">0.0%</span></div>
+          <div class="metric" style="margin-top: 10px; border-top: 1px solid #334155; padding-top: 5px;">
+            <span>Logic Gate Status:</span> <span class="val" id="statusVal" style="color:#94a3b8">UNCALIBRATED</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      let editor;
+      require.config({ paths: { 'vs': 'https://unpkg.com/monaco-editor@0.36.1/min/vs' }});
+      require(['vs/editor/editor.main'], function() {
+        editor = monaco.editor.create(document.getElementById('editor-container'), {
+          value: `// Quantum Logic Gate Controller (CNOT)
+// 1. Cool Rubidium atoms to near absolute zero (nanokelvins).
+// 2. Manipulate the resulting Bose-Einstein Condensate wave function.
+
+function applyLaserCooling() {
+    // Return cooling parameters to drop temperature
+    // and increase wave coherence to 100%.
+    
+    return {
+        dopplerFrequency: 384e12, // Hz (Target resonance)
+        magneticTrapStrength: 5.0, // Tesla
+        evaporativeCoolingRate: 0.99
+    };
+}`,
+          language: 'javascript',
+          theme: 'vs-dark',
+          minimap: { enabled: false },
+          automaticLayout: true
+        });
+      });
+
+      const canvas = document.getElementById('becCanvas');
+      const ctx = canvas.getContext('2d');
+      
+      let isCooling = false;
+      let temperature = 300.0;
+      let coherence = 0;
+      
+      // Particles representing Rubidium atoms
+      let atoms = [];
+      
+      function resize() { canvas.width = canvas.clientWidth; canvas.height = canvas.clientHeight; }
+      window.addEventListener('resize', resize);
+      resize();
+
+      function initAtoms() {
+          atoms = [];
+          for(let i=0; i<300; i++) {
+              atoms.push({
+                  x: Math.random() * canvas.width,
+                  y: Math.random() * canvas.height,
+                  vx: (Math.random() - 0.5) * 10,
+                  vy: (Math.random() - 0.5) * 10,
+                  phase: Math.random() * Math.PI * 2
+              });
+          }
+      }
+      initAtoms();
+
+      function animate() {
+        // Trailing effect
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.2)';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        
+        let cx = canvas.width / 2;
+        let cy = canvas.height / 2;
+
+        if (isCooling) {
+            // Apply cooling logic
+            temperature *= 0.95; // Exponential decay
+            if(temperature < 0.000001) temperature = 0.000001; // 1 nanokelvin limit
+            
+            coherence += 1.5;
+            if(coherence > 100) coherence = 100;
+        }
+
+        // Speed is proportional to sqrt(Temperature)
+        let speedFactor = Math.sqrt(temperature / 300);
+
+        ctx.lineWidth = 1.5;
+
+        for(let i=0; i<atoms.length; i++) {
+            let a = atoms[i];
+            
+            if(isCooling) {
+                // Drift towards center magnetic trap
+                let dx = cx - a.x;
+                let dy = cy - a.y;
+                let dist = Math.hypot(dx, dy);
+                if(dist > 0) {
+                    a.vx += (dx / dist) * 0.5;
+                    a.vy += (dy / dist) * 0.5;
+                }
+                
+                // Damping (cooling)
+                a.vx *= 0.9;
+                a.vy *= 0.9;
+                
+                // Phase alignment
+                a.phase += (0 - a.phase) * 0.05;
+            } else {
+                // Random thermal noise
+                a.phase += (Math.random() - 0.5) * 0.5;
+            }
+
+            // Move
+            let effVx = a.vx * speedFactor;
+            let effVy = a.vy * speedFactor;
+            
+            // If near absolute zero, speed is dominated by quantum uncertainty, not thermal
+            if(temperature < 1) {
+                // Macroscopic wave function visual (particles merge into a glowing blob)
+                let jitter = (100 - coherence) * 0.1;
+                effVx += (Math.random() - 0.5) * jitter;
+                effVy += (Math.random() - 0.5) * jitter;
+            }
+
+            a.x += effVx;
+            a.y += effVy;
+            
+            // Bounce
+            if(a.x < 0 || a.x > canvas.width) a.vx *= -1;
+            if(a.y < 0 || a.y > canvas.height) a.vy *= -1;
+
+            // Draw Atom (represented as a wave packet)
+            ctx.beginPath();
+            
+            if(coherence > 80) {
+                // Quantum State - Unified glowing wave
+                ctx.arc(a.x, a.y, 4, 0, Math.PI*2);
+                ctx.fillStyle = 'rgba(192, 132, 252, 0.8)';
+                ctx.shadowBlur = 15;
+                ctx.shadowColor = '#c084fc';
+                ctx.fill();
+            } else {
+                // Classical State - distinct particles
+                let waveSize = 5 + Math.sin(a.phase) * 2;
+                ctx.arc(a.x, a.y, waveSize, 0, Math.PI*2);
+                ctx.strokeStyle = \`rgba(56, 189, 248, \${0.5 + Math.sin(a.phase)*0.5})\`;
+                ctx.shadowBlur = 0;
+                ctx.stroke();
+            }
+        }
+
+        // Draw macroscopic BEC blob
+        if(coherence > 95) {
+             let blobPulse = Math.sin(Date.now() / 200) * 10;
+             let grad = ctx.createRadialGradient(cx, cy, 10, cx, cy, 150 + blobPulse);
+             grad.addColorStop(0, 'rgba(255, 255, 255, 0.8)');
+             grad.addColorStop(0.2, 'rgba(192, 132, 252, 0.5)');
+             grad.addColorStop(1, 'transparent');
+             ctx.fillStyle = grad;
+             ctx.beginPath();
+             ctx.arc(cx, cy, 150 + blobPulse, 0, Math.PI*2);
+             ctx.fill();
+        }
+
+        // Update HUD
+        let tempDisplay = temperature > 1 ? temperature.toFixed(2) + " K" : (temperature * 1e9).toFixed(0) + " nK";
+        document.getElementById('tempVal').innerText = tempDisplay;
+        
+        let keDisplay = temperature > 100 ? "High" : (temperature > 1 ? "Medium" : "Quantum Floor");
+        document.getElementById('keVal').innerText = keDisplay;
+        if(temperature < 1) document.getElementById('keVal').style.color = "#38bdf8";
+        
+        document.getElementById('coherenceVal').innerText = coherence.toFixed(1) + "%";
+        
+        if (coherence > 99) {
+            document.getElementById('statusVal').innerText = "CNOT GATE SUCCESS (MACROSCOPIC)";
+            document.getElementById('statusVal').style.color = "#10b981";
+            isCooling = false; // Stop updating state, maintain
+        }
+
+        requestAnimationFrame(animate);
+      }
+      animate();
+
+      function executeGate() {
+          if(isCooling || coherence > 99) return; // already done
+          
+          try {
+              eval(editor.getValue());
+              if(typeof applyLaserCooling === 'function') {
+                  let config = applyLaserCooling();
+                  if(config.dopplerFrequency && config.magneticTrapStrength) {
+                      isCooling = true;
+                      document.getElementById('statusVal').innerText = "LASER COOLING INITIATED";
+                      document.getElementById('statusVal').style.color = "#38bdf8";
+                  }
+              }
+          } catch(e) {
+              alert("Algorithm Error: " + e.message);
+          }
+      }
+    </script>
+  </body>
+</html>

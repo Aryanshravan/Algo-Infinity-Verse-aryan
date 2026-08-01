@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Rigid Body Physics Engine Sandbox | Algo Infinity Verse</title>
+    <meta
+      name="description"
+      content="Interactive 2D Rigid Body Physics Engine Sandbox demonstrating rotational dynamics, impulse resolution, SAT collision detection, and manifold generation."
+    />
+
+    <link
+      href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Fira+Code:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+
+    <!-- External Stylesheets -->
+    <link rel="stylesheet" href="/styles.css" />
+    <link rel="stylesheet" href="rigid-body-physics.css" />
+    <link rel="stylesheet" href="/modules/quick-notes/quick-notes.css" />
+  </head>
+  <body class="physics-body">
+    <!-- Navbar Placeholder -->
+    <div id="navbar-placeholder"></div>
+
+    <main class="workspace">
+      <!-- Left Panel: Controls -->
+      <div class="panel-left">
+        <div class="panel-header">
+          <h3><i class="fas fa-cubes"></i> Physics Engine</h3>
+        </div>
+
+        <div class="control-section">
+          <p class="desc-text">
+            Interact with a real-time impulse-based 2D rigid body physics engine. Spawn shapes, drag
+            them with the mouse, and adjust physical properties.
+          </p>
+
+          <!-- Spawning Shapes -->
+          <div class="input-group">
+            <span id="spawnLabel" style="font-size: 0.85rem; color: #cbd5e1; font-weight: 500"
+              >Spawn Object</span
+            >
+            <div class="spawn-buttons" role="group" aria-labelledby="spawnLabel">
+              <button type="button" id="spawnCircleBtn" class="btn btn-secondary">
+                <i class="fas fa-circle"></i> Circle
+              </button>
+              <button type="button" id="spawnBoxBtn" class="btn btn-secondary">
+                <i class="fas fa-square"></i> Box
+              </button>
+              <button type="button" id="spawnTriangleBtn" class="btn btn-secondary">
+                <i class="fas fa-caret-up"></i> Triangle
+              </button>
+            </div>
+          </div>
+
+          <!-- Parameters -->
+          <div class="sliders-container">
+            <div class="slider-group">
+              <div class="slider-header">
+                <label for="gravitySlider">Gravity (y)</label>
+                <span id="gravityVal" class="val-badge">9.8 m/s²</span>
+              </div>
+              <input type="range" id="gravitySlider" min="0" max="30" step="0.5" value="9.8" />
+            </div>
+
+            <div class="slider-group">
+              <div class="slider-header">
+                <label for="restitutionSlider">Restitution (Bounciness)</label>
+                <span id="restitutionVal" class="val-badge">0.5</span>
+              </div>
+              <input type="range" id="restitutionSlider" min="0" max="1" step="0.05" value="0.5" />
+            </div>
+
+            <div class="slider-group">
+              <div class="slider-header">
+                <label for="frictionSlider">Friction Coefficient</label>
+                <span id="frictionVal" class="val-badge">0.3</span>
+              </div>
+              <input type="range" id="frictionSlider" min="0" max="1" step="0.05" value="0.3" />
+            </div>
+          </div>
+
+          <!-- Visual Toggles -->
+          <div class="toggles-container">
+            <label class="toggle-item">
+              <input type="checkbox" id="showContactsToggle" checked />
+              <span>Show Contact Points & Normals</span>
+            </label>
+            <label class="toggle-item">
+              <input type="checkbox" id="showVelocitiesToggle" />
+              <span>Show Velocity Vectors</span>
+            </label>
+            <label class="toggle-item">
+              <input type="checkbox" id="wireframeToggle" />
+              <span>Wireframe Mode</span>
+            </label>
+          </div>
+
+          <!-- Action Buttons -->
+          <div class="action-buttons">
+            <button type="button" id="clearBtn" class="btn btn-outline">
+              <i class="fas fa-trash"></i> Clear Sandbox
+            </button>
+            <button type="button" id="presetStackBtn" class="btn btn-primary">
+              <i class="fas fa-layer-group"></i> Spawn Stack
+            </button>
+          </div>
+
+          <!-- Live Telemetry -->
+          <div class="stats-panel">
+            <div class="stat-row">
+              <span>FPS:</span>
+              <strong id="fpsStat">60</strong>
+            </div>
+            <div aria-live="polite">
+              <div class="stat-row">
+                <span>Active Bodies:</span>
+                <strong id="bodiesStat">0</strong>
+              </div>
+              <div class="stat-row">
+                <span>Contacts Checked:</span>
+                <strong id="contactsStat">0</strong>
+              </div>
+            </div>
+            <div class="legend-hint">
+              <small
+                ><strong>Tip:</strong> Left-click and drag bodies to throw them. Hold Shift to spawn
+                fixed/static anchor bodies.</small
+              >
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Panel: Canvas -->
+      <div class="panel-right">
+        <div class="canvas-wrapper" id="canvasWrapper">
+          <canvas
+            id="physicsCanvas"
+            tabindex="0"
+            aria-label="2D Physics Simulation Sandbox Canvas"
+          ></canvas>
+        </div>
+      </div>
+    </main>
+
+    <!-- Footer Placeholder -->
+    <div id="footer-placeholder"></div>
+
+    <script src="/auth.js"></script>
+    <script src="/bootstrap-legacy.js"></script>
+    <script src="/script.js"></script>
+    <script type="module" src="/dist/legacy-bundle.mjs"></script>
+    <script src="/theme.js"></script>
+    <script src="rigid-body-physics.js"></script>
+    <script>
+      loadPartial('navbar-placeholder', '/partials/navbar.html');
+      loadPartial('footer-placeholder', '/partials/footer.html');
+    </script>
+    <script src="/modules/quick-notes/quick-notes.js"></script>
+  </body>
+</html>

@@ -68,11 +68,26 @@ let simState = {
   isRunning: false,
   timer: null,
 
-  // TCP Variables
+  // Algorithm: 'reno' | 'cubic'
+  algorithm: 'reno',
+
+  // TCP Variables (Reno)
   round: 0,
   cwnd: 1,
   ssthresh: 16,
-  state: TCP_STATES.CLOSED, // start closed
+  state: TCP_STATES.CLOSED,
+
+  // CUBIC-specific state
+  cubicState: {
+    cwnd: 1,
+    ssthresh: 16,
+    state: 'SLOW_START', // 'SLOW_START' | 'CONGESTION_AVOIDANCE' | 'FAST_RECOVERY' | 'TIMEOUT'
+    W_max: 0,   // cwnd at last congestion event
+    K: 0,       // time offset to reach W_max again
+    t_epoch: 0, // round at start of current epoch
+    C: 0.4,     // CUBIC scaling constant
+    beta: 0.7,  // CUBIC multiplicative decrease factor
+  },
 
   // Config
   lossProb: 0.02,
@@ -84,8 +99,9 @@ let simState = {
 
   // Chart Data
   labels: [],
-  cwndData: [],
-  ssthreshData: [],
+  cwndData: [],      // Reno CWND
+  ssthreshData: [],  // Reno ssthresh
+  cubicCwndData: [], // CUBIC CWND
 };
 
 // Canvas Packet Engine
@@ -98,6 +114,8 @@ const els = {
   btnForceTimeout: document.getElementById('btnForceTimeout'),
   btnStepHandshake: document.getElementById('btnStepHandshake'),
   handshakeNextStep: document.getElementById('handshakeNextStep'),
+  btnAlgoReno: document.getElementById('btnAlgoReno'),
+  btnAlgoCubic: document.getElementById('btnAlgoCubic'),
 
   lossRateSlider: document.getElementById('lossRateSlider'),
   lossRateVal: document.getElementById('lossRateVal'),
@@ -156,10 +174,31 @@ function initTCPVisualizer() {
   els.initSsthresh.addEventListener('change', (e) => {
     if (!simState.isRunning && simState.round === 0) {
       simState.ssthresh = parseInt(e.target.value);
+      simState.cubicState.ssthresh = parseInt(e.target.value);
       els.dispSsthresh.textContent = simState.ssthresh;
       updateChartDirect();
     }
   });
+
+  // Algorithm selector
+  if (els.btnAlgoReno) {
+    els.btnAlgoReno.addEventListener('click', () => {
+      if (!simState.isRunning) {
+        simState.algorithm = 'reno';
+        els.btnAlgoReno.classList.add('active');
+        els.btnAlgoCubic.classList.remove('active');
+      }
+    });
+  }
+  if (els.btnAlgoCubic) {
+    els.btnAlgoCubic.addEventListener('click', () => {
+      if (!simState.isRunning) {
+        simState.algorithm = 'cubic';
+        els.btnAlgoCubic.classList.add('active');
+        els.btnAlgoReno.classList.remove('active');
+      }
+    });
+  }
 }
 
 // ==========================================
@@ -171,7 +210,7 @@ function toggleSimulation() {
     simState.state === TCP_STATES.SYN_SENT ||
     simState.state === TCP_STATES.SYN_RECEIVED
   ) {
-    alert('Please complete the 3-Way Handshake first!');
+    window.Toast.warning('Please complete the 3-Way Handshake first!');
     return;
   }
 
@@ -207,6 +246,18 @@ function resetSimulation() {
   simState.ssthresh = parseInt(els.initSsthresh.value) || 16;
   simState.state = TCP_STATES.CLOSED;
 
+  // Reset CUBIC state
+  simState.cubicState = {
+    cwnd: 1,
+    ssthresh: parseInt(els.initSsthresh.value) || 16,
+    state: 'SLOW_START',
+    W_max: 0,
+    K: 0,
+    t_epoch: 0,
+    C: 0.4,
+    beta: 0.7,
+  };
+
   els.btnStepHandshake.disabled = false;
   els.handshakeNextStep.textContent = 'Send SYN';
 
@@ -216,8 +267,9 @@ function resetSimulation() {
   simState.labels = [];
   simState.cwndData = [];
   simState.ssthreshData = [];
+  simState.cubicCwndData = [];
 
-  packets = []; // Clear visual packets
+  packets = [];
 
   els.btnToggleSim.innerHTML = '<i class="fas fa-play"></i> Start Simulation';
   els.engineBadge.classList.remove('active');
@@ -280,12 +332,24 @@ function stepHandshake() {
 
 function tcpTick() {
   simState.round++;
+
+  if (simState.algorithm === 'cubic') {
+    tcpTickCubic();
+  } else {
+    tcpTickReno();
+  }
+
+  recordChartData();
+  updateUIState();
+}
+
+/**
+ * TCP Reno tick — original AIMD algorithm.
+ */
+function tcpTickReno() {
   let hadLoss = false;
 
-  // 1. Check for packet drops (Manual or Random)
   if (simState.forceTimeout || Math.random() < simState.lossProb * 0.2) {
-    // 20% of losses are strict timeouts
-    // TIMEOUT
     simState.ssthresh = Math.max(Math.floor(simState.cwnd / 2), 2);
     simState.cwnd = 1;
     simState.state = TCP_STATES.TIMEOUT;
@@ -293,46 +357,107 @@ function tcpTick() {
     hadLoss = true;
     spawnPackets(true, 'TIMEOUT');
   } else if (simState.forceDupAck || Math.random() < simState.lossProb * 0.8) {
-    // 80% are 3 DUP ACKs
-    // 3 DUP ACKs (Fast Retransmit / Fast Recovery)
     simState.ssthresh = Math.max(Math.floor(simState.cwnd / 2), 2);
-    simState.cwnd = simState.ssthresh; // Skipping actual +3 exact math for visual simplicity
+    simState.cwnd = simState.ssthresh;
     simState.state = TCP_STATES.FAST_RECOVERY;
     simState.forceDupAck = false;
     hadLoss = true;
     spawnPackets(true, 'DUP_ACK');
   }
 
-  // 2. Successful Transmission
   if (!hadLoss) {
-    // If we were recovering/timeout last tick, transition back to standard flow
     if (simState.state === TCP_STATES.FAST_RECOVERY) {
       simState.state = TCP_STATES.CONGESTION_AVOIDANCE;
     } else if (simState.state === TCP_STATES.TIMEOUT) {
       simState.state = TCP_STATES.SLOW_START;
     }
 
-    // Increase Window
     if (simState.state === TCP_STATES.SLOW_START) {
-      simState.cwnd *= 2; // Exponential Growth
-
+      simState.cwnd *= 2;
       if (simState.cwnd >= simState.ssthresh) {
         simState.cwnd = simState.ssthresh;
         simState.state = TCP_STATES.CONGESTION_AVOIDANCE;
       }
     } else if (simState.state === TCP_STATES.CONGESTION_AVOIDANCE) {
-      simState.cwnd += 1; // Linear Growth
+      simState.cwnd += 1;
     }
-
     spawnPackets(false);
   }
 
-  // Ensure floating points don't mess up display
   simState.cwnd = Math.floor(simState.cwnd);
+}
 
-  // 3. Update Visuals
-  recordChartData();
-  updateUIState();
+/**
+ * TCP CUBIC tick — implements the cubic window growth function.
+ * W(t) = C * (t - K)^3 + W_max
+ * K = cbrt(W_max * beta / C)
+ */
+function tcpTickCubic() {
+  const cs = simState.cubicState;
+  let hadLoss = false;
+
+  if (simState.forceTimeout || Math.random() < simState.lossProb * 0.2) {
+    // Timeout: reset to slow start
+    cs.W_max = cs.cwnd;
+    cs.ssthresh = Math.max(Math.floor(cs.cwnd * cs.beta), 2);
+    cs.cwnd = 1;
+    cs.state = 'SLOW_START';
+    cs.t_epoch = simState.round;
+    cs.K = Math.cbrt(cs.W_max * (1 - cs.beta) / cs.C);
+    simState.forceTimeout = false;
+    hadLoss = true;
+    // Mirror Reno state for UI badge
+    simState.state = TCP_STATES.TIMEOUT;
+    simState.ssthresh = cs.ssthresh;
+    simState.cwnd = cs.cwnd;
+    spawnPackets(true, 'TIMEOUT');
+  } else if (simState.forceDupAck || Math.random() < simState.lossProb * 0.8) {
+    // 3 DUP ACKs: multiplicative decrease by beta (0.7) not 0.5 like Reno
+    cs.W_max = cs.cwnd;
+    cs.ssthresh = Math.max(Math.floor(cs.cwnd * cs.beta), 2);
+    cs.cwnd = cs.ssthresh;
+    cs.state = 'CONGESTION_AVOIDANCE';
+    cs.t_epoch = simState.round;
+    cs.K = Math.cbrt(cs.W_max * (1 - cs.beta) / cs.C);
+    simState.forceDupAck = false;
+    hadLoss = true;
+    simState.state = TCP_STATES.FAST_RECOVERY;
+    simState.ssthresh = cs.ssthresh;
+    simState.cwnd = cs.cwnd;
+    spawnPackets(true, 'DUP_ACK');
+  }
+
+  if (!hadLoss) {
+    const t = (simState.round - cs.t_epoch) * (simState.rttMs / 1000);
+
+    if (cs.state === 'SLOW_START') {
+      cs.cwnd *= 2; // Same slow start as Reno
+      if (cs.cwnd >= cs.ssthresh) {
+        cs.cwnd = cs.ssthresh;
+        cs.state = 'CONGESTION_AVOIDANCE';
+        cs.t_epoch = simState.round;
+        cs.K = (cs.W_max === 0)
+          ? 0
+          : Math.cbrt(cs.W_max * (1 - cs.beta) / cs.C);
+      }
+    } else {
+      // CUBIC window function: W(t) = C*(t-K)^3 + W_max
+      const W_cubic = cs.C * Math.pow(t - cs.K, 3) + cs.W_max;
+      // Reno-friendly estimate for reference
+      const W_reno_est = cs.W_max * cs.beta + (3 * cs.beta / (2 - cs.beta)) * (t / (simState.rttMs / 1000));
+
+      // Use the larger of CUBIC and Reno-friendly windows
+      cs.cwnd = Math.max(W_cubic, W_reno_est, cs.ssthresh);
+      cs.state = 'CONGESTION_AVOIDANCE';
+    }
+
+    simState.state = cs.state === 'SLOW_START' ? TCP_STATES.SLOW_START : TCP_STATES.CONGESTION_AVOIDANCE;
+    simState.ssthresh = cs.ssthresh;
+    simState.cwnd = Math.floor(cs.cwnd);
+    spawnPackets(false);
+  }
+
+  simState.cwnd = Math.max(1, Math.floor(simState.cwnd));
 }
 
 function updateUIState() {
@@ -353,22 +478,39 @@ function updateUIState() {
 // 4. CHART.JS INTEGRATION
 // ==========================================
 function initChart() {
-  const canvas = document.getElementById('cwndChart');
-  chartInstance = new Chart(canvas.getContext('2d'), {
+  var canvas = document.getElementById('cwndChart');
+  if (!canvas) return;
+
+  function createChart() {
+    if (typeof Chart === 'undefined') return;
+    chartInstance = new Chart(canvas.getContext('2d'), {
     type: 'line',
     data: {
       labels: simState.labels,
       datasets: [
         {
-          label: 'CWND',
+          label: 'CWND (Reno)',
           data: simState.cwndData,
           borderColor: '#0ea5e9',
-          backgroundColor: 'rgba(14, 165, 233, 0.2)',
-          borderWidth: 3,
+          backgroundColor: 'rgba(14, 165, 233, 0.1)',
+          borderWidth: 2,
           fill: true,
-          tension: 0.1,
-          pointRadius: 4,
+          stepped: true,
+          tension: 0,
+          pointRadius: 3,
           pointBackgroundColor: '#0284c7',
+        },
+        {
+          label: 'CWND (CUBIC)',
+          data: simState.cubicCwndData,
+          borderColor: '#f97316',
+          backgroundColor: 'rgba(249, 115, 22, 0.08)',
+          borderWidth: 2,
+          fill: false,
+          tension: 0.3,
+          pointRadius: 3,
+          pointBackgroundColor: '#ea580c',
+          borderDash: [],
         },
         {
           label: 'ssthresh',
@@ -399,28 +541,37 @@ function initChart() {
           ticks: { color: '#94a3b8' },
         },
       },
-      plugins: { legend: { display: false } },
+      plugins: { legend: { display: true, labels: { color: '#94a3b8', boxWidth: 20 } } },
     },
   });
+  }
+
+  if (window.lazyVisualizer) {
+    window.lazyVisualizer.lazyLoadChartJS(canvas, createChart);
+  } else {
+    createChart();
+  }
 }
 
 function recordChartData() {
   simState.labels.push(simState.round);
-  simState.cwndData.push(simState.cwnd);
+  simState.cwndData.push(simState.algorithm === 'reno' ? simState.cwnd : null);
   simState.ssthreshData.push(simState.ssthresh);
+  simState.cubicCwndData.push(simState.algorithm === 'cubic' ? simState.cwnd : null);
 
   // Keep window sliding if too long
   if (simState.labels.length > 30) {
     simState.labels.shift();
     simState.cwndData.shift();
     simState.ssthreshData.shift();
+    simState.cubicCwndData.shift();
   }
 
   updateChartDirect();
 }
 
 function updateChartDirect() {
-  chartInstance.update();
+  if (chartInstance) chartInstance.update();
 }
 
 // ==========================================
@@ -477,7 +628,7 @@ function spawnPackets(hasLoss, lossType) {
       y: yOffset,
       targetX: receiverX,
       progress: 0, // 0.0 to 1.0 (DATA) then 1.0 to 2.0 (ACK)
-      speed: speed,
+      speed: speed * (0.9 + Math.random() * 0.2), // Jitter for realism
       type: type,
       failAt: failAt,
     });
@@ -593,6 +744,13 @@ function drawExplosion(x, y) {
   ctx.moveTo(x + 5, y - 5);
   ctx.lineTo(x - 5, y + 5);
   ctx.stroke();
+
+  // Draw particle fragments
+  ctx.fillStyle = '#ef4444';
+  ctx.fillRect(x - 12, y - 12, 3, 3);
+  ctx.fillRect(x + 10, y - 8, 2, 2);
+  ctx.fillRect(x - 10, y + 10, 3, 3);
+  ctx.fillRect(x + 12, y + 12, 2, 2);
 
   ctx.shadowBlur = 0;
 }

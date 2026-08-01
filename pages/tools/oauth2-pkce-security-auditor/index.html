@@ -1,0 +1,297 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>OAuth2 PKCE Security Auditor | Algo Infinity Verse</title>
+  <meta name="description" content="Generate PKCE verifiers with Web Crypto, simulate Authorization Code + PKCE flow, audit misconfigurations, decode JWTs, and export an OAuth2 security report." />
+  <link rel="stylesheet" href="/styles.css" />
+  <link rel="stylesheet" href="style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Poppins:wght@300;400;500;600;700&family=Fira+Code:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <script>
+    (function () {
+      try {
+        var storedTheme = localStorage.getItem('theme');
+        var prefersLight = window.matchMedia('(prefers-color-scheme: light)').matches;
+        var theme = storedTheme || (prefersLight ? 'light' : 'dark');
+        if (theme === 'light') {
+          document.documentElement.classList.add('light-mode');
+        } else {
+          document.documentElement.classList.remove('light-mode');
+        }
+      } catch (e) {}
+    })();
+  </script>
+</head>
+<body data-page="oauth2-pkce-security-auditor">
+  <a href="#oauth-main" class="oauth-skip-link">Skip to main content</a>
+  <button type="button" id="scrollTopBtn" class="scroll-top-btn" aria-label="Scroll to top">
+    <i class="fas fa-arrow-up" aria-hidden="true"></i>
+  </button>
+
+  <div id="navbar-placeholder"></div>
+
+  <header class="oauth-hero">
+    <div class="oauth-hero-badge">
+      <i class="fas fa-shield-halved" aria-hidden="true"></i>
+      OAuth2 Security Lab
+    </div>
+    <h1>
+      OAuth2 PKCE
+      <span class="oauth-hero-accent">Security Auditor</span>
+    </h1>
+    <p>
+      Generate PKCE challenges with Web Crypto, walk the Authorization Code + PKCE flow,
+      flag misconfigurations and JWT risks, then export a hardening report.
+    </p>
+    <div class="oauth-hero-stats" aria-live="polite">
+      <div class="oauth-stat">
+        <span class="oauth-stat-val" id="statRisk">—</span>
+        <span class="oauth-stat-label">Risk score</span>
+      </div>
+      <div class="oauth-stat">
+        <span class="oauth-stat-val" id="statFindings">—</span>
+        <span class="oauth-stat-label">Findings</span>
+      </div>
+      <div class="oauth-stat">
+        <span class="oauth-stat-val" id="statPkce">—</span>
+        <span class="oauth-stat-label">PKCE status</span>
+      </div>
+    </div>
+  </header>
+
+  <main id="oauth-main" class="oauth-main">
+    <div class="container">
+      <div class="oauth-workspace">
+        <section class="oauth-panel" aria-labelledby="oauth-pkce-title">
+          <div class="oauth-panel-header">
+            <div class="oauth-panel-title">
+              <i class="fas fa-key oauth-panel-icon" aria-hidden="true"></i>
+              <h2 id="oauth-pkce-title">PKCE generator</h2>
+            </div>
+          </div>
+
+          <div class="oauth-controls">
+            <button type="button" id="generatePkceBtn" class="btn btn-primary">
+              <i class="fas fa-wand-magic-sparkles" aria-hidden="true"></i> Generate PKCE
+            </button>
+            <button type="button" id="copyVerifierBtn" class="btn btn-outline" disabled>
+              <i class="fas fa-copy" aria-hidden="true"></i> Copy verifier
+            </button>
+          </div>
+
+          <div class="oauth-field-grid">
+            <div class="oauth-field">
+              <label class="oauth-label" for="codeVerifier">code_verifier</label>
+              <textarea id="codeVerifier" class="oauth-mono" rows="2" readonly aria-live="polite"></textarea>
+            </div>
+            <div class="oauth-field">
+              <label class="oauth-label" for="codeChallenge">code_challenge (S256)</label>
+              <textarea id="codeChallenge" class="oauth-mono" rows="2" readonly aria-live="polite"></textarea>
+            </div>
+            <div class="oauth-field">
+              <label class="oauth-label" for="oauthState">state</label>
+              <input type="text" id="oauthState" class="oauth-input oauth-mono" readonly />
+            </div>
+            <div class="oauth-field">
+              <label class="oauth-label" for="challengeMethod">code_challenge_method</label>
+              <input type="text" id="challengeMethod" class="oauth-input" value="S256" readonly />
+            </div>
+          </div>
+          <p class="oauth-hint">Uses <code>crypto.getRandomValues</code> + <code>crypto.subtle.digest('SHA-256')</code> (base64url).</p>
+        </section>
+
+        <section class="oauth-panel" aria-labelledby="oauth-config-title">
+          <div class="oauth-panel-header">
+            <div class="oauth-panel-title">
+              <i class="fas fa-sliders oauth-panel-icon" aria-hidden="true"></i>
+              <h2 id="oauth-config-title">Client config &amp; checks</h2>
+            </div>
+          </div>
+
+          <div class="oauth-field-grid">
+            <div class="oauth-field">
+              <label class="oauth-label" for="clientId">client_id</label>
+              <input type="text" id="clientId" class="oauth-input" value="spa-demo-client" autocomplete="off" />
+            </div>
+            <div class="oauth-field">
+              <label class="oauth-label" for="authEndpoint">authorize endpoint</label>
+              <input type="url" id="authEndpoint" class="oauth-input" value="https://auth.example.com/authorize" />
+            </div>
+            <div class="oauth-field">
+              <label class="oauth-label" for="tokenEndpoint">token endpoint</label>
+              <input type="url" id="tokenEndpoint" class="oauth-input" value="https://auth.example.com/token" />
+            </div>
+            <div class="oauth-field">
+              <label class="oauth-label" for="registeredRedirect">registered redirect_uri</label>
+              <input type="url" id="registeredRedirect" class="oauth-input" value="https://app.example.com/callback" />
+            </div>
+            <div class="oauth-field">
+              <label class="oauth-label" for="requestedRedirect">requested redirect_uri</label>
+              <input type="url" id="requestedRedirect" class="oauth-input" value="https://app.example.com/callback" />
+            </div>
+          </div>
+
+          <fieldset class="oauth-fieldset">
+            <legend class="oauth-label">Misconfiguration toggles</legend>
+            <div class="oauth-toggle-grid" role="group" aria-label="Security configuration toggles">
+              <label class="oauth-toggle">
+                <input type="checkbox" id="togglePkce" checked />
+                Enable PKCE (S256)
+              </label>
+              <label class="oauth-toggle">
+                <input type="checkbox" id="toggleState" checked />
+                Send strong state
+              </label>
+              <label class="oauth-toggle">
+                <input type="checkbox" id="toggleWeakState" />
+                Use weak state (<code>123</code>)
+              </label>
+              <label class="oauth-toggle">
+                <input type="checkbox" id="toggleTokenLocalStorage" />
+                Store tokens in localStorage
+              </label>
+              <label class="oauth-toggle">
+                <input type="checkbox" id="toggleTokenMemory" checked />
+                Keep tokens in memory only
+              </label>
+            </div>
+          </fieldset>
+
+          <div class="oauth-controls">
+            <button type="button" id="runAuditBtn" class="btn btn-primary">
+              <i class="fas fa-magnifying-glass" aria-hidden="true"></i> Run security audit
+            </button>
+            <button type="button" id="exportReportBtn" class="btn btn-secondary" disabled>
+              <i class="fas fa-download" aria-hidden="true"></i> Export report
+            </button>
+          </div>
+        </section>
+      </div>
+
+      <section class="oauth-panel oauth-flow-section" aria-labelledby="oauth-flow-title">
+        <div class="oauth-panel-header">
+          <div class="oauth-panel-title">
+            <i class="fas fa-route oauth-panel-icon" aria-hidden="true"></i>
+            <h2 id="oauth-flow-title">Authorization Code + PKCE flow</h2>
+          </div>
+          <span class="oauth-status-live" id="flowStatus" role="status" aria-live="polite">Ready</span>
+        </div>
+
+        <ol class="oauth-steps" id="flowSteps">
+          <li class="oauth-step" data-step="1" aria-current="false">
+            <div class="oauth-step-head">
+              <span class="oauth-step-num">1</span>
+              <strong>Authorize</strong>
+            </div>
+            <p>Build authorize URL with client_id, redirect_uri, state, code_challenge.</p>
+            <pre class="oauth-mono-block" id="stepAuthorizeOut" aria-live="polite">Not started</pre>
+            <button type="button" class="btn btn-secondary" id="stepAuthorizeBtn">Run authorize</button>
+          </li>
+          <li class="oauth-step" data-step="2" aria-current="false">
+            <div class="oauth-step-head">
+              <span class="oauth-step-num">2</span>
+              <strong>Callback</strong>
+            </div>
+            <p>Simulate redirect with authorization <code>code</code> and echoed <code>state</code>.</p>
+            <pre class="oauth-mono-block" id="stepCallbackOut" aria-live="polite">Waiting</pre>
+            <button type="button" class="btn btn-secondary" id="stepCallbackBtn" disabled>Simulate callback</button>
+          </li>
+          <li class="oauth-step" data-step="3" aria-current="false">
+            <div class="oauth-step-head">
+              <span class="oauth-step-num">3</span>
+              <strong>Token exchange</strong>
+            </div>
+            <p>POST code + code_verifier to token endpoint (simulated).</p>
+            <pre class="oauth-mono-block" id="stepTokenOut" aria-live="polite">Waiting</pre>
+            <button type="button" class="btn btn-secondary" id="stepTokenBtn" disabled>Exchange token</button>
+          </li>
+        </ol>
+      </section>
+
+      <div class="oauth-results-grid">
+        <section class="oauth-panel" aria-labelledby="oauth-findings-title">
+          <div class="oauth-panel-header">
+            <div class="oauth-panel-title">
+              <i class="fas fa-triangle-exclamation oauth-panel-icon" aria-hidden="true"></i>
+              <h2 id="oauth-findings-title">Audit findings</h2>
+            </div>
+          </div>
+          <div id="findingsList" class="oauth-findings" aria-live="polite">
+            <p class="oauth-empty">Configure toggles and run the security audit.</p>
+          </div>
+        </section>
+
+        <section class="oauth-panel" aria-labelledby="oauth-jwt-title">
+          <div class="oauth-panel-header">
+            <div class="oauth-panel-title">
+              <i class="fas fa-file-code oauth-panel-icon" aria-hidden="true"></i>
+              <h2 id="oauth-jwt-title">JWT auditor</h2>
+            </div>
+          </div>
+
+          <label class="oauth-label" for="jwtInput">Paste JWT</label>
+          <textarea
+            id="jwtInput"
+            class="oauth-textarea"
+            rows="4"
+            spellcheck="false"
+            placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIn0.…"
+            aria-describedby="jwtHint"
+          ></textarea>
+          <p class="oauth-hint" id="jwtHint">Decode header/payload (base64url). Signature is not verified.</p>
+
+          <div class="oauth-controls">
+            <button type="button" id="auditJwtBtn" class="btn btn-primary">
+              <i class="fas fa-search" aria-hidden="true"></i> Audit JWT
+            </button>
+            <button type="button" id="loadSampleJwtBtn" class="btn btn-outline">
+              <i class="fas fa-flask" aria-hidden="true"></i> Load unsafe sample
+            </button>
+          </div>
+
+          <div class="oauth-jwt-grid">
+            <div>
+              <h3 class="oauth-subhead">Header</h3>
+              <pre class="oauth-mono-block" id="jwtHeaderOut">—</pre>
+            </div>
+            <div>
+              <h3 class="oauth-subhead">Payload</h3>
+              <pre class="oauth-mono-block" id="jwtPayloadOut">—</pre>
+            </div>
+          </div>
+          <ul id="jwtFlags" class="oauth-jwt-flags" aria-live="polite"></ul>
+        </section>
+      </div>
+
+      <section class="oauth-panel" aria-labelledby="oauth-recs-title">
+        <div class="oauth-panel-header">
+          <div class="oauth-panel-title">
+            <i class="fas fa-lightbulb oauth-panel-icon" aria-hidden="true"></i>
+            <h2 id="oauth-recs-title">Security hardening recommendations</h2>
+          </div>
+        </div>
+        <ul id="recsList" class="oauth-recs" aria-live="polite">
+          <li class="oauth-empty-li">Recommendations appear after audit or JWT checks.</li>
+        </ul>
+      </section>
+    </div>
+  </main>
+
+  <div id="footer-placeholder"></div>
+
+  <script src="/auth.js"></script>
+  <script src="/bootstrap-legacy.js"></script>
+  <script src="/script.js"></script>
+  <script type="module" src="/dist/legacy-bundle.mjs"></script>
+  <script src="/theme.js"></script>
+  <script src="script.js"></script>
+  <script>
+    if (typeof loadPartial === 'function') {
+      loadPartial('navbar-placeholder', '/partials/navbar.html');
+      loadPartial('footer-placeholder', '/partials/footer.html');
+    }
+  </script>
+</body>
+</html>

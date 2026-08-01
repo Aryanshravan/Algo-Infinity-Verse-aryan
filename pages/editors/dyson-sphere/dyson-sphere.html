@@ -1,0 +1,316 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dyson Sphere Grid Balancer | Algo Infinity Verse</title>
+    <link rel="stylesheet" href="/styles.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <!-- Monaco Editor -->
+    <script src="https://unpkg.com/monaco-editor@0.36.1/min/vs/loader.js"></script>
+    <style>
+      body { margin: 0; overflow: hidden; background: #000; font-family: 'Poppins', sans-serif; color: #fff; }
+      .app-container { display: flex; height: 100vh; }
+      
+      .sidebar { width: 450px; background: rgba(15, 23, 42, 0.95); border-right: 1px solid #f59e0b; display: flex; flex-direction: column; z-index: 10; }
+      .header { padding: 20px; border-bottom: 1px solid #334155; }
+      .header h2 { margin: 0; color: #f59e0b; font-family: 'Orbitron', sans-serif; font-size: 1.2rem; }
+      .header p { margin: 5px 0 0 0; font-size: 0.8rem; color: #94a3b8; }
+      
+      #editor-container { flex: 1; min-height: 300px; }
+      
+      .controls { padding: 20px; border-top: 1px solid #334155; background: rgba(0,0,0,0.5); }
+      .btn { background: linear-gradient(90deg, #d97706, #b45309); color: #fff; border: none; padding: 10px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; transition: 0.3s; }
+      .btn:hover { background: #f59e0b; transform: translateY(-2px); box-shadow: 0 0 15px rgba(245, 158, 11, 0.5); }
+      
+      .sim-container { flex: 1; position: relative; background: #000; overflow: hidden; }
+      canvas { width: 100%; height: 100%; display: block; filter: contrast(1.1); }
+      
+      .hud { position: absolute; top: 20px; left: 20px; background: rgba(0,0,0,0.8); padding: 15px; border-radius: 8px; border: 1px solid #f59e0b; width: 280px; z-index: 10; pointer-events: none; }
+      .hud h3 { margin: 0 0 10px 0; color: #f59e0b; font-size: 1rem; font-family: 'Orbitron', sans-serif; }
+      .metric { display: flex; justify-content: space-between; font-size: 0.8rem; color: #cbd5e1; margin-bottom: 5px; }
+      .val { font-weight: bold; font-family: monospace; }
+      .val-energy { color: #fbbf24; }
+      .val-temp { color: #ef4444; }
+    </style>
+  </head>
+  <body>
+    
+    <div class="app-container">
+      <div class="sidebar">
+        <div class="header">
+          <h2><i class="fas fa-sun"></i> Dyson Sphere Balancer</h2>
+          <p>Megascale Energy Routing & Thermodynamics</p>
+        </div>
+        
+        <div id="editor-container"></div>
+        
+        <div class="controls">
+          <button class="btn" onclick="initiateDyson()"><i class="fas fa-bolt"></i> Ignite Star Core</button>
+        </div>
+      </div>
+      
+      <div class="sim-container">
+        <!-- Cosmic Background -->
+        <div style="position: absolute; inset:0; background: radial-gradient(circle at center, #171717 0%, #000 100%); pointer-events: none; z-index: 0;"></div>
+        
+        <canvas id="dysonCanvas" style="position: relative; z-index: 1;"></canvas>
+        
+        <div class="hud">
+          <h3>Sphere Telemetry</h3>
+          <div class="metric"><span>Energy Yield:</span> <span class="val val-energy" id="energyVal">0 EW</span></div>
+          <div class="metric"><span>Star Output Temp:</span> <span class="val val-temp" id="tempVal">0 MK</span></div>
+          <div class="metric"><span>Grid Stability:</span> <span class="val" id="stabVal" style="color:#10b981">100%</span></div>
+          <div class="metric" style="margin-top: 10px; border-top: 1px solid #334155; padding-top: 5px;">
+            <span>Sphere Status:</span> <span class="val" id="statusVal" style="color:#94a3b8">OFFLINE</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      let editor;
+      require.config({ paths: { 'vs': 'https://unpkg.com/monaco-editor@0.36.1/min/vs' }});
+      require(['vs/editor/editor.main'], function() {
+        editor = monaco.editor.create(document.getElementById('editor-container'), {
+          value: `// Dyson Sphere Load Balancing Algorithm
+// The star randomly emits intense solar flares (high temperature spikes).
+// You must route energy away from the overheated sectors to cooler sectors.
+// A sector's temperature should not exceed its safe limit.
+
+function balanceGrid(sectors, solarOutput) {
+    // 'sectors' is an array of objects: { temp: float, maxTemp: float, currentLoad: float }
+    // Return an array of floats (0.0 to 1.0) indicating the energy load to assign to each sector.
+    
+    // Naive logic: Distribute load equally!
+    // Result: The sectors facing a solar flare instantly overload and melt, causing cascading failure.
+    
+    return sectors.map(s => 1.0 / sectors.length);
+}`,
+          language: 'javascript',
+          theme: 'vs-dark',
+          minimap: { enabled: false },
+          automaticLayout: true
+        });
+      });
+
+      const canvas = document.getElementById('dysonCanvas');
+      const ctx = canvas.getContext('2d');
+      
+      let isSimulating = false;
+      let time = 0;
+      
+      let numSectors = 24;
+      let sectors = [];
+      let solarTemp = 10; // millions of kelvin
+      let totalEnergy = 0;
+      let stability = 100;
+      let flareAngle = 0;
+      let flareIntensity = 0;
+      
+      function resize() { 
+          canvas.width = canvas.clientWidth; 
+          canvas.height = canvas.clientHeight;
+          initSectors();
+      }
+      
+      function initSectors() {
+          sectors = [];
+          for(let i=0; i<numSectors; i++) {
+              sectors.push({
+                  angle: (i / numSectors) * Math.PI * 2,
+                  temp: 1.0,
+                  maxTemp: 10.0,
+                  load: 0
+              });
+          }
+      }
+      
+      setTimeout(resize, 100);
+      window.addEventListener('resize', resize);
+
+      function animate() {
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+          let cx = canvas.width / 2;
+          let cy = canvas.height / 2;
+          let radius = Math.min(cx, cy) - 100;
+
+          if (isSimulating) {
+              time += 0.05;
+              
+              // Solar Mechanics
+              solarTemp = 15 + Math.sin(time)*5; // Base temp
+              
+              // Flares
+              if(Math.random() < 0.05 && flareIntensity <= 0) {
+                  flareAngle = Math.random() * Math.PI * 2;
+                  flareIntensity = 10 + Math.random()*20; // Massive temp spike
+              }
+              if (flareIntensity > 0) flareIntensity *= 0.95; // fade out
+              
+              let currentSectorData = sectors.map(s => ({
+                  temp: s.temp,
+                  maxTemp: s.maxTemp,
+                  currentLoad: s.load
+              }));
+              
+              let loadDistribution = [];
+              try {
+                  eval(editor.getValue());
+                  let res = balanceGrid(currentSectorData, solarTemp + flareIntensity);
+                  if (Array.isArray(res) && res.length === numSectors) {
+                      loadDistribution = res;
+                  } else {
+                      loadDistribution = new Array(numSectors).fill(1/numSectors);
+                  }
+              } catch(e) {
+                  loadDistribution = new Array(numSectors).fill(1/numSectors);
+              }
+              
+              totalEnergy = 0;
+              let meltedCount = 0;
+              
+              for(let i=0; i<numSectors; i++) {
+                  let s = sectors[i];
+                  let load = loadDistribution[i] || 0;
+                  // Normalize load slightly so they can't magically pull 100% on all
+                  
+                  // Heat from star (Base + Flare)
+                  let distToFlare = Math.abs(s.angle - flareAngle);
+                  if (distToFlare > Math.PI) distToFlare = Math.PI*2 - distToFlare;
+                  
+                  let flareHeat = 0;
+                  if (distToFlare < Math.PI/4) {
+                      flareHeat = flareIntensity * (1 - (distToFlare / (Math.PI/4)));
+                  }
+                  
+                  let incomingHeat = (solarTemp/10) + flareHeat;
+                  
+                  // Heat generated by processing load
+                  let loadHeat = load * 5.0;
+                  
+                  // Cooling over time
+                  let cooling = 2.0;
+                  
+                  s.temp += (incomingHeat + loadHeat - cooling) * 0.1;
+                  if (s.temp < 1.0) s.temp = 1.0;
+                  
+                  if (s.temp > s.maxTemp) {
+                      meltedCount++;
+                      stability -= 0.1;
+                  } else {
+                      totalEnergy += load * (solarTemp + flareHeat);
+                  }
+              }
+              
+              if(stability < 0) stability = 0;
+              
+              // End conditions
+              if (stability <= 0) {
+                  isSimulating = false;
+                  document.getElementById('statusVal').innerText = "CASCADING GRID FAILURE";
+                  document.getElementById('statusVal').style.color = "#ef4444";
+                  
+                  // Supernova explosion
+                  ctx.fillStyle = '#ef4444';
+                  ctx.beginPath(); ctx.arc(cx, cy, radius*2, 0, Math.PI*2); ctx.fill();
+              } else if (time > 20 && stability > 90) {
+                  document.getElementById('statusVal').innerText = "GRID STABLE";
+                  document.getElementById('statusVal').style.color = "#10b981";
+              } else {
+                  if (flareIntensity > 5) {
+                      document.getElementById('statusVal').innerText = "SOLAR FLARE DETECTED";
+                      document.getElementById('statusVal').style.color = "#f97316";
+                  } else {
+                      document.getElementById('statusVal').innerText = "HARVESTING ENERGY";
+                      document.getElementById('statusVal').style.color = "#facc15";
+                  }
+              }
+              
+              // HUD
+              document.getElementById('energyVal').innerText = (totalEnergy).toFixed(1) + " EW";
+              document.getElementById('tempVal').innerText = (solarTemp + flareIntensity).toFixed(1) + " MK";
+              let stabEl = document.getElementById('stabVal');
+              stabEl.innerText = stability.toFixed(1) + "%";
+              if (stability < 50) stabEl.style.color = "#ef4444";
+              else stabEl.style.color = "#10b981";
+          }
+          
+          // Draw Star
+          let starGrad = ctx.createRadialGradient(cx, cy, 10, cx, cy, radius - 50);
+          starGrad.addColorStop(0, '#fff');
+          starGrad.addColorStop(0.1, '#facc15');
+          starGrad.addColorStop(0.5, '#ea580c');
+          starGrad.addColorStop(1, 'transparent');
+          
+          ctx.fillStyle = starGrad;
+          ctx.beginPath(); ctx.arc(cx, cy, radius - 50, 0, Math.PI*2); ctx.fill();
+          
+          // Draw Flare
+          if (flareIntensity > 0) {
+              ctx.fillStyle = \`rgba(255, 100, 0, \${Math.min(1.0, flareIntensity/10)})\`;
+              ctx.beginPath();
+              ctx.moveTo(cx, cy);
+              ctx.arc(cx, cy, radius-10, flareAngle - 0.2, flareAngle + 0.2);
+              ctx.fill();
+          }
+
+          // Draw Dyson Sphere Sectors
+          let arcLen = (Math.PI * 2) / numSectors;
+          for(let i=0; i<numSectors; i++) {
+              let s = sectors[i];
+              
+              ctx.beginPath();
+              ctx.arc(cx, cy, radius, s.angle - arcLen*0.4, s.angle + arcLen*0.4);
+              
+              // Color based on temperature
+              let heatPct = Math.min(1.0, s.temp / s.maxTemp);
+              if (heatPct > 1.0) heatPct = 1.0;
+              
+              let r = Math.floor(heatPct * 255);
+              let b = Math.floor((1-heatPct) * 255);
+              
+              ctx.strokeStyle = \`rgba(\${r}, 50, \${b}, 0.8)\`;
+              ctx.lineWidth = 15;
+              ctx.stroke();
+              
+              // Energy routing beams (Load)
+              if (isSimulating && s.temp <= s.maxTemp) {
+                  let loadIdx = i % numSectors; // this logic gets complex, just visual here
+                  ctx.strokeStyle = \`rgba(56, 189, 248, 0.3)\`;
+                  ctx.lineWidth = 2;
+                  ctx.beginPath();
+                  ctx.moveTo(cx + Math.cos(s.angle)*radius, cy + Math.sin(s.angle)*radius);
+                  // connect to opposite side for "routing" visual
+                  let opp = (s.angle + Math.PI) % (Math.PI*2);
+                  ctx.lineTo(cx + Math.cos(opp)*(radius-30), cy + Math.sin(opp)*(radius-30));
+                  ctx.stroke();
+              }
+          }
+          
+          // Grid overlay
+          ctx.strokeStyle = 'rgba(255,255,255,0.05)';
+          ctx.lineWidth = 1;
+          ctx.beginPath();
+          ctx.arc(cx, cy, radius + 20, 0, Math.PI*2);
+          ctx.stroke();
+
+          requestAnimationFrame(animate);
+      }
+      
+      animate();
+
+      function initiateDyson() {
+          if(isSimulating) return;
+          initSectors();
+          isSimulating = true;
+          time = 0;
+          stability = 100;
+          totalEnergy = 0;
+          document.getElementById('statusVal').innerText = "IGNITING CORE...";
+          document.getElementById('statusVal').style.color = "#f59e0b";
+      }
+    </script>
+  </body>
+</html>

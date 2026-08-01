@@ -22,6 +22,7 @@
       } catch (e) {}
     })();
   </script>
+    <link rel="stylesheet" href="/modules/quick-notes/quick-notes.css" />
 </head>
   <body data-page="visualizers" data-no-loading>
   <div id="loading-screen" class="hidden">
@@ -84,6 +85,9 @@
           <h3>No visualizers found</h3>
           <p>Try adjusting your search or filter.</p>
         </div>
+
+        <!-- PAGINATION -->
+        <div class="viz-pagination" id="vizPagination" role="navigation" aria-label="Pagination"></div>
       </div>
     </section>
   </main>
@@ -92,5 +96,6 @@
   <script src="/theme.js"></script>
   <script src="/script.js"></script>
   <script src="visualizers.js"></script>
+    <script src="/modules/quick-notes/quick-notes.js"></script>
 </body>
 </html>

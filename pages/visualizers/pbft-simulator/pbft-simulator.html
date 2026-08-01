@@ -20,9 +20,10 @@
 
     <!-- External Stylesheets -->
     <link rel="stylesheet" href="pbft-simulator.css" />
-  <script src="/theme.js"></script>
-</head>
-<body class="pbft-body">
+    <script src="../../../theme.js"></script>
+    <link rel="stylesheet" href="../../../modules/quick-notes/quick-notes.css" />
+  </head>
+  <body class="pbft-body">
     <nav class="navbar pbft-nav">
       <div class="nav-logo">
         <span class="logo-text">∞</span>
@@ -48,20 +49,30 @@
           </p>
 
           <div class="action-grid">
-            <button type="button" class="btn btn-primary" id="btnStartConsensus">
+            <button
+              type="button"
+              class="btn btn-primary"
+              id="btnStartConsensus"
+              style="grid-column: span 2"
+            >
               <i class="fas fa-bolt"></i> Start Consensus
             </button>
             <button type="button" class="btn btn-outline" id="btnReset">
               <i class="fas fa-redo"></i> Reset Network
             </button>
-            <button
-              type="button"
-              class="btn btn-secondary w-100"
-              id="btnAddNode"
-              style="grid-column: span 2"
-            >
+            <button type="button" class="btn btn-secondary" id="btnAddNode">
               <i class="fas fa-plus"></i> Add Replica Node
             </button>
+          </div>
+
+          <div class="toggle-wrapper" style="margin-top: 1.5rem">
+            <div class="toggle-label">
+              <span><i class="fas fa-user-secret"></i> Malicious Leader (Equivocation Attack)</span>
+            </div>
+            <label class="switch">
+              <input type="checkbox" id="leaderToggle" />
+              <span class="slider round"></span>
+            </label>
           </div>
         </div>
 
@@ -128,11 +139,12 @@
           <div style="width: 1px; height: 15px; background: #334155; margin: 0 10px"></div>
           <span class="legend-item"><span class="packet-swatch p-true"></span> Valid Data</span>
           <span class="legend-item"><span class="packet-swatch p-lie"></span> Corrupted / Lie</span>
+          <span class="legend-item"><span class="packet-swatch p-view"></span> View Change</span>
         </div>
       </div>
     </main>
 
     <script src="pbft-simulator.js"></script>
+    <script src="../../../modules/quick-notes/quick-notes.js"></script>
   </body>
 </html>
-

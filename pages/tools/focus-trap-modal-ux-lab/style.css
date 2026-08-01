@@ -1,0 +1,399 @@
+/* ===== Focus Trap Modal UX Lab ===== */
+:root {
+  --focus-glass: rgba(255, 255, 255, 0.04);
+  --focus-border: rgba(255, 255, 255, 0.1);
+  --focus-muted: rgba(255, 255, 255, 0.62);
+  --focus-accent: #a78bfa;
+  --focus-accent-dim: rgba(167, 139, 250, 0.15);
+  --focus-warn: #fbbf24;
+  --focus-danger: #f87171;
+  --focus-ok: #4ade80;
+  --focus-info: #60a5fa;
+  --focus-code-bg: rgba(0, 0, 0, 0.35);
+}
+
+html.light-mode {
+  --focus-glass: rgba(15, 23, 42, 0.04);
+  --focus-border: rgba(15, 23, 42, 0.12);
+  --focus-muted: rgba(15, 23, 42, 0.65);
+  --focus-accent-dim: rgba(124, 58, 237, 0.1);
+  --focus-code-bg: rgba(15, 23, 42, 0.06);
+}
+
+.focus-skip-link {
+  position: absolute;
+  left: 1rem;
+  top: -100px;
+  z-index: 10000;
+  padding: 0.6rem 1rem;
+  background: var(--focus-accent);
+  color: #0a0a14;
+  font-weight: 700;
+  border-radius: 8px;
+  text-decoration: none;
+}
+
+.focus-skip-link:focus {
+  top: 1rem;
+  outline: 3px solid #fff;
+  outline-offset: 2px;
+}
+
+.focus-hero {
+  position: relative;
+  overflow: hidden;
+  padding: 7.5rem 1.5rem 4rem;
+  text-align: center;
+  border-bottom: 1px solid var(--focus-border);
+  background:
+    radial-gradient(ellipse at top right, rgba(167, 139, 250, 0.2), transparent 55%),
+    radial-gradient(ellipse at bottom left, rgba(96, 165, 250, 0.1), transparent 50%);
+}
+
+.focus-hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1.1rem;
+  padding: 0.35rem 0.9rem;
+  border-radius: 999px;
+  border: 1px solid rgba(167, 139, 250, 0.45);
+  background: var(--focus-accent-dim);
+  color: var(--focus-accent);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.focus-hero h1 {
+  margin: 0 0 1rem;
+  font-family: 'Orbitron', sans-serif;
+  font-size: clamp(1.9rem, 5vw, 3rem);
+  font-weight: 900;
+  line-height: 1.15;
+}
+
+.focus-hero-accent {
+  display: inline-block;
+  background: linear-gradient(135deg, #a78bfa, #60a5fa);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.focus-hero p {
+  max-width: 720px;
+  margin: 0 auto 2rem;
+  color: var(--focus-muted);
+  font-size: 1.05rem;
+  line-height: 1.65;
+  font-family: 'Poppins', sans-serif;
+}
+
+.focus-hero-stats {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1rem;
+}
+
+.focus-stat {
+  min-width: 110px;
+  padding: 0.85rem 1.1rem;
+  border: 1px solid var(--focus-border);
+  border-radius: 14px;
+  background: var(--focus-glass);
+}
+
+.focus-stat-val {
+  display: block;
+  font-family: 'Orbitron', sans-serif;
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: var(--focus-accent);
+}
+
+.focus-stat-label {
+  font-size: 0.75rem;
+  color: var(--focus-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.focus-main {
+  padding: 2rem 0 4rem;
+  font-family: 'Poppins', sans-serif;
+}
+
+.focus-workspace {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+@media (max-width: 900px) {
+  .focus-workspace {
+    grid-template-columns: 1fr;
+  }
+}
+
+.focus-panel {
+  padding: 1.4rem;
+  border: 1px solid var(--focus-border);
+  border-radius: 18px;
+  background: var(--focus-glass);
+  backdrop-filter: blur(12px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
+}
+
+.focus-panel-header {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1.2rem;
+  padding-bottom: 0.9rem;
+  border-bottom: 1px solid var(--focus-border);
+}
+
+.focus-panel-title {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.focus-panel-title h2 {
+  margin: 0;
+  font-size: 1.15rem;
+  font-weight: 700;
+}
+
+.focus-panel-icon {
+  color: var(--focus-accent);
+}
+
+.focus-label {
+  display: block;
+  margin-bottom: 0.45rem;
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+.focus-hint {
+  margin: 0.5rem 0 0;
+  font-size: 0.78rem;
+  color: var(--focus-muted);
+  line-height: 1.45;
+}
+
+.focus-textarea {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0.9rem 1rem;
+  border: 1px solid var(--focus-border);
+  border-radius: 12px;
+  background: var(--focus-code-bg);
+  color: inherit;
+  font-family: 'Fira Code', ui-monospace, monospace;
+  font-size: 0.82rem;
+  line-height: 1.5;
+  resize: vertical;
+  min-height: 220px;
+}
+
+.focus-textarea:focus {
+  outline: 2px solid var(--focus-accent);
+  outline-offset: 2px;
+}
+
+.focus-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  margin-top: 1rem;
+}
+
+.focus-status-live {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--focus-accent);
+}
+
+.focus-findings {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.focus-empty,
+.focus-empty-li {
+  color: var(--focus-muted);
+  font-size: 0.9rem;
+}
+
+.focus-finding {
+  padding: 0.9rem 1rem;
+  border-radius: 12px;
+  border: 1px solid var(--focus-border);
+  border-left: 4px solid var(--focus-warn);
+  background: rgba(0, 0, 0, 0.15);
+}
+
+.focus-finding.sev-high {
+  border-left-color: var(--focus-danger);
+}
+
+.focus-finding.sev-medium {
+  border-left-color: var(--focus-warn);
+}
+
+.focus-finding.sev-low {
+  border-left-color: var(--focus-info);
+}
+
+.focus-finding.sev-pass {
+  border-left-color: var(--focus-ok);
+}
+
+.focus-finding-title {
+  margin: 0 0 0.35rem;
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+
+.focus-finding-meta {
+  margin: 0 0 0.4rem;
+  font-size: 0.75rem;
+  color: var(--focus-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.focus-finding p {
+  margin: 0;
+  font-size: 0.85rem;
+  line-height: 1.5;
+  color: var(--focus-muted);
+}
+
+.focus-finding pre {
+  margin: 0.6rem 0 0;
+  padding: 0.6rem 0.75rem;
+  border-radius: 8px;
+  background: var(--focus-code-bg);
+  font-family: 'Fira Code', ui-monospace, monospace;
+  font-size: 0.75rem;
+  overflow-x: auto;
+  white-space: pre-wrap;
+}
+
+.focus-validator-list {
+  margin: 0 0 1rem;
+  padding-left: 1.2rem;
+  font-size: 0.85rem;
+  line-height: 1.6;
+  color: var(--focus-muted);
+}
+
+.focus-validator-list .is-pass {
+  color: var(--focus-ok);
+}
+
+.focus-validator-list .is-fail {
+  color: var(--focus-danger);
+}
+
+.focus-inert-box {
+  padding: 0.9rem 1rem;
+  border-radius: 12px;
+  border: 1px dashed var(--focus-border);
+  background: rgba(0, 0, 0, 0.12);
+  font-size: 0.85rem;
+  line-height: 1.55;
+  color: var(--focus-muted);
+}
+
+.focus-sim-list {
+  margin: 0;
+  padding-left: 1.25rem;
+  font-size: 0.85rem;
+  line-height: 1.65;
+  color: var(--focus-muted);
+}
+
+.focus-sim-list .sim-ok {
+  color: var(--focus-ok);
+}
+
+.focus-sim-list .sim-bad {
+  color: var(--focus-danger);
+}
+
+.focus-checklist {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+}
+
+.focus-check-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.65rem;
+  padding: 0.65rem 0.8rem;
+  border-radius: 10px;
+  border: 1px solid var(--focus-border);
+  font-size: 0.85rem;
+  line-height: 1.45;
+  color: var(--focus-muted);
+}
+
+.focus-check-item i {
+  margin-top: 0.15rem;
+}
+
+.focus-check-item.is-pass i {
+  color: var(--focus-ok);
+}
+
+.focus-check-item.is-fail i {
+  color: var(--focus-danger);
+}
+
+.focus-subhead {
+  margin: 0 0 0.5rem;
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.focus-refactor-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+@media (max-width: 700px) {
+  .focus-refactor-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.focus-mono-block {
+  margin: 0;
+  padding: 0.9rem 1rem;
+  border-radius: 12px;
+  border: 1px solid var(--focus-border);
+  background: var(--focus-code-bg);
+  font-family: 'Fira Code', ui-monospace, monospace;
+  font-size: 0.75rem;
+  line-height: 1.5;
+  overflow-x: auto;
+  white-space: pre-wrap;
+  word-break: break-word;
+  min-height: 120px;
+}

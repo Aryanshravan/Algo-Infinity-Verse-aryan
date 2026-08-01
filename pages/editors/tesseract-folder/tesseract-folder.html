@@ -1,0 +1,377 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Hyperdimensional Tesseract Folder | Algo Infinity Verse</title>
+    <link rel="stylesheet" href="/styles.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <!-- Monaco Editor -->
+    <script src="https://unpkg.com/monaco-editor@0.36.1/min/vs/loader.js"></script>
+    <style>
+      body { margin: 0; overflow: hidden; background: #000; font-family: 'Poppins', sans-serif; color: #fff; perspective: 1000px; }
+      .app-container { display: flex; height: 100vh; }
+      
+      .sidebar { width: 450px; background: rgba(15, 23, 42, 0.95); border-right: 1px solid #ec4899; display: flex; flex-direction: column; z-index: 10; }
+      .header { padding: 20px; border-bottom: 1px solid #334155; }
+      .header h2 { margin: 0; color: #ec4899; font-family: 'Orbitron', sans-serif; font-size: 1.2rem; }
+      .header p { margin: 5px 0 0 0; font-size: 0.8rem; color: #94a3b8; }
+      
+      #editor-container { flex: 1; min-height: 300px; }
+      
+      .controls { padding: 20px; border-top: 1px solid #334155; background: rgba(0,0,0,0.5); }
+      .btn { background: linear-gradient(90deg, #db2777, #be185d); color: #fff; border: none; padding: 10px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; transition: 0.3s; }
+      .btn:hover { background: #ec4899; transform: translateY(-2px); box-shadow: 0 0 15px rgba(236, 72, 153, 0.5); }
+      
+      .sim-container { flex: 1; position: relative; background: #020617; overflow: hidden; display: flex; justify-content: center; align-items: center; }
+      canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: block; }
+      
+      .hud { position: absolute; top: 20px; left: 20px; background: rgba(0,0,0,0.8); padding: 15px; border-radius: 8px; border: 1px solid #ec4899; width: 300px; z-index: 10; pointer-events: none; }
+      .hud h3 { margin: 0 0 10px 0; color: #ec4899; font-size: 1rem; font-family: 'Orbitron', sans-serif; }
+      .metric { display: flex; justify-content: space-between; font-size: 0.8rem; color: #cbd5e1; margin-bottom: 5px; }
+      .val { font-weight: bold; font-family: monospace; }
+      .val-dim { color: #facc15; }
+      .val-shear { color: #ef4444; }
+    </style>
+  </head>
+  <body>
+    
+    <div class="app-container">
+      <div class="sidebar">
+        <div class="header">
+          <h2><i class="fas fa-cube"></i> Project Tesseract</h2>
+          <p>4D Spatial Folding Array</p>
+        </div>
+        
+        <div id="editor-container"></div>
+        
+        <div class="controls">
+          <button class="btn" onclick="initiateFold()"><i class="fas fa-compress-arrows-alt"></i> Initiate Dimensional Fold</button>
+        </div>
+      </div>
+      
+      <div class="sim-container">
+        <!-- Grid Background -->
+        <div style="position: absolute; inset:0; background-image: linear-gradient(rgba(236, 72, 153, 0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(236, 72, 153, 0.1) 1px, transparent 1px); background-size: 40px 40px; pointer-events: none; z-index: 0; perspective: 500px; transform: rotateX(60deg) scale(2); opacity: 0.3;"></div>
+        
+        <canvas id="tesseractCanvas" style="position: relative; z-index: 1;"></canvas>
+        
+        <div class="hud">
+          <h3>Topology Telemetry</h3>
+          <div class="metric"><span>W-Axis (4th Dim):</span> <span class="val val-dim" id="wVal">100%</span></div>
+          <div class="metric"><span>Spatial Shear:</span> <span class="val val-shear" id="shearVal">0%</span></div>
+          <div class="metric"><span>Fold Stability:</span> <span class="val" id="stabVal" style="color:#10b981">100%</span></div>
+          <div class="metric" style="margin-top: 10px; border-top: 1px solid #334155; padding-top: 5px;">
+            <span>Collapse State:</span> <span class="val" id="statusVal" style="color:#94a3b8">STANDBY</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      let editor;
+      require.config({ paths: { 'vs': 'https://unpkg.com/monaco-editor@0.36.1/min/vs' }});
+      require(['vs/editor/editor.main'], function() {
+        editor = monaco.editor.create(document.getElementById('editor-container'), {
+          value: `// 4D Tesseract Folding Algorithm
+// You are collapsing a 4-dimensional hypercube into a 3D pocket universe.
+// To do this, you must compress the W-axis (the 4th dimension).
+// Warning: If vertices intersect in 3D space while folding, it causes catastrophic spatial shear!
+// You must rotate the hypercube in 4D space while compressing to avoid intersections.
+
+function foldTesseract(currentW_Size, currentShear) {
+    // Return { compressionRate: float (0.0 to 0.05), rotationXY: float, rotationZW: float }
+    // rotationZW rotates the object through the 4th dimension!
+    
+    // Naive logic: Just crush it!
+    // Result: The vertices instantly intersect and reality shatters.
+    
+    return {
+        compressionRate: 0.02,
+        rotationXY: 0.0,
+        rotationZW: 0.0
+    };
+}`,
+          language: 'javascript',
+          theme: 'vs-dark',
+          minimap: { enabled: false },
+          automaticLayout: true
+        });
+      });
+
+      const canvas = document.getElementById('tesseractCanvas');
+      const ctx = canvas.getContext('2d');
+      
+      let isSimulating = false;
+      let wSize = 1.0;
+      let spatialShear = 0;
+      let foldStability = 100;
+      
+      let angleXY = 0;
+      let angleZW = 0;
+      
+      // Define a 4D Hypercube (16 vertices)
+      let vertices4D = [];
+      for(let x=-1; x<=1; x+=2) {
+          for(let y=-1; y<=1; y+=2) {
+              for(let z=-1; z<=1; z+=2) {
+                  for(let w=-1; w<=1; w+=2) {
+                      vertices4D.push({x, y, z, w});
+                  }
+              }
+          }
+      }
+
+      let edges = [];
+      for(let i=0; i<16; i++) {
+          for(let j=i+1; j<16; j++) {
+              let diff = 0;
+              if(vertices4D[i].x !== vertices4D[j].x) diff++;
+              if(vertices4D[i].y !== vertices4D[j].y) diff++;
+              if(vertices4D[i].z !== vertices4D[j].z) diff++;
+              if(vertices4D[i].w !== vertices4D[j].w) diff++;
+              if(diff === 1) edges.push([i, j]);
+          }
+      }
+
+      function resize() { canvas.width = canvas.clientWidth; canvas.height = canvas.clientHeight; }
+      window.addEventListener('resize', resize);
+      resize();
+
+      function rotateXY(v, angle) {
+          return {
+              x: v.x * Math.cos(angle) - v.y * Math.sin(angle),
+              y: v.x * Math.sin(angle) + v.y * Math.cos(angle),
+              z: v.z,
+              w: v.w
+          };
+      }
+
+      function rotateZW(v, angle) {
+          return {
+              x: v.x,
+              y: v.y,
+              z: v.z * Math.cos(angle) - v.w * Math.sin(angle),
+              w: v.z * Math.sin(angle) + v.w * Math.cos(angle)
+          };
+      }
+      
+      function project4Dto3D(v, wScale) {
+          // Perspective projection from 4D to 3D
+          let distance = 3;
+          let wMod = v.w * wScale; // Scale the 4th dimension for the folding effect
+          let w = 1 / (distance - wMod);
+          return {
+              x: v.x * w,
+              y: v.y * w,
+              z: v.z * w
+          };
+      }
+      
+      function project3Dto2D(v, cx, cy) {
+          let distance = 2.5;
+          let z = 1 / (distance - v.z);
+          return {
+              x: v.x * z * 300 + cx,
+              y: v.y * z * 300 + cy
+          };
+      }
+
+      function animate() {
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+          let cx = canvas.width / 2;
+          let cy = canvas.height / 2;
+
+          if (isSimulating) {
+              let compRate = 0;
+              let rotXY = 0;
+              let rotZW = 0;
+              
+              try {
+                  eval(editor.getValue());
+                  let res = foldTesseract(wSize, spatialShear);
+                  if (res) {
+                      compRate = Math.max(0, Math.min(0.05, res.compressionRate || 0));
+                      rotXY = res.rotationXY || 0;
+                      rotZW = res.rotationZW || 0;
+                  }
+              } catch(e) {}
+              
+              angleXY += rotXY;
+              angleZW += rotZW;
+              wSize -= compRate;
+              
+              if (wSize < 0) wSize = 0;
+              
+              // Project vertices
+              let projected3D = [];
+              let projected2D = [];
+              
+              for(let i=0; i<16; i++) {
+                  let v = vertices4D[i];
+                  v = rotateXY(v, angleXY);
+                  v = rotateZW(v, angleZW);
+                  
+                  let p3d = project4Dto3D(v, wSize);
+                  projected3D.push(p3d);
+                  projected2D.push(project3Dto2D(p3d, cx, cy));
+              }
+              
+              // Calculate spatial shear (check if 3D projected vertices get too close to each other)
+              let shearDetected = false;
+              if (compRate > 0) {
+                  for(let i=0; i<16; i++) {
+                      for(let j=i+1; j<16; j++) {
+                          let p1 = projected3D[i];
+                          let p2 = projected3D[j];
+                          let dist = Math.sqrt(Math.pow(p1.x-p2.x, 2) + Math.pow(p1.y-p2.y, 2) + Math.pow(p1.z-p2.z, 2));
+                          
+                          // If vertices compress into each other while wSize > 0, it creates shear
+                          if (dist < 0.1) {
+                              shearDetected = true;
+                              spatialShear += (0.1 - dist) * 100;
+                          }
+                      }
+                  }
+              }
+              
+              if (!shearDetected) {
+                  spatialShear -= 1;
+              }
+              
+              if (spatialShear < 0) spatialShear = 0;
+              foldStability = 100 - spatialShear;
+              if (foldStability < 0) foldStability = 0;
+              
+              // End States
+              if (foldStability <= 0) {
+                  isSimulating = false;
+                  document.getElementById('statusVal').innerText = "TOPOLOGICAL RUPTURE (REALITY SHATTERED)";
+                  document.getElementById('statusVal').style.color = "#ef4444";
+              } else if (wSize === 0) {
+                  isSimulating = false;
+                  document.getElementById('statusVal').innerText = "3D POCKET UNIVERSE STABILIZED";
+                  document.getElementById('statusVal').style.color = "#10b981";
+              } else {
+                  if (spatialShear > 50) {
+                      document.getElementById('statusVal').innerText = "WARNING: CRITICAL SPATIAL SHEAR";
+                      document.getElementById('statusVal').style.color = "#f97316";
+                  } else {
+                      document.getElementById('statusVal').innerText = "FOLDING DIMENSIONS...";
+                      document.getElementById('statusVal').style.color = "#ec4899";
+                  }
+              }
+              
+              // HUD Updates
+              document.getElementById('wVal').innerText = (wSize * 100).toFixed(1) + "%";
+              
+              let shearEl = document.getElementById('shearVal');
+              shearEl.innerText = spatialShear.toFixed(1) + "%";
+              if (spatialShear > 50) shearEl.style.color = "#ef4444";
+              else shearEl.style.color = "#cbd5e1";
+              
+              let stabEl = document.getElementById('stabVal');
+              stabEl.innerText = foldStability.toFixed(1) + "%";
+              if (foldStability < 30) stabEl.style.color = "#ef4444";
+              else stabEl.style.color = "#10b981";
+              
+              // Draw Edges
+              ctx.lineWidth = 2;
+              
+              edges.forEach(edge => {
+                  let p1 = projected2D[edge[0]];
+                  let p2 = projected2D[edge[1]];
+                  
+                  // Color edges based on whether they connect inner/outer cubes (the W dimension)
+                  let v1 = vertices4D[edge[0]];
+                  let v2 = vertices4D[edge[1]];
+                  
+                  ctx.beginPath();
+                  ctx.moveTo(p1.x, p1.y);
+                  ctx.lineTo(p2.x, p2.y);
+                  
+                  if (v1.w !== v2.w) {
+                      // Edges across the 4th dimension fade as wSize goes to 0
+                      ctx.strokeStyle = \`rgba(236, 72, 153, \${wSize})\`; 
+                  } else if (v1.w === -1) {
+                      ctx.strokeStyle = 'rgba(56, 189, 248, 0.8)'; // Inner cube
+                  } else {
+                      ctx.strokeStyle = 'rgba(250, 204, 21, 0.8)'; // Outer cube
+                  }
+                  
+                  // If high shear, shake the lines and turn them red
+                  if (spatialShear > 30) {
+                      ctx.strokeStyle = 'rgba(239, 68, 68, 0.9)';
+                      ctx.lineTo(p2.x + (Math.random()-0.5)*10, p2.y + (Math.random()-0.5)*10);
+                  }
+                  
+                  ctx.stroke();
+              });
+              
+              // Draw Vertices
+              projected2D.forEach((p, index) => {
+                  ctx.beginPath();
+                  ctx.arc(p.x, p.y, 4, 0, Math.PI*2);
+                  ctx.fillStyle = spatialShear > 60 ? '#ef4444' : '#fff';
+                  ctx.fill();
+              });
+              
+          } else {
+              // Idle rotation
+              angleXY += 0.01;
+              angleZW += 0.005;
+              
+              let projected2D = [];
+              for(let i=0; i<16; i++) {
+                  let v = vertices4D[i];
+                  v = rotateXY(v, angleXY);
+                  v = rotateZW(v, angleZW);
+                  let p3d = project4Dto3D(v, wSize);
+                  projected2D.push(project3Dto2D(p3d, cx, cy));
+              }
+              
+              ctx.lineWidth = 2;
+              edges.forEach(edge => {
+                  let p1 = projected2D[edge[0]];
+                  let p2 = projected2D[edge[1]];
+                  let v1 = vertices4D[edge[0]];
+                  let v2 = vertices4D[edge[1]];
+                  
+                  ctx.beginPath();
+                  ctx.moveTo(p1.x, p1.y);
+                  ctx.lineTo(p2.x, p2.y);
+                  if (v1.w !== v2.w) ctx.strokeStyle = \`rgba(236, 72, 153, \${wSize})\`;
+                  else if (v1.w === -1) ctx.strokeStyle = 'rgba(56, 189, 248, 0.8)';
+                  else ctx.strokeStyle = 'rgba(250, 204, 21, 0.8)';
+                  ctx.stroke();
+              });
+              
+              projected2D.forEach(p => {
+                  ctx.beginPath();
+                  ctx.arc(p.x, p.y, 4, 0, Math.PI*2);
+                  ctx.fillStyle = '#fff';
+                  ctx.fill();
+              });
+          }
+
+          requestAnimationFrame(animate);
+      }
+      
+      animate();
+
+      function initiateFold() {
+          if(isSimulating) return;
+          isSimulating = true;
+          wSize = 1.0;
+          spatialShear = 0;
+          foldStability = 100;
+          angleXY = 0;
+          angleZW = 0;
+          
+          document.getElementById('statusVal').innerText = "FOLD SEQUENCE INITIATED...";
+          document.getElementById('statusVal').style.color = "#ec4899";
+      }
+    </script>
+  </body>
+</html>

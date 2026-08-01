@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dynamo-Style Leaderless Quorum & Read-Repair Simulator | Algo Infinity Verse</title>
+    <meta
+      name="description"
+      content="Interactive Dynamo-style Leaderless Quorum Database Simulator showing read/write quorums, Vector Clocks for conflict resolution, read repair, and Merkle Tree anti-entropy sync."
+    />
+
+    <link
+      href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Fira+Code:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+
+    <!-- External Stylesheets -->
+    <link rel="stylesheet" href="/styles.css" />
+    <link rel="stylesheet" href="dynamo-quorum.css" />
+    <link rel="stylesheet" href="/modules/quick-notes/quick-notes.css" />
+  </head>
+  <body class="quorum-body">
+    <!-- Navbar Placeholder -->
+    <div id="navbar-placeholder"></div>
+
+    <main class="workspace">
+      <!-- Left Panel: Controls & Inputs -->
+      <div class="panel-left">
+        <div class="panel-header">
+          <h3><i class="fas fa-server"></i> Leaderless Quorum Lab</h3>
+        </div>
+
+        <div class="control-section">
+          <p class="desc-text">
+            Simulate dynamo-style leaderless replication. Configure replication parameters ($N, R,
+            W$), execute read/write quorums, and trigger conflict resolution.
+          </p>
+
+          <!-- Quorum Config -->
+          <div class="sliders-container">
+            <div class="slider-group">
+              <div class="slider-header">
+                <label for="nSlider">Total Nodes (N)</label>
+                <span id="nVal" class="val-badge">5</span>
+              </div>
+              <input type="range" id="nSlider" min="3" max="5" value="5" />
+            </div>
+
+            <div class="slider-group">
+              <div class="slider-header">
+                <label for="rSlider">Read Quorum (R)</label>
+                <span id="rVal" class="val-badge">3</span>
+              </div>
+              <input type="range" id="rSlider" min="1" max="5" value="3" />
+            </div>
+
+            <div class="slider-group">
+              <div class="slider-header">
+                <label for="wSlider">Write Quorum (W)</label>
+                <span id="wVal" class="val-badge">3</span>
+              </div>
+              <input type="range" id="wSlider" min="1" max="5" value="3" />
+            </div>
+
+            <!-- Safety Warning Badge -->
+            <div id="quorumSafetyBadge" class="safety-badge safe">
+              <i class="fas fa-check-circle"></i> Strict Quorum ($R + W > N$)
+            </div>
+          </div>
+
+          <!-- DB Operations -->
+          <div class="ops-container">
+            <div class="input-group">
+              <label for="keyInput">Key</label>
+              <input type="text" id="keyInput" class="styled-input" value="user_name" />
+            </div>
+            <div class="input-group">
+              <label for="valueInput">Value</label>
+              <input type="text" id="valueInput" class="styled-input" value="Akshat" />
+            </div>
+
+            <div class="action-buttons">
+              <button type="button" id="writeBtn" class="btn btn-primary">
+                <i class="fas fa-edit"></i> Write Key
+              </button>
+              <button type="button" id="readBtn" class="btn btn-secondary">
+                <i class="fas fa-book-open"></i> Read Key
+              </button>
+            </div>
+          </div>
+
+          <!-- Advanced Operations -->
+          <div class="advanced-ops">
+            <button type="button" id="concurrentWriteBtn" class="btn btn-accent">
+              <i class="fas fa-code-branch"></i> Trigger Concurrent Conflict
+            </button>
+            <button type="button" id="antiEntropyBtn" class="btn btn-accent">
+              <i class="fas fa-sync-alt"></i> Merkle Anti-Entropy Sync
+            </button>
+            <button type="button" id="resetBtn" class="btn btn-outline">
+              <i class="fas fa-undo"></i> Reset World
+            </button>
+          </div>
+
+          <!-- Console Console -->
+          <div class="console-panel">
+            <div class="console-header">System Event Log</div>
+            <div id="eventConsole">
+              <!-- Events populated here -->
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Panel: Nodes Canvas & Sync Dashboard -->
+      <div class="panel-right">
+        <!-- Node network layout -->
+        <div class="network-canvas-wrapper" id="canvasWrapper">
+          <canvas id="networkCanvas"></canvas>
+        </div>
+
+        <!-- Bottom Dashboard: Merkle Tree comparison -->
+        <div class="merkle-dashboard" id="merkleDashboard" style="display: none">
+          <h4>Merkle Tree Anti-Entropy Comparisons (Node 0 vs Node 4)</h4>
+          <div class="merkle-grid">
+            <div class="merkle-tree-view" id="treeNode0">
+              <h5>Node 0 Merkle Tree</h5>
+              <!-- Tree nodes filled dynamically -->
+            </div>
+            <div class="merkle-tree-view" id="treeNode4">
+              <h5>Node 4 Merkle Tree</h5>
+              <!-- Tree nodes filled dynamically -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- Footer Placeholder -->
+    <div id="footer-placeholder"></div>
+
+    <script src="/auth.js"></script>
+    <script src="/bootstrap-legacy.js"></script>
+    <script src="/script.js"></script>
+    <script type="module" src="/dist/legacy-bundle.mjs"></script>
+    <script src="/theme.js"></script>
+    <script src="dynamo-quorum.js"></script>
+    <script>
+      loadPartial('navbar-placeholder', '/partials/navbar.html');
+      loadPartial('footer-placeholder', '/partials/footer.html');
+    </script>
+    <script src="/modules/quick-notes/quick-notes.js"></script>
+  </body>
+</html>

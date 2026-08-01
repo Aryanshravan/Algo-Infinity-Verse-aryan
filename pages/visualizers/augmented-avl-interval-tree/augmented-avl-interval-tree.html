@@ -1,0 +1,230 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Augmented AVL Interval Tree Visualizer | Algo Infinity Verse</title>
+    <meta
+      name="description"
+      content="Watch an Interval Tree maintain balance through AVL rotations while simultaneously preserving its max-endpoint augmentation for fast overlap queries."
+    />
+    <link rel="stylesheet" href="../../../styles.css" />
+    <link rel="stylesheet" href="augmented-avl-interval-tree.css" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Poppins:wght@300;400;500;600;700&family=Fira+Code:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <link rel="stylesheet" href="/modules/quick-notes/quick-notes.css" />
+  </head>
+  <body data-page="augmented-avl-interval-tree">
+    <div id="navbar-placeholder"></div>
+
+    <button id="scrollTopBtn" aria-label="Scroll to top" class="scroll-top-btn">
+      <i class="fas fa-circle-chevron-up"></i>
+    </button>
+
+    <section class="avl-hero">
+      <div class="avl-hero-bg"><canvas id="heroCanvas" class="avl-hero-canvas"></canvas></div>
+      <div class="avl-hero-inner">
+        <div class="avl-hero-eyebrow">🌳 Data Structures · Augmented Trees</div>
+        <h1 class="avl-hero-title">Augmented AVL <br />Interval Tree</h1>
+        <p class="avl-hero-sub">Self-Balancing Meets Interval Overlap Queries</p>
+        <p class="avl-hero-desc">
+          An Interval Tree built on a naive BST degenerates into a slow O(N) linked list under
+          sorted insertion. To guarantee O(log N) queries, we must use a self-balancing AVL tree.
+          However, every time an AVL rotation occurs, the augmented
+          <strong>max-endpoint</strong> field must be meticulously recalculated along the rotation
+          path. Watch how a single missing update can silently corrupt the entire tree and break
+          overlap queries.
+        </p>
+        <div class="avl-hero-actions">
+          <a href="#lab" class="btn btn-primary avl-btn-primary"
+            ><i class="fas fa-sitemap"></i> Boot Visualizer</a
+          >
+          <a href="#theory" class="btn avl-btn-outline"
+            ><i class="fas fa-biohazard"></i> The Corruption Demo</a
+          >
+        </div>
+      </div>
+    </section>
+
+    <section id="lab" class="section avl-section">
+      <div class="container">
+        <div class="avl-control-card">
+          <div class="avl-toolbar">
+            <div class="avl-tool-group">
+              <button id="btnAddRandom" class="avl-btn avl-btn-ghost">
+                <i class="fas fa-random"></i> Add Random Interval
+              </button>
+              <button id="btnAddAdversarial" class="avl-btn avl-btn-ghost">
+                <i class="fas fa-sort-amount-down"></i> Add Sorted (Adversarial)
+              </button>
+              <button id="btnClear" class="avl-btn avl-btn-ghost" style="color: #ef4444">
+                <i class="fas fa-trash-alt"></i> Clear
+              </button>
+            </div>
+
+            <div
+              class="avl-tool-group"
+              style="border-left: 1px solid rgba(255, 255, 255, 0.1); padding-left: 1rem"
+            >
+              <span class="avl-label"
+                >Test Overlap [ <span id="lblQueryStart" style="color: #10b981">30</span> ,
+                <span id="lblQueryEnd" style="color: #10b981">50</span> ]</span
+              >
+              <input
+                type="range"
+                id="sliderQueryStart"
+                min="0"
+                max="100"
+                value="30"
+                class="avl-slider"
+              />
+              <input
+                type="range"
+                id="sliderQueryEnd"
+                min="0"
+                max="100"
+                value="50"
+                class="avl-slider"
+              />
+              <button id="btnQuery" class="avl-btn avl-btn-primary">
+                <i class="fas fa-search"></i> Run Query
+              </button>
+            </div>
+          </div>
+
+          <div
+            class="avl-toolbar"
+            style="
+              margin-top: 1rem;
+              border-top: 1px solid rgba(255, 255, 255, 0.05);
+              padding-top: 1rem;
+            "
+          >
+            <div class="avl-tool-group">
+              <span class="avl-label" style="color: #ef4444"
+                ><i class="fas fa-bug"></i> Sabotage Controls:</span
+              >
+              <label class="avl-switch">
+                <input type="checkbox" id="chkCorrupt" />
+                <span class="avl-slider-switch"></span>
+              </label>
+              <span class="avl-label" style="text-transform: none"
+                >Disable Max-Endpoint Repair during Rotations</span
+              >
+            </div>
+            <div class="avl-tool-group">
+              <span class="avl-label">Animation Speed:</span>
+              <input
+                type="range"
+                id="sliderSpeed"
+                min="1"
+                max="100"
+                value="70"
+                class="avl-slider"
+              />
+            </div>
+          </div>
+
+          <div class="avl-stats-strip">
+            <div class="avl-stat-box count-box">
+              <div class="stat-lbl">Tree Nodes / Height</div>
+              <div class="stat-val">
+                <span id="statNodes">0</span> / <span id="statHeight">0</span>
+              </div>
+            </div>
+            <div class="avl-stat-box query-box">
+              <div class="stat-lbl">Query Nodes Visited</div>
+              <div class="stat-val" id="statVisited">-</div>
+            </div>
+            <div class="avl-stat-box result-box">
+              <div class="stat-lbl">Overlaps Found (Tree vs BF)</div>
+              <div class="stat-val highlight" id="statFound">-</div>
+            </div>
+          </div>
+        </div>
+
+        <div id="avlStatus" class="avl-status-bar">
+          <div class="status-icon"><i class="fas fa-info-circle"></i></div>
+          <div class="status-text" id="statusMsg">
+            Tree is empty. Add intervals to begin building the augmented AVL tree.
+          </div>
+        </div>
+
+        <div class="avl-main-layout">
+          <div class="avl-panel tree-panel">
+            <div class="panel-header">
+              <h3 class="panel-title" style="color: #10b981">
+                <i class="fas fa-project-diagram"></i> Augmented AVL Tree
+              </h3>
+              <div class="panel-badges">
+                <span class="badge badge-avl" id="badgeAvl">O(log n) Height Guaranteed</span>
+                <span class="badge badge-corrupt" id="badgeCorrupt" style="display: none"
+                  >Sabotaged Rotations</span
+                >
+              </div>
+            </div>
+            <div class="canvas-wrap" id="treeCanvasWrap">
+              <canvas id="treeCanvas"></canvas>
+            </div>
+          </div>
+
+          <div class="avl-panel log-panel">
+            <div class="panel-header">
+              <h3 class="panel-title"><i class="fas fa-terminal"></i> Structure Log</h3>
+            </div>
+            <div class="log-console" id="logConsole"></div>
+          </div>
+        </div>
+
+        <div id="theory" class="avl-learn-section">
+          <h2 class="learn-heading"><i class="fas fa-shield-alt"></i> The Engineering Challenge</h2>
+          <div class="avl-learn-grid">
+            <div class="avl-learn-card">
+              <div class="learn-icon">🌲</div>
+              <h3>The Degeneration Problem</h3>
+              <p>
+                An interval tree is conceptually a standard Binary Search Tree ordered by interval
+                start times. However, if intervals are inserted in sorted order (adversarial
+                insertion), a naive BST degenerates into a right-leaning linked list. A query would
+                then take O(N) instead of O(log N). AVL balancing guarantees the height remains
+                tight, but introduces a new problem: Rotations.
+              </p>
+            </div>
+            <div class="avl-learn-card">
+              <div class="learn-icon">🔄</div>
+              <h3>The Rotation Repair Rule</h3>
+              <p>
+                Interval queries rely on a `max` field at each node, representing the maximum end
+                time anywhere in its subtree. When an AVL rotation shifts subtrees between nodes to
+                restore height balance, the subtree structures change! This means the `max` field of
+                the rotated nodes is instantly invalidated and MUST be recomputed bottom-up
+                immediately after the rotation.
+              </p>
+            </div>
+            <div class="avl-learn-card">
+              <div class="learn-icon">☠️</div>
+              <h3>The Silent Corruption</h3>
+              <p>
+                Toggle the "Sabotage Controls" on, and the rotation code will skip updating the
+                `max` fields. The tree will still perfectly balance its height, but its augmented
+                data will be stale. When you run an Overlap Query, the algorithm uses the `max`
+                field to prune branches. Because the field is wrong, it will incorrectly prune valid
+                branches, returning incomplete results! The visualization explicitly proves this
+                bug.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <script src="../../../modules/navbar.js"></script>
+    <script src="augmented-avl-interval-tree.js"></script>
+  </body>
+</html>

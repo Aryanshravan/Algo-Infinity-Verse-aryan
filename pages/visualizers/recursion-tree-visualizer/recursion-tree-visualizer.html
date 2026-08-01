@@ -25,6 +25,7 @@
         } catch (e) {}
       })();
     </script>
+    <link rel="stylesheet" href="/modules/quick-notes/quick-notes.css" />
 </head>
   <body data-page="recursion-tree-visualizer">
     <!-- Loading Screen -->
@@ -80,7 +81,19 @@
 
               <div class="control-group">
                 <label for="rtv-algo">Algorithm</label>
-                <select id="rtv-algo" class="control-input"></select>
+                <select id="rtv-algo" class="control-input">
+                  <!-- Options injected by JS, plus custom -->
+                </select>
+              </div>
+
+              <div class="control-group" id="rtv-custom-code-group" style="display: none;">
+                <label for="rtv-custom-code">Custom Code (function must be named 'custom')</label>
+                <textarea id="rtv-custom-code" class="control-input" style="height: 120px; font-family: monospace; font-size: 0.75rem;">
+function custom(n) {
+  if (n <= 0) return 0;
+  return custom(n - 1) + 1;
+}
+                </textarea>
               </div>
 
               <div class="control-group">
@@ -189,11 +202,13 @@
     <script src="/script.js"></script>
     <script type="module" src="/dist/legacy-bundle.mjs"></script>
     <script src="/theme.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/acorn/8.11.3/acorn.min.js"></script>
     <script src="recursion-tree-visualizer.js"></script>
   
   <script>
     loadPartial('navbar-placeholder', '/partials/navbar.html');
     loadPartial('footer-placeholder', '/partials/footer.html');
   </script>
+    <script src="/modules/quick-notes/quick-notes.js"></script>
 </body>
 </html>

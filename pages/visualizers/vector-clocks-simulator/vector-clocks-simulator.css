@@ -232,6 +232,14 @@ body.vector-body {
   background: var(--color-node-C);
 }
 
+.event-dot.concurrent-glow {
+  box-shadow:
+    0 0 20px #eab308,
+    inset 0 0 10px #eab308;
+  border: 2px solid #eab308;
+  background: #fef08a !important; /* Overrides original color to highlight */
+}
+
 .event-label {
   position: absolute;
   left: 20px;
@@ -337,9 +345,74 @@ body.vector-body {
   font-size: 0.9rem;
 }
 .result-box.concurrent {
-  color: var(--color-node-C);
-  border-color: var(--color-node-C);
+  border-left-color: #eab308;
+  background: rgba(234, 179, 8, 0.1);
+  color: #fde047;
 }
+
+.concurrency-info {
+  margin-top: 1rem;
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  line-height: 1.4;
+  padding: 0.75rem;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+.concurrency-info i {
+  color: #eab308;
+  margin-right: 0.25rem;
+}
+
+/* Packet Overlay */
+.packet-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 20;
+}
+
+.message-packet {
+  position: absolute;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1.5px solid rgba(255, 255, 255, 0.6);
+  border-radius: 6px;
+  padding: 0.25rem 0.5rem;
+  font-family: 'Fira Code', monospace;
+  font-size: 0.75rem;
+  font-weight: bold;
+  color: #fff;
+  backdrop-filter: blur(4px);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+  transform: translate(-50%, -50%);
+  transition: all 1s cubic-bezier(0.25, 1, 0.5, 1); /* Smooth flight */
+  pointer-events: none;
+}
+
+.message-packet.flash-merge {
+  animation: pmFlash 0.3s ease;
+}
+@keyframes pmFlash {
+  0% {
+    transform: translate(-50%, -50%) scale(1);
+    filter: brightness(1);
+  }
+  50% {
+    transform: translate(-50%, -50%) scale(1.3);
+    filter: brightness(2);
+    background: rgba(255, 255, 255, 0.4);
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(1);
+    filter: brightness(1);
+    opacity: 0;
+  }
+}
+
 .result-box.happened-before {
   color: var(--color-node-B);
   border-color: var(--color-node-B);

@@ -1,0 +1,210 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI GraphQL AuthZ Field Leak Auditor | Algo Infinity Verse</title>
+  <meta name="description" content="Paste a GraphQL schema and resolver stubs to detect missing @auth guards, sensitive field leaks, nested selection bypass paths, and download a GraphQL authorization audit report." />
+  <link rel="stylesheet" href="/styles.css" />
+  <link rel="stylesheet" href="style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Poppins:wght@300;400;500;600;700&family=Fira+Code:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <script>
+    (function () {
+      try {
+        var storedTheme = localStorage.getItem('theme');
+        var prefersLight = window.matchMedia('(prefers-color-scheme: light)').matches;
+        var theme = storedTheme || (prefersLight ? 'light' : 'dark');
+        if (theme === 'light') {
+          document.documentElement.classList.add('light-mode');
+        } else {
+          document.documentElement.classList.remove('light-mode');
+        }
+      } catch (e) {}
+    })();
+  </script>
+</head>
+<body data-page="ai-graphql-authz-field-leak-auditor">
+  <a href="#gqlauth-main" class="gqlauth-skip-link">Skip to main content</a>
+  <button type="button" id="scrollTopBtn" class="scroll-top-btn" aria-label="Scroll to top">
+    <i class="fas fa-arrow-up" aria-hidden="true"></i>
+  </button>
+
+  <div id="navbar-placeholder"></div>
+
+  <header class="gqlauth-hero">
+    <div class="gqlauth-hero-badge">
+      <i class="fas fa-user-shield" aria-hidden="true"></i>
+      GraphQL AuthZ Lab
+    </div>
+    <h1>
+      AI GraphQL AuthZ
+      <span class="gqlauth-hero-accent">Field Leak Auditor</span>
+    </h1>
+    <p>
+      Paste schema SDL and resolver stubs, flag sensitive fields without
+      <code>@auth</code> / guards, find nested selection bypass paths, and export field-policy patches.
+    </p>
+    <div class="gqlauth-hero-stats" aria-live="polite">
+      <div class="gqlauth-stat">
+        <span class="gqlauth-stat-val" id="gqlauth-statRisk">—</span>
+        <span class="gqlauth-stat-label">Risk score</span>
+      </div>
+      <div class="gqlauth-stat">
+        <span class="gqlauth-stat-val" id="gqlauth-statSensitive">—</span>
+        <span class="gqlauth-stat-label">Sensitive fields</span>
+      </div>
+      <div class="gqlauth-stat">
+        <span class="gqlauth-stat-val" id="gqlauth-statUnguarded">—</span>
+        <span class="gqlauth-stat-label">Unguarded</span>
+      </div>
+      <div class="gqlauth-stat">
+        <span class="gqlauth-stat-val" id="gqlauth-statBypass">—</span>
+        <span class="gqlauth-stat-label">Bypass paths</span>
+      </div>
+    </div>
+  </header>
+
+  <main id="gqlauth-main" class="gqlauth-main">
+    <div class="container">
+      <div class="gqlauth-workspace">
+        <section class="gqlauth-panel" aria-labelledby="gqlauth-schema-title">
+          <div class="gqlauth-panel-header">
+            <div class="gqlauth-panel-title">
+              <i class="fas fa-database gqlauth-panel-icon" aria-hidden="true"></i>
+              <h2 id="gqlauth-schema-title">Schema + resolvers</h2>
+            </div>
+            <label class="gqlauth-inline-label" for="gqlauth-preset">Demo preset</label>
+          </div>
+
+          <div class="gqlauth-field-row">
+            <select id="gqlauth-preset" class="gqlauth-select" aria-describedby="gqlauth-presetHint">
+              <option value="">— Choose leaky demo —</option>
+              <option value="user-pii">User PII + role leak</option>
+              <option value="token-nested">Nested token via Organization</option>
+              <option value="admin-bypass">Admin field via public list</option>
+            </select>
+          </div>
+          <p id="gqlauth-presetHint" class="gqlauth-hint">Presets load intentionally leaky SDL and resolver stubs for training.</p>
+
+          <label class="gqlauth-label" for="gqlauth-schema">GraphQL schema (SDL)</label>
+          <textarea
+            id="gqlauth-schema"
+            class="gqlauth-textarea"
+            rows="12"
+            spellcheck="false"
+            placeholder="type User { email: String }"
+            aria-describedby="gqlauth-schemaHint"
+          ></textarea>
+          <p id="gqlauth-schemaHint" class="gqlauth-hint">Supports @auth / @hasRole directives in SDL as positive signals.</p>
+
+          <label class="gqlauth-label" for="gqlauth-resolvers">Resolver stubs</label>
+          <textarea
+            id="gqlauth-resolvers"
+            class="gqlauth-textarea"
+            rows="10"
+            spellcheck="false"
+            placeholder="Query: { user: (_, __, ctx) => ... }"
+            aria-describedby="gqlauth-resolversHint"
+          ></textarea>
+          <p id="gqlauth-resolversHint" class="gqlauth-hint">Heuristic scan for requireAuth, assertRole, ctx.user, and bare returns of sensitive fields.</p>
+
+          <div class="gqlauth-controls">
+            <button type="button" id="gqlauth-auditBtn" class="btn btn-primary">
+              <i class="fas fa-magnifying-glass" aria-hidden="true"></i> Audit authz leaks
+            </button>
+            <button type="button" id="gqlauth-clearBtn" class="btn btn-outline">
+              <i class="fas fa-eraser" aria-hidden="true"></i> Clear
+            </button>
+            <button type="button" id="gqlauth-exportBtn" class="btn btn-outline" disabled>
+              <i class="fas fa-download" aria-hidden="true"></i> Export audit report
+            </button>
+          </div>
+          <div id="gqlauth-status" class="gqlauth-status" role="status" aria-live="polite"></div>
+        </section>
+
+        <section class="gqlauth-panel" aria-labelledby="gqlauth-taxonomy-title">
+          <div class="gqlauth-panel-header">
+            <div class="gqlauth-panel-title">
+              <i class="fas fa-tags gqlauth-panel-icon" aria-hidden="true"></i>
+              <h2 id="gqlauth-taxonomy-title">Sensitive field taxonomy</h2>
+            </div>
+          </div>
+          <p class="gqlauth-hint gqlauth-hint-top">
+            Fields matching these categories are treated as high-value leak targets.
+          </p>
+          <div id="gqlauth-taxonomy" class="gqlauth-taxonomy" aria-live="polite"></div>
+          <div id="gqlauth-sensitiveList" class="gqlauth-field-list" aria-live="polite">
+            <p class="gqlauth-empty">Run an audit to classify schema fields.</p>
+          </div>
+        </section>
+      </div>
+
+      <div class="gqlauth-workspace">
+        <section class="gqlauth-panel" aria-labelledby="gqlauth-unguarded-title">
+          <div class="gqlauth-panel-header">
+            <div class="gqlauth-panel-title">
+              <i class="fas fa-unlock gqlauth-panel-icon" aria-hidden="true"></i>
+              <h2 id="gqlauth-unguarded-title">Missing @auth / guard heuristics</h2>
+            </div>
+          </div>
+          <div id="gqlauth-unguarded" class="gqlauth-findings" aria-live="polite">
+            <p class="gqlauth-empty">Unguarded sensitive fields appear here.</p>
+          </div>
+        </section>
+
+        <section class="gqlauth-panel" aria-labelledby="gqlauth-bypass-title">
+          <div class="gqlauth-panel-header">
+            <div class="gqlauth-panel-title">
+              <i class="fas fa-route gqlauth-panel-icon" aria-hidden="true"></i>
+              <h2 id="gqlauth-bypass-title">Nested selection bypass paths</h2>
+            </div>
+          </div>
+          <ul id="gqlauth-bypass" class="gqlauth-bypass" aria-live="polite">
+            <li class="gqlauth-empty">Bypass paths appear after audit.</li>
+          </ul>
+        </section>
+      </div>
+
+      <div class="gqlauth-workspace">
+        <section class="gqlauth-panel" aria-labelledby="gqlauth-patches-title">
+          <div class="gqlauth-panel-header">
+            <div class="gqlauth-panel-title">
+              <i class="fas fa-wand-magic-sparkles gqlauth-panel-icon" aria-hidden="true"></i>
+              <h2 id="gqlauth-patches-title">Suggested field-policy patches</h2>
+            </div>
+          </div>
+          <pre class="gqlauth-mono" id="gqlauth-patches" tabindex="0">Run an audit to generate @auth / resolver guard patches.</pre>
+        </section>
+
+        <section class="gqlauth-panel" aria-labelledby="gqlauth-summary-title">
+          <div class="gqlauth-panel-header">
+            <div class="gqlauth-panel-title">
+              <i class="fas fa-clipboard-check gqlauth-panel-icon" aria-hidden="true"></i>
+              <h2 id="gqlauth-summary-title">Audit summary</h2>
+            </div>
+          </div>
+          <div id="gqlauth-summary" class="gqlauth-summary" aria-live="polite">
+            <p class="gqlauth-empty">No audit yet.</p>
+          </div>
+        </section>
+      </div>
+    </div>
+  </main>
+
+  <div id="footer-placeholder"></div>
+
+  <script src="/auth.js"></script>
+  <script src="/bootstrap-legacy.js"></script>
+  <script src="/script.js"></script>
+  <script type="module" src="/dist/legacy-bundle.mjs"></script>
+  <script src="/theme.js"></script>
+  <script src="script.js"></script>
+  <script>
+    if (typeof loadPartial === 'function') {
+      loadPartial('navbar-placeholder', '/partials/navbar.html');
+      loadPartial('footer-placeholder', '/partials/footer.html');
+    }
+  </script>
+</body>
+</html>

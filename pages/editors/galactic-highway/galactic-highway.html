@@ -1,0 +1,406 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Kardashev Galactic Highway | Algo Infinity Verse</title>
+    <link rel="stylesheet" href="/styles.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <!-- Monaco Editor -->
+    <script src="https://unpkg.com/monaco-editor@0.36.1/min/vs/loader.js"></script>
+    <style>
+      body { margin: 0; overflow: hidden; background: #000; font-family: 'Poppins', sans-serif; color: #fff; }
+      .app-container { display: flex; height: 100vh; }
+      
+      .sidebar { width: 450px; background: rgba(15, 23, 42, 0.95); border-right: 1px solid #3b82f6; display: flex; flex-direction: column; z-index: 10; }
+      .header { padding: 20px; border-bottom: 1px solid #334155; }
+      .header h2 { margin: 0; color: #3b82f6; font-family: 'Orbitron', sans-serif; font-size: 1.2rem; }
+      .header p { margin: 5px 0 0 0; font-size: 0.8rem; color: #94a3b8; }
+      
+      #editor-container { flex: 1; min-height: 300px; }
+      
+      .controls { padding: 20px; border-top: 1px solid #334155; background: rgba(0,0,0,0.5); }
+      .btn { background: linear-gradient(90deg, #2563eb, #1d4ed8); color: #fff; border: none; padding: 10px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; transition: 0.3s; }
+      .btn:hover { background: #3b82f6; transform: translateY(-2px); box-shadow: 0 0 15px rgba(59, 130, 246, 0.5); }
+      
+      .sim-container { flex: 1; position: relative; background: #020617; overflow: hidden; }
+      canvas { width: 100%; height: 100%; display: block; filter: contrast(1.2); }
+      
+      .hud { position: absolute; top: 20px; left: 20px; background: rgba(0,0,0,0.8); padding: 15px; border-radius: 8px; border: 1px solid #3b82f6; width: 280px; z-index: 10; pointer-events: none; }
+      .hud h3 { margin: 0 0 10px 0; color: #3b82f6; font-size: 1rem; font-family: 'Orbitron', sans-serif; }
+      .metric { display: flex; justify-content: space-between; font-size: 0.8rem; color: #cbd5e1; margin-bottom: 5px; }
+      .val { font-weight: bold; font-family: monospace; }
+      .val-traffic { color: #facc15; }
+      .val-congestion { color: #ef4444; }
+    </style>
+  </head>
+  <body>
+    
+    <div class="app-container">
+      <div class="sidebar">
+        <div class="header">
+          <h2><i class="fas fa-route"></i> Galactic Highway Network</h2>
+          <p>Type-III Macro-Routing Sandbox</p>
+        </div>
+        
+        <div id="editor-container"></div>
+        
+        <div class="controls">
+          <button class="btn" onclick="openNetwork()"><i class="fas fa-satellite-dish"></i> Activate Wormhole Grid</button>
+        </div>
+      </div>
+      
+      <div class="sim-container">
+        <!-- Galaxy Background -->
+        <div style="position: absolute; inset:0; background: url('https://images.unsplash.com/photo-1462331940025-496dfbfc7564?q=80&w=2000&auto=format&fit=crop') center/cover; opacity: 0.15; pointer-events: none; z-index: 0; mix-blend-mode: lighten;"></div>
+        
+        <canvas id="galaxyCanvas" style="position: relative; z-index: 1;"></canvas>
+        
+        <div class="hud">
+          <h3>Network Telemetry</h3>
+          <div class="metric"><span>Ships en route:</span> <span class="val val-traffic" id="trafficVal">0</span></div>
+          <div class="metric"><span>Congestion Delay:</span> <span class="val val-congestion" id="congestVal">0 yrs</span></div>
+          <div class="metric"><span>Supernova Events:</span> <span class="val" id="novaVal" style="color:#f97316">0</span></div>
+          <div class="metric"><span>Delivery Rate:</span> <span class="val" id="delVal" style="color:#10b981">0%</span></div>
+          <div class="metric" style="margin-top: 10px; border-top: 1px solid #334155; padding-top: 5px;">
+            <span>Network Status:</span> <span class="val" id="statusVal" style="color:#94a3b8">OFFLINE</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      let editor;
+      require.config({ paths: { 'vs': 'https://unpkg.com/monaco-editor@0.36.1/min/vs' }});
+      require(['vs/editor/editor.main'], function() {
+        editor = monaco.editor.create(document.getElementById('editor-container'), {
+          value: `// Galactic Logistics Routing Algorithm
+// The galaxy has multiple wormhole nodes connected by hyper-lanes.
+// You must calculate the optimal path for a starship.
+// If a lane has too much traffic, congestion slows it down.
+// If a supernova hits a node, it is temporarily destroyed (infinite cost).
+
+function calculateRoute(startNodeId, targetNodeId, graph) {
+    // 'graph' is an adjacency list object: { nodeId: [{ targetId, baseCost, traffic, active }] }
+    // Return an array of node IDs representing the path, e.g., [start, nodeA, nodeB, target]
+    
+    // Naive logic: Random hop until target found.
+    // Result: Trillions of ships get lost in deep space or fly into a supernova.
+    
+    let path = [startNodeId];
+    let current = startNodeId;
+    
+    while (current !== targetNodeId && path.length < 10) {
+        let edges = graph[current] || [];
+        if (edges.length === 0) break; // Dead end
+        let randomEdge = edges[Math.floor(Math.random() * edges.length)];
+        path.push(randomEdge.targetId);
+        current = randomEdge.targetId;
+    }
+    
+    return path;
+}`,
+          language: 'javascript',
+          theme: 'vs-dark',
+          minimap: { enabled: false },
+          automaticLayout: true
+        });
+      });
+
+      const canvas = document.getElementById('galaxyCanvas');
+      const ctx = canvas.getContext('2d');
+      
+      let isSimulating = false;
+      let time = 0;
+      
+      let nodes = [];
+      let edges = []; // { source, target, traffic }
+      let ships = []; // { path: [], progress: 0, delay: 0 }
+      
+      let totalDelivered = 0;
+      let totalFailed = 0;
+      let congestionPenalty = 0;
+      let supernovaNode = -1;
+      let supernovaTimer = 0;
+      
+      function resize() { 
+          canvas.width = canvas.clientWidth; 
+          canvas.height = canvas.clientHeight;
+          initGraph();
+      }
+      
+      function initGraph() {
+          nodes = [];
+          edges = [];
+          
+          let numNodes = 12;
+          let cx = canvas.width/2;
+          let cy = canvas.height/2;
+          
+          // Generate galaxy nodes (spiral pattern roughly)
+          for(let i=0; i<numNodes; i++) {
+              let angle = i * 0.8;
+              let rad = 50 + (i * 30);
+              nodes.push({
+                  id: i,
+                  x: cx + Math.cos(angle) * rad,
+                  y: cy + Math.sin(angle) * rad,
+                  active: true
+              });
+          }
+          
+          // Connect nodes
+          for(let i=0; i<numNodes; i++) {
+              // Connect to next
+              if (i < numNodes-1) edges.push({ source: i, target: i+1, traffic: 0, cost: 10 });
+              // Connect cross arms
+              if (i < numNodes-4) edges.push({ source: i, target: i+4, traffic: 0, cost: 25 });
+          }
+      }
+      
+      setTimeout(resize, 100);
+      window.addEventListener('resize', resize);
+
+      function buildGraphObject() {
+          let graph = {};
+          nodes.forEach(n => graph[n.id] = []);
+          
+          edges.forEach(e => {
+              graph[e.source].push({ targetId: e.target, baseCost: e.cost, traffic: e.traffic, active: nodes[e.target].active });
+              graph[e.target].push({ targetId: e.source, baseCost: e.cost, traffic: e.traffic, active: nodes[e.source].active }); // Bi-directional
+          });
+          
+          return graph;
+      }
+
+      function animate() {
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+          
+          if (isSimulating) {
+              time += 0.05;
+              
+              // Supernova Event
+              if (supernovaTimer <= 0 && Math.random() < 0.02) {
+                  supernovaNode = Math.floor(Math.random() * (nodes.length - 2)) + 1; // Don't blow up start/end easily
+                  nodes[supernovaNode].active = false;
+                  supernovaTimer = 100;
+              }
+              
+              if (supernovaTimer > 0) {
+                  supernovaTimer--;
+                  if (supernovaTimer <= 0 && supernovaNode !== -1) {
+                      nodes[supernovaNode].active = true;
+                      supernovaNode = -1;
+                  }
+              }
+              
+              // Spawn Ships
+              if (Math.random() < 0.2) {
+                  let startNode = 0; // Outer edge
+                  let targetNode = nodes.length - 1; // Core
+                  
+                  let graphObj = buildGraphObject();
+                  let calculatedPath = [];
+                  
+                  try {
+                      eval(editor.getValue());
+                      let res = calculateRoute(startNode, targetNode, graphObj);
+                      if (Array.isArray(res) && res.length > 0 && res[0] === startNode) {
+                          calculatedPath = res;
+                      }
+                  } catch(e) {}
+                  
+                  ships.push({
+                      path: calculatedPath,
+                      progress: 0,
+                      currentSegmentIndex: 0,
+                      delay: 0
+                  });
+              }
+              
+              // Reset traffic
+              edges.forEach(e => e.traffic = 0);
+              
+              // Calculate traffic
+              ships.forEach(s => {
+                  if (s.currentSegmentIndex < s.path.length - 1) {
+                      let u = s.path[s.currentSegmentIndex];
+                      let v = s.path[s.currentSegmentIndex + 1];
+                      let edge = edges.find(e => (e.source===u && e.target===v) || (e.source===v && e.target===u));
+                      if (edge) edge.traffic++;
+                  }
+              });
+              
+              // Move Ships
+              congestionPenalty = 0;
+              
+              for(let i=ships.length-1; i>=0; i--) {
+                  let s = ships[i];
+                  
+                  if (s.path.length <= 1 || s.currentSegmentIndex >= s.path.length - 1) {
+                      if (s.path[s.path.length-1] === nodes.length-1) totalDelivered++;
+                      else totalFailed++;
+                      ships.splice(i, 1);
+                      continue;
+                  }
+                  
+                  let u = s.path[s.currentSegmentIndex];
+                  let v = s.path[s.currentSegmentIndex + 1];
+                  
+                  if (!nodes[u] || !nodes[v] || !nodes[v].active) {
+                      totalFailed++; // Flew into supernova or invalid node
+                      ships.splice(i, 1);
+                      continue;
+                  }
+                  
+                  let edge = edges.find(e => (e.source===u && e.target===v) || (e.source===v && e.target===u));
+                  let edgeTraffic = edge ? edge.traffic : 0;
+                  let edgeCost = edge ? edge.cost : 50;
+                  
+                  // Traffic congestion slows them down exponentially
+                  let speed = 1.0 / (1 + (edgeTraffic * 0.2));
+                  s.progress += speed;
+                  
+                  if (speed < 0.5) congestionPenalty += (0.5 - speed);
+                  
+                  if (s.progress >= edgeCost) {
+                      s.progress = 0;
+                      s.currentSegmentIndex++;
+                  }
+              }
+              
+              // End State
+              let totalSpawns = totalDelivered + totalFailed;
+              let winRate = totalSpawns > 0 ? (totalDelivered / totalSpawns) * 100 : 0;
+              
+              if (totalFailed > 100) {
+                  isSimulating = false;
+                  document.getElementById('statusVal').innerText = "GALACTIC SUPPLY CHAIN COLLAPSED";
+                  document.getElementById('statusVal').style.color = "#ef4444";
+              } else if (totalDelivered > 150 && congestionPenalty < 1000) {
+                  isSimulating = false;
+                  document.getElementById('statusVal').innerText = "KARDASHEV III ROUTING OPTIMAL";
+                  document.getElementById('statusVal').style.color = "#10b981";
+              } else {
+                  if (supernovaNode !== -1) {
+                      document.getElementById('statusVal').innerText = "SUPERNOVA REROUTING...";
+                      document.getElementById('statusVal').style.color = "#f97316";
+                  } else if (congestionPenalty > 500) {
+                      document.getElementById('statusVal').innerText = "SEVERE CONGESTION";
+                      document.getElementById('statusVal').style.color = "#facc15";
+                  } else {
+                      document.getElementById('statusVal').innerText = "NETWORK ACTIVE";
+                      document.getElementById('statusVal').style.color = "#3b82f6";
+                  }
+              }
+              
+              // HUD
+              document.getElementById('trafficVal').innerText = ships.length.toLocaleString();
+              document.getElementById('congestVal').innerText = Math.floor(congestionPenalty) + " yrs";
+              document.getElementById('novaVal').innerText = supernovaNode !== -1 ? "1 ACTIVE" : "0";
+              document.getElementById('delVal').innerText = winRate.toFixed(1) + "%";
+          }
+          
+          // Draw Edges (Hyperlanes)
+          edges.forEach(e => {
+              let n1 = nodes[e.source];
+              let n2 = nodes[e.target];
+              
+              ctx.beginPath();
+              ctx.moveTo(n1.x, n1.y);
+              ctx.lineTo(n2.x, n2.y);
+              
+              if (!n1.active || !n2.active) {
+                  ctx.strokeStyle = 'rgba(239, 68, 68, 0.2)'; // Dead lane
+                  ctx.lineWidth = 1;
+              } else {
+                  if (e.traffic > 5) {
+                      ctx.strokeStyle = 'rgba(250, 204, 21, 0.8)'; // Congested
+                      ctx.lineWidth = 3;
+                  } else {
+                      ctx.strokeStyle = 'rgba(59, 130, 246, 0.4)'; // Clear
+                      ctx.lineWidth = 1.5;
+                  }
+              }
+              ctx.stroke();
+          });
+          
+          // Draw Ships
+          ctx.fillStyle = '#fff';
+          ctx.shadowBlur = 5;
+          ctx.shadowColor = '#fff';
+          ships.forEach(s => {
+              if (s.currentSegmentIndex < s.path.length - 1) {
+                  let u = s.path[s.currentSegmentIndex];
+                  let v = s.path[s.currentSegmentIndex + 1];
+                  if(nodes[u] && nodes[v]) {
+                      let edge = edges.find(e => (e.source===u && e.target===v) || (e.source===v && e.target===u));
+                      let edgeCost = edge ? edge.cost : 10;
+                      let pct = Math.min(1.0, s.progress / edgeCost);
+                      
+                      let x = nodes[u].x + (nodes[v].x - nodes[u].x) * pct;
+                      let y = nodes[u].y + (nodes[v].y - nodes[u].y) * pct;
+                      
+                      ctx.beginPath();
+                      ctx.arc(x, y, 2, 0, Math.PI*2);
+                      ctx.fill();
+                  }
+              }
+          });
+          ctx.shadowBlur = 0;
+          
+          // Draw Nodes (Wormholes)
+          nodes.forEach((n, i) => {
+              ctx.beginPath();
+              ctx.arc(n.x, n.y, 6, 0, Math.PI*2);
+              
+              if (!n.active) {
+                  // Supernova expanding visual
+                  ctx.fillStyle = '#ef4444';
+                  ctx.fill();
+                  ctx.strokeStyle = 'rgba(249, 115, 22, 0.5)';
+                  ctx.lineWidth = 2;
+                  ctx.beginPath();
+                  ctx.arc(n.x, n.y, 30 + Math.sin(time*5)*10, 0, Math.PI*2);
+                  ctx.stroke();
+              } else if (i === 0) {
+                  ctx.fillStyle = '#38bdf8'; // Start
+                  ctx.fill();
+              } else if (i === nodes.length - 1) {
+                  ctx.fillStyle = '#10b981'; // End
+                  ctx.fill();
+                  // Pulse Core
+                  ctx.beginPath();
+                  ctx.arc(n.x, n.y, 10 + Math.sin(time*2)*4, 0, Math.PI*2);
+                  ctx.fillStyle = 'rgba(16, 185, 129, 0.3)';
+                  ctx.fill();
+              } else {
+                  ctx.fillStyle = '#64748b';
+                  ctx.fill();
+              }
+          });
+
+          requestAnimationFrame(animate);
+      }
+      
+      animate();
+
+      function openNetwork() {
+          if(isSimulating) return;
+          initGraph();
+          isSimulating = true;
+          time = 0;
+          ships = [];
+          totalDelivered = 0;
+          totalFailed = 0;
+          congestionPenalty = 0;
+          supernovaNode = -1;
+          supernovaTimer = 0;
+          
+          document.getElementById('statusVal').innerText = "ROUTING TRAFFIC...";
+          document.getElementById('statusVal').style.color = "#3b82f6";
+      }
+    </script>
+  </body>
+</html>

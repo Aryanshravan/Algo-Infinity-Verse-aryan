@@ -1,0 +1,299 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Neuromorphic SNN Emulator | Algo Infinity Verse</title>
+    <link rel="stylesheet" href="/styles.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <!-- Monaco Editor -->
+    <script src="https://unpkg.com/monaco-editor@0.36.1/min/vs/loader.js"></script>
+    <style>
+      body { margin: 0; overflow: hidden; background: #000; font-family: 'Poppins', sans-serif; color: #fff; }
+      .app-container { display: flex; height: 100vh; }
+      
+      .sidebar { width: 450px; background: rgba(15, 23, 42, 0.95); border-right: 1px solid #14b8a6; display: flex; flex-direction: column; z-index: 10; }
+      .header { padding: 20px; border-bottom: 1px solid #334155; }
+      .header h2 { margin: 0; color: #14b8a6; font-family: 'Orbitron', sans-serif; font-size: 1.2rem; }
+      .header p { margin: 5px 0 0 0; font-size: 0.8rem; color: #94a3b8; }
+      
+      #editor-container { flex: 1; min-height: 300px; }
+      
+      .controls { padding: 20px; border-top: 1px solid #334155; background: rgba(0,0,0,0.5); }
+      .btn { background: linear-gradient(90deg, #0d9488, #0f766e); color: #fff; border: none; padding: 10px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; transition: 0.3s; }
+      .btn:hover { background: #14b8a6; transform: translateY(-2px); box-shadow: 0 0 15px rgba(20, 184, 166, 0.5); }
+      
+      .sim-container { flex: 1; position: relative; background: #020617; overflow: hidden; }
+      canvas { width: 100%; height: 100%; display: block; }
+      
+      .hud { position: absolute; top: 20px; right: 20px; background: rgba(0,0,0,0.8); padding: 15px; border-radius: 8px; border: 1px solid #14b8a6; width: 280px; z-index: 10; pointer-events: none; }
+      .hud h3 { margin: 0 0 10px 0; color: #14b8a6; font-size: 1rem; font-family: 'Orbitron', sans-serif; }
+      .metric { display: flex; justify-content: space-between; font-size: 0.8rem; color: #cbd5e1; margin-bottom: 5px; }
+      .val { font-weight: bold; font-family: monospace; }
+      .val-energy { color: #facc15; }
+      .val-accuracy { color: #10b981; }
+    </style>
+  </head>
+  <body>
+    
+    <div class="app-container">
+      <div class="sidebar">
+        <div class="header">
+          <h2><i class="fas fa-network-wired"></i> Neuromorphic Emulator</h2>
+          <p>Optimize Spiking Neural Network (SNN) Membrane Potentials</p>
+        </div>
+        
+        <div id="editor-container"></div>
+        
+        <div class="controls">
+          <button class="btn" onclick="runSimulation()"><i class="fas fa-bolt"></i> Flash Hardware & Simulate</button>
+        </div>
+      </div>
+      
+      <div class="sim-container">
+        <!-- Subtle circuit background -->
+        <div style="position: absolute; inset:0; opacity: 0.05; background: url('data:image/svg+xml;utf8,<svg width=\"20\" height=\"20\" xmlns=\"http://www.w3.org/2000/svg\"><path d=\"M1 1h18v18H1z\" stroke=\"%2314b8a6\" fill=\"none\"/></svg>'); pointer-events: none;"></div>
+        <canvas id="snnCanvas"></canvas>
+        <div class="hud">
+          <h3>Hardware Telemetry</h3>
+          <div class="metric"><span>Total Synapses:</span> <span class="val">1,240</span></div>
+          <div class="metric"><span>Energy Used (Spikes):</span> <span class="val val-energy" id="energyVal">0 J</span></div>
+          <div class="metric"><span>Inference Accuracy:</span> <span class="val val-accuracy" id="accVal">0.0%</span></div>
+          <div class="metric" style="margin-top: 10px; border-top: 1px solid #334155; padding-top: 5px;">
+            <span>Chip State:</span> <span class="val" id="statusVal" style="color:#64748b">IDLE</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      let editor;
+      require.config({ paths: { 'vs': 'https://unpkg.com/monaco-editor@0.36.1/min/vs' }});
+      require(['vs/editor/editor.main'], function() {
+        editor = monaco.editor.create(document.getElementById('editor-container'), {
+          value: `// Spiking Neural Network (SNN) Configuration
+// Optimize the Membrane Potential Threshold to balance Accuracy vs Energy
+
+const HardwareParams = {
+    leakageRate: 0.05,       // Voltage decay over time
+    firingThreshold: 1.2,    // Voltage required to spike (Tweak this!)
+    refractoryPeriod: 10     // ms before neuron can fire again
+};
+
+// The biological simulation will use these parameters to classify data.
+// Goal: Accuracy > 95%, Energy < 15,000 J
+`,
+          language: 'javascript',
+          theme: 'vs-dark',
+          minimap: { enabled: false },
+          automaticLayout: true
+        });
+      });
+
+      const canvas = document.getElementById('snnCanvas');
+      const ctx = canvas.getContext('2d');
+      
+      let isSimulating = false;
+      let totalSpikes = 0;
+      let accuracy = 0;
+      
+      function resize() { canvas.width = canvas.clientWidth; canvas.height = canvas.clientHeight; }
+      window.addEventListener('resize', resize);
+      resize();
+
+      // Neural Network Graph Setup
+      let nodes = [];
+      let edges = [];
+      let spikes = [];
+
+      function initNetwork() {
+        nodes = [];
+        edges = [];
+        spikes = [];
+        
+        let layers = [4, 8, 12, 8, 4];
+        let layerSpacing = canvas.width / (layers.length + 1);
+        
+        // Generate nodes
+        for(let l=0; l<layers.length; l++) {
+          let numNodes = layers[l];
+          let vSpacing = canvas.height / (numNodes + 1);
+          for(let n=0; n<numNodes; n++) {
+            nodes.push({
+              id: \`\${l}-\${n}\`,
+              layer: l,
+              x: layerSpacing * (l + 1),
+              y: vSpacing * (n + 1),
+              voltage: 0,
+              refractory: 0
+            });
+          }
+        }
+        
+        // Generate edges (fully connected between adjacent layers)
+        for(let i=0; i<nodes.length; i++) {
+          for(let j=0; j<nodes.length; j++) {
+            if(nodes[j].layer === nodes[i].layer + 1) {
+              edges.push({
+                source: nodes[i],
+                target: nodes[j],
+                weight: Math.random() * 0.5 + 0.1
+              });
+            }
+          }
+        }
+      }
+
+      function drawNetwork() {
+        ctx.fillStyle = 'rgba(2, 6, 23, 0.4)';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        
+        // Draw Edges
+        ctx.strokeStyle = 'rgba(20, 184, 166, 0.15)';
+        ctx.lineWidth = 1;
+        edges.forEach(e => {
+          ctx.beginPath();
+          ctx.moveTo(e.source.x, e.source.y);
+          ctx.lineTo(e.target.x, e.target.y);
+          ctx.stroke();
+        });
+        
+        // Draw Nodes
+        nodes.forEach(n => {
+          ctx.beginPath();
+          ctx.arc(n.x, n.y, 6 + (n.voltage * 3), 0, Math.PI * 2);
+          
+          if(n.voltage > 1.0) ctx.fillStyle = '#facc15'; // About to fire
+          else ctx.fillStyle = '#0f766e';
+          
+          ctx.fill();
+        });
+        
+        // Update and Draw Spikes (pulses traveling along edges)
+        for(let i = spikes.length - 1; i >= 0; i--) {
+          let s = spikes[i];
+          s.progress += 0.05;
+          
+          if(s.progress >= 1) {
+             // Spike hit target
+             if(s.target.refractory <= 0) {
+                 s.target.voltage += s.weight;
+             }
+             spikes.splice(i, 1);
+             continue;
+          }
+          
+          let curX = s.source.x + (s.target.x - s.source.x) * s.progress;
+          let curY = s.source.y + (s.target.y - s.source.y) * s.progress;
+          
+          ctx.beginPath();
+          ctx.arc(curX, curY, 3, 0, Math.PI * 2);
+          ctx.fillStyle = '#5eead4';
+          ctx.shadowBlur = 10;
+          ctx.shadowColor = '#5eead4';
+          ctx.fill();
+          ctx.shadowBlur = 0;
+        }
+      }
+
+      function updateSimulation(threshold, leak, refract) {
+        // Stimulate input layer
+        nodes.filter(n => n.layer === 0).forEach(n => {
+           if(Math.random() > 0.8) n.voltage += 0.5;
+        });
+        
+        // Process nodes
+        nodes.forEach(n => {
+           if(n.refractory > 0) n.refractory--;
+           else {
+               n.voltage -= leak; // Leaky integrate
+               if(n.voltage < 0) n.voltage = 0;
+               
+               if(n.voltage >= threshold) {
+                   // FIRE!
+                   n.voltage = 0;
+                   n.refractory = refract;
+                   totalSpikes++;
+                   
+                   // Create travelling spikes along outgoing edges
+                   edges.filter(e => e.source === n).forEach(e => {
+                       spikes.push({
+                           source: n,
+                           target: e.target,
+                           progress: 0,
+                           weight: e.weight
+                       });
+                   });
+               }
+           }
+        });
+      }
+
+      function animate() {
+        if(!isSimulating && nodes.length === 0) initNetwork();
+        
+        if (isSimulating) {
+           let userThreshold = 1.2;
+           let leak = 0.05;
+           let refract = 10;
+           try {
+              eval(editor.getValue());
+              if(typeof HardwareParams !== 'undefined') {
+                 userThreshold = HardwareParams.firingThreshold;
+                 leak = HardwareParams.leakageRate;
+                 refract = HardwareParams.refractoryPeriod;
+              }
+           } catch(e) {}
+           
+           updateSimulation(userThreshold, leak, refract);
+           
+           // Calculate simulated accuracy based on threshold
+           // Too low = noisy (low acc), Too high = no signal (low acc)
+           // Sweet spot is around 1.5
+           let optimal = 1.5;
+           let diff = Math.abs(userThreshold - optimal);
+           accuracy += (98 - (diff * 50) - accuracy) * 0.1;
+           if(accuracy < 10) accuracy = 10 + Math.random()*5;
+           
+           document.getElementById('energyVal').innerText = totalSpikes.toLocaleString() + " J";
+           document.getElementById('accVal').innerText = accuracy.toFixed(1) + "%";
+           
+           if(totalSpikes > 25000) {
+               document.getElementById('statusVal').innerText = "OVERHEATING";
+               document.getElementById('statusVal').style.color = "#ef4444";
+           } else if (accuracy > 90) {
+               document.getElementById('statusVal').innerText = "OPTIMAL EFFICIENCY";
+               document.getElementById('statusVal').style.color = "#10b981";
+           }
+        }
+        
+        drawNetwork();
+        requestAnimationFrame(animate);
+      }
+      
+      animate();
+
+      function runSimulation() {
+        if(isSimulating) return;
+        initNetwork();
+        totalSpikes = 0;
+        accuracy = 0;
+        isSimulating = true;
+        document.getElementById('statusVal').innerText = "COMPUTING";
+        document.getElementById('statusVal').style.color = "#14b8a6";
+        
+        setTimeout(() => {
+           isSimulating = false;
+           if (accuracy > 90 && totalSpikes < 20000) {
+               document.getElementById('statusVal').innerText = "INFERENCE SUCCESS";
+               document.getElementById('statusVal').style.color = "#10b981";
+           } else {
+               document.getElementById('statusVal').innerText = "INFERENCE FAILED";
+               document.getElementById('statusVal').style.color = "#ef4444";
+           }
+        }, 5000);
+      }
+    </script>
+  </body>
+</html>

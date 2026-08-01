@@ -1,507 +1,869 @@
-/* ─────────────────────────────────────────────
-   Java Learning Page – Scoped Component Styles
-   ───────────────────────────────────────────── */
+/* ================================================
+   JAVA LEARNING PAGE — Design System
+   ================================================
+   Design direction:
+   - Pastel warm peach (#f0c8a0) as primary accent (inspired by Java's orange/red logo #ED8B00)
+   - Pastel warm gold (#f0dca8) as secondary accent
+   - Pastel sage (#b8d4b8) for highlights
+   - JetBrains Mono (display/code) + Inter (body)
+   - No purple, no cyan, no lime, no gradients
+   - Clean, minimal — like the landing pages
+   - Signature: steam/wave motif in hero (coffee ☕ inspiration)
+   ================================================ */
 
-:root {
-  --java-primary: #e63946;
-  --java-secondary: #f4a261;
-  --java-gradient: linear-gradient(135deg, #e63946 0%, #f4a261 100%);
-  --java-bg: rgba(230, 57, 70, 0.06);
-  --java-bg-hover: rgba(230, 57, 70, 0.12);
+/* --- CSS Variables (scoped) --- */
+[data-page='java-learning'] {
+  --jv-bg: #0c0c12;
+  --jv-surface: #13131c;
+  --jv-elevated: #1c1c2a;
+  --jv-primary: #f0c8a0;
+  --jv-primary-rgb: 240, 200, 160;
+  --jv-secondary: #f0dca8;
+  --jv-secondary-rgb: 240, 220, 168;
+  --jv-accent: #b8d4b8;
+  --jv-accent-rgb: 184, 212, 184;
+  --jv-orange-deep: #d9a87a;
+  --jv-text: #f1f5f9;
+  --jv-text-muted: #94a3b8;
+  --jv-text-faint: #5c6084;
+  --jv-border: rgba(148, 163, 184, 0.10);
+  --jv-border-hover: rgba(240, 200, 160, 0.20);
+  --jv-radius: 12px;
+  --jv-radius-sm: 8px;
+  --jv-radius-pill: 100px;
+  --jv-success: #86efac;
+  --jv-warn: #f0dca8;
+  --jv-error: #fca5a5;
+  --jv-code-bg: #0f0f18;
+  --jv-mono: 'JetBrains Mono', 'Fira Code', monospace;
+  --jv-body: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
 }
 
-/* Hero typing text */
-.typing-text_java {
-  color: var(--java-primary);
-  font-weight: 600;
+/* --- Override global cyan focus ring --- */
+[data-page='java-learning'] :focus-visible {
+  outline: 2px solid #d9a87a !important;
+  outline-offset: 2px !important;
+  box-shadow: 0 0 0 4px rgba(240, 200, 160, 0.18) !important;
 }
 
-/* ── Topic Navigation Sidebar ── */
-.java-layout {
-  display: flex;
-  gap: 2rem;
-  align-items: flex-start;
+/* --- Hide the global Report Issue button on this page --- */
+[data-page='java-learning'] #reportIssueBtn,
+[data-page='java-learning'] .report-issue-btn {
+  display: none !important;
 }
 
-.java-sidebar {
-  position: sticky;
-  top: 100px;
-  width: 240px;
-  flex-shrink: 0;
-  background: var(--glass-bg);
-  border: 1px solid var(--glass-border);
-  border-radius: 16px;
-  padding: 1.25rem 0;
-  backdrop-filter: blur(10px);
-}
-
-.java-sidebar-title {
-  font-size: 0.75rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  color: var(--text-secondary);
-  padding: 0 1.25rem 0.75rem;
-  border-bottom: 1px solid var(--glass-border);
-  margin-bottom: 0.5rem;
-}
-
-.java-sidebar-nav {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
-.java-sidebar-nav li a {
-  display: flex;
-  align-items: center;
-  gap: 0.6rem;
-  padding: 0.55rem 1.25rem;
-  font-size: 0.85rem;
-  color: var(--text-secondary);
-  text-decoration: none;
-  transition: all 0.2s ease;
-  border-left: 3px solid transparent;
-}
-
-.java-sidebar-nav li a:hover,
-.java-sidebar-nav li a.active {
-  color: var(--java-primary);
-  background: var(--java-bg);
-  border-left-color: var(--java-primary);
-}
-
-.java-sidebar-nav li a .nav-icon {
-  width: 20px;
+/* --- Hero Section --- */
+[data-page='java-learning'] .jv-hero {
+  position: relative;
+  padding: 6rem 1rem 2rem;
   text-align: center;
-  font-size: 0.9rem;
-}
-
-.java-main-content {
-  flex: 1;
-  min-width: 0;
-}
-
-/* ── Lesson Section Card ── */
-.java-lesson {
-  background: var(--glass-bg);
-  border: 1px solid var(--glass-border);
-  border-radius: 16px;
-  padding: 2.5rem;
-  margin-bottom: 2rem;
-  backdrop-filter: blur(10px);
-  transition: border-color 0.3s ease;
-}
-
-.java-lesson:target {
-  border-color: var(--java-primary);
-}
-
-.java-lesson-header {
+  overflow: hidden;
+  background: var(--jv-bg);
+  min-height: 30vh;
   display: flex;
   align-items: center;
-  gap: 1rem;
+  justify-content: center;
+}
+
+.jv-hero-bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+}
+
+.jv-hero-glow {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 45% 30% at 60% 50%, rgba(240, 200, 160, 0.025) 0%, transparent 50%),
+    radial-gradient(ellipse 35% 25% at 30% 40%, rgba(240, 220, 168, 0.018) 0%, transparent 50%);
+  pointer-events: none;
+}
+
+/* --- Coffee Steam Signature --- */
+.jv-steam {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  margin-bottom: 1.25rem;
+  opacity: 0.35;
+}
+
+.jv-steam-line {
+  display: block;
+  width: 4px;
+  height: 24px;
+  border-radius: 99px;
+  background: var(--jv-primary);
+  animation: jvSteamRise 2.4s ease-in-out infinite;
+}
+
+.jv-steam-line:nth-child(1) { animation-delay: 0s; height: 20px; }
+.jv-steam-line:nth-child(2) { animation-delay: 0.6s; height: 28px; }
+.jv-steam-line:nth-child(3) { animation-delay: 1.2s; height: 22px; }
+
+@keyframes jvSteamRise {
+  0%, 100% {
+    opacity: 0.3;
+    transform: translateY(0) scaleY(1);
+  }
+  50% {
+    opacity: 0.8;
+    transform: translateY(-6px) scaleY(1.15);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .jv-steam-line { animation: none !important; }
+}
+
+.jv-hero-content {
+  position: relative;
+  z-index: 1;
+  max-width: 900px;
+  width: 100%;
+}
+
+/* --- Static Title (Java orange) --- */
+.jv-hero-title {
+  font-family: var(--jv-mono);
+  font-size: clamp(2rem, 5.5vw, 4rem);
+  font-weight: 700;
+  line-height: 1.2;
+  margin-bottom: 1rem;
+  letter-spacing: -0.5px;
+  cursor: default;
+  color: #e8b88a;
+}
+
+.jv-title-line {
+  display: block;
+  color: #e8b88a;
+}
+
+.jv-hero-subtitle {
+  font-family: var(--jv-body);
+  font-size: 1.05rem;
+  color: var(--jv-text-muted);
+  line-height: 1.6;
+  max-width: 540px;
+  margin: 0 auto 2rem;
+}
+
+.jv-hero-subtitle strong {
+  color: var(--jv-primary);
+  font-weight: 600;
+}
+
+/* --- Hero Stats --- */
+.jv-hero-stats {
+  display: flex;
+  justify-content: center;
+  gap: 2rem;
+  margin-top: 1.5rem;
+}
+
+.jv-stat {
+  text-align: center;
+}
+
+.jv-stat-value {
+  display: block;
+  font-family: var(--jv-mono);
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: var(--jv-text);
+  line-height: 1.2;
+}
+
+.jv-stat-label {
+  font-family: var(--jv-body);
+  font-size: 0.75rem;
+  color: var(--jv-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* --- Hero Actions --- */
+.jv-hero-actions {
+  display: flex;
+  justify-content: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  margin-top: 1.5rem;
+}
+
+.jv-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.7rem 1.5rem;
+  border-radius: var(--jv-radius-pill);
+  font-family: var(--jv-body);
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: 1px solid transparent;
+}
+
+.jv-btn-primary {
+  background: var(--jv-primary);
+  color: #1a1a2e;
+  border-color: var(--jv-primary);
+}
+
+.jv-btn-primary:hover {
+  background: var(--jv-orange-deep);
+  border-color: var(--jv-orange-deep);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(240, 200, 160, 0.15);
+}
+
+.jv-btn-secondary {
+  background: transparent;
+  color: var(--jv-text);
+  border-color: var(--jv-border);
+}
+
+.jv-btn-secondary:hover {
+  border-color: var(--jv-secondary);
+  color: var(--jv-secondary);
+  background: rgba(var(--jv-secondary-rgb), 0.06);
+  transform: translateY(-1px);
+}
+
+/* --- Section --- */
+[data-page='java-learning'] .jv-section {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 1rem 1rem 4rem;
+  background: var(--jv-bg);
+}
+
+/* --- Topic Pills --- */
+.jv-topic-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 2.5rem;
+  justify-content: center;
+}
+
+.jv-topic-pill {
+  font-family: var(--jv-mono);
+  font-size: 0.72rem;
+  font-weight: 500;
+  padding: 0.4rem 1rem;
+  border-radius: var(--jv-radius-pill);
+  background: transparent;
+  border: 1px solid var(--jv-border);
+  color: var(--jv-text-muted);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  text-decoration: none;
+  display: inline-block;
+}
+
+.jv-topic-pill:hover {
+  border-color: var(--jv-primary);
+  color: var(--jv-primary);
+  background: rgba(var(--jv-primary-rgb), 0.06);
+}
+
+.jv-topic-pill.active {
+  background: rgba(var(--jv-primary-rgb), 0.10);
+  border-color: var(--jv-primary);
+  color: var(--jv-primary);
+}
+
+/* --- Lesson Card --- */
+.jv-lesson {
+  background: var(--jv-surface);
+  border: 1px solid var(--jv-border);
+  border-radius: var(--jv-radius);
+  padding: 1.75rem;
   margin-bottom: 1.5rem;
+  transition: border-color 0.25s ease, box-shadow 0.25s ease;
+  scroll-margin-top: 5rem;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
-.java-lesson-number {
-  font-family: "Orbitron", sans-serif;
-  font-size: 1.5rem;
-  font-weight: 700;
-  background: var(--java-gradient);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  flex-shrink: 0;
+.jv-lesson:hover {
+  border-color: var(--jv-border-hover);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
 }
 
-.java-lesson-header h3 {
-  font-size: 1.4rem;
-  font-weight: 700;
-  color: var(--text-primary);
-  margin: 0;
-}
-
-.java-lesson p,
-.java-lesson li {
-  color: var(--text-secondary);
-  font-size: 0.95rem;
-  line-height: 1.75;
+.jv-lesson-header {
+  display: flex;
+  align-items: baseline;
+  gap: 0.75rem;
   margin-bottom: 0.75rem;
 }
 
-.java-lesson ul,
-.java-lesson ol {
-  padding-left: 1.5rem;
-  margin-bottom: 1rem;
-}
-
-.java-lesson li {
-  margin-bottom: 0.4rem;
-}
-
-.java-lesson strong {
-  color: var(--text-primary);
-}
-
-/* ── Concept Card ── */
-.java-concept-card {
-  background: var(--dark-surface);
-  border: 1px solid var(--glass-border);
-  border-radius: 12px;
-  padding: 1.25rem 1.5rem;
-  margin: 1rem 0;
-}
-
-.java-concept-card h4 {
-  font-size: 1rem;
+.jv-lesson-number {
+  font-family: var(--jv-mono);
+  font-size: 0.7rem;
   font-weight: 600;
-  color: var(--java-primary);
-  margin: 0 0 0.5rem;
+  color: var(--jv-primary);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  flex-shrink: 0;
 }
 
-.java-concept-card p {
+.jv-lesson-header h3 {
+  font-family: var(--jv-mono);
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--jv-text);
+  margin: 0;
+  line-height: 1.3;
+}
+
+.jv-lesson p {
+  font-family: var(--jv-body);
+  font-size: 0.92rem;
+  color: var(--jv-text-muted);
+  line-height: 1.65;
+  margin: 0 0 1rem;
+}
+
+.jv-lesson p:last-child {
   margin-bottom: 0;
 }
 
-/* ── Code Block ── */
-.java-code-block {
-  position: relative;
-  margin: 1rem 0 1.5rem;
-  border-radius: 12px;
-  overflow: hidden;
-  border: 1px solid var(--glass-border);
+.jv-lesson p strong,
+.jv-lesson p code {
+  color: var(--jv-text);
 }
 
-.java-code-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  background: rgba(0, 0, 0, 0.3);
-  padding: 0.5rem 1rem;
-  border-bottom: 1px solid var(--glass-border);
+.jv-lesson p code {
+  font-family: var(--jv-mono);
+  font-size: 0.85em;
+  background: rgba(255, 255, 255, 0.04);
+  padding: 0.1em 0.4em;
+  border-radius: 4px;
 }
 
-.java-code-lang {
-  font-family: "Fira Code", monospace;
-  font-size: 0.75rem;
-  font-weight: 500;
-  color: var(--java-secondary);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
-
-.java-code-copy {
-  background: none;
-  border: 1px solid var(--glass-border);
-  color: var(--text-secondary);
-  font-size: 0.75rem;
-  padding: 0.25rem 0.6rem;
-  border-radius: 6px;
-  cursor: pointer;
-  font-family: "Poppins", sans-serif;
-  transition: all 0.2s ease;
-}
-
-.java-code-copy:hover {
-  color: var(--text-primary);
-  border-color: var(--java-secondary);
-}
-
-.java-code-copy.copied {
-  color: #22c55e;
-  border-color: #22c55e;
-}
-
-.java-code-block pre {
-  margin: 0;
-  padding: 1.25rem 1.5rem;
-  background: #0d1117;
-  overflow-x: auto;
-}
-
-.java-code-block code {
-  font-family: "Fira Code", Consolas, Monaco, monospace;
-  font-size: 0.85rem;
-  line-height: 1.7;
-  color: #e6edf3;
-}
-
-/* Token colors */
-.java-code-block .tok-kw { color: #c792ea; }
-.java-code-block .tok-fn { color: #82aaff; }
-.java-code-block .tok-str { color: #c3e88d; }
-.java-code-block .tok-num { color: #f78c6c; }
-.java-code-block .tok-cmt { color: #546e7a; font-style: italic; }
-.java-code-block .tok-op { color: #89ddff; }
-.java-code-block .tok-bi { color: #ffcb6b; }
-.java-code-block .tok-var { color: #f07178; }
-.java-code-block .tok-bool { color: #ff5370; }
-.java-code-block .tok-param { color: #e6edf3; }
-
-/* ── Exercise Box ── */
-.java-exercise {
-  background: rgba(34, 197, 94, 0.06);
-  border: 1px solid rgba(34, 197, 94, 0.25);
-  border-radius: 12px;
-  padding: 1.5rem;
-  margin: 1.5rem 0;
-}
-
-.java-exercise-title {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-size: 1rem;
-  font-weight: 600;
-  color: #22c55e;
-  margin-bottom: 0.75rem;
-}
-
-.java-exercise-title i {
-  font-size: 1.1rem;
-}
-
-.java-exercise ol,
-.java-exercise ul {
-  margin-bottom: 0.75rem;
-}
-
-.java-exercise-toggle {
-  background: rgba(34, 197, 94, 0.15);
-  border: 1px solid rgba(34, 197, 94, 0.3);
-  color: #22c55e;
-  font-family: "Poppins", sans-serif;
-  font-size: 0.85rem;
-  font-weight: 500;
-  padding: 0.4rem 1rem;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.java-exercise-toggle:hover {
-  background: rgba(34, 197, 94, 0.25);
-}
-
-.java-exercise-solution {
-  display: none;
-  margin-top: 1rem;
-  padding-top: 1rem;
-  border-top: 1px solid rgba(34, 197, 94, 0.2);
-}
-
-.java-exercise-solution.visible {
-  display: block;
-}
-
-.java-exercise-solution p {
-  font-size: 0.85rem;
-  color: var(--text-secondary);
-  margin-bottom: 0.5rem;
-}
-
-/* ── Output Block ── */
-.java-output {
-  background: rgba(6, 182, 212, 0.06);
-  border: 1px solid rgba(6, 182, 212, 0.25);
-  border-radius: 10px;
+/* --- Concept Card --- */
+.jv-concept {
+  background: rgba(var(--jv-primary-rgb), 0.03);
+  border: 1px solid rgba(var(--jv-primary-rgb), 0.08);
+  border-radius: var(--jv-radius-sm);
   padding: 1rem 1.25rem;
-  margin: 0.75rem 0 1.25rem;
+  margin-bottom: 1rem;
 }
 
-.java-output-label {
-  font-size: 0.75rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: var(--accent);
-  margin-bottom: 0.4rem;
-}
-
-.java-output pre {
-  margin: 0;
-  font-family: "Fira Code", monospace;
+.jv-concept h4 {
+  font-family: var(--jv-mono);
   font-size: 0.82rem;
-  line-height: 1.6;
-  color: var(--text-secondary);
-}
-
-/* ── Progress Tracker ── */
-.java-progress-bar {
+  font-weight: 600;
+  color: var(--jv-primary);
+  margin: 0 0 0.4rem;
   display: flex;
   align-items: center;
-  gap: 1rem;
-  margin: 2rem 0;
-  padding: 1.25rem 1.5rem;
-  background: var(--glass-bg);
-  border: 1px solid var(--glass-border);
-  border-radius: 12px;
-  backdrop-filter: blur(10px);
+  gap: 0.4rem;
 }
 
-.java-progress-track {
-  flex: 1;
-  height: 8px;
-  background: var(--dark-surface);
-  border-radius: 99px;
+.jv-concept p {
+  font-size: 0.88rem !important;
+  margin: 0 !important;
+}
+
+.jv-concept ul {
+  margin: 0.35rem 0 0;
+  padding-left: 1.25rem;
+}
+
+.jv-concept ul li {
+  font-family: var(--jv-body);
+  font-size: 0.88rem;
+  color: var(--jv-text-muted);
+  line-height: 1.6;
+  margin-bottom: 0.15rem;
+}
+
+.jv-concept ul li strong {
+  color: var(--jv-text);
+}
+
+.jv-concept ul li code {
+  font-family: var(--jv-mono);
+  font-size: 0.85em;
+  background: rgba(255, 255, 255, 0.04);
+  padding: 0.1em 0.35em;
+  border-radius: 3px;
+  color: var(--jv-text);
+}
+
+/* --- Code Block --- */
+.jv-code-block {
+  background: var(--jv-code-bg);
+  border: 1px solid var(--jv-border);
+  border-radius: var(--jv-radius-sm);
+  margin-bottom: 1rem;
   overflow: hidden;
 }
 
-.java-progress-fill {
-  height: 100%;
-  width: 0%;
-  background: var(--java-gradient);
-  border-radius: 99px;
-  transition: width 0.5s ease;
-}
-
-.java-progress-text {
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: var(--text-primary);
-  white-space: nowrap;
-}
-
-/* ── Key Takeaway / Tip Callout ── */
-.java-callout {
+.jv-code-header {
   display: flex;
-  gap: 0.75rem;
-  align-items: flex-start;
-  background: var(--java-bg);
-  border: 1px solid rgba(230, 57, 70, 0.25);
-  border-radius: 12px;
-  padding: 1.25rem 1.5rem;
-  margin: 1.25rem 0;
-}
-
-.java-callout-icon {
-  font-size: 1.3rem;
-  flex-shrink: 0;
-  line-height: 1.4;
-}
-
-.java-callout p {
-  margin: 0;
-  font-size: 0.9rem;
-  line-height: 1.6;
-}
-
-/* ── Table ── */
-.java-table-wrap {
-  overflow-x: auto;
-  margin: 1rem 0 1.5rem;
-  border-radius: 12px;
-  border: 1px solid var(--glass-border);
-}
-
-.java-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 0.88rem;
-}
-
-.java-table th {
-  background: rgba(230, 57, 70, 0.12);
-  color: var(--java-primary);
-  font-weight: 600;
-  text-align: left;
-  padding: 0.75rem 1rem;
-  white-space: nowrap;
-}
-
-.java-table td {
-  padding: 0.65rem 1rem;
-  border-top: 1px solid var(--glass-border);
-  color: var(--text-secondary);
-}
-
-.java-table tr:hover td {
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.5rem 1rem;
+  border-bottom: 1px solid var(--jv-border);
   background: rgba(255, 255, 255, 0.02);
 }
 
-/* ── Responsive ── */
-@media (max-width: 1024px) {
-  .java-sidebar {
+.jv-code-lang {
+  font-family: var(--jv-mono);
+  font-size: 0.65rem;
+  color: var(--jv-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-weight: 600;
+}
+
+.jv-code-copy {
+  background: none;
+  border: 1px solid var(--jv-border);
+  border-radius: 6px;
+  color: var(--jv-text-muted);
+  font-family: var(--jv-body);
+  font-size: 0.7rem;
+  padding: 0.2rem 0.6rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.jv-code-copy i {
+  font-size: 0.7rem;
+  margin-right: 0.2rem;
+}
+
+.jv-code-copy:hover {
+  border-color: var(--jv-primary);
+  color: var(--jv-primary);
+  background: rgba(var(--jv-primary-rgb), 0.06);
+}
+
+.jv-code-copy.copied {
+  border-color: var(--jv-success);
+  color: var(--jv-success);
+  background: rgba(134, 239, 172, 0.06);
+}
+
+.jv-code-block pre {
+  margin: 0;
+  padding: 1rem 1.25rem;
+  overflow-x: auto;
+  font-family: var(--jv-mono);
+  font-size: 0.82rem;
+  line-height: 1.6;
+  color: var(--jv-text);
+  white-space: pre;
+  tab-size: 4;
+}
+
+.jv-code-block pre::-webkit-scrollbar {
+  height: 4px;
+}
+
+.jv-code-block pre::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.jv-code-block pre::-webkit-scrollbar-thumb {
+  background: var(--jv-border);
+  border-radius: 2px;
+}
+
+/* --- Java Syntax Colors (pastel, no purple/cyan/lime) --- */
+.jv-code-block .kw { color: #fca5a5; font-weight: 600; }       /* keywords: soft red */
+.jv-code-block .bi { color: #fdba74; font-weight: 600; }       /* builtin/class: soft orange */
+.jv-code-block .type { color: #fdba74; font-weight: 600; }     /* types: soft orange */
+.jv-code-block .str { color: #86efac; }                        /* strings: soft green */
+.jv-code-block .num { color: #f0dca8; }                        /* numbers: pastel gold */
+.jv-code-block .cmt { color: var(--jv-text-faint); font-style: italic; } /* comments */
+.jv-code-block .fn { color: #f0c8a0; }                         /* functions: pastel peach */
+.jv-code-block .ann { color: #f0dca8; }                        /* annotations: pastel gold */
+
+/* --- Output Block --- */
+.jv-output {
+  background: var(--jv-code-bg);
+  border: 1px dashed var(--jv-border);
+  border-radius: var(--jv-radius-sm);
+  padding: 0.75rem 1rem;
+  margin-bottom: 1rem;
+}
+
+.jv-output-label {
+  font-family: var(--jv-mono);
+  font-size: 0.65rem;
+  color: var(--jv-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 0.3rem;
+}
+
+.jv-output pre {
+  margin: 0;
+  font-family: var(--jv-mono);
+  font-size: 0.8rem;
+  color: var(--jv-text-muted);
+  line-height: 1.5;
+}
+
+/* --- Callout --- */
+.jv-callout {
+  background: rgba(var(--jv-accent-rgb), 0.04);
+  border: 1px solid rgba(var(--jv-accent-rgb), 0.1);
+  border-radius: var(--jv-radius-sm);
+  padding: 0.85rem 1rem;
+  margin-bottom: 1rem;
+}
+
+.jv-callout p {
+  font-size: 0.85rem !important;
+  margin: 0 !important;
+}
+
+.jv-callout p code {
+  font-family: var(--jv-mono);
+  font-size: 0.85em;
+  background: rgba(255, 255, 255, 0.04);
+  padding: 0.1em 0.35em;
+  border-radius: 3px;
+  color: var(--jv-text);
+}
+
+/* --- Table --- */
+.jv-table-wrap {
+  overflow-x: auto;
+  margin-bottom: 1rem;
+}
+
+.jv-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: var(--jv-body);
+  font-size: 0.85rem;
+}
+
+.jv-table thead th {
+  font-family: var(--jv-mono);
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--jv-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  text-align: left;
+  padding: 0.6rem 0.75rem;
+  border-bottom: 1px solid var(--jv-border);
+}
+
+.jv-table tbody td {
+  padding: 0.55rem 0.75rem;
+  color: var(--jv-text-muted);
+  border-bottom: 1px solid rgba(148, 163, 184, 0.05);
+}
+
+.jv-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.jv-table tbody td code {
+  font-family: var(--jv-mono);
+  font-size: 0.85em;
+  color: var(--jv-text);
+  background: rgba(255, 255, 255, 0.03);
+  padding: 0.1em 0.35em;
+  border-radius: 3px;
+}
+
+/* --- Exercise --- */
+.jv-exercise {
+  background: rgba(var(--jv-secondary-rgb), 0.03);
+  border: 1px solid rgba(var(--jv-secondary-rgb), 0.12);
+  border-radius: var(--jv-radius-sm);
+  padding: 1.1rem 1.25rem;
+  margin-top: 1rem;
+}
+
+.jv-exercise-title {
+  font-family: var(--jv-mono);
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--jv-secondary);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.jv-exercise p {
+  font-size: 0.85rem !important;
+  margin: 0 0 0.5rem !important;
+}
+
+.jv-exercise ol {
+  margin: 0.3rem 0 0.75rem;
+  padding-left: 1.25rem;
+}
+
+.jv-exercise ol li {
+  font-family: var(--jv-body);
+  font-size: 0.85rem;
+  color: var(--jv-text-muted);
+  line-height: 1.6;
+  margin-bottom: 0.15rem;
+}
+
+.jv-exercise-toggle {
+  background: transparent;
+  border: 1px solid var(--jv-border);
+  border-radius: 6px;
+  color: var(--jv-text-muted);
+  font-family: var(--jv-body);
+  font-size: 0.78rem;
+  padding: 0.35rem 0.85rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.jv-exercise-toggle:hover {
+  border-color: var(--jv-secondary);
+  color: var(--jv-secondary);
+  background: rgba(var(--jv-secondary-rgb), 0.06);
+}
+
+.jv-exercise-solution {
+  display: none;
+  margin-top: 0.75rem;
+}
+
+.jv-exercise-solution.open {
+  display: block;
+}
+
+.jv-exercise-solution .jv-code-block {
+  margin-bottom: 0;
+}
+
+/* --- Section Divider --- */
+.jv-divider {
+  text-align: center;
+  margin: 2.5rem 0 1.5rem;
+}
+
+.jv-divider-inner {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-family: var(--jv-mono);
+  font-size: 0.65rem;
+  color: var(--jv-text-faint);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.jv-divider-inner::before,
+.jv-divider-inner::after {
+  content: '';
+  display: block;
+  width: 40px;
+  height: 1px;
+  background: var(--jv-border);
+}
+
+/* --- Back Button --- */
+.jv-back-btn {
+  position: absolute;
+  top: 1.5rem;
+  left: 1.5rem;
+  z-index: 10;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem 0.5rem 0.85rem;
+  background: var(--jv-surface);
+  border: 1px solid var(--jv-border);
+  border-radius: var(--jv-radius-pill);
+  color: var(--jv-text-muted);
+  font-family: var(--jv-body);
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  text-decoration: none;
+}
+
+.jv-back-btn i {
+  font-size: 0.85rem;
+  transition: transform 0.2s ease;
+}
+
+.jv-back-btn span {
+  font-weight: 500;
+}
+
+.jv-back-btn:hover {
+  border-color: var(--jv-primary);
+  color: var(--jv-primary);
+  background: rgba(var(--jv-primary-rgb), 0.08);
+}
+
+.jv-back-btn:hover i {
+  transform: translateX(-3px);
+}
+
+/* --- Progress Indicator --- */
+.jv-progress {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-bottom: 2rem;
+}
+
+.jv-progress-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--jv-border);
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.jv-progress-dot.completed {
+  background: var(--jv-primary);
+  box-shadow: 0 0 6px rgba(var(--jv-primary-rgb), 0.3);
+}
+
+.jv-progress-dot.active {
+  background: var(--jv-secondary);
+  box-shadow: 0 0 6px rgba(var(--jv-secondary-rgb), 0.3);
+}
+
+.jv-progress-dot:hover {
+  transform: scale(1.3);
+}
+
+.jv-progress-line {
+  width: 20px;
+  height: 1px;
+  background: var(--jv-border);
+}
+
+.jv-progress-line.completed {
+  background: var(--jv-primary);
+}
+
+/* --- Footer --- */
+.jv-footer {
+  text-align: center;
+  padding: 2rem 1.5rem;
+  border-top: 1px solid var(--jv-border);
+}
+
+.jv-footer p {
+  font-family: var(--jv-body);
+  font-size: 0.8rem;
+  color: var(--jv-text-faint);
+  margin: 0 0 0.5rem;
+}
+
+.jv-inline-link,
+.jv-footer a {
+  color: var(--jv-secondary);
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.2s ease;
+}
+
+.jv-inline-link:hover,
+.jv-footer a:hover {
+  color: var(--jv-text);
+}
+
+/* --- Responsive --- */
+@media (max-width: 768px) {
+  [data-page='java-learning'] .jv-hero {
+    padding: 4rem 0.75rem 1.5rem;
+    min-height: auto;
+  }
+
+  .jv-hero-title {
+    font-size: 1.6rem;
+  }
+
+  .jv-hero-subtitle {
+    font-size: 0.9rem;
+  }
+
+  .jv-hero-stats {
+    gap: 1rem;
+  }
+
+  .jv-stat-value {
+    font-size: 1.2rem;
+  }
+
+  .jv-lesson {
+    padding: 1.25rem;
+  }
+
+  .jv-lesson-header h3 {
+    font-size: 0.95rem;
+  }
+
+  .jv-code-block pre {
+    font-size: 0.75rem;
+    padding: 0.75rem 1rem;
+  }
+
+  .jv-topic-nav {
+    gap: 0.35rem;
+  }
+
+  .jv-topic-pill {
+    font-size: 0.65rem;
+    padding: 0.3rem 0.75rem;
+  }
+
+  .jv-back-btn {
+    top: 0.75rem;
+    left: 0.75rem;
+    padding: 0.4rem 0.7rem 0.4rem 0.6rem;
+    font-size: 0.8rem;
+  }
+  .jv-back-btn span {
     display: none;
   }
-}
 
-@media (max-width: 768px) {
-  .java-lesson {
-    padding: 1.5rem;
+  .jv-section {
+    padding: 0.5rem 0 3rem;
   }
 
-  .java-lesson-header h3 {
-    font-size: 1.15rem;
-  }
-
-  .java-code-block pre {
-    padding: 1rem;
-  }
-
-  .java-code-block code {
-    font-size: 0.78rem;
-  }
-
-  .java-progress-bar {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 0.5rem;
-  }
-
-  .java-progress-text {
-    text-align: center;
-  }
-
-  .java-callout {
-    flex-direction: column;
-    gap: 0.5rem;
+  .jv-steam {
+    margin-bottom: 0.75rem;
   }
 }
 
-@media (max-width: 480px) {
-  .java-lesson {
-    padding: 1.25rem;
-    border-radius: 12px;
-  }
-
-  .java-lesson-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 0.5rem;
-  }
-
-  .java-exercise {
-    padding: 1rem;
-  }
-}
-
-/* ── Accessibility: focus-visible ── */
-.java-sidebar-nav li a:focus-visible,
-.java-code-copy:focus-visible,
-.java-exercise-toggle:focus-visible {
-  outline: 2px solid var(--java-primary);
-  outline-offset: 2px;
-}
-
-/* ── Print styles ── */
-@media print {
-  .java-sidebar,
-  .java-progress-bar,
-  .java-exercise-toggle,
-  .java-code-copy,
-  .navbar,
-  .footer {
-    display: none !important;
-  }
-
-  .java-lesson {
-    break-inside: avoid;
-    border: 1px solid #ccc;
-  }
-
-  .java-code-block pre {
-    background: #f5f5f5;
-    color: #333;
-  }
+/* --- Reduced Motion --- */
+@media (prefers-reduced-motion: reduce) {
+  .jv-back-btn { transition: none; }
+  .jv-back-btn i { transition: none; }
+  .jv-back-btn:hover i { transform: none; }
+  .jv-lesson { transition: none; }
+  .jv-lesson:hover { transform: none; }
+  .jv-btn { transition: none; }
+  .jv-topic-pill { transition: none; }
+  .jv-code-copy { transition: none; }
 }

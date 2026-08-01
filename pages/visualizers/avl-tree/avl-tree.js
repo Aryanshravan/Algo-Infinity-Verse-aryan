@@ -56,7 +56,7 @@ class AVLVisualizer {
         this.generator = null;
         this.timer = null;
         
-        this.pendingInsertions = [];
+        this.pendingOperations = [];
 
         this.bindEvents();
         this.resize();
@@ -68,15 +68,27 @@ class AVLVisualizer {
         document.getElementById('btn-insert').addEventListener('click', () => {
             const val = parseInt(document.getElementById('input-val').value, 10);
             if (!isNaN(val)) {
-                this.pendingInsertions.push(val);
+                this.pendingOperations.push({ type: 'insert', val });
                 if (!this.animating) this.startNextOperation();
                 document.getElementById('input-val').value = '';
             }
         });
 
+        const btnDel = document.getElementById('btn-delete');
+        if (btnDel) {
+            btnDel.addEventListener('click', () => {
+                const val = parseInt(document.getElementById('input-del-val').value, 10);
+                if (!isNaN(val)) {
+                    this.pendingOperations.push({ type: 'delete', val });
+                    if (!this.animating) this.startNextOperation();
+                    document.getElementById('input-del-val').value = '';
+                }
+            });
+        }
+
         document.getElementById('btn-random-batch').addEventListener('click', () => {
             for(let i=0; i<5; i++) {
-                this.pendingInsertions.push(Math.floor(Math.random() * 90) + 10);
+                this.pendingOperations.push({ type: 'insert', val: Math.floor(Math.random() * 90) + 10 });
             }
             if (!this.animating) this.startNextOperation();
         });
@@ -102,7 +114,7 @@ class AVLVisualizer {
         
         this.root = null;
         this.nodeCount = 0;
-        this.pendingInsertions = [];
+        this.pendingOperations = [];
         
         this.btnPlay.innerHTML = '<i class="fas fa-play"></i> Auto Run';
         this.btnPlay.disabled = true;
@@ -204,14 +216,189 @@ class AVLVisualizer {
             let parent = path[index - 1];
             if (parent.left === path[index]) parent.left = newSubRoot;
             else parent.right = newSubRoot;
-            
-            // Re-update parent height explicitly after structural change
-            parent.height = Math.max(this.getHeight(parent.left), this.getHeight(parent.right)) + 1;
+        }
+        path[index] = newSubRoot;
+
+        // Re-update heights for all ancestor nodes in path up to 0
+        for (let j = index; j >= 0; j--) {
+            if (path[j]) {
+                path[j].height = Math.max(this.getHeight(path[j].left), this.getHeight(path[j].right)) + 1;
+            }
         }
     }
 
     // --- State Machine Generators ---
     
+    *deleteGenerator(val) {
+        this.statusTxt.innerText = `Status: Deleting ${val}`;
+        this.resetNodeStatuses(this.root);
+        this.highlightCode('avl-1');
+
+        if (!this.root) {
+            this.updateMath(`<span class="eq-err">Tree is empty. Cannot delete ${val}.</span>`);
+            yield;
+            this.finishOperation();
+            return;
+        }
+
+        let path = [];
+        let curr = this.root;
+        while (curr && curr.val !== val) {
+            path.push(curr);
+            curr.status = 'eval';
+            this.updateMath(`Searching for <span class="eq-hl">${val}</span> at node <span class="eq-hl">${curr.val}</span>`);
+            yield;
+            curr.status = 'idle';
+
+            if (val < curr.val) curr = curr.left;
+            else curr = curr.right;
+        }
+
+        if (!curr) {
+            this.updateMath(`<span class="eq-err">Value ${val} not found in tree.</span>`);
+            yield;
+            this.finishOperation();
+            return;
+        }
+
+        path.push(curr);
+        curr.status = 'violation';
+        this.updateMath(`Found target node <span class="eq-err">${curr.val}</span>. Performing BST deletion.`);
+        yield;
+
+        // BST Node Removal Logic
+        let parentIndex = path.length - 2;
+        let parent = parentIndex >= 0 ? path[parentIndex] : null;
+
+        if (!curr.left || !curr.right) {
+            let child = curr.left ? curr.left : curr.right;
+            if (!parent) {
+                this.root = child;
+            } else if (parent.left === curr) {
+                parent.left = child;
+            } else {
+                parent.right = child;
+            }
+            path.pop(); // Remove curr from path as it's deleted
+            this.nodeCount--;
+        } else {
+            // Node with 2 children: Find in-order successor (min in right subtree)
+            let successorPath = [];
+            let succ = curr.right;
+            while (succ.left) {
+                successorPath.push(succ);
+                succ = succ.left;
+            }
+            
+            curr.val = succ.val;
+            this.updateMath(`Replaced value with in-order successor <span class="eq-hl">${succ.val}</span>. Removing successor node.`);
+            yield;
+
+            // Remove successor node
+            let succParent = successorPath.length > 0 ? successorPath[successorPath.length - 1] : curr;
+            if (succParent.left === succ) succParent.left = succ.right;
+            else succParent.right = succ.right;
+
+            // Append successorPath to path for rebalancing
+            path = path.concat(successorPath);
+            this.nodeCount--;
+        }
+
+        this.calculateLayout();
+        this.updateTelemetry();
+        this.updateMath(`BST Deletion complete. Backtracking path to rebalance tree.`);
+        yield;
+
+        // Backtrack and perform cascading rebalance
+        this.highlightCode('avl-2', 'active-purple');
+
+        for (let i = path.length - 1; i >= 0; i--) {
+            let node = path[i];
+            if (!node) continue;
+
+            path.forEach(n => { if (n) n.status = 'idle'; });
+            node.status = 'eval';
+
+            this.highlightCode('avl-3');
+            node.height = 1 + Math.max(this.getHeight(node.left), this.getHeight(node.right));
+            this.updateMath(`Updating Height of Node <span class="eq-hl">${node.val}</span> <br> Height = 1 + max(hL:${this.getHeight(node.left)}, hR:${this.getHeight(node.right)}) = <span class="eq-p">${node.height}</span>`);
+            yield;
+
+            this.highlightCode('avl-4');
+            const hl = this.getHeight(node.left);
+            const hr = this.getHeight(node.right);
+            const bf = hl - hr;
+            node.bf = bf;
+
+            if (bf > 1 || bf < -1) {
+                node.status = 'violation';
+                this.updateMath(`BF = Height(L) - Height(R) = ${hl} - ${hr} = <span class="eq-err">${bf}</span> <br> <span class="eq-err">UNBALANCED. Triggering Rotation.</span>`);
+                yield;
+
+                if (bf > 1) { // Left Heavy
+                    const leftBf = this.getHeight(node.left.left) - this.getHeight(node.left.right);
+                    if (leftBf >= 0) { // LL Case
+                        this.highlightCode('avl-6', 'active-danger');
+                        this.updateMath(`Left Heavy (Left child BF >= 0). <br> <span class="eq-err">Executing Right Rotation (LL Case).</span>`);
+                        document.getElementById('stat-rot').innerText = 'Right (LL)';
+                        yield;
+
+                        let newSubRoot = this.rotateRight(node);
+                        this.replaceChild(path, i, newSubRoot);
+                    } else { // LR Case
+                        this.highlightCode('avl-7', 'active-danger');
+                        this.updateMath(`Left Heavy (Left child BF < 0). <br> <span class="eq-err">Executing Left-Right Rotation (LR Case).</span>`);
+                        document.getElementById('stat-rot').innerText = 'Left-Right (LR)';
+                        yield;
+
+                        node.left = this.rotateLeft(node.left);
+                        this.calculateLayout();
+                        yield;
+
+                        let newSubRoot = this.rotateRight(node);
+                        this.replaceChild(path, i, newSubRoot);
+                    }
+                } else if (bf < -1) { // Right Heavy
+                    const rightBf = this.getHeight(node.right.left) - this.getHeight(node.right.right);
+                    if (rightBf <= 0) { // RR Case
+                        this.highlightCode('avl-9', 'active-danger');
+                        this.updateMath(`Right Heavy (Right child BF <= 0). <br> <span class="eq-err">Executing Left Rotation (RR Case).</span>`);
+                        document.getElementById('stat-rot').innerText = 'Left (RR)';
+                        yield;
+
+                        let newSubRoot = this.rotateLeft(node);
+                        this.replaceChild(path, i, newSubRoot);
+                    } else { // RL Case
+                        this.highlightCode('avl-10', 'active-danger');
+                        this.updateMath(`Right Heavy (Right child BF > 0). <br> <span class="eq-err">Executing Right-Left Rotation (RL Case).</span>`);
+                        document.getElementById('stat-rot').innerText = 'Right-Left (RL)';
+                        yield;
+
+                        node.right = this.rotateRight(node.right);
+                        this.calculateLayout();
+                        yield;
+
+                        let newSubRoot = this.rotateLeft(node);
+                        this.replaceChild(path, i, newSubRoot);
+                    }
+                }
+
+                this.calculateLayout();
+                this.resetNodeStatuses(this.root);
+                this.updateMath(`Rotation complete. Continuing backtracking to check ancestors...`);
+                this.updateTelemetry();
+                yield;
+                // Allow cascading rotations up the tree by NOT breaking
+            } else {
+                node.status = 'balanced';
+                this.updateMath(`BF = ${hl} - ${hr} = <span class="eq-hl">${bf}</span> <br> <span style="color:var(--accent-emerald)">Subtree is Balanced.</span>`);
+                yield;
+            }
+        }
+
+        this.finishOperation();
+    }
+
     *insertGenerator(val) {
         this.statusTxt.innerText = `Status: Inserting ${val}`;
         this.resetNodeStatuses(this.root);
@@ -361,7 +548,7 @@ class AVLVisualizer {
                 this.updateTelemetry();
                 yield;
                 
-                // After 1 rotation, an AVL tree is guaranteed to be balanced locally and globally.
+                // After 1 rotation, an AVL tree insertion is guaranteed to be balanced locally and globally.
                 break; 
             } else {
                 node.status = 'balanced';
@@ -375,10 +562,15 @@ class AVLVisualizer {
 
     // --- Control Flow Engine ---
     startNextOperation() {
-        if (this.pendingInsertions.length === 0) return;
+        if (this.pendingOperations.length === 0) return;
         
-        const nextVal = this.pendingInsertions.shift();
-        this.generator = this.insertGenerator(nextVal);
+        const nextOp = this.pendingOperations.shift();
+        if (nextOp.type === 'insert') {
+            this.generator = this.insertGenerator(nextOp.val);
+        } else if (nextOp.type === 'delete') {
+            this.generator = this.deleteGenerator(nextOp.val);
+        }
+
         this.animating = true;
         
         const btnPlay = document.getElementById('btn-play');
@@ -393,10 +585,10 @@ class AVLVisualizer {
         this.highlightCode(null);
         this.resetNodeStatuses(this.root);
         this.mathPanel.classList.add('hidden');
-        this.statusTxt.innerText = `Status: Insert Complete. Tree Balanced.`;
+        this.statusTxt.innerText = `Status: Operation Complete. Tree Balanced.`;
         
         // If more pending, queue them. Otherwise halt.
-        if (this.pendingInsertions.length > 0) {
+        if (this.pendingOperations.length > 0) {
             setTimeout(() => this.startNextOperation(), 1000);
         } else {
             this.animating = false;

@@ -1,0 +1,240 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>HTTP/2 Request Smuggling Lab | Algo Infinity Verse</title>
+  <meta name="description" content="Simulate CL.TE / TE.CL ambiguity between proxy and origin, audit H2C upgrade risks, hop-by-hop header normalization, and export a request-smuggling risk report." />
+  <link rel="stylesheet" href="/styles.css" />
+  <link rel="stylesheet" href="style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Poppins:wght@300;400;500;600;700&family=Fira+Code:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <script>
+    (function () {
+      try {
+        var storedTheme = localStorage.getItem('theme');
+        var prefersLight = window.matchMedia('(prefers-color-scheme: light)').matches;
+        var theme = storedTheme || (prefersLight ? 'light' : 'dark');
+        if (theme === 'light') {
+          document.documentElement.classList.add('light-mode');
+        } else {
+          document.documentElement.classList.remove('light-mode');
+        }
+      } catch (e) {}
+    })();
+  </script>
+</head>
+<body data-page="http2-request-smuggling-lab">
+  <a href="#h2smug-main" class="h2smug-skip-link">Skip to main content</a>
+  <button type="button" id="scrollTopBtn" class="scroll-top-btn" aria-label="Scroll to top">
+    <i class="fas fa-arrow-up" aria-hidden="true"></i>
+  </button>
+
+  <div id="navbar-placeholder"></div>
+
+  <header class="h2smug-hero">
+    <div class="h2smug-hero-badge">
+      <i class="fas fa-network-wired" aria-hidden="true"></i>
+      HTTP Desync Lab
+    </div>
+    <h1>
+      HTTP/2 Request
+      <span class="h2smug-hero-accent">Smuggling Lab</span>
+    </h1>
+    <p>
+      Configure proxy vs origin parser quirks, simulate CL.TE / TE.CL ambiguity,
+      review H2C upgrade risks and hop-by-hop normalization, then export a smuggling risk report.
+    </p>
+    <div class="h2smug-hero-stats" aria-live="polite">
+      <div class="h2smug-stat">
+        <span class="h2smug-stat-val" id="h2smug-statRisk">—</span>
+        <span class="h2smug-stat-label">Risk score</span>
+      </div>
+      <div class="h2smug-stat">
+        <span class="h2smug-stat-val" id="h2smug-statAmbiguity">—</span>
+        <span class="h2smug-stat-label">Ambiguity</span>
+      </div>
+      <div class="h2smug-stat">
+        <span class="h2smug-stat-val" id="h2smug-statFindings">—</span>
+        <span class="h2smug-stat-label">Findings</span>
+      </div>
+      <div class="h2smug-stat">
+        <span class="h2smug-stat-val" id="h2smug-statH2c">—</span>
+        <span class="h2smug-stat-label">H2C risk</span>
+      </div>
+    </div>
+  </header>
+
+  <main id="h2smug-main" class="h2smug-main">
+    <div class="container">
+      <div class="h2smug-workspace">
+        <section class="h2smug-panel" aria-labelledby="h2smug-config-title">
+          <div class="h2smug-panel-header">
+            <div class="h2smug-panel-title">
+              <i class="fas fa-sliders h2smug-panel-icon" aria-hidden="true"></i>
+              <h2 id="h2smug-config-title">Proxy vs origin quirks</h2>
+            </div>
+            <label class="h2smug-inline-label" for="h2smug-preset">Scenario preset</label>
+          </div>
+
+          <div class="h2smug-field-row">
+            <select id="h2smug-preset" class="h2smug-select" aria-describedby="h2smug-presetHint">
+              <option value="custom">Custom</option>
+              <option value="nginx">nginx-style (TE preferred at edge)</option>
+              <option value="apache">Apache-style (CL preferred at origin)</option>
+              <option value="cdn-h2">CDN H2 front → HTTP/1.1 origin</option>
+              <option value="h2c-open">Open H2C upgrade path</option>
+            </select>
+          </div>
+          <p id="h2smug-presetHint" class="h2smug-hint">Presets load typical proxy/origin length-parser mismatches for training.</p>
+
+          <fieldset class="h2smug-fieldset">
+            <legend>Proxy (front) length preference</legend>
+            <label class="h2smug-radio"><input type="radio" name="h2smug-proxyPref" value="cl" /> Content-Length (CL)</label>
+            <label class="h2smug-radio"><input type="radio" name="h2smug-proxyPref" value="te" checked /> Transfer-Encoding (TE)</label>
+            <label class="h2smug-radio"><input type="radio" name="h2smug-proxyPref" value="reject" /> Reject dual CL+TE</label>
+          </fieldset>
+
+          <fieldset class="h2smug-fieldset">
+            <legend>Origin length preference</legend>
+            <label class="h2smug-radio"><input type="radio" name="h2smug-originPref" value="cl" checked /> Content-Length (CL)</label>
+            <label class="h2smug-radio"><input type="radio" name="h2smug-originPref" value="te" /> Transfer-Encoding (TE)</label>
+            <label class="h2smug-radio"><input type="radio" name="h2smug-originPref" value="reject" /> Reject dual CL+TE</label>
+          </fieldset>
+
+          <div class="h2smug-toggles">
+            <label class="h2smug-check">
+              <input type="checkbox" id="h2smug-stripTe" />
+              Proxy strips TE before forwarding to HTTP/1.1 origin
+            </label>
+            <label class="h2smug-check">
+              <input type="checkbox" id="h2smug-normalizeHop" checked />
+              Normalize hop-by-hop headers (Connection / Keep-Alive / TE / Upgrade)
+            </label>
+            <label class="h2smug-check">
+              <input type="checkbox" id="h2smug-allowH2c" />
+              Allow cleartext H2C upgrade on edge
+            </label>
+            <label class="h2smug-check">
+              <input type="checkbox" id="h2smug-rejectAbs" checked />
+              Reject absolute-form request targets on reverse proxy
+            </label>
+          </div>
+
+          <div class="h2smug-controls">
+            <button type="button" id="h2smug-simBtn" class="btn btn-primary">
+              <i class="fas fa-flask" aria-hidden="true"></i> Run CL.TE / TE.CL sim
+            </button>
+            <button type="button" id="h2smug-auditBtn" class="btn btn-secondary">
+              <i class="fas fa-magnifying-glass" aria-hidden="true"></i> Full risk audit
+            </button>
+            <button type="button" id="h2smug-exportBtn" class="btn btn-outline" disabled>
+              <i class="fas fa-download" aria-hidden="true"></i> Export risk report
+            </button>
+          </div>
+          <div id="h2smug-status" class="h2smug-status" role="status" aria-live="polite"></div>
+        </section>
+
+        <section class="h2smug-panel" aria-labelledby="h2smug-sim-title">
+          <div class="h2smug-panel-header">
+            <div class="h2smug-panel-title">
+              <i class="fas fa-split h2smug-panel-icon" aria-hidden="true"></i>
+              <h2 id="h2smug-sim-title">Ambiguity simulator</h2>
+            </div>
+            <span class="h2smug-status-live" id="h2smug-simLive">Ready</span>
+          </div>
+
+          <label class="h2smug-label" for="h2smug-payload">Ambiguous request (HTTP/1.1 framing)</label>
+          <textarea
+            id="h2smug-payload"
+            class="h2smug-textarea"
+            rows="12"
+            spellcheck="false"
+            aria-describedby="h2smug-payloadHint"
+          ></textarea>
+          <p id="h2smug-payloadHint" class="h2smug-hint">Dual CL+TE bodies illustrate desync. Simulation is educational — no network traffic is sent.</p>
+
+          <div class="h2smug-split">
+            <div>
+              <h3 class="h2smug-subhead">Proxy sees</h3>
+              <pre class="h2smug-mono" id="h2smug-proxyView" tabindex="0">Run the simulator.</pre>
+            </div>
+            <div>
+              <h3 class="h2smug-subhead">Origin sees</h3>
+              <pre class="h2smug-mono" id="h2smug-originView" tabindex="0">Run the simulator.</pre>
+            </div>
+          </div>
+          <p class="h2smug-verdict" id="h2smug-verdict" aria-live="polite"></p>
+        </section>
+      </div>
+
+      <div class="h2smug-workspace">
+        <section class="h2smug-panel" aria-labelledby="h2smug-h2c-title">
+          <div class="h2smug-panel-header">
+            <div class="h2smug-panel-title">
+              <i class="fas fa-arrow-up-right-dots h2smug-panel-icon" aria-hidden="true"></i>
+              <h2 id="h2smug-h2c-title">H2C upgrade risk checklist</h2>
+            </div>
+          </div>
+          <ul id="h2smug-h2cList" class="h2smug-checklist" aria-live="polite">
+            <li class="h2smug-empty">Run a full audit to populate the checklist.</li>
+          </ul>
+        </section>
+
+        <section class="h2smug-panel" aria-labelledby="h2smug-hop-title">
+          <div class="h2smug-panel-header">
+            <div class="h2smug-panel-title">
+              <i class="fas fa-route h2smug-panel-icon" aria-hidden="true"></i>
+              <h2 id="h2smug-hop-title">Hop-by-hop normalization tips</h2>
+            </div>
+          </div>
+          <ul id="h2smug-hopList" class="h2smug-tips" aria-live="polite">
+            <li class="h2smug-empty">Tips appear after audit.</li>
+          </ul>
+        </section>
+      </div>
+
+      <div class="h2smug-workspace">
+        <section class="h2smug-panel" aria-labelledby="h2smug-findings-title">
+          <div class="h2smug-panel-header">
+            <div class="h2smug-panel-title">
+              <i class="fas fa-triangle-exclamation h2smug-panel-icon" aria-hidden="true"></i>
+              <h2 id="h2smug-findings-title">Findings</h2>
+            </div>
+          </div>
+          <div id="h2smug-findings" class="h2smug-findings" aria-live="polite">
+            <p class="h2smug-empty">Configure quirks and run the audit.</p>
+          </div>
+        </section>
+
+        <section class="h2smug-panel" aria-labelledby="h2smug-recs-title">
+          <div class="h2smug-panel-header">
+            <div class="h2smug-panel-title">
+              <i class="fas fa-shield-halved h2smug-panel-icon" aria-hidden="true"></i>
+              <h2 id="h2smug-recs-title">Safe reverse-proxy recommendations</h2>
+            </div>
+          </div>
+          <ul id="h2smug-recs" class="h2smug-tips" aria-live="polite">
+            <li class="h2smug-empty">Recommendations appear after audit.</li>
+          </ul>
+        </section>
+      </div>
+    </div>
+  </main>
+
+  <div id="footer-placeholder"></div>
+
+  <script src="/auth.js"></script>
+  <script src="/bootstrap-legacy.js"></script>
+  <script src="/script.js"></script>
+  <script type="module" src="/dist/legacy-bundle.mjs"></script>
+  <script src="/theme.js"></script>
+  <script src="script.js"></script>
+  <script>
+    if (typeof loadPartial === 'function') {
+      loadPartial('navbar-placeholder', '/partials/navbar.html');
+      loadPartial('footer-placeholder', '/partials/footer.html');
+    }
+  </script>
+</body>
+</html>

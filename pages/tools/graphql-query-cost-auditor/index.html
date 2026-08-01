@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GraphQL Query Cost Auditor | Algo Infinity Verse</title>
+  <meta name="description" content="Paste a GraphQL schema and query to estimate depth, fan-out, complexity score, alias flood, fragment cycles, and N+1 risks — then download an audit report." />
+  <link rel="stylesheet" href="/styles.css" />
+  <link rel="stylesheet" href="style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Poppins:wght@300;400;500;600;700&family=Fira+Code:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <script>
+    (function () {
+      try {
+        var storedTheme = localStorage.getItem('theme');
+        var prefersLight = window.matchMedia('(prefers-color-scheme: light)').matches;
+        var theme = storedTheme || (prefersLight ? 'light' : 'dark');
+        if (theme === 'light') {
+          document.documentElement.classList.add('light-mode');
+        } else {
+          document.documentElement.classList.remove('light-mode');
+        }
+      } catch (e) {}
+    })();
+  </script>
+</head>
+<body data-page="graphql-query-cost-auditor">
+  <a href="#gql-main" class="gql-skip-link">Skip to main content</a>
+  <button type="button" id="scrollTopBtn" class="scroll-top-btn" aria-label="Scroll to top">
+    <i class="fas fa-arrow-up" aria-hidden="true"></i>
+  </button>
+
+  <div id="navbar-placeholder"></div>
+
+  <header class="gql-hero">
+    <div class="gql-hero-badge">
+      <i class="fas fa-diagram-project" aria-hidden="true"></i>
+      GraphQL Cost Lab
+    </div>
+    <h1>
+      GraphQL Query
+      <span class="gql-hero-accent">Cost Auditor</span>
+    </h1>
+    <p>
+      Paste a schema and query, measure depth and fan-out, flag alias floods and fragment cycles,
+      then get cost-limit recommendations — fully client-side.
+    </p>
+    <div class="gql-hero-stats" aria-live="polite">
+      <div class="gql-stat">
+        <span class="gql-stat-val" id="statDepth">—</span>
+        <span class="gql-stat-label">Max depth</span>
+      </div>
+      <div class="gql-stat">
+        <span class="gql-stat-val" id="statComplexity">—</span>
+        <span class="gql-stat-label">Complexity</span>
+      </div>
+      <div class="gql-stat">
+        <span class="gql-stat-val" id="statWarnings">—</span>
+        <span class="gql-stat-label">Warnings</span>
+      </div>
+    </div>
+  </header>
+
+  <main id="gql-main" class="gql-main">
+    <div class="container">
+      <div class="gql-workspace">
+        <section class="gql-panel" aria-labelledby="gql-schema-title">
+          <div class="gql-panel-header">
+            <div class="gql-panel-title">
+              <i class="fas fa-database gql-panel-icon" aria-hidden="true"></i>
+              <h2 id="gql-schema-title">Schema (SDL)</h2>
+            </div>
+          </div>
+          <label class="gql-label" for="gqlSchema">Paste GraphQL schema</label>
+          <textarea
+            id="gqlSchema"
+            class="gql-textarea"
+            rows="14"
+            spellcheck="false"
+            placeholder="type Query {&#10;  users: [User!]!&#10;}"
+            aria-describedby="gqlSchemaHint"
+          ></textarea>
+          <p id="gqlSchemaHint" class="gql-hint">Lightweight SDL parse — used for list-field and N+1 hints.</p>
+        </section>
+
+        <section class="gql-panel" aria-labelledby="gql-query-title">
+          <div class="gql-panel-header">
+            <div class="gql-panel-title">
+              <i class="fas fa-code gql-panel-icon" aria-hidden="true"></i>
+              <h2 id="gql-query-title">Query / mutation</h2>
+            </div>
+          </div>
+          <label class="gql-label" for="gqlQuery">Paste GraphQL operation</label>
+          <textarea
+            id="gqlQuery"
+            class="gql-textarea"
+            rows="14"
+            spellcheck="false"
+            placeholder="{ users { id name } }"
+            aria-describedby="gqlQueryHint"
+          ></textarea>
+          <p id="gqlQueryHint" class="gql-hint">Supports nested selections, aliases, and fragments (heuristic).</p>
+        </section>
+      </div>
+
+      <div class="gql-controls">
+        <button type="button" id="gqlDemoBtn" class="btn btn-secondary">
+          <i class="fas fa-flask" aria-hidden="true"></i> Load expensive demo
+        </button>
+        <button type="button" id="gqlAuditBtn" class="btn btn-primary">
+          <i class="fas fa-magnifying-glass" aria-hidden="true"></i> Run cost audit
+        </button>
+        <button type="button" id="gqlClearBtn" class="btn btn-outline">
+          <i class="fas fa-eraser" aria-hidden="true"></i> Clear
+        </button>
+        <button type="button" id="gqlDownloadBtn" class="btn btn-outline" disabled>
+          <i class="fas fa-download" aria-hidden="true"></i> Download audit
+        </button>
+      </div>
+      <div id="gqlStatus" class="gql-status" role="status" aria-live="polite"></div>
+
+      <div class="gql-results-grid">
+        <section class="gql-panel" aria-labelledby="gql-metrics-title">
+          <div class="gql-panel-header">
+            <div class="gql-panel-title">
+              <i class="fas fa-gauge-high gql-panel-icon" aria-hidden="true"></i>
+              <h2 id="gql-metrics-title">Cost metrics</h2>
+            </div>
+          </div>
+          <div id="gqlMetrics" class="gql-metrics" aria-live="polite">
+            <p class="gql-empty">Run an audit to see depth, fan-out, and complexity.</p>
+          </div>
+        </section>
+
+        <section class="gql-panel" aria-labelledby="gql-warnings-title">
+          <div class="gql-panel-header">
+            <div class="gql-panel-title">
+              <i class="fas fa-triangle-exclamation gql-panel-icon" aria-hidden="true"></i>
+              <h2 id="gql-warnings-title">Warnings &amp; N+1 hints</h2>
+            </div>
+          </div>
+          <div id="gqlWarnings" class="gql-findings" aria-live="polite">
+            <p class="gql-empty">Alias floods, fragment cycles, and N+1 hints appear here.</p>
+          </div>
+        </section>
+      </div>
+
+      <section class="gql-panel" aria-labelledby="gql-recs-title">
+        <div class="gql-panel-header">
+          <div class="gql-panel-title">
+            <i class="fas fa-shield-halved gql-panel-icon" aria-hidden="true"></i>
+            <h2 id="gql-recs-title">Cost limit &amp; maxDepth recommendations</h2>
+          </div>
+        </div>
+        <ul id="gqlRecs" class="gql-recs" aria-live="polite">
+          <li class="gql-empty-li">Recommendations appear after a successful audit.</li>
+        </ul>
+      </section>
+    </div>
+  </main>
+
+  <div id="footer-placeholder"></div>
+
+  <script src="/auth.js"></script>
+  <script src="/bootstrap-legacy.js"></script>
+  <script src="/script.js"></script>
+  <script type="module" src="/dist/legacy-bundle.mjs"></script>
+  <script src="/theme.js"></script>
+  <script src="script.js"></script>
+  <script>
+    if (typeof loadPartial === 'function') {
+      loadPartial('navbar-placeholder', '/partials/navbar.html');
+      loadPartial('footer-placeholder', '/partials/footer.html');
+    }
+  </script>
+</body>
+</html>

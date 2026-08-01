@@ -1,0 +1,191 @@
+/* LALR(1) Parser Generator Studio Stylesheet */
+
+:root {
+  --lalr-bg: #0b0f19;
+  --lalr-card-bg: rgba(23, 31, 46, 0.85);
+  --lalr-border: rgba(51, 65, 85, 0.7);
+  --lalr-accent: #a855f7;
+  --lalr-accent-glow: rgba(168, 85, 247, 0.25);
+  --lalr-shift: #3b82f6;
+  --lalr-reduce: #22c55e;
+  --lalr-accept: #eab308;
+  --lalr-conflict: #ef4444;
+  --lalr-text: #f8fafc;
+  --lalr-muted: #94a3b8;
+  --lalr-font-mono: 'JetBrains Mono', monospace;
+}
+
+body[data-page="lalr-parser-studio"] {
+  background-color: var(--lalr-bg);
+  color: var(--lalr-text);
+  font-family: 'Poppins', sans-serif;
+  margin: 0;
+  padding: 0;
+}
+
+.tool-hero {
+  text-align: center;
+  padding: 2.5rem 1.5rem 1.5rem;
+  background: radial-gradient(circle at top, rgba(168, 85, 247, 0.12), transparent 70%);
+  border-bottom: 1px solid var(--lalr-border);
+}
+
+.tool-hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.35rem 0.85rem;
+  border-radius: 999px;
+  background: rgba(168, 85, 247, 0.1);
+  color: var(--lalr-accent);
+  font-size: 0.85rem;
+  font-weight: 600;
+  margin-bottom: 0.75rem;
+}
+
+.tool-hero h1 {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 2.2rem;
+  margin: 0.5rem 0;
+}
+
+.accent-text { color: var(--lalr-accent); }
+
+.tool-container {
+  max-width: 1400px;
+  margin: 1.5rem auto;
+  padding: 0 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.toolbar-card, .panel-card {
+  background: var(--lalr-card-bg);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--lalr-border);
+  border-radius: 12px;
+  padding: 1.25rem;
+}
+
+.toolbar-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.tool-select, .tool-input {
+  background: #070a13;
+  color: var(--lalr-text);
+  border: 1px solid var(--lalr-border);
+  border-radius: 6px;
+  padding: 0.5rem 0.85rem;
+  font-family: var(--lalr-font-mono);
+}
+
+.tool-btn {
+  padding: 0.55rem 1.1rem;
+  border-radius: 6px;
+  border: none;
+  font-weight: 600;
+  font-size: 0.85rem;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.primary-btn { background: var(--lalr-accent); color: #fff; }
+.accent-btn { background: #10b981; color: #000; }
+
+.workspace-grid, .secondary-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+}
+
+#cfgEditor {
+  width: 100%;
+  height: 150px;
+  background: #050811;
+  color: #c084fc;
+  border: 1px solid var(--lalr-border);
+  border-radius: 8px;
+  padding: 0.85rem;
+  font-family: var(--lalr-font-mono);
+  font-size: 0.9rem;
+  box-sizing: border-box;
+}
+
+.sets-table, .parsing-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: var(--lalr-font-mono);
+  font-size: 0.825rem;
+}
+
+.sets-table th, .parsing-table th {
+  background: #0f172a;
+  padding: 0.5rem;
+  color: var(--lalr-muted);
+  border: 1px solid var(--lalr-border);
+}
+
+.sets-table td, .parsing-table td {
+  padding: 0.45rem;
+  border: 1px solid var(--lalr-border);
+  text-align: center;
+}
+
+.automaton-graph-box {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 1rem;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.state-item-card {
+  background: #070a13;
+  border: 1px solid var(--lalr-border);
+  border-radius: 8px;
+  padding: 0.75rem;
+  font-family: var(--lalr-font-mono);
+  font-size: 0.8rem;
+}
+
+.state-item-header {
+  font-weight: bold;
+  color: var(--lalr-accent);
+  margin-bottom: 0.4rem;
+  border-bottom: 1px solid var(--lalr-border);
+  padding-bottom: 0.2rem;
+}
+
+.cell-shift { background: rgba(59, 130, 246, 0.2); color: var(--lalr-shift); font-weight: bold; }
+.cell-reduce { background: rgba(34, 197, 94, 0.2); color: var(--lalr-reduce); font-weight: bold; }
+.cell-accept { background: rgba(234, 179, 8, 0.2); color: var(--lalr-accept); font-weight: bold; }
+.cell-conflict { background: rgba(239, 68, 68, 0.25); color: var(--lalr-conflict); font-weight: bold; }
+
+.parse-step-log {
+  height: 150px;
+  overflow-y: auto;
+  background: #050811;
+  padding: 0.75rem;
+  border-radius: 8px;
+  font-family: var(--lalr-font-mono);
+  font-size: 0.8rem;
+}
+
+.ast-canvas-container {
+  height: 190px;
+  background: #050811;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--lalr-font-mono);
+  color: var(--lalr-muted);
+}

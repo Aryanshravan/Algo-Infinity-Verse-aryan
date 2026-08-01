@@ -1,0 +1,327 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Subspace Bubble Warp Drive | Algo Infinity Verse</title>
+    <link rel="stylesheet" href="/styles.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <!-- Monaco Editor -->
+    <script src="https://unpkg.com/monaco-editor@0.36.1/min/vs/loader.js"></script>
+    <style>
+      body { margin: 0; overflow: hidden; background: #000; font-family: 'Poppins', sans-serif; color: #fff; }
+      .app-container { display: flex; height: 100vh; }
+      
+      .sidebar { width: 450px; background: rgba(15, 23, 42, 0.95); border-right: 1px solid #6366f1; display: flex; flex-direction: column; z-index: 10; }
+      .header { padding: 20px; border-bottom: 1px solid #334155; }
+      .header h2 { margin: 0; color: #6366f1; font-family: 'Orbitron', sans-serif; font-size: 1.2rem; }
+      .header p { margin: 5px 0 0 0; font-size: 0.8rem; color: #94a3b8; }
+      
+      #editor-container { flex: 1; min-height: 300px; }
+      
+      .controls { padding: 20px; border-top: 1px solid #334155; background: rgba(0,0,0,0.5); }
+      .btn { background: linear-gradient(90deg, #4f46e5, #4338ca); color: #fff; border: none; padding: 10px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; transition: 0.3s; }
+      .btn:hover { background: #6366f1; transform: translateY(-2px); box-shadow: 0 0 15px rgba(99, 102, 241, 0.5); }
+      
+      .sim-container { flex: 1; position: relative; background: #020617; overflow: hidden; }
+      canvas { width: 100%; height: 100%; display: block; filter: contrast(1.1); }
+      
+      .hud { position: absolute; top: 20px; right: 20px; background: rgba(0,0,0,0.8); padding: 15px; border-radius: 8px; border: 1px solid #6366f1; width: 300px; z-index: 10; pointer-events: none; }
+      .hud h3 { margin: 0 0 10px 0; color: #6366f1; font-size: 1rem; font-family: 'Orbitron', sans-serif; }
+      .metric { display: flex; justify-content: space-between; font-size: 0.8rem; color: #cbd5e1; margin-bottom: 5px; }
+      .val { font-weight: bold; font-family: monospace; }
+      .val-speed { color: #38bdf8; }
+      .val-tidal { color: #ef4444; }
+    </style>
+  </head>
+  <body>
+    
+    <div class="app-container">
+      <div class="sidebar">
+        <div class="header">
+          <h2><i class="fas fa-meteor"></i> Alcubierre Drive</h2>
+          <p>Spacetime Distortion Manifold</p>
+        </div>
+        
+        <div id="editor-container"></div>
+        
+        <div class="controls">
+          <button class="btn" onclick="engageWarp()"><i class="fas fa-space-shuttle"></i> Engage Warp Drive</button>
+        </div>
+      </div>
+      
+      <div class="sim-container">
+        
+        <canvas id="warpCanvas" style="position: relative; z-index: 1;"></canvas>
+        
+        <div class="hud">
+          <h3>Warp Telemetry</h3>
+          <div class="metric"><span>Velocity:</span> <span class="val val-speed" id="velVal">0 c</span></div>
+          <div class="metric"><span>Tidal Shear Force:</span> <span class="val val-tidal" id="shearVal">0 G</span></div>
+          <div class="metric"><span>Exotic Matter Res:</span> <span class="val" id="fuelVal" style="color:#a855f7">100%</span></div>
+          <div class="metric" style="margin-top: 10px; border-top: 1px solid #334155; padding-top: 5px;">
+            <span>Manifold State:</span> <span class="val" id="statusVal" style="color:#94a3b8">STANDBY</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      let editor;
+      require.config({ paths: { 'vs': 'https://unpkg.com/monaco-editor@0.36.1/min/vs' }});
+      require(['vs/editor/editor.main'], function() {
+        editor = monaco.editor.create(document.getElementById('editor-container'), {
+          value: `// Alcubierre Warp Field Stabilizer
+// You must compress space in front of the ship and expand it behind.
+// This requires carefully balancing Exotic Matter (negative energy density).
+// Too much compression creates infinite tidal shear (spaghettifies the ship).
+// Too little expansion causes the bubble to collapse, instantly stopping the ship.
+
+function modulateWarpField(currentVelocity, currentShear, remainingExoticMatter) {
+    // Return { compressionFront: float (0-1), expansionRear: float (0-1) }
+    // Both must be balanced perfectly to maintain the bubble safely.
+    // The faster you go, the harder it is to balance.
+    
+    // Naive logic: MAX WARP!
+    // Result: Ship is crushed by infinite tidal shear immediately.
+    
+    return {
+        compressionFront: 1.0,
+        expansionRear: 1.0
+    };
+}`,
+          language: 'javascript',
+          theme: 'vs-dark',
+          minimap: { enabled: false },
+          automaticLayout: true
+        });
+      });
+
+      const canvas = document.getElementById('warpCanvas');
+      const ctx = canvas.getContext('2d');
+      
+      let isSimulating = false;
+      let time = 0;
+      
+      let velocity = 0;
+      let tidalShear = 0;
+      let exoticMatter = 100;
+      
+      let stars = [];
+      let shipX = 0;
+      
+      function resize() { 
+          canvas.width = canvas.clientWidth; 
+          canvas.height = canvas.clientHeight;
+          shipX = canvas.width / 4;
+          initStars();
+      }
+      
+      function initStars() {
+          stars = [];
+          for(let i=0; i<300; i++) {
+              stars.push({
+                  x: Math.random() * canvas.width,
+                  y: Math.random() * canvas.height,
+                  size: Math.random() * 2 + 0.5,
+                  baseSpeed: Math.random() * 2 + 0.5
+              });
+          }
+      }
+      
+      setTimeout(resize, 100);
+      window.addEventListener('resize', resize);
+
+      function animate() {
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+          let cy = canvas.height / 2;
+
+          if (isSimulating) {
+              time += 0.05;
+              
+              let compF = 0.5;
+              let expR = 0.5;
+              
+              try {
+                  eval(editor.getValue());
+                  let res = modulateWarpField(velocity, tidalShear, exoticMatter);
+                  if (res) {
+                      compF = Math.max(0, Math.min(1.0, res.compressionFront || 0));
+                      expR = Math.max(0, Math.min(1.0, res.expansionRear || 0));
+                  }
+              } catch(e) {}
+              
+              // Physics Evaluation
+              let bubbleBalance = Math.abs(compF - expR);
+              
+              // Thrust is based on how strong the field is
+              let targetVel = (compF + expR) * 5.0; // max 10c
+              
+              velocity += (targetVel - velocity) * 0.1;
+              
+              // Tidal shear is caused by imbalance in the bubble OR by pushing it too hard too fast
+              tidalShear = (bubbleBalance * 50) + (velocity * 2);
+              
+              // Consume fuel
+              exoticMatter -= (compF + expR) * 0.1;
+              if (exoticMatter < 0) exoticMatter = 0;
+              
+              // Move stars based on warp speed
+              stars.forEach(s => {
+                  // Stars get "pulled" by the spacetime compression if they are near the ship
+                  let dx = s.x - shipX;
+                  let dy = s.y - cy;
+                  let dist = Math.sqrt(dx*dx + dy*dy);
+                  
+                  let localWarpFactor = velocity * 10;
+                  
+                  // If near the bubble edge, extreme lensing
+                  if (dist > 50 && dist < 150) {
+                      s.y += (dy/dist) * velocity * 2;
+                  }
+                  
+                  s.x -= (s.baseSpeed + localWarpFactor);
+                  if (s.x < 0) {
+                      s.x = canvas.width;
+                      s.y = Math.random() * canvas.height;
+                  }
+              });
+              
+              // End States
+              if (tidalShear > 30) {
+                  isSimulating = false;
+                  document.getElementById('statusVal').innerText = "STRUCTURAL FAILURE (SPAGHETTIFIED)";
+                  document.getElementById('statusVal').style.color = "#ef4444";
+              } else if (exoticMatter <= 0) {
+                  isSimulating = false;
+                  document.getElementById('statusVal').innerText = "WARP BUBBLE COLLAPSED (NO FUEL)";
+                  document.getElementById('statusVal').style.color = "#ef4444";
+              } else if (time > 20 && velocity > 8.0 && tidalShear < 15) {
+                  isSimulating = false;
+                  document.getElementById('statusVal').innerText = "DESTINATION REACHED (MAX WARP)";
+                  document.getElementById('statusVal').style.color = "#10b981";
+              } else {
+                  if (tidalShear > 20) {
+                      document.getElementById('statusVal').innerText = "WARNING: HIGH TIDAL SHEAR";
+                      document.getElementById('statusVal').style.color = "#f97316";
+                  } else if (velocity > 1.0) {
+                      document.getElementById('statusVal').innerText = "WARP FACTOR ENGAGED";
+                      document.getElementById('statusVal').style.color = "#6366f1";
+                  } else {
+                      document.getElementById('statusVal').innerText = "ACCELERATING...";
+                      document.getElementById('statusVal').style.color = "#cbd5e1";
+                  }
+              }
+              
+              // HUD
+              document.getElementById('velVal').innerText = velocity.toFixed(2) + " c";
+              
+              let shearEl = document.getElementById('shearVal');
+              shearEl.innerText = tidalShear.toFixed(1) + " G";
+              if (tidalShear > 20) shearEl.style.color = "#ef4444";
+              else shearEl.style.color = "#10b981";
+              
+              let fuelEl = document.getElementById('fuelVal');
+              fuelEl.innerText = exoticMatter.toFixed(1) + "%";
+              if (exoticMatter < 20) fuelEl.style.color = "#ef4444";
+          }
+          
+          // Draw Stars
+          stars.forEach(s => {
+              ctx.beginPath();
+              
+              // Star streaking effect at high warp
+              if (velocity > 1.0) {
+                  ctx.moveTo(s.x, s.y);
+                  ctx.lineTo(s.x + velocity*5, s.y);
+                  ctx.strokeStyle = '#fff';
+                  ctx.lineWidth = s.size;
+                  ctx.stroke();
+              } else {
+                  ctx.arc(s.x, s.y, s.size, 0, Math.PI*2);
+                  ctx.fillStyle = '#fff';
+                  ctx.fill();
+              }
+          });
+          
+          // Draw Warp Bubble & Ship
+          ctx.save();
+          ctx.translate(shipX, cy);
+          
+          if (isSimulating) {
+              // Bubble distortion ring
+              ctx.beginPath();
+              ctx.ellipse(0, 0, 100 + (velocity*5), 80 - (velocity*2), 0, 0, Math.PI*2);
+              
+              // Gradient for exotic matter ring
+              let grad = ctx.createRadialGradient(0,0,60, 0,0,120);
+              grad.addColorStop(0, 'transparent');
+              grad.addColorStop(0.8, 'rgba(99, 102, 241, 0.4)');
+              grad.addColorStop(1, 'transparent');
+              
+              ctx.fillStyle = grad;
+              ctx.fill();
+              
+              // Compression/Expansion visualization
+              ctx.lineWidth = 3;
+              // Front Compression (Blue-shifted)
+              ctx.beginPath();
+              ctx.arc(50, 0, 50, -Math.PI/4, Math.PI/4);
+              ctx.strokeStyle = 'rgba(56, 189, 248, 0.8)';
+              ctx.stroke();
+              
+              // Rear Expansion (Red-shifted)
+              ctx.beginPath();
+              ctx.arc(-50, 0, 50, Math.PI - Math.PI/4, Math.PI + Math.PI/4);
+              ctx.strokeStyle = 'rgba(239, 68, 68, 0.8)';
+              ctx.stroke();
+              
+              // Shake ship if shear is high
+              if (tidalShear > 10) {
+                  let shake = (tidalShear - 10) * 0.5;
+                  ctx.translate((Math.random()-0.5)*shake, (Math.random()-0.5)*shake);
+              }
+          }
+          
+          // The Ship
+          ctx.beginPath();
+          ctx.moveTo(30, 0);
+          ctx.lineTo(-20, -15);
+          ctx.lineTo(-20, 15);
+          ctx.closePath();
+          ctx.fillStyle = '#cbd5e1';
+          ctx.fill();
+          
+          // Engine glow
+          ctx.beginPath();
+          ctx.arc(-22, 0, 10, Math.PI/2, Math.PI*1.5);
+          ctx.fillStyle = '#38bdf8';
+          ctx.shadowBlur = 20;
+          ctx.shadowColor = '#38bdf8';
+          ctx.fill();
+          ctx.shadowBlur = 0;
+          
+          ctx.restore();
+
+          requestAnimationFrame(animate);
+      }
+      
+      initStars();
+      animate();
+
+      function engageWarp() {
+          if(isSimulating) return;
+          isSimulating = true;
+          time = 0;
+          velocity = 0;
+          tidalShear = 0;
+          exoticMatter = 100;
+          initStars();
+          
+          document.getElementById('statusVal').innerText = "SPOOLING MANIFOLD...";
+          document.getElementById('statusVal').style.color = "#6366f1";
+      }
+    </script>
+  </body>
+</html>

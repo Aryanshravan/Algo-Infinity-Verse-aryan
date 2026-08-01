@@ -193,7 +193,8 @@ document.addEventListener('DOMContentLoaded', function() {
     simulationRunning = true;
     this.textContent = '⏹️ Stop';
     
-    const pages = [0, 1, 2, 3, 0, 4, 2, 3, 1, 5, 6, 2, 0, 3, 4];
+    const refInput = document.getElementById('refString').value;
+    const pages = refInput.split(',').map(n => parseInt(n.trim())).filter(n => !isNaN(n));
     let idx = 0;
     
     simulationInterval = setInterval(() => {
@@ -209,7 +210,9 @@ document.addEventListener('DOMContentLoaded', function() {
   });
 
   document.getElementById('stepBtn').addEventListener('click', function() {
-    const pages = [0, 1, 2, 3, 0, 4, 2, 3, 1, 5];
+    const refInput = document.getElementById('refString').value;
+    const pages = refInput.split(',').map(n => parseInt(n.trim())).filter(n => !isNaN(n));
+    if (pages.length === 0) return;
     const idx = vm.logs.length % pages.length;
     vm.accessPage(pages[idx]);
   });
@@ -234,5 +237,118 @@ document.addEventListener('DOMContentLoaded', function() {
     const frames = parseInt(this.value) || 4;
     const algo = document.getElementById('algorithm').value;
     vm.init(frames, algo);
+  });
+
+  // Belady's Anomaly Plotter Logic
+  let anomalyChart = null;
+
+  document.getElementById('anomalyBtn').addEventListener('click', function() {
+    const refInput = document.getElementById('refString').value;
+    const pages = refInput.split(',').map(n => parseInt(n.trim())).filter(n => !isNaN(n));
+    if (pages.length === 0) {
+      alert("Please enter a valid reference string (comma separated numbers).");
+      return;
+    }
+
+    const algo = document.getElementById('algorithm').value;
+    const maxFrames = 10;
+    let faultCounts = [];
+    let frameLabels = [];
+    let pointColors = [];
+
+    // Headless simulation
+    for (let f = 1; f <= maxFrames; f++) {
+      let sim = new VirtualMemory();
+      sim.render = function(){}; // Muck the render method for headless speed
+      sim.addLog = function(){};
+      sim.init(f, algo);
+      
+      for (let p of pages) {
+        sim.accessPage(p);
+      }
+      
+      faultCounts.push(sim.pageFaults);
+      frameLabels.push(f + " Frames");
+
+      // Anomaly detection: if faults increased compared to f-1
+      if (f > 1 && faultCounts[f - 1] > faultCounts[f - 2]) {
+        pointColors.push('#ef4444'); // Red for anomaly
+      } else {
+        pointColors.push('#10b981'); // Green for normal
+      }
+    }
+
+    // Custom segment coloring for line
+    const colorCallback = (ctx) => {
+      // ctx.p0DataIndex, ctx.p1DataIndex
+      if (ctx.p0DataIndex !== undefined && ctx.p1DataIndex !== undefined) {
+        if (faultCounts[ctx.p1DataIndex] > faultCounts[ctx.p0DataIndex]) {
+          return '#ef4444'; // Belady's Anomaly!
+        }
+      }
+      return '#3b82f6'; // Standard blue
+    };
+
+    if (anomalyChart) {
+      anomalyChart.destroy();
+    }
+
+    const ctx = document.getElementById('anomalyChart').getContext('2d');
+    anomalyChart = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: frameLabels,
+        datasets: [{
+          label: 'Page Faults',
+          data: faultCounts,
+          borderColor: '#3b82f6',
+          segment: {
+            borderColor: colorCallback,
+            borderDash: ctx => faultCounts[ctx.p1DataIndex] > faultCounts[ctx.p0DataIndex] ? [5, 5] : undefined,
+          },
+          backgroundColor: 'rgba(59, 130, 246, 0.1)',
+          borderWidth: 3,
+          pointBackgroundColor: pointColors,
+          pointRadius: 6,
+          pointHoverRadius: 8,
+          fill: true,
+          tension: 0.1
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            callbacks: {
+              label: function(context) {
+                let text = `Faults: ${context.raw}`;
+                if (context.dataIndex > 0 && context.raw > faultCounts[context.dataIndex - 1]) {
+                  text += ' (BELADY\'S ANOMALY DETECTED!)';
+                }
+                return text;
+              }
+            }
+          }
+        },
+        scales: {
+          y: {
+            beginAtZero: true,
+            title: { display: true, text: 'Total Page Faults', color: '#9ca3af' },
+            grid: { color: 'rgba(255,255,255,0.05)' },
+            ticks: { color: '#9ca3af', stepSize: 1 }
+          },
+          x: {
+            title: { display: true, text: 'Number of Frames allocated', color: '#9ca3af' },
+            grid: { color: 'rgba(255,255,255,0.05)' },
+            ticks: { color: '#9ca3af' }
+          }
+        }
+      }
+    });
+
+    // Auto-scroll to anomaly chart
+    document.querySelector('.anomaly-layout').scrollIntoView({ behavior: 'smooth' });
   });
 });

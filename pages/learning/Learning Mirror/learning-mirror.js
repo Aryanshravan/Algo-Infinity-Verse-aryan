@@ -142,14 +142,20 @@ document.addEventListener("DOMContentLoaded", () => {
     elements.replayOutput.textContent = snap.replayText;
 
     elements.viewButtons.forEach((btn) => {
-      btn.classList.toggle("active", btn.dataset.view === view);
-    });
-
-    localStorage.setItem("learning-mirror-view", view);
       const isSelected = btn.dataset.view === view;
       btn.classList.toggle("active", isSelected);
       btn.setAttribute("aria-selected", isSelected);
     });
+
+    try {
+      localStorage.setItem("learning-mirror-view", view);
+    } catch (error) {
+      console.warn(
+        "Learning Mirror: Could not save view preference to localStorage",
+        error
+      );
+      // Feature degrades gracefully - view preference just won't persist
+    }
 
     try {
       localStorage.setItem("learning-mirror-view", view);

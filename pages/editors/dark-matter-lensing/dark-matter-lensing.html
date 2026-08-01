@@ -1,0 +1,319 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dark Matter Lensing Telescope Matrix | Algo Infinity Verse</title>
+    <link rel="stylesheet" href="/styles.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <!-- Monaco Editor -->
+    <script src="https://unpkg.com/monaco-editor@0.36.1/min/vs/loader.js"></script>
+    <style>
+      body { margin: 0; overflow: hidden; background: #000; font-family: 'Poppins', sans-serif; color: #fff; }
+      .app-container { display: flex; height: 100vh; }
+      
+      .sidebar { width: 450px; background: rgba(15, 23, 42, 0.95); border-right: 1px solid #8b5cf6; display: flex; flex-direction: column; z-index: 10; }
+      .header { padding: 20px; border-bottom: 1px solid #334155; }
+      .header h2 { margin: 0; color: #8b5cf6; font-family: 'Orbitron', sans-serif; font-size: 1.2rem; }
+      .header p { margin: 5px 0 0 0; font-size: 0.8rem; color: #94a3b8; }
+      
+      #editor-container { flex: 1; min-height: 300px; }
+      
+      .controls { padding: 20px; border-top: 1px solid #334155; background: rgba(0,0,0,0.5); }
+      .btn { background: linear-gradient(90deg, #7c3aed, #6d28d9); color: #fff; border: none; padding: 10px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; transition: 0.3s; }
+      .btn:hover { background: #8b5cf6; transform: translateY(-2px); box-shadow: 0 0 15px rgba(139, 92, 246, 0.5); }
+      
+      .sim-container { flex: 1; position: relative; background: #000; overflow: hidden; display: flex; flex-direction: column; }
+      
+      .panels { display: flex; flex: 1; padding: 20px; gap: 20px; }
+      
+      .view-panel { flex: 1; background: rgba(2, 6, 23, 0.8); border: 1px solid #334155; border-radius: 12px; position: relative; overflow: hidden; display: flex; flex-direction: column; }
+      .view-panel h3 { margin: 0; padding: 15px; background: rgba(15, 23, 42, 0.9); font-family: 'Orbitron', sans-serif; font-size: 0.9rem; color: #c4b5fd; border-bottom: 1px solid #334155; text-align: center; }
+      
+      canvas { width: 100%; flex: 1; background: #000; }
+      
+      .hud { background: rgba(0,0,0,0.8); padding: 15px; border-top: 1px solid #8b5cf6; }
+      .metric { display: flex; justify-content: space-between; font-size: 0.8rem; color: #cbd5e1; margin-bottom: 5px; }
+      .val { font-weight: bold; font-family: monospace; }
+      .val-accuracy { color: #10b981; }
+    </style>
+  </head>
+  <body>
+    
+    <div class="app-container">
+      <div class="sidebar">
+        <div class="header">
+          <h2><i class="fas fa-satellite-dish"></i> Gravitational Lensing</h2>
+          <p>Un-warp light bent by Dark Matter</p>
+        </div>
+        
+        <div id="editor-container"></div>
+        
+        <div class="controls">
+          <button class="btn" onclick="processImage()"><i class="fas fa-cogs"></i> Execute Reconstruction Algorithm</button>
+        </div>
+      </div>
+      
+      <div class="sim-container">
+        
+        <div class="panels">
+            <div class="view-panel">
+                <h3>Raw Telescope Feed (Einstein Ring)</h3>
+                <canvas id="rawCanvas"></canvas>
+            </div>
+            
+            <div class="view-panel" style="border-color: #8b5cf6;">
+                <h3 style="color: #8b5cf6;">Reconstructed Background Galaxy</h3>
+                <canvas id="reconCanvas"></canvas>
+            </div>
+        </div>
+
+        <div class="hud">
+          <div class="metric"><span>Processing Status:</span> <span class="val" id="statusVal" style="color:#94a3b8">WAITING FOR ALGORITHM</span></div>
+          <div class="metric"><span>Reconstruction Accuracy (SSIM):</span> <span class="val val-accuracy" id="accVal">0.00%</span></div>
+        </div>
+        
+      </div>
+    </div>
+
+    <script>
+      let editor;
+      require.config({ paths: { 'vs': 'https://unpkg.com/monaco-editor@0.36.1/min/vs' }});
+      require(['vs/editor/editor.main'], function() {
+        editor = monaco.editor.create(document.getElementById('editor-container'), {
+          value: `// Inverse Ray-Tracing Algorithm
+// The foreground Dark Matter halo acts as a massive convex lens, warping the background galaxy into a ring.
+// You must calculate the inverse mapping to un-warp the pixels.
+
+function unwarpPixel(x, y, centerX, centerY, lensingMass) {
+    // Return { sourceX, sourceY }
+    
+    let dx = x - centerX;
+    let dy = y - centerY;
+    let r = Math.sqrt(dx*dx + dy*dy);
+    
+    // Naive pass-through (No un-warping):
+    let sourceX = x;
+    let sourceY = y;
+    
+    // Hint: The true deflection angle depends on the mass enclosed and distance r.
+    // Try to shift pixels radially inward/outward based on the Einstein radius.
+    
+    return { sourceX, sourceY };
+}`,
+          language: 'javascript',
+          theme: 'vs-dark',
+          minimap: { enabled: false },
+          automaticLayout: true
+        });
+      });
+
+      const rawCanvas = document.getElementById('rawCanvas');
+      const rawCtx = rawCanvas.getContext('2d');
+      const reconCanvas = document.getElementById('reconCanvas');
+      const reconCtx = reconCanvas.getContext('2d');
+      
+      let centerX = 0, centerY = 0;
+      let lensingMass = 80; // Abstract Einstein radius
+      let baseImagePixels = [];
+
+      function resize() { 
+          rawCanvas.width = rawCanvas.clientWidth; 
+          rawCanvas.height = rawCanvas.clientHeight;
+          reconCanvas.width = reconCanvas.clientWidth; 
+          reconCanvas.height = reconCanvas.clientHeight;
+          
+          centerX = rawCanvas.width / 2;
+          centerY = rawCanvas.height / 2;
+          
+          generateSourceGalaxy();
+          drawLensedImage();
+      }
+      
+      // Delay to ensure layout is complete
+      setTimeout(resize, 100);
+      window.addEventListener('resize', resize);
+
+      function generateSourceGalaxy() {
+          // We generate a "true" source galaxy off-center behind the dark matter
+          let tempCanvas = document.createElement('canvas');
+          tempCanvas.width = rawCanvas.width;
+          tempCanvas.height = rawCanvas.height;
+          let tCtx = tempCanvas.getContext('2d');
+          
+          tCtx.fillStyle = '#000';
+          tCtx.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
+          
+          // Draw a spiral galaxy slightly offset
+          let gx = centerX + 15;
+          let gy = centerY - 15;
+          
+          let grad = tCtx.createRadialGradient(gx, gy, 0, gx, gy, 50);
+          grad.addColorStop(0, '#ffffff');
+          grad.addColorStop(0.2, '#60a5fa');
+          grad.addColorStop(1, 'transparent');
+          
+          tCtx.fillStyle = grad;
+          tCtx.beginPath();
+          tCtx.arc(gx, gy, 50, 0, Math.PI*2);
+          tCtx.fill();
+          
+          // Some dust lanes
+          tCtx.strokeStyle = 'rgba(0,0,0,0.8)';
+          tCtx.lineWidth = 5;
+          tCtx.beginPath();
+          tCtx.arc(gx-5, gy+5, 20, 0, Math.PI);
+          tCtx.stroke();
+          
+          baseImagePixels = tCtx.getImageData(0, 0, tempCanvas.width, tempCanvas.height).data;
+      }
+
+      function applyTrueLensing(x, y) {
+          // Forward simulation to create the warped feed
+          let dx = x - centerX;
+          let dy = y - centerY;
+          let r = Math.sqrt(dx*dx + dy*dy);
+          
+          if (r === 0) return {x, y};
+          
+          // Deflection equation: alpha = (4GM / c^2) / r
+          // Source position = Image position - alpha
+          // Here, lensingMass represents the Einstein radius squared (theta_E^2) roughly
+          
+          let deflection = lensingMass * lensingMass / r;
+          
+          let sourceX = x - (dx/r) * deflection;
+          let sourceY = y - (dy/r) * deflection;
+          
+          return {x: sourceX, y: sourceY};
+      }
+
+      let warpedImageData = null;
+
+      function drawLensedImage() {
+          let imgData = rawCtx.createImageData(rawCanvas.width, rawCanvas.height);
+          let data = imgData.data;
+          
+          for(let y=0; y<rawCanvas.height; y++) {
+              for(let x=0; x<rawCanvas.width; x++) {
+                  let src = applyTrueLensing(x, y);
+                  let sx = Math.floor(src.x);
+                  let sy = Math.floor(src.y);
+                  
+                  let idx = (y * rawCanvas.width + x) * 4;
+                  
+                  if (sx >= 0 && sx < rawCanvas.width && sy >= 0 && sy < rawCanvas.height) {
+                      let sIdx = (sy * rawCanvas.width + sx) * 4;
+                      data[idx] = baseImagePixels[sIdx];
+                      data[idx+1] = baseImagePixels[sIdx+1];
+                      data[idx+2] = baseImagePixels[sIdx+2];
+                      data[idx+3] = 255;
+                  } else {
+                      data[idx] = 0; data[idx+1] = 0; data[idx+2] = 0; data[idx+3] = 255;
+                  }
+              }
+          }
+          
+          rawCtx.putImageData(imgData, 0, 0);
+          warpedImageData = imgData.data;
+          
+          // Draw the invisible Dark Matter cluster center
+          rawCtx.strokeStyle = 'rgba(139, 92, 246, 0.5)';
+          rawCtx.setLineDash([5, 5]);
+          rawCtx.beginPath();
+          rawCtx.arc(centerX, centerY, lensingMass, 0, Math.PI*2);
+          rawCtx.stroke();
+          rawCtx.setLineDash([]);
+      }
+
+      function processImage() {
+          document.getElementById('statusVal').innerText = "PROCESSING...";
+          document.getElementById('statusVal').style.color = "#facc15";
+          
+          setTimeout(() => {
+              let imgData = reconCtx.createImageData(reconCanvas.width, reconCanvas.height);
+              let data = imgData.data;
+              
+              let algError = false;
+              
+              for(let y=0; y<reconCanvas.height; y++) {
+                  for(let x=0; x<reconCanvas.width; x++) {
+                      let idx = (y * reconCanvas.width + x) * 4;
+                      
+                      try {
+                          eval(editor.getValue());
+                          // We are mapping from the RECONSTRUCTED space (source) backwards to find what pixel to pull from the RAW image
+                          // Actually, standard inverse mapping: for every pixel (x,y) in the output, where did it come from in the warped image?
+                          // The user's function is meant to do: given warped(x,y), find source(x,y).
+                          // To draw it, we need: given source(x,y), find warped(x,y). 
+                          // Or we do forward splatting. We will do forward splatting for simplicity, iterating over warped image.
+                      } catch(e) {
+                          algError = true;
+                      }
+                  }
+              }
+              
+              if(algError) {
+                  document.getElementById('statusVal').innerText = "SYNTAX ERROR";
+                  document.getElementById('statusVal').style.color = "#ef4444";
+                  return;
+              }
+
+              // Forward splatting approach
+              for(let i=0; i<data.length; i+=4) { data[i]=0; data[i+1]=0; data[i+2]=0; data[i+3]=255; }
+              
+              let totalPixels = reconCanvas.width * reconCanvas.height;
+              let correctPixels = 0;
+
+              for(let y=0; y<rawCanvas.height; y++) {
+                  for(let x=0; x<rawCanvas.width; x++) {
+                      let wIdx = (y * rawCanvas.width + x) * 4;
+                      
+                      // Skip black pixels to save time
+                      if(warpedImageData[wIdx] === 0 && warpedImageData[wIdx+1] === 0 && warpedImageData[wIdx+2] === 0) continue;
+                      
+                      let src = {sourceX: x, sourceY: y};
+                      try {
+                          eval(editor.getValue());
+                          src = unwarpPixel(x, y, centerX, centerY, lensingMass);
+                      } catch(e) {}
+                      
+                      let sx = Math.floor(src.sourceX);
+                      let sy = Math.floor(src.sourceY);
+                      
+                      if (sx >= 0 && sx < reconCanvas.width && sy >= 0 && sy < reconCanvas.height) {
+                          let rIdx = (sy * reconCanvas.width + sx) * 4;
+                          data[rIdx] = warpedImageData[wIdx];
+                          data[rIdx+1] = warpedImageData[wIdx+1];
+                          data[rIdx+2] = warpedImageData[wIdx+2];
+                          data[rIdx+3] = 255;
+                      }
+                  }
+              }
+              
+              reconCtx.putImageData(imgData, 0, 0);
+              
+              // Calculate accuracy against baseImagePixels
+              let diff = 0;
+              for(let i=0; i<data.length; i+=4) {
+                  diff += Math.abs(data[i] - baseImagePixels[i]);
+              }
+              // Max diff is 255 * totalPixels
+              let accuracy = 100 - ((diff / (255 * totalPixels)) * 100);
+              
+              if (accuracy > 95) {
+                  document.getElementById('statusVal').innerText = "GALAXY RESOLVED";
+                  document.getElementById('statusVal').style.color = "#10b981";
+              } else {
+                  document.getElementById('statusVal').innerText = "ABERRATION DETECTED";
+                  document.getElementById('statusVal').style.color = "#ef4444";
+              }
+              
+              document.getElementById('accVal').innerText = accuracy.toFixed(2) + "%";
+
+          }, 100);
+      }
+    </script>
+  </body>
+</html>

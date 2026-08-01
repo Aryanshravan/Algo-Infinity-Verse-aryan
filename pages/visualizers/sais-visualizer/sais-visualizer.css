@@ -1,0 +1,117 @@
+.sais-hero {
+  position: relative; min-height: 56vh;
+  display: flex; align-items: center; justify-content: center;
+  padding: 7rem 1.5rem 3rem; overflow: hidden;
+  background: radial-gradient(ellipse at 50% 0%, rgba(244,63,94,0.07) 0%, rgba(139,92,246,0.05) 55%, transparent 80%);
+}
+.sais-hero-bg { position: absolute; inset: 0; z-index: 0; opacity: 0.5; }
+.sais-hero-canvas { display: block; width: 100%; height: 100%; }
+.sais-hero-inner { position: relative; z-index: 2; text-align: center; max-width: 800px; margin: 0 auto; }
+.sais-hero-eyebrow {
+  display: inline-block; font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em;
+  padding: 0.35rem 1.1rem; border-radius: 999px;
+  background: rgba(244,63,94,0.1); border: 1px solid rgba(244,63,94,0.3); color: #f43f5e;
+  margin-bottom: 1.25rem;
+}
+.sais-hero-title {
+  font-family: Orbitron, sans-serif;
+  font-size: clamp(1.7rem, 5vw, 3.2rem); font-weight: 900;
+  background: linear-gradient(135deg, #f43f5e 0%, #8b5cf6 55%, #06b6d4 100%);
+  background-clip: text; -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  line-height: 1.12; margin-bottom: 0.6rem;
+}
+.sais-hero-sub  { font-family: Fira Code, monospace; font-size: 0.85rem; color: #8b5cf6; font-style: italic; margin-bottom: 0.9rem; }
+.sais-hero-desc { font-size: 0.9rem; color: var(--text-secondary); line-height: 1.8; margin-bottom: 1.85rem; }
+
+.sais-btn-primary { background: linear-gradient(135deg, #f43f5e 0%, #8b5cf6 100%); border: none; color: #fff; font-weight: 700; display: inline-flex; align-items: center; gap: 0.5rem; box-shadow: 0 4px 20px rgba(244,63,94,0.25); cursor:pointer; padding: 0.6rem 1.2rem; border-radius: 6px;}
+.sais-btn-outline { background: rgba(0,0,0,0.1); border: 1px solid var(--glass-border); color: var(--text-primary); font-weight: 700; display: inline-flex; align-items: center; gap: 0.5rem; cursor:pointer; padding: 0.6rem 1.2rem; border-radius: 6px;}
+.sais-hero-actions { display: flex; gap: 1rem; justify-content: center; }
+
+.sais-section { padding: 1.5rem 0 4rem; }
+
+.sais-control-card { background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 18px; padding: 1.25rem; backdrop-filter: blur(10px); margin-bottom: 0.85rem; display: flex; flex-direction: column; gap: 1rem; }
+.sais-toolbar { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; border-bottom: 1px solid var(--glass-border); padding-bottom: 1rem;}
+.sais-tool-group { display: flex; align-items: center; gap: 0.75rem; }
+.sais-label { font-size: 0.75rem; font-weight: 600; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.05em; }
+.sais-select, .sais-input { background: rgba(0,0,0,0.2); border: 1px solid var(--glass-border); color: var(--text-primary); padding: 0.4rem 0.8rem; border-radius: 6px; font-family: 'Fira Code', monospace; font-size: 0.75rem; outline: none; }
+.sais-select option { background: #0f172a; }
+.sais-slider { width: 120px; accent-color: #f43f5e; }
+
+.sais-btn { padding: 0.45rem 0.9rem; font-size: 0.8rem; font-weight: 600; display: flex; align-items: center; gap: 0.4rem; cursor: pointer; border-radius: 6px; transition: all 0.2s; border: none; }
+.sais-btn-ghost { background: transparent; border: 1px solid var(--glass-border); color: var(--text-primary); }
+.sais-btn-ghost:hover { background: rgba(255,255,255,0.05); }
+.sais-btn:disabled { opacity: 0.5; filter: grayscale(100%); cursor: not-allowed; }
+
+.sais-stats-strip { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; }
+.sais-stat-box { background: rgba(0,0,0,0.15); border: 1px solid var(--glass-border); border-radius: 10px; padding: 0.75rem 1rem; display: flex; justify-content: space-between; align-items: center;}
+.stat-lbl { font-size: 0.75rem; color: var(--text-secondary); text-transform: uppercase; font-weight: 700; letter-spacing: 0.05em;}
+.stat-val { font-family: 'Fira Code', monospace; font-size: 1.25rem; font-weight: 700; color: var(--text-primary); }
+.stat-val.highlight { color: #f43f5e; }
+.stat-val.highlight-danger { color: #8b5cf6; }
+
+.sais-status-bar { padding: 0.75rem 1.25rem; border-radius: 10px; font-size: 0.85rem; color: #06b6d4; margin-bottom: 1rem; background: rgba(6,182,212,0.08); border: 1px solid rgba(6,182,212,0.2); display: flex; align-items: center; gap: 0.75rem; transition: all 0.3s ease; line-height: 1.5; font-weight: 500;}
+.sais-status-bar.warn { color: #f43f5e; background: rgba(244,63,94,0.08); border-color: rgba(244,63,94,0.2); }
+.sais-status-bar.done { color: #10b981; background: rgba(16,185,129,0.08); border-color: rgba(16,185,129,0.2); }
+.status-icon { font-size: 1.1rem; }
+
+.sais-main-layout { display: grid; grid-template-columns: 2fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+@media (max-width: 1000px) { .sais-main-layout { grid-template-columns: 1fr; } }
+
+.sais-panel { background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 16px; padding: 1.25rem; backdrop-filter: blur(10px); display: flex; flex-direction: column; }
+.panel-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
+.panel-title { font-size: 0.95rem; font-weight: 700; color: var(--text-primary); display: flex; align-items: center; gap: 0.5rem; }
+.panel-badges { display: flex; gap: 0.5rem; }
+.badge { font-size: 0.65rem; padding: 0.2rem 0.5rem; border-radius: 4px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; }
+.badge-neutral { background: rgba(255,255,255,0.1); color: var(--text-secondary); border: 1px solid rgba(255,255,255,0.2); }
+.badge-ltype { background: rgba(244,63,94,0.15); color: #f43f5e; border: 1px solid rgba(244,63,94,0.3); }
+.badge-stype { background: rgba(59,130,246,0.15); color: #3b82f6; border: 1px solid rgba(59,130,246,0.3); }
+.badge-lms { background: rgba(16,185,129,0.15); color: #10b981; border: 1px solid rgba(16,185,129,0.3); }
+
+.string-wrapper { display: flex; justify-content: center; margin-bottom: 1rem; overflow-x: auto; padding-bottom: 1rem;}
+.char-grid { display: flex; gap: 2px; }
+.char-col { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.char-idx { font-size: 0.6rem; color: var(--text-secondary); font-family: 'Fira Code', monospace; }
+.char-box { width: 36px; height: 36px; display: flex; justify-content: center; align-items: center; font-family: 'Fira Code', monospace; font-size: 1.2rem; font-weight: 700; background: rgba(0,0,0,0.2); border: 1px solid var(--glass-border); border-radius: 6px; color: var(--text-primary); transition: all 0.3s; }
+.type-lbl { font-size: 0.75rem; font-weight: 700; height: 16px; transition: all 0.3s; }
+.type-lbl.L { color: #f43f5e; }
+.type-lbl.S { color: #3b82f6; }
+.type-lbl.LMS { color: #10b981; text-shadow: 0 0 5px rgba(16,185,129,0.5); }
+
+.char-col.active .char-box { border-color: #06b6d4; box-shadow: 0 0 10px rgba(6,182,212,0.4); transform: translateY(-3px); }
+
+.lms-substr-box { margin-top: 1rem; background: rgba(16,185,129,0.05); border: 1px solid rgba(16,185,129,0.2); border-radius: 8px; padding: 1rem; }
+.lms-title { font-size: 0.75rem; color: #10b981; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 700; margin-bottom: 0.75rem;}
+.lms-list { display: flex; gap: 1rem; flex-wrap: wrap; }
+.lms-item { background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.1); padding: 0.25rem 0.5rem; border-radius: 4px; font-family: 'Fira Code', monospace; font-size: 0.85rem; color: #10b981; }
+
+.sa-bucket-wrapper { display: flex; flex-direction: column; overflow-x: auto; margin-bottom: 1rem; padding-bottom: 1rem; position: relative;}
+.bucket-headers { display: flex; gap: 2px; height: 20px; margin-bottom: 4px; }
+.bucket-hdr { font-family: 'Fira Code', monospace; font-size: 0.7rem; font-weight: 700; display: flex; justify-content: center; align-items: center; border-bottom: 2px solid; }
+.sa-array { display: flex; gap: 2px; }
+.sa-cell-col { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.sa-cell { width: 36px; height: 36px; display: flex; justify-content: center; align-items: center; font-family: 'Fira Code', monospace; font-size: 1rem; font-weight: 700; background: rgba(0,0,0,0.3); border: 1px dashed rgba(255,255,255,0.1); border-radius: 6px; color: var(--text-primary); transition: all 0.3s; }
+.sa-cell.filled { border-style: solid; background: rgba(255,255,255,0.1); }
+.sa-cell.filled.L { border-color: #f43f5e; color: #f43f5e; }
+.sa-cell.filled.S { border-color: #3b82f6; color: #3b82f6; }
+.sa-cell.filled.LMS { border-color: #10b981; color: #10b981; }
+.sa-cell.active { box-shadow: 0 0 10px rgba(255,255,255,0.5); transform: translateY(-2px); }
+
+.induced-anim-box { text-align: center; font-family: 'Fira Code', monospace; font-size: 0.85rem; padding: 0.5rem; background: rgba(6,182,212,0.1); border: 1px solid rgba(6,182,212,0.3); border-radius: 6px; color: #06b6d4; }
+.ind-hl { font-weight: 700; color: #fff; background: rgba(0,0,0,0.3); padding: 0.1rem 0.3rem; border-radius: 4px;}
+
+.log-console { background: #0f172a; border: 1px solid var(--glass-border); border-radius: 8px; height: 240px; overflow-y: auto; padding: 1rem; font-family: 'Fira Code', monospace; font-size: 0.75rem; color: #a1a1aa; line-height: 1.6; display: flex; flex-direction: column; gap: 4px; }
+.log-entry.phase { color: #fff; font-weight: 700; background: rgba(255,255,255,0.1); padding: 2px 5px; border-radius: 4px; display: inline-block; margin: 5px 0;}
+.log-entry.info { color: #06b6d4; }
+.log-entry.ltype { color: #f43f5e; }
+.log-entry.stype { color: #3b82f6; }
+.log-entry.lms { color: #10b981; }
+
+.sais-learn-section { margin-top: 3rem; }
+.learn-heading { font-family: Orbitron, sans-serif; font-size: 1.5rem; font-weight: 700; color: var(--text-primary); margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.75rem; }
+.sais-learn-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; }
+.sais-learn-card { background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 16px; padding: 1.5rem; backdrop-filter: blur(10px); position: relative; overflow: hidden; transition: transform 0.2s ease; }
+.sais-learn-card:hover { transform: translateY(-3px); }
+.sais-learn-card::before { content:""; position:absolute; top:0;left:0;width:100%;height:3px; background:var(--lc,#f43f5e); }
+.learn-icon { font-size: 2rem; margin-bottom: 0.75rem; }
+.sais-learn-card h3 { font-size: 1.05rem; font-weight: 700; margin-bottom: 0.75rem; color: var(--text-primary); }
+.sais-learn-card p  { font-size: 0.85rem; color: var(--text-secondary); line-height: 1.7; }

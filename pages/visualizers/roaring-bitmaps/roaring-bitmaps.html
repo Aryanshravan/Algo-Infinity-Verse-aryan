@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Roaring Bitmaps Visualizer | Algo Infinity Verse</title>
+    <meta
+      name="description"
+      content="Visualize how Roaring Bitmaps compress integers using Array, Bitmap, and Run containers."
+    />
+
+    <link
+      href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Poppins:wght@300;400;500;600;700&family=Fira+Code:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+
+    <link rel="stylesheet" href="roaring-bitmaps.css" />
+    <script src="/theme.js"></script>
+  </head>
+  <body class="roaring-body">
+    <nav class="navbar roaring-nav">
+      <div class="nav-logo">
+        <span class="logo-text">∞</span>
+        <span class="logo-title">Algo Infinity Verse</span>
+      </div>
+      <div class="engine-badge"><i class="fas fa-server"></i> Data Structures</div>
+    </nav>
+
+    <main class="roaring-workspace">
+      <header class="workspace-header">
+        <h1>Roaring Bitmaps Data Compression</h1>
+        <p class="subtitle">
+          Roaring Bitmaps compress 32-bit integer sets by dividing them into chunks. Watch it
+          dynamically choose Array, Bitmap, or Run-Length Encoding containers to save memory.
+        </p>
+
+        <div class="control-panel">
+          <input
+            type="number"
+            id="numInput"
+            placeholder="Enter integer (0-100000)"
+            class="data-input"
+            min="0"
+            max="100000"
+          />
+          <button id="btnInsert" class="btn btn-primary"><i class="fas fa-plus"></i> Insert</button>
+          <button id="btnInsertRandom" class="btn btn-warning">
+            <i class="fas fa-random"></i> Insert Random
+          </button>
+          <button id="btnInsertRun" class="btn btn-success">
+            <i class="fas fa-arrow-right"></i> Insert Sequence (Run)
+          </button>
+          <button id="btnReset" class="btn btn-danger">
+            <i class="fas fa-trash-alt"></i> Reset
+          </button>
+        </div>
+      </header>
+
+      <div class="visualizer-content">
+        <section class="container-panel">
+          <div class="panel-header">
+            <h2><i class="fas fa-boxes"></i> Roaring Containers</h2>
+          </div>
+
+          <div class="containers-grid" id="containersGrid">
+            <!-- Dynamic containers appear here -->
+            <div class="empty-state" id="emptyState">No integers inserted yet.</div>
+          </div>
+        </section>
+
+        <section class="info-panel">
+          <div class="panel-header">
+            <h2><i class="fas fa-memory"></i> Memory Comparison</h2>
+          </div>
+
+          <div class="memory-stats">
+            <div class="stat-card">
+              <div class="stat-title">Naive Bitset (32-bit range)</div>
+              <div class="stat-value text-danger">536,870,912 Bytes</div>
+              <div class="stat-desc">Allocates bit for all possible ints</div>
+            </div>
+
+            <div class="stat-card">
+              <div class="stat-title">Naive Array</div>
+              <div class="stat-value text-warning" id="arrayMem">0 Bytes</div>
+              <div class="stat-desc">4 bytes per integer inserted</div>
+            </div>
+
+            <div class="stat-card highlighted">
+              <div class="stat-title">Roaring Bitmap</div>
+              <div class="stat-value text-success" id="roaringMem">0 Bytes</div>
+              <div class="stat-desc" id="compressionRatio">Compression: 0%</div>
+            </div>
+          </div>
+
+          <div class="algorithm-details">
+            <h3>Container Types:</h3>
+            <ul>
+              <li>
+                <span class="badge badge-array">Array</span>
+                <strong>&lt; 4096 elements:</strong> Stores 16-bit integers directly. Cost: 2 bytes
+                per element.
+              </li>
+              <li>
+                <span class="badge badge-bitmap">Bitmap</span>
+                <strong>&gt; 4096 elements:</strong> Uses a bitset. Fixed cost: 8192 bytes.
+              </li>
+              <li>
+                <span class="badge badge-run">Run</span>
+                <strong>Continuous sequences:</strong> Stores (start, length). Extremely efficient
+                for dense runs.
+              </li>
+            </ul>
+          </div>
+        </section>
+      </div>
+    </main>
+
+    <script src="roaring-bitmaps.js"></script>
+  </body>
+</html>

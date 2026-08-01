@@ -1,0 +1,290 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CRDT Tombstone Compaction Lab | Algo Infinity Verse</title>
+  <meta name="description" content="Learn LWW, OR-Set, conflicts, tombstones, compaction, memory pressure, and merge strategies with a concurrent edit simulator, compaction recommender, and quiz." />
+  <link rel="stylesheet" href="/styles.css" />
+  <link rel="stylesheet" href="style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Poppins:wght@300;400;500;600;700&family=Fira+Code:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <script>
+    (function () {
+      try {
+        var storedTheme = localStorage.getItem('theme');
+        var prefersLight = window.matchMedia('(prefers-color-scheme: light)').matches;
+        var theme = storedTheme || (prefersLight ? 'light' : 'dark');
+        if (theme === 'light') {
+          document.documentElement.classList.add('light-mode');
+        } else {
+          document.documentElement.classList.remove('light-mode');
+        }
+      } catch (e) {}
+    })();
+  </script>
+</head>
+<body data-page="crdt-tombstone-compaction-lab">
+  <a href="#crdt-main" class="crdt-skip-link">Skip to main content</a>
+  <button type="button" id="scrollTopBtn" class="scroll-top-btn" aria-label="Scroll to top">
+    <i class="fas fa-arrow-up" aria-hidden="true"></i>
+  </button>
+
+  <div id="navbar-placeholder"></div>
+
+  <header class="crdt-hero">
+    <div class="crdt-hero-badge">
+      <i class="fas fa-code-merge" aria-hidden="true"></i>
+      Distributed Systems Academy
+    </div>
+    <h1>
+      CRDT Tombstone
+      <span class="crdt-hero-accent">Compaction Lab</span>
+    </h1>
+    <p>
+      Master LWW registers, OR-Sets, conflict resolution, tombstone growth, compaction policies,
+      and memory pressure — with a concurrent merge simulator and quiz.
+    </p>
+    <div class="crdt-hero-stats" aria-live="polite">
+      <div class="crdt-stat">
+        <span class="crdt-stat-val" id="statModulesDone">0</span>
+        <span class="crdt-stat-label">Modules done</span>
+      </div>
+      <div class="crdt-stat">
+        <span class="crdt-stat-val" id="statModulesTotal">8</span>
+        <span class="crdt-stat-label">Total modules</span>
+      </div>
+      <div class="crdt-stat">
+        <span class="crdt-stat-val" id="statProgressPct">0%</span>
+        <span class="crdt-stat-label">Progress</span>
+      </div>
+      <div class="crdt-stat">
+        <span class="crdt-stat-val" id="statQuizBest">—</span>
+        <span class="crdt-stat-label">Quiz best</span>
+      </div>
+    </div>
+    <div class="crdt-progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-label="Course progress" id="heroProgressBar">
+      <div class="crdt-progress-fill" id="heroProgressFill"></div>
+    </div>
+  </header>
+
+  <main id="crdt-main" class="crdt-main">
+    <div class="crdt-container">
+
+      <section class="crdt-section" aria-labelledby="modules-title">
+        <div class="crdt-section-head">
+          <h2 id="modules-title">
+            <i class="fas fa-book-open" aria-hidden="true"></i>
+            Learning modules
+          </h2>
+          <p>Eight lessons on CRDTs, tombstones, and compaction. Mark each complete to track progress.</p>
+        </div>
+
+        <div class="crdt-modules-layout">
+          <nav class="crdt-module-nav" aria-label="Module list">
+            <ul class="crdt-module-list" id="moduleList" role="list"></ul>
+          </nav>
+
+          <article class="crdt-lesson-panel" id="lessonPanel" aria-labelledby="lessonTitle">
+            <div class="crdt-lesson-header">
+              <h3 id="lessonTitle">Select a module</h3>
+              <span class="crdt-lesson-badge" id="lessonBadge" hidden>Completed</span>
+            </div>
+            <div class="crdt-lesson-body" id="lessonBody">
+              <p class="crdt-muted">Choose a module from the sidebar to begin.</p>
+            </div>
+            <div class="crdt-lesson-actions">
+              <button type="button" class="crdt-btn crdt-btn-primary" id="markCompleteBtn" disabled>
+                <i class="fas fa-check" aria-hidden="true"></i>
+                Mark complete
+              </button>
+              <button type="button" class="crdt-btn crdt-btn-ghost" id="prevModuleBtn" disabled>
+                <i class="fas fa-chevron-left" aria-hidden="true"></i>
+                Previous
+              </button>
+              <button type="button" class="crdt-btn crdt-btn-ghost" id="nextModuleBtn" disabled>
+                Next
+                <i class="fas fa-chevron-right" aria-hidden="true"></i>
+              </button>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section class="crdt-section" aria-labelledby="sim-title">
+        <div class="crdt-section-head">
+          <h2 id="sim-title">
+            <i class="fas fa-shuffle" aria-hidden="true"></i>
+            Concurrent edit merge simulator
+          </h2>
+          <p>Choose a CRDT type, inject concurrent ops from two replicas, and watch how merges and tombstones behave.</p>
+        </div>
+
+        <div class="crdt-lab-grid">
+          <div class="crdt-panel">
+            <label class="crdt-label" for="crdtType">CRDT type</label>
+            <select id="crdtType" class="crdt-select">
+              <option value="lww">LWW Register</option>
+              <option value="orset">OR-Set</option>
+              <option value="lww-map">LWW-Map (key/value)</option>
+            </select>
+
+            <label class="crdt-label" for="replicaAOps">Replica A concurrent ops</label>
+            <textarea id="replicaAOps" class="crdt-textarea" rows="4" spellcheck="false" aria-describedby="opsHintA">set:title=Hello@t=10
+add:tag=alpha</textarea>
+
+            <label class="crdt-label" for="replicaBOps">Replica B concurrent ops</label>
+            <textarea id="replicaBOps" class="crdt-textarea" rows="4" spellcheck="false" aria-describedby="opsHintB">set:title=World@t=12
+remove:tag=alpha
+add:tag=beta</textarea>
+            <p class="crdt-hint" id="opsHintA">Use <code>set:key=val@t=N</code>, <code>add:elem</code>, <code>remove:elem</code>. Higher <code>t</code> wins for LWW.</p>
+
+            <label class="crdt-label" for="injectBurst">Inject tombstone burst size</label>
+            <input type="range" id="injectBurst" class="crdt-range" min="0" max="500" value="50" aria-valuemin="0" aria-valuemax="500" aria-valuenow="50" />
+            <span class="crdt-hint" id="burstLabel">50 removals</span>
+
+            <div class="crdt-btn-row">
+              <button type="button" class="crdt-btn crdt-btn-primary" id="runMergeBtn">
+                <i class="fas fa-bolt" aria-hidden="true"></i>
+                Merge concurrent ops
+              </button>
+              <button type="button" class="crdt-btn crdt-btn-ghost" id="resetMergeBtn">
+                <i class="fas fa-rotate-left" aria-hidden="true"></i>
+                Reset
+              </button>
+            </div>
+          </div>
+
+          <div class="crdt-panel">
+            <h3 class="crdt-panel-subtitle">Merged state &amp; tombstones</h3>
+            <div id="mergeOut" class="crdt-outcome-box" role="status" aria-live="assertive">
+              <p class="crdt-muted">Configure ops and run a merge.</p>
+            </div>
+            <div class="crdt-meter-block">
+              <div class="crdt-meter-head">
+                <span>Tombstone / memory pressure</span>
+                <span id="pressurePct">0%</span>
+              </div>
+              <div class="crdt-meter-track" role="meter" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-label="Memory pressure" id="pressureMeter">
+                <div class="crdt-meter-fill" id="pressureFill"></div>
+              </div>
+              <p class="crdt-hint" id="pressureNote">Pressure rises with live tombstones vs live elements.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="crdt-section" aria-labelledby="rec-title">
+        <div class="crdt-section-head">
+          <h2 id="rec-title">
+            <i class="fas fa-lightbulb" aria-hidden="true"></i>
+            Compaction policy recommendation engine
+          </h2>
+          <p>Describe workload shape and retention needs. Get a compaction / GC policy recommendation.</p>
+        </div>
+
+        <div class="crdt-lab-grid">
+          <div class="crdt-panel">
+            <fieldset class="crdt-fieldset">
+              <legend class="crdt-label">Workload</legend>
+              <label class="crdt-check">
+                <input type="radio" name="workload" id="wlChat" value="chat" checked />
+                High churn deletes (chat / presence)
+              </label>
+              <label class="crdt-check">
+                <input type="radio" name="workload" id="wlDoc" value="doc" />
+                Collaborative documents (long-lived keys)
+              </label>
+              <label class="crdt-check">
+                <input type="radio" name="workload" id="wlSync" value="sync" />
+                Multi-device sync with offline windows
+              </label>
+            </fieldset>
+
+            <fieldset class="crdt-fieldset">
+              <legend class="crdt-label">Constraints</legend>
+              <label class="crdt-check">
+                <input type="checkbox" id="reqCausal" checked />
+                Must preserve causal safety (no resurrection bugs)
+              </label>
+              <label class="crdt-check">
+                <input type="checkbox" id="reqLowMem" checked />
+                Memory / disk budget is tight
+              </label>
+              <label class="crdt-check">
+                <input type="checkbox" id="reqOffline" />
+                Devices can be offline for days
+              </label>
+              <label class="crdt-check">
+                <input type="checkbox" id="reqSimple" />
+                Prefer operational simplicity
+              </label>
+            </fieldset>
+
+            <div class="crdt-btn-row">
+              <button type="button" class="crdt-btn crdt-btn-primary" id="recommendBtn">
+                <i class="fas fa-wand-magic-sparkles" aria-hidden="true"></i>
+                Recommend policy
+              </button>
+              <button type="button" class="crdt-btn crdt-btn-ghost" id="resetRecBtn">
+                <i class="fas fa-rotate-left" aria-hidden="true"></i>
+                Reset
+              </button>
+            </div>
+          </div>
+
+          <div class="crdt-panel">
+            <h3 class="crdt-panel-subtitle">Recommendation</h3>
+            <div id="recResults" class="crdt-results" role="status" aria-live="polite">
+              <p class="crdt-muted">Select constraints and click Recommend.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="crdt-section" aria-labelledby="quiz-title">
+        <div class="crdt-section-head">
+          <h2 id="quiz-title">
+            <i class="fas fa-clipboard-question" aria-hidden="true"></i>
+            Self-assessment quiz
+          </h2>
+          <p>Seven questions on CRDTs, tombstones, and compaction. Best score is saved in localStorage.</p>
+        </div>
+
+        <div class="crdt-panel">
+          <form id="quizForm" class="crdt-quiz" novalidate>
+            <div id="quizQuestions"></div>
+            <div class="crdt-btn-row">
+              <button type="submit" class="crdt-btn crdt-btn-primary" id="submitQuizBtn">
+                <i class="fas fa-paper-plane" aria-hidden="true"></i>
+                Submit quiz
+              </button>
+              <button type="button" class="crdt-btn crdt-btn-ghost" id="resetQuizBtn">
+                <i class="fas fa-rotate-left" aria-hidden="true"></i>
+                Reset
+              </button>
+            </div>
+          </form>
+          <div id="quizResult" class="crdt-quiz-result" role="status" aria-live="polite" hidden></div>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <div id="footer-placeholder"></div>
+
+  <script src="/auth.js"></script>
+  <script src="/bootstrap-legacy.js"></script>
+  <script src="/script.js"></script>
+  <script type="module" src="/dist/legacy-bundle.mjs"></script>
+  <script src="/theme.js"></script>
+  <script src="script.js"></script>
+  <script>
+    if (typeof loadPartial === 'function') {
+      loadPartial('navbar-placeholder', '/partials/navbar.html');
+      loadPartial('footer-placeholder', '/partials/footer.html');
+    }
+  </script>
+</body>
+</html>

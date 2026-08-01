@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>BGP Cyber-Warfare Simulator | Algo Infinity Verse</title>
+    <link rel="stylesheet" href="/styles.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <!-- Vis.js for Network Graphing -->
+    <script type="text/javascript" src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
+    <style>
+      .bgp-container { padding: 40px 20px; max-width: 1400px; margin: 0 auto; color: #e2e8f0; display: flex; gap: 20px; height: 85vh; }
+      .bgp-sidebar { flex: 1; background: rgba(15, 23, 42, 0.9); border: 1px solid #ef4444; padding: 20px; border-radius: 12px; display: flex; flex-direction: column; }
+      .bgp-main { flex: 3; background: #020617; border: 1px solid #334155; border-radius: 12px; position: relative; overflow: hidden; }
+      #network { width: 100%; height: 100%; }
+      .bgp-log { flex: 1; background: #000; color: #f87171; font-family: monospace; font-size: 0.8rem; padding: 10px; border-radius: 8px; overflow-y: auto; margin-top: 20px; border: 1px solid #7f1d1d; }
+      .btn-attack { background: #ef4444; color: white; border: none; padding: 10px; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.3s; margin-top: 10px; }
+      .btn-attack:hover { background: #dc2626; }
+      .btn-defend { background: #10b981; color: white; border: none; padding: 10px; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.3s; margin-top: 10px; }
+      .btn-defend:hover { background: #059669; }
+      .hud { position: absolute; top: 20px; left: 20px; background: rgba(0,0,0,0.7); padding: 15px; border-radius: 8px; border: 1px solid #334155; pointer-events: none; }
+      .hud h3 { margin: 0; color: #38bdf8; font-family: 'Orbitron', sans-serif; font-size: 1rem; }
+    </style>
+  </head>
+  <body class="dark-mode" style="background: #020617; margin: 0; overflow: hidden;">
+    <div id="navbar-placeholder"></div>
+
+    <div class="bgp-container">
+      <div class="bgp-sidebar">
+        <h2 style="margin-top:0; color: #ef4444; font-family: 'Orbitron', sans-serif;"><i class="fas fa-satellite-dish"></i> BGP Hijack Simulator</h2>
+        <p style="font-size: 0.9rem; color: #94a3b8;">Simulate nation-state cyber attacks on global Autonomous Systems (AS).</p>
+        
+        <button class="btn-attack" onclick="simulateBGPLeak()"><i class="fas fa-biohazard"></i> Inject BGP Route Leak (Attack)</button>
+        <button class="btn-attack" onclick="simulateDDoS()"><i class="fas fa-meteor"></i> Launch Volumetric DDoS</button>
+        
+        <hr style="border-color: #334155; margin: 20px 0;">
+
+        <button class="btn-defend" onclick="executeDefensiveAlgorithm()"><i class="fas fa-shield-alt"></i> Execute Autonomous Rerouting</button>
+        
+        <div class="bgp-log" id="terminalLog">
+          > Global BGP Table Loaded.<br>
+          > Monitoring Autonomous Systems for anomalies...<br>
+        </div>
+      </div>
+
+      <div class="bgp-main">
+        <div class="hud">
+          <h3>Network Status: <span id="netStatus" style="color:#10b981;">SECURE</span></h3>
+          <div style="font-size: 0.8rem; margin-top: 5px;">Packet Loss: <span id="pktLoss">0.02%</span></div>
+          <div style="font-size: 0.8rem;">BGP Flaps: <span id="bgpFlaps">12/min</span></div>
+        </div>
+        <div id="network"></div>
+      </div>
+    </div>
+
+    <script src="/script.js"></script>
+    <script type="module" src="/dist/legacy-bundle.mjs"></script>
+    <script>
+      fetch('/partials/navbar.html').then(r=>r.text()).then(html => document.getElementById('navbar-placeholder').innerHTML = html).catch(e => console.log('Navbar load failed.'));
+
+      const log = document.getElementById("terminalLog");
+      function writeLog(msg, color="#f87171") {
+        log.innerHTML += `<span style="color:${color}">> ${msg}</span><br>`;
+        log.scrollTop = log.scrollHeight;
+      }
+
+      // Initialize Vis.js Network
+      const nodes = new vis.DataSet([
+        { id: 1, label: "AS15169\n(Google)", color: "#38bdf8", shape: "hexagon" },
+        { id: 2, label: "AS8075\n(Microsoft)", color: "#38bdf8", shape: "hexagon" },
+        { id: 3, label: "AS13335\n(Cloudflare)", color: "#38bdf8", shape: "hexagon" },
+        { id: 4, label: "AS3356\n(Level3)", color: "#94a3b8", shape: "dot" },
+        { id: 5, label: "AS174\n(Cogent)", color: "#94a3b8", shape: "dot" },
+        { id: 6, label: "AS2914\n(NTT)", color: "#94a3b8", shape: "dot" },
+        { id: 7, label: "AS7018\n(AT&T)", color: "#94a3b8", shape: "dot" },
+        { id: 8, label: "Rogue AS\n(Attacker)", color: "#000", font: {color: "#ef4444"}, shape: "triangle", size: 30 }
+      ]);
+
+      const edges = new vis.DataSet([
+        { id: 'e1', from: 4, to: 1, color: {color: '#10b981'} },
+        { id: 'e2', from: 5, to: 2, color: {color: '#10b981'} },
+        { id: 'e3', from: 6, to: 3, color: {color: '#10b981'} },
+        { id: 'e4', from: 4, to: 5, color: {color: '#475569'} },
+        { id: 'e5', from: 5, to: 6, color: {color: '#475569'} },
+        { id: 'e6', from: 6, to: 7, color: {color: '#475569'} },
+        { id: 'e7', from: 7, to: 1, color: {color: '#10b981'} },
+      ]);
+
+      const container = document.getElementById("network");
+      const data = { nodes: nodes, edges: edges };
+      const options = {
+        nodes: { font: { color: "#fff", face: "monospace" } },
+        edges: { width: 2, smooth: { type: 'continuous' } },
+        physics: { barnesHut: { gravitationalConstant: -2000, centralGravity: 0.3, springLength: 150 } }
+      };
+      
+      const network = new vis.Network(container, data, options);
+
+      // Simulation Actions
+      function simulateBGPLeak() {
+        document.getElementById("netStatus").innerText = "COMPROMISED";
+        document.getElementById("netStatus").style.color = "#ef4444";
+        document.getElementById("bgpFlaps").innerText = "14,302/min";
+        
+        writeLog("WARNING: BGP Route Leak detected from Rogue AS.");
+        
+        // Attacker announces a more specific prefix (/24) for Google (AS15169)
+        edges.add({ id: 'a1', from: 8, to: 4, color: {color: '#ef4444'}, dashes: true });
+        edges.add({ id: 'a2', from: 8, to: 5, color: {color: '#ef4444'}, dashes: true });
+        
+        // Traffic from transit providers starts flowing to Attacker instead of Google
+        edges.update({ id: 'e1', color: {color: '#ef4444'} });
+        
+        nodes.update({ id: 8, color: "#ef4444" });
+        nodes.update({ id: 1, color: "#ef4444" }); // Google goes offline
+      }
+
+      function simulateDDoS() {
+        document.getElementById("netStatus").innerText = "UNDER ATTACK";
+        document.getElementById("netStatus").style.color = "#ef4444";
+        document.getElementById("pktLoss").innerText = "89.4%";
+
+        writeLog("CRITICAL: Volumetric DDoS hitting AS13335 (Cloudflare).");
+        nodes.update({ id: 3, color: "#ef4444", size: 40 });
+        edges.update({ id: 'e3', color: {color: '#ef4444'}, width: 8 });
+      }
+
+      function executeDefensiveAlgorithm() {
+        writeLog("Executing Reroute Algorithm...", "#10b981");
+        
+        setTimeout(() => {
+          writeLog("Injecting Blackhole Routes (BGP RTBH)...", "#10b981");
+          nodes.update({ id: 8, color: "#000" }); // Attacker blackholed
+          
+          if(edges.get('a1')) edges.remove(['a1', 'a2']); // Drop attacker links
+          
+          writeLog("Scrubbing traffic through Anycast nodes...", "#10b981");
+          nodes.update({ id: 3, color: "#38bdf8", size: 25 });
+          
+          writeLog("Traffic restored. O(E log V) Dijkstra recalculation complete.", "#10b981");
+          edges.update({ id: 'e1', color: {color: '#10b981'}, width: 2 });
+          edges.update({ id: 'e3', color: {color: '#10b981'}, width: 2 });
+          nodes.update({ id: 1, color: "#38bdf8" });
+
+          document.getElementById("netStatus").innerText = "SECURE";
+          document.getElementById("netStatus").style.color = "#10b981";
+          document.getElementById("pktLoss").innerText = "0.01%";
+          document.getElementById("bgpFlaps").innerText = "2/min";
+        }, 1500);
+      }
+    </script>
+  </body>
+</html>

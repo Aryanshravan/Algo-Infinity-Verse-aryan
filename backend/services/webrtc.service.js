@@ -141,6 +141,7 @@ export class WebRTCService {
     this.rooms = new Map();
     this.peers = new Map();
     this.roomTimeouts = new Map();
+    this.roomOpSequences = new Map();
     this.maxRoomSize = options.maxRoomSize || MAX_ROOM_SIZE;
     this.roomTimeout = options.roomTimeout || ROOM_TIMEOUT_MS;
   }
@@ -166,6 +167,7 @@ export class WebRTCService {
     const timeout = setTimeout(() => {
       if (this.rooms.has(roomName) && this.rooms.get(roomName).size === 0) {
         this.rooms.delete(roomName);
+        this.roomOpSequences.delete(roomName);
         console.log(`[WebRTC] Cleaned empty room: ${roomName}`);
       }
       this.roomTimeouts.delete(roomName);
@@ -519,10 +521,74 @@ export class WebRTCService {
   }
 
   /**
+   * Handle WebRTC OT operation with room sequence numbers and vector clocks
+   * @param {Object} socket - Socket instance
+   * @param {string} roomId - Room ID
+   * @param {Object} opData - Operation payload
+   * @param {string} targetSocketId - Target socket ID
+   */
+  handleOtOperation(socket, roomId, opData, targetSocketId) {
+    try {
+      const roomValidation = validateRoomId(roomId);
+      if (!roomValidation.valid) {
+        socket.emit('error', { message: roomValidation.error });
+        return;
+      }
+      const validRoomId = roomValidation.value;
+      const roomName = this.getRoomName(validRoomId);
+
+      if (!opData || typeof opData !== 'object') {
+        socket.emit('error', { message: 'Invalid OT operation payload.' });
+        return;
+      }
+
+      const currentSeq = (this.roomOpSequences.get(roomName) || 0) + 1;
+      this.roomOpSequences.set(roomName, currentSeq);
+
+      const enrichedOp = {
+        ...opData,
+        opSeq: currentSeq,
+        senderSocketId: socket.id,
+        timestamp: Date.now(),
+      };
+
+      if (targetSocketId) {
+        const targetValidation = validateTargetSocketId(targetSocketId);
+        if (targetValidation.valid) {
+          socket.to(targetSocketId).emit('webrtc-ot-operation', enrichedOp, socket.id);
+        }
+      } else {
+        socket.to(roomName).emit('webrtc-ot-operation', enrichedOp, socket.id);
+      }
+    } catch (error) {
+      console.error('[WebRTC] OT operation error:', error);
+      socket.emit('error', { message: 'Failed to process OT operation.' });
+    }
+  }
+
+  /**
    * Setup WebRTC signaling for socket
    * @param {Object} socket - Socket instance
    */
   setup(socket) {
+    // Heartbeat mechanism for stale connection cleanup
+    socket.webrtcLastPong = Date.now();
+
+    socket.on('webrtc-pong', () => {
+      socket.webrtcLastPong = Date.now();
+    });
+
+    const pingInterval = setInterval(() => {
+      if (Date.now() - socket.webrtcLastPong > 60000) {
+        console.log(`[WebRTC] Stale connection detected for socket ${socket.id}, cleaning up...`);
+        clearInterval(pingInterval);
+        this.handleDisconnect(socket);
+        socket.disconnect(true);
+      } else {
+        socket.emit('webrtc-ping');
+      }
+    }, 30000);
+
     // Join room
     socket.on('webrtc-join', (roomId, userId) => {
       this.handleJoin(socket, roomId, userId);
@@ -546,6 +612,11 @@ export class WebRTCService {
       this.handleIceCandidate(socket, roomId, candidate, targetSocketId);
     });
 
+    // OT operations
+    socket.on('webrtc-ot-operation', (roomId, opData, targetSocketId) => {
+      this.handleOtOperation(socket, roomId, opData, targetSocketId);
+    });
+
     // Screen sharing
     socket.on('webrtc-screen-share', (roomId, enabled, targetSocketId) => {
       this.handleScreenShare(socket, roomId, enabled, targetSocketId);
@@ -558,6 +629,7 @@ export class WebRTCService {
 
     // Disconnect
     socket.on('disconnect', () => {
+      clearInterval(pingInterval);
       this.handleDisconnect(socket);
     });
   }

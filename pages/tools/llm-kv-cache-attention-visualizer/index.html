@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LLM Multi-Head Attention & KV-Cache Memory Studio — Algo Infinity Verse</title>
+  <meta name="description" content="Simulate Large Language Model (LLM) Transformer attention mechanics, Q/K/V matrix multiplications, attention weight heatmaps, and KV-Cache VRAM allocation." />
+  
+  <link rel="stylesheet" href="../../../styles.css" />
+  <link rel="stylesheet" href="style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+
+  <script>
+    (function() {
+      try {
+        var t = localStorage.getItem('theme');
+        var p = window.matchMedia('(prefers-color-scheme: light)').matches;
+        var theme = t || (p ? 'light' : 'dark');
+        if (theme === 'light') document.documentElement.classList.add('light-mode');
+      } catch (e) {}
+    })();
+  </script>
+</head>
+<body data-page="llm-studio">
+
+  <header class="llm-header">
+    <div class="llm-header-container">
+      <a href="../tools.html" class="llm-back-btn">
+        <i class="fas fa-arrow-left"></i>
+        <span>Tools Hub</span>
+      </a>
+      <div class="llm-title-area">
+        <h1><i class="fas fa-brain"></i> LLM Attention &amp; KV-Cache Memory Studio</h1>
+        <p>Transformer Multi-Head Attention Heatmaps, Q/K/V Matrices, and vLLM PagedAttention VRAM Allocation</p>
+      </div>
+      <div class="llm-header-actions">
+        <button id="themeToggleBtn" class="llm-icon-btn" title="Toggle Theme">
+          <i class="fas fa-moon"></i>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="llm-main">
+    <!-- INPUT & CONFIG BAR -->
+    <div class="llm-toolbar">
+      <div class="llm-input-group">
+        <label><i class="fas fa-quote-left"></i> Prompt Tokens:</label>
+        <input type="text" id="llmPromptInput" class="llm-input" value="The cat sat on the mat" placeholder="Enter prompt text..." />
+        <button id="btnComputeAttention" class="llm-btn llm-btn-primary"><i class="fas fa-microchip"></i> Compute Q/K/V &amp; Attention</button>
+      </div>
+      <div class="llm-config-group">
+        <label>Attention Heads:</label>
+        <select id="headSelect" class="llm-select">
+          <option value="1">Head 1 (Syntax / Grammar)</option>
+          <option value="2">Head 2 (Semantic Context)</option>
+        </select>
+        <button id="btnGenerateToken" class="llm-btn llm-btn-success"><i class="fas fa-forward-step"></i> Generate Next Token (+1)</button>
+      </div>
+    </div>
+
+    <!-- MAIN GRID LAYOUT -->
+    <div class="llm-grid">
+      
+      <!-- LEFT: ATTENTION HEATMAP & Q/K/V MATRICES -->
+      <div class="llm-card llm-heatmap-card">
+        <div class="llm-card-header">
+          <h2><i class="fas fa-th"></i> Scaled Dot-Product Attention Heatmap</h2>
+          <div class="llm-formula">
+            <code>Attention(Q,K,V) = Softmax( (Q · K<sup>T</sup>) / √d<sub>k</sub> ) · V</code>
+          </div>
+        </div>
+        
+        <!-- TOKEN CHIPS DISPLAY -->
+        <div class="llm-tokens-bar" id="tokensDisplay">
+          <!-- Rendered by JS -->
+        </div>
+
+        <!-- HEATMAP CONTAINER -->
+        <div class="llm-heatmap-wrapper">
+          <div id="heatmapGrid" class="llm-heatmap-grid">
+            <!-- Heatmap table rendered by JS -->
+          </div>
+        </div>
+
+        <div class="llm-hover-info" id="hoverInfoBox">
+          <i class="fas fa-info-circle"></i> Hover over any cell in the heatmap matrix to inspect Query-Key cross-attention weights.
+        </div>
+      </div>
+
+      <!-- RIGHT: KV-CACHE VRAM TRACKER & PAGED ATTENTION -->
+      <div class="llm-side-panel">
+        
+        <!-- TABS NAV -->
+        <div class="llm-tabs">
+          <button class="llm-tab-btn active" data-tab="kvcache"><i class="fas fa-memory"></i> KV-Cache VRAM</button>
+          <button class="llm-tab-btn" data-tab="paged"><i class="fas fa-cubes-stacked"></i> PagedAttention</button>
+          <button class="llm-tab-btn" data-tab="qkv"><i class="fas fa-table-cells-large"></i> Q/K/V Matrices</button>
+        </div>
+
+        <!-- TAB 1: KV-CACHE VRAM TRACKER -->
+        <div class="llm-tab-content active" id="tab-kvcache">
+          <div class="llm-card-body">
+            <h3><i class="fas fa-chart-pie"></i> GPU VRAM Memory Allocation</h3>
+            
+            <div class="llm-vram-stats">
+              <div class="llm-stat-box">
+                <span class="llm-stat-label">Cache Memory</span>
+                <span class="llm-stat-value" id="vramUsageVal">0.12 MB</span>
+              </div>
+              <div class="llm-stat-box">
+                <span class="llm-stat-label">Sequence Length</span>
+                <span class="llm-stat-value" id="seqLenVal">6 Tokens</span>
+              </div>
+              <div class="llm-stat-box">
+                <span class="llm-stat-label">Savings vs Naive</span>
+                <span class="llm-stat-value llm-green" id="vramSavingsVal">85%</span>
+              </div>
+            </div>
+
+            <hr class="llm-divider" />
+
+            <h4><i class="fas fa-database"></i> Appended Key-Value Cache Buffer</h4>
+            <div class="llm-table-scroll">
+              <table class="llm-table">
+                <thead>
+                  <tr>
+                    <th>Token Position</th>
+                    <th>Token Text</th>
+                    <th>Key Vector (K<sub>i</sub>)</th>
+                    <th>Value Vector (V<sub>i</sub>)</th>
+                  </tr>
+                </thead>
+                <tbody id="kvCacheTableBody">
+                  <!-- Rendered by JS -->
+                </tbody>
+              </table>
+            </div>
+
+            <div class="llm-callout llm-callout-success">
+              <i class="fas fa-bolt"></i> <strong>Why KV-Cache?</strong> Without KV-Cache, generating each token requires re-computing Key and Value vectors for all $N$ previous tokens ($O(N^2)$ FLOPs). KV-Cache reduces decoding to $O(N)$!
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB 2: PAGED ATTENTION SIMULATOR -->
+        <div class="llm-tab-content" id="tab-paged">
+          <div class="llm-card-body">
+            <h3><i class="fas fa-layer-group"></i> vLLM PagedAttention Virtual Memory</h3>
+            <p>Maps logical token blocks to non-contiguous physical GPU VRAM memory blocks to eliminate fragmentation.</p>
+
+            <div class="llm-blocks-grid" id="pagedBlocksGrid">
+              <!-- Rendered by JS -->
+            </div>
+
+            <div class="llm-block-table-wrapper">
+              <h4>Logical to Physical Block Table</h4>
+              <table class="llm-table">
+                <thead>
+                  <tr>
+                    <th>Logical Block ID</th>
+                    <th>Tokens Contained</th>
+                    <th>Physical Memory Page Frame</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody id="blockTableBody">
+                  <!-- Rendered by JS -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB 3: Q/K/V MATRICES -->
+        <div class="llm-tab-content" id="tab-qkv">
+          <div class="llm-card-body">
+            <h3><i class="fas fa-matrix"></i> Query, Key &amp; Value Projections</h3>
+            <div class="llm-qkv-containers" id="qkvMatricesContainer">
+              <!-- Rendered by JS -->
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- CONSOLE LOG -->
+    <div class="llm-card llm-console-card">
+      <div class="llm-card-header">
+        <h2><i class="fas fa-terminal"></i> Transformer Inference Execution Log</h2>
+        <button id="btnClearConsole" class="llm-btn llm-btn-sm"><i class="fas fa-trash"></i> Clear Log</button>
+      </div>
+      <div class="llm-console-body" id="llmConsole">
+        <div class="llm-log-entry info">[SYSTEM] Transformer Multi-Head Attention &amp; KV-Cache Memory Studio ready.</div>
+      </div>
+    </div>
+  </main>
+
+  <script src="../../../auth.js"></script>
+  <script src="../../../theme.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>

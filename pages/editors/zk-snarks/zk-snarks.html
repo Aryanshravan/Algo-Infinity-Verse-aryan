@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>zk-SNARKs Voting Protocol | Algo Infinity Verse</title>
+    <link rel="stylesheet" href="/styles.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <!-- Monaco Editor -->
+    <script src="https://unpkg.com/monaco-editor@0.36.1/min/vs/loader.js"></script>
+    <style>
+      body { margin: 0; overflow: hidden; background: #020617; font-family: 'Poppins', sans-serif; color: #fff; }
+      .app-container { display: flex; height: 100vh; }
+      
+      .sidebar { width: 450px; background: rgba(15, 23, 42, 0.95); border-right: 1px solid #3b82f6; display: flex; flex-direction: column; z-index: 10; }
+      .header { padding: 20px; border-bottom: 1px solid #334155; }
+      .header h2 { margin: 0; color: #3b82f6; font-family: 'Orbitron', sans-serif; font-size: 1.2rem; }
+      .header p { margin: 5px 0 0 0; font-size: 0.8rem; color: #94a3b8; }
+      
+      #editor-container { flex: 1; min-height: 300px; }
+      
+      .controls { padding: 20px; border-top: 1px solid #334155; background: rgba(0,0,0,0.5); }
+      .btn { background: linear-gradient(90deg, #3b82f6, #1d4ed8); color: #fff; border: none; padding: 10px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; transition: 0.3s; }
+      .btn:hover { background: #60a5fa; transform: translateY(-2px); box-shadow: 0 0 15px rgba(59, 130, 246, 0.5); }
+      
+      .sim-container { flex: 1; position: relative; background: #000; display: flex; flex-direction: column; padding: 20px; overflow-y: auto; }
+      
+      .panel { background: rgba(15, 23, 42, 0.8); border: 1px solid #1e293b; border-radius: 12px; padding: 20px; margin-bottom: 20px; }
+      .panel h3 { color: #60a5fa; margin-top: 0; font-family: 'Orbitron', sans-serif; font-size: 1rem; border-bottom: 1px solid #1e293b; padding-bottom: 10px; }
+      
+      .data-display { font-family: monospace; font-size: 0.9rem; background: #0f172a; padding: 15px; border-radius: 8px; color: #cbd5e1; margin-top: 10px; border-left: 4px solid #3b82f6; }
+      .ledger { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
+      .vote-card { background: #020617; border: 1px solid #334155; padding: 10px; border-radius: 6px; font-family: monospace; font-size: 0.75rem; color: #94a3b8; }
+      
+      .metric-row { display: flex; gap: 20px; margin-top: 15px; }
+      .metric-box { flex: 1; background: #020617; border: 1px solid #1e293b; border-radius: 8px; padding: 10px; text-align: center; }
+      .metric-val { font-size: 1.5rem; font-weight: bold; font-family: monospace; color: #facc15; }
+      .metric-label { font-size: 0.75rem; color: #94a3b8; text-transform: uppercase; }
+      
+      .hash { color: #8b5cf6; }
+      .proof { color: #10b981; }
+    </style>
+  </head>
+  <body>
+    
+    <div class="app-container">
+      <div class="sidebar">
+        <div class="header">
+          <h2><i class="fas fa-link"></i> zk-SNARKs Protocol</h2>
+          <p>Verify election integrity without decrypting votes</p>
+        </div>
+        
+        <div id="editor-container"></div>
+        
+        <div class="controls">
+          <button class="btn" onclick="runValidation()"><i class="fas fa-check-double"></i> Execute Zero-Knowledge Proof</button>
+        </div>
+      </div>
+      
+      <div class="sim-container">
+        
+        <div class="metric-row" style="margin-top: 0; margin-bottom: 20px;">
+            <div class="metric-box">
+                <div class="metric-val" id="totalVotes">142,501,993</div>
+                <div class="metric-label">Total Global Votes</div>
+            </div>
+            <div class="metric-box">
+                <div class="metric-val" id="candA" style="color:#60a5fa">?</div>
+                <div class="metric-label">Candidate A (Tally)</div>
+            </div>
+            <div class="metric-box">
+                <div class="metric-val" id="candB" style="color:#f87171">?</div>
+                <div class="metric-label">Candidate B (Tally)</div>
+            </div>
+        </div>
+
+        <div class="panel">
+            <h3>1. Distributed Ledger (Encrypted Mempool)</h3>
+            <div class="ledger" id="ledgerDisplay">
+                <!-- Populated via JS -->
+            </div>
+        </div>
+
+        <div class="panel" style="border-color: #8b5cf6;">
+            <h3><i class="fas fa-project-diagram" style="color:#8b5cf6;"></i> 2. Merkle Root Hash (Public)</h3>
+            <div class="data-display hash" id="merkleRoot">0x8a7b9c2d... (Awaiting ZKP Execution)</div>
+        </div>
+
+        <div class="panel" id="proofPanel" style="border-color: #334155;">
+            <h3><i class="fas fa-shield-alt"></i> 3. zk-SNARK Validation Output</h3>
+            <div class="data-display" id="proofDisplay" style="color: #94a3b8;">Execute the validation protocol to verify the election.</div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      let editor;
+      require.config({ paths: { 'vs': 'https://unpkg.com/monaco-editor@0.36.1/min/vs' }});
+      require(['vs/editor/editor.main'], function() {
+        editor = monaco.editor.create(document.getElementById('editor-container'), {
+          value: `// Zero-Knowledge Proof (zk-SNARKs) Validator
+// Validate that the election tally matches the Merkle root 
+// without decrypting individual mempool votes.
+
+function generateProof(publicMerkleRoot, candidateATally, candidateBTally) {
+    // A real zk-SNARK uses elliptic curve pairings.
+    // For this sandbox, implement a pseudo-verification logic:
+    // Ensure Tally A + Tally B = Total Votes (142,501,993)
+    // and return a proof object.
+    
+    let total = candidateATally + candidateBTally;
+    let isValid = (total === 142501993);
+    
+    return {
+        valid: isValid,
+        proofString: isValid ? "ZKP_SUCCESS: Tally verified cryptographically." : "ZKP_FAILED: Tally mismatch."
+    };
+}`,
+          language: 'javascript',
+          theme: 'vs-dark',
+          minimap: { enabled: false },
+          automaticLayout: true
+        });
+      });
+
+      // Generate fake encrypted ledger entries
+      let ledgerHTML = "";
+      for(let i=0; i<8; i++) {
+          let fakeHash = "0x" + [...Array(40)].map(() => Math.floor(Math.random() * 16).toString(16)).join('');
+          ledgerHTML += \`<div class="vote-card">VoteHash: <span class="hash">\${fakeHash.substring(0, 16)}...</span><br>Value: <span style="color:#ef4444">[ENCRYPTED]</span></div>\`;
+      }
+      document.getElementById('ledgerDisplay').innerHTML = ledgerHTML;
+
+      function runValidation() {
+          let candATally = 71250996;
+          let candBTally = 71250997; // 71250996 + 71250997 = 142501993
+          
+          let publicRoot = "0x8a7b9c2df1e54a3698b420215a782b3c99001f3e9a";
+          document.getElementById('merkleRoot').innerText = publicRoot;
+          
+          let proofDisplay = document.getElementById('proofDisplay');
+          let proofPanel = document.getElementById('proofPanel');
+          
+          proofDisplay.innerText = "Generating polynomial commitment...";
+          
+          setTimeout(() => {
+              try {
+                  eval(editor.getValue());
+                  let result = generateProof(publicRoot, candATally, candBTally);
+                  
+                  if(result && result.valid) {
+                      document.getElementById('candA').innerText = candATally.toLocaleString();
+                      document.getElementById('candB').innerText = candBTally.toLocaleString();
+                      
+                      proofDisplay.innerText = result.proofString + "\\n\\nCryptographic verification complete. The election results are mathematically proven to be accurate without exposing voter identities.";
+                      proofDisplay.style.color = "#10b981";
+                      proofPanel.style.borderColor = "#10b981";
+                  } else {
+                      proofDisplay.innerText = result.proofString || "Validation Failed.";
+                      proofDisplay.style.color = "#ef4444";
+                      proofPanel.style.borderColor = "#ef4444";
+                  }
+              } catch(e) {
+                  proofDisplay.innerText = "Algorithm Error: " + e.message;
+                  proofDisplay.style.color = "#ef4444";
+                  proofPanel.style.borderColor = "#ef4444";
+              }
+          }, 800);
+      }
+    </script>
+  </body>
+</html>

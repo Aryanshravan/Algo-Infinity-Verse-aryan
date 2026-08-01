@@ -1,0 +1,358 @@
+/* ===== GraphQL Query Cost Auditor ===== */
+:root {
+  --gql-glass: rgba(255, 255, 255, 0.04);
+  --gql-border: rgba(255, 255, 255, 0.1);
+  --gql-muted: rgba(255, 255, 255, 0.62);
+  --gql-accent: #e879f9;
+  --gql-accent-dim: rgba(232, 121, 249, 0.15);
+  --gql-warn: #fbbf24;
+  --gql-danger: #f87171;
+  --gql-ok: #4ade80;
+  --gql-info: #60a5fa;
+  --gql-code-bg: rgba(0, 0, 0, 0.35);
+}
+
+html.light-mode {
+  --gql-glass: rgba(15, 23, 42, 0.04);
+  --gql-border: rgba(15, 23, 42, 0.12);
+  --gql-muted: rgba(15, 23, 42, 0.65);
+  --gql-accent-dim: rgba(192, 38, 211, 0.1);
+  --gql-code-bg: rgba(15, 23, 42, 0.06);
+}
+
+.gql-skip-link {
+  position: absolute;
+  left: 1rem;
+  top: -100px;
+  z-index: 10000;
+  padding: 0.6rem 1rem;
+  background: var(--gql-accent);
+  color: #0a0a14;
+  font-weight: 700;
+  border-radius: 8px;
+  text-decoration: none;
+}
+
+.gql-skip-link:focus {
+  top: 1rem;
+  outline: 3px solid #fff;
+  outline-offset: 2px;
+}
+
+.gql-hero {
+  position: relative;
+  overflow: hidden;
+  padding: 7.5rem 1.5rem 4rem;
+  text-align: center;
+  border-bottom: 1px solid var(--gql-border);
+  background:
+    radial-gradient(ellipse at top right, rgba(232, 121, 249, 0.16), transparent 55%),
+    radial-gradient(ellipse at bottom left, rgba(96, 165, 250, 0.1), transparent 50%);
+}
+
+.gql-hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1.1rem;
+  padding: 0.35rem 0.9rem;
+  border-radius: 999px;
+  border: 1px solid rgba(232, 121, 249, 0.4);
+  background: var(--gql-accent-dim);
+  color: var(--gql-accent);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.gql-hero h1 {
+  margin: 0 0 1rem;
+  font-family: 'Orbitron', sans-serif;
+  font-size: clamp(1.9rem, 5vw, 3rem);
+  font-weight: 900;
+  line-height: 1.15;
+}
+
+.gql-hero-accent {
+  display: inline-block;
+  background: linear-gradient(135deg, #e879f9, #60a5fa);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.gql-hero p {
+  max-width: 700px;
+  margin: 0 auto 2rem;
+  color: var(--gql-muted);
+  font-size: 1.05rem;
+  line-height: 1.65;
+  font-family: 'Poppins', sans-serif;
+}
+
+.gql-hero-stats {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1rem;
+}
+
+.gql-stat {
+  min-width: 120px;
+  padding: 0.85rem 1.1rem;
+  border: 1px solid var(--gql-border);
+  border-radius: 14px;
+  background: var(--gql-glass);
+}
+
+.gql-stat-val {
+  display: block;
+  font-family: 'Orbitron', sans-serif;
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: var(--gql-accent);
+}
+
+.gql-stat-label {
+  font-size: 0.75rem;
+  color: var(--gql-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.gql-main {
+  padding: 2rem 0 4rem;
+  font-family: 'Poppins', sans-serif;
+}
+
+.gql-workspace {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+@media (max-width: 960px) {
+  .gql-workspace {
+    grid-template-columns: 1fr;
+  }
+}
+
+.gql-panel {
+  padding: 1.4rem;
+  border: 1px solid var(--gql-border);
+  border-radius: 18px;
+  background: var(--gql-glass);
+  backdrop-filter: blur(12px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
+  margin-bottom: 1.5rem;
+}
+
+.gql-workspace .gql-panel,
+.gql-results-grid .gql-panel {
+  margin-bottom: 0;
+}
+
+.gql-panel-header {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1.2rem;
+  padding-bottom: 0.9rem;
+  border-bottom: 1px solid var(--gql-border);
+}
+
+.gql-panel-title {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.gql-panel-title h2 {
+  margin: 0;
+  font-size: 1.15rem;
+  font-weight: 700;
+}
+
+.gql-panel-icon {
+  color: var(--gql-accent);
+}
+
+.gql-label {
+  display: block;
+  margin-bottom: 0.4rem;
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+.gql-hint {
+  margin: 0.55rem 0 0;
+  font-size: 0.78rem;
+  color: var(--gql-muted);
+  line-height: 1.45;
+}
+
+.gql-textarea {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0.7rem 0.85rem;
+  border: 1px solid var(--gql-border);
+  border-radius: 10px;
+  background: var(--gql-code-bg);
+  color: inherit;
+  font-family: 'Fira Code', ui-monospace, monospace;
+  font-size: 0.78rem;
+  line-height: 1.5;
+  resize: vertical;
+}
+
+.gql-textarea:focus {
+  outline: 2px solid var(--gql-accent);
+  outline-offset: 2px;
+}
+
+.gql-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  margin: 0 0 0.75rem;
+}
+
+.gql-status {
+  min-height: 1.4rem;
+  margin-bottom: 1.25rem;
+  font-size: 0.88rem;
+  color: var(--gql-muted);
+}
+
+.gql-results-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+@media (max-width: 960px) {
+  .gql-results-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.gql-empty,
+.gql-empty-li {
+  color: var(--gql-muted);
+  font-size: 0.9rem;
+  list-style: none;
+}
+
+.gql-metrics {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+@media (max-width: 560px) {
+  .gql-metrics {
+    grid-template-columns: 1fr;
+  }
+}
+
+.gql-metric-card {
+  padding: 0.85rem 1rem;
+  border: 1px solid var(--gql-border);
+  border-radius: 12px;
+  background: var(--gql-code-bg);
+}
+
+.gql-metric-label {
+  display: block;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--gql-muted);
+  margin-bottom: 0.25rem;
+}
+
+.gql-metric-val {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--gql-accent);
+}
+
+.gql-findings {
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+}
+
+.gql-finding {
+  padding: 0.85rem 1rem;
+  border: 1px solid var(--gql-border);
+  border-left: 4px solid var(--gql-warn);
+  border-radius: 12px;
+  background: var(--gql-code-bg);
+}
+
+.gql-finding[data-severity="critical"],
+.gql-finding[data-severity="high"] {
+  border-left-color: var(--gql-danger);
+}
+
+.gql-finding[data-severity="medium"] {
+  border-left-color: var(--gql-warn);
+}
+
+.gql-finding[data-severity="low"] {
+  border-left-color: var(--gql-info);
+}
+
+.gql-finding[data-severity="ok"] {
+  border-left-color: var(--gql-ok);
+}
+
+.gql-finding-meta {
+  margin: 0 0 0.3rem;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--gql-muted);
+}
+
+.gql-finding-title {
+  margin: 0 0 0.35rem;
+  font-size: 0.92rem;
+  font-weight: 700;
+}
+
+.gql-finding-detail {
+  margin: 0;
+  font-size: 0.85rem;
+  line-height: 1.5;
+  color: var(--gql-muted);
+}
+
+.gql-recs {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 0.65rem;
+}
+
+.gql-recs li:not(.gql-empty-li) {
+  padding: 0.85rem 1rem;
+  border: 1px solid var(--gql-border);
+  border-radius: 12px;
+  background: var(--gql-code-bg);
+  font-size: 0.88rem;
+  line-height: 1.5;
+}
+
+.gql-recs li strong {
+  color: var(--gql-accent);
+}

@@ -106,6 +106,7 @@ function initVisualizer() {
   const stepBtn = document.getElementById("stepBtn");
   const resetBtn = document.getElementById("resetBtn");
   const clearGraphBtn = document.getElementById("clearGraphBtn");
+  const autoLayoutBtn = document.getElementById("autoLayoutBtn");
   
   const logPanel = document.getElementById("logPanel");
   const liveStructureEl = document.getElementById("liveStructure");
@@ -170,6 +171,50 @@ function initVisualizer() {
       resetVisualStates();
       renderGraph();
       addLogEntry("Graph cleared.");
+    });
+  }
+
+  // Auto Layout via Web Worker
+  if (autoLayoutBtn) {
+    autoLayoutBtn.addEventListener("click", () => {
+      if (nodes.length === 0) return;
+      addLogEntry("Running force-directed layout on a background Web Worker...");
+      autoLayoutBtn.disabled = true;
+      
+      const worker = new Worker("graph-worker.js");
+      
+      worker.onmessage = (e) => {
+        const updatedNodes = e.data.nodes;
+        // Merge positions back
+        nodes.forEach((n, idx) => {
+          if (updatedNodes[idx]) {
+            n.x = updatedNodes[idx].x;
+            n.y = updatedNodes[idx].y;
+          }
+        });
+        renderGraph();
+        addLogEntry("Auto Layout completed via Web Worker.");
+        autoLayoutBtn.disabled = false;
+        worker.terminate();
+      };
+      
+      worker.onerror = (err) => {
+        console.error("Worker error:", err);
+        addLogEntry("Error running layout worker.");
+        autoLayoutBtn.disabled = false;
+        worker.terminate();
+      };
+      
+      const width = svg.clientWidth || 800;
+      const height = svg.clientHeight || 600;
+      
+      worker.postMessage({
+        nodes: nodes,
+        edges: edges,
+        iterations: 100,
+        width: width,
+        height: height
+      });
     });
   }
 

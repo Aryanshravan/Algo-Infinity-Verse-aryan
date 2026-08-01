@@ -1813,12 +1813,23 @@ const DOM = {
 
 // ─── INITIALIZATION ────────────────────────────────────────
 
+let reactTerminal;
+
 function init() {
   loadProgress();
   updateProgressBar();
   setupEventListeners();
   renderSidebar();
   renderActiveState();
+  
+  if (window.MiniTerminal) {
+    reactTerminal = new MiniTerminal('react-terminal');
+    window.addEventListener('message', (event) => {
+      if (event.data && event.data.type === 'CONSOLE_LOG' && reactTerminal) {
+        reactTerminal.appendLog(event.data.level, event.data.payload);
+      }
+    });
+  }
 }
 
 function setupEventListeners() {
@@ -2145,6 +2156,8 @@ window.handleQuizSelection = function (questionId, optionIndex) {
 
 function runCode() {
   const userCode = DOM.codeEditor.value;
+  if (reactTerminal) reactTerminal.clear();
+
   const iframeContent = `
     <!DOCTYPE html>
     <html>
@@ -2162,8 +2175,16 @@ function runCode() {
       <div id="root"></div>
       <div id="error-container"></div>
       <script>
+        const origLog = console.log;
+        const origWarn = console.warn;
+        const origError = console.error;
+        console.log = function(...args) { window.parent.postMessage({ type: 'CONSOLE_LOG', level: 'log', payload: args }, '*'); origLog.apply(console, args); };
+        console.warn = function(...args) { window.parent.postMessage({ type: 'CONSOLE_LOG', level: 'warn', payload: args }, '*'); origWarn.apply(console, args); };
+        console.error = function(...args) { window.parent.postMessage({ type: 'CONSOLE_LOG', level: 'error', payload: args }, '*'); origError.apply(console, args); };
+
         window.onerror = function(msg) {
           document.getElementById('error-container').innerHTML = '<div id="error-boundary"><strong>Runtime Error:</strong><br/>' + msg + '</div>';
+          console.error(msg);
           return false;
         };
       <\/script>

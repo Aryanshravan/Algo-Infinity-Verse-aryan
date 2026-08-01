@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Trusted Types Migration Planner | Algo Infinity Verse</title>
+  <meta name="description" content="Scan JS/HTML for DOM XSS sinks, analyze Trusted Types policy gaps, build an incremental migration roadmap, and export an audit report with before/after rewrites." />
+  <link rel="stylesheet" href="/styles.css" />
+  <link rel="stylesheet" href="style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Poppins:wght@300;400;500;600;700&family=Fira+Code:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <script>
+    (function () {
+      try {
+        var storedTheme = localStorage.getItem('theme');
+        var prefersLight = window.matchMedia('(prefers-color-scheme: light)').matches;
+        var theme = storedTheme || (prefersLight ? 'light' : 'dark');
+        if (theme === 'light') {
+          document.documentElement.classList.add('light-mode');
+        } else {
+          document.documentElement.classList.remove('light-mode');
+        }
+      } catch (e) {}
+    })();
+  </script>
+</head>
+<body data-page="trusted-types-migration-planner">
+  <a href="#tt-main" class="tt-skip-link">Skip to main content</a>
+  <button type="button" id="scrollTopBtn" class="scroll-top-btn" aria-label="Scroll to top">
+    <i class="fas fa-arrow-up" aria-hidden="true"></i>
+  </button>
+
+  <div id="navbar-placeholder"></div>
+
+  <header class="tt-hero">
+    <div class="tt-hero-badge">
+      <i class="fas fa-shield-halved" aria-hidden="true"></i>
+      Browser Security Lab
+    </div>
+    <h1>
+      Trusted Types
+      <span class="tt-hero-accent">Migration Planner</span>
+    </h1>
+    <p>
+      Paste JS/HTML with DOM sinks, scan for XSS vectors, analyze Trusted Types policy gaps,
+      and export an incremental migration roadmap with safe rewrite tips.
+    </p>
+    <div class="tt-hero-stats" aria-live="polite">
+      <div class="tt-stat">
+        <span class="tt-stat-val" id="statSinks">—</span>
+        <span class="tt-stat-label">Sinks found</span>
+      </div>
+      <div class="tt-stat">
+        <span class="tt-stat-val" id="statHigh">—</span>
+        <span class="tt-stat-label">High risk</span>
+      </div>
+      <div class="tt-stat">
+        <span class="tt-stat-val" id="statGaps">—</span>
+        <span class="tt-stat-label">Policy gaps</span>
+      </div>
+      <div class="tt-stat">
+        <span class="tt-stat-val" id="statRoadmap">—</span>
+        <span class="tt-stat-label">Roadmap steps</span>
+      </div>
+    </div>
+  </header>
+
+  <main id="tt-main" class="tt-main">
+    <div class="container">
+      <div class="tt-workspace">
+        <section class="tt-panel" aria-labelledby="tt-input-title">
+          <div class="tt-panel-header">
+            <div class="tt-panel-title">
+              <i class="fas fa-file-code tt-panel-icon" aria-hidden="true"></i>
+              <h2 id="tt-input-title">Source input</h2>
+            </div>
+          </div>
+
+          <label class="tt-label" for="ttInput">Paste JavaScript or HTML with DOM sinks</label>
+          <textarea
+            id="ttInput"
+            class="tt-textarea"
+            rows="14"
+            spellcheck="false"
+            aria-describedby="ttHint"
+            placeholder="el.innerHTML = userInput; …"
+          ></textarea>
+          <p class="tt-hint" id="ttHint">Scans for innerHTML, outerHTML, document.write, insertAdjacentHTML, eval-ish sinks, and more.</p>
+
+          <div class="tt-controls">
+            <button type="button" id="ttLoadDemoBtn" class="btn btn-secondary">
+              <i class="fas fa-flask" aria-hidden="true"></i> Load unsafe demo
+            </button>
+            <button type="button" id="ttScanBtn" class="btn btn-primary">
+              <i class="fas fa-magnifying-glass" aria-hidden="true"></i> Scan sinks
+            </button>
+            <button type="button" id="ttClearBtn" class="btn btn-outline">
+              <i class="fas fa-eraser" aria-hidden="true"></i> Clear
+            </button>
+            <button type="button" id="ttExportMdBtn" class="btn btn-outline" disabled>
+              <i class="fas fa-download" aria-hidden="true"></i> Export .md
+            </button>
+            <button type="button" id="ttExportTxtBtn" class="btn btn-outline" disabled>
+              <i class="fas fa-file-lines" aria-hidden="true"></i> Export .txt
+            </button>
+          </div>
+          <div id="ttStatus" class="tt-status" role="status" aria-live="polite">Ready</div>
+        </section>
+
+        <section class="tt-panel" aria-labelledby="tt-findings-title">
+          <div class="tt-panel-header">
+            <div class="tt-panel-title">
+              <i class="fas fa-bug tt-panel-icon" aria-hidden="true"></i>
+              <h2 id="tt-findings-title">Sink findings</h2>
+            </div>
+          </div>
+          <div id="ttFindings" class="tt-findings" aria-live="polite">
+            <p class="tt-empty">Run a scan to list DOM XSS sinks.</p>
+          </div>
+        </section>
+      </div>
+
+      <div class="tt-workspace">
+        <section class="tt-panel" aria-labelledby="tt-policy-title">
+          <div class="tt-panel-header">
+            <div class="tt-panel-title">
+              <i class="fas fa-clipboard-list tt-panel-icon" aria-hidden="true"></i>
+              <h2 id="tt-policy-title">Trusted Types policy gap analyzer</h2>
+            </div>
+          </div>
+          <div id="ttPolicyGaps" class="tt-findings" aria-live="polite">
+            <p class="tt-empty">Gaps appear after scan.</p>
+          </div>
+        </section>
+
+        <section class="tt-panel" aria-labelledby="tt-roadmap-title">
+          <div class="tt-panel-header">
+            <div class="tt-panel-title">
+              <i class="fas fa-route tt-panel-icon" aria-hidden="true"></i>
+              <h2 id="tt-roadmap-title">Incremental migration roadmap</h2>
+            </div>
+          </div>
+          <ul id="ttRoadmap" class="tt-roadmap" aria-live="polite">
+            <li class="tt-empty">Checklist builds after scan.</li>
+          </ul>
+        </section>
+      </div>
+
+      <div class="tt-workspace">
+        <section class="tt-panel" aria-labelledby="tt-tips-title">
+          <div class="tt-panel-header">
+            <div class="tt-panel-title">
+              <i class="fas fa-lightbulb tt-panel-icon" aria-hidden="true"></i>
+              <h2 id="tt-tips-title">Safe rewrite tips</h2>
+            </div>
+          </div>
+          <div id="ttTips" class="tt-tips" aria-live="polite">
+            <p class="tt-empty">Tips for textContent / sanitizer rewrites show after scan.</p>
+          </div>
+        </section>
+
+        <section class="tt-panel" aria-labelledby="tt-diff-title">
+          <div class="tt-panel-header">
+            <div class="tt-panel-title">
+              <i class="fas fa-code-compare tt-panel-icon" aria-hidden="true"></i>
+              <h2 id="tt-diff-title">Before / after snippets</h2>
+            </div>
+          </div>
+          <div class="tt-diff-grid">
+            <div>
+              <h3 class="tt-subhead">Before (unsafe)</h3>
+              <pre class="tt-mono-block" id="ttBefore" aria-live="polite">—</pre>
+            </div>
+            <div>
+              <h3 class="tt-subhead">After (safer)</h3>
+              <pre class="tt-mono-block" id="ttAfter" aria-live="polite">—</pre>
+            </div>
+          </div>
+        </section>
+      </div>
+    </div>
+  </main>
+
+  <div id="footer-placeholder"></div>
+
+  <script src="/auth.js"></script>
+  <script src="/bootstrap-legacy.js"></script>
+  <script src="/script.js"></script>
+  <script type="module" src="/dist/legacy-bundle.mjs"></script>
+  <script src="/theme.js"></script>
+  <script src="script.js"></script>
+  <script>
+    if (typeof loadPartial === 'function') {
+      loadPartial('navbar-placeholder', '/partials/navbar.html');
+      loadPartial('footer-placeholder', '/partials/footer.html');
+    }
+  </script>
+</body>
+</html>

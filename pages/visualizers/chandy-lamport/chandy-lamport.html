@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Chandy-Lamport Distributed Snapshot | Algo Infinity Verse</title>
+    <meta
+      name="description"
+      content="Visualize the Chandy-Lamport algorithm for distributed snapshots. See how nodes record state and capture messages in flight without a global clock."
+    />
+
+    <link
+      href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Poppins:wght@300;400;500;600;700&family=Fira+Code:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+
+    <link rel="stylesheet" href="chandy-lamport.css" />
+    <script src="/theme.js"></script>
+  </head>
+  <body class="chandy-body">
+    <nav class="navbar chandy-nav">
+      <div class="nav-logo">
+        <span class="logo-text">∞</span>
+        <span class="logo-title">Algo Infinity Verse</span>
+      </div>
+      <div class="engine-badge"><i class="fas fa-network-wired"></i> Distributed Systems</div>
+    </nav>
+
+    <main class="chandy-workspace">
+      <header class="workspace-header">
+        <h1>Chandy-Lamport Distributed Snapshot</h1>
+        <p class="subtitle">
+          Capture a consistent global state in a distributed system where nodes only have local
+          clocks. Nodes exchange tokens, and "Marker" messages are used to safely record node states
+          and channel states.
+        </p>
+
+        <div class="control-panel">
+          <button id="btnStartTraffic" class="btn btn-primary">
+            <i class="fas fa-random"></i> Start Token Traffic
+          </button>
+          <button id="btnInitiateSnapshot" class="btn btn-warning">
+            <i class="fas fa-camera"></i> Initiate Snapshot
+          </button>
+          <button id="btnReset" class="btn btn-danger">
+            <i class="fas fa-sync-alt"></i> Reset System
+          </button>
+        </div>
+      </header>
+
+      <div class="visualizer-content">
+        <section class="network-panel">
+          <div class="panel-header">
+            <h2><i class="fas fa-project-diagram"></i> Network Topology</h2>
+            <div class="stats-box">
+              <span class="stat-label">Total System Tokens:</span>
+              <span class="stat-value" id="systemTotal">1500</span>
+            </div>
+          </div>
+
+          <div class="canvas-container" id="canvasContainer">
+            <canvas id="networkCanvas"></canvas>
+          </div>
+
+          <div class="explanation-box">
+            <p>
+              Circles represent nodes with a local token balance. Lines represent unidirectional
+              communication channels where tokens (and markers) travel.
+            </p>
+          </div>
+        </section>
+
+        <section class="info-panel">
+          <div class="panel-header">
+            <h2><i class="fas fa-clipboard-list"></i> Snapshot State Log</h2>
+          </div>
+
+          <div class="snapshot-status" id="snapshotStatus">
+            <div class="status-indicator waiting">Waiting to start snapshot...</div>
+          </div>
+
+          <div class="recorded-states" id="recordedStates">
+            <!-- Logs appear here -->
+          </div>
+
+          <div class="algorithm-details">
+            <h3>Algorithm Rules:</h3>
+            <ul>
+              <li>
+                <strong>Initiator:</strong> Records its own state, then sends a <em>Marker</em> out
+                on all outgoing channels.
+              </li>
+              <li>
+                <strong>On First Marker Received:</strong> A node records its state, starts
+                recording incoming messages on <em>other</em> channels, and sends Markers on its
+                outgoing channels.
+              </li>
+              <li>
+                <strong>On Subsequent Markers:</strong> Node stops recording messages on that
+                specific channel and saves the channel state.
+              </li>
+              <li>
+                <strong>Completion:</strong> Snapshot finishes when all nodes and all channels have
+                recorded their state.
+              </li>
+            </ul>
+          </div>
+        </section>
+      </div>
+    </main>
+
+    <script src="chandy-lamport.js"></script>
+  </body>
+</html>

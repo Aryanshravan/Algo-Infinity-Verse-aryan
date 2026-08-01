@@ -246,3 +246,37 @@
     padding: 2rem;
     font-style: italic;
 }
+/* Yjs Collaborative Cursor Styles */
+.yRemoteSelection {
+    background-color: rgb(250, 129, 0, 0.5);
+}
+.yRemoteSelectionHead {
+    position: absolute;
+    border-left: 2px solid orange;
+    border-top: 2px solid orange;
+    border-bottom: 2px solid orange;
+    height: 100%;
+    box-sizing: border-box;
+}
+.yRemoteSelectionHead::after {
+    position: absolute;
+    content: ' ';
+    border: 3px solid orange;
+    border-radius: 4px;
+    left: -4px;
+    top: -5px;
+}
+.yRemoteSelectionHead::before {
+    content: attr(user-name);
+    position: absolute;
+    top: -1.2em;
+    left: -2px;
+    background-color: orange;
+    color: #fff;
+    font-size: 10px;
+    padding: 2px 4px;
+    border-radius: 4px;
+    white-space: nowrap;
+    z-index: 10;
+    font-family: var(--font-mono);
+}

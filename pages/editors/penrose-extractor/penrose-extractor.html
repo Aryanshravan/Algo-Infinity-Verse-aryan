@@ -1,0 +1,321 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Penrose Process Extractor | Algo Infinity Verse</title>
+    <link rel="stylesheet" href="/styles.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <!-- Monaco Editor -->
+    <script src="https://unpkg.com/monaco-editor@0.36.1/min/vs/loader.js"></script>
+    <style>
+      body { margin: 0; overflow: hidden; background: #000; font-family: 'Poppins', sans-serif; color: #fff; }
+      .app-container { display: flex; height: 100vh; }
+      
+      .sidebar { width: 450px; background: rgba(15, 23, 42, 0.95); border-right: 1px solid #f97316; display: flex; flex-direction: column; z-index: 10; }
+      .header { padding: 20px; border-bottom: 1px solid #334155; }
+      .header h2 { margin: 0; color: #f97316; font-family: 'Orbitron', sans-serif; font-size: 1.2rem; }
+      .header p { margin: 5px 0 0 0; font-size: 0.8rem; color: #94a3b8; }
+      
+      #editor-container { flex: 1; min-height: 300px; }
+      
+      .controls { padding: 20px; border-top: 1px solid #334155; background: rgba(0,0,0,0.5); }
+      .btn { background: linear-gradient(90deg, #ea580c, #c2410c); color: #fff; border: none; padding: 10px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; transition: 0.3s; }
+      .btn:hover { background: #f97316; transform: translateY(-2px); box-shadow: 0 0 15px rgba(249, 115, 22, 0.5); }
+      
+      .sim-container { flex: 1; position: relative; background: #020617; overflow: hidden; }
+      canvas { width: 100%; height: 100%; display: block; filter: brightness(1.2) contrast(1.1); }
+      
+      .hud { position: absolute; top: 20px; left: 20px; background: rgba(0,0,0,0.8); padding: 15px; border-radius: 8px; border: 1px solid #f97316; width: 280px; z-index: 10; pointer-events: none; }
+      .hud h3 { margin: 0 0 10px 0; color: #f97316; font-size: 1rem; font-family: 'Orbitron', sans-serif; }
+      .metric { display: flex; justify-content: space-between; font-size: 0.8rem; color: #cbd5e1; margin-bottom: 5px; }
+      .val { font-weight: bold; font-family: monospace; }
+      .val-energy { color: #facc15; }
+      .val-vel { color: #38bdf8; }
+    </style>
+  </head>
+  <body>
+    
+    <div class="app-container">
+      <div class="sidebar">
+        <div class="header">
+          <h2><i class="fas fa-compact-disc"></i> Penrose Process</h2>
+          <p>Kerr Black Hole Energy Extraction</p>
+        </div>
+        
+        <div id="editor-container"></div>
+        
+        <div class="controls">
+          <button class="btn" onclick="launchPayload()"><i class="fas fa-rocket"></i> Launch Extraction Payload</button>
+        </div>
+      </div>
+      
+      <div class="sim-container">
+        <!-- Space Background with lensing effect -->
+        <div style="position: absolute; inset:0; background: radial-gradient(circle at center, transparent 30%, rgba(249, 115, 22, 0.1) 60%, transparent 100%); pointer-events: none; z-index: 0; mix-blend-mode: screen;"></div>
+        
+        <canvas id="bhCanvas" style="position: relative; z-index: 1;"></canvas>
+        
+        <div class="hud">
+          <h3>Orbital Telemetry</h3>
+          <div class="metric"><span>Altitude:</span> <span class="val" id="altVal" style="color:#cbd5e1">0 km</span></div>
+          <div class="metric"><span>Velocity:</span> <span class="val val-vel" id="velVal">0 c</span></div>
+          <div class="metric"><span>Net Energy Yield:</span> <span class="val val-energy" id="energyVal">0 EJ</span></div>
+          <div class="metric" style="margin-top: 10px; border-top: 1px solid #334155; padding-top: 5px;">
+            <span>Operation State:</span> <span class="val" id="statusVal" style="color:#94a3b8">STANDBY</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      let editor;
+      require.config({ paths: { 'vs': 'https://unpkg.com/monaco-editor@0.36.1/min/vs' }});
+      require(['vs/editor/editor.main'], function() {
+        editor = monaco.editor.create(document.getElementById('editor-container'), {
+          value: `// Penrose Process Orbital Algorithm
+// You must guide a payload into the Ergosphere of a rotating Kerr black hole.
+// Once inside, you must split the payload in half with immense explosive force.
+// If timed perfectly, half falls into the event horizon (negative energy state),
+// and the other half escapes with MORE energy than it entered with!
+
+function controlPayload(altitude, velocity, isInErgosphere) {
+    // Return { thrust: float (-1 to 1), detonate: boolean }
+    // thrust > 0 accelerates away from black hole, < 0 decelerates (falls).
+    // detonate = True splits the payload. ONLY do this inside the ergosphere!
+    
+    // Naive logic: Full speed ahead, blow it up instantly!
+    // Result: Explodes outside ergosphere. No energy gained.
+    return {
+        thrust: -0.5,
+        detonate: false
+    };
+}`,
+          language: 'javascript',
+          theme: 'vs-dark',
+          minimap: { enabled: false },
+          automaticLayout: true
+        });
+      });
+
+      const canvas = document.getElementById('bhCanvas');
+      const ctx = canvas.getContext('2d');
+      
+      let isSimulating = false;
+      let time = 0;
+      
+      let payloadAlt = 800; // Pixels
+      let payloadVel = 0;
+      let payloadMass = 100;
+      
+      let isSplit = false;
+      let part1 = null; // Escaping half
+      let part2 = null; // Falling half
+      
+      let totalEnergyYield = 0;
+      
+      const EVENT_HORIZON = 80;
+      const ERGOSPHERE = 200;
+      
+      function resize() { canvas.width = canvas.clientWidth; canvas.height = canvas.clientHeight; }
+      window.addEventListener('resize', resize);
+      resize();
+
+      function animate() {
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+          let cx = canvas.width / 2;
+          let cy = canvas.height / 2;
+
+          if (isSimulating) {
+              time += 0.05;
+              
+              if (!isSplit) {
+                  let isInErgo = payloadAlt < ERGOSPHERE && payloadAlt > EVENT_HORIZON;
+                  
+                  let thrust = 0;
+                  let shouldDetonate = false;
+                  
+                  try {
+                      eval(editor.getValue());
+                      let res = controlPayload(payloadAlt, payloadVel, isInErgo);
+                      if (res) {
+                          thrust = Math.max(-1, Math.min(1, res.thrust || 0));
+                          shouldDetonate = !!res.detonate;
+                      }
+                  } catch(e) {}
+                  
+                  // Gravity pull (relativistic curve)
+                  let gravity = 8000 / (payloadAlt * payloadAlt);
+                  // Frame dragging inside ergosphere (adds lateral spin, modelled as centrifugal push for simplicity)
+                  let frameDragging = isInErgo ? (ERGOSPHERE - payloadAlt) * 0.05 : 0;
+                  
+                  payloadVel -= gravity;
+                  payloadVel += thrust * 2.0;
+                  payloadVel += frameDragging;
+                  
+                  payloadAlt += payloadVel;
+                  
+                  // Detonation Logic
+                  if (shouldDetonate) {
+                      isSplit = true;
+                      if (isInErgo) {
+                          // Successful Penrose Process!
+                          // Part 2 gets forced into negative energy state (falls in fast)
+                          part2 = { alt: payloadAlt, vel: payloadVel - 10, mass: 50 };
+                          // Part 1 steals rotational energy and gets blasted out
+                          part1 = { alt: payloadAlt, vel: payloadVel + 20, mass: 50 };
+                          // Energy gained = (mass escaping * high vel) - initial energy
+                          totalEnergyYield = 5000 + Math.abs(payloadVel) * 1000;
+                      } else {
+                          // Failed. Just blew it up in space or event horizon.
+                          part2 = { alt: payloadAlt, vel: payloadVel - 2, mass: 50 };
+                          part1 = { alt: payloadAlt, vel: payloadVel + 2, mass: 50 };
+                          totalEnergyYield = 0;
+                      }
+                  }
+                  
+                  // Spaghettification if didn't split
+                  if (payloadAlt <= EVENT_HORIZON) {
+                      isSimulating = false;
+                      document.getElementById('statusVal').innerText = "PAYLOAD CONSUMED (NO YIELD)";
+                      document.getElementById('statusVal').style.color = "#ef4444";
+                  }
+              } else {
+                  // Post split physics
+                  if (part2 && part2.alt > 0) {
+                      part2.vel -= 10000 / (part2.alt * part2.alt); // Gravity
+                      part2.alt += part2.vel;
+                  }
+                  
+                  if (part1) {
+                      part1.vel -= 8000 / (part1.alt * part1.alt); // Gravity
+                      part1.alt += part1.vel;
+                      
+                      // Win condition
+                      if (part1.alt > 800) {
+                          isSimulating = false;
+                          if (totalEnergyYield > 0) {
+                              document.getElementById('statusVal').innerText = "EXTRACTION SUCCESSFUL!";
+                              document.getElementById('statusVal').style.color = "#10b981";
+                          } else {
+                              document.getElementById('statusVal').innerText = "PAYLOAD RECOVERED (ZERO YIELD)";
+                              document.getElementById('statusVal').style.color = "#facc15";
+                          }
+                      } else if (part1.alt <= EVENT_HORIZON) {
+                          isSimulating = false;
+                          document.getElementById('statusVal').innerText = "ALL MASS CONSUMED";
+                          document.getElementById('statusVal').style.color = "#ef4444";
+                          totalEnergyYield = 0;
+                      }
+                  }
+              }
+              
+              // HUD Updates
+              if (!isSplit) {
+                  document.getElementById('altVal').innerText = Math.floor(payloadAlt) + " km";
+                  document.getElementById('velVal').innerText = payloadVel.toFixed(2) + " c";
+              } else if (part1) {
+                  document.getElementById('altVal').innerText = "R:" + Math.floor(part1.alt) + " km";
+                  document.getElementById('velVal').innerText = "R:" + part1.vel.toFixed(2) + " c";
+              }
+              document.getElementById('energyVal').innerText = Math.floor(totalEnergyYield) + " EJ";
+          }
+          
+          // Draw Kerr Black Hole
+          // Accretion Disk (back half)
+          ctx.beginPath();
+          ctx.ellipse(cx, cy, EVENT_HORIZON*4, EVENT_HORIZON*1.5, 0, Math.PI, Math.PI*2);
+          ctx.strokeStyle = 'rgba(249, 115, 22, 0.4)';
+          ctx.lineWidth = 15;
+          ctx.stroke();
+          
+          // Ergosphere (Pumpkin shaped region where space rotates faster than c)
+          ctx.beginPath();
+          ctx.ellipse(cx, cy, ERGOSPHERE, ERGOSPHERE*0.8, 0, 0, Math.PI*2);
+          ctx.strokeStyle = 'rgba(56, 189, 248, 0.3)';
+          ctx.setLineDash([5, 10]);
+          ctx.lineWidth = 2;
+          ctx.stroke();
+          ctx.setLineDash([]);
+          
+          // Event Horizon (Perfect black sphere)
+          ctx.beginPath();
+          ctx.arc(cx, cy, EVENT_HORIZON, 0, Math.PI*2);
+          ctx.fillStyle = '#000';
+          ctx.fill();
+          ctx.strokeStyle = '#fff';
+          ctx.lineWidth = 1;
+          ctx.stroke();
+          
+          // Accretion Disk (front half)
+          ctx.beginPath();
+          ctx.ellipse(cx, cy, EVENT_HORIZON*4, EVENT_HORIZON*1.5, 0, 0, Math.PI);
+          ctx.strokeStyle = 'rgba(250, 204, 21, 0.8)';
+          ctx.shadowBlur = 20;
+          ctx.shadowColor = '#facc15';
+          ctx.lineWidth = 15;
+          ctx.stroke();
+          ctx.shadowBlur = 0;
+
+          // Draw Payload(s)
+          ctx.fillStyle = '#fff';
+          if (!isSplit) {
+              // Falling spiraling path
+              let angle = (800 - payloadAlt) * 0.05 + time;
+              let px = cx + Math.cos(angle) * payloadAlt;
+              let py = cy + Math.sin(angle) * payloadAlt * 0.5; // Flattened perspective
+              
+              ctx.beginPath(); ctx.arc(px, py, 6, 0, Math.PI*2); ctx.fill();
+              
+              // Thruster trail
+              ctx.fillStyle = 'rgba(56, 189, 248, 0.5)';
+              ctx.beginPath(); ctx.arc(px - Math.cos(angle)*10, py - Math.sin(angle)*5, 3, 0, Math.PI*2); ctx.fill();
+          } else {
+              // Part 1 (Escaping)
+              if (part1 && part1.alt > EVENT_HORIZON) {
+                  let angle1 = (800 - part1.alt) * -0.05 + time; // Spins opposite way as it steals momentum
+                  let p1x = cx + Math.cos(angle1) * part1.alt;
+                  let p1y = cy + Math.sin(angle1) * part1.alt * 0.5;
+                  
+                  ctx.fillStyle = '#38bdf8'; // Blue for high energy
+                  ctx.shadowBlur = 10;
+                  ctx.shadowColor = '#38bdf8';
+                  ctx.beginPath(); ctx.arc(p1x, p1y, 4, 0, Math.PI*2); ctx.fill();
+                  ctx.shadowBlur = 0;
+              }
+              
+              // Part 2 (Falling)
+              if (part2 && part2.alt > EVENT_HORIZON) {
+                  let angle2 = (800 - part2.alt) * 0.08 + time; // Spins fast into the hole
+                  let p2x = cx + Math.cos(angle2) * part2.alt;
+                  let p2y = cy + Math.sin(angle2) * part2.alt * 0.5;
+                  
+                  ctx.fillStyle = '#ef4444'; // Red for doomed
+                  ctx.beginPath(); ctx.arc(p2x, p2y, 4, 0, Math.PI*2); ctx.fill();
+              }
+          }
+
+          requestAnimationFrame(animate);
+      }
+      
+      animate();
+
+      function launchPayload() {
+          if(isSimulating) return;
+          isSimulating = true;
+          time = 0;
+          
+          payloadAlt = 600;
+          payloadVel = 0;
+          isSplit = false;
+          part1 = null;
+          part2 = null;
+          totalEnergyYield = 0;
+          
+          document.getElementById('statusVal').innerText = "DESCENDING TO ERGOSPHERE...";
+          document.getElementById('statusVal').style.color = "#f97316";
+      }
+    </script>
+  </body>
+</html>

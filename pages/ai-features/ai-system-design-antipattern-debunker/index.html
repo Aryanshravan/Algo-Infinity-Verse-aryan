@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI System Design Antipattern Debunker | Algo Infinity Verse</title>
+  <meta name="description" content="Paste a system-design answer, detect SPOF, chatty services, unbounded queues, single-DB, and fake-Kafka antipatterns, score interview risk, and export a redesign critique." />
+  <link rel="stylesheet" href="/styles.css" />
+  <link rel="stylesheet" href="style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Poppins:wght@300;400;500;600;700&family=Fira+Code:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <script>
+    (function () {
+      try {
+        var storedTheme = localStorage.getItem('theme');
+        var prefersLight = window.matchMedia('(prefers-color-scheme: light)').matches;
+        var theme = storedTheme || (prefersLight ? 'light' : 'dark');
+        if (theme === 'light') {
+          document.documentElement.classList.add('light-mode');
+        } else {
+          document.documentElement.classList.remove('light-mode');
+        }
+      } catch (e) {}
+    })();
+  </script>
+</head>
+<body data-page="ai-system-design-antipattern-debunker">
+  <a href="#sdap-main" class="sdap-skip-link">Skip to main content</a>
+  <button type="button" id="scrollTopBtn" class="scroll-top-btn" aria-label="Scroll to top">
+    <i class="fas fa-arrow-up" aria-hidden="true"></i>
+  </button>
+
+  <div id="navbar-placeholder"></div>
+
+  <header class="sdap-hero">
+    <div class="sdap-hero-badge">
+      <i class="fas fa-diagram-project" aria-hidden="true"></i>
+      System Design Critique Lab
+    </div>
+    <h1>
+      AI System Design
+      <span class="sdap-hero-accent">Antipattern Debunker</span>
+    </h1>
+    <p>
+      Paste a system-design answer, surface SPOF / chatty services / unbounded queues / single-DB /
+      fake-Kafka antipatterns, score interview risk, and export a redesign critique — client-side only.
+    </p>
+    <div class="sdap-hero-stats" aria-live="polite">
+      <div class="sdap-stat">
+        <span class="sdap-stat-val" id="statPatterns">0</span>
+        <span class="sdap-stat-label">Antipatterns</span>
+      </div>
+      <div class="sdap-stat">
+        <span class="sdap-stat-val" id="statSeverity">—</span>
+        <span class="sdap-stat-label">Top severity</span>
+      </div>
+      <div class="sdap-stat">
+        <span class="sdap-stat-val" id="statInterview">—</span>
+        <span class="sdap-stat-label">Interview risk</span>
+      </div>
+      <div class="sdap-stat">
+        <span class="sdap-stat-val" id="statFixes">0</span>
+        <span class="sdap-stat-label">Redesign tips</span>
+      </div>
+    </div>
+  </header>
+
+  <main id="sdap-main" class="sdap-main">
+    <div class="container">
+      <div class="sdap-workspace">
+        <section class="sdap-panel" aria-labelledby="sdap-input-title">
+          <div class="sdap-panel-header">
+            <div class="sdap-panel-title">
+              <i class="fas fa-file-lines sdap-panel-icon" aria-hidden="true"></i>
+              <h2 id="sdap-input-title">System-design answer</h2>
+            </div>
+          </div>
+
+          <label class="sdap-label" for="sdapAnswerInput">Paste architecture write-up or interview answer</label>
+          <textarea
+            id="sdapAnswerInput"
+            class="sdap-textarea"
+            rows="16"
+            spellcheck="false"
+            placeholder="Describe services, data stores, queues, caching, and failure modes…"
+            aria-describedby="sdapAnswerHint"
+          ></textarea>
+          <p id="sdapAnswerHint" class="sdap-hint">
+            Looks for SPOF, chatty sync hops, unbounded queues, single shared DB, and “Kafka as magic bus” claims.
+          </p>
+
+          <div class="sdap-controls">
+            <button type="button" id="sdapLoadDemoBtn" class="btn btn-secondary">
+              <i class="fas fa-flask" aria-hidden="true"></i> Load weak-answer demos
+            </button>
+            <button type="button" id="sdapAuditBtn" class="btn btn-primary">
+              <i class="fas fa-magnifying-glass" aria-hidden="true"></i> Debunk antipatterns
+            </button>
+            <button type="button" id="sdapClearBtn" class="btn btn-outline">
+              <i class="fas fa-eraser" aria-hidden="true"></i> Clear
+            </button>
+            <button type="button" id="sdapExportBtn" class="btn btn-outline" disabled>
+              <i class="fas fa-download" aria-hidden="true"></i> Export critique report
+            </button>
+          </div>
+          <div id="sdapStatus" class="sdap-status" role="status" aria-live="polite"></div>
+        </section>
+
+        <section class="sdap-panel sdap-report-panel" aria-labelledby="sdap-report-title">
+          <div class="sdap-panel-header">
+            <div class="sdap-panel-title">
+              <i class="fas fa-clipboard-check sdap-panel-icon" aria-hidden="true"></i>
+              <h2 id="sdap-report-title">Critique results</h2>
+            </div>
+          </div>
+
+          <div id="sdapEmpty" class="sdap-empty">
+            <i class="fas fa-diagram-project" aria-hidden="true"></i>
+            <p>No critique yet. Load weak-answer demos or paste a design answer, then run the debunker.</p>
+          </div>
+
+          <div id="sdapResults" hidden>
+            <div class="sdap-score-card">
+              <div>
+                <h3 id="sdapRiskHeading">Interview-risk score</h3>
+                <p id="sdapRiskBlurb" class="sdap-muted"></p>
+              </div>
+              <div class="sdap-score-ring" id="sdapScoreRing" aria-hidden="true">
+                <span id="sdapScoreVal">0</span>
+              </div>
+            </div>
+
+            <section class="sdap-section" aria-labelledby="sdapCatalogHeading">
+              <h3 id="sdapCatalogHeading"><i class="fas fa-book" aria-hidden="true"></i> Antipattern catalog hits</h3>
+              <ul id="sdapFindingList" class="sdap-findings"></ul>
+            </section>
+
+            <section class="sdap-section" aria-labelledby="sdapSuggestHeading">
+              <h3 id="sdapSuggestHeading"><i class="fas fa-lightbulb" aria-hidden="true"></i> Redesign suggestion engine</h3>
+              <div id="sdapSuggestOut" class="sdap-suggest-out"></div>
+            </section>
+          </div>
+        </section>
+      </div>
+
+      <div class="sdap-diff-grid" id="sdapRewritePanel" hidden>
+        <section class="sdap-panel" aria-labelledby="sdap-before-title">
+          <div class="sdap-panel-header">
+            <div class="sdap-panel-title">
+              <i class="fas fa-file-code sdap-panel-icon" aria-hidden="true"></i>
+              <h2 id="sdap-before-title">Before (as pasted)</h2>
+            </div>
+          </div>
+          <pre id="sdapBefore" class="sdap-code-panel" tabindex="0"><code>Run a critique to capture the original answer.</code></pre>
+        </section>
+        <section class="sdap-panel" aria-labelledby="sdap-after-title">
+          <div class="sdap-panel-header">
+            <div class="sdap-panel-title">
+              <i class="fas fa-wand-magic-sparkles sdap-panel-icon" aria-hidden="true"></i>
+              <h2 id="sdap-after-title">After (redesign sketch)</h2>
+            </div>
+          </div>
+          <pre id="sdapAfter" class="sdap-code-panel sdap-code-after" tabindex="0"><code>Hardened redesign guidance appears here.</code></pre>
+        </section>
+      </div>
+    </div>
+  </main>
+
+  <div id="footer-placeholder"></div>
+
+  <script src="/auth.js"></script>
+  <script src="/bootstrap-legacy.js"></script>
+  <script src="/script.js"></script>
+  <script type="module" src="/dist/legacy-bundle.mjs"></script>
+  <script src="/theme.js"></script>
+  <script src="script.js"></script>
+  <script>
+    if (typeof loadPartial === 'function') {
+      loadPartial('navbar-placeholder', '/partials/navbar.html');
+      loadPartial('footer-placeholder', '/partials/footer.html');
+    }
+  </script>
+</body>
+</html>

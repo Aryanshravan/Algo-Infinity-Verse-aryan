@@ -1,0 +1,390 @@
+/* ===== SRI CDN Integrity Lab ===== */
+:root {
+  --sri-glass: rgba(255, 255, 255, 0.04);
+  --sri-border: rgba(255, 255, 255, 0.1);
+  --sri-muted: rgba(255, 255, 255, 0.62);
+  --sri-accent: #fb923c;
+  --sri-accent-2: #f472b6;
+  --sri-accent-dim: rgba(251, 146, 60, 0.14);
+  --sri-warn: #fbbf24;
+  --sri-danger: #f87171;
+  --sri-ok: #4ade80;
+  --sri-info: #60a5fa;
+  --sri-code-bg: rgba(0, 0, 0, 0.35);
+  --sri-radius: 14px;
+}
+
+html.light-mode {
+  --sri-glass: rgba(15, 23, 42, 0.04);
+  --sri-border: rgba(15, 23, 42, 0.12);
+  --sri-muted: rgba(15, 23, 42, 0.65);
+  --sri-accent-dim: rgba(234, 88, 12, 0.1);
+  --sri-code-bg: rgba(15, 23, 42, 0.06);
+}
+
+.sri-skip-link {
+  position: absolute;
+  left: 1rem;
+  top: -100px;
+  z-index: 10000;
+  padding: 0.6rem 1rem;
+  background: var(--sri-accent);
+  color: #0a0a14;
+  font-weight: 700;
+  border-radius: 8px;
+  text-decoration: none;
+}
+
+.sri-skip-link:focus {
+  top: 1rem;
+  outline: 3px solid #fff;
+  outline-offset: 2px;
+}
+
+.sri-hero {
+  position: relative;
+  overflow: hidden;
+  padding: 7.5rem 1.5rem 4rem;
+  text-align: center;
+  border-bottom: 1px solid var(--sri-border);
+  background:
+    radial-gradient(ellipse at top right, rgba(251, 146, 60, 0.18), transparent 55%),
+    radial-gradient(ellipse at bottom left, rgba(244, 114, 182, 0.1), transparent 50%);
+}
+
+.sri-hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1.1rem;
+  padding: 0.35rem 0.9rem;
+  border-radius: 999px;
+  border: 1px solid rgba(251, 146, 60, 0.45);
+  background: var(--sri-accent-dim);
+  color: var(--sri-accent);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.sri-hero h1 {
+  margin: 0 0 1rem;
+  font-family: 'Orbitron', sans-serif;
+  font-size: clamp(1.9rem, 5vw, 3rem);
+  font-weight: 900;
+  line-height: 1.15;
+}
+
+.sri-hero-accent {
+  display: inline-block;
+  background: linear-gradient(135deg, #fb923c, #f472b6);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.sri-hero p {
+  max-width: 720px;
+  margin: 0 auto 2rem;
+  color: var(--sri-muted);
+  font-size: 1.05rem;
+  line-height: 1.65;
+  font-family: 'Poppins', sans-serif;
+}
+
+.sri-hero code {
+  font-family: 'Fira Code', ui-monospace, monospace;
+  font-size: 0.9em;
+  padding: 0.1em 0.35em;
+  border-radius: 4px;
+  background: var(--sri-code-bg);
+}
+
+.sri-hero-stats {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1rem;
+}
+
+.sri-stat {
+  min-width: 120px;
+  padding: 0.85rem 1.1rem;
+  border: 1px solid var(--sri-border);
+  border-radius: var(--sri-radius);
+  background: var(--sri-glass);
+}
+
+.sri-stat-val {
+  display: block;
+  font-family: 'Orbitron', sans-serif;
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: var(--sri-accent);
+}
+
+.sri-stat-label {
+  font-size: 0.75rem;
+  color: var(--sri-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.sri-main {
+  padding: 2rem 0 4rem;
+  font-family: 'Poppins', sans-serif;
+}
+
+.sri-workspace {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+@media (max-width: 900px) {
+  .sri-workspace {
+    grid-template-columns: 1fr;
+  }
+}
+
+.sri-panel {
+  padding: 1.4rem;
+  border: 1px solid var(--sri-border);
+  border-radius: 18px;
+  background: var(--sri-glass);
+  backdrop-filter: blur(12px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
+}
+
+.sri-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.sri-panel-title {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.sri-panel-title h2 {
+  margin: 0;
+  font-family: 'Orbitron', sans-serif;
+  font-size: 1.05rem;
+}
+
+.sri-panel-icon {
+  color: var(--sri-accent);
+}
+
+.sri-label {
+  display: block;
+  font-weight: 600;
+  font-size: 0.88rem;
+  margin: 0.75rem 0 0.4rem;
+}
+
+.sri-label:first-of-type {
+  margin-top: 0;
+}
+
+.sri-textarea {
+  width: 100%;
+  padding: 0.85rem;
+  border-radius: 12px;
+  border: 1px solid var(--sri-border);
+  background: var(--sri-code-bg);
+  color: inherit;
+  font-family: 'Fira Code', ui-monospace, monospace;
+  font-size: 0.82rem;
+  line-height: 1.5;
+  resize: vertical;
+}
+
+.sri-textarea-sm {
+  min-height: 90px;
+}
+
+.sri-textarea:focus-visible {
+  outline: 3px solid var(--sri-accent);
+  outline-offset: 1px;
+}
+
+.sri-hint {
+  margin: 0.45rem 0 0;
+  font-size: 0.82rem;
+  color: var(--sri-muted);
+  line-height: 1.45;
+}
+
+.sri-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+  margin-top: 1rem;
+}
+
+.sri-status {
+  margin-top: 0.75rem;
+  font-size: 0.88rem;
+  color: var(--sri-muted);
+}
+
+.sri-empty {
+  color: var(--sri-muted);
+  margin: 0;
+}
+
+.sri-findings {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  max-height: 440px;
+  overflow-y: auto;
+}
+
+.sri-finding {
+  border: 1px solid var(--sri-border);
+  border-radius: 12px;
+  padding: 0.85rem 1rem;
+  background: rgba(0, 0, 0, 0.15);
+}
+
+html.light-mode .sri-finding {
+  background: rgba(15, 23, 42, 0.03);
+}
+
+.sri-finding-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.35rem;
+}
+
+.sri-sev {
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 0.15rem 0.45rem;
+  border-radius: 999px;
+}
+
+.sri-sev-high {
+  background: rgba(248, 113, 113, 0.18);
+  color: var(--sri-danger);
+}
+
+.sri-sev-medium {
+  background: rgba(251, 191, 36, 0.18);
+  color: var(--sri-warn);
+}
+
+.sri-sev-low {
+  background: rgba(96, 165, 250, 0.18);
+  color: var(--sri-info);
+}
+
+.sri-finding-title {
+  font-weight: 700;
+  font-size: 0.92rem;
+}
+
+.sri-finding-detail {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--sri-muted);
+  line-height: 1.45;
+}
+
+.sri-finding-snip {
+  margin: 0.5rem 0 0;
+  padding: 0.55rem 0.7rem;
+  border-radius: 8px;
+  background: var(--sri-code-bg);
+  font-family: 'Fira Code', ui-monospace, monospace;
+  font-size: 0.72rem;
+  overflow-x: auto;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.sri-swap-result {
+  margin-top: 1rem;
+  border: 1px solid var(--sri-border);
+  border-radius: 12px;
+  padding: 0.9rem 1rem;
+  background: rgba(0, 0, 0, 0.12);
+  line-height: 1.5;
+  font-size: 0.9rem;
+}
+
+html.light-mode .sri-swap-result {
+  background: rgba(15, 23, 42, 0.03);
+}
+
+.sri-swap-result.is-mismatch {
+  border-color: rgba(248, 113, 113, 0.5);
+}
+
+.sri-swap-result.is-match {
+  border-color: rgba(74, 222, 128, 0.5);
+}
+
+.sri-hash {
+  font-family: 'Fira Code', ui-monospace, monospace;
+  font-size: 0.72rem;
+  word-break: break-all;
+  display: block;
+  margin: 0.35rem 0 0.75rem;
+  padding: 0.45rem 0.55rem;
+  border-radius: 8px;
+  background: var(--sri-code-bg);
+}
+
+.sri-subhead {
+  margin: 0.85rem 0 0.45rem;
+  font-size: 0.85rem;
+  color: var(--sri-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.sri-subhead:first-child {
+  margin-top: 0;
+}
+
+.sri-mono-block {
+  margin: 0;
+  padding: 0.85rem;
+  border-radius: 12px;
+  border: 1px solid var(--sri-border);
+  background: var(--sri-code-bg);
+  font-family: 'Fira Code', ui-monospace, monospace;
+  font-size: 0.75rem;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  word-break: break-word;
+  max-height: 260px;
+  overflow: auto;
+}
+
+.sri-diff .sri-add {
+  color: var(--sri-ok);
+}
+
+.sri-diff .sri-del {
+  color: var(--sri-danger);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sri-panel {
+    box-shadow: none;
+  }
+}

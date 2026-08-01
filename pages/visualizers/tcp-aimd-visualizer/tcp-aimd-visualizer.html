@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>TCP Congestion Window Slow Start & AIMD | Algo Infinity Verse</title>
+    <meta name="description" content="Simulate TCP Slow Start and AIMD mechanism." />
+
+    <link
+      href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Poppins:wght@300;400;500;600;700&family=Fira+Code:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+
+    <link rel="stylesheet" href="tcp-aimd-visualizer.css" />
+    <script src="/theme.js"></script>
+    <script src="/modules/lazyVisualizer.js"></script>
+    <link rel="stylesheet" href="/modules/quick-notes/quick-notes.css" />
+  </head>
+  <body class="tcp-body">
+    <nav class="navbar tcp-nav">
+      <div class="nav-logo">
+        <span class="logo-text">∞</span>
+        <span class="logo-title">Algo Infinity Verse</span>
+      </div>
+      <div class="engine-badge"><i class="fas fa-network-wired"></i> TCP AIMD Visualizer</div>
+    </nav>
+
+    <main class="tcp-workspace">
+      <header class="workspace-header">
+        <h1>TCP Congestion Window: Slow Start & AIMD</h1>
+        <p class="subtitle">
+          Observe exponential growth during Slow Start. Trigger a packet drop to see AIMD halve the
+          window and resume linear growth.
+        </p>
+
+        <div class="control-panel">
+          <button id="btnStart" class="btn btn-primary">
+            <i class="fas fa-play"></i> Start Transmission
+          </button>
+          <button id="btnDropPacket" class="btn btn-danger" disabled>
+            <i class="fas fa-bomb"></i> Drop Packet
+          </button>
+          <button id="btnReset" class="btn btn-secondary"><i class="fas fa-redo"></i> Reset</button>
+        </div>
+      </header>
+
+      <div class="visualizer-content">
+        <section class="pipes-panel">
+          <div class="lane-container">
+            <div class="lane-header">
+              <h2>
+                <i class="fas fa-server"></i> TCP Sender
+                <span class="badge badge-phase" id="phaseBadge">Slow Start</span>
+              </h2>
+              <div class="stats-box">
+                <span class="stat-label">cwnd:</span>
+                <span class="stat-value" id="currentCwnd">1</span>
+                <span class="stat-label ml-3">ssthresh:</span>
+                <span class="stat-value" id="currentSsthresh">64</span>
+              </div>
+            </div>
+            <div class="network-pipe" id="tcpPipe">
+              <!-- Packets -->
+            </div>
+          </div>
+        </section>
+
+        <section class="graph-panel">
+          <div class="panel-header">
+            <h2><i class="fas fa-chart-line"></i> Congestion Window (cwnd) Over Time</h2>
+          </div>
+          <div class="graph-container">
+            <canvas id="cwndChart"></canvas>
+          </div>
+          <div class="explanation-box" id="algoExplanation">
+            <p><strong>Slow Start:</strong> Window grows exponentially (doubles each RTT).</p>
+            <p>
+              <strong>Congestion Avoidance (AIMD):</strong> Upon packet loss, window halves
+              (Multiplicative Decrease) and then grows linearly (Additive Increase).
+            </p>
+          </div>
+        </section>
+      </div>
+    </main>
+
+    <script src="tcp-aimd-visualizer.js"></script>
+    <script src="/modules/quick-notes/quick-notes.js"></script>
+  </body>
+</html>

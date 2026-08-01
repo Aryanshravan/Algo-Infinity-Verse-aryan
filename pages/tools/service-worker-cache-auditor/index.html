@@ -1,0 +1,194 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Service Worker Cache Auditor | Algo Infinity Verse</title>
+  <meta name="description" content="Configure SW cache strategies and route rules, simulate poison/stale assets, check key collisions and integrity hashes, then export an offline pack risk report." />
+  <link rel="stylesheet" href="/styles.css" />
+  <link rel="stylesheet" href="style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Poppins:wght@300;400;500;600;700&family=Fira+Code:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <script>
+    (function () {
+      try {
+        var storedTheme = localStorage.getItem('theme');
+        var prefersLight = window.matchMedia('(prefers-color-scheme: light)').matches;
+        var theme = storedTheme || (prefersLight ? 'light' : 'dark');
+        if (theme === 'light') {
+          document.documentElement.classList.add('light-mode');
+        } else {
+          document.documentElement.classList.remove('light-mode');
+        }
+      } catch (e) {}
+    })();
+  </script>
+</head>
+<body data-page="service-worker-cache-auditor">
+  <a href="#swc-main" class="swc-skip-link">Skip to main content</a>
+  <button type="button" id="scrollTopBtn" class="scroll-top-btn" aria-label="Scroll to top">
+    <i class="fas fa-arrow-up" aria-hidden="true"></i>
+  </button>
+
+  <div id="navbar-placeholder"></div>
+
+  <header class="swc-hero">
+    <div class="swc-hero-badge">
+      <i class="fas fa-box-archive" aria-hidden="true"></i>
+      PWA Cache Lab
+    </div>
+    <h1>
+      Service Worker
+      <span class="swc-hero-accent">Cache Auditor</span>
+    </h1>
+    <p>
+      Model cache-first, network-first, and stale-while-revalidate strategies, simulate
+      poison and stale assets, and score offline pack risk with integrity recommendations.
+    </p>
+    <div class="swc-hero-stats" aria-live="polite">
+      <div class="swc-stat">
+        <span class="swc-stat-val" id="statRisk">—</span>
+        <span class="swc-stat-label">Offline risk</span>
+      </div>
+      <div class="swc-stat">
+        <span class="swc-stat-val" id="statCollisions">—</span>
+        <span class="swc-stat-label">Key collisions</span>
+      </div>
+      <div class="swc-stat">
+        <span class="swc-stat-val" id="statStale">—</span>
+        <span class="swc-stat-label">Stale / poison</span>
+      </div>
+      <div class="swc-stat">
+        <span class="swc-stat-val" id="statIntegrity">—</span>
+        <span class="swc-stat-label">Integrity gaps</span>
+      </div>
+    </div>
+  </header>
+
+  <main id="swc-main" class="swc-main">
+    <div class="container">
+      <div class="swc-workspace">
+        <section class="swc-panel" aria-labelledby="swc-config-title">
+          <div class="swc-panel-header">
+            <div class="swc-panel-title">
+              <i class="fas fa-gears swc-panel-icon" aria-hidden="true"></i>
+              <h2 id="swc-config-title">Cache configuration</h2>
+            </div>
+          </div>
+
+          <div class="swc-field-grid">
+            <div class="swc-field">
+              <label class="swc-label" for="cacheVersion">Cache version</label>
+              <input type="text" id="cacheVersion" class="swc-input swc-mono" value="v1" autocomplete="off" />
+            </div>
+            <div class="swc-field">
+              <label class="swc-label" for="defaultStrategy">Default strategy</label>
+              <select id="defaultStrategy" class="swc-input">
+                <option value="cache-first">cache-first</option>
+                <option value="network-first" selected>network-first</option>
+                <option value="stale-while-revalidate">stale-while-revalidate</option>
+              </select>
+            </div>
+          </div>
+
+          <label class="swc-label" for="routeRules">Route rules (one per line: pattern | strategy)</label>
+          <textarea
+            id="routeRules"
+            class="swc-textarea"
+            rows="8"
+            spellcheck="false"
+            aria-describedby="rulesHint"
+          >/assets/* | cache-first
+/api/* | network-first
+/index.html | stale-while-revalidate
+/app.js | cache-first</textarea>
+          <p class="swc-hint" id="rulesHint">Patterns are simple prefix/glob heuristics for the simulator.</p>
+
+          <fieldset class="swc-fieldset">
+            <legend class="swc-label">Scenario toggles</legend>
+            <div class="swc-toggle-grid" role="group" aria-label="Poison and stale scenarios">
+              <label class="swc-toggle">
+                <input type="checkbox" id="togglePoison" />
+                Simulate poisoned cached asset
+              </label>
+              <label class="swc-toggle">
+                <input type="checkbox" id="toggleStale" checked />
+                Simulate stale shell after deploy
+              </label>
+              <label class="swc-toggle">
+                <input type="checkbox" id="toggleNoIntegrity" checked />
+                Missing Subresource Integrity
+              </label>
+              <label class="swc-toggle">
+                <input type="checkbox" id="toggleCollision" />
+                Force key collision (same URL, two versions)
+              </label>
+            </div>
+          </fieldset>
+
+          <div class="swc-controls">
+            <button type="button" id="auditBtn" class="btn btn-primary">
+              <i class="fas fa-magnifying-glass" aria-hidden="true"></i> Run cache audit
+            </button>
+            <button type="button" id="exportBtn" class="btn btn-outline" disabled>
+              <i class="fas fa-download" aria-hidden="true"></i> Export report
+            </button>
+          </div>
+        </section>
+
+        <section class="swc-panel" aria-labelledby="swc-findings-title">
+          <div class="swc-panel-header">
+            <div class="swc-panel-title">
+              <i class="fas fa-triangle-exclamation swc-panel-icon" aria-hidden="true"></i>
+              <h2 id="swc-findings-title">Audit findings</h2>
+            </div>
+            <span class="swc-status-live" id="auditStatus" role="status" aria-live="polite">Ready</span>
+          </div>
+          <div id="findingsList" class="swc-findings" aria-live="polite">
+            <p class="swc-empty">Configure strategies and run the audit.</p>
+          </div>
+        </section>
+      </div>
+
+      <div class="swc-workspace">
+        <section class="swc-panel" aria-labelledby="swc-sim-title">
+          <div class="swc-panel-header">
+            <div class="swc-panel-title">
+              <i class="fas fa-flask swc-panel-icon" aria-hidden="true"></i>
+              <h2 id="swc-sim-title">Fetch simulation log</h2>
+            </div>
+          </div>
+          <pre class="swc-mono-block" id="simLog" aria-live="polite">Awaiting audit…</pre>
+        </section>
+
+        <section class="swc-panel" aria-labelledby="swc-integrity-title">
+          <div class="swc-panel-header">
+            <div class="swc-panel-title">
+              <i class="fas fa-shield-halved swc-panel-icon" aria-hidden="true"></i>
+              <h2 id="swc-integrity-title">Integrity recommendations</h2>
+            </div>
+          </div>
+          <ul id="integrityList" class="swc-recs" aria-live="polite">
+            <li class="swc-empty-li">SRI / versioning tips appear after audit.</li>
+          </ul>
+        </section>
+      </div>
+    </div>
+  </main>
+
+  <div id="footer-placeholder"></div>
+
+  <script src="/auth.js"></script>
+  <script src="/bootstrap-legacy.js"></script>
+  <script src="/script.js"></script>
+  <script type="module" src="/dist/legacy-bundle.mjs"></script>
+  <script src="/theme.js"></script>
+  <script src="script.js"></script>
+  <script>
+    if (typeof loadPartial === 'function') {
+      loadPartial('navbar-placeholder', '/partials/navbar.html');
+      loadPartial('footer-placeholder', '/partials/footer.html');
+    }
+  </script>
+</body>
+</html>

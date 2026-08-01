@@ -1,117 +1,177 @@
 <!doctype html>
 <html lang="en">
-<head>
+  <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>3D Procedural Pathfinding | Algo Infinity Verse</title>
-    <meta name="description" content="Visualize A* Pathfinding on dynamically generated 3D procedural terrain using WebGL." />
-    
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Poppins:wght@300;400;500;600;700&family=Fira+Code:wght@400;500;600&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
-    
-    <!-- External Stylesheets -->
-    <link rel="stylesheet" href="/styles.css" />
+    <title>3D A* Pathfinding | Cyber-Voxel Engine</title>
+    <meta
+      name="description"
+      content="Advanced 3D A* Pathfinding Visualizer. Explore cost-weighted optimization across mountainous voxel terrain with real-time heuristic rendering."
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Fira+Code:wght@400;500;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <link rel="stylesheet" href="../../../styles.css" />
     <link rel="stylesheet" href="3d-pathfinding.css" />
-    
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    <script src="../../../modules/toast.js"></script>
+  </head>
+  <body class="voxel-body">
+    <div id="navbar-placeholder"></div>
 
-    <!-- Theme Initialization Script -->
-    <script>
-      (function() {
-        try {
-          var storedTheme = localStorage.getItem('theme');
-          var prefersLight = window.matchMedia('(prefers-color-scheme: light)').matches;
-          var theme = storedTheme || (prefersLight ? 'light' : 'dark');
-          if (theme === 'light') {
-            document.documentElement.classList.add('light-mode');
-          } else {
-            document.documentElement.classList.remove('light-mode');
-          }
-        } catch (e) {}
-      })();
-    </script>
-  <script src="/theme.js"></script>
-</head>
-<body class="path-body">
+    <section class="voxel-hero">
+      <div class="voxel-hero-inner">
+        <div class="voxel-eyebrow">Cost-Weighted Optimization</div>
+        <h1 class="voxel-title">3D A* Pathfinding</h1>
+        <p class="voxel-desc">
+          Most tutorials teach A* on a flat 2D grid. Real engines use the <strong>Z-axis</strong>.
+          Watch the algorithm mathematically weigh the cost of climbing a steep mountain vs walking
+          a longer, flat path around it.
+        </p>
+      </div>
+    </section>
 
-    <nav class="navbar">
-        <div class="nav-logo">
-            <span class="logo-text">∞</span>
-            <span class="logo-title">Algo Infinity Verse</span>
-        </div>
-        <div class="engine-badge" id="engineBadge">
-            <i class="fas fa-mountain"></i> WebGL Terrain Engine
-        </div>
-    </nav>
-
-    <main class="path-workspace">
-        
-        <!-- UI Overlay (Glassmorphism) -->
-        <div class="controls-overlay">
-            <div class="panel-header">
-                <h3><i class="fas fa-route"></i> 3D Pathfinding</h3>
+    <div class="voxel-dashboard container">
+      <div class="voxel-layout">
+        <!-- Left Panel: Tactical Controls -->
+        <div class="voxel-sidebar">
+          <div class="cyber-panel mb-4">
+            <div class="panel-header text-cyan">
+              <i class="fas fa-satellite-dish"></i> Terrain Generation
             </div>
-            
-            <div class="controls-content">
-                <p class="desc-text">
-                    Observe the <strong>A* Algorithm</strong> navigate procedural 3D terrain. The cost of movement factors in both distance and the <em>elevation slope</em> between nodes.
-                </p>
 
-                <div class="action-grid">
-                    <button type="button" class="btn btn-primary w-100" id="btnGenerate">
-                        <i class="fas fa-random"></i> Generate Terrain
-                    </button>
-                    <button type="button" class="btn btn-success w-100" id="btnStartSearch">
-                        <i class="fas fa-play"></i> Start Search
-                    </button>
-                </div>
-
-                <div class="settings-group">
-                    <label>Algorithm Speed</label>
-                    <input type="range" id="speedSlider" min="1" max="50" value="20" aria-label="Algorithm Speed">
-                </div>
-
-                <div class="legend-box">
-                    <h4>Map Legend</h4>
-                    <div class="legend-item"><span class="color-box start"></span> Start Node</div>
-                    <div class="legend-item"><span class="color-box end"></span> Target Node</div>
-                    <div class="legend-item"><span class="color-box open"></span> Frontier (Open Set)</div>
-                    <div class="legend-item"><span class="color-box closed"></span> Explored (Closed Set)</div>
-                    <div class="legend-item"><span class="color-box path"></span> Optimal Path</div>
-                </div>
-
-                <div class="stats-panel">
-                    <div class="stat-row">
-                        <span>Terrain Size:</span>
-                        <strong class="text-accent">40 x 40 (1600 Nodes)</strong>
-                    </div>
-                    <div class="stat-row">
-                        <span>Nodes Explored:</span>
-                        <strong class="text-accent" id="statExplored" aria-live="polite">0</strong>
-                    </div>
-                    <div class="stat-row">
-                        <span>Path Cost:</span>
-                        <strong class="text-accent" id="statCost" aria-live="polite">0.00</strong>
-                    </div>
-                </div>
+            <div class="terrain-legend mb-3">
+              <div class="legend-item"><span class="color-box bg-grass"></span> Grass (Cost 1)</div>
+              <div class="legend-item"><span class="color-box bg-mud"></span> Mud (Cost 3)</div>
+              <div class="legend-item">
+                <span class="color-box bg-mountain"></span> Mountain (Cost 5)
+              </div>
+              <div class="legend-item"><span class="color-box bg-water"></span> Water (Wall)</div>
             </div>
+
+            <button class="cyber-btn w-100 mb-2" id="btnGenRandom">
+              <i class="fas fa-dice"></i> Generate Random Map
+            </button>
+            <button class="cyber-btn w-100 mb-2" id="btnGenMountain">
+              <i class="fas fa-mountain"></i> Mountain Pass Scenario
+            </button>
+            <button class="cyber-btn w-100 border-red text-red" id="btnClear">
+              <i class="fas fa-trash"></i> Clear Grid
+            </button>
+          </div>
+
+          <div class="cyber-panel">
+            <div class="panel-header text-magenta">
+              <i class="fas fa-microchip"></i> Pathfinding Engine
+            </div>
+
+            <div class="control-group">
+              <label>Heuristic Equation (H)</label>
+              <select id="selHeuristic" class="cyber-select w-100">
+                <option value="manhattan">Manhattan (3D Block)</option>
+                <option value="euclidean">Euclidean (3D Direct)</option>
+              </select>
+            </div>
+
+            <div class="control-group mt-3">
+              <label>Scan Speed</label>
+              <input
+                type="range"
+                id="sliderSpeed"
+                min="10"
+                max="200"
+                step="10"
+                value="100"
+                class="cyber-range"
+              />
+            </div>
+
+            <button class="cyber-btn btn-glow w-100 mt-4" id="btnStart">
+              <i class="fas fa-play"></i> Run A* Algorithm
+            </button>
+          </div>
         </div>
 
-        <!-- 3D Canvas Container -->
-        <div class="canvas-wrapper" id="threejs-container" aria-label="3D Pathfinding Terrain Canvas" role="region">
-            <p class="sr-only">A 3D representation of terrain where the A* algorithm visually searches for the optimal path.</p>
-            <div class="camera-hint" aria-hidden="true"><i class="fas fa-mouse"></i> Click & Drag to Rotate | Scroll to Zoom</div>
+        <!-- Center: 3D Voxel Canvas -->
+        <div class="voxel-main">
+          <div class="camera-controls">
+            <span class="text-xs text-gray"><i class="fas fa-camera"></i> Camera Y-Axis</span>
+            <input
+              type="range"
+              id="camRotateZ"
+              min="0"
+              max="360"
+              value="45"
+              class="cyber-range"
+              style="width: 200px"
+            />
+          </div>
+
+          <div class="voxel-stage" id="voxelStage">
+            <div class="voxel-grid" id="voxelGrid">
+              <!-- JS Injects 15x15 3D DOM Grid Here -->
+            </div>
+          </div>
+
+          <div class="math-overlay" id="mathOverlay">
+            <div class="text-center font-fira text-sm">
+              <span class="text-cyan">G</span> (Cost from Start) +
+              <span class="text-magenta">H</span> (Est. to End) =
+              <span class="text-lime">F</span> (Total Score)
+            </div>
+          </div>
         </div>
 
-    </main>
+        <!-- Right Panel: Diagnostics Stream -->
+        <div class="voxel-sidebar">
+          <div class="cyber-panel h-100 flex-col">
+            <div class="panel-header text-lime">
+              <i class="fas fa-terminal"></i> Terminal Output
+            </div>
 
-    <!-- External Scripts -->
-    <script src="/bootstrap-legacy.js"></script>
+            <div class="terminal-stream" id="terminalStream">
+              <div class="term-line">> System Initialized.</div>
+              <div class="term-line">> Voxel Grid: 15x15xZ</div>
+              <div class="term-line">> Awaiting execution command...</div>
+            </div>
 
-    <script src="/script.js"></script>
-    <script type="module" src="/dist/legacy-bundle.mjs"></script>
+            <div class="path-stats mt-3" id="pathStats" style="display: none">
+              <div class="stat-row">
+                <span>Path Found:</span>
+                <strong class="text-lime" id="statStatus">TRUE</strong>
+              </div>
+              <div class="stat-row">
+                <span>Total Cost (G):</span>
+                <strong class="text-cyan" id="statCost">0</strong>
+              </div>
+              <div class="stat-row">
+                <span>Nodes Scanned:</span>
+                <strong class="text-magenta" id="statScanned">0</strong>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="footer-placeholder"></div>
+
+    <script src="../../../auth.js"></script>
+    <script src="../../../script.js"></script>
+    <script src="../../../theme.js"></script>
+    <script src="../../../auth-gate.js"></script>
     <script src="3d-pathfinding.js"></script>
-</body>
+    <script>
+      if (typeof loadPartial === 'function') {
+        loadPartial('navbar-placeholder', '/partials/navbar.html').then(function () {
+          if (typeof initNavbar === 'function') initNavbar();
+        });
+        loadPartial('footer-placeholder', '/partials/footer.html');
+      }
+    </script>
+  </body>
 </html>
-

@@ -1,0 +1,308 @@
+:root {
+  --tms-bg: #090d16;
+  --tms-card-bg: rgba(15, 23, 42, 0.85);
+  --tms-card-border: rgba(239, 68, 68, 0.25);
+  --tms-text: #f8fafc;
+  --tms-text-muted: #94a3b8;
+  --tms-primary: #ef4444;
+  --tms-primary-glow: rgba(239, 68, 68, 0.35);
+  --tms-secondary: #f59e0b;
+  --tms-success: #10b981;
+  --tms-info: #38bdf8;
+  --tms-code-bg: #030712;
+  --tms-radius: 14px;
+}
+
+html.light-mode {
+  --tms-bg: #f8fafc;
+  --tms-card-bg: rgba(255, 255, 255, 0.9);
+  --tms-card-border: rgba(239, 68, 68, 0.3);
+  --tms-text: #0f172a;
+  --tms-text-muted: #64748b;
+  --tms-primary: #dc2626;
+  --tms-primary-glow: rgba(220, 38, 38, 0.2);
+  --tms-secondary: #d97706;
+  --tms-success: #059669;
+  --tms-info: #0284c7;
+  --tms-code-bg: #f1f5f9;
+}
+
+body[data-page="threat-scanner"] {
+  background-color: var(--tms-bg);
+  color: var(--tms-text);
+  font-family: 'Inter', sans-serif;
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+}
+
+.tms-header {
+  background: rgba(15, 23, 42, 0.85);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--tms-card-border);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  padding: 12px 24px;
+}
+
+.tms-header-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.tms-back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--tms-primary);
+  text-decoration: none;
+  font-weight: 600;
+  padding: 8px 14px;
+  background: rgba(239, 68, 68, 0.1);
+  border-radius: 8px;
+}
+
+.tms-back-btn:hover {
+  background: var(--tms-primary);
+  color: #fff;
+}
+
+.tms-title-area h1 {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 1.4rem;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.tms-title-area p {
+  margin: 4px 0 0 0;
+  font-size: 0.85rem;
+  color: var(--tms-text-muted);
+}
+
+.tms-icon-btn {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--tms-card-border);
+  color: var(--tms-text);
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.tms-main {
+  max-width: 1400px;
+  margin: 24px auto;
+  padding: 0 24px;
+}
+
+.tms-card {
+  background: var(--tms-card-bg);
+  border: 1px solid var(--tms-card-border);
+  border-radius: var(--tms-radius);
+  padding: 20px;
+}
+
+.tms-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--tms-card-border);
+}
+
+.tms-card-header h3 {
+  font-family: 'Space Grotesk', sans-serif;
+  margin: 0;
+  font-size: 1.2rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.tms-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+}
+
+.tms-preset-group, .tms-action-group {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.tms-btn-preset {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--tms-card-border);
+  color: var(--tms-text-muted);
+  padding: 6px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.85rem;
+}
+
+.tms-btn-preset.active, .tms-btn-preset:hover {
+  background: var(--tms-primary);
+  color: #fff;
+}
+
+.tms-btn-main {
+  background: var(--tms-primary);
+  color: #fff;
+  border: none;
+  font-weight: 700;
+  padding: 10px 20px;
+  border-radius: 8px;
+  cursor: pointer;
+  box-shadow: 0 0 16px var(--tms-primary-glow);
+}
+
+.tms-btn-sec {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--tms-card-border);
+  color: var(--tms-text);
+  padding: 10px 20px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.tms-btn-mini {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--tms-card-border);
+  color: var(--tms-text);
+  padding: 4px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.8rem;
+}
+
+.tms-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+
+.tms-components-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.tms-comp-item {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--tms-card-border);
+  border-radius: 8px;
+  padding: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.tms-comp-title {
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+
+.tms-comp-boundary {
+  font-size: 0.78rem;
+  color: var(--tms-info);
+  background: rgba(56, 189, 248, 0.1);
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+
+.tms-score-card {
+  text-align: center;
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid var(--tms-primary);
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 20px;
+}
+
+.tms-score-val {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 2.2rem;
+  font-weight: 700;
+  color: var(--tms-primary);
+}
+
+.tms-score-sub {
+  font-size: 0.85rem;
+  color: var(--tms-text-muted);
+}
+
+.tms-stride-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+.tms-stride-box {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--tms-card-border);
+  border-radius: 8px;
+  padding: 10px;
+  font-size: 0.82rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.tms-cnt {
+  background: var(--tms-primary);
+  color: #fff;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-weight: 700;
+  font-size: 0.75rem;
+}
+
+.tms-threats-container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.tms-threat-item {
+  background: rgba(255, 255, 255, 0.03);
+  border-left: 4px solid var(--tms-primary);
+  border-radius: 8px;
+  padding: 14px;
+}
+
+.tms-threat-item.medium {
+  border-left-color: var(--tms-secondary);
+}
+
+.tms-threat-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+
+.tms-threat-desc {
+  font-size: 0.85rem;
+  color: var(--tms-text-muted);
+  line-height: 1.4;
+}
+
+.tms-threat-fix {
+  margin-top: 8px;
+  font-size: 0.82rem;
+  color: var(--tms-success);
+  font-family: 'JetBrains Mono', monospace;
+}

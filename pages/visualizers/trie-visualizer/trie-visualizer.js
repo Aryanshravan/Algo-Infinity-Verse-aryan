@@ -66,6 +66,7 @@ Trie.prototype.cloneNode = function (node) {
     id: node.id,
     x: node.x,
     y: node.y,
+    isCompressed: node.isCompressed,
   };
   for (let key in node.children) {
     if (Object.prototype.hasOwnProperty.call(node.children, key))
@@ -152,31 +153,37 @@ Trie.prototype.search = function (word) {
   let current = this.root;
   let path = [this.root.id];
   this.recordStep('Starting search for "' + word + '"', 'Begin traversal from root.', 'info', path);
-  for (let i = 0; i < word.length; i++) {
-    let ch = word[i];
-    this.recordStep(
-      "Searching character '" + ch + "'",
-      "Looking for child '" + ch + "' from the current node.",
-      'info',
-      path
-    );
-    if (!current.children[ch]) {
+
+  let i = 0;
+  while (i < word.length) {
+    let foundChild = false;
+    for (let key in current.children) {
+      let child = current.children[key];
+      // Check if the remaining word starts with this node's char (handles compressed nodes)
+      if (word.startsWith(child.char, i)) {
+        current = child;
+        path.push(current.id);
+        this.recordStep(
+          "Traversing to child '" + child.char + "'",
+          'Matched substring, moving down the path.',
+          'current',
+          path
+        );
+        i += child.char.length;
+        foundChild = true;
+        break;
+      }
+    }
+
+    if (!foundChild) {
       this.recordStep(
-        "Search failed at character '" + ch + "'",
-        "No child node exists for '" + ch + "'. The word is not present.",
+        'Search failed at index ' + i,
+        'No matching branch exists for the remaining string.',
         'failed',
         path
       );
       return false;
     }
-    current = current.children[ch];
-    path.push(current.id);
-    this.recordStep(
-      "Traversing to child '" + ch + "'",
-      'Moved to the next node in the word path.',
-      'current',
-      path
-    );
   }
   if (current.isEnd) {
     this.recordStep('Reached terminal node', 'Word Found', 'terminal', path);
@@ -190,6 +197,167 @@ Trie.prototype.search = function (word) {
   );
   return false;
 };
+Trie.prototype.delete = function (word) {
+  this.steps = [];
+  word = (word || '').trim().toLowerCase();
+  if (!word) {
+    this.recordStep('Please enter a word.', 'Word input cannot be empty.', 'failed', []);
+    return false;
+  }
+
+  let path = [this.root.id];
+  this.recordStep(
+    'Starting deletion for "' + word + '"',
+    'Begin traversal from root to locate word for deletion.',
+    'info',
+    path
+  );
+
+  let current = this.root;
+  let nodesOnPath = [this.root];
+
+  for (let i = 0; i < word.length; i++) {
+    let ch = word[i];
+    if (!current.children[ch]) {
+      this.recordStep(
+        "Deletion failed: '" + ch + "' not found",
+        "Word '" + word + "' does not exist in the Trie.",
+        'failed',
+        path
+      );
+      return false;
+    }
+    current = current.children[ch];
+    nodesOnPath.push(current);
+    path.push(current.id);
+    this.recordStep(
+      "Traversing character '" + ch + "'",
+      "Found node for '" + ch + "'.",
+      'current',
+      path
+    );
+  }
+
+  if (!current.isEnd) {
+    this.recordStep(
+      'Deletion failed: non-terminal node',
+      "Path for '" + word + "' exists, but it is not marked as a complete word.",
+      'failed',
+      path
+    );
+    return false;
+  }
+
+  current.isEnd = false;
+  this.recordStep(
+    'Unmarked terminal node',
+    "Removed terminal flag from node '" + current.char + "'.",
+    'terminal',
+    path
+  );
+
+  function hasChildren(node) {
+    return Object.keys(node.children).length > 0;
+  }
+
+  let prunedPath = path.slice();
+  for (let i = nodesOnPath.length - 1; i > 0; i--) {
+    let node = nodesOnPath[i];
+    let parentNode = nodesOnPath[i - 1];
+
+    if (!node.isEnd && !hasChildren(node)) {
+      delete parentNode.children[node.char];
+      prunedPath.pop();
+      this.recordStep(
+        "Pruned unreferenced branch node '" + node.char + "'",
+        "Node '" +
+          node.char +
+          "' has no children and is not a word end. Garbage collecting node from DOM/SVG tree.",
+        'failed',
+        prunedPath
+      );
+    } else {
+      this.recordStep(
+        "Retaining branch node '" + node.char + "'",
+        "Node '" + node.char + "' is either part of another word or has child branches.",
+        'info',
+        prunedPath
+      );
+      break;
+    }
+  }
+
+  this.recordStep(
+    'Word deleted successfully',
+    "Deletion of '" + word + "' and recursive branch pruning completed.",
+    'info',
+    prunedPath
+  );
+  return true;
+};
+
+Trie.prototype.compressToRadix = function () {
+  this.steps = [];
+  let path = ['root'];
+  this.recordStep(
+    'Starting Radix Compression',
+    'Scanning for linear, unbranching chains...',
+    'info',
+    path
+  );
+
+  let compressCount = 0;
+
+  const dfsCompress = (node, currentPath) => {
+    let keys = Object.keys(node.children);
+
+    // If exact 1 child and not end-of-word (unless it's root, root can't be compressed into)
+    if (keys.length === 1 && !node.isEnd && node.id !== 'root') {
+      let childKey = keys[0];
+      let child = node.children[childKey];
+
+      this.recordStep(
+        `Compressing chain: ${node.char} + ${child.char}`,
+        'Vacuuming unbranching chain into a single edge.',
+        'terminal',
+        [...currentPath, child.id]
+      );
+
+      node.char += child.char;
+      node.isEnd = child.isEnd;
+      node.children = child.children;
+      node.isCompressed = true;
+
+      compressCount++;
+
+      // Re-evaluate this node again (recursive vacuum)
+      dfsCompress(node, currentPath);
+    } else {
+      for (let k in node.children) {
+        dfsCompress(node.children[k], [...currentPath, node.children[k].id]);
+      }
+    }
+  };
+
+  dfsCompress(this.root, path);
+
+  if (compressCount > 0) {
+    this.recordStep(
+      'Compression Complete',
+      `Successfully collapsed ${compressCount} nodes. See Telemetry for bytes saved!`,
+      'info',
+      []
+    );
+  } else {
+    this.recordStep(
+      'No Compression Needed',
+      'The Trie is already optimal or has no linear chains.',
+      'failed',
+      []
+    );
+  }
+};
+
 Trie.prototype.layout = function () {
   let levels = [];
   let queue = [{ node: this.root, depth: 0 }];
@@ -243,16 +411,17 @@ Trie.prototype.render = function (snapshot) {
     if (depth < levels.length - 1) {
       for (let i = 0; i < keys.length; i++) {
         let child = node.children[keys[i]];
-        line(
-          node.x,
-          node.y + 30,
-          child.x,
-          child.y - 30,
-          'trie-edge' +
-            (snapshot.activePath.indexOf(node.id) > -1 && snapshot.activePath.indexOf(child.id) > -1
-              ? ' current'
-              : '')
-        );
+        let edgeCls = 'trie-edge';
+        if (
+          snapshot.activePath.indexOf(node.id) > -1 &&
+          snapshot.activePath.indexOf(child.id) > -1
+        ) {
+          edgeCls += ' current';
+        }
+        if (child.isCompressed) {
+          edgeCls += ' compressed';
+        }
+        line(node.x, node.y + 30, child.x, child.y - 30, edgeCls);
         drawNode(child, depth + 1);
       }
     }
@@ -262,6 +431,7 @@ Trie.prototype.render = function (snapshot) {
     let el = document.createElement('div');
     let cls = 'trie-node';
     if (node.id === 'root') cls += ' root';
+    if (node.isCompressed) cls += ' compressed';
     if (node.isEnd) cls += ' terminal';
     if (snapshot.activePath.indexOf(node.id) > -1) {
       if (snapshot.type === 'created') cls += ' created';
@@ -359,14 +529,105 @@ function initTrieVisualizer() {
     trie.search(input.value);
     loadSteps();
   }
+  function runDelete() {
+    stopPlayback();
+    trie.delete(input.value);
+    loadSteps();
+  }
   function resetTrie() {
     stopPlayback();
     trie = new Trie();
     trie.recordStep('Trie reset', 'Empty Trie ready for a new operation.', 'info', ['root']);
     loadSteps();
   }
+  function updateTelemetry(trieRoot) {
+    let nodeCount = 0;
+    let charCount = 0;
+    function traverse(node) {
+      if (!node) return;
+      if (node.id !== 'root') {
+        nodeCount++;
+        charCount += (node.char || '').length;
+      }
+      for (let key in node.children) traverse(node.children[key]);
+    }
+    traverse(trieRoot);
+    const rawBytes = charCount * 24;
+    const currentBytes = nodeCount * 24;
+    const savedBytes = rawBytes - currentBytes;
+    const savedPercentage = rawBytes > 0 ? Math.round((savedBytes / rawBytes) * 100) : 0;
+
+    document.getElementById('telNodes').textContent = nodeCount;
+    document.getElementById('telRaw').textContent = rawBytes;
+    document.getElementById('telSaved').textContent = `${savedPercentage}%`;
+  }
+
+  function attachAutoComplete(trieRef) {
+    const dropdown = document.getElementById('autocompleteDropdown');
+    input.addEventListener('input', (e) => {
+      const prefix = e.target.value.trim().toLowerCase();
+      dropdown.innerHTML = '';
+      if (!prefix) {
+        dropdown.classList.add('hidden');
+        return;
+      }
+      let results = [];
+      function dfsFromRoot(node, currentStr) {
+        if (results.length >= 5) return;
+        if (node.isEnd && node.id !== 'root' && currentStr.startsWith(prefix)) {
+          results.push(currentStr);
+        }
+        // If the current string doesn't start with prefix AND prefix doesn't start with current string, prune branch
+        if (
+          currentStr.length > 0 &&
+          !currentStr.startsWith(prefix) &&
+          !prefix.startsWith(currentStr)
+        ) {
+          return;
+        }
+        for (let key in node.children) {
+          dfsFromRoot(node.children[key], currentStr + node.children[key].char);
+        }
+      }
+      dfsFromRoot(trieRef.root, '');
+
+      if (results.length > 0) {
+        dropdown.classList.remove('hidden');
+        results.forEach((res) => {
+          let div = document.createElement('div');
+          div.className = 'ac-item';
+          div.textContent = res;
+          div.onclick = () => {
+            input.value = res;
+            dropdown.classList.add('hidden');
+          };
+          dropdown.appendChild(div);
+        });
+      } else {
+        dropdown.classList.add('hidden');
+      }
+    });
+    document.addEventListener('click', (e) => {
+      if (!input.contains(e.target) && !dropdown.contains(e.target)) {
+        dropdown.classList.add('hidden');
+      }
+    });
+  }
+
   document.getElementById('insertBtn').addEventListener('click', runInsert);
   document.getElementById('searchBtn').addEventListener('click', runSearch);
+  let deleteBtn = document.getElementById('deleteBtn');
+  if (deleteBtn) deleteBtn.addEventListener('click', runDelete);
+
+  let compressBtn = document.getElementById('compressBtn');
+  if (compressBtn) {
+    compressBtn.addEventListener('click', () => {
+      stopPlayback();
+      trie.compressToRadix();
+      loadSteps();
+    });
+  }
+
   document.getElementById('resetBtn').addEventListener('click', resetTrie);
   document.getElementById('previousBtn').addEventListener('click', function () {
     stopPlayback();
@@ -394,4 +655,18 @@ function initTrieVisualizer() {
     if (trie.steps.length) renderStep();
   });
   resetTrie();
+  attachAutoComplete(trie);
+
+  // Patch renderStep to update telemetry
+  const originalRenderStep = renderStep;
+  renderStep = function () {
+    originalRenderStep();
+    if (trie.steps.length && trie.steps[currentStep]) {
+      updateTelemetry(trie.steps[currentStep].trie.root);
+    } else {
+      updateTelemetry(trie.root);
+    }
+  };
+
+  updateTelemetry(trie.root); // Initial call
 }

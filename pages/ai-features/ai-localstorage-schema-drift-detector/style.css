@@ -1,0 +1,489 @@
+/* ===== AI localStorage Schema Drift Detector ===== */
+:root {
+  --drift-glass: rgba(255, 255, 255, 0.04);
+  --drift-border: rgba(255, 255, 255, 0.1);
+  --drift-muted: rgba(255, 255, 255, 0.62);
+  --drift-accent: #34d399;
+  --drift-accent-dim: rgba(52, 211, 153, 0.15);
+  --drift-error: #f87171;
+  --drift-warn: #fbbf24;
+  --drift-info: #60a5fa;
+  --drift-ok: #4ade80;
+  --drift-break: #fb7185;
+  --drift-add: #38bdf8;
+}
+
+html.light-mode {
+  --drift-glass: rgba(15, 23, 42, 0.04);
+  --drift-border: rgba(15, 23, 42, 0.12);
+  --drift-muted: rgba(15, 23, 42, 0.65);
+  --drift-accent-dim: rgba(5, 150, 105, 0.12);
+}
+
+.drift-skip-link {
+  position: absolute;
+  left: 1rem;
+  top: -100px;
+  z-index: 10000;
+  padding: 0.6rem 1rem;
+  background: var(--drift-accent);
+  color: #0a0a14;
+  font-weight: 700;
+  border-radius: 8px;
+  text-decoration: none;
+}
+
+.drift-skip-link:focus {
+  top: 1rem;
+  outline: 3px solid #fff;
+  outline-offset: 2px;
+}
+
+.drift-hero {
+  position: relative;
+  overflow: hidden;
+  padding: 7.5rem 1.5rem 4rem;
+  text-align: center;
+  border-bottom: 1px solid var(--drift-border);
+  background:
+    radial-gradient(ellipse at top right, rgba(52, 211, 153, 0.16), transparent 55%),
+    radial-gradient(ellipse at bottom left, rgba(56, 189, 248, 0.1), transparent 50%);
+}
+
+.drift-hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1.1rem;
+  padding: 0.35rem 0.9rem;
+  border-radius: 999px;
+  border: 1px solid rgba(52, 211, 153, 0.35);
+  background: var(--drift-accent-dim);
+  color: var(--drift-accent);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.drift-hero h1 {
+  margin: 0 0 1rem;
+  font-family: 'Orbitron', sans-serif;
+  font-size: clamp(1.9rem, 5vw, 3rem);
+  font-weight: 900;
+  line-height: 1.15;
+}
+
+.drift-hero-accent {
+  display: inline-block;
+  background: linear-gradient(135deg, #34d399, #38bdf8);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.drift-hero p {
+  max-width: 740px;
+  margin: 0 auto 2rem;
+  color: var(--drift-muted);
+  font-size: 1.05rem;
+  line-height: 1.65;
+  font-family: 'Poppins', sans-serif;
+}
+
+.drift-hero-stats {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1rem;
+}
+
+.drift-stat {
+  min-width: 120px;
+  padding: 0.85rem 1.1rem;
+  border: 1px solid var(--drift-border);
+  border-radius: 14px;
+  background: var(--drift-glass);
+}
+
+.drift-stat-val {
+  display: block;
+  font-family: 'Orbitron', sans-serif;
+  font-size: 1.45rem;
+  font-weight: 700;
+}
+
+.drift-stat-label {
+  font-size: 0.75rem;
+  color: var(--drift-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+#statDiffs { color: var(--drift-info); }
+#statBreaking { color: var(--drift-break); }
+#statRisk { color: var(--drift-warn); }
+
+.drift-main {
+  padding: 2rem 0 4rem;
+  font-family: 'Poppins', sans-serif;
+}
+
+.drift-workspace {
+  display: grid;
+  grid-template-columns: minmax(300px, 1fr) minmax(320px, 1.05fr);
+  gap: 1.5rem;
+  align-items: start;
+}
+
+@media (max-width: 980px) {
+  .drift-workspace {
+    grid-template-columns: 1fr;
+  }
+}
+
+.drift-panel {
+  padding: 1.4rem;
+  border: 1px solid var(--drift-border);
+  border-radius: 18px;
+  background: var(--drift-glass);
+  backdrop-filter: blur(12px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
+}
+
+.drift-panel-header {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1.2rem;
+  padding-bottom: 0.9rem;
+  border-bottom: 1px solid var(--drift-border);
+}
+
+.drift-panel-title {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.drift-panel-title h2 {
+  margin: 0;
+  font-size: 1.15rem;
+  font-weight: 700;
+}
+
+.drift-panel-icon {
+  color: var(--drift-accent);
+}
+
+.drift-label {
+  display: block;
+  margin-bottom: 0.4rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.drift-editors {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.drift-textarea {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0.85rem 1rem;
+  border: 1px solid var(--drift-border);
+  border-radius: 12px;
+  background: rgba(0, 0, 0, 0.25);
+  color: inherit;
+  font-family: 'Fira Code', monospace;
+  font-size: 0.78rem;
+  line-height: 1.5;
+  resize: vertical;
+  min-height: 180px;
+}
+
+html.light-mode .drift-textarea {
+  background: rgba(255, 255, 255, 0.85);
+}
+
+.drift-textarea:focus,
+.drift-preset-btn:focus-visible {
+  outline: 2px solid var(--drift-accent);
+  outline-offset: 2px;
+  border-color: var(--drift-accent);
+}
+
+.drift-hint {
+  margin: 0.5rem 0 0;
+  font-size: 0.8rem;
+  color: var(--drift-muted);
+  line-height: 1.5;
+}
+
+.drift-presets {
+  margin: 1.1rem 0;
+  padding: 0.9rem 1rem;
+  border: 1px solid var(--drift-border);
+  border-radius: 12px;
+}
+
+.drift-preset-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.55rem;
+}
+
+@media (max-width: 560px) {
+  .drift-preset-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.drift-preset-btn {
+  justify-content: flex-start;
+  font-size: 0.82rem;
+}
+
+.drift-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  align-items: center;
+}
+
+.drift-status {
+  margin-top: 0.85rem;
+  min-height: 1.25rem;
+  font-size: 0.85rem;
+  color: var(--drift-muted);
+}
+
+.drift-status.is-error { color: var(--drift-error); }
+.drift-status.is-ok { color: var(--drift-ok); }
+
+.drift-empty {
+  text-align: center;
+  padding: 2.5rem 1rem;
+  color: var(--drift-muted);
+}
+
+.drift-empty i {
+  font-size: 2rem;
+  margin-bottom: 0.75rem;
+  color: var(--drift-accent);
+  opacity: 0.85;
+}
+
+.drift-section {
+  margin-bottom: 1.5rem;
+}
+
+.drift-section h3 {
+  margin: 0 0 0.85rem;
+  font-size: 0.95rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--drift-accent);
+}
+
+.drift-muted {
+  margin: 0.25rem 0 0;
+  font-size: 0.82rem;
+  color: var(--drift-muted);
+  line-height: 1.5;
+}
+
+.drift-score-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.4rem;
+  padding: 1rem 1.1rem;
+  border: 1px solid var(--drift-border);
+  border-radius: 14px;
+  background: rgba(0, 0, 0, 0.15);
+}
+
+html.light-mode .drift-score-card {
+  background: rgba(255, 255, 255, 0.55);
+}
+
+.drift-score-card h3 {
+  margin: 0;
+  font-size: 0.95rem;
+  color: inherit;
+}
+
+.drift-score-ring {
+  flex-shrink: 0;
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  border: 3px solid var(--drift-warn);
+  background: var(--drift-accent-dim);
+  font-family: 'Orbitron', sans-serif;
+  font-size: 1.35rem;
+  font-weight: 700;
+}
+
+.drift-score-ring.is-low { border-color: var(--drift-ok); color: var(--drift-ok); }
+.drift-score-ring.is-mid { border-color: var(--drift-warn); color: var(--drift-warn); }
+.drift-score-ring.is-high { border-color: var(--drift-error); color: var(--drift-error); }
+
+.drift-findings {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.drift-finding {
+  padding: 0.85rem 1rem;
+  border: 1px solid var(--drift-border);
+  border-left: 4px solid var(--drift-warn);
+  border-radius: 12px;
+  background: rgba(0, 0, 0, 0.15);
+}
+
+html.light-mode .drift-finding {
+  background: rgba(255, 255, 255, 0.55);
+}
+
+.drift-finding.is-breaking { border-left-color: var(--drift-break); }
+.drift-finding.is-additive { border-left-color: var(--drift-add); }
+.drift-finding.is-rename { border-left-color: var(--drift-warn); }
+.drift-finding.is-type { border-left-color: var(--drift-info); }
+.drift-finding.is-ok { border-left-color: var(--drift-ok); }
+.drift-finding.is-rec { border-left-color: var(--drift-accent); }
+
+.drift-finding-title {
+  margin: 0 0 0.3rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.drift-finding-body {
+  margin: 0;
+  font-size: 0.82rem;
+  color: var(--drift-muted);
+  line-height: 1.5;
+  white-space: pre-wrap;
+}
+
+.drift-badge {
+  display: inline-block;
+  margin-bottom: 0.35rem;
+  padding: 0.12rem 0.45rem;
+  border-radius: 6px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.drift-badge-breaking {
+  background: rgba(251, 113, 133, 0.18);
+  color: var(--drift-break);
+}
+
+.drift-badge-additive {
+  background: rgba(56, 189, 248, 0.18);
+  color: var(--drift-add);
+}
+
+.drift-badge-rename {
+  background: rgba(251, 191, 36, 0.18);
+  color: var(--drift-warn);
+}
+
+.drift-badge-type {
+  background: rgba(96, 165, 250, 0.18);
+  color: var(--drift-info);
+}
+
+.drift-classifier {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+}
+
+@media (max-width: 560px) {
+  .drift-classifier {
+    grid-template-columns: 1fr;
+  }
+}
+
+.drift-class-card {
+  padding: 0.9rem 1rem;
+  border: 1px solid var(--drift-border);
+  border-radius: 12px;
+  background: rgba(0, 0, 0, 0.12);
+}
+
+html.light-mode .drift-class-card {
+  background: rgba(255, 255, 255, 0.55);
+}
+
+.drift-class-card h4 {
+  margin: 0 0 0.4rem;
+  font-size: 0.88rem;
+}
+
+.drift-class-card p {
+  margin: 0;
+  font-size: 0.8rem;
+  color: var(--drift-muted);
+  line-height: 1.5;
+}
+
+.drift-class-card.is-breaking {
+  border-color: rgba(251, 113, 133, 0.35);
+}
+
+.drift-class-card.is-additive {
+  border-color: rgba(56, 189, 248, 0.35);
+}
+
+.drift-code {
+  margin: 0 0 1rem;
+  padding: 1rem 1.1rem;
+  border: 1px solid var(--drift-border);
+  border-radius: 12px;
+  background: rgba(0, 0, 0, 0.28);
+  font-family: 'Fira Code', monospace;
+  font-size: 0.72rem;
+  line-height: 1.55;
+  overflow: auto;
+  max-height: 280px;
+  white-space: pre;
+}
+
+html.light-mode .drift-code {
+  background: rgba(255, 255, 255, 0.75);
+}
+
+.drift-empty[hidden],
+#driftResults[hidden] {
+  display: none !important;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .drift-finding {
+    animation: drift-fade 0.35s ease both;
+  }
+
+  @keyframes drift-fade {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: none; }
+  }
+}

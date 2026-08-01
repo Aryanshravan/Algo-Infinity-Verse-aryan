@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Post-Quantum Cryptography & ZKP Academy — Algo Infinity Verse</title>
+  <meta name="description" content="Master Zero-Knowledge Proofs (zk-SNARKs, zk-STARKs), Lattice-Based Post-Quantum Cryptography (Kyber/Dilithium), and Homomorphic Encryption." />
+  
+  <link rel="stylesheet" href="../../../styles.css" />
+  <link rel="stylesheet" href="style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+
+  <script>
+    (function() {
+      try {
+        var t = localStorage.getItem('theme');
+        var p = window.matchMedia('(prefers-color-scheme: light)').matches;
+        var theme = t || (p ? 'light' : 'dark');
+        if (theme === 'light') document.documentElement.classList.add('light-mode');
+      } catch (e) {}
+    })();
+  </script>
+</head>
+<body data-page="zkp-academy">
+
+  <header class="zk-header">
+    <div class="zk-header-container">
+      <a href="../academy.html" class="zk-back-btn">
+        <i class="fas fa-arrow-left"></i>
+        <span>Academies Hub</span>
+      </a>
+      <div class="zk-title-area">
+        <h1><i class="fas fa-key"></i> Post-Quantum Cryptography &amp; ZKP Masterclass</h1>
+        <p>Zero-Knowledge Proofs (zk-SNARKs), Lattice Cryptography (Kyber/Dilithium), and Homomorphic Encryption</p>
+      </div>
+      <div class="zk-header-actions">
+        <button id="themeToggleBtn" class="zk-icon-btn" title="Toggle Theme">
+          <i class="fas fa-moon"></i>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="zk-main">
+    <!-- HERO / PROGRESS -->
+    <div class="zk-hero">
+      <div class="zk-hero-content">
+        <h2><i class="fas fa-shield-halved"></i> Next-Gen Cryptography Learning Path</h2>
+        <p>Explore ZKP proofs, test lattice encryption parameters, and run interactive cryptographic verifications.</p>
+      </div>
+      <div class="zk-hero-stats">
+        <div class="zk-stat-card">
+          <span class="zk-stat-label">Modules Completed</span>
+          <span class="zk-stat-val" id="zkCompletedVal">2 / 5</span>
+        </div>
+        <div class="zk-stat-card">
+          <span class="zk-stat-label">Earned XP</span>
+          <span class="zk-stat-val zk-green" id="zkXpVal">+350 XP</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- MAIN GRID -->
+    <div class="zk-grid">
+      <!-- LEFT: INTERACTIVE PROVER VS VERIFIER DEMO -->
+      <div class="zk-card zk-demo-card">
+        <div class="zk-card-header">
+          <h2><i class="fas fa-user-secret"></i> Interactive Zero-Knowledge Prover &amp; Verifier Lab</h2>
+          <span class="zk-badge zk-badge-purple">zk-SNARK Demo</span>
+        </div>
+        <div class="zk-card-body">
+          <div class="zk-form-group">
+            <label>Secret Value (Known ONLY to Prover):</label>
+            <input type="password" id="secretInput" class="zk-input" value="SuperSecretPassword123" />
+          </div>
+
+          <div class="zk-steps-flow">
+            <div class="zk-step-box">
+              <h4>1. Commitment Hash</h4>
+              <code id="commitHashDisplay">0x8f9a2b...</code>
+            </div>
+            <div class="zk-step-box">
+              <h4>2. Challenge Prompt</h4>
+              <code id="challengeDisplay">Random R<sub>1</sub></code>
+            </div>
+            <div class="zk-step-box">
+              <h4>3. Proof Evaluation</h4>
+              <code id="proofOutputDisplay">π = {A, B, C}</code>
+            </div>
+          </div>
+
+          <div class="zk-action-row">
+            <button id="btnGenerateProof" class="zk-btn zk-btn-primary"><i class="fas fa-lock"></i> Generate ZK Proof</button>
+            <button id="btnVerifyProof" class="zk-btn zk-btn-success"><i class="fas fa-check-double"></i> Verify Proof without revealing secret</button>
+          </div>
+
+          <div id="zkVerificationResult" class="zk-result-box">
+            <!-- Verification result -->
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT: ALGORITHM COMPARISON MATRIX & QUIZ -->
+      <div class="zk-side-panel">
+        
+        <div class="zk-card">
+          <div class="zk-card-header">
+            <h3><i class="fas fa-table"></i> PQC &amp; Classic Crypto Matrix</h3>
+          </div>
+          <div class="zk-card-body">
+            <table class="zk-table">
+              <thead>
+                <tr>
+                  <th>Algorithm</th>
+                  <th>Type</th>
+                  <th>Quantum Safe?</th>
+                  <th>Key Size</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><strong>RSA-4096</strong></td>
+                  <td>Factoring</td>
+                  <td><span class="zk-danger">NO (Shor's)</span></td>
+                  <td>4096 bits</td>
+                </tr>
+                <tr>
+                  <td><strong>ECC P-256</strong></td>
+                  <td>Discrete Log</td>
+                  <td><span class="zk-danger">NO (Shor's)</span></td>
+                  <td>256 bits</td>
+                </tr>
+                <tr>
+                  <td><strong>Kyber-768</strong></td>
+                  <td>Lattice (ML-KEM)</td>
+                  <td><span class="zk-green">YES</span></td>
+                  <td>1184 bytes</td>
+                </tr>
+                <tr>
+                  <td><strong>Dilithium-3</strong></td>
+                  <td>Lattice Signature</td>
+                  <td><span class="zk-green">YES</span></td>
+                  <td>1952 bytes</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </main>
+
+  <script src="../../../auth.js"></script>
+  <script src="../../../theme.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>

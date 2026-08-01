@@ -96,11 +96,12 @@ describe('Auth Helper Functions', () => {
 
       const mockToggleBtn = {
         closest: jest.fn((selector) => {
-          if (selector === '.cpw-toggle') return mockToggleBtn;
+          if (selector.includes('.cpw-toggle')) return mockToggleBtn;
           return null;
         }),
         dataset: { target: 'mockInput' },
         innerHTML: '',
+        classList: { contains: jest.fn(() => false) },
       };
 
       const mockInput = {

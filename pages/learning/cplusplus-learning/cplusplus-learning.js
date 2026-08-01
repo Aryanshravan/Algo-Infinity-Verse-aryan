@@ -1,267 +1,287 @@
-/**
- * cplusplus-learning.js
- * Interactivity for the C++ Learning page:
- *  - Hero typing animation
- *  - Stats counter animation
- *  - Sidebar scroll-spy (active link tracking)
- *  - Progress bar (tracks completed topics via localStorage)
- *  - Exercise toggle (show/hide solutions)
- *  - Copy code button
- */
+/* ================================================
+   C++ LEARNING PAGE -- Interactive Functions
+   ================================================
+   - Copy-to-clipboard for code blocks
+   - Exercise solution toggles
+   - Topic pill active tracking (IntersectionObserver)
+   - Progress dot updates
+   - Hero typing animation
+   ================================================ */
 
-document.addEventListener("DOMContentLoaded", () => {
-  initHeroTyping();
-  initStatsAnimation();
-  initExerciseToggles();
-  initCopyButtons();
-  initSidebarSpy();
-  initProgressTracker();
-});
+(function () {
+  'use strict';
 
-/* ─────────────────────────────────────────────
-   Hero Typing Animation
-   ───────────────────────────────────────────── */
-function initHeroTyping() {
-  const el = document.getElementById("typingTextCpp");
-  if (!el) return;
+  /* --------------------------------------------
+     CONSTANTS
+     -------------------------------------------- */
+  const PROGRESS_KEY = 'cpp_progress';
 
-  const words = [
-    "Variables & Data Types",
-    "Input & Output",
-    "Operators",
-    "Conditionals",
-    "Loops",
-    "Functions",
-    "Arrays & Strings",
-    "Classes & Objects",
-    "OOP Concepts",
-  ];
+  /* --------------------------------------------
+     UTILITY FUNCTIONS
+     -------------------------------------------- */
 
-  let wordIdx = 0;
-  let charIdx = 0;
-  let isDeleting = false;
-
-  const prefersReducedMotion = window.matchMedia(
-    "(prefers-reduced-motion: reduce)"
-  ).matches;
-
-  if (prefersReducedMotion) {
-    el.textContent = words[0];
-    return;
+  /** Safely read progress from localStorage. */
+  function getProgress() {
+    try {
+      var stored = localStorage.getItem(PROGRESS_KEY);
+      return stored ? JSON.parse(stored) : [];
+    } catch (_e) {
+      return [];
+    }
   }
 
-  function tick() {
-    const current = words[wordIdx];
-
-    if (isDeleting) {
-      el.textContent = current.substring(0, charIdx - 1);
-      charIdx--;
-    } else {
-      el.textContent = current.substring(0, charIdx + 1);
-      charIdx++;
+  /** Safely write progress to localStorage. */
+  function setProgress(topics) {
+    try {
+      localStorage.setItem(PROGRESS_KEY, JSON.stringify(topics));
+    } catch (_e) {
+      /* localStorage may be full or unavailable */
     }
-
-    let speed = isDeleting ? 50 : 100;
-
-    if (!isDeleting && charIdx === current.length) {
-      speed = 2000;
-      isDeleting = true;
-    } else if (isDeleting && charIdx === 0) {
-      isDeleting = false;
-      wordIdx = (wordIdx + 1) % words.length;
-      speed = 500;
-    }
-
-    requestAnimationFrame(() => setTimeout(tick, speed));
   }
 
-  tick();
-}
+  /* --------------------------------------------
+     INIT
+     -------------------------------------------- */
 
-/* ─────────────────────────────────────────────
-   Stats Counter Animation
-   ───────────────────────────────────────────── */
-function initStatsAnimation() {
-  const statNumbers = document.querySelectorAll(".stat-number[data-target]");
-  if (!statNumbers.length) return;
+  function init() {
+    initCopyButtons();
+    initExerciseToggles();
+    initTopicPills();
+    initProgressDots();
+  }
 
-  const observer = new IntersectionObserver(
-    (entries) => {
-      entries.forEach((entry) => {
-        if (entry.isIntersecting) {
-          if (typeof animateValue === "function") {
-            animateValue(entry.target);
+  /* --------------------------------------------
+     COPY-TO-CLIPBOARD
+     -------------------------------------------- */
+
+  function initCopyButtons() {
+    var buttons = document.querySelectorAll('.cpp-code-copy');
+    if (!buttons.length) return;
+
+    buttons.forEach(function (btn) {
+      btn.addEventListener('click', function (e) {
+        e.preventDefault();
+        var code = btn.getAttribute('data-code');
+        if (!code) return;
+
+        copyText(code).then(function (ok) {
+          if (ok) {
+            var originalHTML = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-check"></i> Copied!';
+            btn.classList.add('copied');
+            setTimeout(function () {
+              btn.innerHTML = originalHTML;
+              btn.classList.remove('copied');
+            }, 2000);
+          } else {
+            fallbackCopy(code, btn);
           }
-          observer.unobserve(entry.target);
-        }
+        });
       });
-    },
-    { threshold: 0.5, rootMargin: "0px 0px -50px 0px" }
-  );
-
-  statNumbers.forEach((s) => observer.observe(s));
-}
-
-/* ─────────────────────────────────────────────
-   Exercise Show/Hide Toggle
-   ───────────────────────────────────────────── */
-function initExerciseToggles() {
-  document.querySelectorAll(".cpp-exercise-toggle").forEach((btn) => {
-    btn.addEventListener("click", () => {
-      const targetId = btn.getAttribute("aria-controls");
-      const solution = document.getElementById(targetId);
-      if (!solution) return;
-
-      const isVisible = solution.classList.toggle("visible");
-      btn.setAttribute("aria-expanded", isVisible);
-      btn.textContent = isVisible ? "Hide Solution" : "Show Solution";
     });
-  });
-}
+  }
 
-/* ─────────────────────────────────────────────
-   Copy Code Button
-   ───────────────────────────────────────────── */
-function initCopyButtons() {
-  document.querySelectorAll(".cpp-code-copy").forEach((btn) => {
-    btn.addEventListener("click", async () => {
-      const code = btn.getAttribute("data-code");
-      if (!code) return;
+  /** Attempt modern clipboard API; returns true on success. */
+  function copyText(text) {
+    if (!navigator.clipboard) return Promise.resolve(false);
+    return navigator.clipboard.writeText(text).then(function () {
+      return true;
+    }).catch(function () {
+      return false;
+    });
+  }
 
-      try {
-        await navigator.clipboard.writeText(code);
-        btn.textContent = "Copied!";
-        btn.classList.add("copied");
-        setTimeout(() => {
-          btn.textContent = "Copy";
-          btn.classList.remove("copied");
-        }, 2000);
-      } catch {
-        const textarea = document.createElement("textarea");
-        textarea.value = code;
-        textarea.style.position = "fixed";
-        textarea.style.opacity = "0";
-        document.body.appendChild(textarea);
-        textarea.select();
-        const copied = document.execCommand("copy");
-        document.body.removeChild(textarea);
-        if (!copied) {
-          btn.textContent = "Copy failed";
-          setTimeout(() => (btn.textContent = "Copy"), 2000);
-          return;
-        }
-        btn.textContent = "Copied!";
-        btn.classList.add("copied");
-        setTimeout(() => {
-          btn.textContent = "Copy";
-          btn.classList.remove("copied");
+  /** Fallback using textarea + execCommand. */
+  function fallbackCopy(text, btn) {
+    try {
+      var ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.position = 'fixed';
+      ta.style.opacity = '0';
+      ta.style.pointerEvents = 'none';
+      document.body.appendChild(ta);
+      ta.select();
+      var ok = document.execCommand('copy');
+      document.body.removeChild(ta);
+      if (ok) {
+        btn.textContent = 'Copied!';
+        btn.classList.add('copied');
+        setTimeout(function () {
+          btn.textContent = 'Copy';
+          btn.classList.remove('copied');
         }, 2000);
       }
-    });
-  });
-}
-
-/* ─────────────────────────────────────────────
-   Sidebar Scroll-Spy
-   ───────────────────────────────────────────── */
-function initSidebarSpy() {
-  const links = document.querySelectorAll(".cpp-sidebar-nav a");
-  const lessons = document.querySelectorAll(".cpp-lesson");
-  if (!links.length || !lessons.length) return;
-
-  const NAV_HEIGHT = 80;
-
-  function getActiveId() {
-    let bestId = null;
-    let bestDist = Infinity;
-
-    lessons.forEach((lesson) => {
-      const rect = lesson.getBoundingClientRect();
-      const dist = Math.abs(rect.top - NAV_HEIGHT);
-      if (dist < bestDist) {
-        bestDist = dist;
-        bestId = lesson.getAttribute("id");
-      }
-    });
-
-    return bestId;
+    } catch (_e) {
+      /* ignore */
+    }
   }
 
-  let ticking = false;
+  /* --------------------------------------------
+     EXERCISE TOGGLES
+     -------------------------------------------- */
 
-  function onScroll() {
-    if (ticking) return;
-    ticking = true;
+  function initExerciseToggles() {
+    var toggles = document.querySelectorAll('.cpp-exercise-toggle');
+    if (!toggles.length) return;
 
-    requestAnimationFrame(() => {
-      const id = getActiveId();
-      if (id) {
-        links.forEach((l) => l.classList.remove("active"));
-        const active = document.querySelector(
-          `.cpp-sidebar-nav a[href="#${id}"]`
-        );
-        if (active) active.classList.add("active");
-      }
-      ticking = false;
-    });
-  }
+    toggles.forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var targetId = btn.getAttribute('aria-controls');
+        if (!targetId) return;
+        var solution = document.getElementById(targetId);
+        if (!solution) return;
 
-  window.addEventListener("scroll", onScroll, { passive: true });
-  onScroll();
-}
-
-/* ─────────────────────────────────────────────
-   Progress Tracker
-   ───────────────────────────────────────────── */
-function initProgressTracker() {
-  const STORAGE_KEY = "cplusplus-learning-progress";
-  const TOTAL_TOPICS = 10;
-  const fill = document.getElementById("progressFill");
-  const count = document.getElementById("progressCount");
-  const bar = document.querySelector(".cpp-progress-bar");
-
-  if (!fill || !count) return;
-
-  let completed = new Set();
-  try {
-    const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
-    if (Array.isArray(saved)) completed = new Set(saved);
-  } catch {
-    /* ignore */
-  }
-
-  function updateUI() {
-    const pct = Math.round((completed.size / TOTAL_TOPICS) * 100);
-    fill.style.width = pct + "%";
-    count.textContent = completed.size;
-    if (bar) bar.setAttribute("aria-valuenow", pct);
-  }
-
-  updateUI();
-
-  const lessons = document.querySelectorAll(".cpp-lesson");
-  const observer = new IntersectionObserver(
-    (entries) => {
-      let changed = false;
-      entries.forEach((entry) => {
-        if (entry.isIntersecting) {
-          const topic = entry.target.getAttribute("data-topic");
-          if (topic && !completed.has(topic)) {
-            completed.add(topic);
-            changed = true;
-          }
-        }
+        var isVisible = solution.classList.toggle('visible');
+        btn.setAttribute('aria-expanded', isVisible);
+        btn.textContent = isVisible ? 'Hide Solution' : 'Show Solution';
       });
-      if (changed) {
-        localStorage.setItem(
-          STORAGE_KEY,
-          JSON.stringify([...completed])
-        );
-        updateUI();
-      }
-    },
-    { threshold: 0.15, rootMargin: "0px 0px -20% 0px" }
-  );
+    });
+  }
 
-  lessons.forEach((l) => observer.observe(l));
-}
+  /* --------------------------------------------
+     TOPIC PILL ACTIVE TRACKING
+     -------------------------------------------- */
+
+  function initTopicPills() {
+    var pills = document.querySelectorAll('.cpp-topic-pill');
+    var lessons = document.querySelectorAll('.cpp-lesson[data-topic]');
+    if (!pills.length || !lessons.length) return;
+
+    var observer = new IntersectionObserver(
+      function (entries) {
+        entries.forEach(function (entry) {
+          if (entry.isIntersecting) {
+            var topic = entry.target.getAttribute('data-topic');
+            if (topic !== null) {
+              setActivePill(topic);
+            }
+          }
+        });
+      },
+      {
+        rootMargin: '0px 0px -40% 0px',
+        threshold: 0.1,
+      }
+    );
+
+    lessons.forEach(function (lesson) {
+      observer.observe(lesson);
+    });
+
+    // Set initial active pill on load
+    setTimeout(function () {
+      var firstVisible = getFirstVisibleLesson();
+      if (firstVisible !== null) {
+        setActivePill(firstVisible);
+      }
+    }, 100);
+  }
+
+  /** Find the first lesson that is on-screen. */
+  function getFirstVisibleLesson() {
+    var lessons = document.querySelectorAll('.cpp-lesson[data-topic]');
+    var min = Infinity;
+    var best = null;
+    lessons.forEach(function (lesson) {
+      var rect = lesson.getBoundingClientRect();
+      var dist = Math.abs(rect.top - 100);
+      if (dist < min) {
+        min = dist;
+        best = lesson.getAttribute('data-topic');
+      }
+    });
+    return best;
+  }
+
+  /** Update pill active state. */
+  function setActivePill(topic) {
+    var pills = document.querySelectorAll('.cpp-topic-pill');
+    pills.forEach(function (pill, index) {
+      if (String(index) === String(topic)) {
+        pill.classList.add('active');
+      } else {
+        pill.classList.remove('active');
+      }
+    });
+  }
+
+  /* Progress tracking is handled by initProgressDots() separately. */
+
+  /* --------------------------------------------
+     PROGRESS DOTS
+     -------------------------------------------- */
+
+  function initProgressDots() {
+    var dots = document.querySelectorAll('.cpp-progress-dot');
+    var lessons = document.querySelectorAll('.cpp-lesson[data-topic]');
+    if (!dots.length || !lessons.length) return;
+
+    // Restore saved progress
+    var saved = getProgress();
+
+    dots.forEach(function (dot, index) {
+      if (saved.indexOf(index) !== -1) {
+        dot.classList.add('active');
+      }
+    });
+
+    // Also activate progress lines
+    updateProgressLines();
+
+    // Track lesson visibility to update progress
+    var progressObserver = new IntersectionObserver(
+      function (entries) {
+        entries.forEach(function (entry) {
+          if (entry.isIntersecting) {
+            var topic = entry.target.getAttribute('data-topic');
+            if (topic !== null) {
+              var idx = parseInt(topic, 10);
+              var saved = getProgress();
+              if (saved.indexOf(idx) === -1) {
+                saved.push(idx);
+                setProgress(saved);
+                // Update dot
+                if (dots[idx]) {
+                  dots[idx].classList.add('active');
+                }
+                updateProgressLines();
+              }
+            }
+          }
+        });
+      },
+      {
+        rootMargin: '0px 0px -40% 0px',
+        threshold: 0.1,
+      }
+    );
+
+    lessons.forEach(function (lesson) {
+      progressObserver.observe(lesson);
+    });
+  }
+
+  /** Sync progress line active states based on dots. */
+  function updateProgressLines() {
+    var lines = document.querySelectorAll('.cpp-progress-line');
+    var dots = document.querySelectorAll('.cpp-progress-dot');
+    lines.forEach(function (line, index) {
+      // Line i is active if dot i is active
+      if (dots[index] && dots[index].classList.contains('active')) {
+        line.classList.add('active');
+      } else {
+        line.classList.remove('active');
+      }
+    });
+  }
+
+  /* --------------------------------------------
+     START
+     -------------------------------------------- */
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+})();

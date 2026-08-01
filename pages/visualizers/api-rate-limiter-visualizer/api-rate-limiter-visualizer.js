@@ -15,8 +15,12 @@ document.addEventListener('DOMContentLoaded', () => {
   const refillRateContainer = document.getElementById('refillRateContainer');
   const capacityLabel = document.getElementById('capacityLabel');
 
+  const secondaryBucketFill = document.getElementById('secondaryBucketFill');
+  const secondaryBucketStatus = document.getElementById('secondaryBucketStatus');
+
   let state = {
     tokens: 0,
+    leakyTokens: 0,
     capacity: 5,
     refillRate: 2,
     lastRefill: Date.now(),
@@ -38,6 +42,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function updateVisuals() {
     let fillPercentage = 0;
+    let secondaryFillPercentage = 0;
 
     switch (algorithmSelect.value) {
       case 'token_bucket':
@@ -54,9 +59,18 @@ document.addEventListener('DOMContentLoaded', () => {
         fillPercentage = (state.requestCount / state.capacity) * 100;
         bucketStatus.textContent = `Requests: ${state.requestCount} / ${state.capacity}`;
         break;
+      case 'comparison':
+        fillPercentage = (state.tokens / state.capacity) * 100;
+        bucketStatus.textContent = `Tokens: ${Math.floor(state.tokens)} / ${state.capacity}`;
+        secondaryFillPercentage = (state.leakyTokens / state.capacity) * 100;
+        secondaryBucketStatus.textContent = `Water: ${Math.floor(state.leakyTokens)} / ${state.capacity}`;
+        break;
     }
 
     bucketFill.style.height = `${Math.min(100, Math.max(0, fillPercentage))}%`;
+    if (algorithmSelect.value === 'comparison' && secondaryBucketFill) {
+      secondaryBucketFill.style.height = `${Math.min(100, Math.max(0, secondaryFillPercentage))}%`;
+    }
   }
 
   function updateLogic() {
@@ -65,21 +79,25 @@ document.addEventListener('DOMContentLoaded', () => {
     state.capacity = parseInt(capacityInput.value) || 5;
     state.refillRate = parseInt(refillRateInput.value) || 2;
 
-    if (algorithm === 'token_bucket') {
-      const elapsed = (now - state.lastRefill) / 1000;
-      const tokensToAdd = elapsed * state.refillRate;
+    const elapsed = (now - state.lastRefill) / 1000;
 
+    if (algorithm === 'token_bucket') {
+      const tokensToAdd = elapsed * state.refillRate;
       if (tokensToAdd >= 1) {
         state.tokens = Math.min(state.capacity, state.tokens + tokensToAdd);
         state.lastRefill = now;
       }
     } else if (algorithm === 'leaky_bucket') {
-      // Leak water over time
-      const elapsed = (now - state.lastRefill) / 1000;
       const leaked = elapsed * state.refillRate;
-
       if (leaked >= 1) {
         state.tokens = Math.max(0, state.tokens - leaked);
+        state.lastRefill = now;
+      }
+    } else if (algorithm === 'comparison') {
+      const amount = elapsed * state.refillRate;
+      if (amount >= 1) {
+        state.tokens = Math.min(state.capacity, state.tokens + amount);
+        state.leakyTokens = Math.max(0, state.leakyTokens - amount);
         state.lastRefill = now;
       }
     } else if (algorithm === 'fixed_window') {
@@ -103,6 +121,23 @@ document.addEventListener('DOMContentLoaded', () => {
   function checkRateLimit() {
     const algorithm = algorithmSelect.value;
     const now = Date.now();
+
+    if (algorithm === 'comparison') {
+      let allowedToken = false;
+      if (state.tokens >= 1) {
+        state.tokens--;
+        allowedToken = true;
+      }
+
+      let allowedLeaky = false;
+      if (state.leakyTokens < state.capacity) {
+        state.leakyTokens++;
+        allowedLeaky = true;
+      }
+
+      return { allowedToken, allowedLeaky };
+    }
+
     let allowed = false;
 
     if (algorithm === 'token_bucket') {
@@ -133,37 +168,69 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function handleAlgorithmChange() {
     const algo = algorithmSelect.value;
-    if (algo === 'token_bucket' || algo === 'leaky_bucket') {
+    const visArea = document.getElementById('visArea');
+    const primaryTitle = document.getElementById('primaryTitle');
+    const secondaryPanel = document.getElementById('secondaryPanel');
+
+    if (algo === 'token_bucket' || algo === 'leaky_bucket' || algo === 'comparison') {
       refillRateContainer.style.display = 'flex';
-      capacityLabel.textContent =
-        algo === 'token_bucket' ? 'Bucket Capacity (Tokens)' : 'Bucket Capacity (Water)';
+      if (algo === 'token_bucket') capacityLabel.textContent = 'Bucket Capacity (Tokens)';
+      else if (algo === 'leaky_bucket') capacityLabel.textContent = 'Bucket Capacity (Water)';
+      else capacityLabel.textContent = 'Capacity';
     } else {
       refillRateContainer.style.display = 'none';
       capacityLabel.textContent = 'Request Limit (per 10s window)';
     }
+
+    if (algo === 'comparison') {
+      visArea.classList.add('comparison-mode');
+      primaryTitle.style.display = 'block';
+      secondaryPanel.style.display = 'flex';
+    } else {
+      visArea.classList.remove('comparison-mode');
+      primaryTitle.style.display = 'none';
+      secondaryPanel.style.display = 'none';
+    }
+
     resetSimulation();
   }
 
   function resetSimulation() {
+    const algo = algorithmSelect.value;
     state.capacity = parseInt(capacityInput.value) || 5;
     state.refillRate = parseInt(refillRateInput.value) || 2;
-    state.tokens = algorithmSelect.value === 'token_bucket' ? state.capacity : 0;
+
+    if (algo === 'token_bucket') {
+      state.tokens = state.capacity;
+    } else if (algo === 'comparison') {
+      state.tokens = state.capacity;
+      state.leakyTokens = 0;
+    } else {
+      state.tokens = 0;
+    }
+
     state.lastRefill = Date.now();
     state.windowStart = Date.now();
     state.requestCount = 0;
     state.slidingWindowLog = [];
 
     requestsTrack.innerHTML = '';
+    const secondaryTrack = document.getElementById('secondaryRequestsTrack');
+    if (secondaryTrack) secondaryTrack.innerHTML = '';
+
     logOutput.innerHTML = '> Simulation reset. Ready to receive requests...';
     setStatus('IDLE', '');
     updateVisuals();
   }
 
-  function animateRequest(isAllowed) {
+  function animateRequest(isAllowed, isSecondary = false) {
+    const track = isSecondary ? document.getElementById('secondaryRequestsTrack') : requestsTrack;
+    if (!track) return;
+
     const req = document.createElement('div');
     req.className = 'req-packet';
     req.innerHTML = '<i class="fas fa-envelope"></i>';
-    requestsTrack.appendChild(req);
+    track.appendChild(req);
 
     // Force reflow
     void req.offsetWidth;
@@ -180,26 +247,44 @@ document.addEventListener('DOMContentLoaded', () => {
       }
 
       setTimeout(() => {
-        if (requestsTrack.contains(req)) {
-          requestsTrack.removeChild(req);
+        if (track.contains(req)) {
+          track.removeChild(req);
         }
       }, 500);
     }, 500);
   }
 
   function sendSingleRequest() {
-    const isAllowed = checkRateLimit();
+    const result = checkRateLimit();
     updateVisuals();
 
-    if (isAllowed) {
-      logMessage('Request Accepted (200 OK)', 'success');
-      setStatus('200 OK', 'success');
+    if (typeof result === 'boolean') {
+      if (result) {
+        logMessage('Request Accepted (200 OK)', 'success');
+        setStatus('200 OK', 'success');
+      } else {
+        logMessage('Request Throttled (429 Too Many Requests)', 'error');
+        setStatus('429 TOO MANY REQUESTS', 'error');
+      }
+      animateRequest(result);
     } else {
-      logMessage('Request Throttled (429 Too Many Requests)', 'error');
-      setStatus('429 TOO MANY REQUESTS', 'error');
-    }
+      const { allowedToken, allowedLeaky } = result;
+      const tokenMsg = allowedToken ? 'Accepted' : 'Throttled';
+      const leakyMsg = allowedLeaky ? 'Accepted' : 'Throttled';
 
-    animateRequest(isAllowed);
+      logMessage(`[TB] ${tokenMsg} | [LB] ${leakyMsg}`, 'info');
+
+      if (allowedToken && allowedLeaky) {
+        setStatus('200 OK', 'success');
+      } else if (!allowedToken && !allowedLeaky) {
+        setStatus('429 TOO MANY', 'error');
+      } else {
+        setStatus('MIXED', 'warn');
+      }
+
+      animateRequest(allowedToken, false);
+      animateRequest(allowedLeaky, true);
+    }
   }
 
   btnSendRequest.addEventListener('click', sendSingleRequest);

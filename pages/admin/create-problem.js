@@ -35,6 +35,7 @@ document.addEventListener('DOMContentLoaded', () => {
     submitBtn.addEventListener('click', handleSubmit);
     document.getElementById('addExampleBtn').addEventListener('click', addExample);
     document.getElementById('addTestCaseBtn').addEventListener('click', addTestCase);
+    document.getElementById('cpBackBtn').addEventListener('click', () => window.history.back());
     
     // Auto-save listener
     form.addEventListener('input', saveDraft);

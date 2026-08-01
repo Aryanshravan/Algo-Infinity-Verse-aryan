@@ -1,0 +1,1671 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Learn Ruby – Beginner Guide | Algo Infinity Verse</title>
+  <meta name="description" content="Free beginner-friendly Ruby tutorial covering syntax, control flow, methods, arrays, hashes, blocks, OOP, error handling, gems, and an intro to Rails with interactive exercises." />
+
+  <link rel="stylesheet" href="/styles.css" />
+  <link rel="stylesheet" href="ruby-learning.css" />
+
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+
+  <script>
+    (function() {
+      try {
+        var t = localStorage.getItem('theme');
+        var p = window.matchMedia('(prefers-color-scheme: light)').matches;
+        var theme = t || (p ? 'light' : 'dark');
+        if (theme === 'light') document.documentElement.classList.add('light-mode');
+      } catch (e) {}
+    })();
+  </script>
+</head>
+<body data-page="ruby-learning" data-no-loading>
+  <div id="loading-screen" class="hidden">
+    <div class="loader">
+      <div class="infinity-loader">&#x221E;</div>
+      <h2>Loading Ruby Learning...</h2>
+    </div>
+  </div>
+
+  <main>
+    <!-- ════════════════════════════════════════
+         HERO SECTION
+         ════════════════════════════════════════ -->
+    <section class="rb-hero">
+      <div class="rb-hero-bg">
+        <div class="rb-hero-glow"></div>
+      </div>
+
+      <a href="/pages/learning/languages.html" class="rb-back-btn" id="rbBackBtn" aria-label="Go back to languages">
+        <i class="fas fa-arrow-left"></i>
+        <span>Languages</span>
+      </a>
+
+      <div class="rb-hero-content">
+        <!-- irb REPL prompt signature motif -->
+        <div class="rb-repl" aria-hidden="true">
+          <span class="rb-repl-prompt">&gt;&gt;</span>
+          <span class="rb-repl-code">puts "Hello, World!"</span>
+          <span class="rb-repl-result"># =&gt; "Hello, World!"</span>
+        </div>
+
+        <h1 class="rb-hero-title" id="rbHeroTitle">
+          <span class="rb-title-line">Learn Ruby</span>
+          <span class="rb-title-line">&amp; Ruby on Rails</span>
+        </h1>
+
+        <p class="rb-hero-subtitle">
+          A language designed for <strong>developer happiness</strong>. From your first <code>puts</code> to classes, blocks, and Rails &mdash; <strong>9 interactive modules</strong> to build your Ruby fluency.
+        </p>
+
+        <!-- Stats -->
+        <div class="rb-hero-stats">
+          <div class="rb-stat">
+            <span class="rb-stat-value" id="moduleCount">9</span>
+            <span class="rb-stat-label">Modules</span>
+          </div>
+          <div class="rb-stat">
+            <span class="rb-stat-value">40+</span>
+            <span class="rb-stat-label">Examples</span>
+          </div>
+          <div class="rb-stat">
+            <span class="rb-stat-value">9</span>
+            <span class="rb-stat-label">Exercises</span>
+          </div>
+        </div>
+
+        <!-- CTA -->
+        <div class="rb-hero-actions">
+          <a href="#topic-introduction" class="rb-btn rb-btn-primary">
+            <i class="fas fa-play"></i> Start Learning
+          </a>
+          <a href="#topic-blocks" class="rb-btn rb-btn-secondary">
+            <i class="fas fa-code"></i> Jump to Blocks
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- ════════════════════════════════════════
+         TOPIC NAVIGATION PILLS
+         ════════════════════════════════════════ -->
+    <section class="rb-section">
+      <div class="rb-container">
+        <nav class="rb-topic-nav" id="rbTopicNav" aria-label="Lesson modules">
+          <a href="#topic-introduction" class="rb-topic-pill active">Introduction</a>
+          <a href="#topic-setup" class="rb-topic-pill">Installation</a>
+          <a href="#topic-syntax" class="rb-topic-pill">Syntax &amp; Variables</a>
+          <a href="#topic-methods" class="rb-topic-pill">Control Flow &amp; Methods</a>
+          <a href="#topic-arrays-hashes" class="rb-topic-pill">Arrays &amp; Hashes</a>
+          <a href="#topic-blocks" class="rb-topic-pill">Blocks, Procs &amp; Lambdas</a>
+          <a href="#topic-oop" class="rb-topic-pill">OOP: Classes &amp; Modules</a>
+          <a href="#topic-errors" class="rb-topic-pill">Error Handling</a>
+          <a href="#topic-gems-rails" class="rb-topic-pill">Gems &amp; Intro to Rails</a>
+        </nav>
+
+        <!-- Progress dots -->
+        <div class="rb-progress" id="rbProgress" aria-hidden="true">
+          <span class="rb-progress-dot active" data-topic="0"></span>
+          <span class="rb-progress-line" data-topic="0"></span>
+          <span class="rb-progress-dot" data-topic="1"></span>
+          <span class="rb-progress-line" data-topic="1"></span>
+          <span class="rb-progress-dot" data-topic="2"></span>
+          <span class="rb-progress-line" data-topic="2"></span>
+          <span class="rb-progress-dot" data-topic="3"></span>
+          <span class="rb-progress-line" data-topic="3"></span>
+          <span class="rb-progress-dot" data-topic="4"></span>
+          <span class="rb-progress-line" data-topic="4"></span>
+          <span class="rb-progress-dot" data-topic="5"></span>
+          <span class="rb-progress-line" data-topic="5"></span>
+          <span class="rb-progress-dot" data-topic="6"></span>
+          <span class="rb-progress-line" data-topic="6"></span>
+          <span class="rb-progress-dot" data-topic="7"></span>
+          <span class="rb-progress-line" data-topic="7"></span>
+          <span class="rb-progress-dot" data-topic="8"></span>
+        </div>
+
+        <!-- ════════════════════════════════════════
+             MODULE 1: INTRODUCTION TO RUBY
+             ════════════════════════════════════════ -->
+        <article class="rb-lesson" id="topic-introduction" data-topic="0">
+          <div class="rb-lesson-header">
+            <span class="rb-lesson-number">01</span>
+            <h3>Introduction to Ruby</h3>
+          </div>
+
+          <p>
+            Ruby is a dynamic, open-source programming language created by <strong>Yukihiro "Matz" Matsumoto</strong> in 1995. It was designed with a single guiding principle: <strong>make developers happy</strong>. Its clean, expressive syntax reads almost like English.
+          </p>
+
+          <div class="rb-concept">
+            <h4>Why Learn Ruby?</h4>
+            <ul>
+              <li><strong>Joyful to read</strong> &mdash; natural, English-like syntax</li>
+              <li><strong>Convention over configuration</strong> &mdash; Ruby on Rails made web dev famously fast</li>
+              <li><strong>Everything is an object</strong> &mdash; a pure, consistent OO model</li>
+              <li><strong>Huge ecosystem</strong> &mdash; thousands of gems via <code>gem install</code></li>
+            </ul>
+          </div>
+
+          <p>Your very first Ruby program is one line:</p>
+
+          <div class="rb-code-block">
+            <div class="rb-code-header">
+              <span class="rb-code-lang">Ruby</span>
+              <button type="button" class="rb-code-copy" aria-label="Copy code" data-code="puts 'Hello, World!'"><i class="fas fa-copy"></i> Copy</button>
+            </div>
+            <pre><code><span class="fn">puts</span> <span class="str">'Hello, World!'</span></code></pre>
+          </div>
+
+          <div class="rb-output">
+            <div class="rb-output-label">Output</div>
+            <pre>Hello, World!</pre>
+          </div>
+
+          <div class="rb-callout">
+            <p><strong>No semicolons needed.</strong> Ruby uses newlines to end statements and <code>end</code> to close blocks &mdash; not curly braces <code>{}</code>. Indentation is convention, not syntax.</p>
+          </div>
+
+          <div class="rb-concept">
+            <h4>The Ruby REPL: irb</h4>
+            <p>Type <code>irb</code> in your terminal for an interactive Ruby shell. Try an expression and Ruby prints its result with <code>=&gt;</code>.</p>
+          </div>
+
+          <div class="rb-code-block">
+            <div class="rb-code-header">
+              <span class="rb-code-lang">irb</span>
+              <button type="button" class="rb-code-copy" aria-label="Copy code" data-code='irb(main):001:0> 2 + 3
+=> 5
+irb(main):002:0> "ruby".upcase
+=> "RUBY"'><i class="fas fa-copy"></i> Copy</button>
+            </div>
+            <pre><code>irb(main):001:0&gt; 2 + <span class="num">3</span>
+=&gt; <span class="num">5</span>
+irb(main):002:0&gt; <span class="str">"ruby"</span>.<span class="fn">upcase</span>
+=&gt; <span class="str">"RUBY"</span></code></pre>
+          </div>
+
+          <!-- Exercise -->
+          <div class="rb-exercise" id="exercise-introduction">
+            <div class="rb-exercise-title">
+              Practice: Say Hello in irb
+            </div>
+            <p>Fire up <code>irb</code> and experiment:</p>
+            <ol>
+              <li>Print your name with <code>puts "Your name"</code></li>
+              <li>Compute <code>10 * 5 - 3</code> and check the <code>=&gt;</code> result</li>
+              <li>Call <code>"ruby".reverse</code> and <code>"ruby".capitalize</code></li>
+            </ol>
+            <button type="button" class="rb-exercise-toggle" aria-expanded="false" aria-controls="solution-introduction">Show Solution</button>
+            <div class="rb-exercise-solution" id="solution-introduction">
+              <div class="rb-code-block">
+                <div class="rb-code-header">
+                  <span class="rb-code-lang">irb</span>
+                  <button type="button" class="rb-code-copy" aria-label="Copy code" data-code='irb(main):001:0> puts "Alice"
+Alice
+=> nil
+irb(main):002:0> 10 * 5 - 3
+=> 47
+irb(main):003:0> "ruby".reverse
+=> "ybur"
+irb(main):004:0> "ruby".capitalize
+=> "Ruby"'><i class="fas fa-copy"></i> Copy</button>
+                </div>
+                <pre><code>irb(main):001:0&gt; <span class="fn">puts</span> <span class="str">"Alice"</span>
+Alice
+=&gt; <span class="bool">nil</span>
+irb(main):002:0&gt; <span class="num">10</span> * <span class="num">5</span> - <span class="num">3</span>
+=&gt; <span class="num">47</span>
+irb(main):003:0&gt; <span class="str">"ruby"</span>.<span class="fn">reverse</span>
+=&gt; <span class="str">"ybur"</span>
+irb(main):004:0&gt; <span class="str">"ruby"</span>.<span class="fn">capitalize</span>
+=&gt; <span class="str">"Ruby"</span></code></pre>
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <!-- ════════════════════════════════════════
+             MODULE 2: INSTALLATION & SETUP
+             ════════════════════════════════════════ -->
+        <article class="rb-lesson" id="topic-setup" data-topic="1">
+          <div class="rb-lesson-header">
+            <span class="rb-lesson-number">02</span>
+            <h3>Installation &amp; Setup</h3>
+          </div>
+
+          <p>
+            Install Ruby on your machine and verify you have a modern version (3.1+). For real projects, use a version manager like <strong>rbenv</strong> or <strong>RVM</strong>.
+          </p>
+
+          <div class="rb-concept">
+            <h4><i class="fab fa-apple"></i> macOS</h4>
+            <p>Install via <strong>Homebrew</strong> (recommended):</p>
+          </div>
+
+          <div class="rb-code-block">
+            <div class="rb-code-header">
+              <span class="rb-code-lang">Bash</span>
+              <button type="button" class="rb-code-copy" aria-label="Copy code" data-code="brew install ruby"><i class="fas fa-copy"></i> Copy</button>
+            </div>
+            <pre><code>brew install ruby</code></pre>
+          </div>
+
+          <div class="rb-concept">
+            <h4><i class="fab fa-windows"></i> Windows</h4>
+            <p>Download the installer from <strong>rubyinstaller.org</strong> and check the "Add Ruby to PATH" option during installation.</p>
+          </div>
+
+          <div class="rb-concept">
+            <h4><i class="fab fa-linux"></i> Linux</h4>
+            <p>Install via your package manager:</p>
+          </div>
+
+          <div class="rb-code-block">
+            <div class="rb-code-header">
+              <span class="rb-code-lang">Bash</span>
+              <button type="button" class="rb-code-copy" aria-label="Copy code" data-code="sudo apt update && sudo apt install ruby-full"><i class="fas fa-copy"></i> Copy</button>
+            </div>
+            <pre><code>sudo apt update && sudo apt install ruby-full</code></pre>
+          </div>
+
+          <div class="rb-callout">
+            <p>Verify your installation by running <code>ruby --version</code> in your terminal. You should see <code>ruby 3.x.x</code> (or newer).</p>
+          </div>
+
+          <div class="rb-code-block">
+            <div class="rb-code-header">
+              <span class="rb-code-lang">Bash</span>
+              <button type="button" class="rb-code-copy" aria-label="Copy code" data-code="ruby --version
+# Expected: ruby 3.2.x (or newer)"><i class="fas fa-copy"></i> Copy</button>
+            </div>
+            <pre><code>ruby --version
+<span class="cmt"># Expected: ruby 3.2.x (or newer)</span></code></pre>
+          </div>
+
+          <p>Run a file with <code>ruby hello.rb</code>, or start the interactive REPL with <code>irb</code>. Need an editor? Try the built-in <a href="/pages/editors/ruby-editor/ruby-editor.html" class="rb-inline-link">Ruby Editor</a> right here.</p>
+
+          <!-- Exercise -->
+          <div class="rb-exercise" id="exercise-setup">
+            <div class="rb-exercise-title">
+              Practice: Verify Your Setup
+            </div>
+            <p>Confirm Ruby is ready to go on your machine:</p>
+            <ol>
+              <li>Check the version with <code>ruby --version</code></li>
+              <li>Create <code>hello.rb</code> containing <code>puts "Hello, Ruby!"</code></li>
+              <li>Run it with <code>ruby hello.rb</code></li>
+            </ol>
+            <button type="button" class="rb-exercise-toggle" aria-expanded="false" aria-controls="solution-setup">Show Solution</button>
+            <div class="rb-exercise-solution" id="solution-setup">
+              <div class="rb-code-block">
+                <div class="rb-code-header">
+                  <span class="rb-code-lang">Bash</span>
+                  <button type="button" class="rb-code-copy" aria-label="Copy code" data-code='ruby --version
+# ruby 3.2.2 (2023-03-30 revision e51014f9c0) [x86_64-darwin]
+
+echo "puts \'Hello, Ruby!\'" > hello.rb
+ruby hello.rb
+# Hello, Ruby!'><i class="fas fa-copy"></i> Copy</button>
+                </div>
+                <pre><code>ruby --version
+<span class="cmt"># ruby 3.2.2 (2023-03-30 revision e51014f9c0) [x86_64-darwin]</span>
+
+echo <span class="str">"puts 'Hello, Ruby!'"</span> &gt; hello.rb
+ruby hello.rb
+<span class="cmt"># Hello, Ruby!</span></code></pre>
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <!-- ════════════════════════════════════════
+             MODULE 3: SYNTAX & VARIABLES
+             ════════════════════════════════════════ -->
+        <div class="rb-divider">
+          <span class="rb-divider-inner">Next Module</span>
+        </div>
+
+        <article class="rb-lesson" id="topic-syntax" data-topic="2">
+          <div class="rb-lesson-header">
+            <span class="rb-lesson-number">03</span>
+            <h3>Syntax &amp; Variables</h3>
+          </div>
+
+          <p>
+            Ruby is dynamically typed &mdash; you don't declare a type. Variables are assigned with <code>=</code> and come in a few flavors based on their first character.
+          </p>
+
+          <div class="rb-code-block">
+            <div class="rb-code-header">
+              <span class="rb-code-lang">Ruby</span>
+              <button type="button" class="rb-code-copy" aria-label="Copy code" data-code='name = "Alice"       # local variable
+AGE = 25              # constant (capitalized)
+PI = 3.14159
+
+puts name
+puts AGE
+puts PI.class'><i class="fas fa-copy"></i> Copy</button>
+            </div>
+            <pre><code>name = <span class="str">"Alice"</span>       <span class="cmt"># local variable</span>
+AGE = <span class="num">25</span>              <span class="cmt"># constant (capitalized)</span>
+PI = <span class="num">3.14159</span>
+
+<span class="fn">puts</span> name
+<span class="fn">puts</span> AGE
+<span class="fn">puts</span> PI.<span class="fn">class</span></code></pre>
+          </div>
+
+          <div class="rb-output">
+            <div class="rb-output-label">Output</div>
+            <pre>Alice
+25
+Float</pre>
+          </div>
+
+          <div class="rb-concept">
+            <h4>String Interpolation &mdash; <code>#{"{}"}</code></h4>
+            <p>Embed expressions directly into strings. This is the idiomatic way to build dynamic strings in Ruby.</p>
+          </div>
+
+          <div class="rb-code-block">
+            <div class="rb-code-header">
+              <span class="rb-code-lang">Ruby</span>
+              <button type="button" class="rb-code-copy" aria-label="Copy code" data-code='city = "New York"
+population = 8_400_000
+
+puts "Welcome to #{city}!"
+puts "#{city} has about #{population} residents."'><i class="fas fa-copy"></i> Copy</button>
+            </div>
+            <pre><code>city = <span class="str">"New York"</span>
+population = <span class="num">8_400_000</span>
+
+<span class="fn">puts</span> <span class="str">"Welcome to </span><span class="iv">#{</span>city<span class="iv">}</span><span class="str">!"</span>
+<span class="fn">puts</span> <span class="str">"</span><span class="iv">#{</span>city<span class="iv">}</span><span class="str"> has about </span><span class="iv">#{</span>population<span class="iv">}</span><span class="str"> residents."</span></code></pre>
+          </div>
+
+          <div class="rb-output">
+            <div class="rb-output-label">Output</div>
+            <pre>Welcome to New York!
+New York has about 8400000 residents.</pre>
+          </div>
+
+          <div class="rb-table-wrap">
+            <table class="rb-table" aria-label="Ruby data types">
+              <thead>
+                <tr>
+                  <th scope="col">Type</th>
+                  <th scope="col">Example</th>
+                  <th scope="col">Description</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><td><code>Integer</code></td><td><code>42</code></td><td>Whole numbers</td></tr>
+                <tr><td><code>Float</code></td><td><code>3.14</code></td><td>Decimal numbers</td></tr>
+                <tr><td><code>String</code></td><td><code>"hello"</code></td><td>Text</td></tr>
+                <tr><td><code>Symbol</code></td><td><code>:name</code></td><td>Immutable, lightweight identifiers</td></tr>
+                <tr><td><code>true / false / nil</code></td><td><code>true</code></td><td>Boolean &amp; "nothing" values</td></tr>
+                <tr><td><code>Array</code></td><td><code>[1, 2, 3]</code></td><td>Ordered collection</td></tr>
+                <tr><td><code>Hash</code></td><td><code>{ a: 1 }</code></td><td>Key-value pairs</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="rb-callout">
+            <p><strong>Symbols vs Strings:</strong> <code>:name</code> (symbol) is immutable and memory-efficient &mdash; ideal for hash keys and identifiers. <code>"name"</code> (string) is mutable text.</p>
+          </div>
+
+          <p>Use <code>.class</code> to check any value's type, and <code>nil?</code> to test for nothing.</p>
+
+          <!-- Exercise -->
+          <div class="rb-exercise" id="exercise-syntax">
+            <div class="rb-exercise-title">
+              Practice: Variables &amp; Syntax
+            </div>
+            <p>Build a mini profile using variables and interpolation:</p>
+            <ol>
+              <li>Create a string <code>name = "Ruby"</code></li>
+              <li>Create an integer <code>version = 3</code></li>
+              <li>Create a symbol <code>trait = :friendly</code></li>
+              <li>Print <code>"Ruby version 3 is friendly"</code> using interpolation</li>
+              <li>Print the class of each variable</li>
+            </ol>
+            <button type="button" class="rb-exercise-toggle" aria-expanded="false" aria-controls="solution-syntax">Show Solution</button>
+            <div class="rb-exercise-solution" id="solution-syntax">
+              <div class="rb-code-block">
+                <div class="rb-code-header">
+                  <span class="rb-code-lang">Ruby</span>
+                  <button type="button" class="rb-code-copy" aria-label="Copy code" data-code='name = "Ruby"
+version = 3
+trait = :friendly
+
+puts "#{name} version #{version} is #{trait}"
+puts name.class
+puts version.class
+puts trait.class'><i class="fas fa-copy"></i> Copy</button>
+                </div>
+                <pre><code>name = <span class="str">"Ruby"</span>
+version = <span class="num">3</span>
+trait = <span class="sym">:friendly</span>
+
+<span class="fn">puts</span> <span class="str">"</span><span class="iv">#{</span>name<span class="iv">}</span><span class="str"> version </span><span class="iv">#{</span>version<span class="iv">}</span><span class="str"> is </span><span class="iv">#{</span>trait<span class="iv">}</span><span class="str">"</span>
+<span class="fn">puts</span> name.<span class="fn">class</span>
+<span class="fn">puts</span> version.<span class="fn">class</span>
+<span class="fn">puts</span> trait.<span class="fn">class</span></code></pre>
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <!-- ════════════════════════════════════════
+             MODULE 4: CONTROL FLOW & METHODS
+             ════════════════════════════════════════ -->
+        <article class="rb-lesson" id="topic-methods" data-topic="3">
+          <div class="rb-lesson-header">
+            <span class="rb-lesson-number">04</span>
+            <h3>Control Flow &amp; Methods</h3>
+          </div>
+
+          <p>
+            Ruby branches with <code>if</code> / <code>elsif</code> / <code>else</code> and even an <code>unless</code> (the "if not"). Blocks close with <code>end</code>.
+          </p>
+
+          <div class="rb-code-block">
+            <div class="rb-code-header">
+              <span class="rb-code-lang">Ruby</span>
+              <button type="button" class="rb-code-copy" aria-label="Copy code" data-code='score = 85
+
+if score >= 90
+  grade = "A"
+elsif score >= 80
+  grade = "B"
+elsif score >= 70
+  grade = "C"
+else
+  grade = "F"
+end
+
+puts "Score: #{score} → Grade: #{grade}"'><i class="fas fa-copy"></i> Copy</button>
+            </div>
+            <pre><code>score = <span class="num">85</span>
+
+<span class="kw">if</span> score >= <span class="num">90</span>
+  grade = <span class="str">"A"</span>
+<span class="kw">elsif</span> score >= <span class="num">80</span>
+  grade = <span class="str">"B"</span>
+<span class="kw">elsif</span> score >= <span class="num">70</span>
+  grade = <span class="str">"C"</span>
+<span class="kw">else</span>
+  grade = <span class="str">"F"</span>
+<span class="kw">end</span>
+
+<span class="fn">puts</span> <span class="str">"Score: </span><span class="iv">#{</span>score<span class="iv">}</span><span class="str"> → Grade: </span><span class="iv">#{</span>grade<span class="iv">}</span><span class="str">"</span></code></pre>
+          </div>
+
+          <div class="rb-output">
+            <div class="rb-output-label">Output</div>
+            <pre>Score: 85 → Grade: B</pre>
+          </div>
+
+          <div class="rb-concept">
+            <h4>unless &amp; Case</h4>
+            <p><code>unless</code> runs a block when a condition is <em>false</em> &mdash; perfect for guard clauses. Use <code>case/when</code> for many branches.</p>
+          </div>
+
+          <div class="rb-code-block">
+            <div class="rb-code-header">
+              <span class="rb-code-lang">Ruby</span>
+              <button type="button" class="rb-code-copy" aria-label="Copy code" data-code='status = :pending
+
+case status
+when :active   then puts "Running"
+when :paused   then puts "Paused"
+when :pending  then puts "Waiting to start"
+else puts "Unknown status"
+end
+
+puts "You are not logged in" unless false'><i class="fas fa-copy"></i> Copy</button>
+            </div>
+            <pre><code>status = <span class="sym">:pending</span>
+
+<span class="kw">case</span> status
+<span class="kw">when</span> <span class="sym">:active</span>   <span class="kw">then</span> <span class="fn">puts</span> <span class="str">"Running"</span>
+<span class="kw">when</span> <span class="sym">:paused</span>   <span class="kw">then</span> <span class="fn">puts</span> <span class="str">"Paused"</span>
+<span class="kw">when</span> <span class="sym">:pending</span>  <span class="kw">then</span> <span class="fn">puts</span> <span class="str">"Waiting to start"</span>
+<span class="kw">else</span> <span class="fn">puts</span> <span class="str">"Unknown status"</span>
+<span class="kw">end</span>
+
+<span class="fn">puts</span> <span class="str">"You are not logged in"</span> <span class="kw">unless</span> <span class="bool">false</span></code></pre>
+          </div>
+
+          <div class="rb-output">
+            <div class="rb-output-label">Output</div>
+            <pre>Waiting to start
+You are not logged in</pre>
+          </div>
+
+          <div class="rb-concept">
+            <h4>Methods</h4>
+            <p>Define methods with <code>def ... end</code>. The <strong>last evaluated expression</strong> is returned automatically &mdash; no explicit <code>return</code> needed.</p>
+          </div>
+
+          <div class="rb-code-block">
+            <div class="rb-code-header">
+              <span class="rb-code-lang">Ruby</span>
+              <button type="button" class="rb-code-copy" aria-label="Copy code" data-code='def greet(name, greeting = "Hello")
+  "#{greeting}, #{name}!"
+end
+
+def add(a, b)
+  a + b
+end
+
+puts greet("Alice")          # Hello, Alice!
+puts greet("Sam", "Howdy")   # Howdy, Sam!
+puts add(3, 4)               # 7
+
+def even?(n)
+  n.even?
+end
+
+puts even?(4)   # true
+puts even?(7)   # false'><i class="fas fa-copy"></i> Copy</button>
+            </div>
+            <pre><code><span class="kw">def</span> <span class="fn">greet</span>(<span class="param">name</span>, <span class="param">greeting</span> = <span class="str">"Hello"</span>)
+  <span class="str">"</span><span class="iv">#{</span>greeting<span class="iv">}</span><span class="str">, </span><span class="iv">#{</span>name<span class="iv">}</span><span class="str">!"</span>
+<span class="kw">end</span>
+
+<span class="kw">def</span> <span class="fn">add</span>(<span class="param">a</span>, <span class="param">b</span>)
+  a + b
+<span class="kw">end</span>
+
+<span class="fn">puts</span> <span class="fn">greet</span>(<span class="str">"Alice"</span>)          <span class="cmt"># Hello, Alice!</span>
+<span class="fn">puts</span> <span class="fn">greet</span>(<span class="str">"Sam"</span>, <span class="str">"Howdy"</span>)   <span class="cmt"># Howdy, Sam!</span>
+<span class="fn">puts</span> <span class="fn">add</span>(<span class="num">3</span>, <span class="num">4</span>)               <span class="cmt"># 7</span>
+
+<span class="kw">def</span> <span class="fn">even?</span>(<span class="param">n</span>)
+  n.<span class="fn">even?</span>
+<span class="kw">end</span>
+
+<span class="fn">puts</span> <span class="fn">even?</span>(<span class="num">4</span>)   <span class="cmt"># true</span>
+<span class="fn">puts</span> <span class="fn">even?</span>(<span class="num">7</span>)   <span class="cmt"># false</span></code></pre>
+          </div>
+
+          <div class="rb-callout">
+            <p>Predicate methods end in <code>?</code> and return a boolean. Bang methods end in <code>!</code> and mutate the receiver in place (e.g. <code>array.sort!</code>).</p>
+          </div>
+
+          <!-- Exercise -->
+          <div class="rb-exercise" id="exercise-methods">
+            <div class="rb-exercise-title">
+              Practice: Control Flow &amp; Methods
+            </div>
+            <ol>
+              <li>Write <code>classify(n)</code> returning <code>:positive</code>, <code>:negative</code>, or <code>:zero</code></li>
+              <li>Write <code>factorial(n)</code> using recursion</li>
+              <li>Write <code>shout(text)</code> returning the text uppercased with a <code>!</code></li>
+            </ol>
+            <button type="button" class="rb-exercise-toggle" aria-expanded="false" aria-controls="solution-methods">Show Solution</button>
+            <div class="rb-exercise-solution" id="solution-methods">
+              <div class="rb-code-block">
+                <div class="rb-code-header">
+                  <span class="rb-code-lang">Ruby</span>
+                  <button type="button" class="rb-code-copy" aria-label="Copy code" data-code='def classify(n)
+  return :positive if n > 0
+  return :negative if n < 0
+  :zero
+end
+
+def factorial(n)
+  return 1 if n <= 1
+  n * factorial(n - 1)
+end
+
+def shout(text)
+  "#{text.upcase}!"
+end
+
+puts classify(5)     # positive
+puts classify(0)     # zero
+puts factorial(5)    # 120
+puts shout("hello")  # HELLO!'><i class="fas fa-copy"></i> Copy</button>
+                </div>
+                <pre><code><span class="kw">def</span> <span class="fn">classify</span>(<span class="param">n</span>)
+  <span class="kw">return</span> <span class="sym">:positive</span> <span class="kw">if</span> n > <span class="num">0</span>
+  <span class="kw">return</span> <span class="sym">:negative</span> <span class="kw">if</span> n &lt; <span class="num">0</span>
+  <span class="sym">:zero</span>
+<span class="kw">end</span>
+
+<span class="kw">def</span> <span class="fn">factorial</span>(<span class="param">n</span>)
+  <span class="kw">return</span> <span class="num">1</span> <span class="kw">if</span> n &lt;= <span class="num">1</span>
+  n * <span class="fn">factorial</span>(n - <span class="num">1</span>)
+<span class="kw">end</span>
+
+<span class="kw">def</span> <span class="fn">shout</span>(<span class="param">text</span>)
+  <span class="str">"</span><span class="iv">#{</span>text.<span class="fn">upcase</span><span class="iv">}</span><span class="str">!"</span>
+<span class="kw">end</span>
+
+<span class="fn">puts</span> <span class="fn">classify</span>(<span class="num">5</span>)     <span class="cmt"># positive</span>
+<span class="fn">puts</span> <span class="fn">classify</span>(<span class="num">0</span>)     <span class="cmt"># zero</span>
+<span class="fn">puts</span> <span class="fn">factorial</span>(<span class="num">5</span>)    <span class="cmt"># 120</span>
+<span class="fn">puts</span> <span class="fn">shout</span>(<span class="str">"hello"</span>)  <span class="cmt"># HELLO!</span></code></pre>
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <!-- ════════════════════════════════════════
+             MODULE 5: ARRAYS & HASHES
+             ════════════════════════════════════════ -->
+        <div class="rb-divider">
+          <span class="rb-divider-inner">Next Module</span>
+        </div>
+
+        <article class="rb-lesson" id="topic-arrays-hashes" data-topic="4">
+          <div class="rb-lesson-header">
+            <span class="rb-lesson-number">05</span>
+            <h3>Arrays &amp; Hashes</h3>
+          </div>
+
+          <p>
+            Arrays and hashes are Ruby's workhorse collections. Arrays are ordered lists; hashes store key-value pairs. Both pair beautifully with the <code>each</code> iterator.
+          </p>
+
+          <div class="rb-concept">
+            <h4>Arrays &mdash; Ordered &amp; Mutable</h4>
+            <p>Create arrays with <code>[]</code> or the <code>Array.new</code> shorthand.</p>
+          </div>
+
+          <div class="rb-code-block">
+            <div class="rb-code-header">
+              <span class="rb-code-lang">Ruby</span>
+              <button type="button" class="rb-code-copy" aria-label="Copy code" data-code='fruits = ["apple", "banana", "cherry"]
+
+puts fruits[0]        # apple
+puts fruits[-1]       # cherry
+
+fruits << "date"      # shovel operator (push)
+fruits.unshift("kiwi")
+fruits.delete("banana")
+
+p fruits              # inspect
+puts "Length: #{fruits.length}"'><i class="fas fa-copy"></i> Copy</button>
+            </div>
+            <pre><code>fruits = [<span class="str">"apple"</span>, <span class="str">"banana"</span>, <span class="str">"cherry"</span>]
+
+<span class="fn">puts</span> fruits[<span class="num">0</span>]        <span class="cmt"># apple</span>
+<span class="fn">puts</span> fruits[<span class="num">-1</span>]       <span class="cmt"># cherry</span>
+
+fruits &lt;&lt; <span class="str">"date"</span>      <span class="cmt"># shovel operator (push)</span>
+fruits.<span class="fn">unshift</span>(<span class="str">"kiwi"</span>)
+fruits.<span class="fn">delete</span>(<span class="str">"banana"</span>)
+
+<span class="fn">p</span> fruits              <span class="cmt"># inspect</span>
+<span class="fn">puts</span> <span class="str">"Length: </span><span class="iv">#{</span>fruits.<span class="fn">length</span><span class="iv">}</span><span class="str">"</span></code></pre>
+          </div>
+
+          <div class="rb-output">
+            <div class="rb-output-label">Output</div>
+            <pre>apple
+cherry
+["kiwi", "apple", "cherry", "date"]
+Length: 4</pre>
+          </div>
+
+          <div class="rb-concept">
+            <h4>Ranges &amp; Slicing</h4>
+            <p>Ranges <code>1..5</code> (inclusive) and <code>1...5</code> (exclusive) turn into arrays with <code>to_a</code>.</p>
+          </div>
+
+          <div class="rb-code-block">
+            <div class="rb-code-header">
+              <span class="rb-code-lang">Ruby</span>
+              <button type="button" class="rb-code-copy" aria-label="Copy code" data-code='nums = (1..10).to_a
+
+p nums[2..4]        # [3, 4, 5]
+p nums.first(3)     # [1, 2, 3]
+p nums.last(2)      # [9, 10]
+p nums.reverse      # [10, 9, ..., 1]'><i class="fas fa-copy"></i> Copy</button>
+            </div>
+            <pre><code>nums = (<span class="num">1</span>..<span class="num">10</span>).<span class="fn">to_a</span>
+
+<span class="fn">p</span> nums[<span class="num">2</span>..<span class="num">4</span>]        <span class="cmt"># [3, 4, 5]</span>
+<span class="fn">p</span> nums.<span class="fn">first</span>(<span class="num">3</span>)     <span class="cmt"># [1, 2, 3]</span>
+<span class="fn">p</span> nums.<span class="fn">last</span>(<span class="num">2</span>)      <span class="cmt"># [9, 10]</span>
+<span class="fn">p</span> nums.<span class="fn">reverse</span>      <span class="cmt"># [10, 9, ..., 1]</span></code></pre>
+          </div>
+
+          <div class="rb-concept">
+            <h4>Hashes &mdash; Key-Value Pairs</h4>
+            <p>Modern Ruby prefers the <code>key: value</code> syntax (symbol keys). Access with <code>[]</code> or the safe <code>fetch</code>.</p>
+          </div>
+
+          <div class="rb-code-block">
+            <div class="rb-code-header">
+              <span class="rb-code-lang">Ruby</span>
+              <button type="button" class="rb-code-copy" aria-label="Copy code" data-code='person = {
+  name: "Alice",
+  age: 25,
+  city: "New York"
+}
+
+puts person[:name]                 # Alice
+puts person.fetch(:age, 0)         # 25
+puts person.fetch(:email, "n/a")   # n/a
+
+person[:email] = "alice@mail.com"
+person[:age] = 26
+
+person.each do |key, value|
+  puts "#{key}: #{value}"
+end'><i class="fas fa-copy"></i> Copy</button>
+            </div>
+            <pre><code>person = {
+  <span class="sym">name</span>: <span class="str">"Alice"</span>,
+  <span class="sym">age</span>: <span class="num">25</span>,
+  <span class="sym">city</span>: <span class="str">"New York"</span>
+}
+
+<span class="fn">puts</span> person[<span class="sym">:name</span>]                 <span class="cmt"># Alice</span>
+<span class="fn">puts</span> person.<span class="fn">fetch</span>(<span class="sym">:age</span>, <span class="num">0</span>)         <span class="cmt"># 25</span>
+<span class="fn">puts</span> person.<span class="fn">fetch</span>(<span class="sym">:email</span>, <span class="str">"n/a"</span>)   <span class="cmt"># n/a</span>
+
+person[<span class="sym">:email</span>] = <span class="str">"alice@mail.com"</span>
+person[<span class="sym">:age</span>] = <span class="num">26</span>
+
+person.<span class="fn">each</span> <span class="kw">do</span> |<span class="param">key</span>, <span class="param">value</span>|
+  <span class="fn">puts</span> <span class="str">"</span><span class="iv">#{</span>key<span class="iv">}</span><span class="str">: </span><span class="iv">#{</span>value<span class="iv">}</span><span class="str">"</span>
+<span class="kw">end</span></code></pre>
+          </div>
+
+          <div class="rb-output">
+            <div class="rb-output-label">Output</div>
+            <pre>Alice
+25
+n/a
+name: Alice
+age: 26
+city: New York
+email: alice@mail.com</pre>
+          </div>
+
+          <div class="rb-callout">
+            <p>Prefer <code>fetch(key, default)</code> over <code>[]</code> when a missing key should fall back gracefully &mdash; it avoids silent <code>nil</code> surprises.</p>
+          </div>
+
+          <!-- Exercise -->
+          <div class="rb-exercise" id="exercise-arrays-hashes">
+            <div class="rb-exercise-title">
+              Practice: Arrays &amp; Hashes
+            </div>
+            <ol>
+              <li>Create an array of 5 numbers and print their sum &amp; average</li>
+              <li>Create a hash for a book (title, author, pages, genre) and iterate it</li>
+              <li>Build a <code>counts</code> hash from an array of strings using <code>each</code></li>
+            </ol>
+            <button type="button" class="rb-exercise-toggle" aria-expanded="false" aria-controls="solution-arrays-hashes">Show Solution</button>
+            <div class="rb-exercise-solution" id="solution-arrays-hashes">
+              <div class="rb-code-block">
+                <div class="rb-code-header">
+                  <span class="rb-code-lang">Ruby</span>
+                  <button type="button" class="rb-code-copy" aria-label="Copy code" data-code='# Sum and average
+nums = [10, 20, 30, 40, 50]
+total = nums.sum
+avg = total / nums.length.to_f
+puts "Sum: #{total}, Average: #{avg}"
+
+# Book hash
+book = { title: "1984", author: "George Orwell", pages: 328, genre: "Dystopian" }
+book.each { |key, value| puts "#{key}: #{value}" }
+
+# Count elements
+words = %w[a b a c b a]
+counts = Hash.new(0)
+words.each { |word| counts[word] += 1 }
+p counts'><i class="fas fa-copy"></i> Copy</button>
+                </div>
+                <pre><code><span class="cmt"># Sum and average</span>
+nums = [<span class="num">10</span>, <span class="num">20</span>, <span class="num">30</span>, <span class="num">40</span>, <span class="num">50</span>]
+total = nums.<span class="fn">sum</span>
+avg = total / nums.<span class="fn">length</span>.<span class="fn">to_f</span>
+<span class="fn">puts</span> <span class="str">"Sum: </span><span class="iv">#{</span>total<span class="iv">}</span><span class="str">, Average: </span><span class="iv">#{</span>avg<span class="iv">}</span><span class="str">"</span>
+
+<span class="cmt"># Book hash</span>
+book = { <span class="sym">title</span>: <span class="str">"1984"</span>, <span class="sym">author</span>: <span class="str">"George Orwell"</span>, <span class="sym">pages</span>: <span class="num">328</span>, <span class="sym">genre</span>: <span class="str">"Dystopian"</span> }
+book.<span class="fn">each</span> { |<span class="param">key</span>, <span class="param">value</span>| <span class="fn">puts</span> <span class="str">"</span><span class="iv">#{</span>key<span class="iv">}</span><span class="str">: </span><span class="iv">#{</span>value<span class="iv">}</span><span class="str">"</span> }
+
+<span class="cmt"># Count elements</span>
+words = <span class="fn">%w[a b a c b a]</span>
+counts = <span class="type">Hash</span>.<span class="fn">new</span>(<span class="num">0</span>)
+words.<span class="fn">each</span> { |<span class="param">word</span>| counts[word] += <span class="num">1</span> }
+<span class="fn">p</span> counts</code></pre>
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <!-- ════════════════════════════════════════
+             MODULE 6: BLOCKS, PROCS & LAMBDAS
+             ════════════════════════════════════════ -->
+        <article class="rb-lesson" id="topic-blocks" data-topic="5">
+          <div class="rb-lesson-header">
+            <span class="rb-lesson-number">06</span>
+            <h3>Blocks, Procs &amp; Lambdas</h3>
+          </div>
+
+          <p>
+            Blocks are Ruby's bread and butter &mdash; anonymous chunks of code passed to methods. <code>each</code>, <code>map</code>, and <code>select</code> all take blocks. Blocks become <strong>procs</strong> and <strong>lambdas</strong> when you need to store or pass them around.
+          </p>
+
+          <div class="rb-concept">
+            <h4>Blocks &mdash; <code>{ }</code> and <code>do...end</code></h4>
+            <p>Use <code>{ }</code> for single-line blocks, <code>do...end</code> for multi-line. <code>yield</code> runs a passed block.</p>
+          </div>
+
+          <div class="rb-code-block">
+            <div class="rb-code-header">
+              <span class="rb-code-lang">Ruby</span>
+              <button type="button" class="rb-code-copy" aria-label="Copy code" data-code='numbers = [1, 2, 3, 4, 5]
+
+numbers.each { |n| puts "Count: #{n}" }
+
+doubled = numbers.map { |n| n * 2 }
+p doubled            # [2, 4, 6, 8, 10]
+
+evens = numbers.select { |n| n.even? }
+p evens              # [2, 4]
+
+def repeat(times)
+  times.times { yield }
+end
+
+repeat(3) { puts "Ruby!" }'><i class="fas fa-copy"></i> Copy</button>
+            </div>
+            <pre><code>numbers = [<span class="num">1</span>, <span class="num">2</span>, <span class="num">3</span>, <span class="num">4</span>, <span class="num">5</span>]
+
+numbers.<span class="fn">each</span> { |<span class="param">n</span>| <span class="fn">puts</span> <span class="str">"Count: </span><span class="iv">#{</span>n<span class="iv">}</span><span class="str">"</span> }
+
+doubled = numbers.<span class="fn">map</span> { |<span class="param">n</span>| n * <span class="num">2</span> }
+<span class="fn">p</span> doubled            <span class="cmt"># [2, 4, 6, 8, 10]</span>
+
+evens = numbers.<span class="fn">select</span> { |<span class="param">n</span>| n.<span class="fn">even?</span> }
+<span class="fn">p</span> evens              <span class="cmt"># [2, 4]</span>
+
+<span class="kw">def</span> <span class="fn">repeat</span>(<span class="param">times</span>)
+  times.<span class="fn">times</span> { <span class="kw">yield</span> }
+<span class="kw">end</span>
+
+<span class="fn">repeat</span>(<span class="num">3</span>) { <span class="fn">puts</span> <span class="str">"Ruby!"</span> }</code></pre>
+          </div>
+
+          <div class="rb-output">
+            <div class="rb-output-label">Output</div>
+            <pre>Count: 1
+Count: 2
+Count: 3
+Count: 4
+Count: 5
+[2, 4, 6, 8, 10]
+[2, 4]
+Ruby!
+Ruby!
+Ruby!</pre>
+          </div>
+
+          <div class="rb-concept">
+            <h4>Procs &amp; Lambdas</h4>
+            <p>A <strong>proc</strong> is a saved block created with <code>Proc.new</code>. A <strong>lambda</strong> is stricter: it checks arity and its <code>return</code> exits only itself, not the enclosing method.</p>
+          </div>
+
+          <div class="rb-code-block">
+            <div class="rb-code-header">
+              <span class="rb-code-lang">Ruby</span>
+              <button type="button" class="rb-code-copy" aria-label="Copy code" data-code='square = Proc.new { |x| x * x }
+cube = ->(x) { x * x * x }        # lambda shorthand
+
+puts square.call(4)   # 16
+puts cube.call(3)     # 27
+
+def apply(list, proc)
+  list.map { |item| proc.call(item) }
+end
+
+p apply([1, 2, 3], square)   # [1, 4, 9]
+p apply([1, 2, 3], cube)     # [1, 8, 27]
+
+double = proc { |x| x * 2 }  # same as Proc.new'><i class="fas fa-copy"></i> Copy</button>
+            </div>
+            <pre><code>square = <span class="type">Proc</span>.<span class="fn">new</span> { |<span class="param">x</span>| x * x }
+cube = <span class="op">-&gt;</span>(<span class="param">x</span>) { x * x * x }        <span class="cmt"># lambda shorthand</span>
+
+<span class="fn">puts</span> square.<span class="fn">call</span>(<span class="num">4</span>)   <span class="cmt"># 16</span>
+<span class="fn">puts</span> cube.<span class="fn">call</span>(<span class="num">3</span>)     <span class="cmt"># 27</span>
+
+<span class="kw">def</span> <span class="fn">apply</span>(<span class="param">list</span>, <span class="param">proc</span>)
+  list.<span class="fn">map</span> { |<span class="param">item</span>| proc.<span class="fn">call</span>(item) }
+<span class="kw">end</span>
+
+<span class="fn">p</span> <span class="fn">apply</span>([<span class="num">1</span>, <span class="num">2</span>, <span class="num">3</span>], square)   <span class="cmt"># [1, 4, 9]</span>
+<span class="fn">p</span> <span class="fn">apply</span>([<span class="num">1</span>, <span class="num">2</span>, <span class="num">3</span>], cube)     <span class="cmt"># [1, 8, 27]</span>
+
+double = <span class="fn">proc</span> { |<span class="param">x</span>| x * <span class="num">2</span> }  <span class="cmt"># same as Proc.new</span></code></pre>
+          </div>
+
+          <div class="rb-table-wrap">
+            <table class="rb-table" aria-label="Proc vs Lambda comparison">
+              <thead>
+                <tr>
+                  <th scope="col">Behavior</th>
+                  <th scope="col">Proc</th>
+                  <th scope="col">Lambda</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><td><code>return</code> inside</td><td>Exits the enclosing method</td><td>Exits only the lambda</td></tr>
+                <tr><td>Argument count</td><td>Lenient (fills with <code>nil</code>)</td><td>Strict (raises ArgumentError)</td></tr>
+                <tr><td>Creation</td><td><code>proc { }</code> / <code>Proc.new</code></td><td><code>lambda { }</code> / <code>-&gt;(x) { }</code></td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Exercise -->
+          <div class="rb-exercise" id="exercise-blocks">
+            <div class="rb-exercise-title">
+              Practice: Blocks, Procs &amp; Lambdas
+            </div>
+            <ol>
+              <li>Use <code>map</code> to square every number in <code>[1, 2, 3, 4]</code></li>
+              <li>Use <code>select</code> to keep only words longer than 3 letters</li>
+              <li>Create a lambda that reverses a string, then call it</li>
+            </ol>
+            <button type="button" class="rb-exercise-toggle" aria-expanded="false" aria-controls="solution-blocks">Show Solution</button>
+            <div class="rb-exercise-solution" id="solution-blocks">
+              <div class="rb-code-block">
+                <div class="rb-code-header">
+                  <span class="rb-code-lang">Ruby</span>
+                  <button type="button" class="rb-code-copy" aria-label="Copy code" data-code='squares = [1, 2, 3, 4].map { |n| n * n }
+p squares                       # [1, 4, 9, 16]
+
+words = %w[ruby code gem rails data]
+long = words.select { |w| w.length > 3 }
+p long                          # ["ruby", "code", "rails"]
+
+reverse = ->(s) { s.reverse }
+puts reverse.call("ruby")       # ybur'><i class="fas fa-copy"></i> Copy</button>
+                </div>
+                <pre><code>squares = [<span class="num">1</span>, <span class="num">2</span>, <span class="num">3</span>, <span class="num">4</span>].<span class="fn">map</span> { |<span class="param">n</span>| n * n }
+<span class="fn">p</span> squares                       <span class="cmt"># [1, 4, 9, 16]</span>
+
+words = <span class="fn">%w[ruby code gem rails data]</span>
+long = words.<span class="fn">select</span> { |<span class="param">w</span>| w.<span class="fn">length</span> > <span class="num">3</span> }
+<span class="fn">p</span> long                          <span class="cmt"># ["ruby", "code", "rails"]</span>
+
+reverse = <span class="op">-&gt;</span>(<span class="param">s</span>) { s.<span class="fn">reverse</span> }
+<span class="fn">puts</span> reverse.<span class="fn">call</span>(<span class="str">"ruby"</span>)       <span class="cmt"># ybur</span></code></pre>
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <!-- ════════════════════════════════════════
+             MODULE 7: OOP — CLASSES & MODULES
+             ════════════════════════════════════════ -->
+        <div class="rb-divider">
+          <span class="rb-divider-inner">Next Module</span>
+        </div>
+
+        <article class="rb-lesson" id="topic-oop" data-topic="6">
+          <div class="rb-lesson-header">
+            <span class="rb-lesson-number">07</span>
+            <h3>Object-Oriented Ruby: Classes &amp; Modules</h3>
+          </div>
+
+          <p>
+            In Ruby, <strong>everything is an object</strong>. Classes define behavior, and modules bundle reusable behavior for mixing in or namespacing.
+          </p>
+
+          <div class="rb-concept">
+            <h4>Classes &amp; Instance Variables</h4>
+            <p><code>@name</code> is an instance variable. <code>attr_accessor</code> generates getters and setters automatically.</p>
+          </div>
+
+          <div class="rb-code-block">
+            <div class="rb-code-header">
+              <span class="rb-code-lang">Ruby</span>
+              <button type="button" class="rb-code-copy" aria-label="Copy code" data-code='class Person
+  attr_accessor :name, :age
+
+  def initialize(name, age)
+    @name = name
+    @age = age
+  end
+
+  def introduce
+    "Hi, I'm #{@name} and I'm #{@age} years old."
+  end
+
+  def to_s
+    "#{@name} (#{@age})"
+  end
+end
+
+alice = Person.new("Alice", 25)
+puts alice.introduce
+alice.age = 26
+puts alice.to_s'><i class="fas fa-copy"></i> Copy</button>
+            </div>
+            <pre><code><span class="kw">class</span> <span class="type">Person</span>
+  <span class="fn">attr_accessor</span> <span class="sym">:name</span>, <span class="sym">:age</span>
+
+  <span class="kw">def</span> <span class="fn">initialize</span>(<span class="param">name</span>, <span class="param">age</span>)
+    <span class="ivar">@name</span> = name
+    <span class="ivar">@age</span> = age
+  <span class="kw">end</span>
+
+  <span class="kw">def</span> <span class="fn">introduce</span>
+    <span class="str">"Hi, I'm </span><span class="iv">#{</span><span class="ivar">@name</span><span class="iv">}</span><span class="str"> and I'm </span><span class="iv">#{</span><span class="ivar">@age</span><span class="iv">}</span><span class="str"> years old."</span>
+  <span class="kw">end</span>
+
+  <span class="kw">def</span> <span class="fn">to_s</span>
+    <span class="str">"</span><span class="iv">#{</span><span class="ivar">@name</span><span class="iv">}</span><span class="str"> (</span><span class="iv">#{</span><span class="ivar">@age</span><span class="iv">}</span><span class="str">)"</span>
+  <span class="kw">end</span>
+<span class="kw">end</span>
+
+alice = <span class="type">Person</span>.<span class="fn">new</span>(<span class="str">"Alice"</span>, <span class="num">25</span>)
+<span class="fn">puts</span> alice.<span class="fn">introduce</span>
+alice.<span class="fn">age=</span>(<span class="num">26</span>)
+<span class="fn">puts</span> alice.<span class="fn">to_s</span></code></pre>
+          </div>
+
+          <div class="rb-output">
+            <div class="rb-output-label">Output</div>
+            <pre>Hi, I'm Alice and I'm 25 years old.
+Alice (26)</pre>
+          </div>
+
+          <div class="rb-concept">
+            <h4>Inheritance &mdash; <code>super</code></h4>
+            <p>Use <code>&lt;</code> to inherit. <code>super</code> forwards to the parent class.</p>
+          </div>
+
+          <div class="rb-code-block">
+            <div class="rb-code-header">
+              <span class="rb-code-lang">Ruby</span>
+              <button type="button" class="rb-code-copy" aria-label="Copy code" data-code='class Animal
+  attr_reader :name
+
+  def initialize(name)
+    @name = name
+  end
+
+  def speak
+    "..."
+  end
+end
+
+class Dog < Animal
+  def speak
+    "#{@name} says woof!"
+  end
+end
+
+class Cat < Animal
+  def speak
+    "#{@name} says meow!"
+  end
+end
+
+puts Dog.new("Rex").speak
+puts Cat.new("Milo").speak'><i class="fas fa-copy"></i> Copy</button>
+            </div>
+            <pre><code><span class="kw">class</span> <span class="type">Animal</span>
+  <span class="fn">attr_reader</span> <span class="sym">:name</span>
+
+  <span class="kw">def</span> <span class="fn">initialize</span>(<span class="param">name</span>)
+    <span class="ivar">@name</span> = name
+  <span class="kw">end</span>
+
+  <span class="kw">def</span> <span class="fn">speak</span>
+    <span class="str">"..."</span>
+  <span class="kw">end</span>
+<span class="kw">end</span>
+
+<span class="kw">class</span> <span class="type">Dog</span> <span class="op">&lt;</span> <span class="type">Animal</span>
+  <span class="kw">def</span> <span class="fn">speak</span>
+    <span class="str">"</span><span class="iv">#{</span><span class="ivar">@name</span><span class="iv">}</span><span class="str"> says woof!"</span>
+  <span class="kw">end</span>
+<span class="kw">end</span>
+
+<span class="kw">class</span> <span class="type">Cat</span> <span class="op">&lt;</span> <span class="type">Animal</span>
+  <span class="kw">def</span> <span class="fn">speak</span>
+    <span class="str">"</span><span class="iv">#{</span><span class="ivar">@name</span><span class="iv">}</span><span class="str"> says meow!"</span>
+  <span class="kw">end</span>
+<span class="kw">end</span>
+
+<span class="fn">puts</span> <span class="type">Dog</span>.<span class="fn">new</span>(<span class="str">"Rex"</span>).<span class="fn">speak</span>
+<span class="fn">puts</span> <span class="type">Cat</span>.<span class="fn">new</span>(<span class="str">"Milo"</span>).<span class="fn">speak</span></code></pre>
+          </div>
+
+          <div class="rb-output">
+            <div class="rb-output-label">Output</div>
+            <pre>Rex says woof!
+Milo says meow!</pre>
+          </div>
+
+          <div class="rb-concept">
+            <h4>Modules &mdash; Mixins &amp; Namespacing</h4>
+            <p><code>include</code> mixes module methods into a class (as instance methods); <code>extend</code> adds them as class methods. <code>Comparable</code> and <code>Enumerable</code> are famous built-in mixins.</p>
+          </div>
+
+          <div class="rb-code-block">
+            <div class="rb-code-header">
+              <span class="rb-code-lang">Ruby</span>
+              <button type="button" class="rb-code-copy" aria-label="Copy code" data-code='module MathHelpers
+  def squared
+    self * self
+  end
+end
+
+class Integer
+  include MathHelpers
+end
+
+puts 7.squared       # 49
+
+module Greeting
+  def hello
+    "Hello from Greeting!"
+  end
+end
+
+class Greeter
+  include Greeting
+end
+
+puts Greeter.new.hello'><i class="fas fa-copy"></i> Copy</button>
+            </div>
+            <pre><code><span class="kw">module</span> <span class="type">MathHelpers</span>
+  <span class="kw">def</span> <span class="fn">squared</span>
+    self * self
+  <span class="kw">end</span>
+<span class="kw">end</span>
+
+<span class="kw">class</span> <span class="type">Integer</span>
+  <span class="kw">include</span> <span class="type">MathHelpers</span>
+<span class="kw">end</span>
+
+<span class="fn">puts</span> <span class="num">7</span>.<span class="fn">squared</span>       <span class="cmt"># 49</span>
+
+<span class="kw">module</span> <span class="type">Greeting</span>
+  <span class="kw">def</span> <span class="fn">hello</span>
+    <span class="str">"Hello from Greeting!"</span>
+  <span class="kw">end</span>
+<span class="kw">end</span>
+
+<span class="kw">class</span> <span class="type">Greeter</span>
+  <span class="kw">include</span> <span class="type">Greeting</span>
+<span class="kw">end</span>
+
+<span class="fn">puts</span> <span class="type">Greeter</span>.<span class="fn">new</span>.<span class="fn">hello</span></code></pre>
+          </div>
+
+          <!-- Exercise -->
+          <div class="rb-exercise" id="exercise-oop">
+            <div class="rb-exercise-title">
+              Practice: Classes &amp; Modules
+            </div>
+            <ol>
+              <li>Define a <code>BankAccount</code> with <code>balance</code>, <code>deposit</code>, and <code>withdraw</code></li>
+              <li>Prevent withdrawing more than the balance (return <code>false</code>)</li>
+              <li>Add a <code>SavingsAccount &lt; BankAccount</code> that adds <code>interest</code></li>
+            </ol>
+            <button type="button" class="rb-exercise-toggle" aria-expanded="false" aria-controls="solution-oop">Show Solution</button>
+            <div class="rb-exercise-solution" id="solution-oop">
+              <div class="rb-code-block">
+                <div class="rb-code-header">
+                  <span class="rb-code-lang">Ruby</span>
+                  <button type="button" class="rb-code-copy" aria-label="Copy code" data-code='class BankAccount
+  attr_reader :balance
+
+  def initialize(balance = 0)
+    @balance = balance
+  end
+
+  def deposit(amount)
+    @balance += amount
+  end
+
+  def withdraw(amount)
+    return false if amount > @balance
+    @balance -= amount
+    true
+  end
+end
+
+class SavingsAccount < BankAccount
+  def interest
+    @balance += @balance * 0.05
+  end
+end
+
+account = SavingsAccount.new(100)
+account.deposit(50)
+puts account.withdraw(200)   # false
+puts account.withdraw(20)    # true
+account.interest
+puts account.balance         # 136.5'><i class="fas fa-copy"></i> Copy</button>
+                </div>
+                <pre><code><span class="kw">class</span> <span class="type">BankAccount</span>
+  <span class="fn">attr_reader</span> <span class="sym">:balance</span>
+
+  <span class="kw">def</span> <span class="fn">initialize</span>(<span class="param">balance</span> = <span class="num">0</span>)
+    <span class="ivar">@balance</span> = balance
+  <span class="kw">end</span>
+
+  <span class="kw">def</span> <span class="fn">deposit</span>(<span class="param">amount</span>)
+    <span class="ivar">@balance</span> += amount
+  <span class="kw">end</span>
+
+  <span class="kw">def</span> <span class="fn">withdraw</span>(<span class="param">amount</span>)
+    <span class="kw">return</span> <span class="bool">false</span> <span class="kw">if</span> amount &gt; <span class="ivar">@balance</span>
+    <span class="ivar">@balance</span> -= amount
+    <span class="bool">true</span>
+  <span class="kw">end</span>
+<span class="kw">end</span>
+
+<span class="kw">class</span> <span class="type">SavingsAccount</span> <span class="op">&lt;</span> <span class="type">BankAccount</span>
+  <span class="kw">def</span> <span class="fn">interest</span>
+    <span class="ivar">@balance</span> += <span class="ivar">@balance</span> * <span class="num">0.05</span>
+  <span class="kw">end</span>
+<span class="kw">end</span>
+
+account = <span class="type">SavingsAccount</span>.<span class="fn">new</span>(<span class="num">100</span>)
+account.<span class="fn">deposit</span>(<span class="num">50</span>)
+<span class="fn">puts</span> account.<span class="fn">withdraw</span>(<span class="num">200</span>)   <span class="cmt"># false</span>
+<span class="fn">puts</span> account.<span class="fn">withdraw</span>(<span class="num">20</span>)    <span class="cmt"># true</span>
+account.<span class="fn">interest</span>
+<span class="fn">puts</span> account.<span class="fn">balance</span>         <span class="cmt"># 136.5</span></code></pre>
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <!-- ════════════════════════════════════════
+             MODULE 8: ERROR HANDLING
+             ════════════════════════════════════════ -->
+        <article class="rb-lesson" id="topic-errors" data-topic="7">
+          <div class="rb-lesson-header">
+            <span class="rb-lesson-number">08</span>
+            <h3>Error Handling</h3>
+          </div>
+
+          <p>
+            Ruby uses <code>begin / rescue / ensure</code> to handle exceptions gracefully instead of crashing. Every error is an object &mdash; <code>StandardError</code> and its subclasses.
+          </p>
+
+          <div class="rb-code-block">
+            <div class="rb-code-header">
+              <span class="rb-code-lang">Ruby</span>
+              <button type="button" class="rb-code-copy" aria-label="Copy code" data-code='def safe_divide(a, b)
+  begin
+    a / b
+  rescue ZeroDivisionError => e
+    "Cannot divide by zero: #{e.message}"
+  rescue NoMethodError
+    "Invalid operands"
+  ensure
+    puts "Division attempt finished"
+  end
+end
+
+puts safe_divide(10, 2)
+puts safe_divide(10, 0)'><i class="fas fa-copy"></i> Copy</button>
+            </div>
+            <pre><code><span class="kw">def</span> <span class="fn">safe_divide</span>(<span class="param">a</span>, <span class="param">b</span>)
+  <span class="kw">begin</span>
+    a / b
+  <span class="kw">rescue</span> <span class="type">ZeroDivisionError</span> =&gt; e
+    <span class="str">"Cannot divide by zero: </span><span class="iv">#{</span>e.<span class="fn">message</span><span class="iv">}</span><span class="str">"</span>
+  <span class="kw">rescue</span> <span class="type">NoMethodError</span>
+    <span class="str">"Invalid operands"</span>
+  <span class="kw">ensure</span>
+    <span class="fn">puts</span> <span class="str">"Division attempt finished"</span>
+  <span class="kw">end</span>
+<span class="kw">end</span>
+
+<span class="fn">puts</span> <span class="fn">safe_divide</span>(<span class="num">10</span>, <span class="num">2</span>)
+<span class="fn">puts</span> <span class="fn">safe_divide</span>(<span class="num">10</span>, <span class="num">0</span>)</code></pre>
+          </div>
+
+          <div class="rb-output">
+            <div class="rb-output-label">Output</div>
+            <pre>Division attempt finished
+5
+Division attempt finished
+Cannot divide by zero: divided by 0</pre>
+          </div>
+
+          <div class="rb-concept">
+            <h4>Rescue Modifier &amp; Custom Exceptions</h4>
+            <p>Use the one-line <code>rescue</code> modifier for quick fallbacks, and subclass <code>StandardError</code> for domain-specific errors.</p>
+          </div>
+
+          <div class="rb-code-block">
+            <div class="rb-code-header">
+              <span class="rb-code-lang">Ruby</span>
+              <button type="button" class="rb-code-copy" aria-label="Copy code" data-code='risk = 0
+result = 100 / risk rescue "safe fallback"
+puts result        # safe fallback
+
+class InsufficientFundsError < StandardError; end
+
+def withdraw(balance, amount)
+  raise InsufficientFundsError, "Only $#{balance} available" if amount > balance
+  balance - amount
+end
+
+begin
+  withdraw(50, 200)
+rescue InsufficientFundsError => e
+  puts "Error: #{e.message}"
+end'><i class="fas fa-copy"></i> Copy</button>
+            </div>
+            <pre><code>risk = <span class="num">0</span>
+result = <span class="num">100</span> / risk <span class="kw">rescue</span> <span class="str">"safe fallback"</span>
+<span class="fn">puts</span> result        <span class="cmt"># safe fallback</span>
+
+<span class="kw">class</span> <span class="type">InsufficientFundsError</span> <span class="op">&lt;</span> <span class="type">StandardError</span>; <span class="kw">end</span>
+
+<span class="kw">def</span> <span class="fn">withdraw</span>(<span class="param">balance</span>, <span class="param">amount</span>)
+  <span class="kw">raise</span> <span class="type">InsufficientFundsError</span>, <span class="str">"Only $</span><span class="iv">#{</span>balance<span class="iv">}</span><span class="str"> available"</span> <span class="kw">if</span> amount &gt; balance
+  balance - amount
+<span class="kw">end</span>
+
+<span class="kw">begin</span>
+  <span class="fn">withdraw</span>(<span class="num">50</span>, <span class="num">200</span>)
+<span class="kw">rescue</span> <span class="type">InsufficientFundsError</span> =&gt; e
+  <span class="fn">puts</span> <span class="str">"Error: </span><span class="iv">#{</span>e.<span class="fn">message</span><span class="iv">}</span><span class="str">"</span>
+<span class="kw">end</span></code></pre>
+          </div>
+
+          <div class="rb-output">
+            <div class="rb-output-label">Output</div>
+            <pre>safe fallback
+Error: Only $50 available</pre>
+          </div>
+
+          <div class="rb-table-wrap">
+            <table class="rb-table" aria-label="Common Ruby exceptions">
+              <thead>
+                <tr>
+                  <th scope="col">Exception</th>
+                  <th scope="col">When it happens</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><td><code>ZeroDivisionError</code></td><td>Dividing by zero</td></tr>
+                <tr><td><code>NoMethodError</code></td><td>Calling a method that doesn't exist</td></tr>
+                <tr><td><code>ArgumentError</code></td><td>Wrong number of arguments</td></tr>
+                <tr><td><code>TypeError</code></td><td>Operation on incompatible types</td></tr>
+                <tr><td><code>KeyError</code></td><td>Hash key not found</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Exercise -->
+          <div class="rb-exercise" id="exercise-errors">
+            <div class="rb-exercise-title">
+              Practice: Error Handling
+            </div>
+            <ol>
+              <li>Write <code>parse_int(s)</code> that returns <code>nil</code> instead of raising on bad input</li>
+              <li>Rescue a <code>KeyError</code> when a hash key is missing</li>
+              <li>Define a custom <code>ValidationError</code> and raise it for empty names</li>
+            </ol>
+            <button type="button" class="rb-exercise-toggle" aria-expanded="false" aria-controls="solution-errors">Show Solution</button>
+            <div class="rb-exercise-solution" id="solution-errors">
+              <div class="rb-code-block">
+                <div class="rb-code-header">
+                  <span class="rb-code-lang">Ruby</span>
+                  <button type="button" class="rb-code-copy" aria-label="Copy code" data-code='def parse_int(s)
+  Integer(s) rescue nil
+end
+
+puts parse_int("42")    # 42
+puts parse_int("abc")   # nil
+
+config = { port: 3000 }
+begin
+  puts config.fetch(:host)
+rescue KeyError
+  puts "Missing key :host"
+end
+
+class ValidationError < StandardError; end
+
+def register(name)
+  raise ValidationError, "Name cannot be empty" if name.to_s.strip.empty?
+  "Welcome, #{name}!"
+end
+
+begin
+  register("")
+rescue ValidationError => e
+  puts "Error: #{e.message}"
+end'><i class="fas fa-copy"></i> Copy</button>
+                </div>
+                <pre><code><span class="kw">def</span> <span class="fn">parse_int</span>(<span class="param">s</span>)
+  <span class="type">Integer</span>(s) <span class="kw">rescue</span> <span class="bool">nil</span>
+<span class="kw">end</span>
+
+<span class="fn">puts</span> <span class="fn">parse_int</span>(<span class="str">"42"</span>)    <span class="cmt"># 42</span>
+<span class="fn">puts</span> <span class="fn">parse_int</span>(<span class="str">"abc"</span>)   <span class="cmt"># nil</span>
+
+config = { <span class="sym">port</span>: <span class="num">3000</span> }
+<span class="kw">begin</span>
+  <span class="fn">puts</span> config.<span class="fn">fetch</span>(<span class="sym">:host</span>)
+<span class="kw">rescue</span> <span class="type">KeyError</span>
+  <span class="fn">puts</span> <span class="str">"Missing key :host"</span>
+<span class="kw">end</span>
+
+<span class="kw">class</span> <span class="type">ValidationError</span> <span class="op">&lt;</span> <span class="type">StandardError</span>; <span class="kw">end</span>
+
+<span class="kw">def</span> <span class="fn">register</span>(<span class="param">name</span>)
+  <span class="kw">raise</span> <span class="type">ValidationError</span>, <span class="str">"Name cannot be empty"</span> <span class="kw">if</span> name.<span class="fn">to_s</span>.<span class="fn">strip</span>.<span class="fn">empty?</span>
+  <span class="str">"Welcome, </span><span class="iv">#{</span>name<span class="iv">}</span><span class="str">!"</span>
+<span class="kw">end</span>
+
+<span class="kw">begin</span>
+  <span class="fn">register</span>(<span class="str">""</span>)
+<span class="kw">rescue</span> <span class="type">ValidationError</span> =&gt; e
+  <span class="fn">puts</span> <span class="str">"Error: </span><span class="iv">#{</span>e.<span class="fn">message</span><span class="iv">}</span><span class="str">"</span>
+<span class="kw">end</span></code></pre>
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <!-- ════════════════════════════════════════
+             MODULE 9: GEMS & INTRO TO RAILS
+             ════════════════════════════════════════ -->
+        <div class="rb-divider">
+          <span class="rb-divider-inner">Next Module</span>
+        </div>
+
+        <article class="rb-lesson" id="topic-gems-rails" data-topic="8">
+          <div class="rb-lesson-header">
+            <span class="rb-lesson-number">09</span>
+            <h3>Gems &amp; Intro to Rails</h3>
+          </div>
+
+          <p>
+            Gems are Ruby's packages &mdash; installable libraries with <code>gem install</code>. <strong>Bundler</strong> manages them per project via a <code>Gemfile</code>.
+          </p>
+
+          <div class="rb-code-block">
+            <div class="rb-code-header">
+              <span class="rb-code-lang">Bash</span>
+              <button type="button" class="rb-code-copy" aria-label="Copy code" data-code="gem install rails        # install a gem
+gem list                  # list installed gems
+gem search json           # search the gem registry"><i class="fas fa-copy"></i> Copy</button>
+            </div>
+            <pre><code>gem install rails        <span class="cmt"># install a gem</span>
+gem list                  <span class="cmt"># list installed gems</span>
+gem search json           <span class="cmt"># search the gem registry</span></code></pre>
+          </div>
+
+          <div class="rb-concept">
+            <h4>Bundler &amp; the Gemfile</h4>
+            <p>Declare dependencies in a <code>Gemfile</code>, then run <code>bundle install</code> to lock them into a <code>Gemfile.lock</code> for reproducible builds.</p>
+          </div>
+
+          <div class="rb-code-block">
+            <div class="rb-code-header">
+              <span class="rb-code-lang">Gemfile</span>
+              <button type="button" class="rb-code-copy" aria-label="Copy code" data-code='source "https://rubygems.org"
+
+gem "rails", "~> 7.1"
+gem "pg"
+gem "puma"
+gem "nokogiri", group: :scraping
+
+group :development, :test do
+  gem "rspec"
+end'><i class="fas fa-copy"></i> Copy</button>
+            </div>
+            <pre><code>source <span class="str">"https://rubygems.org"</span>
+
+gem <span class="str">"rails"</span>, <span class="str">"~&gt; 7.1"</span>
+gem <span class="str">"pg"</span>
+gem <span class="str">"puma"</span>
+gem <span class="str">"nokogiri"</span>, <span class="sym">group</span>: <span class="sym">:scraping</span>
+
+group <span class="sym">:development</span>, <span class="sym">:test</span> <span class="kw">do</span>
+  gem <span class="str">"rspec"</span>
+<span class="kw">end</span></code></pre>
+          </div>
+
+          <div class="rb-table-wrap">
+            <table class="rb-table" aria-label="Popular Ruby gems">
+              <thead>
+                <tr>
+                  <th scope="col">Gem</th>
+                  <th scope="col">Purpose</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><td><code>rails</code></td><td>Full-stack web framework (MVC)</td></tr>
+                <tr><td><code>sinatra</code></td><td>Lightweight web DSL</td></tr>
+                <tr><td><code>nokogiri</code></td><td>HTML/XML parsing</td></tr>
+                <tr><td><code>json</code></td><td>JSON parsing &amp; generation</td></tr>
+                <tr><td><code>rspec</code></td><td>Behavior-driven testing</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="rb-concept">
+            <h4>Intro to Ruby on Rails</h4>
+            <p>Rails is an MVC web framework built on Ruby. It follows <strong>Convention over Configuration</strong> and <strong>Don't Repeat Yourself</strong>. Requests flow: Router &rarr; Controller &rarr; Model &rarr; View.</p>
+          </div>
+
+          <div class="rb-code-block">
+            <div class="rb-code-header">
+              <span class="rb-code-lang">Bash</span>
+              <button type="button" class="rb-code-copy" aria-label="Copy code" data-code="rails new blog
+cd blog
+rails generate scaffold Article title:string body:text
+rails db:migrate
+rails server   # http://localhost:3000"><i class="fas fa-copy"></i> Copy</button>
+            </div>
+            <pre><code>rails new blog
+cd blog
+rails generate scaffold Article title:string body:text
+rails db:migrate
+rails server   <span class="cmt"># http://localhost:3000</span></code></pre>
+          </div>
+
+          <div class="rb-concept">
+            <h4>The MVC Pattern</h4>
+            <ul>
+              <li><strong>Model</strong> &mdash; data &amp; business logic (e.g. <code>Article</code>)</li>
+              <li><strong>View</strong> &mdash; HTML templates (ERB files)</li>
+              <li><strong>Controller</strong> &mdash; routes requests, binds model to view</li>
+            </ul>
+          </div>
+
+          <div class="rb-callout">
+            <p>Rails gives you everything to ship a web app fast &mdash; routing, ORM (ActiveRecord), migrations, templating, and asset handling. Learn Ruby first, then Rails makes sense.</p>
+          </div>
+
+          <!-- Exercise -->
+          <div class="rb-exercise" id="exercise-gems-rails">
+            <div class="rb-exercise-title">
+              Practice: Gems &amp; Rails
+            </div>
+            <ol>
+              <li>Create a <code>Gemfile</code> with <code>sinatra</code> and <code>json</code></li>
+              <li>Write a tiny Sinatra app returning <code>{"hello":"world"}</code></li>
+              <li>Sketch the flow of a Rails request through MVC</li>
+            </ol>
+            <button type="button" class="rb-exercise-toggle" aria-expanded="false" aria-controls="solution-gems-rails">Show Solution</button>
+            <div class="rb-exercise-solution" id="solution-gems-rails">
+              <div class="rb-code-block">
+                <div class="rb-code-header">
+                  <span class="rb-code-lang">Gemfile</span>
+                  <button type="button" class="rb-code-copy" aria-label="Copy code" data-code='source "https://rubygems.org"
+gem "sinatra"
+gem "json"'><i class="fas fa-copy"></i> Copy</button>
+                </div>
+                <pre><code>source <span class="str">"https://rubygems.org"</span>
+gem <span class="str">"sinatra"</span>
+gem <span class="str">"json"</span></code></pre>
+              </div>
+              <div class="rb-code-block">
+                <div class="rb-code-header">
+                  <span class="rb-code-lang">Ruby</span>
+                  <button type="button" class="rb-code-copy" aria-label="Copy code" data-code='# app.rb
+require "sinatra"
+require "json"
+
+get "/" do
+  content_type :json
+  { hello: "world" }.to_json
+end
+
+# Run: ruby app.rb'><i class="fas fa-copy"></i> Copy</button>
+                </div>
+                <pre><code><span class="cmt"># app.rb</span>
+<span class="kw">require</span> <span class="str">"sinatra"</span>
+<span class="kw">require</span> <span class="str">"json"</span>
+
+<span class="kw">get</span> <span class="str">"/"</span> <span class="kw">do</span>
+  <span class="fn">content_type</span> <span class="sym">:json</span>
+  { <span class="sym">hello</span>: <span class="str">"world"</span> }.<span class="fn">to_json</span>
+<span class="kw">end</span>
+
+<span class="cmt"># Run: ruby app.rb</span></code></pre>
+              </div>
+            </div>
+          </div>
+        </article>
+
+      </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer class="rb-footer">
+      <p>Try it yourself &mdash; open the <a href="/pages/editors/ruby-editor/ruby-editor.html" target="_blank" rel="noopener noreferrer">Ruby Editor &rarr;</a></p>
+      <p>Back to <a href="/pages/learning/languages.html">Programming Languages</a></p>
+    </footer>
+  </main>
+
+  <script src="/auth.js"></script>
+  <script src="/theme.js"></script>
+  <script src="/script.js"></script>
+  <script src="ruby-learning.js"></script>
+</body>
+</html>

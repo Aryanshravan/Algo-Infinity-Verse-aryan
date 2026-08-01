@@ -180,27 +180,58 @@ function fwGenSteps(graph) {
     }
   }
 
-  // Check negative cycle
+  // Check negative cycle — Phase 1: diagonal check
   let negCycleNodes = [];
+  let negCycleEdges = [];
   let hasNegCycle = false;
   for (let i = 0; i < V; i++) {
     if (dist[i][i] < 0) {
       hasNegCycle = true;
-      negCycleNodes.push(i);
+      if (negCycleNodes.indexOf(i) === -1) negCycleNodes.push(i);
     }
   }
 
+  // Phase 2: verification pass — run one additional relaxation sweep
+  // If any dist[i][j] can still be reduced, vertices i and j are on or
+  // reachable from a negative cycle (catches cycles missed by diagonal check)
+  let negAffected = new Set(negCycleNodes);
+  for (let k = 0; k < V; k++) {
+    for (let i = 0; i < V; i++) {
+      for (let j = 0; j < V; j++) {
+        if (dist[i][k] !== INF && dist[k][j] !== INF) {
+          let nd = dist[i][k] + dist[k][j];
+          if (nd < dist[i][j]) {
+            hasNegCycle = true;
+            negAffected.add(i);
+            negAffected.add(j);
+            negAffected.add(k);
+          }
+        }
+      }
+    }
+  }
+  negCycleNodes = Array.from(negAffected);
+
+  // Identify edges involved in negative cycles
   if (hasNegCycle) {
+    for (let idx = 0; idx < edges.length; idx++) {
+      let e = edges[idx];
+      if (negAffected.has(e.u) && negAffected.has(e.v)) {
+        negCycleEdges.push({ u: e.u, v: e.v });
+      }
+    }
+
     steps.push({
       type: 'neg-cycle',
       dist: fwCloneDist(dist),
       k: -1,
       i: -1,
       j: -1,
-      passStr: 'Done',
+      passStr: 'Verification',
       negCycle: true,
       negCycleNodes: negCycleNodes.slice(),
-      msg: '⚠️ Negative cycle detected! Diagonal element dist[i][i] < 0.',
+      negCycleEdges: negCycleEdges.slice(),
+      msg: '⚠️ Negative cycle detected! Affected vertices: {' + negCycleNodes.join(', ') + '} — shortest paths are undefined for these nodes.',
     });
   }
 
@@ -213,8 +244,9 @@ function fwGenSteps(graph) {
     passStr: 'Done',
     negCycle: hasNegCycle,
     negCycleNodes: negCycleNodes.slice(),
+    negCycleEdges: negCycleEdges.slice(),
     msg: hasNegCycle
-      ? '⚠️ Finished, but negative cycles exist.'
+      ? '⚠️ Finished, but negative cycles exist. Affected vertices: {' + negCycleNodes.join(', ') + '}.'
       : '✅ Floyd-Warshall complete. All pairs shortest paths found.',
   });
 
@@ -255,11 +287,15 @@ function fwDraw(step) {
     let isPath2 = e.u === k && e.v === j;
     let isDirect = e.u === i && e.v === j;
     let isNeg = e.w < 0;
+    let isNegCycleEdge = step.negCycleEdges && step.negCycleEdges.some(ce => ce.u === e.u && ce.v === e.v);
 
     let strokeColor = 'rgba(100,116,139,0.35)';
     let lineWidth = 1.5;
 
-    if (isPath1 || isPath2) {
+    if (isNegCycleEdge) {
+      strokeColor = '#ef4444'; // Bright red for negative cycle edges
+      lineWidth = 3.5;
+    } else if (isPath1 || isPath2) {
       strokeColor = '#a855f7'; // purple for path through k
       lineWidth = 2.5;
     } else if (isDirect) {

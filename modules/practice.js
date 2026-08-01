@@ -159,12 +159,12 @@ function initPracticeSection() {
   });
 }
 
-function getFilteredProblems() {
+async function getFilteredProblems() {
   const userProgress = window.userProgress || {};
   const practiceProblems = window.practiceProblems || [];
   let filtered = practiceProblems;
   if (currentSearch && window.dsaSearchEngine) {
-    filtered = window.dsaSearchEngine.search(currentSearch);
+    filtered = await window.dsaSearchEngine.search(currentSearch);
   } else if (currentSearch) {
     const searchLower = currentSearch.toLowerCase();
     filtered = filtered.filter(
@@ -174,21 +174,23 @@ function getFilteredProblems() {
     );
   }
   if (currentFilter !== 'all') {
-    if (currentFilter === 'favorites') filtered = filtered.filter(p => userProgress.favoriteProblems?.includes(p.id));
-    else filtered = filtered.filter(p => p.difficulty === currentFilter);
+    if (currentFilter === 'favorites')
+      filtered = filtered.filter((p) => userProgress.favoriteProblems?.includes(p.id));
+    else filtered = filtered.filter((p) => p.difficulty === currentFilter);
   }
   // Topic filter
   if (currentTopic !== 'all') {
-    filtered = filtered.filter(p =>
-      p.category === currentTopic ||
-      p.tags?.some(tag => tag.toLowerCase().includes(currentTopic.toLowerCase()))
+    filtered = filtered.filter(
+      (p) =>
+        p.category === currentTopic ||
+        p.tags?.some((tag) => tag.toLowerCase().includes(currentTopic.toLowerCase()))
     );
   }
   return filtered;
 }
 
-function renderProblems() {
-  const filtered = getFilteredProblems();
+async function renderProblems() {
+  const filtered = await getFilteredProblems();
   const totalProblems = filtered.length;
 
   const visibleCountEl = document.getElementById('visible-count');
@@ -235,14 +237,15 @@ function renderProblemCardHtml(problem) {
 
   let isRec = false,
     recLabel = '';
+  const problemDifficulty = (problem.difficulty || '').toLowerCase();
   if (cpType === 'brute-force first') {
-    if (problem.difficulty === 'easy' || problem.tags.includes('Arrays')) {
+    if (problemDifficulty === 'easy' || problem.tags.includes('Arrays')) {
       isRec = true;
       recLabel = 'Plan First!';
     }
   } else if (cpType === 'over-optimizer') {
     if (
-      problem.difficulty === 'hard' ||
+      problemDifficulty === 'hard' ||
       problem.tags.includes('Dynamic Programming') ||
       problem.tags.includes('Hash Table')
     ) {
@@ -250,7 +253,7 @@ function renderProblemCardHtml(problem) {
       recLabel = 'Optimize Metrics';
     }
   } else if (cpType === 'slow but accurate') {
-    if (problem.difficulty === 'medium') {
+    if (problemDifficulty === 'medium') {
       isRec = true;
       recLabel = 'Speed Practice';
     }

@@ -1,0 +1,213 @@
+body {
+    margin: 0;
+    min-height: 100vh;
+    font-family: 'Courier New', monospace;
+
+    background:
+        radial-gradient(circle at top left, #2b174d 0%, transparent 35%),
+        radial-gradient(circle at bottom right, #063b4a 0%, transparent 40%),
+        linear-gradient(135deg, #080d1f, #111a35);
+
+    color: #ffffff;
+
+}
+
+h1 {
+    text-align: center;
+}
+
+.container {
+
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    gap:40px;
+
+    margin-top:40px;
+
+}
+
+.visualizer-card,
+.container,
+.exchange-area {
+    background: rgba(25, 35, 60, 0.85);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255,255,255,0.08);
+    box-shadow: 0 15px 40px rgba(0,0,0,0.4);
+}
+
+
+.visualizer-card,
+.exchange-area {
+    background: rgba(25, 35, 60, 0.85);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255,255,255,0.08);
+    box-shadow: 0 15px 40px rgba(0,0,0,0.4);
+}
+
+.card,
+.channel,
+.calculation,
+.secret,
+.eve {
+
+    background: rgba(15, 23, 45, 0.85);
+
+    padding:20px;
+
+    border-radius:15px;
+
+    border:1px solid rgba(255,255,255,0.08);
+
+    box-shadow:
+    0 10px 25px rgba(0,0,0,0.3);
+
+}
+
+.card:first-child {
+    border: 1px solid #ff3ea5;
+}
+
+
+.channel {
+    border:1px dashed #00e6a8;
+}
+
+
+.card:last-child {
+    border:1px solid #3685ff;
+}
+
+
+h1,h2 {
+    letter-spacing:1px;
+}
+
+
+button {
+
+    background: linear-gradient(
+        135deg,
+        #3b82f6,
+        #8b5cf6
+    );
+
+    color:white;
+
+    box-shadow:
+    0 8px 20px rgba(59,130,246,0.4);
+
+}
+
+.card {
+
+    width:250px;
+
+}
+
+
+.channel {
+
+    width:250px;
+
+}
+
+
+#packet {
+
+    font-size:35px;
+
+    opacity:0;
+
+}
+
+
+.move {
+
+animation:
+moveKey 2s;
+
+}
+
+
+@keyframes moveKey {
+
+
+0% {
+
+transform:translateX(-100px);
+
+opacity:0;
+
+}
+
+50% {
+
+opacity:1;
+
+}
+
+
+100% {
+
+transform:translateX(100px);
+
+opacity:0;
+
+}
+
+
+}
+
+
+
+button {
+
+
+padding:12px 25px;
+
+margin:20px;
+
+border:none;
+
+border-radius:10px;
+
+cursor:pointer;
+
+font-size:16px;
+
+}
+
+
+.secret {
+
+margin:30px auto;
+
+width:300px;
+
+}
+
+
+.eve {
+
+    margin:30px auto;
+
+    border:2px dashed #ff4d6d;
+
+    background:
+    rgba(255,77,109,0.12);
+
+}
+
+
+@media(max-width:700px){
+
+
+.container{
+
+flex-direction:column;
+
+}
+
+
+}

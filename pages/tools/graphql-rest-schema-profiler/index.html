@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GraphQL & REST API Schema Performance Profiler — Algo Infinity Verse</title>
+  <meta name="description" content="Benchmark API query performance, evaluate N+1 query bottlenecks, REST vs GraphQL over-fetching, payload bloat, and cache hit ratios." />
+  
+  <link rel="stylesheet" href="../../../styles.css" />
+  <link rel="stylesheet" href="style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+
+  <script>
+    (function() {
+      try {
+        var t = localStorage.getItem('theme');
+        var p = window.matchMedia('(prefers-color-scheme: light)').matches;
+        var theme = t || (p ? 'light' : 'dark');
+        if (theme === 'light') document.documentElement.classList.add('light-mode');
+      } catch (e) {}
+    })();
+  </script>
+</head>
+<body data-page="api-profiler">
+
+  <header class="grp-header">
+    <div class="grp-header-container">
+      <a href="../tools.html" class="grp-back-btn">
+        <i class="fas fa-arrow-left"></i>
+        <span>Developer Tools</span>
+      </a>
+      <div class="grp-title-area">
+        <h1><i class="fas fa-network-wired"></i> GraphQL &amp; REST Schema Performance Profiler</h1>
+        <p>Detect N+1 Queries, Benchmark REST Over-fetching, Payload Size &amp; Database Call Counts</p>
+      </div>
+      <div class="grp-header-actions">
+        <button id="themeToggleBtn" class="grp-icon-btn" title="Toggle Theme">
+          <i class="fas fa-moon"></i>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="grp-main">
+    <!-- TOOLBAR PRESETS & CONTROLS -->
+    <div class="grp-toolbar grp-card">
+      <div class="grp-toolbar-left">
+        <label><i class="fas fa-sliders"></i> Scenario Presets:</label>
+        <button class="grp-btn-preset active" data-preset="e-commerce">E-Commerce Product Feed (N+1 Risk)</button>
+        <button class="grp-btn-preset" data-preset="social">Social Media User Timeline</button>
+        <button class="grp-btn-preset" data-preset="blog">Blog Post Comments &amp; Authors</button>
+      </div>
+      <div class="grp-toolbar-right">
+        <label><i class="fas fa-database"></i> DB Cache Ratio:</label>
+        <input type="range" id="cacheHitSlider" min="0" max="100" value="20" class="grp-slider" />
+        <span id="cacheHitLabel" class="grp-slider-val">20%</span>
+      </div>
+    </div>
+
+    <!-- MAIN COMPARISON LAB GRID -->
+    <div class="grp-grid">
+      <!-- GRAPHQL SIDE -->
+      <div class="grp-card">
+        <div class="grp-card-header">
+          <h3><i class="fab fa-connectdevelop" style="color: #e535ab;"></i> GraphQL Query Workbench</h3>
+          <div class="grp-toggle-group">
+            <label><input type="checkbox" id="chkDataLoader" /> Enable DataLoader Batching</label>
+          </div>
+        </div>
+        <div class="grp-card-body">
+          <textarea id="gqlQueryInput" class="grp-code-area" spellcheck="false" placeholder="Enter GraphQL Query..."></textarea>
+          <div class="grp-metrics-box" id="gqlMetrics">
+            <div class="grp-metric"><span class="grp-m-val" id="gqlDbCalls">0</span><span class="grp-m-lbl">DB Queries</span></div>
+            <div class="grp-metric"><span class="grp-m-val" id="gqlPayload">0 KB</span><span class="grp-m-lbl">Payload Size</span></div>
+            <div class="grp-metric"><span class="grp-m-val" id="gqlLatency">0 ms</span><span class="grp-m-lbl">Latency</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- REST SIDE -->
+      <div class="grp-card">
+        <div class="grp-card-header">
+          <h3><i class="fas fa-server" style="color: #38bdf8;"></i> REST Endpoint Workbench</h3>
+          <span class="grp-tag">Over-fetching Analyzer</span>
+        </div>
+        <div class="grp-card-body">
+          <textarea id="restEndpointInput" class="grp-code-area" spellcheck="false" placeholder="Endpoints invoked..."></textarea>
+          <div class="grp-metrics-box" id="restMetrics">
+            <div class="grp-metric"><span class="grp-m-val" id="restRequests">0</span><span class="grp-m-lbl">HTTP Requests</span></div>
+            <div class="grp-metric"><span class="grp-m-val" id="restPayload">0 KB</span><span class="grp-m-lbl">Payload Size</span></div>
+            <div class="grp-metric"><span class="grp-m-val" id="restOverfetch">0%</span><span class="grp-m-lbl">Unused Data</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RUN PROFILER ACTION -->
+    <div class="grp-action-center">
+      <button id="btnRunProfiler" class="grp-btn-main"><i class="fas fa-bolt"></i> Execute Profiler &amp; Benchmark Schema</button>
+    </div>
+
+    <!-- PROFILER RESULTS & RECOMMENDATIONS -->
+    <div class="grp-results-grid">
+      <!-- N+1 QUERY VISUALIZER -->
+      <div class="grp-card">
+        <div class="grp-card-header">
+          <h3><i class="fas fa-tree"></i> Database Query Execution Breakdown</h3>
+          <span id="n1AlertBadge" class="grp-alert-badge">N+1 DETECTED</span>
+        </div>
+        <div class="grp-card-body">
+          <div id="queryExecutionTree" class="grp-tree-container"></div>
+        </div>
+      </div>
+
+      <!-- SCHEMA OPTIMIZATION RECOMMENDATIONS -->
+      <div class="grp-card">
+        <div class="grp-card-header">
+          <h3><i class="fas fa-lightbulb"></i> Actionable Schema Optimizations</h3>
+        </div>
+        <div class="grp-card-body">
+          <div id="recommendationsList" class="grp-recs-list"></div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script src="script.js" type="module"></script>
+</body>
+</html>

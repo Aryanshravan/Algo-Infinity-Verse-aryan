@@ -1,0 +1,461 @@
+/* ============================================================
+   LLM Multi-Head Attention & KV-Cache Memory Studio CSS
+   ============================================================ */
+
+:root {
+  --llm-bg-dark: #0b0f19;
+  --llm-card-bg-dark: rgba(21, 29, 46, 0.85);
+  --llm-border-dark: rgba(255, 255, 255, 0.1);
+  --llm-text-dark: #f1f5f9;
+  --llm-text-muted-dark: #94a3b8;
+
+  --llm-accent: #8b5cf6;
+  --llm-accent-hover: #7c3aed;
+  --llm-success: #10b981;
+  --llm-warning: #f59e0b;
+  --llm-danger: #ef4444;
+  --llm-blue: #3b82f6;
+
+  --llm-radius: 12px;
+  --llm-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+}
+
+.light-mode {
+  --llm-bg-dark: #f8fafc;
+  --llm-card-bg-dark: #ffffff;
+  --llm-border-dark: #e2e8f0;
+  --llm-text-dark: #0f172a;
+  --llm-text-muted-dark: #64748b;
+  --llm-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+}
+
+body[data-page="llm-studio"] {
+  margin: 0;
+  padding: 0;
+  background-color: var(--llm-bg-dark);
+  color: var(--llm-text-dark);
+  font-family: 'Inter', sans-serif;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* HEADER */
+.llm-header {
+  background: var(--llm-card-bg-dark);
+  border-bottom: 1px solid var(--llm-border-dark);
+  padding: 16px 24px;
+  backdrop-filter: blur(10px);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.llm-header-container {
+  max-width: 1600px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.llm-back-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--llm-text-muted-dark);
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 0.9rem;
+  padding: 8px 14px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.05);
+  transition: all 0.2s ease;
+}
+
+.llm-back-btn:hover {
+  color: var(--llm-text-dark);
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.llm-title-area h1 {
+  margin: 0;
+  font-size: 1.4rem;
+  font-family: 'Space Grotesk', sans-serif;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.llm-title-area p {
+  margin: 4px 0 0 0;
+  font-size: 0.85rem;
+  color: var(--llm-text-muted-dark);
+}
+
+.llm-icon-btn {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--llm-border-dark);
+  color: var(--llm-text-dark);
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.llm-icon-btn:hover { background: var(--llm-accent); color: #fff; }
+
+/* TOOLBAR */
+.llm-toolbar {
+  max-width: 1600px;
+  margin: 20px auto 0 auto;
+  padding: 0 24px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.llm-input-group, .llm-config-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.llm-input-group label, .llm-config-group label {
+  font-weight: 600;
+  font-size: 0.85rem;
+  color: var(--llm-text-muted-dark);
+}
+
+.llm-input, .llm-select {
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--llm-border-dark);
+  background: var(--llm-card-bg-dark);
+  color: var(--llm-text-dark);
+  font-family: inherit;
+  font-size: 0.85rem;
+}
+
+.llm-input { width: 280px; }
+
+/* BUTTONS */
+.llm-btn {
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  border: 1px solid var(--llm-border-dark);
+  background: var(--llm-card-bg-dark);
+  color: var(--llm-text-dark);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.llm-btn:hover { border-color: var(--llm-accent); color: var(--llm-accent); }
+.llm-btn-primary { background: var(--llm-accent); color: #fff; border-color: var(--llm-accent); }
+.llm-btn-primary:hover { background: var(--llm-accent-hover); }
+.llm-btn-success { background: var(--llm-success); color: #fff; border-color: var(--llm-success); }
+.llm-btn-sm { padding: 4px 10px; font-size: 0.75rem; }
+
+/* GRID LAYOUT */
+.llm-main {
+  max-width: 1600px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 20px 24px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.llm-grid {
+  display: grid;
+  grid-template-columns: 1fr 520px;
+  gap: 20px;
+}
+
+@media (max-width: 1100px) {
+  .llm-grid { grid-template-columns: 1fr; }
+}
+
+/* CARDS */
+.llm-card {
+  background: var(--llm-card-bg-dark);
+  border: 1px solid var(--llm-border-dark);
+  border-radius: var(--llm-radius);
+  box-shadow: var(--llm-shadow);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.llm-card-header {
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--llm-border-dark);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.llm-card-header h2, .llm-card-header h3 {
+  margin: 0;
+  font-size: 1.1rem;
+  font-family: 'Space Grotesk', sans-serif;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.llm-formula code {
+  font-family: 'JetBrains Mono', monospace;
+  background: rgba(139, 92, 246, 0.15);
+  color: var(--llm-accent);
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 0.8rem;
+}
+
+/* TOKEN CHIPS */
+.llm-tokens-bar {
+  padding: 16px 20px;
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  border-bottom: 1px solid var(--llm-border-dark);
+  background: rgba(0, 0, 0, 0.15);
+}
+
+.llm-chip {
+  padding: 4px 10px;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--llm-border-dark);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.8rem;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.llm-chip-id { color: var(--llm-text-muted-dark); font-size: 0.7rem; }
+
+/* HEATMAP GRID */
+.llm-heatmap-wrapper {
+  padding: 20px;
+  overflow-x: auto;
+  display: flex;
+  justify-content: center;
+}
+
+.llm-heatmap-table {
+  border-collapse: separate;
+  border-spacing: 4px;
+  font-size: 0.8rem;
+}
+
+.llm-heatmap-cell {
+  width: 44px;
+  height: 44px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 600;
+  font-size: 0.75rem;
+  color: #fff;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.llm-heatmap-cell:hover {
+  transform: scale(1.15);
+  box-shadow: 0 0 12px rgba(139, 92, 246, 0.6);
+  z-index: 10;
+}
+
+.llm-heatmap-header {
+  font-weight: 600;
+  font-family: 'JetBrains Mono', monospace;
+  color: var(--llm-text-muted-dark);
+  padding: 6px;
+  text-align: center;
+}
+
+.llm-hover-info {
+  padding: 12px 20px;
+  border-top: 1px solid var(--llm-border-dark);
+  background: rgba(0, 0, 0, 0.2);
+  font-size: 0.8rem;
+  color: var(--llm-text-muted-dark);
+}
+
+/* SIDE PANEL & TABS */
+.llm-side-panel {
+  display: flex;
+  flex-direction: column;
+  background: var(--llm-card-bg-dark);
+  border: 1px solid var(--llm-border-dark);
+  border-radius: var(--llm-radius);
+  height: 620px;
+  overflow: hidden;
+}
+
+.llm-tabs {
+  display: flex;
+  border-bottom: 1px solid var(--llm-border-dark);
+  background: rgba(0, 0, 0, 0.15);
+}
+
+.llm-tab-btn {
+  flex: 1;
+  padding: 12px 10px;
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: var(--llm-text-muted-dark);
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: all 0.2s;
+}
+
+.llm-tab-btn.active {
+  color: var(--llm-accent);
+  border-bottom-color: var(--llm-accent);
+  background: var(--llm-card-bg-dark);
+}
+
+.llm-tab-content {
+  display: none;
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+}
+
+.llm-tab-content.active { display: block; }
+
+/* VRAM STAT CARDS */
+.llm-vram-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.llm-stat-box {
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid var(--llm-border-dark);
+  border-radius: 8px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.llm-stat-label { font-size: 0.75rem; color: var(--llm-text-muted-dark); }
+.llm-stat-value { font-size: 1.1rem; font-weight: 700; font-family: 'JetBrains Mono', monospace; }
+.llm-green { color: var(--llm-success); }
+
+/* TABLES */
+.llm-table-scroll {
+  overflow-x: auto;
+  border: 1px solid var(--llm-border-dark);
+  border-radius: 8px;
+  margin-top: 10px;
+}
+
+.llm-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.8rem;
+  text-align: left;
+}
+
+.llm-table th, .llm-table td {
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--llm-border-dark);
+}
+
+.llm-table th { background: rgba(0, 0, 0, 0.25); color: var(--llm-text-muted-dark); }
+
+.llm-table code {
+  font-family: 'JetBrains Mono', monospace;
+  background: rgba(255, 255, 255, 0.08);
+  padding: 2px 4px;
+  border-radius: 4px;
+}
+
+.llm-divider { border: none; border-top: 1px solid var(--llm-border-dark); margin: 16px 0; }
+
+.llm-callout {
+  padding: 12px;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  margin-top: 16px;
+}
+
+.llm-callout-success {
+  background: rgba(16, 185, 129, 0.1);
+  border-left: 4px solid var(--llm-success);
+}
+
+/* PAGED ATTENTION BLOCKS */
+.llm-blocks-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  margin: 12px 0;
+}
+
+.llm-block-card {
+  background: rgba(139, 92, 246, 0.1);
+  border: 1px solid var(--llm-accent);
+  border-radius: 8px;
+  padding: 10px;
+  text-align: center;
+  font-size: 0.75rem;
+}
+
+.llm-block-card code { font-family: 'JetBrains Mono', monospace; font-weight: 700; color: var(--llm-accent); }
+
+/* CONSOLE */
+.llm-console-card { height: 180px; }
+
+.llm-console-body {
+  flex: 1;
+  background: #05070d;
+  color: #a7f3d0;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.8rem;
+  padding: 12px 16px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.llm-log-entry.info { color: #93c5fd; }
+.llm-log-entry.success { color: #6ee7b7; }
+.llm-log-entry.warning { color: #fde047; }

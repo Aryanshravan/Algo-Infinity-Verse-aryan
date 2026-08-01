@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MVCC Garbage Collection Visualizer | Algo Infinity Verse</title>
+    <meta
+      name="description"
+      content="Interactive visualization of Postgres-style Multi-Version Concurrency Control (MVCC) and Garbage Collection (Vacuum)."
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Poppins:wght@300;400;500;600;700&family=Fira+Code:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <link rel="stylesheet" href="mvcc-visualizer.css" />
+    <script src="/theme.js"></script>
+    <link rel="stylesheet" href="/modules/quick-notes/quick-notes.css" />
+  </head>
+  <body class="mvcc-body">
+    <nav class="navbar mvcc-nav">
+      <div class="nav-logo">
+        <span class="logo-text">∞</span>
+        <span class="logo-title">Algo Infinity Verse</span>
+      </div>
+      <div class="engine-badge"><i class="fas fa-database"></i> MVCC Engine: Active</div>
+    </nav>
+
+    <main class="mvcc-workspace">
+      <!-- Left Panel: Controls -->
+      <div class="panel-left">
+        <div class="panel-header">
+          <h3><i class="fas fa-cogs"></i> Database Controls</h3>
+        </div>
+
+        <div class="control-section">
+          <p class="desc-text">
+            Simulate <strong>MVCC (Multi-Version Concurrency Control)</strong> updates. Instead of
+            overwriting data, an update creates a new row version.
+          </p>
+          <div class="action-grid">
+            <button type="button" class="btn btn-primary" id="btnUpdateRow1">
+              <i class="fas fa-pen"></i> Update Row 1
+            </button>
+            <button type="button" class="btn btn-primary" id="btnUpdateRow2">
+              <i class="fas fa-pen"></i> Update Row 2
+            </button>
+            <button
+              type="button"
+              class="btn btn-warning"
+              id="btnRunVacuum"
+              style="grid-column: span 2"
+            >
+              <i class="fas fa-broom"></i> Run Vacuum (GC)
+            </button>
+            <button type="button" class="btn btn-outline" id="btnReset" style="grid-column: span 2">
+              <i class="fas fa-redo"></i> Reset Table
+            </button>
+          </div>
+        </div>
+
+        <div class="info-section">
+          <h4><i class="fas fa-book"></i> How MVCC Works</h4>
+          <div class="vc-explanation">
+            <ul>
+              <li><strong>Live Tuple:</strong> The current active version of a row.</li>
+              <li>
+                <strong>Dead Tuple:</strong> Old versions kept for concurrent readers, causing bloat
+                over time.
+              </li>
+              <li><strong>Vacuum:</strong> Scans pages to reclaim space from dead tuples.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- Center Panel: Disk Pages -->
+      <div class="panel-center">
+        <div class="canvas-header">
+          <span><i class="fas fa-hdd"></i> Disk Pages Representation</span>
+          <span class="status-display" id="dbStatusDisplay">Status: IDLE</span>
+        </div>
+
+        <div class="canvas-wrapper" id="diskCanvas">
+          <div class="disk-page" id="page1">
+            <div class="page-title">Page 1</div>
+            <div class="tuple-container" id="tupleContainer1"></div>
+          </div>
+        </div>
+
+        <div class="canvas-legend">
+          <span class="legend-item"><span class="swatch s-live"></span> Live Tuple</span>
+          <span class="legend-item"><span class="swatch s-dead"></span> Dead Tuple</span>
+          <span class="legend-item"><span class="swatch s-empty"></span> Free Space</span>
+        </div>
+      </div>
+
+      <!-- Right Panel: Logs -->
+      <div class="panel-right">
+        <div class="panel-header">
+          <h3><i class="fas fa-terminal"></i> Operation Logs</h3>
+        </div>
+        <div class="logs-container" id="logsContainer">
+          <div class="log-entry sys">>> Database initialized.</div>
+        </div>
+      </div>
+    </main>
+
+    <script src="mvcc-visualizer.js"></script>
+    <script src="/modules/quick-notes/quick-notes.js"></script>
+  </body>
+</html>

@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Transactional Outbox Pattern | Algo Infinity Verse</title>
+    <meta
+      name="description"
+      content="Visualize the Transactional Outbox Pattern to solve the dual-write problem in microservices."
+    />
+
+    <link
+      href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Poppins:wght@300;400;500;600;700&family=Fira+Code:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+
+    <link rel="stylesheet" href="outbox-pattern.css" />
+    <script src="/theme.js"></script>
+    <link rel="stylesheet" href="/modules/quick-notes/quick-notes.css" />
+  </head>
+  <body class="outbox-body">
+    <nav class="navbar outbox-nav">
+      <div class="nav-logo">
+        <span class="logo-text">∞</span>
+        <span class="logo-title">Algo Infinity Verse</span>
+      </div>
+      <div class="engine-badge"><i class="fas fa-database"></i> Distributed Systems</div>
+    </nav>
+
+    <main class="outbox-workspace">
+      <header class="workspace-header">
+        <h1>Transactional Outbox Pattern</h1>
+        <p class="subtitle">
+          Solve the "dual-write" problem. Ensure domain events are reliably published to a Message
+          Broker.
+        </p>
+
+        <div class="control-panel">
+          <button id="btnCreateOrder" class="btn btn-primary">
+            <i class="fas fa-plus"></i> Create Order
+          </button>
+          <div class="mode-toggle">
+            <label class="switch">
+              <input type="checkbox" id="modeCrash" />
+              <span class="slider round"></span>
+            </label>
+            <span id="modeLabel">Simulate App Crash after DB Commit</span>
+          </div>
+          <button id="btnReset" class="btn btn-secondary">
+            <i class="fas fa-trash"></i> Reset All
+          </button>
+        </div>
+      </header>
+
+      <div class="visualizer-content">
+        <!-- Microservice -->
+        <section class="system-panel app-panel">
+          <div class="panel-header">
+            <h2><i class="fas fa-cube"></i> Order Service</h2>
+          </div>
+          <div class="panel-body">
+            <div class="process-box" id="appProcess">
+              <i class="fas fa-cogs"></i>
+              <span class="status-text">Idle</span>
+            </div>
+          </div>
+        </section>
+
+        <!-- Database -->
+        <section class="system-panel db-panel">
+          <div class="panel-header">
+            <h2><i class="fas fa-database"></i> Relational DB</h2>
+            <span class="badge tx-badge">Transaction Scope</span>
+          </div>
+          <div class="panel-body db-body">
+            <div class="table-container">
+              <h3>Orders Table</h3>
+              <div class="table-rows" id="ordersTable">
+                <div class="empty-state">No orders</div>
+              </div>
+            </div>
+            <div class="table-container outbox-container">
+              <h3>Outbox Table</h3>
+              <div class="table-rows" id="outboxTable">
+                <div class="empty-state">No pending events</div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Message Relay CDC -->
+        <section class="system-panel relay-panel">
+          <div class="panel-header">
+            <h2><i class="fas fa-sync"></i> Message Relay</h2>
+          </div>
+          <div class="panel-body">
+            <div class="relay-process" id="relayProcess">
+              <i class="fas fa-search"></i>
+              <span class="status-text">Polling Outbox...</span>
+            </div>
+          </div>
+        </section>
+
+        <!-- Message Broker -->
+        <section class="system-panel broker-panel">
+          <div class="panel-header">
+            <h2><i class="fas fa-stream"></i> Kafka Broker</h2>
+          </div>
+          <div class="panel-body">
+            <div class="topic-container">
+              <h3>Topic: `order_created`</h3>
+              <div class="kafka-stream" id="kafkaStream">
+                <!-- Events go here -->
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Consumer Groups -->
+        <section class="system-panel consumer-panel">
+          <div class="panel-header" style="justify-content: space-between">
+            <h2><i class="fas fa-users"></i> Consumer Groups</h2>
+            <div>
+              <button id="btnDropMsg" class="btn btn-sm btn-secondary" style="font-size: 0.75rem">
+                <i class="fas fa-exclamation-triangle"></i> Drop Msg
+              </button>
+            </div>
+          </div>
+          <div class="panel-body" style="display: flex; gap: 10px">
+            <!-- Consumer A -->
+            <div class="consumer-group" id="consumerA">
+              <div class="consumer-header">
+                <h4>Inventory Service</h4>
+                <div class="consumer-lag">Lag: <span id="lagA">0</span></div>
+              </div>
+              <div class="consumer-status" id="statusA">Polling...</div>
+              <div class="consumer-log" id="logA"></div>
+            </div>
+            <!-- Consumer B -->
+            <div class="consumer-group" id="consumerB">
+              <div class="consumer-header">
+                <h4>Notification Service</h4>
+                <div class="consumer-lag">Lag: <span id="lagB">0</span></div>
+              </div>
+              <div class="consumer-status" id="statusB">Polling...</div>
+              <div class="consumer-log" id="logB"></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Network Canvas for Animations -->
+        <div id="animationLayer"></div>
+      </div>
+
+      <div class="explanation-panel">
+        <h3 id="expTitle"><i class="fas fa-info-circle"></i> What is happening?</h3>
+        <p id="expText">
+          Without the outbox pattern, an app might commit to the DB and then crash before publishing
+          to Kafka (or vice versa), leading to data inconsistency. By writing the Order and the
+          Event to an <strong>Outbox table in a single local transaction</strong>, we guarantee
+          atomicity. A separate relay process then reads the Outbox and publishes to Kafka.
+        </p>
+      </div>
+    </main>
+
+    <script src="outbox-pattern.js"></script>
+    <script src="/modules/quick-notes/quick-notes.js"></script>
+  </body>
+</html>

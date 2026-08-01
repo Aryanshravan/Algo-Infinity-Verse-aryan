@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WebGL 3D B-Tree & B+ Tree Disk Visualizer - Algo-Infinity-Verse</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+  <!-- Three.js Library -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+</head>
+<body>
+  <div class="app-container">
+    <header class="header">
+      <div class="brand">
+        <a href="../../../index.html" class="back-btn"><i class="fas fa-arrow-left"></i> Home</a>
+        <h1><i class="fas fa-cube icon-glow"></i> WebGL 3D B-Tree & B+ Tree Disk Visualizer</h1>
+      </div>
+      <div class="stats-pills">
+        <div class="pill"><span class="label">Tree Mode:</span> <span id="stat-tree-mode">B+ Tree</span></div>
+        <div class="pill"><span class="label">Order (M):</span> <span id="stat-order">3</span></div>
+        <div class="pill"><span class="label">Disk Pages:</span> <span id="stat-pages">1</span></div>
+      </div>
+    </header>
+
+    <main class="main-content">
+      <!-- Control Panel -->
+      <section class="control-panel glass-card">
+        <div class="input-group">
+          <input type="number" id="key-input" placeholder="Key e.g. 42" style="width: 110px;">
+          <button id="btn-3d-insert" class="btn btn-primary"><i class="fas fa-plus"></i> Insert Key</button>
+          <button id="btn-3d-delete" class="btn btn-danger"><i class="fas fa-minus"></i> Delete Key</button>
+          <button id="btn-3d-random" class="btn btn-secondary"><i class="fas fa-random"></i> Add Random</button>
+          <button id="btn-3d-reset" class="btn btn-outline"><i class="fas fa-redo"></i> Reset Scene</button>
+        </div>
+
+        <div class="mode-row">
+          <div class="mode-item">
+            <label for="mode-select"><i class="fas fa-layer-group"></i> Tree Structure:</label>
+            <select id="mode-select">
+              <option value="bplus" selected>B+ Tree (Leaf Linked List)</option>
+              <option value="btree">Standard B-Tree</option>
+            </select>
+          </div>
+
+          <div class="mode-item">
+            <label for="order-select"><i class="fas fa-sliders-h"></i> Order (M):</label>
+            <select id="order-select">
+              <option value="3" selected>M = 3 (Max 2 keys/node)</option>
+              <option value="4">M = 4 (Max 3 keys/node)</option>
+              <option value="5">M = 5 (Max 4 keys/node)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="range-query-row">
+          <label><i class="fas fa-search-location"></i> Range Search:</label>
+          <input type="number" id="range-min" placeholder="Min" style="width: 80px;" value="10">
+          <span>to</span>
+          <input type="number" id="range-max" placeholder="Max" style="width: 80px;" value="50">
+          <button id="btn-range-search" class="btn btn-accent"><i class="fas fa-search"></i> Highlight Range</button>
+        </div>
+      </section>
+
+      <!-- 3D Canvas View -->
+      <section class="visualizer-area glass-card">
+        <div class="canvas-header">
+          <h3><i class="fas fa-cube"></i> 3D Disk Page Spatial Scene</h3>
+          <span class="hint"><i class="fas fa-mouse"></i> Click & drag to rotate 3D camera | Scroll to zoom</span>
+        </div>
+        <div class="canvas-container">
+          <div id="three-container"></div>
+        </div>
+      </section>
+
+      <!-- Bottom Info Grid -->
+      <div class="info-grid">
+        <section class="info-card glass-card">
+          <h3><i class="fas fa-info-circle"></i> Page Split & Merge Operations Log</h3>
+          <div id="split-log" class="log-container">
+            <div class="log-entry">3D B+ Tree initialized with Order M=3. Ready for key insertions.</div>
+          </div>
+        </section>
+
+        <section class="info-card glass-card">
+          <h3><i class="fas fa-hdd"></i> Disk I/O & Page Allocation Metrics</h3>
+          <div class="metrics-grid">
+            <div class="metric">
+              <span class="m-val" id="metric-splits">0</span>
+              <span class="m-lbl">Page Splits Triggered</span>
+            </div>
+            <div class="metric">
+              <span class="m-val" id="metric-tree-height">1</span>
+              <span class="m-lbl">Tree Height (Disk IOs)</span>
+            </div>
+            <div class="metric">
+              <span class="m-val" id="metric-total-keys">0</span>
+              <span class="m-lbl">Total Stored Keys</span>
+            </div>
+          </div>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <script type="module" src="btree-3d.js"></script>
+</body>
+</html>

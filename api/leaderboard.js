@@ -56,11 +56,13 @@ export default async function handler(req, res) {
     const page = Number.isNaN(parsedPage) ? 1 : Math.max(parsedPage, 1);
 
     const parsedLimit = parseInt(req.query.limit, 10);
-    const limit = Number.isNaN(parsedLimit) ? 10 : Math.min(Math.max(parsedLimit, 1), MAX_PAGE_SIZE);
+    const limit = Number.isNaN(parsedLimit)
+      ? 10
+      : Math.min(Math.max(parsedLimit, 1), MAX_PAGE_SIZE);
     const offset = (page - 1) * limit;
 
     const cookies = parseCookies(req.headers.cookie || '');
-    const session = verifySessionToken(cookies[SESSION_COOKIE]);
+    const session = await verifySessionToken(cookies[SESSION_COOKIE]);
 
     // Try fetching from Redis Sorted Set first (only for all-time, since Redis
     // stores total XP and cannot filter by time period)

@@ -1,0 +1,223 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>R-Tree Spatial Index Visualizer | Algo Infinity Verse</title>
+    <meta
+      name="description"
+      content="Explore R-Trees, spatial data querying, range searches, and nearest-neighbor (k-NN) branch-and-bound searches visualized interactively."
+    />
+    <link rel="stylesheet" href="/styles.css" />
+    <link rel="stylesheet" href="r-tree.css" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Poppins:wght@300;400;500;600;700&family=Fira+Code:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+
+    <!-- Theme Initialization Script -->
+    <script>
+      (function () {
+        try {
+          const storedTheme = localStorage.getItem('theme');
+          const prefersLight = window.matchMedia('(prefers-color-scheme: light)').matches;
+          const theme = storedTheme || (prefersLight ? 'light' : 'dark');
+          if (theme === 'light') {
+            document.documentElement.classList.add('light-mode');
+          } else {
+            document.documentElement.classList.remove('light-mode');
+          }
+        } catch (e) {}
+      })();
+    </script>
+  </head>
+  <body data-page="r-tree" data-no-loading>
+    <div id="loading-screen" class="hidden">
+      <div class="loader">
+        <div class="infinity-loader">∞</div>
+        <h2>Algo Infinity Verse</h2>
+        <div class="loading-bar"><div class="loading-progress"></div></div>
+      </div>
+    </div>
+
+    <button type="button" id="scrollTopBtn" class="scroll-top-btn" aria-label="Scroll to top">
+      <i class="fas fa-arrow-up"></i>
+    </button>
+
+    <div id="navbar-placeholder"></div>
+
+    <section class="hero rt-hero">
+      <div class="hero-background">
+        <div class="stars"></div>
+        <div class="stars2"></div>
+        <div class="stars3"></div>
+      </div>
+      <div class="hero-content">
+        <h1 class="hero-title">
+          <span class="title-line">R-Tree Spatial Index.</span>
+          <span
+            class="main-title"
+            style="
+              background: linear-gradient(135deg, #a855f7 0%, #d8b4fe 100%);
+              -webkit-background-clip: text;
+              -webkit-text-fill-color: transparent;
+            "
+            >2D Spatial Queries.</span
+          >
+          <span class="subtitle">Interactive Spatial Bounding Box Hierarchy Visualizer</span>
+        </h1>
+      </div>
+    </section>
+
+    <main class="rt-container">
+      <div class="rt-panel control-panel">
+        <div class="panel-header">
+          <i class="fas fa-sliders-h" style="color: #a855f7"></i>
+          <span>Controls & Interaction Modes</span>
+        </div>
+        <div class="panel-body">
+          <div class="control-row">
+            <div class="mode-selector-group" role="radiogroup" aria-label="Drawing and Query Modes">
+              <button
+                type="button"
+                id="modeInsertBtn"
+                class="rt-btn mode-btn active"
+                role="radio"
+                aria-checked="true"
+                data-mode="insert"
+              >
+                <i class="fas fa-plus-square"></i> Insert Rect
+              </button>
+              <button
+                type="button"
+                id="modeRangeBtn"
+                class="rt-btn mode-btn"
+                role="radio"
+                aria-checked="false"
+                data-mode="range"
+              >
+                <i class="fas fa-expand"></i> Range Query
+              </button>
+              <button
+                type="button"
+                id="modeKnnBtn"
+                class="rt-btn mode-btn"
+                role="radio"
+                aria-checked="false"
+                data-mode="knn"
+              >
+                <i class="fas fa-street-view"></i> Nearest Neighbor (k-NN)
+              </button>
+            </div>
+
+            <div class="action-buttons-group">
+              <button type="button" id="rtRandomBtn" class="rt-btn secondary-btn">
+                <i class="fas fa-random"></i> Add Random
+              </button>
+              <button type="button" id="rtClearBtn" class="rt-btn danger-btn">
+                <i class="fas fa-trash"></i> Clear Tree
+              </button>
+            </div>
+          </div>
+
+          <hr class="rt-divider" />
+
+          <div class="control-row secondary-controls">
+            <div class="param-box">
+              <label for="knnKVal">k-NN Neighbors (k):</label>
+              <select id="knnKVal" class="rt-select" aria-label="Select k for Nearest Neighbors">
+                <option value="1" selected>1 Neighbor</option>
+                <option value="3">3 Neighbors</option>
+                <option value="5">5 Neighbors</option>
+              </select>
+            </div>
+            <div class="param-box">
+              <label for="rtMaxEntries">Node Capacity (M):</label>
+              <select id="rtMaxEntries" class="rt-select" aria-label="Select maximum node capacity">
+                <option value="3" selected>3 Entries</option>
+                <option value="4">4 Entries</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="workspace-grid">
+        <!-- Interactive 2D Canvas -->
+        <div class="canvas-card">
+          <div class="card-header">
+            <i class="fas fa-map" style="color: #a855f7"></i>
+            <span>2D Spatial Index Coordinate Grid</span>
+            <span class="canvas-instructions" id="canvasHint"
+              >Drag on canvas to draw a new rectangle.</span
+            >
+          </div>
+          <div class="card-body">
+            <canvas
+              id="rtCanvas"
+              class="rt-canvas"
+              role="img"
+              aria-label="Interactive 2D spatial coordinate plane showing rectangles, bounding boxes, and queries."
+            ></canvas>
+          </div>
+        </div>
+
+        <div class="side-panels">
+          <!-- Telemetry -->
+          <div class="panel telemetry-panel">
+            <div class="panel-header">
+              <i class="fas fa-info-circle" style="color: #a855f7"></i>
+              <span>Spatial Telemetry</span>
+            </div>
+            <div id="rtStatusBody" class="panel-body" aria-live="polite">
+              <div class="telemetry-row">
+                <span class="label">Tree Status:</span>
+                <span id="telStatus" class="value text-success">Empty</span>
+              </div>
+              <div class="telemetry-row">
+                <span class="label">Total Rectangles:</span>
+                <span id="telRectCount" class="value">0</span>
+              </div>
+              <div class="telemetry-row">
+                <span class="label">R-Tree Nodes:</span>
+                <span id="telNodeCount" class="value">0</span>
+              </div>
+              <div class="telemetry-row">
+                <span class="label">Query Steps:</span>
+                <span id="telQuerySteps" class="value">-</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Trace Log -->
+          <div class="panel log-panel">
+            <div class="panel-header">
+              <i class="fas fa-list-ul" style="color: #a855f7"></i>
+              <span>Spatial Operation Log</span>
+            </div>
+            <div id="rtLogBody" class="panel-body" aria-live="polite">
+              <span class="rt-log-placeholder">Add geometries or run queries to see logs...</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <div id="footer-placeholder"></div>
+
+    <script src="r-tree.js"></script>
+    <script src="/auth.js"></script>
+    <script src="/bootstrap-legacy.js"></script>
+    <script src="/script.js"></script>
+    <script type="module" src="/dist/legacy-bundle.mjs"></script>
+    <script src="/theme.js"></script>
+    <script>
+      loadPartial('navbar-placeholder', '/partials/navbar.html');
+      loadPartial('footer-placeholder', '/partials/footer.html');
+    </script>
+  </body>
+</html>

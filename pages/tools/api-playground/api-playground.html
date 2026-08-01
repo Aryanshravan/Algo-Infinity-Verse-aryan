@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>API Playground – Algo Infinity Verse</title>
+  <meta
+    name="description"
+    content="Test REST APIs directly from your browser. Send GET, POST, PUT, PATCH, DELETE, and HEAD requests with custom headers and JSON body. View formatted responses with syntax highlighting, status codes, response time, and size."
+  />
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="Algo Infinity Verse" />
+  <meta property="og:title" content="API Playground – Mini Postman Tool" />
+  <meta
+    property="og:description"
+    content="Test REST APIs directly from your browser. Send requests, see formatted responses, and review history."
+  />
+
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+  />
+  <link rel="stylesheet" href="api-playground.css" />
+
+  <!-- Theme initialization -->
+  <script>
+    (function () {
+      try {
+        var storedTheme = localStorage.getItem('theme');
+        var prefersLight = window.matchMedia('(prefers-color-scheme: light)').matches;
+        var theme = storedTheme || (prefersLight ? 'light' : 'dark');
+        if (theme === 'light') {
+          document.documentElement.classList.add('light-mode');
+        } else {
+          document.documentElement.classList.remove('light-mode');
+        }
+      } catch (e) {}
+    })();
+  </script>
+</head>
+<body>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- TOAST CONTAINER                                     -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <div id="toastContainer" class="toast-container"></div>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- MAIN CONTAINER                                     -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <div class="app-container">
+
+    <!-- ── Header ────────────────────────────────────── -->
+    <header class="api-header">
+      <div class="api-header-left">
+        <div class="api-header-icon">
+          <i class="fas fa-plug"></i>
+        </div>
+        <div class="api-header-text">
+          <h1>API Playground</h1>
+          <p>Send requests to any REST API and inspect the response</p>
+        </div>
+      </div>
+      <div class="api-header-badge">
+        <i class="fas fa-shield-alt"></i>
+        Requests are proxied through the server
+      </div>
+    </header>
+
+    <!-- ════════════════════════════════════════════════ -->
+    <!-- LAYOUT                                           -->
+    <!-- ════════════════════════════════════════════════ -->
+    <div class="api-layout">
+
+      <!-- ── Left Column: Request Builder + Response ── -->
+      <div class="api-main">
+
+        <!-- ── Request Builder Panel ─────────────────── -->
+        <div class="panel">
+          <div class="panel-header">
+            <h2><i class="fas fa-pen"></i> Request Builder</h2>
+          </div>
+          <div class="panel-body">
+
+            <!-- URL Bar -->
+            <div class="url-bar">
+              <select id="apiMethod" class="method-select" aria-label="HTTP method">
+                <option value="GET">GET</option>
+                <option value="POST" selected>POST</option>
+                <option value="PUT">PUT</option>
+                <option value="PATCH">PATCH</option>
+                <option value="DELETE">DELETE</option>
+                <option value="HEAD">HEAD</option>
+              </select>
+              <div class="url-input-wrapper">
+                <input
+                  type="text"
+                  id="apiUrl"
+                  class="url-input"
+                  placeholder="https://jsonplaceholder.typicode.com/posts"
+                  autocomplete="off"
+                  spellcheck="false"
+                  aria-label="Request URL"
+                />
+              </div>
+              <button type="button" id="apiSendBtn" class="btn btn-send">
+                <span id="apiSendBtnText"><i class="fas fa-paper-plane"></i> Send</span>
+              </button>
+            </div>
+
+            <!-- Query Parameters -->
+            <div class="section-toggle">
+              <div
+                id="paramsToggle"
+                class="section-toggle-header"
+                role="button"
+                tabindex="0"
+                aria-expanded="false"
+              >
+                <i class="fas fa-chevron-right toggle-icon"></i>
+                <span>Query Params</span>
+                <span id="paramsCount" class="toggle-count">0</span>
+              </div>
+              <div id="paramsBody" class="section-toggle-body">
+                <div id="paramsContainer" class="kv-rows">
+                  <!-- Rows will be added dynamically -->
+                </div>
+                <button type="button" class="kv-add-btn" data-add-param>
+                  <i class="fas fa-plus"></i> Add Parameter
+                </button>
+              </div>
+            </div>
+
+            <!-- Headers -->
+            <div class="section-toggle">
+              <div
+                id="headersToggle"
+                class="section-toggle-header expanded"
+                role="button"
+                tabindex="0"
+                aria-expanded="true"
+              >
+                <i class="fas fa-chevron-right toggle-icon"></i>
+                <span>Headers</span>
+                <span id="headersCount" class="toggle-count">1</span>
+              </div>
+              <div id="headersBody" class="section-toggle-body open">
+                <div id="headersContainer" class="kv-rows">
+                  <!-- Rows will be added dynamically -->
+                </div>
+                <button type="button" class="kv-add-btn" data-add-header>
+                  <i class="fas fa-plus"></i> Add Header
+                </button>
+              </div>
+            </div>
+
+            <!-- Request Body -->
+            <div id="bodySection">
+              <label
+                style="
+                  display: block;
+                  font-size: 0.8rem;
+                  font-weight: 600;
+                  color: var(--text-muted);
+                  margin-bottom: 6px;
+                  text-transform: uppercase;
+                  letter-spacing: 0.03em;
+                "
+              >
+                <i class="fas fa-code"></i> Request Body (JSON)
+              </label>
+              <textarea
+                id="requestBody"
+                class="body-editor"
+                placeholder='{\n  "title": "foo",\n  "body": "bar",\n  "userId": 1\n}'
+                spellcheck="false"
+                aria-label="JSON request body"
+              ></textarea>
+              <div id="bodyValidationHint" class="body-validation-hint"></div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- ── Response Panel ────────────────────────── -->
+        <div id="responsePanel" class="panel response-panel" style="display: none">
+          <div class="panel-header">
+            <h2><i class="fas fa-reply"></i> Response</h2>
+          </div>
+          <div class="panel-body">
+            <div class="response-header-bar">
+              <span id="responseStatus" class="status-badge">—</span>
+              <div class="response-meta">
+                <span class="response-meta-item">
+                  <i class="fas fa-clock"></i>
+                  <span>Time: <span id="responseTime" class="meta-value">—</span></span>
+                </span>
+                <span class="response-meta-item">
+                  <i class="fas fa-weight"></i>
+                  <span>Size: <span id="responseSize" class="meta-value">—</span></span>
+                </span>
+              </div>
+              <div class="response-actions">
+                <button type="button" id="prettyPrintBtn" class="btn btn-secondary btn-sm" title="Pretty-print JSON">
+                  <i class="fas fa-indent"></i> Pretty
+                </button>
+                <button type="button" id="copyResponseBtn" class="btn btn-secondary btn-sm" title="Copy response body">
+                  <i class="fas fa-copy"></i> Copy
+                </button>
+              </div>
+            </div>
+
+            <!-- Tabs -->
+            <div id="responseTabs" class="response-tabs" role="tablist">
+              <button
+                type="button"
+                class="response-tab active"
+                data-tab="body"
+                role="tab"
+                aria-selected="true"
+              >
+                <i class="fas fa-file-code"></i> Body
+              </button>
+              <button
+                type="button"
+                class="response-tab"
+                data-tab="headers"
+                role="tab"
+                aria-selected="false"
+              >
+                <i class="fas fa-list"></i> Headers
+              </button>
+            </div>
+
+            <!-- Content area -->
+            <div class="response-content" id="responseContent">
+              <div class="response-empty">
+                <i class="fas fa-paper-plane"></i>
+                <p>Send a request to see the response here</p>
+                <p class="hint">Response body, status code, and timing will appear</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ── Right Column: History ──────────────────── -->
+      <div class="history-panel">
+        <div class="panel">
+          <div class="panel-header">
+            <h2><i class="fas fa-history"></i> History</h2>
+            <span style="font-size: 0.72rem; color: var(--text-tertiary); font-family: var(--code-font);">
+              Last 50
+            </span>
+          </div>
+          <div id="historyList" class="history-list panel-body">
+            <!-- History items rendered by JS -->
+          </div>
+          <div class="history-footer">
+            <button type="button" id="clearHistoryBtn" class="btn btn-danger btn-sm" style="display: none;">
+              <i class="fas fa-trash-alt"></i> Clear All
+            </button>
+          </div>
+        </div>
+
+        <!-- Quick Tips -->
+        <div class="panel" style="margin-top: 16px;">
+          <div class="panel-header">
+            <h2><i class="fas fa-lightbulb"></i> Tips</h2>
+          </div>
+          <div class="panel-body" style="font-size: 0.82rem; color: var(--text-muted); line-height: 1.7;">
+            <ul style="margin: 0; padding-left: 18px;">
+              <li style="margin-bottom: 6px;">
+                Press <kbd style="background: var(--bg-input); padding: 1px 6px; border-radius: 3px; border: 1px solid var(--border-color); font-family: var(--code-font); font-size: 0.75rem;">Enter</kbd> in the URL bar to send quickly
+              </li>
+              <li style="margin-bottom: 6px;">
+                Press <kbd style="background: var(--bg-input); padding: 1px 6px; border-radius: 3px; border: 1px solid var(--border-color); font-family: var(--code-font); font-size: 0.75rem;">Ctrl+Enter</kbd> to send from anywhere
+              </li>
+              <li style="margin-bottom: 6px;">
+                Press <kbd style="background: var(--bg-input); padding: 1px 6px; border-radius: 3px; border: 1px solid var(--border-color); font-family: var(--code-font); font-size: 0.75rem;">Ctrl+Enter</kbd> in the body editor to send quickly
+              </li>
+              <li style="margin-bottom: 6px;">
+                Click a history item to reload that request
+              </li>
+              <li style="margin-bottom: 6px;">
+                Hover over a history item and click <i class="fas fa-times" style="font-size:0.65rem;"></i> to delete it
+              </li>
+              <li style="margin-bottom: 6px;">
+                Request body validation happens in real-time
+              </li>
+              <li>
+                Responses are syntax-highlighted for readability
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- SCRIPTS                                            -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <script src="api-playground.js"></script>
+</body>
+</html>
