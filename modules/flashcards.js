@@ -92,8 +92,9 @@ function revealAnswer() {
 
   revealedCards.add(currentCardIndex);
 
+  // NEW
   const optionsHtml = card.options.map((opt, i) =>
-    `<div class="flashcard-option" data-option-index="${i}">${opt}</div>`
+    `<div class="flashcard-option" data-option-index="${i}">${escapeHtml(opt)}</div>`
   ).join('');
   answerEl.innerHTML = `<div class="flashcard-options">${optionsHtml}</div>`;
   revealBtn.style.display = 'none';
