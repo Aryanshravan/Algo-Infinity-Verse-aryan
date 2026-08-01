@@ -15,28 +15,28 @@ export function initKeyboardShortcuts() {
     const tag = e.target.tagName;
     const isEditing = tag === 'INPUT' || tag === 'TEXTAREA' || e.target.isContentEditable;
 
-    if (e.ctrlKey && e.key === 'k') {
+if (!isEditing && e.ctrlKey && e.key === 'k') {
       e.preventDefault();
       const searchInput = document.getElementById('searchInput');
       if (searchInput) searchInput.focus();
     }
-    if (e.altKey && e.key === 'h') {
+    if (!isEditing && e.altKey && e.key === 'h') {
       e.preventDefault();
       window.location.href = '#home';
     }
-    if (e.altKey && e.key === 't') {
+    if (!isEditing && e.altKey && e.key === 't') {
       e.preventDefault();
       window.location.href = '/pages/learning/learning-topics.html';
     }
-    if (e.altKey && e.key === 'p') {
+    if (!isEditing && e.altKey && e.key === 'p') {
       e.preventDefault();
       window.location.href = '/pages/practice/problems.html';
     }
-    if (e.altKey && e.key === 'q') {
+    if (!isEditing && e.altKey && e.key === 'q') {
       e.preventDefault();
       window.location.href = '#quiz';
     }
-    if (e.altKey && e.key === 'd') {
+    if (!isEditing && e.altKey && e.key === 'd') {
       e.preventDefault();
       window.location.href = '#dashboard';
     }
